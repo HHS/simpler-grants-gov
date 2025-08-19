@@ -7,7 +7,12 @@ from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
-from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
+from src.db.models.user_models import (
+    LinkExternalUser,
+    SuppressedEmail,
+    UserOpportunityNotificationLog,
+    UserSavedOpportunity,
+)
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import NotificationReason, UserEmailNotification
@@ -73,6 +78,7 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         # == NotificationReason.CLOSING_DATE_REMINDER
                     )
                 ),
+                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
             )
         )
 

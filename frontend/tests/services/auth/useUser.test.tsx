@@ -145,6 +145,7 @@ describe("useUser", () => {
     it("does not make a fetch call if there is no token (user is not logged in)", async () => {
       debouncedUserFetcherMock.mockReturnValue({
         token: "",
+        expiresAt: Date.parse("1-1-2099"),
       });
       const { result } = renderHook(() => useUser(), { wrapper });
 

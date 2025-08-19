@@ -202,7 +202,11 @@ FORM_JSON_SCHEMA = {
             "minLength": 12,
             "maxLength": 12,
         },
-        "applicant": {"$ref": "#/$defs/address"},
+        "applicant": {
+            "allOf": [{"$ref": "#/$defs/address"}],
+            "title": "applicant",
+            "description": "Enter information about the applicant.",
+        },
         "department_name": {
             "type": "string",
             "title": "Department Name",
@@ -217,7 +221,11 @@ FORM_JSON_SCHEMA = {
             "minLength": 1,
             "maxLength": 100,
         },
-        "contact_person": {"$ref": "#/$defs/person_name"},
+        "contact_person": {
+            "allOf": [{"$ref": "#/$defs/person_name"}],
+            "title": "Contact Person",
+            "description": "Enter information about the contact person.",
+        },
         "organization_affiliation": {
             "type": "string",
             "title": "Organizational Affiliation",
@@ -451,7 +459,11 @@ FORM_JSON_SCHEMA = {
             "title": "Certification Agree",
             "description": "Check to select.",
         },
-        "authorized_representative": {"$ref": "#/$defs/person_name"},
+        "authorized_representative": {
+            "allOf": [{"$ref": "#/$defs/person_name"}],
+            "title": "Authorized Representative Header",
+            "description": "",
+        },
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": "#/$defs/phone_number_field"}],
             "title": "AOR Telephone Number",
@@ -732,7 +744,13 @@ FORM_UI_SCHEMA = [
         "name": "applicant_address",
         "label": "Applicant Address",
         "children": [
-            {"type": "field", "definition": "/properties/applicant"},
+            {"type": "field", "definition": "/properties/applicant/properties/street1"},
+            {"type": "field", "definition": "/properties/applicant/properties/street2"},
+            {"type": "field", "definition": "/properties/applicant/properties/city"},
+            {"type": "field", "definition": "/properties/applicant/properties/state"},
+            {"type": "field", "definition": "/properties/applicant/properties/province"},
+            {"type": "field", "definition": "/properties/applicant/properties/country"},
+            {"type": "field", "definition": "/properties/applicant/properties/zip_code"},
         ],
     },
     {
@@ -755,7 +773,12 @@ FORM_UI_SCHEMA = [
         "name": "contact_info",
         "label": "Contact Person Information",
         "children": [
-            {"type": "field", "definition": "/properties/contact_person"},
+            {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
+            {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
+            {"type": "field", "definition": "/properties/contact_person/properties/middle_name"},
+            {"type": "field", "definition": "/properties/contact_person/properties/last_name"},
+            {"type": "field", "definition": "/properties/contact_person/properties/suffix"},
+            {"type": "field", "definition": "/properties/contact_person/properties/title"},
             {
                 "type": "field",
                 "definition": "/properties/organization_affiliation",
@@ -976,7 +999,30 @@ FORM_UI_SCHEMA = [
         "name": "authorized_representative",
         "label": "Authorized Representative Info",
         "children": [
-            {"type": "field", "definition": "/properties/authorized_representative"},
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/suffix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/title",
+            },
             {"type": "field", "definition": "/properties/authorized_representative_phone_number"},
             {"type": "field", "definition": "/properties/authorized_representative_fax"},
             {"type": "field", "definition": "/properties/authorized_representative_email"},

@@ -14,7 +14,7 @@ from src.constants.lookup_constants import (
     OpportunityStatus,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityVersion
-from src.db.models.user_models import UserNotificationLog, UserSavedOpportunity
+from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedOpportunity
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     Metrics,
@@ -191,6 +191,7 @@ class TestOpportunityNotification:
         cascade_delete_from_db_table(db_session, UserNotificationLog)
         cascade_delete_from_db_table(db_session, Opportunity)
         cascade_delete_from_db_table(db_session, UserSavedOpportunity)
+        cascade_delete_from_db_table(db_session, SuppressedEmail)
 
     @pytest.fixture(autouse=True)
     def user_with_email(self, db_session, user):
@@ -200,6 +201,7 @@ class TestOpportunityNotification:
     def notification_task(self, db_session):
         self.notification_config = EmailNotificationConfig()
         self.notification_config.reset_emails_without_sending = False
+        self.notification_config.sync_suppressed_emails = False
 
         return OpportunityNotificationTask(db_session, self.notification_config)
 
@@ -216,7 +218,6 @@ class TestOpportunityNotification:
 
         """Test that latest opportunity version is collected for each saved opportunity"""
         # create a different user
-
         user_2 = factories.LinkExternalUserFactory.create().user
 
         # Create a saved opportunity that needs notification
@@ -1126,3 +1127,28 @@ class TestOpportunityNotification:
             ]
         )
         assert res == expected
+
+    def test_get_latest_opportunity_versions_suppressed(
+        self,
+        db_session,
+        enable_factory_create,
+        set_env_var_for_email_notification_config,
+        notification_task,
+        user,
+    ):
+        """Test that the user notification does not pick up user on suppression_list"""
+        # create a suppressed email
+        factories.SuppressedEmailFactory(email=user.email)
+
+        # create opportunity
+        opp = factories.OpportunityFactory.create(is_posted_summary=True)
+        factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp,
+        )
+        factories.OpportunityVersionFactory.create(opportunity=opp)
+
+        # Instantiate the task
+        results = notification_task._get_latest_opportunity_versions()
+
+        assert len(results) == 0

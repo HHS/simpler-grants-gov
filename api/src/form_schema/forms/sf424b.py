@@ -84,7 +84,13 @@ FORM_JSON_SCHEMA = {
 }
 
 FORM_UI_SCHEMA = [
-    {"type": "section", "label": "1. Directions", "name": "directions", "description": DIRECTIONS},
+    {
+        "type": "section",
+        "label": "1. Directions",
+        "name": "directions",
+        "description": DIRECTIONS,
+        "children": [],
+    },
     {
         "type": "section",
         "label": "2. Signature",

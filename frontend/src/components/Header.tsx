@@ -69,7 +69,7 @@ const NavLink = ({
 };
 
 const wikiLink = "https://wiki.simpler.grants.gov/";
-const forumLink = "https://simplergrants.discourse.group/";
+const forumLink = "https://forum.simpler.grants.gov/";
 
 const NavLinks = ({
   mobileExpanded,
@@ -332,7 +332,7 @@ const Header = ({ locale }: Props) => {
             />
           </div>
           {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+            <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
               <UserControl />
             </div>
           )}
