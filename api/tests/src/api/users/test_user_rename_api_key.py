@@ -26,7 +26,7 @@ def test_rename_api_key_success(enable_factory_create, db_session, client, user,
     assert "created_at" in response_data
 
     db_session.expunge(api_key)
-    
+
     updated_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)
     ).scalar_one_or_none()
