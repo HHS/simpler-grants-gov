@@ -45,10 +45,9 @@ locals {
 
 #  3. Prefer the given variable if provided, otherwise default to the value from last time.
 locals {
-#   image_tag = (var.image_tag == null
-#     ? data.terraform_remote_state.current_image_tag[0].outputs.image_tag
-#   : var.image_tag)
-  image_tag = "nginx"
+  image_tag = (var.image_tag == null
+    ? data.terraform_remote_state.current_image_tag[0].outputs.image_tag
+  : var.image_tag)
 }
 
 #  4. Store the final value used as a terraform output for next time.
