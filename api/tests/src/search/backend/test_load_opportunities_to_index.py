@@ -18,11 +18,11 @@ from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
+    ExcludedOpportunityReviewFactory,
     OpportunityAttachmentFactory,
     OpportunityChangeAuditFactory,
     OpportunityFactory,
 )
-from tests.src.db.models.factories import ExcludedOpportunityReviewFactory
 
 
 class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
