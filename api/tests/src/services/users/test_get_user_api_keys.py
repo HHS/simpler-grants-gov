@@ -32,13 +32,13 @@ def test_get_user_api_keys_multiple_keys(enable_factory_create, db_session: db.S
     user = UserFactory.create()
 
     api_key1 = UserApiKeyFactory.create(
-        user=user, key_name="First Key", created_at=datetime.utcnow() - timedelta(hours=2)
+        user=user, key_name="First Key", created_at=datetime_util.utcnow() - timedelta(hours=2)
     )
     api_key2 = UserApiKeyFactory.create(
-        user=user, key_name="Second Key", created_at=datetime.utcnow() - timedelta(hours=1)
+        user=user, key_name="Second Key", created_at=datetime_util.utcnow() - timedelta(hours=1)
     )
     api_key3 = UserApiKeyFactory.create(
-        user=user, key_name="Third Key", created_at=datetime.utcnow()
+        user=user, key_name="Third Key", created_at=datetime_util.utcnow()
     )
 
     api_keys = get_user_api_keys(db_session, user.user_id)
