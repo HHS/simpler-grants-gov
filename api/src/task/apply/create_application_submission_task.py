@@ -193,7 +193,7 @@ class CreateApplicationSubmissionTask(Task):
                 db_session=self.db_session,
                 application_id=submission.application.application_id,
                 application_form_id=application_form.application_form_id,
-                use_mocks=False,  # Use real clients for production
+                use_mocks=False,  # TODO: Should this be driven via config?
             )
 
             app_form_file_name = f"{application_form.form.short_form_name}.pdf"
