@@ -136,7 +136,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
         data-testid="opportunity-intro-content"
         paddingTop={false}
       >
-        <div className="padding-y-3 display-flex">
+        <div className="display-flex desktop:padding-y-1 padding-y-3">
           <OpportunitySaveUserControl
             opportunityId={opportunityData.opportunity_id}
             type="button"
@@ -149,10 +149,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
               />
             )}
         </div>
-        <div
-          className="grid-row grid-gap margin-top-2"
-          id="opportunity-detail-content"
-        >
+        <div className="grid-row grid-gap" id="opportunity-detail-content">
           <div className="desktop:grid-col-8 grid-col-12 order-1 desktop:order-first">
             <OpportunityIntro opportunityData={opportunityData} />
             <OpportunityDescription

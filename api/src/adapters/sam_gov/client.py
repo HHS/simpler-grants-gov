@@ -111,8 +111,10 @@ class SamGovClient(BaseSamGovClient):
         try:
             headers = self._build_headers()
 
-            logging.info(f"Downloading SAM.gov extract from {url}")
-            logging.debug(f"Request parameters: {params}")
+            logging.info(
+                f"Downloading SAM.gov extract from {url}",
+                extra={"extract_file_name": extract_request.file_name},
+            )
 
             response = requests.get(url, params=params, headers=headers, stream=True, timeout=30)
 

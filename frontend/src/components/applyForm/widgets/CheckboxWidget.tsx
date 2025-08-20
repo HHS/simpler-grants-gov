@@ -63,7 +63,7 @@ function CheckboxWidget<
   );
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
+    <FormGroup error={error} key={`form-group__checkbox--${id}`}>
       <Checkbox
         id={id}
         label={label}

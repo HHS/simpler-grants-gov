@@ -1,22 +1,69 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
-import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
+  condenseFormSchemaProperties,
   determineFieldType,
-  getApplicationResponse,
   getFieldName,
   getFieldSchema,
+  processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
 } from "src/components/applyForm/utils";
 
+type FormActionArgs = [
+  {
+    applicationId: string;
+    formId: string;
+    formData: FormData;
+    saved: boolean;
+    error: boolean;
+  },
+  FormData,
+];
+
+type FormActionResult = Promise<{
+  applicationId: string;
+  formId: string;
+  saved: boolean;
+  error: boolean;
+  formData: FormData;
+}>;
+
+const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
+const mockRevalidateTag = jest.fn<void, [string]>();
+const getSessionMock = jest.fn();
+const mockDereference = jest.fn();
+const mockMergeAllOf = jest.fn();
+
+jest.mock("src/components/applyForm/actions", () => ({
+  handleFormAction: (...args: [...FormActionArgs]) =>
+    mockHandleFormAction(...args),
+}));
+
+jest.mock("next/cache", () => ({
+  revalidateTag: (tag: string) => mockRevalidateTag(tag),
+}));
+
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   useCallback: (fn: unknown) => fn,
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("@apidevtools/json-schema-ref-parser", () => ({
+  dereference: () => mockDereference() as unknown,
+}));
+
+jest.mock("json-schema-merge-allof", () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockMergeAllOf(...args) as unknown,
 }));
 
 describe("shapeFormData", () => {
@@ -34,7 +81,7 @@ describe("shapeFormData", () => {
     formData.append("name", "test");
     formData.append("state", "PA");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
 
     expect(data).toMatchObject(shapedFormData);
   });
@@ -84,7 +131,7 @@ describe("shapeFormData", () => {
     formData.append("todos[0]", "email");
     formData.append("todos[1]", "write");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
     expect(data).toMatchObject(shapedFormData);
   });
 });
@@ -207,9 +254,17 @@ describe("buildFormTreeRecursive", () => {
       uiSchema,
     });
 
-    expect(result).toHaveLength(2);
-    expect(result[0].key).toBe("wrapper-for-name");
-    expect(result[1].key).toBe("wrapper-for-age");
+    // render the result
+    render(<>{result}</>);
+
+    // assert field inputs
+    const nameField = screen.getByTestId("name");
+    expect(nameField).toBeInTheDocument();
+    expect(nameField).toHaveValue("John");
+
+    const ageField = screen.getByTestId("age");
+    expect(ageField).toBeInTheDocument();
+    expect(ageField).toHaveValue(30);
   });
 
   it("should build a tree for a nested schema", () => {
@@ -252,7 +307,7 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("address-wrapper");
+    expect(result[0].key).toBe("address-fieldset");
   });
 
   it("should handle empty uiSchema gracefully", () => {
@@ -320,27 +375,27 @@ describe("buildFormTreeRecursive", () => {
     });
 
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("section-wrapper");
+    expect(result[0].key).toBe("section-fieldset");
   });
 });
 
-describe("getApplicationResponse", () => {
-  it("should return a structured response for valid input", () => {
-    const forms = [
-      {
-        application_form_id: "test",
-        application_id: "test",
-        application_form_status: "complete",
-        application_response: { test: "test" },
-        form_id: "test",
-      },
-    ] as ApplicationFormDetail[];
+// describe("getApplicationResponse", () => {
+//   it("should return a structured response for valid input", () => {
+//     const forms = [
+//       {
+//         application_form_id: "test",
+//         application_id: "test",
+//         application_form_status: "complete",
+//         application_response: { test: "test" },
+//         form_id: "test",
+//       },
+//     ] as ApplicationFormDetail[];
 
-    const result = getApplicationResponse(forms, "test");
+//     const result = getApplicationResponse(forms, "test");
 
-    expect(result).toEqual({ test: "test" });
-  });
-});
+//     expect(result).toEqual({ test: "test" });
+//   });
+// });
 
 describe("determineFieldType", () => {
   it("should return proper fields", () => {
@@ -501,5 +556,83 @@ describe("getFieldName", () => {
         schema: {},
       }),
     ).toEqual("untitled");
+  });
+});
+
+describe("processFormSchema", () => {
+  beforeEach(() => {
+    mockDereference.mockResolvedValue({
+      others: {
+        just: "for fun",
+      },
+      properties: {
+        dereferenced: "stuff",
+        allOf: "things",
+      },
+    });
+    mockMergeAllOf.mockImplementation(
+      (processMe: { properties?: { allOf: unknown } }): unknown => {
+        if (processMe.properties) {
+          delete processMe.properties.allOf;
+        }
+        return processMe;
+      },
+    );
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it("calls the dereference function", async () => {
+    await processFormSchema({});
+    expect(mockDereference).toHaveBeenCalled();
+  });
+  it("calls allOf merge function", async () => {
+    await processFormSchema({ properties: {} });
+    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
+  });
+  it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
+    const processed = await processFormSchema({});
+    expect(processed).toEqual({
+      others: {
+        just: "for fun",
+      },
+      properties: {
+        dereferenced: "stuff",
+      },
+    });
+  });
+});
+
+describe("condenseFormSchemaProperties", () => {
+  const noProperties = {
+    path: {
+      thing: {
+        cool: "value",
+      },
+      list: ["of", "stuff"],
+    },
+    secondary: 2,
+  };
+  it("leaves an object with no 'properties' unchanged", () => {
+    expect(condenseFormSchemaProperties(noProperties)).toEqual(noProperties);
+  });
+  it("brings contents of 'properties' attributes up one level", () => {
+    expect(
+      condenseFormSchemaProperties({
+        path: {
+          properties: {
+            thing: {
+              cool: "value",
+            },
+            properties: {
+              list: ["of", "stuff"],
+            },
+          },
+        },
+        properties: {
+          secondary: 2,
+        },
+      }),
+    ).toEqual(noProperties);
   });
 });

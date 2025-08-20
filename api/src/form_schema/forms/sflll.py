@@ -96,10 +96,18 @@ FORM_JSON_SCHEMA = {
                     "maximum": 99,
                 },
                 "applicant_reporting_entity": {
-                    "$ref": "#/$defs/reporting_entity_awardee",
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/reporting_entity_awardee",
+                        }
+                    ]
                 },
                 "prime_reporting_entity": {
-                    "$ref": "#/$defs/reporting_entity_awardee",
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/reporting_entity_awardee",
+                        }
+                    ]
                 },
             },
         },
@@ -134,7 +142,9 @@ FORM_JSON_SCHEMA = {
             "maxLength": 120,
         },
         "award_amount": {
-            "$ref": "#/$defs/budget_monetary_amount",
+            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "title": "Award Amount",
+            "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
         },
         "lobbying_registrant": {
             "type": "object",
@@ -142,10 +152,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "$ref": "#/$defs/person_name",
+                    "allOf": [{"$ref": "#/$defs/person_name"}],
                 },
                 "address": {
-                    "$ref": "#/$defs/simple_address",
+                    "allOf": [{"$ref": "#/$defs/simple_address"}],
                 },
             },
         },
@@ -155,10 +165,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "$ref": "#/$defs/person_name",
+                    "allOf": [{"$ref": "#/$defs/person_name"}],
                 },
                 "address": {
-                    "$ref": "#/$defs/simple_address",
+                    "allOf": [{"$ref": "#/$defs/simple_address"}],
                 },
             },
         },
@@ -174,7 +184,7 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 144,
                 },
                 "name": {
-                    "$ref": "#/$defs/person_name",
+                    "allOf": [{"$ref": "#/$defs/person_name"}],
                 },
                 "title": {
                     "type": "string",
@@ -300,7 +310,7 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 60,
                 },
                 "address": {
-                    "$ref": "#/$defs/simple_address",
+                    "allOf": [{"$ref": "#/$defs/simple_address"}],
                 },
                 "congressional_district": {
                     "type": "string",
@@ -322,8 +332,6 @@ FORM_JSON_SCHEMA = {
             "pattern": r"^\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
-            "title": "Award Amount",
-            "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
         },
         "state_code": {
             "type": "string",
@@ -578,8 +586,6 @@ FORM_UI_SCHEMA = [
 
 FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
-    # Note - we don't have pre-population enabled yet, so these
-    # won't run yet.
     "federal_program_name": {"gg_pre_population": {"rule": "assistance_listing_program_title"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
     ##### POST-POPULATION RULES

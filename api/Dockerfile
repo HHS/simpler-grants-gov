@@ -28,6 +28,8 @@ RUN apt-get update \
         postgresql \
         wget \
         libgnutls30 \
+        linux-libc-dev \
+        libxslt1.1 \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && apt-get clean \
@@ -56,7 +58,7 @@ ARG RUN_USER
 # If there is anything that needs to be ran as root, this is the spot
 
 # Install graphviz which is used to generate ERD diagrams
-RUN apt-get update && apt-get install --no-install-recommends --yes graphviz \ 
+RUN apt-get update && apt-get install --no-install-recommends --yes graphviz \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

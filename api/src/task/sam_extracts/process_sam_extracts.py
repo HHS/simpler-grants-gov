@@ -107,12 +107,9 @@ class ProcessSamExtractsTask(Task):
                 "extract_type": sam_extract_file.extract_type,
             }
             start = time.perf_counter()
-            with self.db_session.begin():
-                self.process_extract(sam_extract_file, extract_log_extra)
+            self.process_extract(sam_extract_file, extract_log_extra)
 
             # Record the time that extract took to complete
-            # We do this after the with db_session.begin block
-            # so that we count the time it takes the commit to occur
             end = time.perf_counter()
             duration = round((end - start), 3)
             logger.info(
@@ -134,39 +131,46 @@ class ProcessSamExtractsTask(Task):
 
     def process_extract(self, sam_extract_file: SamExtractFile, extract_log_extra: dict) -> None:
         """Process a sam.gov FOUO entity extract file, parsing and loading the file to our sam.gov entity table"""
-        # process the extract
         sam_gov_entity_container = self.parse_extract_file(sam_extract_file, extract_log_extra)
 
         self.load_sam_gov_entities_to_db(
             sam_gov_entity_container, sam_extract_file, extract_log_extra
         )
 
-        # Handle deactivated sam.gov entity records
-        existing_deactivated_entities = self.get_existing_entities(
-            sam_gov_entity_container.deactivated_ueis
-        )
-        for uei in sam_gov_entity_container.deactivated_ueis:
-            self.handle_deactivated_entity(
-                uei, existing_deactivated_entities, sam_extract_file, extract_log_extra
+        # Process all of the deactivations/expired in one transaction as they're usually fairly small.
+        with self.db_session.begin():
+            # Handle deactivated sam.gov entity records
+            existing_deactivated_entities = self.get_existing_entities(
+                sam_gov_entity_container.deactivated_ueis
+            )
+            for uei in sam_gov_entity_container.deactivated_ueis:
+                self.handle_deactivated_entity(
+                    uei, existing_deactivated_entities, sam_extract_file, extract_log_extra
+                )
+
+            # Handle expired sam.gov entity records
+            existing_expired_entities = self.get_existing_entities(
+                sam_gov_entity_container.expired_ueis
+            )
+            for uei in sam_gov_entity_container.expired_ueis:
+                self.handle_expired_entity(
+                    uei, existing_expired_entities, sam_extract_file, extract_log_extra
+                )
+
+            # Verify that the records we skipped due to non-empty EFT indicator all got processed
+            # in one of the above sections.
+            self.verify_skipped_entities_have_processed_row(
+                sam_gov_entity_container, extract_log_extra
             )
 
-        # Handle expired sam.gov entity records
-        existing_expired_entities = self.get_existing_entities(
-            sam_gov_entity_container.expired_ueis
-        )
-        for uei in sam_gov_entity_container.expired_ueis:
-            self.handle_expired_entity(
-                uei, existing_expired_entities, sam_extract_file, extract_log_extra
+            logger.info(
+                "Finished loading records to DB for Sam.gov extract", extra=extract_log_extra
             )
 
-        # Verify that the records we skipped due to non-empty EFT indicator all got processed
-        # in one of the above sections.
-        self.verify_skipped_entities_have_processed_row(sam_gov_entity_container, extract_log_extra)
-
-        logger.info("Finished loading records to DB for Sam.gov extract", extra=extract_log_extra)
-
-        # Mark extract as processed
-        sam_extract_file.processing_status = SamGovProcessingStatus.COMPLETED
+            # Mark extract as processed
+            # Have to add to the session as it was fetched in a different transaction
+            self.db_session.add(sam_extract_file)
+            sam_extract_file.processing_status = SamGovProcessingStatus.COMPLETED
 
     def parse_extract_file(
         self, sam_extract_file: SamExtractFile, extract_log_extra: dict
@@ -302,7 +306,7 @@ class ProcessSamExtractsTask(Task):
         sam_extract_file: SamExtractFile,
         extract_log_extra: dict,
     ) -> None:
-        """Load sam.gov entities to the DB"""
+        """Load sam.gov entities to the DB in batches"""
         total_to_process = len(sam_gov_entity_container.processed_entities)
         total_processed = 0
         for batch in itertools.batched(
@@ -310,19 +314,25 @@ class ProcessSamExtractsTask(Task):
             n=self.config.process_sam_extracts_upsert_batch_size,
             strict=False,
         ):
-            logger.info(
-                f"Processing a batch, processed {total_processed} / {total_to_process}",
-                extra=extract_log_extra,
-            )
-            entity_map = self.get_existing_entities([entity.uei for entity in batch])
-
-            # Process updated/new sam.gov entity records
-            for sam_gov_entity in batch:
-                self.load_sam_gov_entity_to_db(
-                    sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
+            # Process each of these batches as a separate DB transaction/commit to save memory
+            with self.db_session.begin():
+                logger.info(
+                    f"Processing a batch, processed {total_processed} / {total_to_process}",
+                    extra=extract_log_extra,
                 )
 
-            total_processed += len(batch)
+                entity_map = self.get_existing_entities([entity.uei for entity in batch])
+
+                # Process updated/new sam.gov entity records
+                for sam_gov_entity in batch:
+                    self.load_sam_gov_entity_to_db(
+                        sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
+                    )
+
+                total_processed += len(batch)
+
+            # Clear the SQLAlchemy cache between batches
+            self.db_session.expunge_all()
 
     def load_sam_gov_entity_to_db(
         self,

@@ -296,6 +296,9 @@ setup-foreign-tables:
 seed-local-legacy-tables:
 	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_legacy_tables
 
+generate-internal-token:
+	$(FLASK_CMD) task generate-internal-token $(args)
+
 ##################################################
 # Tasks/Jobs
 ##################################################

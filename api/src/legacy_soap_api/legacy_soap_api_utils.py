@@ -137,6 +137,7 @@ def diff_soap_dicts(
     # to determine how to match up entries based on the key name and which key name to use to find and compare
     # the dicts with the specified matching key name.
     key_indexes = key_indexes if key_indexes else {}
+
     sgg_keys = set(sgg_dict.keys())
     gg_keys = set(gg_dict.keys())
 
@@ -158,24 +159,30 @@ def diff_soap_dicts(
             if nested_diff:
                 differing[k] = nested_diff
         elif sgg_value != gg_value:
-            # Only support diffing list of dicts if key_indexes is specified
-            if is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value):
-                if key_indexes:
-                    key_index = key_indexes.get(k)
-                    if key_index:
-                        differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index, keys_only)
-            else:
-                if isinstance(sgg_value, list) and isinstance(gg_value, list):
-                    try:
-                        if sgg_value.sort() == gg_value.sort():
-                            continue
-                    except TypeError:
-                        # Could not sort this type list
-                        pass
-                differing[k] = {
-                    "sgg_dict": _hide_value(sgg_value, keys_only),
-                    "gg_dict": _hide_value(gg_value, keys_only),
-                }
+            # Try to diff list of dicts if key_indexes is specified
+            if is_list_of_dicts(sgg_value) and is_list_of_dicts(gg_value) and key_indexes:
+                key_index = key_indexes.get(k)
+                if key_index:
+                    differing[k] = diff_list_of_dicts(sgg_value, gg_value, key_index, keys_only)
+                    continue  # Skip the general diff logic below
+
+            # General diff logic for all other cases (including list of dicts without key_indexes)
+            if isinstance(sgg_value, list) and isinstance(gg_value, list):
+                try:
+                    # Create copies to avoid modifying original lists, then sort and compare
+                    sgg_sorted = sorted(sgg_value)
+                    gg_sorted = sorted(gg_value)
+                    if sgg_sorted == gg_sorted:
+                        continue
+                except TypeError:
+                    # Could not sort this type list
+                    pass
+
+            # Add the difference to the result
+            differing[k] = {
+                "sgg_dict": _hide_value(sgg_value, keys_only),
+                "gg_dict": _hide_value(gg_value, keys_only),
+            }
     return {**key_diffs, **differing}
 
 

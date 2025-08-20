@@ -2,12 +2,7 @@
   "defaults": {
     "timeout": 240000,
     "runners": ["axe"],
-    "ignore": [
-      "color-contrast",
-      "document-title",
-      "frame-title",
-      "frame-tested"
-    ],
+    "ignore": ["color-contrast", "document-title"],
     "concurrency": 1,
     "chromeLaunchConfig": {
       "ignoreHTTPSErrors": true,

@@ -971,6 +971,36 @@ class UserSavedSearchFactory(BaseFactory):
     )
 
 
+class UserApiKeyFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserApiKey
+
+    api_key_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda k: k.user.user_id)
+
+    key_name = factory.Faker("sentence", nb_words=3)
+    key_id = factory.Sequence(lambda n: f"aws-api-gateway-key-{n:08d}")
+
+    last_used = sometimes_none(
+        factory.Faker("date_time_between", start_date="-30d", end_date="now"), none_chance=0.3
+    )
+    is_active = True
+
+    class Params:
+        # Trait for inactive keys
+        inactive = factory.Trait(is_active=False)
+
+        # Trait for recently used keys
+        recently_used = factory.Trait(
+            last_used=factory.Faker("date_time_between", start_date="-7d", end_date="now")
+        )
+
+        # Trait for unused keys
+        never_used = factory.Trait(last_used=None)
+
+
 ###################
 # Competition & Form Factories
 ###################
@@ -2536,7 +2566,7 @@ class SamGovEntityFactory(BaseFactory):
         model = entity_models.SamGovEntity
 
     sam_gov_entity_id = Generators.UuidObj
-    uei = factory.Sequence(lambda n: f"TESTUEI{n:07d}")  # Example UEI format
+    uei = factory.Sequence(lambda n: f"UEI{n:09d}")  # Example UEI format
     legal_business_name = factory.Faker("company")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     initial_registration_date = factory.Faker("date_between", start_date="-5y", end_date="-1y")
@@ -2546,7 +2576,7 @@ class SamGovEntityFactory(BaseFactory):
     ebiz_poc_last_name = factory.Faker("last_name")
     has_debt_subject_to_offset = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
     has_exclusion_status = sometimes_none(factory.Faker("boolean"), none_chance=0.8)
-    eft_indicator = sometimes_none(factory.Faker("pystr", min_chars=3, max_chars=3))
+    eft_indicator = None
 
     class Params:
         has_organization = factory.Trait(
@@ -2628,3 +2658,13 @@ class SuppressedEmailFactory(BaseFactory):
     last_update_time = factory.Faker(
         "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
     )
+
+
+class ExcludedOpportunityReviewFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.ExcludedOpportunityReview
+
+    opportunity_id = factory.Sequence(lambda n: n)
+    omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
+    omb_review_status_date = factory.Faker("date_between", start_date="-5y", end_date="-3y")
+    last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")

@@ -63,7 +63,7 @@ Front End Development Instructions [Front End Development Instructions](../../..
 {% hint style="info" %}
 Nee**d help with your local development environment?**\
 \
-Post in the [Discourse forum](https://simplergrants.discourse.group/) if you're having issues. We can walk you through the process of resolving blockers.\
+Post in the [Discourse forum](https://forum.simpler.grants.gov/) if you're having issues. We can walk you through the process of resolving blockers.\
 \
 We also use a CODEOWNERS file to automatically suggest and add folks knowledgeable about the area of the code you're making changes to.
 {% endhint %}

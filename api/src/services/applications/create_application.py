@@ -17,6 +17,7 @@ from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, OrganizationUser, User
 from src.services.applications.application_validation import (
     ApplicationAction,
+    validate_application_form,
     validate_competition_open,
 )
 from src.util.datetime_util import get_now_us_eastern_date
@@ -205,6 +206,9 @@ def create_application(
         )
 
         db_session.add(application_form)
+
+        # Validate the application form to trigger pre-population
+        validate_application_form(application_form, ApplicationAction.START)
 
     logger.info(
         "Created new application",

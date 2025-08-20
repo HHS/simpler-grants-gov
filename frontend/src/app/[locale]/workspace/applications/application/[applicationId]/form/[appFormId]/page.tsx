@@ -1,34 +1,34 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/error/page";
 import NotFound from "src/app/[locale]/not-found";
-import {
-  ApiRequestError,
-  parseErrorStatus,
-  UnauthorizedError,
-} from "src/errors";
-import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
-import { FormDetail } from "src/types/formResponseTypes";
+import getFormData from "src/utils/getFormData";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
-import { FormValidationWarning } from "src/components/applyForm/types";
-import { getApplicationResponse } from "src/components/applyForm/utils";
-import { validateUiSchema } from "src/components/applyForm/validate";
 import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
-export function generateMetadata() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ applicationId: string; appFormId: string; locale: string }>;
+}) {
+  const { applicationId, appFormId } = await params;
+  let title = "";
+  const { data } = await getFormData({ applicationId, appFormId });
+
+  if (data) {
+    const { formName } = data;
+    title = formName;
+  }
   const meta: Metadata = {
-    title: `Form test for form React JSON Schema`,
-    description: "this is the form",
+    title,
+    description: "Follow instructions to complete this form.",
   };
   return meta;
 }
@@ -39,85 +39,23 @@ interface formPageProps {
 
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
-  let applicationData = {} as ApplicationDetail;
-  let formValidationWarnings: FormValidationWarning[] | null;
-  let formId = "";
-  let formData: FormDetail | null;
-  const session = await getSession();
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session to access form");
-  }
+  const { data, error } = await getFormData({ applicationId, appFormId });
 
-  try {
-    const response = await getApplicationDetails(applicationId, session.token);
-
-    if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving form details for applicationID (${applicationId}), appFormId (${appFormId})`,
-        response,
-      );
-      return <TopLevelError />;
-    }
-    applicationData = response.data;
-    formId =
-      applicationData.application_forms?.find(
-        (form) => form.application_form_id === appFormId,
-      )?.form_id || "";
-    if (!formId) {
-      console.error(
-        `No form found for applicationID (${applicationId}), appFormId (${appFormId})`,
-      );
-      return <TopLevelError />;
-    }
-    formData =
-      applicationData.competition.competition_forms.find(
-        (form) => form.form.form_id === formId,
-      )?.form || null;
-    if (!formData) {
-      console.error(
-        `No form data found for applicationID (${applicationId}), appFormId (${appFormId}), formId (${formId})`,
-      );
-      return <TopLevelError />;
-    }
-    formValidationWarnings =
-      (applicationData.form_validation_warnings?.[
-        appFormId
-      ] as unknown as FormValidationWarning[]) || null;
-  } catch (e) {
-    if (parseErrorStatus(e as ApiRequestError) === 404) {
-      console.error(
-        `Error retrieving application details for applicationID (${applicationId}), appFormId ${appFormId}:`,
-        e,
-      );
-      return <NotFound />;
-    }
+  if (error || !data) {
+    if (error === "UnauthorizedError") return redirect("/unauthenticated");
+    if (error === "NotFound") return <NotFound />;
     return <TopLevelError />;
   }
 
-  const application_response = getApplicationResponse(
-    applicationData.application_forms,
+  const {
+    applicationResponse,
+    applicationFormData,
     formId,
-  );
-  const { form_id, form_name, form_json_schema, form_ui_schema } = formData;
-
-  const schemaErrors = validateUiSchema(form_ui_schema);
-  if (schemaErrors) {
-    console.error(
-      "Error validating form ui schema",
-      form_ui_schema,
-      schemaErrors,
-    );
-    return <TopLevelError />;
-  }
-
-  let formSchema = {};
-  try {
-    // creates single object for json schema from references
-    formSchema = await $RefParser.dereference(form_json_schema);
-  } catch (e) {
-    console.error("Error parsing JSON schema", e);
-    return <TopLevelError />;
-  }
+    formName,
+    formSchema,
+    formUiSchema,
+    formValidationWarnings,
+  } = data;
 
   return (
     <>
@@ -127,23 +65,23 @@ async function FormPage({ params }: formPageProps) {
           breadcrumbList={[
             { title: "home", path: "/" },
             {
-              title: applicationData.application_name,
-              path: `/workspace/applications/application/${applicationData.application_id}`,
+              title: applicationFormData.application_name,
+              path: `/workspace/applications/application/${applicationFormData.application_id}`,
             },
             {
               title: "Form",
-              path: `/workspace/applications/application/${applicationData.application_id}/form/${applicationId}`,
+              path: `/workspace/applications/application/${applicationFormData.application_id}/form/${applicationId}`,
             },
           ]}
         />
-        <h1>{form_name}</h1>
+        <h1>{formName}</h1>
         <ApplyForm
-          validationWarnings={formValidationWarnings}
-          savedFormData={application_response}
-          formSchema={formSchema}
-          uiSchema={form_ui_schema}
-          formId={form_id}
           applicationId={applicationId}
+          validationWarnings={formValidationWarnings}
+          savedFormData={applicationResponse}
+          formSchema={formSchema}
+          uiSchema={formUiSchema}
+          formId={formId}
         />
       </GridContainer>
     </>

@@ -2,6 +2,10 @@ import { APIResponse } from "src/types/apiResponseTypes";
 
 export type UploadStatus = "uploading" | "cancelled" | "completed" | "failed";
 
+export type AttachmentUploadResponse = {
+  application_attachment_id?: string;
+};
+
 export interface Attachment {
   application_attachment_id: string;
   download_path: string;

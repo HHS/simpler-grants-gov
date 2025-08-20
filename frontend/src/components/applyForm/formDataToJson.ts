@@ -1,5 +1,9 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
+import { RJSFSchema } from "@rjsf/utils";
+
+import { getByPointer, getFieldPath } from "./utils";
+
 // like, this is basically anything lol - DWS
 type NestedObject = {
   [key: string]:
@@ -13,8 +17,49 @@ type FormDataToJsonOptions = {
   delimiter?: string;
 };
 
+/*
+  - string representations of booleans are cast to booleans
+  - for number type fields, cast to number as long as a value is present
+  - for string type fields that represent a number, ensure they remain strings (or undefined)
+  - otherwise it may be an object or array, so try to cast to parse json
+    - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
+  - if the json parse fails, just return the string (or undefined)
+*/
+const parseValue = (value: unknown, type: string) => {
+  if (value === "false") return false;
+  if (value === "true") return true;
+  if (
+    (type === "integer" || type === "number") &&
+    value !== "" &&
+    !isNaN(Number(value))
+  )
+    return Number(value);
+  if (type === "string" && !isNaN(Number(value))) {
+    return value || undefined;
+  }
+  try {
+    return JSON.parse(value as string) as unknown;
+  } catch (e) {
+    return value || undefined;
+  }
+};
+
+const getFieldType = (
+  currentKey: string,
+  formSchema: RJSFSchema,
+  parentKey?: string,
+): string => {
+  const path = getFieldPath(currentKey);
+  const fullPath = parentKey ? `${parentKey}/${path}` : path;
+  const formFieldDefinition = getByPointer(formSchema, fullPath) as {
+    type?: string;
+  };
+  return formFieldDefinition?.type || "";
+};
+
 export function formDataToObject(
   formData = new FormData(),
+  formSchema: RJSFSchema,
   options?: FormDataToJsonOptions,
 ): NestedObject {
   const delimiter = options?.delimiter || ".";
@@ -25,19 +70,10 @@ export function formDataToObject(
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
+    const fieldType = getFieldType(currentKey, formSchema, parentKey);
+    const parsedValue = parseValue(value, fieldType);
+
     let current = result;
-    const parsedValue = (() => {
-      if (value === "false") return false;
-      if (value === "true") return true;
-      if (
-        value !== "" &&
-        value !== null &&
-        value !== undefined &&
-        !isNaN(Number(value))
-      )
-        return Number(value);
-      return value || undefined;
-    })();
 
     const chunksLen = chunks.length;
     for (let chunkIdx = 0; chunkIdx < chunksLen; chunkIdx++) {
@@ -75,7 +111,7 @@ export function formDataToObject(
         }
       } else {
         if (chunkIdx === chunks.length - 1) {
-          current[chunkName] = parsedValue;
+          current[chunkName] = parsedValue as NestedObject;
         } else {
           current[chunkName] = current[chunkName] ?? {};
           current = current[chunkName] as NestedObject;
