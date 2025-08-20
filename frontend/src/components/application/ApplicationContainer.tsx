@@ -112,6 +112,7 @@ const ApplicationContainer = ({
         applicationForms={applicationForms}
         applicationId={applicationId}
         forms={forms}
+        errors={validationErrors}
       />
       <AttachmentsCard
         applicationId={applicationId}
