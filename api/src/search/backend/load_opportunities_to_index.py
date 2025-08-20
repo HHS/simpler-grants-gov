@@ -9,7 +9,7 @@ from typing import Iterator, Sequence
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
-from sqlalchemy import select, update
+from sqlalchemy import exists, select, update
 from sqlalchemy.orm import noload, selectinload
 from sqlalchemy.sql import Select
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
@@ -20,6 +20,7 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
+    ExcludedOpportunityReview,
     Opportunity,
     OpportunityAttachment,
     OpportunityChangeAudit,
@@ -298,6 +299,7 @@ class LoadOpportunitiesToIndex(Task):
         Fetches all opportunities where:
             * is_draft = False
             * current_opportunity_summary is not None
+            * not in excluded_opportunity_review table
         """
         return (
             self.db_session.execute(
@@ -306,6 +308,12 @@ class LoadOpportunitiesToIndex(Task):
                 .where(
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
+                    ~exists(
+                        select(ExcludedOpportunityReview.opportunity_id).where(
+                            ExcludedOpportunityReview.opportunity_id
+                            == Opportunity.legacy_opportunity_id
+                        )
+                    ),
                 )
                 .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
                 # Top level agency won't be automatically fetched up front unless we add this
