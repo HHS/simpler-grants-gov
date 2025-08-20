@@ -496,6 +496,7 @@ def user_create_api_key(
 
     return response.ApiResponse(message="Success", data=api_key)
 
+
 @user_blueprint.delete("/<uuid:user_id>/api-keys/<uuid:api_key_id>")
 @user_blueprint.output(UserApiKeyDeleteResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403, 404])
@@ -518,6 +519,7 @@ def user_delete_api_key(
     )
 
     return response.ApiResponse(message="Success")
+
 
 @user_blueprint.post("/<uuid:user_id>/api-keys/list")
 @user_blueprint.input(UserApiKeyListRequestSchema, location="json")

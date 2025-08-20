@@ -315,6 +315,8 @@ class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
 
 class UserApiKeyDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
 class UserApiKeyListRequestSchema(Schema):
     # Future filtering fields can be added here
     pass
