@@ -89,14 +89,13 @@ module "database" {
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
   # The following are not AWS infra resources and therefore do not need to be
   # isolated via the terraform workspace prefix
-  app_username      = local.database_config.app_username
-  migrator_username = local.database_config.migrator_username
-  schema_name       = local.database_config.schema_name
-  instance_count    = local.database_config.instance_count
-  max_capacity      = local.database_config.max_capacity
-  min_capacity      = local.database_config.min_capacity
-  #   enable_http_endpoint           = local.database_config.enable_http_endpoint
-  enable_http_endpoint           = true
+  app_username                   = local.database_config.app_username
+  migrator_username              = local.database_config.migrator_username
+  schema_name                    = local.database_config.schema_name
+  instance_count                 = local.database_config.instance_count
+  max_capacity                   = local.database_config.max_capacity
+  min_capacity                   = local.database_config.min_capacity
+  enable_http_endpoint           = local.database_config.enable_http_endpoint
   vpc_id                         = data.aws_vpc.network.id
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
