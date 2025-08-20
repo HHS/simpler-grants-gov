@@ -58,7 +58,7 @@ const Footer = () => {
                 <FooterNavLinkItem to="vision" />
                 <FooterNavLinkItem to="roadmap" />
                 <FooterNavLinkItem to="events" />
-                <FooterNavLinkItem to="newsletter" />
+                <FooterNavLinkItem to="subscribe" />
               </ul>
             </Grid>
             <Grid
