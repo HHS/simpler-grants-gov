@@ -1,11 +1,10 @@
 locals {
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
-  #   domain_identity_arn = local.notifications_config != null ? (
-  #     !local.is_temporary ?
-  #     module.notifications_email_domain[0].domain_identity_arn :
-  #     module.existing_notifications_email_domain[0].domain_identity_arn
-  #   ) : null
-  domain_identity_arn = null
+  domain_identity_arn = local.notifications_config != null ? (
+    !local.is_temporary ?
+    module.notifications_email_domain[0].domain_identity_arn :
+    module.existing_notifications_email_domain[0].domain_identity_arn
+  ) : null
   notifications_environment_variables = local.notifications_config != null ? {
     AWS_PINPOINT_APP_ID = module.notifications[0].app_id
   } : {}
