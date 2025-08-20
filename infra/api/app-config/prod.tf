@@ -86,7 +86,7 @@ module "prod_config" {
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
-    SYNC_SUPPRESSED_EMAILS="false"
+    SYNC_SUPPRESSED_EMAILS = "false"
   }
   instance_cpu    = 1024
   instance_memory = 4096
