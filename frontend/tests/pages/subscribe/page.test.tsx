@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Subscribe from "src/app/[locale]/subscribe/page";
+import Subscribe from "src/app/[locale]/(base)/subscribe/page";
 import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const mockSetItem = jest.fn();

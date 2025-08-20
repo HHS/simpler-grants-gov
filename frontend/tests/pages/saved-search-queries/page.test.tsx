@@ -1,5 +1,5 @@
 import { axe } from "jest-axe";
-import SavedSearchQueries from "src/app/[locale]/saved-search-queries/page";
+import SavedSearchQueries from "src/app/[locale]/(base)/saved-search-queries/page";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 import { render, screen, waitFor } from "tests/react-utils";
