@@ -22,7 +22,7 @@ class TestPdfGenerationService:
     def test_init_with_default_config(self, monkeypatch):
         """Test service initialization with configuration from environment."""
         env_vars = {
-            "FRONTEND_SIDECAR_URL": "http://localhost:3000",
+            "FRONTEND_URL": "http://localhost:3000",
             "DOCRAPTOR_API_KEY": "test-key",
             "DOCRAPTOR_TEST_MODE": "true",
             "DOCRAPTOR_API_URL": "https://docraptor.com/docs",
@@ -36,12 +36,12 @@ class TestPdfGenerationService:
         service = PdfGenerationService()
 
         assert isinstance(service.config, PdfGenerationConfig)
-        assert service.config.frontend_sidecar_url == "http://localhost:3000"
+        assert service.config.frontend_url == "http://localhost:3000"
 
     def test_init_with_custom_config(self):
         """Test service initialization with custom configuration."""
         config = PdfGenerationConfig(
-            frontend_sidecar_url="http://test:8080",
+            frontend_url="http://test:8080",
             docraptor_api_key="test-key",
             docraptor_test_mode=False,
             docraptor_api_url="https://docraptor.com/docs",
@@ -49,7 +49,7 @@ class TestPdfGenerationService:
             pdf_generation_use_mocks=True,
         )
         service = PdfGenerationService(config)
-        assert service.config.frontend_sidecar_url == "http://test:8080"
+        assert service.config.frontend_url == "http://test:8080"
         assert service.config.docraptor_test_mode is False
 
     def test_init_with_custom_clients(self):
@@ -96,7 +96,8 @@ class TestPdfGenerationService:
         )  # 15 minutes later with same timezone
         assert expires_at == expected_expires_at
 
-        mock_db_session.commit.assert_called_once()
+        # Note: commit is no longer called within the token generation function
+        mock_db_session.commit.assert_not_called()
 
     def test_generate_pdf_success(self, db_session):
         """Test successful PDF generation."""
@@ -226,7 +227,7 @@ class TestFactoryFunctions:
     def test_create_pdf_generation_service_with_config(self):
         """Test creating service with custom config."""
         config = PdfGenerationConfig(
-            frontend_sidecar_url="http://custom:8080",
+            frontend_url="http://custom:8080",
             docraptor_api_key="test-key",
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
@@ -234,7 +235,7 @@ class TestFactoryFunctions:
             pdf_generation_use_mocks=False,
         )
         service = create_pdf_generation_service(config=config)
-        assert service.config.frontend_sidecar_url == "http://custom:8080"
+        assert service.config.frontend_url == "http://custom:8080"
 
     def test_generate_application_form_pdf_convenience_function(self, db_session):
         """Test the convenience function for PDF generation."""

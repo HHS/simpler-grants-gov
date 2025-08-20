@@ -116,9 +116,6 @@ class PdfGenerationService:
             expires_at=expires_at, db_session=db_session
         )
 
-        # Commit the token to the database
-        db_session.commit()
-
         logger.info(
             "Generated short-lived token for PDF generation",
             extra={
@@ -146,8 +143,8 @@ def create_pdf_generation_service(
     if config is None:
         config = get_config()
 
-    frontend_client = MockFrontendClient() if config.pdf_generation_use_mocks else FrontendClient(config)
-    docraptor_client = MockDocRaptorClient() if config.pdf_generation_use_mocks else DocRaptorClient(config)
+    frontend_client = MockFrontendClient() if use_mocks else FrontendClient(config)
+    docraptor_client = MockDocRaptorClient() if use_mocks else DocRaptorClient(config)
 
     return PdfGenerationService(
         config=config,

@@ -697,6 +697,23 @@ files = [
 ]
 
 [[package]]
+name = "docraptor"
+version = "3.1.0"
+description = "DocRaptor"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "docraptor-3.1.0-py3-none-any.whl", hash = "sha256:044cef59c44546c15106668973168c540eefb5344532bb782540beaa6828901b"},
+    {file = "docraptor-3.1.0.tar.gz", hash = "sha256:ba6f0e8c6f1cb7eaf5c7987be4d51d09a35f95f21222d709300ddefc8dc6fa3c"},
+]
+
+[package.dependencies]
+python-dateutil = "*"
+six = ">=1.10"
+urllib3 = ">=1.25.3"
+
+[[package]]
 name = "eralchemy"
 version = "1.5.0"
 description = "Simple entity relation (ER) diagrams generation"
@@ -3460,4 +3477,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.13"
-content-hash = "14ff1b586bc9c65ca57ed03476b881be8f7e92918648e6fc897738f247e517cf"
+content-hash = "d5d6d0225396c250c75e30b01c3229902912094210489cc383f083d3aae69792"
