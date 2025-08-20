@@ -1206,7 +1206,7 @@ paths:
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/api-keys/{api_key_id}:
-    patch:
+    put:
       parameters:
       - in: path
         name: user_id
