@@ -503,19 +503,28 @@ const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   );
 };
 
+const isEmptyField = (mightBeEmpty: unknown): boolean => {
+  if (mightBeEmpty === undefined) {
+    return true;
+  }
+  return Object.values(mightBeEmpty as object).every((nestedValue) => {
+    if (isBasicallyAnObject(nestedValue)) {
+      return isEmptyField(nestedValue);
+    }
+    return !nestedValue;
+  });
+};
+
 // if a nested field contains no defined items, remove it from the data
 // this may not be necessary, as JSON.stringify probably does the same thing
 export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
-      if (!isBasicallyAnObject(value)) {
+      if (!isBasicallyAnObject(value) && value !== undefined) {
         acc[key] = value;
         return acc;
       }
-      const isEmptyObject = Object.values(value as object).every(
-        (nestedValue) => !nestedValue,
-      );
-      if (isEmptyObject) {
+      if (isEmptyField(value)) {
         return acc;
       }
       const pruned = pruneEmptyNestedFields(value as object);
