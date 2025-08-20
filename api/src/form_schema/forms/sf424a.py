@@ -332,39 +332,87 @@ FORM_JSON_SCHEMA = {
 }
 
 FORM_UI_SCHEMA = [
-    {
-        "name": "SectionA",
-        "type": "section",
-        "label": "Section A - Budget summary",
-        "children": [
-            {
-                "type": "multiField",
-                "name": "Budget424aSectionA",
-                "widget": "Budget424aSectionA",
-                "definition": [
-                    "/properties/activity_line_items",
-                    "/properties/total_budget_summary",
-                ],
-            }
-        ],
-    },
-    {
-        "name": "SectionB",
-        "type": "section",
-        "label": "Section B - Budget categories",
-        "children": [
-            {
-                "type": "multiField",
-                "name": "Budget424aSectionB",
-                "widget": "Budget424aSectionB",
-                "definition": [
-                    "/properties/activity_line_items",
-                    "/properties/total_budget_categories",
-                ],
-            }
-        ],
-    },
+  {
+    "name": "SectionA",
+    "type": "section",
+    "label": "Section A - Budget summary",
+    "children": [
+      {
+        "type": "multiField",
+        "name": "Budget424aSectionA",
+        "widget": "Budget424aSectionA",
+        "definition": [
+          "/properties/activity_line_items",
+          "/properties/total_budget_summary"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SectionB",
+    "type": "section",
+    "label": "Section B - Budget categories",
+    "children": [
+      {
+        "type": "multiField",
+        "name": "Budget424aSectionB",
+        "widget": "Budget424aSectionB",
+        "definition": [
+          "/properties/activity_line_items",
+          "/properties/total_budget_categories"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SectionC",
+    "type": "section",
+    "label": "Section C - Non-federal resources",
+    "children": [
+      {
+        "type": "multiField",
+        "name": "Budget424aSectionC",
+        "widget": "Budget424aSectionC",
+        "definition": [
+          "/properties/activity_line_items",
+          "/properties/total_non_federal_resources"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SectionD",
+    "type": "section",
+    "label": "Section D - Forecasted cash needs",
+    "children": [
+      {
+        "type": "multiField",
+        "name": "Budget424aSectionD",
+        "widget": "Budget424aSectionD",
+        "definition": [
+          "/properties/forecasted_cash_needs"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SectionE",
+    "type": "section",
+    "label": "Section E - Budget estimates of federal funds needed for balance of the project ",
+    "children": [
+      {
+        "type": "multiField",
+        "name": "Budget424aSectionE",
+        "widget": "Budget424aSectionE",
+        "definition": [
+          "/properties/activity_line_items",
+          "/properties/total_federal_fund_estimates"
+        ]
+      }
+    ]
+  }
 ]
+
 
 
 SF424a_v1_0 = Form(
