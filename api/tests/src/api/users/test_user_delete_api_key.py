@@ -18,6 +18,9 @@ def test_delete_api_key_success(enable_factory_create, db_session, client, user,
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
+    # Expunge the object to see changes made by the API call
+    db_session.expunge(api_key)
+
     db_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)
     ).scalar_one_or_none()
@@ -112,6 +115,9 @@ def test_delete_api_key_already_inactive(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
+    # Expunge the object to see changes made by the API call
+    db_session.expunge(api_key)
+
     db_api_key = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key.api_key_id)
     ).scalar_one_or_none()
@@ -131,6 +137,10 @@ def test_delete_api_key_multiple_keys(
     )
 
     assert response.status_code == 200
+
+    # Expunge the objects to see changes made by the API call
+    db_session.expunge(api_key1)
+    db_session.expunge(api_key2)
 
     db_api_key1 = db_session.execute(
         select(UserApiKey).where(UserApiKey.api_key_id == api_key1.api_key_id)

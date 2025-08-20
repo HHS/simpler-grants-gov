@@ -1,27 +1,23 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select
-
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
-from src.db.models.user_models import UserApiKey
+from src.services.users.get_user_api_keys import get_user_api_keys
 
 logger = logging.getLogger(__name__)
 
 
 def delete_api_key(db_session: db.Session, user_id: UUID, api_key_id: UUID) -> None:
-    api_key = db_session.execute(
-        select(UserApiKey).where(
-            UserApiKey.api_key_id == api_key_id,
-            UserApiKey.user_id == user_id,
-        )
-    ).scalar_one_or_none()
+    """Delete an API key for a user"""
+    # Reuse the get_user_api_keys service to fetch all user's API keys
+    api_keys = get_user_api_keys(db_session, user_id)
+
+    # Find the specific API key to delete
+    api_key = next((key for key in api_keys if key.api_key_id == api_key_id), None)
 
     if not api_key:
         raise_flask_error(404, "API key not found")
-
-    key_name = api_key.key_name
 
     db_session.delete(api_key)
 
@@ -30,6 +26,5 @@ def delete_api_key(db_session: db.Session, user_id: UUID, api_key_id: UUID) -> N
         extra={
             "api_key_id": api_key_id,
             "user_id": user_id,
-            "key_name": key_name,
         },
     )
