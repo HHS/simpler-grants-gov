@@ -49,7 +49,7 @@ class TopportunityCfdaMixin:
 
 @declarative_mixin
 class VopportunitySummaryMixin:
-    opportunity_id: Mapped[int]
+    opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     omb_review_status_display: Mapped[str | None]
     omb_review_status_date: Mapped[datetime.date | None]
     fo_last_upd_dt: Mapped[datetime.datetime | None]
