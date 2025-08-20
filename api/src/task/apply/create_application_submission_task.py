@@ -64,14 +64,21 @@ class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
 
 class CreateApplicationSubmissionTask(Task):
 
-    def __init__(self, db_session: db.Session, s3_config: S3Config | None = None):
+    def __init__(
+        self,
+        db_session: db.Session,
+        s3_config: S3Config | None = None,
+        pdf_generation_config: PdfGenerationConfig | None = None,
+    ):
         super().__init__(db_session)
         if s3_config is None:
             s3_config = S3Config()
         self.s3_config = s3_config
 
         self.app_submission_config = ApplicationSubmissionConfig()
-        self.pdf_generation_config = PdfGenerationConfig()
+        if pdf_generation_config is None:
+            pdf_generation_config = PdfGenerationConfig()
+        self.pdf_generation_config = pdf_generation_config
         self.has_more_to_process = True
 
     class Metrics(StrEnum):

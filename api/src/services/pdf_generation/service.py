@@ -63,8 +63,11 @@ class PdfGenerationService:
                 },
             )
 
-            # Step 1: Generate short-lived token
-            token = self._generate_short_lived_token(db_session)
+            # Step 1: Generate short-lived token (skip if using mocks)
+            if isinstance(self.frontend_client, MockFrontendClient):
+                token = "mock-token"  # Mock clients don't need real tokens
+            else:
+                token = self._generate_short_lived_token(db_session)
 
             # Step 2: Get HTML from frontend
             html_content = self.frontend_client.get_application_form_html(request, token)
