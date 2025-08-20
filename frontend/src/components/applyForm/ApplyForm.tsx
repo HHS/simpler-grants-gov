@@ -11,8 +11,9 @@ import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
+import { buildFormTreeRecursive } from "./builFormTree";
 import { FormValidationWarning, UiSchema } from "./types";
-import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
+import { getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
   applicationId,

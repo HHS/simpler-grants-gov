@@ -6,145 +6,14 @@ import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
-import React, { JSX } from "react";
-
 import { formDataToObject } from "./formDataToJson";
 import {
   FormValidationWarning,
   SchemaField,
   UiSchema,
   UiSchemaField,
-  UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
-import AttachmentWidget from "./widgets/AttachmentUploadWidget";
-import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
-import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
-import CheckboxWidget from "./widgets/CheckboxWidget";
-import { FieldsetWidget } from "./widgets/FieldsetWidget";
-import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
-import RadioWidget from "./widgets/RadioWidget";
-import SelectWidget from "./widgets/SelectWidget";
-import TextAreaWidget from "./widgets/TextAreaWidget";
-import TextWidget from "./widgets/TextWidget";
-
-export function buildFormTreeRecursive({
-  errors,
-  formData,
-  schema,
-  uiSchema,
-}: {
-  errors: FormValidationWarning[] | null;
-  formData: object;
-  schema: RJSFSchema;
-  uiSchema: UiSchema;
-}) {
-  let acc: JSX.Element[] = [];
-  // json schema describes arrays with dots, our html uses --
-  const formattedErrors = errors?.map((error) => {
-    error.field = error.field.replace("$.", "").replace(".", "--");
-    return error;
-  });
-
-  const buildFormTree = (
-    uiSchema:
-      | UiSchema
-      | {
-          children: UiSchema;
-          label: string;
-          name: string;
-          description?: string;
-        },
-    parent: { label: string; name: string; description?: string } | null,
-  ) => {
-    if (
-      !Array.isArray(uiSchema) &&
-      typeof uiSchema === "object" &&
-      "children" in uiSchema
-    ) {
-      buildFormTree(uiSchema.children, {
-        label: uiSchema.label,
-        name: uiSchema.name,
-        description: uiSchema.description,
-      });
-    } else if (Array.isArray(uiSchema)) {
-      uiSchema.forEach((node) => {
-        if ("children" in node) {
-          buildFormTree(node.children as unknown as UiSchema, {
-            label: node.label,
-            name: node.name,
-            description: node.description,
-          });
-        } else if (!parent && ("definition" in node || "schema" in node)) {
-          const field = buildField({
-            uiFieldObject: node,
-            formSchema: schema,
-            errors: formattedErrors ?? null,
-            formData,
-          });
-          if (field) {
-            acc = [
-              ...acc,
-              <React.Fragment key={node.name}>{field}</React.Fragment>,
-            ];
-          }
-        }
-      });
-      if (parent) {
-        const childAcc: JSX.Element[] = [];
-        const keys: number[] = [];
-        const row = uiSchema.map((node) => {
-          if ("children" in node) {
-            acc.forEach((item, key) => {
-              if (item) {
-                if (item.key === `${node.name}-wrapper`) {
-                  keys.push(key);
-                }
-              }
-            });
-            return null;
-          } else {
-            return buildField({
-              uiFieldObject: node,
-              formSchema: schema,
-              errors: formattedErrors ?? null,
-              formData,
-            });
-          }
-        });
-        if (keys.length) {
-          keys.forEach((key) => {
-            childAcc.push(acc[key]);
-            delete acc[key];
-          });
-          acc = [
-            ...acc,
-            wrapSection({
-              label: parent.label,
-              fieldName: parent.name,
-              description: parent.description,
-              tree: <>{childAcc}</>,
-            }),
-          ];
-        } else {
-          acc = [
-            ...acc,
-            wrapSection({
-              label: parent.label,
-              fieldName: parent.name,
-              tree: <>{row}</>,
-              description: parent.description,
-            }),
-          ];
-        }
-      }
-    }
-  };
-
-  buildFormTree(uiSchema, null);
-
-  return acc;
-}
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -246,24 +115,6 @@ export const getFieldName = ({
 export const getFieldPath = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
 
-const widgetComponents: Record<
-  WidgetTypes,
-  (widgetProps: UswdsWidgetProps) => JSX.Element
-> = {
-  Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
-  TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
-  Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
-  Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
-  Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
-  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
-  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    AttachmentArrayWidget(widgetProps),
-  Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionA(widgetProps),
-  Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionB(widgetProps),
-};
-
 const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
     return;
@@ -287,7 +138,7 @@ const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
   return (formSchema.required ?? []).includes(fieldName);
 };
 
-export const buildField = ({
+export const getFieldConfig = ({
   errors,
   formSchema,
   formData,
@@ -395,27 +246,21 @@ export const buildField = ({
       emptyValue: "- Select -",
     };
   }
-
-  const Widget = widgetComponents[type];
-
-  // light debugging for unknown widgets
-  if (typeof Widget !== "function") {
-    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
-    throw new Error(`Unknown widget type: ${type}`);
-  }
-
-  return Widget({
-    id: name,
-    key: name,
-    disabled,
-    required: isFieldRequired(name, formSchema),
-    minLength: fieldSchema?.minLength,
-    maxLength: fieldSchema?.maxLength,
-    schema: fieldSchema,
-    rawErrors,
-    value,
-    options,
-  });
+  return {
+    type,
+    props: {
+      id: name,
+      key: name,
+      disabled,
+      required: isFieldRequired(name, formSchema),
+      minLength: fieldSchema?.minLength,
+      maxLength: fieldSchema?.maxLength,
+      schema: fieldSchema,
+      rawErrors,
+      value,
+      options,
+    },
+  };
 };
 
 const formatFieldWarnings = (
@@ -468,30 +313,6 @@ export function getFieldsForNav(
 
   return results;
 }
-
-const wrapSection = ({
-  label,
-  fieldName,
-  tree,
-  description,
-}: {
-  label: string;
-  fieldName: string;
-  tree: JSX.Element | undefined;
-  description?: string;
-}) => {
-  const uniqueKey = `${fieldName}-fieldset`;
-  return (
-    <FieldsetWidget
-      key={uniqueKey}
-      fieldName={fieldName}
-      label={label}
-      description={description}
-    >
-      {tree}
-    </FieldsetWidget>
-  );
-};
 
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   return (

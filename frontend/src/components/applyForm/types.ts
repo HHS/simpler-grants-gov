@@ -60,18 +60,22 @@ export type WidgetTypes =
   | "Budget424aSectionA"
   | "Budget424aSectionB";
 
+export type DefinitionPath =
+  | `/properties/${string}`
+  | [`/properties/${string}`];
+
 export type UiSchemaField = {
   type: "field" | "multiField" | "null";
   widget?: WidgetTypes;
   name?: string;
 } & (
   | {
-      definition: `/properties/${string}` | [`/properties/${string}`];
+      definition: DefinitionPath;
       schema?: undefined;
     }
   | { schema: SchemaField; definition?: undefined }
   | {
-      definition: `/properties/${string}` | [`/properties/${string}`];
+      definition: DefinitionPath;
       schema: SchemaField;
     }
 );
