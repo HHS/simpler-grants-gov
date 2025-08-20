@@ -8,12 +8,9 @@ locals {
   notifications_environment_variables = local.notifications_config != null ? {
     AWS_PINPOINT_APP_ID = module.notifications[0].app_id
   } : {}
-
-
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
   pinpoint_app_id        = module.notifications[0].app_id
-
-  ses_configuration_set = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
+  ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
 }
 
