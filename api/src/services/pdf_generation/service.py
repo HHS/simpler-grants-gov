@@ -89,14 +89,12 @@ class PdfGenerationService:
             return PdfGenerationResponse(pdf_data=pdf_data, success=True)
 
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Error generating PDF",
                 extra={
                     "application_id": str(request.application_id),
                     "application_form_id": str(request.application_form_id),
-                    "error": str(e),
                 },
-                exc_info=True,
             )
 
             return PdfGenerationResponse(
