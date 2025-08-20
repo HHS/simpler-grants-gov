@@ -3,7 +3,7 @@ import uuid
 from typing import Any, Sequence, Tuple
 
 from pydantic import BaseModel, Field
-from sqlalchemy import Select, exists, select
+from sqlalchemy import Select, and_, exists, select
 from sqlalchemy.orm import InstrumentedAttribute, joinedload
 
 import src.adapters.db as db
@@ -47,8 +47,18 @@ def _construct_active_inner_query(
             )
         )
         .where(
-            ~exists(ExcludedOpportunityReview.opportunity_id == Opportunity.legacy_opportunity_id)
-        )  # Exclude opportunities in review status
+            ~exists(
+                select(ExcludedOpportunityReview.opportunity_id).where(
+                    and_(
+                        ExcludedOpportunityReview.opportunity_id
+                        == Opportunity.legacy_opportunity_id,
+                        CurrentOpportunitySummary.opportunity_status.in_(
+                            opportunity_status
+                        ),  # Match status
+                    )
+                )
+            )
+        )
     )
 
 
