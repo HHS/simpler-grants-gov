@@ -1,6 +1,5 @@
 /**
- * Root layout component, wraps all pages.
- * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
+ * Layout for all non form PDF / print pages
  */
 
 import { Metadata } from "next";
