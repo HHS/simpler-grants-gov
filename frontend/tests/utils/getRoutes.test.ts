@@ -16,6 +16,7 @@ describe("getNextRoutes", () => {
       "/maintenance",
       "/opportunity/1",
       "/",
+      "/print/application/[applicationId]/form/[appFormId]",
       "/roadmap",
       "/saved-opportunities",
       "/saved-search-queries",

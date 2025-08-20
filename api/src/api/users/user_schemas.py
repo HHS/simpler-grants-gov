@@ -315,3 +315,13 @@ class UserApiKeyCreateResponseSchema(AbstractResponseSchema):
 
 class UserApiKeyDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+class UserApiKeyListRequestSchema(Schema):
+    # Future filtering fields can be added here
+    pass
+
+
+class UserApiKeyListResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserApiKeySchema),
+        metadata={"description": "List of API keys for the user"},
+    )
