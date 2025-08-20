@@ -37,11 +37,11 @@ def test_run_task_multiple_entities_and_users_same_email(enable_factory_create, 
     task = CreateOrgsFromSamEntityTask(db_session)
     task.run()
 
-    user_ids = [user_a.user_id, user_b.user_id, user_c.user_id]
+    user_ids = {user_a.user_id, user_b.user_id, user_c.user_id}
 
     for entity in [entity_a, entity_b, entity_c]:
         assert entity.organization is not None
-        assert [org_user.user_id for org_user in entity.organization.organization_users] == user_ids
+        assert {org_user.user_id for org_user in entity.organization.organization_users} == user_ids
         for org_user in entity.organization.organization_users:
             assert org_user.is_organization_owner
 

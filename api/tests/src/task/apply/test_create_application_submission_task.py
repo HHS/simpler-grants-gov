@@ -15,7 +15,11 @@ from src.task.apply.create_application_submission_task import (
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ApplicationAttachmentFactory, ApplicationFactory
+from tests.src.db.models.factories import (
+    ApplicationAttachmentFactory,
+    ApplicationFactory,
+    ApplicationFormFactory,
+)
 
 
 def validate_manifest_contents(contents_of_manifest: str, expected_files: list[str]):
@@ -79,6 +83,14 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             f"{f.form.short_form_name}.pdf"
             for f in application_without_attachments.application_forms
         ]
+        # Add another application form that is not required and was marked to not be included in submission
+        skipped_app_form = ApplicationFormFactory.create(
+            application=application_without_attachments,
+            competition_form__competition=application_without_attachments.competition,
+            competition_form__is_required=False,
+            is_included_in_submission=False,
+        )
+        application_without_attachments.application_forms.append(skipped_app_form)
 
         application_with_attachments = ApplicationFactory.create(
             with_forms=True, application_status=ApplicationStatus.SUBMITTED
@@ -159,9 +171,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
         assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 4
         apps_processed = [application_with_attachments, application_without_attachments]
-        assert metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT] == sum(
-            [len(app.application_forms) for app in apps_processed]
-        )
+        assert (
+            metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
+            == sum([len(app.application_forms) for app in apps_processed]) - 1
+        )  # Not counting the one app form that we skip
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch

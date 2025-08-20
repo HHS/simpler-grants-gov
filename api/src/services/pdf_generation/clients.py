@@ -4,6 +4,7 @@ import abc
 import logging
 from urllib.parse import urljoin
 
+import docraptor
 import requests
 
 from src.services.pdf_generation.config import PdfGenerationConfig
@@ -57,10 +58,8 @@ class FrontendClient(BaseFrontendClient):
         """Get the HTML for an application form from the frontend sidecar."""
 
         # Construct the frontend URL for the application form
-        url_path = (
-            f"/print/application/{request.application_id}" f"/form/{request.application_form_id}"
-        )
-        url = urljoin(self.config.frontend_sidecar_url, url_path)
+        url_path = f"/print/application/{request.application_id}/form/{request.application_form_id}"
+        url = urljoin(self.config.frontend_url, url_path)
 
         headers = {
             "X-SGG-Internal-Token": token,
@@ -82,14 +81,13 @@ class FrontendClient(BaseFrontendClient):
 
             return response.text
 
-        except requests.exceptions.RequestException as e:
-            logger.error(
+        except requests.exceptions.RequestException:
+            logger.exception(
                 "Error requesting application form HTML from frontend",
                 extra={
                     "application_id": str(request.application_id),
                     "application_form_id": str(request.application_form_id),
                     "url": url,
-                    "error": str(e),
                 },
             )
             raise
@@ -106,29 +104,20 @@ class DocRaptorClient(BaseDocRaptorClient):
     def html_to_pdf(self, html_content: str) -> bytes:
         """Convert HTML content to PDF using DocRaptor."""
 
-        # DocRaptor API endpoint
-        url = "https://docraptor.com/docs"
+        # Initialize DocRaptor API client
+        doc_api = docraptor.DocApi()
+        doc_api.api_client.configuration.username = self.config.docraptor_api_key
 
-        # Request payload for DocRaptor
-        payload = {
-            "doc": {
-                "document_content": html_content,
-                "document_type": "pdf",
-                "test": self.config.docraptor_test_mode,
-                "prince_options": {
-                    "media": "print",
-                    "baseurl": self.config.frontend_sidecar_url,
-                },
-            }
+        # Build document request
+        doc_request = {
+            "test": self.config.docraptor_test_mode,
+            "document_type": "pdf",
+            "document_content": html_content,
+            "prince_options": {
+                "media": "print",
+                "baseurl": self.config.frontend_url,
+            },
         }
-
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "simpler-grants-gov-pdf-generator/1.0",
-        }
-
-        # Use API key authentication
-        auth = (self.config.docraptor_api_key, "")
 
         try:
             logger.info(
@@ -139,19 +128,33 @@ class DocRaptorClient(BaseDocRaptorClient):
                 },
             )
 
-            response = requests.post(url, json=payload, headers=headers, auth=auth, timeout=60)
-            response.raise_for_status()
+            # Call DocRaptor API
+            response = doc_api.create_doc(doc_request)
 
-            return response.content
+            # Convert response to bytes
+            pdf_bytes = bytearray(response)
 
-        except requests.exceptions.RequestException as e:
-            logger.error(
-                "Error converting HTML to PDF using DocRaptor",
+            logger.info(
+                "Successfully converted HTML to PDF",
                 extra={
-                    "error": str(e),
-                    "html_length": len(html_content),
+                    "pdf_size": len(pdf_bytes),
                 },
             )
+
+            return bytes(pdf_bytes)
+
+        except docraptor.rest.ApiException as e:
+            logger.error(
+                "DocRaptor API error",
+                extra={
+                    "status_code": e.status,
+                    "reason": e.reason,
+                    "body": e.body if hasattr(e, "body") else None,
+                },
+            )
+            raise
+        except Exception:
+            logger.exception("Unexpected error calling DocRaptor API")
             raise
 
 

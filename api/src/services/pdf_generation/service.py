@@ -50,9 +50,10 @@ class PdfGenerationService:
         Args:
             db_session: Database session for creating short-lived tokens
             request: PDF generation request with application and form IDs
+            token: Optional pre-generated token (avoids DB transaction conflicts)
 
         Returns:
-            PdfGenerationResponse with PDF data or error information
+            PdfGenerationResponse with raw PDF bytes ready for task consumption
         """
         try:
             logger.info(
@@ -88,14 +89,12 @@ class PdfGenerationService:
             return PdfGenerationResponse(pdf_data=pdf_data, success=True)
 
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Error generating PDF",
                 extra={
                     "application_id": str(request.application_id),
                     "application_form_id": str(request.application_form_id),
-                    "error": str(e),
                 },
-                exc_info=True,
             )
 
             return PdfGenerationResponse(
@@ -116,9 +115,6 @@ class PdfGenerationService:
         token, short_lived_token = create_jwt_for_internal_token(
             expires_at=expires_at, db_session=db_session
         )
-
-        # Commit the token to the database
-        db_session.commit()
 
         logger.info(
             "Generated short-lived token for PDF generation",
@@ -166,14 +162,18 @@ def generate_application_form_pdf(
 ) -> PdfGenerationResponse:
     """Convenience function to generate a PDF for an application form.
 
+    This service generates PDF bytes that can be consumed by tasks (e.g., for zip files).
+    The service handles frontend rendering and DocRaptor conversion, returning raw PDF data.
+
     Args:
         db_session: Database session
         application_id: UUID of the application
         application_form_id: UUID of the application form
         use_mocks: Whether to use mock clients for testing
+        token: Optional pre-generated token (for batch operations)
 
     Returns:
-        PdfGenerationResponse with PDF data or error information
+        PdfGenerationResponse with PDF bytes ready for consumption by tasks
     """
     service = create_pdf_generation_service(use_mocks=use_mocks)
     request = PdfGenerationRequest(

@@ -3,7 +3,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
-import { filter, get, isArray, isNumber, isString } from "lodash";
+import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import React, { JSX } from "react";
@@ -243,6 +243,7 @@ export const getFieldName = ({
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
 
+// transform a form data field name / id into a json pointer that can be used to reference the form schema
 export const getFieldPath = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
 
@@ -264,7 +265,7 @@ const widgetComponents: Record<
     Budget424aSectionB(widgetProps),
 };
 
-const getByPointer = (target: object, path: string): unknown => {
+export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
     return;
   }
@@ -502,19 +503,28 @@ const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   );
 };
 
+const isEmptyField = (mightBeEmpty: unknown): boolean => {
+  if (mightBeEmpty === undefined) {
+    return true;
+  }
+  return Object.values(mightBeEmpty as object).every((nestedValue) => {
+    if (isBasicallyAnObject(nestedValue)) {
+      return isEmptyField(nestedValue);
+    }
+    return !nestedValue;
+  });
+};
+
 // if a nested field contains no defined items, remove it from the data
 // this may not be necessary, as JSON.stringify probably does the same thing
 export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
-      if (!isBasicallyAnObject(value)) {
+      if (!isBasicallyAnObject(value) && value !== undefined) {
         acc[key] = value;
         return acc;
       }
-      const isEmptyObject = Object.values(value as object).every(
-        (nestedValue) => !nestedValue,
-      );
-      if (isEmptyObject) {
+      if (isEmptyField(value)) {
         return acc;
       }
       const pruned = pruneEmptyNestedFields(value as object);
@@ -526,7 +536,10 @@ export const pruneEmptyNestedFields = (structuredFormData: object): object => {
 };
 
 // filters, orders, and nests the form data to match the form schema
-export const shapeFormData = <T extends object>(formData: FormData): T => {
+export const shapeFormData = <T extends object>(
+  formData: FormData,
+  formSchema: RJSFSchema,
+): T => {
   formData.delete("$ACTION_REF_1");
   formData.delete("$ACTION_1:0");
   formData.delete("$ACTION_1:1");
@@ -534,9 +547,13 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  const structuredFormData = formDataToObject(formData, {
-    delimiter: "--",
-  });
+  const structuredFormData = formDataToObject(
+    formData,
+    condenseFormSchemaProperties(formSchema),
+    {
+      delimiter: "--",
+    },
+  );
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
@@ -588,6 +605,35 @@ export const processFormSchema = async (
     console.error("Error processing schema");
     throw e;
   }
+};
+
+/*
+  this will flatten any properties objects so that we can directly reference field paths
+  within a json schema without traversing nested "properties". Any other object attributes
+  and values are unchanged
+
+  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
+      { path: { nested: 'value' } }
+*/
+
+export const condenseFormSchemaProperties = (schema: object): object => {
+  return Object.entries(schema).reduce(
+    (condensed: Record<string, unknown>, [key, value]: [string, unknown]) => {
+      if (key === "properties") {
+        return {
+          ...condensed,
+          ...condenseFormSchemaProperties(value as object),
+        };
+      }
+      if (isObject(value) && !isArray(value)) {
+        condensed[key] = { ...condenseFormSchemaProperties(value) };
+        return condensed;
+      }
+      condensed[key] = value;
+      return condensed;
+    },
+    {},
+  );
 };
 
 // This is only needed when extracting an application response from the application endpoint's

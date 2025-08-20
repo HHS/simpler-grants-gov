@@ -22,7 +22,7 @@ class TestFrontendClient:
     def test_init_with_config(self):
         """Test frontend client initialization with custom config."""
         config = PdfGenerationConfig(
-            frontend_sidecar_url="http://test:8080",
+            frontend_url="http://test:8080",
             docraptor_api_key="test-key",
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
@@ -30,12 +30,12 @@ class TestFrontendClient:
             pdf_generation_use_mocks=False,
         )
         client = FrontendClient(config)
-        assert client.config.frontend_sidecar_url == "http://test:8080"
+        assert client.config.frontend_url == "http://test:8080"
 
     def test_init_without_config(self, monkeypatch):
         """Test frontend client initialization with config from environment."""
         env_vars = {
-            "FRONTEND_SIDECAR_URL": "http://localhost:3000",
+            "FRONTEND_URL": "http://localhost:3000",
             "DOCRAPTOR_API_KEY": "test-key",
             "DOCRAPTOR_TEST_MODE": "true",
             "DOCRAPTOR_API_URL": "https://docraptor.com/docs",
@@ -48,14 +48,14 @@ class TestFrontendClient:
 
         client = FrontendClient()
 
-        assert client.config.frontend_sidecar_url == "http://localhost:3000"
+        assert client.config.frontend_url == "http://localhost:3000"
 
     @patch("src.services.pdf_generation.clients.requests.get")
     def test_get_application_form_html_success(self, mock_get):
         """Test successful HTML retrieval from frontend."""
         # Setup
         config = PdfGenerationConfig(
-            frontend_sidecar_url="http://test:3000",
+            frontend_url="http://test:3000",
             docraptor_api_key="test-key",
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
@@ -129,7 +129,7 @@ class TestDocRaptorClient:
     def test_init_with_config(self):
         """Test DocRaptor client initialization with custom config."""
         config = PdfGenerationConfig(
-            frontend_sidecar_url="http://localhost:3000",
+            frontend_url="http://localhost:3000",
             docraptor_api_key="test-key",
             docraptor_test_mode=False,
             docraptor_api_url="https://docraptor.com/docs",
@@ -140,11 +140,11 @@ class TestDocRaptorClient:
         assert client.config.docraptor_api_key == "test-key"
         assert client.config.docraptor_test_mode is False
 
-    @patch("src.services.pdf_generation.clients.requests.post")
-    def test_html_to_pdf_success(self, mock_post):
+    @patch("src.services.pdf_generation.clients.docraptor.DocApi")
+    def test_html_to_pdf_success(self, mock_doc_api_class):
         """Test successful PDF conversion."""
         config = PdfGenerationConfig(
-            frontend_sidecar_url="http://test:3000",
+            frontend_url="http://test:3000",
             docraptor_api_key="test-key",
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
@@ -153,10 +153,10 @@ class TestDocRaptorClient:
         )
         client = DocRaptorClient(config)
 
-        mock_response = Mock()
-        mock_response.content = b"Mock PDF content"
-        mock_response.raise_for_status.return_value = None
-        mock_post.return_value = mock_response
+        # Mock the DocApi instance and its methods
+        mock_doc_api = Mock()
+        mock_doc_api_class.return_value = mock_doc_api
+        mock_doc_api.create_doc.return_value = b"Mock PDF content"
 
         html_content = "<html><body>Test</body></html>"
 
@@ -165,40 +165,56 @@ class TestDocRaptorClient:
 
         # Verify
         assert result == b"Mock PDF content"
-        mock_post.assert_called_once()
+        mock_doc_api.create_doc.assert_called_once_with(
+            {
+                "test": True,
+                "document_type": "pdf",
+                "document_content": html_content,
+                "prince_options": {
+                    "media": "print",
+                    "baseurl": "http://test:3000",
+                },
+            }
+        )
 
-        # Check the call arguments
-        call_args = mock_post.call_args
-        assert "docs" in call_args[0][0]  # URL contains docs endpoint
-
-        # Check request payload
-        payload = call_args[1]["json"]
-        assert payload["doc"]["document_content"] == html_content
-        assert payload["doc"]["document_type"] == "pdf"
-        assert payload["doc"]["test"] is True
-        assert payload["doc"]["prince_options"]["baseurl"] == "http://test:3000"
-
-        # Check authentication
-        assert call_args[1]["auth"] == ("test-key", "")
-
-    @patch("src.services.pdf_generation.clients.requests.post")
-    def test_html_to_pdf_http_error(self, mock_post):
+    @patch("src.services.pdf_generation.clients.docraptor.DocApi")
+    def test_html_to_pdf_http_error(self, mock_doc_api_class):
         """Test HTTP error handling in DocRaptor client."""
         client = DocRaptorClient()
 
-        mock_post.side_effect = requests.exceptions.HTTPError("API Error")
+        # Mock the DocApi instance to raise an ApiException
+        mock_doc_api = Mock()
+        mock_doc_api_class.return_value = mock_doc_api
 
-        with pytest.raises(requests.exceptions.HTTPError):
+        # Create a proper exception that mimics docraptor.rest.ApiException
+        class MockApiException(Exception):
+            def __init__(self, status, reason, body):
+                self.status = status
+                self.reason = reason
+                self.body = body
+                super().__init__(f"API Error: {status} {reason}")
+
+        api_exception = MockApiException(400, "Bad Request", "Invalid request")
+        mock_doc_api.create_doc.side_effect = api_exception
+
+        with pytest.raises(MockApiException):
             client.html_to_pdf("<html><body>Test</body></html>")
 
-    @patch("src.services.pdf_generation.clients.requests.post")
-    def test_html_to_pdf_connection_error(self, mock_post):
+    @patch("src.services.pdf_generation.clients.docraptor.DocApi")
+    def test_html_to_pdf_connection_error(self, mock_doc_api_class):
         """Test connection error handling in DocRaptor client."""
         client = DocRaptorClient()
 
-        mock_post.side_effect = requests.exceptions.ConnectionError("Connection failed")
+        # Mock the DocApi instance to raise a generic exception
+        mock_doc_api = Mock()
+        mock_doc_api_class.return_value = mock_doc_api
 
-        with pytest.raises(requests.exceptions.ConnectionError):
+        class MockConnectionError(Exception):
+            pass
+
+        mock_doc_api.create_doc.side_effect = MockConnectionError("Connection failed")
+
+        with pytest.raises(MockConnectionError):
             client.html_to_pdf("<html><body>Test</body></html>")
 
 

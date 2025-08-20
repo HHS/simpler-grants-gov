@@ -4,8 +4,8 @@ from src.util.env_config import PydanticBaseEnvConfig
 class PdfGenerationConfig(PydanticBaseEnvConfig):
     """Configuration for PDF generation service."""
 
-    # Frontend sidecar URL for calling application pages
-    frontend_sidecar_url: str
+    # Frontend URL for calling application pages
+    frontend_url: str
 
     # Docraptor configuration
     docraptor_api_key: str

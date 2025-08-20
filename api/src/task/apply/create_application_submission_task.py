@@ -16,6 +16,7 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.service import generate_application_form_pdf
+from src.services.applications.application_validation import is_form_required
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -230,9 +231,22 @@ class CreateApplicationSubmissionTask(Task):
         }
         logger.info("Processing application forms for application submission")
         for application_form in submission.application.application_forms:
+            app_form_log_extra = log_extra | {
+                "application_form_id": application_form.application_form_id
+            }
+            if (
+                not is_form_required(application_form)
+                and not application_form.is_included_in_submission
+            ):
+                logger.info(
+                    "Skipping adding form to submission as it is not required, and marked as not being included in submission",
+                    extra=app_form_log_extra,
+                )
+                continue
+
             logger.info(
                 "Adding application form to application submission zip",
-                extra=log_extra | {"application_form_id": application_form.application_form_id},
+                extra=app_form_log_extra,
             )
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
 
