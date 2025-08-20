@@ -31,8 +31,3 @@ class TopportunityCfda(foreignbase.ForeignBase, opportunity_mixin.TopportunityCf
 
 class VopportunitySummary(foreignbase.ForeignBase, opportunity_mixin.VopportunitySummaryMixin):
     __tablename__ = "vopportunity_summary"
-
-    opportunity: Mapped[Topportunity | None] = relationship(
-        primaryjoin=lambda: TopportunityCfda.opportunity_id == foreign(Topportunity.opportunity_id),
-        uselist=False,
-    )
