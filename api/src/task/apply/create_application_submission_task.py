@@ -165,7 +165,7 @@ class CreateApplicationSubmissionTask(Task):
         # Create token in its own transaction to avoid conflicts
         from datetime import datetime, timedelta, timezone
 
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime_util.utcnow() + timedelta(
             minutes=self.pdf_generation_config.short_lived_token_expiration_minutes
         )
 
