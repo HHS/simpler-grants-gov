@@ -547,7 +547,6 @@ export const shapeFormData = <T extends object>(formData: FormData): T => {
     delimiter: "--",
   });
   return pruneEmptyNestedFields(structuredFormData) as T;
-  // return structuredFormData as T;
 };
 
 // arrays from the html look like field_[row]_item
