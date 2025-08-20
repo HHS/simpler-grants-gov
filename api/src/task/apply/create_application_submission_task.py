@@ -282,9 +282,6 @@ class CreateApplicationSubmissionTask(Task):
                         "error": pdf_response.error_message,
                     },
                 )
-                # Fall back to placeholder content if PDF generation fails
-                with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
-                    file_in_zip.write(b"PDF generation failed - placeholder content")
 
             file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
             submission.form_pdf_metadata.append(FileMetadata(file_name_in_zip, file_size))
