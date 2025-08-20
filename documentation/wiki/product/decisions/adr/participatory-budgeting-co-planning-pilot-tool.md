@@ -1,6 +1,6 @@
 # Participatory Budgeting/Co-Planning Pilot Tool
 
-**Status:** Draft\
+**Status: Active**\
 **Last Modified:** 2025-08-12\
 **Deciders:** Lucas, Brandon, Michael, Wendy\
 **Tags:** participatory budgeting, civic engagement, tool selection, pb pilot, co-planning
