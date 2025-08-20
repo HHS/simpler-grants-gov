@@ -104,9 +104,9 @@ exports[`Footer matches snapshot 1`] = `
                 class="usa-footer__secondary-link margin-left-0"
               >
                 <a
-                  href="/newsletter"
+                  href="/subscribe"
                 >
-                  Newsletter
+                  Subscribe
                 </a>
               </li>
             </ul>

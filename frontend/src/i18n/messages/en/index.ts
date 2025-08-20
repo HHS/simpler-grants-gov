@@ -567,6 +567,7 @@ export const messages = {
       roadmap: "Roadmap",
       events: "Events",
       newsletter: "Newsletter",
+      subscribe: "Subscribe",
     },
     feedback: "To give feedback, contact: <email>simpler@grants.gov</email>",
     supportCenter: "Grants.gov Support Center",
