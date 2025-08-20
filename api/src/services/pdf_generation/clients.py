@@ -153,8 +153,8 @@ class DocRaptorClient(BaseDocRaptorClient):
                 },
             )
             raise
-        except Exception as e:
-            logger.error("Unexpected error calling DocRaptor API", extra={"error": str(e)})
+        except Exception:
+            logger.exception("Unexpected error calling DocRaptor API")
             raise
 
 
