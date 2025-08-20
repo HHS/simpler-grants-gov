@@ -17,7 +17,7 @@ const FooterNavLinkItem = ({ to }: { to: keyof FooterNavItems }) => {
   const t = useTranslations("Footer");
   return (
     <li className="usa-footer__secondary-link margin-left-0">
-      <Link href={`/{to}`}>{t(`links.${to}`)}</Link>
+      <Link href={`/${to}`}>{t(`links.${to}`)}</Link>
     </li>
   );
 };
