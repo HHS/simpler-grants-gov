@@ -66,7 +66,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
     def create_submission_task(self, db_session, s3_config):
         # Create a mock PDF generation config to avoid requiring environment variables
         pdf_config = PdfGenerationConfig(
-            frontend_sidecar_url="http://localhost:3000",
+            frontend_url="http://localhost:3000",
             docraptor_api_key="test-key",
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",

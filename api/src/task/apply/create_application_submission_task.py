@@ -14,9 +14,9 @@ from src.adapters.db import flask_db
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission
+from src.services.applications.application_validation import is_form_required
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.service import generate_application_form_pdf
-from src.services.applications.application_validation import is_form_required
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
