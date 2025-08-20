@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 import src.adapters.db as db
 from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
+from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.services.pdf_generation.config import PdfGenerationConfig
@@ -113,9 +114,12 @@ class CreateApplicationSubmissionTask(Task):
         """Process a batch of application submissions"""
         submitted_applications = self.fetch_applications()
 
+        # Create a single short-lived token for this batch (if not using mocks)
+        batch_token = self._create_batch_token()
+
         for application in submitted_applications:
             try:
-                self.process_application(application)
+                self.process_application(application, batch_token)
             except Exception:
                 # If for whatever reason we fail to create an application
                 # submission, we'll log an error and continue on, hoping
@@ -148,7 +152,40 @@ class CreateApplicationSubmissionTask(Task):
             .limit(self.app_submission_config.application_submission_batch_size)
         ).all()
 
-    def process_application(self, application: Application) -> None:
+    def _create_batch_token(self) -> str | None:
+        """Create a single short-lived token for the entire batch.
+
+        Returns:
+            JWT token string, or None if using mocks
+        """
+        if self.pdf_generation_config.pdf_generation_use_mocks:
+            return None  # Mock clients don't need real tokens
+
+        # Create token in its own transaction to avoid conflicts
+        from datetime import datetime, timedelta, timezone
+
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            minutes=self.pdf_generation_config.short_lived_token_expiration_minutes
+        )
+
+        token, short_lived_token = create_jwt_for_internal_token(
+            expires_at=expires_at, db_session=self.db_session
+        )
+
+        # Commit this token creation immediately in its own transaction
+        self.db_session.commit()
+
+        logger.info(
+            "Created batch token for PDF generation",
+            extra={
+                "token_id": str(short_lived_token.short_lived_internal_token_id),
+                "expires_at": expires_at.isoformat(),
+            },
+        )
+
+        return token
+
+    def process_application(self, application: Application, batch_token: str | None = None) -> None:
         """Process an application and create an application submission"""
         logger.info(
             "Processing application submission",
@@ -166,7 +203,7 @@ class CreateApplicationSubmissionTask(Task):
 
                 submission_container = SubmissionContainer(application, submission_zip)
 
-                self.process_application_forms(submission_container)
+                self.process_application_forms(submission_container, batch_token)
                 self.process_application_attachments(submission_container)
                 self.create_manifest_file(submission_container)
 
@@ -183,7 +220,9 @@ class CreateApplicationSubmissionTask(Task):
         self.db_session.add(application_submission)
         application.application_status = ApplicationStatus.ACCEPTED
 
-    def process_application_forms(self, submission: SubmissionContainer) -> None:
+    def process_application_forms(
+        self, submission: SubmissionContainer, batch_token: str | None = None
+    ) -> None:
         """Turn an application form into a PDF and add to the zip file"""
         log_extra = {
             "application_id": submission.application.application_id,
@@ -203,6 +242,7 @@ class CreateApplicationSubmissionTask(Task):
                 application_id=submission.application.application_id,
                 application_form_id=application_form.application_form_id,
                 use_mocks=self.pdf_generation_config.pdf_generation_use_mocks,
+                token=batch_token,
             )
 
             app_form_file_name = f"{application_form.form.short_form_name}.pdf"

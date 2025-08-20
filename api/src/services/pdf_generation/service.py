@@ -43,7 +43,7 @@ class PdfGenerationService:
         self.docraptor_client = docraptor_client
 
     def generate_pdf(
-        self, db_session: db.Session, request: PdfGenerationRequest
+        self, db_session: db.Session, request: PdfGenerationRequest, token: str | None = None
     ) -> PdfGenerationResponse:
         """Generate a PDF for an application form.
 
@@ -63,11 +63,12 @@ class PdfGenerationService:
                 },
             )
 
-            # Step 1: Generate short-lived token (skip if using mocks)
-            if isinstance(self.frontend_client, MockFrontendClient):
-                token = "mock-token"  # Mock clients don't need real tokens
-            else:
-                token = self._generate_short_lived_token(db_session)
+            # Step 1: Use provided token or generate one
+            if token is None:
+                if isinstance(self.frontend_client, MockFrontendClient):
+                    token = "mock-token"  # Mock clients don't need real tokens
+                else:
+                    token = self._generate_short_lived_token(db_session)
 
             # Step 2: Get HTML from frontend
             html_content = self.frontend_client.get_application_form_html(request, token)
@@ -161,6 +162,7 @@ def generate_application_form_pdf(
     application_id: UUID,
     application_form_id: UUID,
     use_mocks: bool = False,
+    token: str | None = None,
 ) -> PdfGenerationResponse:
     """Convenience function to generate a PDF for an application form.
 
@@ -179,4 +181,4 @@ def generate_application_form_pdf(
         application_form_id=application_form_id,
     )
 
-    return service.generate_pdf(db_session, request)
+    return service.generate_pdf(db_session, request, token)
