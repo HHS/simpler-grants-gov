@@ -569,6 +569,30 @@ export const shapeFormData = <T extends object>(
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
+// assumes a dereferenced and condensed schema
+// does not do conditionals. For that we'd have to first:
+// - gather all conditional rules
+// - check all conditional rules against form state / values
+// - re-annotate the form schema with new "required" designations
+// At that point we're basically running validation
+const getRequiredProperties = (formSchema: RJSFSchema, parentPath?: string) => {
+  return Object.entries(formSchema).reduce((requiredPaths, [key, value]) => {
+    if (key === "required") {
+      value.forEach((requiredFieldName) => {
+        requiredPaths.push(
+          parentPath ? `${parentPath}/${requiredFieldName}` : requiredFieldName,
+        );
+      });
+      return requiredPaths;
+    }
+    if (value.type === "object") {
+      const newPaths = getRequiredProperties(value);
+      return [...requiredPaths, ...newPaths];
+    }
+    return requiredPaths;
+  }, []);
+};
+
 // arrays from the html look like field_[row]_item
 const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   return Object.entries(data).reduce(
