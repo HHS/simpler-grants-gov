@@ -57,9 +57,7 @@ class FrontendClient(BaseFrontendClient):
         """Get the HTML for an application form from the frontend sidecar."""
 
         # Construct the frontend URL for the application form
-        url_path = (
-            f"/print/application/{request.application_id}" f"/form/{request.application_form_id}"
-        )
+        url_path = f"/print/application/{request.application_id}/form/{request.application_form_id}"
         url = urljoin(self.config.frontend_sidecar_url, url_path)
 
         headers = {
