@@ -519,15 +519,6 @@ def user_rename_api_key(
     with db_session.begin():
         api_key = rename_api_key(db_session, user_id, api_key_id, json_data)
 
-    logger.info(
-        "Renamed API key for user",
-        extra={
-            "user_id": user_id,
-            "api_key_id": api_key.api_key_id,
-            "key_name": api_key.key_name,
-        },
-    )
-
     return response.ApiResponse(message="Success", data=api_key)
 
 
