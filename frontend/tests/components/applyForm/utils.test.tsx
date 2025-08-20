@@ -5,6 +5,7 @@ import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
+  condenseFormSchemaProperties,
   determineFieldType,
   getFieldName,
   getFieldSchema,
@@ -80,7 +81,7 @@ describe("shapeFormData", () => {
     formData.append("name", "test");
     formData.append("state", "PA");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
 
     expect(data).toMatchObject(shapedFormData);
   });
@@ -130,7 +131,7 @@ describe("shapeFormData", () => {
     formData.append("todos[0]", "email");
     formData.append("todos[1]", "write");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
     expect(data).toMatchObject(shapedFormData);
   });
 });
@@ -477,32 +478,34 @@ describe("getFieldSchema", () => {
 });
 
 describe("pruneEmptyNestedFields", () => {
-  it("returns flat object unchanged", () => {
+  it("returns flat object with undefined fields removed", () => {
     const flat = {
       thing: 1,
       another: "string",
-      bad: null,
+      bad: undefined,
       stuff: [2, "hi"],
     };
-    expect(pruneEmptyNestedFields(flat)).toEqual(flat);
+    expect(pruneEmptyNestedFields(flat)).toEqual({
+      thing: 1,
+      another: "string",
+      stuff: [2, "hi"],
+    });
   });
   it("returns empty object if passed an empty object or object with only undefined fields", () => {
     const empty = {};
     expect(pruneEmptyNestedFields(empty)).toEqual(empty);
   });
-  it("prunes only top level empty objects", () => {
+  it("prunes all empty objects and objects containing only undefined properties", () => {
     const undefinedFields = {
       whatever: {
         again: { something: undefined },
         another: undefined,
-        more: { stuff: undefined },
+        more: {},
       },
     };
-    expect(pruneEmptyNestedFields(undefinedFields)).toEqual({
-      whatever: { another: undefined },
-    });
+    expect(pruneEmptyNestedFields(undefinedFields)).toEqual({});
   });
-  it("removes nested objects containing only undefined properties", () => {
+  it("removes nested objects containing only undefined properties or objects with only undefined properties", () => {
     expect(
       pruneEmptyNestedFields({
         thing: "stuff",
@@ -522,7 +525,6 @@ describe("pruneEmptyNestedFields", () => {
       }),
     ).toEqual({
       thing: "stuff",
-      another: {},
       keepMe: {
         here: {
           ok: "sure",
@@ -599,5 +601,39 @@ describe("processFormSchema", () => {
         dereferenced: "stuff",
       },
     });
+  });
+});
+
+describe("condenseFormSchemaProperties", () => {
+  const noProperties = {
+    path: {
+      thing: {
+        cool: "value",
+      },
+      list: ["of", "stuff"],
+    },
+    secondary: 2,
+  };
+  it("leaves an object with no 'properties' unchanged", () => {
+    expect(condenseFormSchemaProperties(noProperties)).toEqual(noProperties);
+  });
+  it("brings contents of 'properties' attributes up one level", () => {
+    expect(
+      condenseFormSchemaProperties({
+        path: {
+          properties: {
+            thing: {
+              cool: "value",
+            },
+            properties: {
+              list: ["of", "stuff"],
+            },
+          },
+        },
+        properties: {
+          secondary: 2,
+        },
+      }),
+    ).toEqual(noProperties);
   });
 });
