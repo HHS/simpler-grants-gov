@@ -80,14 +80,13 @@ class FrontendClient(BaseFrontendClient):
 
             return response.text
 
-        except requests.exceptions.RequestException as e:
-            logger.error(
+        except requests.exceptions.RequestException:
+            logger.exception(
                 "Error requesting application form HTML from frontend",
                 extra={
                     "application_id": str(request.application_id),
                     "application_form_id": str(request.application_form_id),
                     "url": url,
-                    "error": str(e),
                 },
             )
             raise
