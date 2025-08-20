@@ -5,6 +5,7 @@ import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
   buildFormTreeRecursive,
+  condenseFormSchemaProperties,
   determineFieldType,
   getFieldName,
   getFieldSchema,
@@ -599,5 +600,39 @@ describe("processFormSchema", () => {
         dereferenced: "stuff",
       },
     });
+  });
+});
+
+describe("condenseFormSchemaProperties", () => {
+  const noProperties = {
+    path: {
+      thing: {
+        cool: "value",
+      },
+      list: ["of", "stuff"],
+    },
+    secondary: 2,
+  };
+  it("leaves an object with no 'properties' unchanged", () => {
+    expect(condenseFormSchemaProperties(noProperties)).toEqual(noProperties);
+  });
+  it("brings contents of 'properties' attributes up one level", () => {
+    expect(
+      condenseFormSchemaProperties({
+        path: {
+          properties: {
+            thing: {
+              cool: "value",
+            },
+            properties: {
+              list: ["of", "stuff"],
+            },
+          },
+        },
+        properties: {
+          secondary: 2,
+        },
+      }),
+    ).toEqual(noProperties);
   });
 });

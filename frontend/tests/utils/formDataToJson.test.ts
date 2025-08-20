@@ -44,6 +44,7 @@ describe("formDataToObject", () => {
     formData.append("user--name", "Alice");
     formData.append("user--age", "30");
     formData.append("user--emptyString", "");
+    formData.append("user--emptyNumber", "");
     formData.append("user--deeper--value", "hello");
     formData.append("user--skills[0]", "JavaScript");
     formData.append("user--skills[1]", "TypeScript");
@@ -62,6 +63,9 @@ describe("formDataToObject", () => {
         },
         emptyString: {
           type: "string",
+        },
+        emptyNumber: {
+          type: "number",
         },
         skills: {
           type: "array",
@@ -88,6 +92,7 @@ describe("formDataToObject", () => {
         age: "30",
         name: "Alice",
         emptyString: undefined,
+        emptyNumber: undefined,
         skills: ["JavaScript", "TypeScript", { surprise: "more stuff" }],
         deeper: {
           value: "hello",
@@ -106,7 +111,7 @@ describe("formDataToObject", () => {
   });
   it("handles json string values", () => {
     const formData = new FormData();
-    formData.append("arrayLike", '["i am", "an array", 100]');
+    formData.append("arrayLike", '["i am", "an array", 100, ""]');
     formData.append("complicated", '{"key": "value"}');
 
     const formSchema = {
@@ -117,7 +122,7 @@ describe("formDataToObject", () => {
     };
 
     const expected = {
-      arrayLike: ["i am", "an array", 100],
+      arrayLike: ["i am", "an array", 100, ""], // should this last one actually be undefined?
       complicated: { key: "value" },
     };
 

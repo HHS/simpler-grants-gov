@@ -17,16 +17,44 @@ type FormDataToJsonOptions = {
   delimiter?: string;
 };
 
+/*
+  - string representations of booleans are cast to booleans
+  - for number type fields, cast to number as long as a value is present
+  - for string type fields that represent a number, ensure they remain strings (or undefined)
+  - otherwise it may be an object or array, so try to cast to parse json
+    - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
+  - if the json parse fails, just return the string (or undefined)
+*/
 const parseValue = (value: unknown, type: string) => {
   if (value === "false") return false;
   if (value === "true") return true;
-  if (type === "integer" || type === "number") return Number(value);
-  if (type === "string" && !isNaN(Number(value))) return value || undefined;
+  if (
+    (type === "integer" || type === "number") &&
+    value !== "" &&
+    !isNaN(Number(value))
+  )
+    return Number(value);
+  if (type === "string" && !isNaN(Number(value))) {
+    return value || undefined;
+  }
   try {
     return JSON.parse(value as string) as unknown;
   } catch (e) {
     return value || undefined;
   }
+};
+
+const getFieldType = (
+  currentKey: string,
+  formSchema: RJSFSchema,
+  parentKey?: string,
+): string => {
+  const path = getFieldPath(currentKey);
+  const fullPath = parentKey ? `${parentKey}/${path}` : path;
+  const formFieldDefinition = getByPointer(formSchema, fullPath) as {
+    type?: string;
+  };
+  return formFieldDefinition?.type || "";
 };
 
 export function formDataToObject(
@@ -42,12 +70,7 @@ export function formDataToObject(
   for (const [key, value] of entries) {
     const currentKey = parentKey ? `${parentKey}${delimiter}${key}` : key;
     const chunks = currentKey.split(delimiter);
-    const path = getFieldPath(currentKey);
-    const fullPath = parentKey ? `${parentKey}/${path}` : path;
-    const formFieldDefinition = getByPointer(formSchema, fullPath) as {
-      type?: string;
-    };
-    const fieldType = formFieldDefinition?.type || "";
+    const fieldType = getFieldType(currentKey, formSchema, parentKey);
     const parsedValue = parseValue(value, fieldType);
 
     let current = result;

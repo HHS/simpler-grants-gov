@@ -3,7 +3,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
-import { filter, get, isArray, isNumber, isString } from "lodash";
+import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import React, { JSX } from "react";
@@ -538,9 +538,13 @@ export const shapeFormData = <T extends object>(
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  const structuredFormData = formDataToObject(formData, formSchema, {
-    delimiter: "--",
-  });
+  const structuredFormData = formDataToObject(
+    formData,
+    condenseFormSchemaProperties(formSchema),
+    {
+      delimiter: "--",
+    },
+  );
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
@@ -592,6 +596,35 @@ export const processFormSchema = async (
     console.error("Error processing schema");
     throw e;
   }
+};
+
+/*
+  this will flatten any properties objects so that we can directly reference field paths
+  within a json schema without traversing nested "properties". Any other object attributes
+  and values are unchanged
+
+  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
+      { path: { nested: 'value' } }
+*/
+
+export const condenseFormSchemaProperties = (schema: object): object => {
+  return Object.entries(schema).reduce(
+    (condensed: Record<string, unknown>, [key, value]: [string, unknown]) => {
+      if (key === "properties") {
+        return {
+          ...condensed,
+          ...condenseFormSchemaProperties(value as object),
+        };
+      }
+      if (isObject(value) && !isArray(value)) {
+        condensed[key] = { ...condenseFormSchemaProperties(value) };
+        return condensed;
+      }
+      condensed[key] = value;
+      return condensed;
+    },
+    {},
+  );
 };
 
 // This is only needed when extracting an application response from the application endpoint's
