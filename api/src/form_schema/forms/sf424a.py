@@ -364,8 +364,69 @@ FORM_UI_SCHEMA = [
             }
         ],
     },
+    {
+        "name": "SectionC",
+        "type": "section",
+        "label": "Section C - Non-federal resources",
+        "children": [
+            {
+                "type": "multiField",
+                "name": "Budget424aSectionC",
+                "widget": "Budget424aSectionC",
+                "definition": [
+                    "/properties/activity_line_items",
+                    "/properties/total_non_federal_resources",
+                ],
+            }
+        ],
+    },
+    {
+        "name": "SectionD",
+        "type": "section",
+        "label": "Section D - Forecasted cash needs",
+        "children": [
+            {
+                "type": "multiField",
+                "name": "Budget424aSectionD",
+                "widget": "Budget424aSectionD",
+                "definition": ["/properties/forecasted_cash_needs"],
+            }
+        ],
+    },
+    {
+        "name": "SectionE",
+        "type": "section",
+        "label": "Section E - Budget estimates of federal funds needed for balance of the project ",
+        "children": [
+            {
+                "type": "multiField",
+                "name": "Budget424aSectionE",
+                "widget": "Budget424aSectionE",
+                "definition": [
+                    "/properties/activity_line_items",
+                    "/properties/total_federal_fund_estimates",
+                ],
+            }
+        ],
+    },
+    {
+        "name": "SectionF",
+        "type": "section",
+        "label": "Section F - Other budget information",
+        "children": [
+            {
+                "type": "multiField",
+                "name": "Budget424aSectionF",
+                "widget": "Budget424aSectionF",
+                "definition": [
+                    "/properties/direct_charges_explanation",
+                    "/properties/indirect_charges_explanation",
+                    "/properties/remarks",
+                ],
+            }
+        ],
+    },
 ]
-
 
 SF424a_v1_0 = Form(
     # https://grants.gov/forms/form-items-description/fid/241
