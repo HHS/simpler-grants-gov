@@ -9,7 +9,7 @@ def test_rename_api_key_success(enable_factory_create, db_session, client, user,
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name", last_used=None)
     json_data = {"key_name": "Updated API Key Name"}
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -44,7 +44,7 @@ def test_rename_api_key_validation_error_missing_key_name(
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
     json_data = {}
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -64,7 +64,7 @@ def test_rename_api_key_validation_error_long_key_name(
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
     json_data = {"key_name": "a" * 256}  # Exceeds 255 character limit
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -84,7 +84,7 @@ def test_rename_api_key_validation_error_empty_key_name(
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
     json_data = {"key_name": ""}
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -105,7 +105,7 @@ def test_rename_api_key_unauthorized_different_user(
     api_key = UserApiKeyFactory.create(user=other_user, key_name="Original Key Name")
     json_data = {"key_name": "Updated API Key Name"}
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{other_user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -126,7 +126,7 @@ def test_rename_api_key_unauthorized_wrong_user_owns_key(
     api_key = UserApiKeyFactory.create(user=other_user, key_name="Original Key Name")
     json_data = {"key_name": "Updated API Key Name"}
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -144,7 +144,7 @@ def test_rename_api_key_no_authentication(enable_factory_create, db_session, cli
     api_key = UserApiKeyFactory.create(user=user, key_name="Original Key Name")
     json_data = {"key_name": "Updated API Key Name"}
 
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         json=json_data,
     )
@@ -165,7 +165,7 @@ def test_rename_api_key_multiple_keys_same_user(
 
     # Rename the second key
     json_data = {"key_name": "Renamed Second API Key"}
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key2.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,
@@ -201,7 +201,7 @@ def test_rename_api_key_preserves_other_fields(
     original_created_at = api_key.created_at
 
     json_data = {"key_name": "Updated Key Name"}
-    response = client.patch(
+    response = client.put(
         f"/v1/users/{user.user_id}/api-keys/{api_key.api_key_id}",
         headers={"X-SGG-Token": user_auth_token},
         json=json_data,

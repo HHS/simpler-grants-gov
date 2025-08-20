@@ -498,7 +498,7 @@ def user_create_api_key(
     return response.ApiResponse(message="Success", data=api_key)
 
 
-@user_blueprint.patch("/<uuid:user_id>/api-keys/<uuid:api_key_id>")
+@user_blueprint.put("/<uuid:user_id>/api-keys/<uuid:api_key_id>")
 @user_blueprint.input(UserApiKeyRenameRequestSchema, location="json")
 @user_blueprint.output(UserApiKeyRenameResponseSchema)
 @user_blueprint.doc(responses=[200, 400, 401, 403, 404])
@@ -509,7 +509,7 @@ def user_rename_api_key(
 ) -> response.ApiResponse:
     """Rename an existing API key for the authenticated user"""
     add_extra_data_to_current_request_logs({"user_id": user_id, "api_key_id": api_key_id})
-    logger.info("PATCH /v1/users/:user_id/api-keys/:api_key_id")
+    logger.info("PUT /v1/users/:user_id/api-keys/:api_key_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
