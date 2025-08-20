@@ -148,8 +148,8 @@ def create_pdf_generation_service(
     if config is None:
         config = get_config()
 
-    frontend_client = MockFrontendClient() if use_mocks else FrontendClient(config)
-    docraptor_client = MockDocRaptorClient() if use_mocks else DocRaptorClient(config)
+    frontend_client = MockFrontendClient() if config.pdf_generation_use_mocks else FrontendClient(config)
+    docraptor_client = MockDocRaptorClient() if config.pdf_generation_use_mocks else DocRaptorClient(config)
 
     return PdfGenerationService(
         config=config,
