@@ -16,6 +16,8 @@ from src.api.users.user_schemas import (
     UserApiKeyDeleteResponseSchema,
     UserApiKeyListRequestSchema,
     UserApiKeyListResponseSchema,
+    UserApiKeyRenameRequestSchema,
+    UserApiKeyRenameResponseSchema,
     UserApplicationListRequestSchema,
     UserApplicationListResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
@@ -56,6 +58,7 @@ from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
 )
+from src.services.users.rename_api_key import rename_api_key
 from src.services.users.update_saved_searches import update_saved_search
 
 logger = logging.getLogger(__name__)
@@ -526,6 +529,30 @@ def user_delete_api_key(
     )
 
     return response.ApiResponse(message="Success")
+
+
+@user_blueprint.put("/<uuid:user_id>/api-keys/<uuid:api_key_id>")
+@user_blueprint.input(UserApiKeyRenameRequestSchema, location="json")
+@user_blueprint.output(UserApiKeyRenameResponseSchema)
+@user_blueprint.doc(responses=[200, 400, 401, 403, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_rename_api_key(
+    db_session: db.Session, user_id: UUID, api_key_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Rename an existing API key for the authenticated user"""
+    add_extra_data_to_current_request_logs({"user_id": user_id, "api_key_id": api_key_id})
+    logger.info("PUT /v1/users/:user_id/api-keys/:api_key_id")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        api_key = rename_api_key(db_session, user_id, api_key_id, json_data)
+
+    return response.ApiResponse(message="Success", data=api_key)
 
 
 @user_blueprint.post("/<uuid:user_id>/api-keys/list")
