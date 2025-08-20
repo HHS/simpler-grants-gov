@@ -24,6 +24,9 @@ import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
+import Budget424aSectionC from "./widgets/budget/Budget424aSectionC";
+import Budget424aSectionD from "./widgets/budget/Budget424aSectionD";
+import Budget424aSectionE from "./widgets/budget/Budget424aSectionE";
 
 export function buildFormTreeRecursive({
   errors,
@@ -259,6 +262,12 @@ const widgetComponents: Record<
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionB(widgetProps),
+  Budget424aSectionC: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionC(widgetProps),
+  Budget424aSectionD: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionD(widgetProps),
+  Budget424aSectionE: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionE(widgetProps),
 };
 
 const getByPointer = (target: object, path: string): unknown => {

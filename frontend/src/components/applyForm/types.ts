@@ -58,7 +58,10 @@ export type WidgetTypes =
   | "Radio"
   | "Select"
   | "Budget424aSectionA"
-  | "Budget424aSectionB";
+  | "Budget424aSectionB"
+  | "Budget424aSectionC"
+  | "Budget424aSectionD"
+  | "Budget424aSectionE";
 
 export type UiSchemaField = {
   type: "field" | "multiField" | "null";
