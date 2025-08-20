@@ -6,7 +6,6 @@ from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
-from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     CreateApplicationSubmissionTask,
     FileMetadata,
@@ -60,16 +59,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
     @pytest.fixture
     def create_submission_task(self, db_session, s3_config):
-        # Create a mock PDF generation config to avoid requiring environment variables
-        pdf_config = PdfGenerationConfig(
-            frontend_sidecar_url="http://localhost:3000",
-            docraptor_api_key="test-key",
-            docraptor_test_mode=True,
-            docraptor_api_url="https://docraptor.com/docs",
-            short_lived_token_expiration_minutes=15,
-            pdf_generation_use_mocks=True,  # Use mocks in tests
-        )
-        return CreateApplicationSubmissionTask(db_session, pdf_generation_config=pdf_config)
+        return CreateApplicationSubmissionTask(db_session)
 
     def test_run_task(self, db_session, create_submission_task):
         application_without_attachments = ApplicationFactory.create(
