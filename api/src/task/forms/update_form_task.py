@@ -157,7 +157,7 @@ class UpdateFormTask(Task):
                 f"Failed to fetch existing form from {self.update_form_container.environment}: {resp.text}"
             )
 
-        existing_form_data = resp.json()["data"]
+        existing_form_data = resp.json().get("data", None)
         self.do_diff(planned_put_request, existing_form_data)
 
     def do_diff(self, planned_put_request: dict, existing_form_data: dict) -> list[str]:
