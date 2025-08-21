@@ -1,5 +1,5 @@
 import { axe } from "jest-axe";
-import SavedOpportunities from "src/app/[locale]/saved-opportunities/page";
+import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
 import {
   MinimalOpportunity,
   OpportunityApiResponse,

@@ -1,4 +1,4 @@
-import EventsCoding from "src/app/[locale]/events/EventsCoding";
+import EventsCoding from "src/app/[locale]/(base)/events/EventsCoding";
 import { render, screen } from "tests/react-utils";
 
 describe("Events coding Content", () => {

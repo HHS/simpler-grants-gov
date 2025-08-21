@@ -1,4 +1,4 @@
-import EventsDemo from "src/app/[locale]/events/EventsDemo";
+import EventsDemo from "src/app/[locale]/(base)/events/EventsDemo";
 import { render, screen } from "tests/react-utils";
 
 describe("Events demo Content", () => {

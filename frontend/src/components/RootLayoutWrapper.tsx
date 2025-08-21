@@ -4,7 +4,6 @@ import * as newrelic from "newrelic";
  * Root layout component, wraps all pages.
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/layout
  */
-import { Metadata } from "next";
 import { environment } from "src/constants/environments";
 import { NewRelicWithCorrectTypes } from "src/types/newRelic";
 
@@ -16,14 +15,9 @@ import { LayoutProps } from "src/types/generalTypes";
 
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-
-import Layout from "src/components/Layout";
+import Head from "next/head";
 
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
-
-export const metadata: Metadata = {
-  icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],
-};
 
 const locales = ["en", "es"];
 
@@ -31,7 +25,10 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({ children, params }: LayoutProps) {
+export default async function RootLayoutWrapper({
+  children,
+  params,
+}: LayoutProps) {
   const { locale } = await params;
   // Enable static rendering
   setRequestLocale(locale);
@@ -58,16 +55,16 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
+      <Head>
         <GoogleAnalytics gaId={environment.GOOGLE_TAG_MANAGER_ID} />
         <meta
           name="google-site-verification"
           content="jFShzxCTiLzv8gvEW4ft7fCaQkluH229-B-tJKteYJY"
         />
-      </head>
+      </Head>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <Layout locale={locale}>{children}</Layout>
+          {children}
         </NextIntlClientProvider>
         {environment.IS_CI !== "true" && (
           <>

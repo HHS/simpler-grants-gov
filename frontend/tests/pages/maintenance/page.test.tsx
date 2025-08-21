@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Maintenance from "src/app/[locale]/maintenance/page";
+import Maintenance from "src/app/[locale]/(base)/maintenance/page";
 import { UserContext } from "src/services/auth/useUser";
 import {
   localeParams,
