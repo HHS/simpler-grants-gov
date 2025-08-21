@@ -51,5 +51,5 @@ class TopportunityCfdaMixin:
 class VOpportunitySummaryMixin:
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     omb_review_status_display: Mapped[str | None]
-    omb_review_status_date: Mapped[datetime.date | None]
+    omb_review_status_date: Mapped[datetime.datetime | None]
     fo_last_upd_dt: Mapped[datetime.datetime | None]
