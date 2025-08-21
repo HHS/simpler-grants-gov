@@ -166,6 +166,7 @@ describe("buildField", () => {
       formSchema,
       errors,
       formData,
+      requiredField: true,
     });
     render(BuiltField);
 
@@ -213,6 +214,7 @@ describe("buildField", () => {
       formSchema,
       errors,
       formData,
+      requiredField: false,
     });
     render(BuiltField);
 
@@ -641,6 +643,17 @@ describe("condenseFormSchemaProperties", () => {
 });
 
 describe("getRequiredProperties", () => {
+  it("returns an empty array for a schema with no required fields", () => {
+    expect(
+      getRequiredProperties({
+        properties: {
+          something: {
+            type: "string",
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
   it("returns a list of all unconditionally required property paths within a schema", () => {
     expect(getRequiredProperties(sflllSchema as RJSFSchema)).toEqual([
       "federal_action_type",
