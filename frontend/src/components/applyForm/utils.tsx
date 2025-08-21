@@ -569,28 +569,52 @@ export const shapeFormData = <T extends object>(
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
-// assumes a dereferenced and condensed schema
-// does not do conditionals. For that we'd have to first:
-// - gather all conditional rules
-// - check all conditional rules against form state / values
-// - re-annotate the form schema with new "required" designations
-// At that point we're basically running validation
-const getRequiredProperties = (formSchema: RJSFSchema, parentPath?: string) => {
+const removePropertyPaths = (path: string): string => {
+  return path.replace(/properties\//g, "");
+};
+
+const getKeyParentPath = (key: string, parentPath?: string) => {
+  const keyParent = parentPath ? `${parentPath}/${key}` : key;
+  return removePropertyPaths(keyParent);
+};
+
+/*
+  gets an array of all paths to required fields in the form schema, not
+  including any intermediate paths that do not represent actual fields
+  assumes a dereferenced but not condensed schema (property paths will still be in place)
+
+  does not do conditionals. For that we'd have to first:
+  - gather all conditional rules
+  - check all conditional rules against form state / values
+  - re-annotate the form schema with new "required" designations
+  At that point we're basically running validation
+*/
+export const getRequiredProperties = (
+  formSchema: RJSFSchema,
+  parentPath?: string,
+): string[] => {
   return Object.entries(formSchema).reduce((requiredPaths, [key, value]) => {
+    let acc = requiredPaths;
     if (key === "required") {
-      value.forEach((requiredFieldName) => {
-        requiredPaths.push(
-          parentPath ? `${parentPath}/${requiredFieldName}` : requiredFieldName,
-        );
+      (value as []).forEach((requiredPropertyKey: string) => {
+        if (!formSchema?.properties) {
+          console.error("Error finding required properties, malformed schema?");
+          return;
+        }
+        const requiredProperty = formSchema.properties[requiredPropertyKey];
+        if ((requiredProperty as RJSFSchema).type === "object") {
+          const nestedRequiredProperties = getRequiredProperties(
+            requiredProperty as RJSFSchema,
+            getKeyParentPath(requiredPropertyKey, parentPath),
+          );
+          acc = acc.concat(nestedRequiredProperties);
+          return;
+        }
+        acc.push(getKeyParentPath(requiredPropertyKey, parentPath));
       });
-      return requiredPaths;
     }
-    if (value.type === "object") {
-      const newPaths = getRequiredProperties(value);
-      return [...requiredPaths, ...newPaths];
-    }
-    return requiredPaths;
-  }, []);
+    return acc;
+  }, [] as string[]);
 };
 
 // arrays from the html look like field_[row]_item

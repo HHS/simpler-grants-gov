@@ -1,5 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
@@ -9,6 +10,7 @@ import {
   determineFieldType,
   getFieldName,
   getFieldSchema,
+  getRequiredProperties,
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
@@ -635,5 +637,26 @@ describe("condenseFormSchemaProperties", () => {
         },
       }),
     ).toEqual(noProperties);
+  });
+});
+
+describe("getRequiredProperties", () => {
+  it.only("returns a list of all unconditionally required property paths within a schema", () => {
+    expect(getRequiredProperties(sflllSchema as RJSFSchema)).toEqual([
+      "federal_action_type",
+      "federal_action_status",
+      "report_type",
+      "reporting_entity/entity_type",
+      "reporting_entity/applicant_reporting_entity/organization_name",
+      "reporting_entity/applicant_reporting_entity/address/street1",
+      "reporting_entity/applicant_reporting_entity/address/city",
+      "federal_agency_department",
+      "lobbying_registrant/individual/first_name",
+      "lobbying_registrant/individual/last_name",
+      "individual_performing_service/individual/first_name",
+      "individual_performing_service/individual/last_name",
+      "signature_block/name/first_name",
+      "signature_block/name/last_name",
+    ]);
   });
 });
