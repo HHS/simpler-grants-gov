@@ -67,9 +67,7 @@ def test_validate_api_key_in_db_key_inactive(enable_factory_create, db_session):
 def test_api_gateway_key_auth_happy_path(mini_app, enable_factory_create, db_session):
     """Test successful API Gateway key authentication"""
     user = UserFactory.create()
-    UserApiKeyFactory.create(
-        user=user, key_id="valid-gateway-key", is_active=True, last_used=None
-    )
+    UserApiKeyFactory.create(user=user, key_id="valid-gateway-key", is_active=True, last_used=None)
     db_session.commit()
 
     resp = mini_app.test_client().get(
