@@ -49,7 +49,6 @@ module "dev_config" {
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
-
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
