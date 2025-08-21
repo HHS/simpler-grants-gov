@@ -50,6 +50,8 @@ export function buildFormTreeRecursive({
     return error;
   });
 
+  const requiredFieldPaths = getRequiredProperties(schema);
+
   const buildFormTree = (
     uiSchema:
       | UiSchema
@@ -80,11 +82,17 @@ export function buildFormTreeRecursive({
             description: node.description,
           });
         } else if (!parent && ("definition" in node || "schema" in node)) {
+          console.log("$$$ this node", node);
+          const requiredField = isFieldRequired(
+            node.definition,
+            requiredFieldPaths,
+          );
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
             errors: formattedErrors ?? null,
             formData,
+            requiredField,
           });
           if (field) {
             acc = [
@@ -108,11 +116,17 @@ export function buildFormTreeRecursive({
             });
             return null;
           } else {
+            console.log("$$$ this node", node);
+            const requiredField = isFieldRequired(
+              node.definition,
+              requiredFieldPaths,
+            );
             return buildField({
               uiFieldObject: node,
               formSchema: schema,
               errors: formattedErrors ?? null,
               formData,
+              requiredField,
             });
           }
         });
@@ -615,6 +629,14 @@ export const getRequiredProperties = (
     }
     return acc;
   }, [] as string[]);
+};
+
+const isFieldRequired = (
+  definition: string,
+  requiredFields: string[],
+): boolean => {
+  const path = removePropertyPaths(definition);
+  return requiredFields.indexOf(path) > -1;
 };
 
 // arrays from the html look like field_[row]_item
