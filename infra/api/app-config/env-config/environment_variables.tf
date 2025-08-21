@@ -34,6 +34,13 @@ locals {
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"
+
+    # PDF Generation Configuration
+    FRONTEND_URL = "https://${var.environment}.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE = "false"
+    DOCRAPTOR_API_URL = "https://docraptor.com/docs"
+    SHORT_LIVED_TOKEN_EXPIRATION_MINUTES = "60"
+    PDF_GENERATION_USE_MOCKS = "false"
   }
 
   # Configuration for secrets
@@ -94,6 +101,11 @@ locals {
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"
+    }
+
+    DOCRAPTOR_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/docraptor-api-key"
     }
   }
 }

@@ -49,6 +49,11 @@ module "dev_config" {
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
+
+    # PDF Generation - Dev overrides
+    FRONTEND_URL = "https://dev.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE = "true"
+    PDF_GENERATION_USE_MOCKS = "false"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
