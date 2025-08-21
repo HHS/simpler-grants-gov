@@ -20,6 +20,10 @@ import {
 import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
+import Budget424aSectionC from "./widgets/budget/Budget424aSectionC";
+import Budget424aSectionD from "./widgets/budget/Budget424aSectionD";
+import Budget424aSectionE from "./widgets/budget/Budget424aSectionE";
+import Budget424aSectionF from "./widgets/budget/Budget424aSectionF";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
@@ -263,6 +267,14 @@ const widgetComponents: Record<
     Budget424aSectionA(widgetProps),
   Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionB(widgetProps),
+  Budget424aSectionC: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionC(widgetProps),
+  Budget424aSectionD: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionD(widgetProps),
+  Budget424aSectionE: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionE(widgetProps),
+  Budget424aSectionF: (widgetProps: UswdsWidgetProps) =>
+    Budget424aSectionF(widgetProps),
 };
 
 export const getByPointer = (target: object, path: string): unknown => {
