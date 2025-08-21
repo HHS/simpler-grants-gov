@@ -50,8 +50,8 @@ module "staging_config" {
     RESET_EMAILS_WITHOUT_SENDING = "false"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL = "https://staging.simpler.grants.gov"
-    DOCRAPTOR_TEST_MODE = "true"
+    FRONTEND_URL             = "https://staging.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
   }
   # Enables ECS Exec access for debugging or jump access.

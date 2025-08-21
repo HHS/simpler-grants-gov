@@ -36,11 +36,11 @@ locals {
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"
 
     # PDF Generation Configuration
-    FRONTEND_URL = "https://${var.environment}.simpler.grants.gov"
-    DOCRAPTOR_TEST_MODE = "false"
-    DOCRAPTOR_API_URL = "https://docraptor.com/docs"
+    FRONTEND_URL                         = "https://${var.environment}.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE                  = "true" # Default to test mode for safety
+    DOCRAPTOR_API_URL                    = "https://docraptor.com/docs"
     SHORT_LIVED_TOKEN_EXPIRATION_MINUTES = "60"
-    PDF_GENERATION_USE_MOCKS = "false"
+    PDF_GENERATION_USE_MOCKS             = "false"
   }
 
   # Configuration for secrets

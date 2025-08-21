@@ -89,9 +89,9 @@ module "prod_config" {
     SYNC_SUPPRESSED_EMAILS       = "false"
 
     # PDF Generation - Production overrides
-    FRONTEND_URL = "https://simpler.grants.gov"
-    DOCRAPTOR_TEST_MODE = "false"  # Use production mode in prod
-    PDF_GENERATION_USE_MOCKS = "false"  # Use real service in prod
+    FRONTEND_URL             = "https://simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
+    PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
   }
   instance_cpu    = 1024
   instance_memory = 4096
