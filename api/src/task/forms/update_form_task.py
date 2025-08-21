@@ -97,7 +97,6 @@ class UpdateFormTask(Task):
 
         if self.update_form_container.is_dry_run:
             self.call_get_and_diff(url, headers, request)
-
             logger.info(f"DRY RUN - NOT SENDING REQUEST TO {url}")
             logger.info(
                 f"DRY RUN - WOULD HAVE UPDATED FORM {form.form_id} | {form.short_form_name}"
@@ -143,24 +142,31 @@ class UpdateFormTask(Task):
 
 
     def call_get_and_diff(self, url: str, headers: dict, planned_put_request: dict) -> None:
+        """Call the GET /forms endpoint in the given environment and
+           note down what would change.
+        """
         resp = requests.get(url, headers=headers, timeout=5)
 
         if resp.status_code == 404:
-            logger.info(f"Form {self.update_form_container.form_id} does not yet existing in {self.update_form_container.environment}")
+            logger.info(f"Form {self.update_form_container.form_id} does not yet exist in {self.update_form_container.environment}")
             return
 
         if resp.status_code != 200:
-            logger.error("Failed to fetch existing form")
-            raise Exception("TODO")
+            raise Exception(f"Failed to fetch existing form from {self.update_form_container.environment}: {resp.text}")
 
         existing_form_data = resp.json()["data"]
+        self.do_diff(planned_put_request, existing_form_data)
 
-        print(existing_form_data["form_instruction"])
+
+    def do_diff(self, planned_put_request: dict, existing_form_data: dict) -> list[str]:
+        print(existing_form_data)
 
         changed_fields = []
         for field, planned_value in planned_put_request.items():
+            # The instruction ID isn't returned in the top-level object, but can be found
+            # in the form instructions object, so pull it out differently.
             if field == "form_instruction_id":
-                existing_value = existing_form_data["form_instruction"]["form_instruction_id"]
+                existing_value = existing_form_data.get("form_instruction", {}).get("form_instruction_id", None)
             else:
                 existing_value = existing_form_data.get(field)
             if planned_value != existing_value:
@@ -173,3 +179,5 @@ class UpdateFormTask(Task):
             logger.warning(f"Running this will update the following fields on the form: {changed_fields}")
         else:
             logger.info(f"No fields would be changed in {self.update_form_container.environment}")
+
+        return changed_fields

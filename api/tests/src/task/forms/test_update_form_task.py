@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from src.api.form_alpha.form_schema import FormAlphaSchema
 from src.task.forms.update_form_task import UpdateFormContainer, UpdateFormTask
 from tests.src.db.models.factories import FormFactory
 
@@ -94,9 +95,16 @@ def test_build_headers(db_session):
     }
 
 
-# TODO
-# * Verify request built correctly
-# * Verify response handled correctly
-# * Mock the API call
-# * Setup forms
-# * Write docs
+def test_do_diff_no_changes(db_session, enable_factory_create):
+    update_form_container = UpdateFormContainer(
+        environment="local", form_id="", form_instruction_id="", is_dry_run=True
+    )
+    task = UpdateFormTask(db_session, update_form_container)
+
+    form = FormFactory.create()
+    planned_request = task.build_request(form)
+
+    schema = FormAlphaSchema()
+    endpoint_response = schema.dump(form)
+
+    assert task.do_diff(planned_request, endpoint_response) == []

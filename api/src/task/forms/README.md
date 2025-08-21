@@ -16,7 +16,7 @@ The script takes in the following parameters:
 * `--environment` - The environment you want to run in
 * `--form-id` - The ID of the form you want to update - Grab the ID from our static definition of a form in our code, do not create a new ID
 * `--form-instruction-id` - The ID of the form instruction of a form, if not included will be set as null, see section below for details
-* `--dry-run/--no-dry-run` - Whether to actually make the call to the API endpoint
+* `--dry-run/--no-dry-run` - Whether to actually make the call to the API endpoint - in dry-run mode a call will be made to the GET /forms endpoint and you will be presented with what fields would change.
 * (Environment Variable) `NON_LOCAL_API_AUTH_TOKEN` - the auth token for calling the environment - at the moment MUST be the same auth token the frontend uses (the first one configured in our API_AUTH_TOKEN env var).
 
 ```sh
