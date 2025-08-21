@@ -8,6 +8,7 @@ import {
   buildFormTreeRecursive,
   condenseFormSchemaProperties,
   determineFieldType,
+  formatFieldWarnings,
   getFieldName,
   getFieldSchema,
   getRequiredProperties,
@@ -672,4 +673,31 @@ describe("getRequiredProperties", () => {
       "signature_block/name/last_name",
     ]);
   });
+});
+
+describe("formatFieldWarnings", () => {
+  const name = "field_name";
+  it.only("returns an empty array if there are not any warnings", () => {
+    expect(formatFieldWarnings([], name, "string", false)).toEqual([]);
+    expect(formatFieldWarnings(null, name, "string", false)).toEqual([]);
+  });
+  it("does something with arrays?", () => {});
+  it.only("returns warnings that directly reference the field name", () => {
+    expect(
+      formatFieldWarnings(
+        [
+          {
+            field: "field_name",
+            message: "something went wrong",
+            type: "generic",
+            value: "not sure",
+          },
+        ],
+        name,
+        "string",
+        false,
+      ),
+    ).toEqual(["something went wrong"]);
+  });
+  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {});
 });

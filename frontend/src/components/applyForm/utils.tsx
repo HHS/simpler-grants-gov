@@ -461,25 +461,24 @@ const getWarningsForField = (
   return [...directWarnings, ...nestedRequiredWarnings];
 };
 
-const formatFieldWarnings = (
+export const formatFieldWarnings = (
   warnings: FormValidationWarning[] | null,
   name: string,
-  type: string,
+  fieldType: string,
   required: boolean,
 ): string[] => {
   if (!warnings || warnings.length < 1) {
     return [];
   }
-  if (type === "array") {
-    const data = warnings.reduce(
+  if (fieldType === "array") {
+    const warningMap = warnings.reduce(
       (acc, item) => {
-        const field = item.field.replace(/^\$\./, "");
-        acc[field] = item.message;
+        acc[item.field] = item.message;
         return acc;
       },
       {} as Record<string, unknown>,
     );
-    return flatFormDataToArray(name, data) as unknown as [];
+    return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
   return warningsforField.map((warning) => {
@@ -656,14 +655,13 @@ const isFieldRequired = (
 // arrays from the html look like field_[row]_item
 const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   return Object.entries(data).reduce(
-    (values: Array<Record<string, unknown>>, CV) => {
-      const value = CV[1];
-      const fieldSplit = CV[0].split(/\[\d+\]\./);
+    (values: Array<Record<string, unknown>>, [key, value]) => {
+      const fieldSplit = key.split(/\[\d+\]\./);
       const fieldName = fieldSplit[0];
       const itemName = fieldSplit[1];
 
       if (fieldName === field && value) {
-        const match = CV[0].match(/[0-9]+/);
+        const match = key.match(/[0-9]+/);
         const arrayNumber = match ? Number(match[0]) : -1;
         if (!values[arrayNumber]) {
           values[arrayNumber] = {};
