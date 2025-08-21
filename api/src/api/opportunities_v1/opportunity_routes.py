@@ -12,7 +12,7 @@ import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
-from src.auth.api_key_auth import api_key_auth
+from src.auth.multi_auth import api_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
@@ -180,7 +180,7 @@ examples = {
     examples=examples,
 )
 @opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV1Schema())
-@opportunity_blueprint.auth_required(api_key_auth)
+@opportunity_blueprint.auth_required(api_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
     # This adds a file response schema
@@ -228,7 +228,7 @@ def opportunity_search(
 
 @opportunity_blueprint.get("/opportunities/<int:legacy_opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
-@opportunity_blueprint.auth_required(api_key_auth)
+@opportunity_blueprint.auth_required(api_key_multi_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_get_legacy(
@@ -244,7 +244,7 @@ def opportunity_get_legacy(
 
 @opportunity_blueprint.get("/opportunities/<uuid:opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
-@opportunity_blueprint.auth_required(api_key_auth)
+@opportunity_blueprint.auth_required(api_key_multi_auth)
 @opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
 @flask_db.with_db_session()
 def opportunity_get(db_session: db.Session, opportunity_id: UUID) -> response.ApiResponse:
