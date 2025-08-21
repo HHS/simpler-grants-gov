@@ -286,6 +286,12 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
+openapi-spec-common-grants:
+	$(PY_RUN_CMD) python src/common_grants/scripts/generate_openapi.py > ./openapi-cg.generated.yaml
+
+check-spec: openapi-spec-common-grants
+	cg check spec ./openapi-cg.generated.yaml
+
 
 copy-oracle-data:
 	$(FLASK_CMD) data-migration copy-oracle-data
