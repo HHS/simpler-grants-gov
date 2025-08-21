@@ -37,7 +37,7 @@ examples = {
     examples=examples,
 )
 @extract_blueprint.output(extract_schema.ExtractMetadataListResponseSchema)
-@extract_blueprint.auth_required(api_key_multi_auth)
+@api_key_multi_auth.login_required
 @flask_db.with_db_session()
 def extract_metadata_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: ExtractListParams = ExtractListParams.model_validate(raw_list_params)

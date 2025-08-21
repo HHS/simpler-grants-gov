@@ -41,7 +41,7 @@ examples = {
     examples=examples,
 )
 @agency_blueprint.output(agency_schema.AgencyListResponseSchema)
-@agency_blueprint.auth_required(api_key_multi_auth)
+@api_key_multi_auth.login_required
 @flask_db.with_db_session()
 def agencies_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: AgencyListParams = AgencyListParams.model_validate(raw_list_params)
@@ -108,7 +108,7 @@ examples = {
     examples=examples,
 )
 @agency_blueprint.output(agency_schema.AgencySearchResponseV1Schema)
-@agency_blueprint.auth_required(api_key_multi_auth)
+@api_key_multi_auth.login_required
 @flask_opensearch.with_search_client()
 def agency_search(
     search_client: search.SearchClient, raw_search_params: dict

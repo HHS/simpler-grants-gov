@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @form_blueprint.get("/forms/<uuid:form_id>")
 @form_blueprint.output(form_schema.FormResponseAlphaSchema())
-@form_blueprint.auth_required(api_key_multi_auth)
+@api_key_multi_auth.login_required
 @flask_db.with_db_session()
 def form_get(db_session: db.Session, form_id: uuid.UUID) -> response.ApiResponse:
     add_extra_data_to_current_request_logs({"form_id": form_id})
@@ -34,7 +34,7 @@ def form_get(db_session: db.Session, form_id: uuid.UUID) -> response.ApiResponse
 @form_blueprint.put("/forms/<uuid:form_id>")
 @form_blueprint.input(form_schema.FormUpdateRequestSchema, location="json")
 @form_blueprint.output(form_schema.FormUpdateResponseSchema)
-@form_blueprint.auth_required(api_key_multi_auth)
+@api_key_multi_auth.login_required
 @flask_db.with_db_session()
 def form_update(
     db_session: db.Session, form_id: uuid.UUID, json_data: dict
