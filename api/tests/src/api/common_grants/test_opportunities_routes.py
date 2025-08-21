@@ -284,9 +284,14 @@ class TestCommonGrantsProtocolFormat:
             # Check funding format
             if data["funding"]:
                 funding = data["funding"]
-                for field in ["estimatedTotalProgramFunding", "awardCeiling", "awardFloor"]:
+                for field in ["total_amount_available", "max_award_amount", "min_award_amount"]:
                     if field in funding:
-                        assert isinstance(funding[field], (int, float)) or funding[field] is None
+                        # Funding fields should be Money objects with amount and currency
+                        assert isinstance(funding[field], dict) or funding[field] is None
+                        if isinstance(funding[field], dict):
+                            assert "amount" in funding[field]
+                            assert "currency" in funding[field]
+                            assert funding[field]["currency"] == "USD"
 
     def test_list_response_format(self, client):
         """Test that list response follows CommonGrants Protocol format."""
