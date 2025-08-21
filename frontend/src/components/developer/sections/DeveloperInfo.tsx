@@ -17,7 +17,7 @@ const DeveloperInfoContent = () => {
       <h3 data-testid="developer-info">{t("canDoHeader")}</h3>
       <h4>{t("canDoSubHeader")}</h4>
       <p>{t("canDoParagraph")}</p>
-      <Link href="/dev/feature-flags">
+      <Link href="/dev/api-dashboard">
         <Button
           className="margin-y-2 usa-button--secondary"
           type="button"
