@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Roadmap from "src/app/[locale]/roadmap/page";
+import Roadmap from "src/app/[locale]/(base)/roadmap/page";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({

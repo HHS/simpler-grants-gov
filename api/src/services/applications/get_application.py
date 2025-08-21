@@ -75,6 +75,11 @@ def get_application(
     if not application:
         raise_flask_error(404, f"Application with ID {application_id} not found")
 
+    # To make sure the UI displays forms in a consistent order, sort the application_forms list
+    # NOTE: Trying to put this in an order_by in the relationship doesn't work as we can't sort on a joined value
+    #       Haven't found a way to sort this when querying above that doesn't break the query
+    application.application_forms.sort(key=lambda app_form: app_form.form.form_name)
+
     # Check if the user has access to the application (skip for internal users or when user is None)
     if not is_internal_user and user is not None:
         check_user_application_access(application, user)

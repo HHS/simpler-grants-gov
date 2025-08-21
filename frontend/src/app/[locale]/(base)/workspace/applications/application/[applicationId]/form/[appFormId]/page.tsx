@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/error/page";
-import NotFound from "src/app/[locale]/not-found";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
+import NotFound from "src/app/[locale]/(base)/not-found";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import getFormData from "src/utils/getFormData";
 
