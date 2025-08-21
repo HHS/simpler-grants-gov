@@ -96,15 +96,55 @@ def test_build_headers(db_session):
 
 
 def test_do_diff_no_changes(db_session, enable_factory_create):
+    form = FormFactory.create()
     update_form_container = UpdateFormContainer(
-        environment="local", form_id="", form_instruction_id="", is_dry_run=True
+        environment="local", form_id="", form_instruction_id=None, is_dry_run=True
     )
     task = UpdateFormTask(db_session, update_form_container)
-
-    form = FormFactory.create()
     planned_request = task.build_request(form)
 
     schema = FormAlphaSchema()
     endpoint_response = schema.dump(form)
 
     assert task.do_diff(planned_request, endpoint_response) == []
+
+
+def test_do_diff_no_changes_with_instruction(db_session, enable_factory_create):
+    form = FormFactory.create(with_instruction=True)
+    update_form_container = UpdateFormContainer(
+        environment="local",
+        form_id="",
+        form_instruction_id=str(form.form_instruction_id),
+        is_dry_run=True,
+    )
+    task = UpdateFormTask(db_session, update_form_container)
+    planned_request = task.build_request(form)
+
+    schema = FormAlphaSchema()
+    endpoint_response = schema.dump(form)
+
+    assert task.do_diff(planned_request, endpoint_response) == []
+
+
+def test_do_diff_with_diff(db_session, enable_factory_create):
+    form = FormFactory.create(with_instruction=True)
+    update_form_container = UpdateFormContainer(
+        environment="local", form_id="", form_instruction_id=None, is_dry_run=True
+    )
+    task = UpdateFormTask(db_session, update_form_container)
+    planned_request = task.build_request(form)
+    planned_request["agency_code"] = "XYZ-123"
+    planned_request["form_json_schema"] = {}
+    planned_request["form_rule_schema"] = {}
+    planned_request["omb_number"] = "1234-5678"
+
+    schema = FormAlphaSchema()
+    endpoint_response = schema.dump(form)
+
+    assert set(task.do_diff(planned_request, endpoint_response)) == {
+        "form_instruction_id",
+        "agency_code",
+        "form_json_schema",
+        "form_rule_schema",
+        "omb_number",
+    }

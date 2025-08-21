@@ -140,43 +140,52 @@ class UpdateFormTask(Task):
         base_url = ENV_URL_MAP[self.update_form_container.environment]
         return base_url.format(self.update_form_container.form_id)
 
-
     def call_get_and_diff(self, url: str, headers: dict, planned_put_request: dict) -> None:
         """Call the GET /forms endpoint in the given environment and
-           note down what would change.
+        note down what would change.
         """
         resp = requests.get(url, headers=headers, timeout=5)
 
         if resp.status_code == 404:
-            logger.info(f"Form {self.update_form_container.form_id} does not yet exist in {self.update_form_container.environment}")
+            logger.info(
+                f"Form {self.update_form_container.form_id} does not yet exist in {self.update_form_container.environment}"
+            )
             return
 
         if resp.status_code != 200:
-            raise Exception(f"Failed to fetch existing form from {self.update_form_container.environment}: {resp.text}")
+            raise Exception(
+                f"Failed to fetch existing form from {self.update_form_container.environment}: {resp.text}"
+            )
 
         existing_form_data = resp.json()["data"]
         self.do_diff(planned_put_request, existing_form_data)
 
-
     def do_diff(self, planned_put_request: dict, existing_form_data: dict) -> list[str]:
-        print(existing_form_data)
-
+        """Diff what we plan to send to the Form endpoint with what it already has"""
         changed_fields = []
         for field, planned_value in planned_put_request.items():
             # The instruction ID isn't returned in the top-level object, but can be found
             # in the form instructions object, so pull it out differently.
             if field == "form_instruction_id":
-                existing_value = existing_form_data.get("form_instruction", {}).get("form_instruction_id", None)
+                form_instruction_obj = existing_form_data.get("form_instruction", {})
+                if form_instruction_obj is None:
+                    existing_value = None
+                else:
+                    existing_value = form_instruction_obj.get("form_instruction_id", None)
             else:
                 existing_value = existing_form_data.get(field)
             if planned_value != existing_value:
-                logger.warning(f"Value of {field} will change from {existing_value} to {planned_value}")
+                logger.warning(
+                    f"Value of {field} will change from {existing_value} to {planned_value}"
+                )
                 changed_fields.append(field)
             else:
                 logger.info(f"Value of {field} will not change")
 
         if changed_fields:
-            logger.warning(f"Running this will update the following fields on the form: {changed_fields}")
+            logger.warning(
+                f"Running this will update the following fields on the form: {changed_fields}"
+            )
         else:
             logger.info(f"No fields would be changed in {self.update_form_container.environment}")
 
