@@ -713,7 +713,7 @@ dl {
 
 // SF 424 A Budget Form
 .sf424a__row {
-  height: 1px;
+  height: fit-content;
   .sf424a__cell {
     height: inherit;
     &--row-headers {
