@@ -641,7 +641,7 @@ describe("condenseFormSchemaProperties", () => {
 });
 
 describe("getRequiredProperties", () => {
-  it.only("returns a list of all unconditionally required property paths within a schema", () => {
+  it("returns a list of all unconditionally required property paths within a schema", () => {
     expect(getRequiredProperties(sflllSchema as RJSFSchema)).toEqual([
       "federal_action_type",
       "federal_action_status",

@@ -82,7 +82,6 @@ export function buildFormTreeRecursive({
             description: node.description,
           });
         } else if (!parent && ("definition" in node || "schema" in node)) {
-          console.log("$$$ this node", node);
           const requiredField = isFieldRequired(
             (node.definition || node.schema.title || "") as string,
             requiredFieldPaths,
@@ -116,7 +115,6 @@ export function buildFormTreeRecursive({
             });
             return null;
           } else {
-            console.log("$$$ this node", node);
             const requiredField = isFieldRequired(
               (node.definition || node.schema.title || "") as string,
               requiredFieldPaths,
@@ -308,12 +306,6 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-// // this is going to need to get much more complicated to figure out if
-// // nested and conditionally required fields are required
-// const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
-//   return (formSchema.required ?? []).includes(fieldName);
-// };
-
 export const buildField = ({
   errors,
   formSchema,
@@ -327,7 +319,6 @@ export const buildField = ({
   uiFieldObject: UiSchemaField;
   requiredField: boolean;
 }) => {
-  console.log("*** it is required", requiredField, uiFieldObject.definition);
   const { definition, schema, type: fieldType } = uiFieldObject;
 
   let fieldSchema = {} as RJSFSchema;
@@ -451,7 +442,6 @@ const getNestedWarningsForField = (
   fieldName: string,
   warnings: FormValidationWarning[],
 ): FormValidationWarning[] => {
-  // const subPaths = fieldName.split("--");
   return warnings.filter(({ field, type }) => {
     return type === "required" && fieldName.includes(field);
   });
