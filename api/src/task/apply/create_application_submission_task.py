@@ -2,6 +2,7 @@ import logging
 import uuid
 import zipfile
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from enum import StrEnum
 from typing import Sequence
 
@@ -13,7 +14,7 @@ from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import Application, ApplicationSubmission
+from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.service import generate_application_form_pdf
@@ -82,6 +83,9 @@ class CreateApplicationSubmissionTask(Task):
             pdf_generation_config = PdfGenerationConfig()
         self.pdf_generation_config = pdf_generation_config
         self.has_more_to_process = True
+        
+        # Create a single internal token for the entire job lifecycle
+        self.internal_token = self._create_internal_token()
 
     class Metrics(StrEnum):
         APPLICATION_PROCESSED_COUNT = "application_processed_count"
@@ -115,12 +119,9 @@ class CreateApplicationSubmissionTask(Task):
         """Process a batch of application submissions"""
         submitted_applications = self.fetch_applications()
 
-        # Create a single short-lived token for this batch (if not using mocks)
-        batch_token = self._create_batch_token()
-
         for application in submitted_applications:
             try:
-                self.process_application(application, batch_token)
+                self.process_application(application)
             except Exception:
                 # If for whatever reason we fail to create an application
                 # submission, we'll log an error and continue on, hoping
@@ -145,7 +146,7 @@ class CreateApplicationSubmissionTask(Task):
             .where(Application.application_status == ApplicationStatus.SUBMITTED)
             .options(
                 selectinload(Application.application_attachments),
-                selectinload(Application.application_forms),
+                selectinload(Application.application_forms).selectinload(ApplicationForm.competition_form),
                 selectinload(Application.competition),
             )
             # We only fetch a limited number of apps in a batch so that we're
@@ -153,18 +154,16 @@ class CreateApplicationSubmissionTask(Task):
             .limit(self.app_submission_config.application_submission_batch_size)
         ).all()
 
-    def _create_batch_token(self) -> str | None:
-        """Create a single short-lived token for the entire batch.
+    def _create_internal_token(self) -> str | None:
+        """Create a single internal token for the entire job lifecycle.
 
         Returns:
             JWT token string, or None if using mocks
         """
         if self.pdf_generation_config.pdf_generation_use_mocks:
-            return None  # Mock clients don't need real tokens
+            return "mock-token"  # Always provide a token for testing consistency
 
         # Create token in its own transaction to avoid conflicts
-        from datetime import datetime, timedelta, timezone
-
         expires_at = datetime.now(timezone.utc) + timedelta(
             minutes=self.pdf_generation_config.short_lived_token_expiration_minutes
         )
@@ -177,7 +176,7 @@ class CreateApplicationSubmissionTask(Task):
         self.db_session.commit()
 
         logger.info(
-            "Created batch token for PDF generation",
+            "Created internal token for PDF generation",
             extra={
                 "token_id": str(short_lived_token.short_lived_internal_token_id),
                 "expires_at": expires_at.isoformat(),
@@ -186,7 +185,28 @@ class CreateApplicationSubmissionTask(Task):
 
         return token
 
-    def process_application(self, application: Application, batch_token: str | None = None) -> None:
+    def get_pdf_for_app_form(self, application_id: uuid.UUID, application_form_id: uuid.UUID):
+        """Get PDF for an application form, handling errors appropriately.
+        
+        If PDF generation fails, we raise an error as we cannot create a submission
+        without the required PDFs.
+        """
+        pdf_response = generate_application_form_pdf(
+            db_session=self.db_session,
+            application_id=application_id,
+            application_form_id=application_form_id,
+            use_mocks=self.pdf_generation_config.pdf_generation_use_mocks,
+            token=self.internal_token,
+        )
+        
+        if not pdf_response.success:
+            raise Exception(
+                f"Failed to generate PDF for application form {application_form_id}: {pdf_response.error_message}"
+            )
+        
+        return pdf_response
+
+    def process_application(self, application: Application) -> None:
         """Process an application and create an application submission"""
         logger.info(
             "Processing application submission",
@@ -204,7 +224,7 @@ class CreateApplicationSubmissionTask(Task):
 
                 submission_container = SubmissionContainer(application, submission_zip)
 
-                self.process_application_forms(submission_container, batch_token)
+                self.process_application_forms(submission_container)
                 self.process_application_attachments(submission_container)
                 self.create_manifest_file(submission_container)
 
@@ -221,9 +241,7 @@ class CreateApplicationSubmissionTask(Task):
         self.db_session.add(application_submission)
         application.application_status = ApplicationStatus.ACCEPTED
 
-    def process_application_forms(
-        self, submission: SubmissionContainer, batch_token: str | None = None
-    ) -> None:
+    def process_application_forms(self, submission: SubmissionContainer) -> None:
         """Turn an application form into a PDF and add to the zip file"""
         log_extra = {
             "application_id": submission.application.application_id,
@@ -251,37 +269,25 @@ class CreateApplicationSubmissionTask(Task):
             self.increment(self.Metrics.APPLICATION_FORM_COUNT)
 
             # Generate PDF from the application form
-            pdf_response = generate_application_form_pdf(
-                db_session=self.db_session,
-                application_id=submission.application.application_id,
-                application_form_id=application_form.application_form_id,
-                use_mocks=self.pdf_generation_config.pdf_generation_use_mocks,
-                token=batch_token,
+            pdf_response = self.get_pdf_for_app_form(
+                submission.application.application_id,
+                application_form.application_form_id,
             )
 
             app_form_file_name = f"{application_form.form.short_form_name}.pdf"
             file_name_in_zip = submission.get_file_name_in_zip(app_form_file_name)
 
-            if pdf_response.success:
-                logger.info(
-                    "Successfully generated PDF for application form",
-                    extra=log_extra
-                    | {
-                        "application_form_id": application_form.application_form_id,
-                        "pdf_size_bytes": len(pdf_response.pdf_data),
-                    },
-                )
-                with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
-                    file_in_zip.write(pdf_response.pdf_data)
-            else:
-                logger.error(
-                    "Failed to generate PDF for application form, using placeholder",
-                    extra=log_extra
-                    | {
-                        "application_form_id": application_form.application_form_id,
-                        "error": pdf_response.error_message,
-                    },
-                )
+            # PDF generation is now handled in get_pdf_for_app_form which raises on failure
+            logger.info(
+                "Successfully generated PDF for application form",
+                extra=log_extra
+                | {
+                    "application_form_id": application_form.application_form_id,
+                    "pdf_size_bytes": len(pdf_response.pdf_data),
+                },
+            )
+            with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
+                file_in_zip.write(pdf_response.pdf_data)
 
             file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
             submission.form_pdf_metadata.append(FileMetadata(file_name_in_zip, file_size))

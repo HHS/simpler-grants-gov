@@ -70,7 +70,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             docraptor_api_key="test-key",
             docraptor_test_mode=True,
             docraptor_api_url="https://docraptor.com/docs",
-            short_lived_token_expiration_minutes=15,
+            short_lived_token_expiration_minutes=60,
             pdf_generation_use_mocks=True,  # Use mocks in tests
         )
         return CreateApplicationSubmissionTask(db_session, pdf_generation_config=pdf_config)
