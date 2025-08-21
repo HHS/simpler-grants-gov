@@ -69,7 +69,7 @@ function Budget424aSectionD<
   const rows = [
     { key: "federal_forecasted_cash_needs", label: "13. Federal" },
     { key: "non_federal_forecasted_cash_needs", label: "14. Non-federal" },
-    { key: "total_forecasted_cash_needs", label: "15. TOTAL" },
+    { key: "total_forecasted_cash_needs", label: "15. Total" },
   ] as const;
 
   // Helper text for the far-right "Total" on rows 13 & 14
@@ -96,8 +96,14 @@ function Budget424aSectionD<
   }): string[] =>
     (errors || []).filter((e) => e.field === id).map((e) => e.message);
 
-  const HelperText: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <div className="text-italic font-sans-2xs border-top-2px width-full padding-top-2 margin-top-1">
+  const HelperText: React.FC<
+    React.PropsWithChildren<{ noBorder?: boolean }>
+  > = ({ children, noBorder }) => (
+    <div
+      className={`text-italic font-sans-2xs width-full padding-top-2 margin-top-1${
+        noBorder ? "" : " border-top-2px"
+      }`}
+    >
       {children}
     </div>
   );
@@ -114,21 +120,26 @@ function Budget424aSectionD<
     const value = rowObj ? rowObj[colKey] : undefined;
 
     let helper: string | undefined;
+    let isRowTotalHelper = false;
+
     if (rowKey in rowTotalHelpers && colKey === "total_amount") {
       helper = rowTotalHelpers[rowKey];
+      isRowTotalHelper = true;
     } else if (rowKey === "total_forecasted_cash_needs") {
       helper = totalRowHelpers[colKey];
     }
 
     return (
-      <div className="display-flex flex-column sf424a__cell-content">
-        {helper && <HelperText>{helper}</HelperText>}
+      <div className="display-flex flex-column ">
+        {helper && (
+          <HelperText noBorder={isRowTotalHelper}>{helper}</HelperText>
+        )}
         <TextWidget
           schema={amountSchema}
           id={idPath}
           rawErrors={getErrors({ errors, id: idPath })}
           formClassName={`margin-top-${helper ? "1" : "auto"} padding-top-05 simpler-currency-input-wrapper`}
-          inputClassName={`minw-10${helper ? " border-2px" : ""}`}
+          inputClassName="minw-10"
           inputMode="decimal"
           pattern="\\d*(\\.\\d{2})?"
           maxLength={14}
@@ -158,31 +169,49 @@ function Budget424aSectionD<
             >
               &nbsp;
             </th>
-            {quarters.map((q) => (
-              <th
-                key={q.key}
-                scope="col"
-                className="bg-base-lightest text-bold border-bottom-0 border-x-1px text-center border-base-light"
-              >
-                {q.quarter}
-              </th>
+            {quarters.map((q, qIndex) => (
+              <React.Fragment key={q.key}>
+                <th
+                  scope="col"
+                  className={`bg-base-lightest text-bold border-bottom-0 border-x-1px text-center border-base-light ${qIndex === 3 ? "border-right-0" : ""}`}
+                >
+                  {q.quarter}
+                </th>
+
+                {/* Empty header after column D */}
+                {qIndex === 3 && (
+                  <th
+                    className="bg-base-lightest border-bottom-0 border-x-0 border-right-0 border-left-0 border-base-light"
+                    aria-hidden="true"
+                  />
+                )}
+              </React.Fragment>
             ))}
           </tr>
           <tr>
-            {quarters.map((q) => (
-              <th
-                key={q.key}
-                scope="col"
-                className="bg-base-lightest text-bold border-x-1px text-center border-base-light"
-              >
-                {q.label}
-              </th>
+            {quarters.map((q, qIndex) => (
+              <React.Fragment key={q.key}>
+                <th
+                  scope="col"
+                  className={`bg-base-lightest text-bold border-x-1px text-center border-base-light ${qIndex === 3 ? "border-right-0" : ""}`}
+                >
+                  {q.label}
+                </th>
+
+                {/* Empty header after column D */}
+                {qIndex === 3 && (
+                  <th
+                    className="bg-base-lightest border-x-0 text-center border-right-0 border-left-0  border-base-light"
+                    aria-hidden="true"
+                  />
+                )}
+              </React.Fragment>
             ))}
           </tr>
         </thead>
 
         <tbody>
-          {rows.map((r) => (
+          {rows.map((r, rowIndex) => (
             <tr
               key={r.key}
               className={`sf424a__row${r.key === "total_forecasted_cash_needs" ? " bg-base-lightest" : ""}`}
@@ -191,19 +220,29 @@ function Budget424aSectionD<
                 scope="row"
                 className="padding-05 border-top-0 border-bottom-0 text-bold sf424a__cell"
               >
-                <div className="display-flex flex-column sf424a__cell-content">
+                <div className="display-flex flex-column">
                   <div className="margin-top-auto padding-bottom-1">
                     {r.label}
                   </div>
                 </div>
               </th>
-              {quarters.map((q) => (
-                <td
-                  key={`${r.key}-${q.key}`}
-                  className="padding-05 border-top-0 border-bottom-0 sf424a__cell verticle-align-bottom"
-                >
-                  {cellInput({ rowKey: r.key as RowKey, colKey: q.key })}
-                </td>
+
+              {quarters.map((q, qIndex) => (
+                <React.Fragment key={`${r.key}-${q.key}`}>
+                  <td className="padding-05 border-top-0 border-bottom-0 sf424a__cell verticle-align-bottom">
+                    {cellInput({ rowKey: r.key as RowKey, colKey: q.key })}
+                  </td>
+
+                  {/* "=" for row 1 & 2, empty for row 3 (totals) */}
+                  {qIndex === 3 && (
+                    <td
+                      className="border-bottom-0 border-top-0 verticle-align-bottom text-center text-bold"
+                      aria-hidden="true"
+                    >
+                      {rowIndex < 2 ? "=" : ""}
+                    </td>
+                  )}
+                </React.Fragment>
               ))}
             </tr>
           ))}

@@ -242,17 +242,17 @@ function Budget424aSectionC<
 
               {/* Columns B-D: Applicant, State, Other */}
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column sf424a__cell-content">
+                <div className="display-flex flex-column">
                   {cellInput(rowIndex, "applicant_amount")}
                 </div>
               </td>
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column sf424a__cell-content">
+                <div className="display-flex flex-column">
                   {cellInput(rowIndex, "state_amount")}
                 </div>
               </td>
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column sf424a__cell-content">
+                <div className="display-flex flex-column">
                   {cellInput(rowIndex, "other_amount")}
                 </div>
               </td>
@@ -267,7 +267,7 @@ function Budget424aSectionC<
 
               {/* Column E: Total — with helper */}
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column sf424a__cell-content">
+                <div className="display-flex flex-column">
                   <HelperText>Sum of row {rowIndex + 8}</HelperText>
                   {cellInput(rowIndex, "total_amount")}
                 </div>
@@ -287,12 +287,10 @@ function Budget424aSectionC<
               scope="row"
               className="padding-05 border-bottom-0 border-top-0 sf424a__cell sf424a__cell--row-headers"
             >
-              <div className="display-flex flex-column sf424a__cell-content">
+              <div className="display-flex flex-column">
                 <div className="margin-top-auto">
                   Total
-                  <div className="font-sans-3xs text-italic">
-                    (sum of rows 8-11)
-                  </div>
+                  <div className="text-italic">(sum of rows 8-11)</div>
                 </div>
               </div>
             </th>

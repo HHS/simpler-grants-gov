@@ -300,7 +300,7 @@ function Budget424aSectionB<
                 scope="row"
                 className="padding-05 text-normal border-bottom-0 border-top-0 sf424a__cell sf424a__cell--row-headers"
               >
-                <div className="display-flex flex-column sf424a__cell-content">
+                <div className="display-flex flex-column">
                   <span className="text-bold">{r.label}</span>
                   {r.note ? (
                     <span className="font-sans-3xs text-italic">{r.note}</span>
@@ -317,10 +317,10 @@ function Budget424aSectionB<
                 return (
                   <td
                     key={`cell-${r.key}-${columnIndex}`}
-                    className={`border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell${extraPad}`}
+                    className={`border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell ${extraPad}`}
                     height={"inherit"}
                   >
-                    <div className="display-flex flex-column sf424a__cell-content">
+                    <div className="display-flex flex-column ">
                       {r.key === ROW_I_KEY && <ColHelper n={columnIndex + 1} />}
                       {r.key === ROW_K_KEY && (
                         <HelperText>Sum of i and j</HelperText>
@@ -334,9 +334,7 @@ function Budget424aSectionB<
               })}
 
               <td className="border-bottom-0 border-top-0 verticle-align-bottom">
-                <div className="display-flex flex-column sf424a__cell-content">
-                  =
-                </div>
+                <div className="display-flex flex-column">=</div>
               </td>
 
               {/* TOTAL (Column 5) */}

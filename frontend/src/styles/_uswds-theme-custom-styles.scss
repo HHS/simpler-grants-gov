@@ -716,15 +716,13 @@ dl {
   height: fit-content;
   .sf424a__cell {
     height: inherit;
+    vertical-align: bottom;
+
     &--row-headers {
       span {
         margin-top: auto;
         padding-bottom: 0.5rem;
       }
-    }
-
-    .sf424a__cell-content {
-      height: 100%;
     }
   }
 }

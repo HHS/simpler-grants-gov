@@ -138,7 +138,7 @@ function Budget424aSectionE<
   const totalInput = (yearKey: YearKey, helper: string): JSX.Element => {
     const idPath = `total_federal_fund_estimates--${yearKey}`;
     return (
-      <div className="display-flex flex-column sf424a__cell-content">
+      <div className="display-flex flex-column">
         <HelperText>{helper}</HelperText>
         <TextWidget
           schema={amountSchema}
@@ -235,7 +235,9 @@ function Budget424aSectionE<
           {/* Rows 1-4: one per grant program */}
           {ROWS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
-              <td className="border-bottom-0 border-top-0">{rowIndex + 16}.</td>
+              <td className="border-bottom-0 border-top-0 verticle-align-bottom">
+                {rowIndex + 16}.
+              </td>
               {/* Column A: grant program input */}
               <th
                 scope="row"
@@ -258,16 +260,16 @@ function Budget424aSectionE<
 
           {/* Bottom totals row */}
           <tr className="bg-base-lightest sf424a__row">
-            <th>20.</th>
+            <th className="verticle-align-bottom">20.</th>
             <th
               scope="row"
               className="padding-05 border-bottom-0 border-top-0 sf424a__cell sf424a__cell--row-headers"
             >
-              <div className="display-flex flex-column sf424a__cell-content">
+              <div className="display-flex flex-column">
                 <div className="margin-top-auto">Total</div>
-                <div className="font-sans-3xs text-italic">
+                <span className="text-italic font-weight-100">
                   (sum of rows 16-19)
-                </div>
+                </span>
               </div>
             </th>
 
