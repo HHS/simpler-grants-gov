@@ -2,7 +2,7 @@ import logging
 import uuid
 import zipfile
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from enum import StrEnum
 from typing import Sequence
 
@@ -17,11 +17,12 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
 from src.services.pdf_generation.config import PdfGenerationConfig
+from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util import file_util
+from src.util import datetime_util, file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ class CreateApplicationSubmissionTask(Task):
             pdf_generation_config = PdfGenerationConfig()
         self.pdf_generation_config = pdf_generation_config
         self.has_more_to_process = True
-        
+
         # Create a single internal token for the entire job lifecycle
         self.internal_token = self._create_internal_token()
 
@@ -146,7 +147,9 @@ class CreateApplicationSubmissionTask(Task):
             .where(Application.application_status == ApplicationStatus.SUBMITTED)
             .options(
                 selectinload(Application.application_attachments),
-                selectinload(Application.application_forms).selectinload(ApplicationForm.competition_form),
+                selectinload(Application.application_forms).selectinload(
+                    ApplicationForm.competition_form
+                ),
                 selectinload(Application.competition),
             )
             # We only fetch a limited number of apps in a batch so that we're
@@ -185,9 +188,11 @@ class CreateApplicationSubmissionTask(Task):
 
         return token
 
-    def get_pdf_for_app_form(self, application_id: uuid.UUID, application_form_id: uuid.UUID):
+    def get_pdf_for_app_form(
+        self, application_id: uuid.UUID, application_form_id: uuid.UUID
+    ) -> "PdfGenerationResponse":
         """Get PDF for an application form, handling errors appropriately.
-        
+
         If PDF generation fails, we raise an error as we cannot create a submission
         without the required PDFs.
         """
@@ -198,12 +203,12 @@ class CreateApplicationSubmissionTask(Task):
             use_mocks=self.pdf_generation_config.pdf_generation_use_mocks,
             token=self.internal_token,
         )
-        
+
         if not pdf_response.success:
             raise Exception(
                 f"Failed to generate PDF for application form {application_form_id}: {pdf_response.error_message}"
             )
-        
+
         return pdf_response
 
     def process_application(self, application: Application) -> None:
