@@ -58,7 +58,7 @@ class VOpportunitySummaryMixin:
     # but they are not used downstream and can safely be typed as simple strings.
     opportunity_id: Mapped[int] = mapped_column(primary_key=True)
     owningagency: Mapped[str | None]
-    oppnumber:  Mapped[str | None]
+    oppnumber: Mapped[str | None]
     opptitle: Mapped[str | None]
     oppcategory: Mapped[str | None]
     oppcategory_desc: Mapped[str | None]
@@ -77,10 +77,10 @@ class VOpportunitySummaryMixin:
     active_packages_cnt: Mapped[str | None]
     inactive_form_pkg_cnt: Mapped[str | None]
     is_draft: Mapped[str]
-    fo_last_upd_dt: Mapped[str | None]
+    fo_last_upd_dt: Mapped[datetime.datetime | None]
     omb_review_status: Mapped[str | None]
     omb_review_status_user: Mapped[str | None]
-    omb_review_status_date: Mapped[str | None]
+    omb_review_status_date: Mapped[datetime.datetime | None]
     omb_review_status_userfullname: Mapped[str | None]
     revision_number: Mapped[str | None]
     publish_date: Mapped[str | None]
