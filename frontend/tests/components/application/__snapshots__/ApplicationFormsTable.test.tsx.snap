@@ -144,14 +144,14 @@ exports[`CompetitionFormsTable matches snapshot 1`] = `
           >
             <input
               class="usa-radio__input"
-              id="include-form-in-application-submission-radio-yes"
-              name="include-form-in-application-submission-radio-yes"
+              id="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-yes"
+              name="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-yes"
               type="radio"
               value="Yes"
             />
             <label
               class="usa-radio__label"
-              for="include-form-in-application-submission-radio-yes"
+              for="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-yes"
             >
               Yes
             </label>
@@ -162,14 +162,14 @@ exports[`CompetitionFormsTable matches snapshot 1`] = `
           >
             <input
               class="usa-radio__input"
-              id="include-form-in-application-submission-radio-no"
-              name="include-form-in-application-submission-radio-no"
+              id="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-no"
+              name="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-no"
               type="radio"
               value="No"
             />
             <label
               class="usa-radio__label"
-              for="include-form-in-application-submission-radio-no"
+              for="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-no"
             >
               No
             </label>
