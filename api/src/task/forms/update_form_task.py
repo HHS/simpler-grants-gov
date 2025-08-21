@@ -96,6 +96,8 @@ class UpdateFormTask(Task):
         url = self.get_url()
 
         if self.update_form_container.is_dry_run:
+            self.call_get_and_diff(url, headers, request)
+
             logger.info(f"DRY RUN - NOT SENDING REQUEST TO {url}")
             logger.info(
                 f"DRY RUN - WOULD HAVE UPDATED FORM {form.form_id} | {form.short_form_name}"
@@ -138,3 +140,36 @@ class UpdateFormTask(Task):
     def get_url(self) -> str:
         base_url = ENV_URL_MAP[self.update_form_container.environment]
         return base_url.format(self.update_form_container.form_id)
+
+
+    def call_get_and_diff(self, url: str, headers: dict, planned_put_request: dict) -> None:
+        resp = requests.get(url, headers=headers, timeout=5)
+
+        if resp.status_code == 404:
+            logger.info(f"Form {self.update_form_container.form_id} does not yet existing in {self.update_form_container.environment}")
+            return
+
+        if resp.status_code != 200:
+            logger.error("Failed to fetch existing form")
+            raise Exception("TODO")
+
+        existing_form_data = resp.json()["data"]
+
+        print(existing_form_data["form_instruction"])
+
+        changed_fields = []
+        for field, planned_value in planned_put_request.items():
+            if field == "form_instruction_id":
+                existing_value = existing_form_data["form_instruction"]["form_instruction_id"]
+            else:
+                existing_value = existing_form_data.get(field)
+            if planned_value != existing_value:
+                logger.warning(f"Value of {field} will change from {existing_value} to {planned_value}")
+                changed_fields.append(field)
+            else:
+                logger.info(f"Value of {field} will not change")
+
+        if changed_fields:
+            logger.warning(f"Running this will update the following fields on the form: {changed_fields}")
+        else:
+            logger.info(f"No fields would be changed in {self.update_form_container.environment}")
