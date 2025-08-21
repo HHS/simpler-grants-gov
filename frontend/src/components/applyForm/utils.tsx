@@ -46,7 +46,7 @@ export function buildFormTreeRecursive({
   let acc: JSX.Element[] = [];
   // json schema describes arrays with dots, our html uses --
   const formattedErrors = errors?.map((error) => {
-    error.field = error.field.replace("$.", "").replace(".", "--");
+    error.field = error.field.replace("$.", "").replace(/\./g, "--");
     return error;
   });
 
@@ -84,7 +84,7 @@ export function buildFormTreeRecursive({
         } else if (!parent && ("definition" in node || "schema" in node)) {
           console.log("$$$ this node", node);
           const requiredField = isFieldRequired(
-            node.definition,
+            (node.definition || node.schema.title || "") as string,
             requiredFieldPaths,
           );
           const field = buildField({
@@ -118,7 +118,7 @@ export function buildFormTreeRecursive({
           } else {
             console.log("$$$ this node", node);
             const requiredField = isFieldRequired(
-              node.definition,
+              (node.definition || node.schema.title || "") as string,
               requiredFieldPaths,
             );
             return buildField({
@@ -308,23 +308,26 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-// this is going to need to get much more complicated to figure out if
-// nested and conditionally required fields are required
-const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
-  return (formSchema.required ?? []).includes(fieldName);
-};
+// // this is going to need to get much more complicated to figure out if
+// // nested and conditionally required fields are required
+// const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
+//   return (formSchema.required ?? []).includes(fieldName);
+// };
 
 export const buildField = ({
   errors,
   formSchema,
   formData,
   uiFieldObject,
+  requiredField,
 }: {
   errors: FormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
   uiFieldObject: UiSchemaField;
+  requiredField: boolean;
 }) => {
+  console.log("*** it is required", requiredField, uiFieldObject.definition);
   const { definition, schema, type: fieldType } = uiFieldObject;
 
   let fieldSchema = {} as RJSFSchema;
@@ -354,6 +357,7 @@ export const buildField = ({
         {},
       );
     // multifield needs to retain field location for errors.
+    // this may not work with nested required fields
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -368,15 +372,13 @@ export const buildField = ({
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
     value = getByPointer(formData, path) as string | number | undefined;
-    rawErrors = formatFieldWarnings(
-      errors,
-      name,
+    const fieldType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
-          : "",
-    );
+          : "";
+    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -435,7 +437,7 @@ export const buildField = ({
     id: name,
     key: name,
     disabled,
-    required: isFieldRequired(name, formSchema),
+    required: requiredField,
     minLength: fieldSchema?.minLength,
     maxLength: fieldSchema?.maxLength,
     schema: fieldSchema,
@@ -445,10 +447,35 @@ export const buildField = ({
   });
 };
 
+const getNestedWarningsForField = (
+  fieldName: string,
+  warnings: FormValidationWarning[],
+): FormValidationWarning[] => {
+  // const subPaths = fieldName.split("--");
+  return warnings.filter(({ field, type }) => {
+    return type === "required" && fieldName.includes(field);
+  });
+};
+
+const getWarningsForField = (
+  fieldName: string,
+  isRequired: boolean,
+  warnings: FormValidationWarning[],
+): FormValidationWarning[] => {
+  const directWarnings = warnings?.filter(
+    (warning) => warning.field.indexOf(fieldName) !== -1,
+  );
+  const nestedRequiredWarnings = isRequired
+    ? getNestedWarningsForField(fieldName, warnings)
+    : [];
+  return [...directWarnings, ...nestedRequiredWarnings];
+};
+
 const formatFieldWarnings = (
   warnings: FormValidationWarning[] | null,
   name: string,
   type: string,
+  required: boolean,
 ): string[] => {
   if (!warnings || warnings.length < 1) {
     return [];
@@ -464,10 +491,7 @@ const formatFieldWarnings = (
     );
     return flatFormDataToArray(name, data) as unknown as [];
   }
-  const warningsforField = filter(
-    warnings,
-    (warning) => warning.field.indexOf(name) !== -1,
-  );
+  const warningsforField = getWarningsForField(name, required, warnings);
   return warningsforField.map((warning) => {
     return warning.message;
   });
@@ -584,7 +608,7 @@ export const shapeFormData = <T extends object>(
 };
 
 const removePropertyPaths = (path: string): string => {
-  return path.replace(/properties\//g, "");
+  return path.replace(/properties\//g, "").replace(/^\//, "");
 };
 
 const getKeyParentPath = (key: string, parentPath?: string) => {
