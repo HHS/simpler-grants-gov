@@ -164,7 +164,7 @@ class CreateApplicationSubmissionTask(Task):
             return "mock-token"  # Always provide a token for testing consistency
 
         # Create token in its own transaction to avoid conflicts
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime_util.utcnow() + timedelta(
             minutes=self.pdf_generation_config.short_lived_token_expiration_minutes
         )
 
