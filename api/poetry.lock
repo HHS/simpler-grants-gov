@@ -488,6 +488,21 @@ files = [
 markers = {main = "platform_system == \"Windows\"", dev = "platform_system == \"Windows\" or sys_platform == \"win32\""}
 
 [[package]]
+name = "common-grants-sdk"
+version = "0.2.2"
+description = "Python SDK for the CommonGrants protocol"
+optional = false
+python-versions = "<4.0,>=3.11"
+groups = ["main"]
+files = [
+    {file = "common_grants_sdk-0.2.2-py3-none-any.whl", hash = "sha256:6b5a4be449754f9f3d4a360e241dd81d326f45acd3aa7e74f66a7333f09f329a"},
+    {file = "common_grants_sdk-0.2.2.tar.gz", hash = "sha256:cfc3472d9ccf9316f2936850ff93251141cbbb26e4d56321359d858605344212"},
+]
+
+[package.dependencies]
+pydantic = ">=2.11.0,<3.0.0"
+
+[[package]]
 name = "coverage"
 version = "7.10.6"
 description = "Code coverage measurement for Python"
