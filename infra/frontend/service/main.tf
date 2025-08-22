@@ -138,8 +138,7 @@ module "service" {
   hosted_zone_id = null
   # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
-
-  hostname = module.app_config.hostname
+  hostname        = module.app_config.hostname
 
   cpu                      = local.service_config.instance_cpu
   memory                   = local.service_config.instance_memory
