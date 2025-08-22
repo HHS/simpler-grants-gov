@@ -166,7 +166,7 @@ FORM_JSON_SCHEMA = {
         },
         "state_receive_date": {
             # A user will never fill this in, it's just on the form for agencies to use
-            "type": "string",
+            "type": "null",
             "title": "Date Received By State",
             "description": "Enter the date received by the state, if applicable.",
             "format": "date",
@@ -174,7 +174,7 @@ FORM_JSON_SCHEMA = {
         },
         "state_application_id": {
             # A user will never fill this in, it's just on the form for agencies to use
-            "type": "string",
+            "type": "null",
             "title": "State Application Identifier",
             "description": "Enter the identifier assigned by the state, if applicable.",
             "minLength": 0,
@@ -183,7 +183,7 @@ FORM_JSON_SCHEMA = {
         },
         "organization_name": {
             "type": "string",
-            "title": "Organization Name",
+            "title": "Legal Name",
             "description": "Enter the legal name of the applicant that will undertake the assistance activity.",
             "minLength": 1,
             "maxLength": 60,
@@ -426,11 +426,11 @@ FORM_JSON_SCHEMA = {
         "total_estimated_funding": {
             "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
             "title": "Total Estimated Funding",
-            "description": "Total dollar amount. This is a calculated field.",
+            "description": "Total dollar amount.",
         },
         "state_review": {
             "type": "string",
-            "title": "Application Subject to Review",
+            "title": "Is Application Subject to Review By State Under Executive Order 12372 Process?",
             "description": "One selection is required.",
             "enum": [
                 "a. This application was made available to the state under the Executive Order 12372 Process for review on",
@@ -440,8 +440,8 @@ FORM_JSON_SCHEMA = {
         },
         "state_review_available_date": {
             "type": "string",
-            "title": "state Review Date",
-            "description": "Enter the date in the format MM/DD/YYYY.",
+            "title": "State Review Date",
+            "description": "If 'a' is selected, enter the date the application was submitted to the State.",
             "format": "date",
         },
         "delinquent_federal_debt": {
@@ -481,14 +481,14 @@ FORM_JSON_SCHEMA = {
             "description": "Enter a valid email Address.",
         },
         "aor_signature": {
-            "type": "string",
+            "type": "null",
             "title": "AOR Signature",
             "description": "Completed by Grants.gov upon submission.",
             "minLength": 1,
             "maxLength": 144,
         },
         "date_signed": {
-            "type": "string",
+            "type": "null",
             "format": "date",
             "title": "Date Signed",
             "description": "Completed by Grants.gov upon submission.",
@@ -688,7 +688,7 @@ FORM_UI_SCHEMA = [
         "label": "Date Received & Applicant ID",
         "children": [
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/date_received",
             },
             {
@@ -975,6 +975,7 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "definition": "/properties/delinquent_federal_debt",
+                "title": "If 'Yes,' provide explanation in attachment."
             },
             {
                 "type": "field",
