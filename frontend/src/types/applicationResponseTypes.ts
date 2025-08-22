@@ -1,7 +1,7 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
-import { Attachment, BasicAttachment } from "./attachmentTypes";
+import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 import { FormDetail } from "./formResponseTypes";
 
@@ -35,7 +35,7 @@ export interface FormValidationErrors {
 }
 
 export interface ApplicationFormDetail {
-  application_attachments: BasicAttachment[];
+  application_attachments: Attachment[];
   application_form_id: string;
   application_form_status: "not_started" | "in_progress" | "complete";
   application_id: string;

@@ -4,7 +4,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
-import { BasicAttachment } from "src/types/attachmentTypes";
+import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { useActionState, useMemo } from "react";
@@ -32,7 +32,7 @@ const ApplyForm = ({
   savedFormData: object;
   uiSchema: UiSchema;
   validationWarnings: FormValidationWarning[] | null;
-  attachments: BasicAttachment[];
+  attachments: Attachment[];
 }) => {
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");

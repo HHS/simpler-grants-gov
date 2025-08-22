@@ -17,6 +17,7 @@ export interface BasicAttachment {
   cancelToken?: AbortController;
 }
 
+// note that in most cases the download_path may not actually available but we're typing things as Attachments for now and will deal with that later
 export interface Attachment extends BasicAttachment {
   download_path: string;
 }

@@ -1,14 +1,17 @@
 "use client";
 
-import { createContext, useContext, PropsWithChildren } from "react";
-import type { BasicAttachment } from "src/types/attachmentTypes";
+import type { Attachment } from "src/types/attachmentTypes";
 
-const AttachmentsContext = createContext<BasicAttachment[] | undefined>(undefined);
+import { createContext, PropsWithChildren, useContext } from "react";
+
+const AttachmentsContext = createContext<Attachment[] | undefined>(undefined);
 
 export const useApplicationAttachments = () => {
   const ctx = useContext(AttachmentsContext);
   if (ctx === undefined) {
-    throw new Error("useApplicationAttachments must be used within <AttachmentsProvider>");
+    throw new Error(
+      "useApplicationAttachments must be used within <AttachmentsProvider>",
+    );
   }
   return ctx;
 };
@@ -16,7 +19,7 @@ export const useApplicationAttachments = () => {
 export function AttachmentsProvider({
   value,
   children,
-}: PropsWithChildren<{ value: BasicAttachment[] }>) {
+}: PropsWithChildren<{ value: Attachment[] }>) {
   return (
     <AttachmentsContext.Provider value={value}>
       {children}
