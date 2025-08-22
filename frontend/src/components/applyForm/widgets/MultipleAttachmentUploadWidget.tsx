@@ -1,5 +1,6 @@
 "use client";
 
+import { useApplicationAttachments } from "src/hooks/useApplicationAttachments";
 import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
@@ -31,8 +32,9 @@ const MultipleAttachmentUploadWidget = ({
   rawErrors = [],
   schema,
   onChange,
-  attachments,
 }: UswdsWidgetProps) => {
+  const attachments = useApplicationAttachments();
+  console.log("~~~ reading attachments", attachments);
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();

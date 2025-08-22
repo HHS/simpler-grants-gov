@@ -3,6 +3,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
+import { AttachmentsContext } from "src/hooks/useApplicationAttachments";
 import { BasicAttachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
@@ -83,39 +84,38 @@ const ApplyForm = ({
     );
   }
 
+  console.log("~~~ setting attachments", attachments);
   return (
-    <>
-      <form
-        className="flex-1 margin-top-2 simpler-apply-form"
-        action={formAction}
-        // turns off html5 validation so all error displays are consistent
-        noValidate
-      >
-        <div className="display-flex flex-justify">
-          <div>{required}</div>
-          <Button
-            data-testid="apply-form-save"
-            type="submit"
-            name="apply-form-button"
-            className="margin-top-0"
-            value="save"
-          >
-            {pending ? "Saving..." : "Save"}
-          </Button>
-        </div>
-        <div className="usa-in-page-nav-container">
-          <FormGroup className="order-2 width-full">
-            <ApplyFormMessage
-              saved={saved}
-              error={error}
-              validationWarnings={validationWarnings}
-            />
-            {fields}
-          </FormGroup>
-          <ApplyFormNav title={t("navTitle")} fields={navFields} />
-        </div>
-      </form>
-    </>
+    <form
+      className="flex-1 margin-top-2 simpler-apply-form"
+      action={formAction}
+      // turns off html5 validation so all error displays are consistent
+      noValidate
+    >
+      <div className="display-flex flex-justify">
+        <div>{required}</div>
+        <Button
+          data-testid="apply-form-save"
+          type="submit"
+          name="apply-form-button"
+          className="margin-top-0"
+          value="save"
+        >
+          {pending ? "Saving..." : "Save"}
+        </Button>
+      </div>
+      <div className="usa-in-page-nav-container">
+        <FormGroup className="order-2 width-full">
+          <ApplyFormMessage
+            saved={saved}
+            error={error}
+            validationWarnings={validationWarnings}
+          />
+          <AttachmentsContext value={attachments}>{fields}</AttachmentsContext>
+        </FormGroup>
+        <ApplyFormNav title={t("navTitle")} fields={navFields} />
+      </div>
+    </form>
   );
 };
 

@@ -108,7 +108,6 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
-  attachments?: Attachment[];
   id: string;
   value?: string | Array<T> | unknown;
   type?: string;

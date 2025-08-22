@@ -35,7 +35,7 @@ export interface FormValidationErrors {
 }
 
 export interface ApplicationFormDetail {
-  application_attachments: BasicAttachment[]; // need to model this better
+  application_attachments: BasicAttachment[];
   application_form_id: string;
   application_form_status: "not_started" | "in_progress" | "complete";
   application_id: string;
