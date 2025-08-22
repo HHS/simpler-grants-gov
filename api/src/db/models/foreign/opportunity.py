@@ -29,5 +29,5 @@ class TopportunityCfda(foreignbase.ForeignBase, opportunity_mixin.TopportunityCf
     )
 
 
-class VopportunitySummary(foreignbase.ForeignBase, opportunity_mixin.VopportunitySummaryMixin):
-    __tablename__ = "vopportunity_summary"
+class VOpportunitySummary(foreignbase.ForeignBase, opportunity_mixin.VOpportunitySummaryMixin):
+    __tablename__ = "v_opportunity_summary"

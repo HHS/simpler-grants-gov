@@ -48,9 +48,9 @@ def _construct_active_inner_query(
         )
         .where(  # Exclude opportunities in review
             ~exists(
-                select(ExcludedOpportunityReview.opportunity_id).where(
+                select(ExcludedOpportunityReview.legacy_opportunity_id).where(
                     and_(
-                        ExcludedOpportunityReview.opportunity_id
+                        ExcludedOpportunityReview.legacy_opportunity_id
                         == Opportunity.legacy_opportunity_id,
                         CurrentOpportunitySummary.opportunity_status.in_(opportunity_status),
                     )

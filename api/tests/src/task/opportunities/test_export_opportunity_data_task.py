@@ -49,7 +49,7 @@ class TestExportOpportunityDataTask(BaseTestClass):
         OpportunityFactory.create_batch(size=3, is_draft=True)
         OpportunityFactory.create_batch(size=4, no_current_summary=True)
         opp = OpportunityFactory.create(is_posted_summary=True)
-        ExcludedOpportunityReviewFactory.create(opportunity_id=opp.legacy_opportunity_id)
+        ExcludedOpportunityReviewFactory.create(legacy_opportunity_id=opp.legacy_opportunity_id)
 
         export_opportunity_data_task.run()
 

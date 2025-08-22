@@ -47,9 +47,11 @@ export function buildFormTreeRecursive({
   let acc: JSX.Element[] = [];
   // json schema describes arrays with dots, our html uses --
   const formattedErrors = errors?.map((error) => {
-    error.field = error.field.replace("$.", "").replace(".", "--");
+    error.field = error.field.replace("$.", "").replace(/\./g, "--");
     return error;
   });
+
+  const requiredFieldPaths = getRequiredProperties(schema);
 
   const buildFormTree = (
     uiSchema:
@@ -81,11 +83,16 @@ export function buildFormTreeRecursive({
             description: node.description,
           });
         } else if (!parent && ("definition" in node || "schema" in node)) {
+          const requiredField = isFieldRequired(
+            (node.definition || node.schema.title || "") as string,
+            requiredFieldPaths,
+          );
           const field = buildField({
             uiFieldObject: node,
             formSchema: schema,
             errors: formattedErrors ?? null,
             formData,
+            requiredField,
           });
           if (field) {
             acc = [
@@ -109,11 +116,16 @@ export function buildFormTreeRecursive({
             });
             return null;
           } else {
+            const requiredField = isFieldRequired(
+              (node.definition || node.schema.title || "") as string,
+              requiredFieldPaths,
+            );
             return buildField({
               uiFieldObject: node,
               formSchema: schema,
               errors: formattedErrors ?? null,
               formData,
+              requiredField,
             });
           }
         });
@@ -318,22 +330,18 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-// this is going to need to get much more complicated to figure out if
-// nested and conditionally required fields are required
-const isFieldRequired = (fieldName: string, formSchema: RJSFSchema) => {
-  return (formSchema.required ?? []).includes(fieldName);
-};
-
 export const buildField = ({
   errors,
   formSchema,
   formData,
   uiFieldObject,
+  requiredField,
 }: {
   errors: FormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
   uiFieldObject: UiSchemaField;
+  requiredField: boolean;
 }) => {
   const { definition, schema, type: fieldType } = uiFieldObject;
 
@@ -364,6 +372,7 @@ export const buildField = ({
         {},
       );
     // multifield needs to retain field location for errors.
+    // this may not work with nested required fields
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -378,15 +387,13 @@ export const buildField = ({
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
     value = getByPointer(formData, path) as string | number | undefined;
-    rawErrors = formatFieldWarnings(
-      errors,
-      name,
+    const fieldType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
-          : "",
-    );
+          : "";
+    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -452,7 +459,7 @@ export const buildField = ({
     id: name,
     key: name,
     disabled,
-    required: isFieldRequired(name, formSchema),
+    required: requiredField,
     minLength: fieldSchema?.minLength,
     maxLength: fieldSchema?.maxLength,
     schema: fieldSchema,
@@ -462,29 +469,49 @@ export const buildField = ({
   });
 };
 
-const formatFieldWarnings = (
+const getNestedWarningsForField = (
+  fieldName: string,
+  warnings: FormValidationWarning[],
+): FormValidationWarning[] => {
+  return warnings.filter(({ field, type }) => {
+    return type === "required" && fieldName.includes(field);
+  });
+};
+
+const getWarningsForField = (
+  fieldName: string,
+  isRequired: boolean,
+  warnings: FormValidationWarning[],
+): FormValidationWarning[] => {
+  const directWarnings = warnings?.filter(
+    (warning) => warning.field.indexOf(fieldName) !== -1,
+  );
+  const nestedRequiredWarnings = isRequired
+    ? getNestedWarningsForField(fieldName, warnings)
+    : [];
+  return [...directWarnings, ...nestedRequiredWarnings];
+};
+
+export const formatFieldWarnings = (
   warnings: FormValidationWarning[] | null,
   name: string,
-  type: string,
+  fieldType: string,
+  required: boolean,
 ): string[] => {
   if (!warnings || warnings.length < 1) {
     return [];
   }
-  if (type === "array") {
-    const data = warnings.reduce(
+  if (fieldType === "array") {
+    const warningMap = warnings.reduce(
       (acc, item) => {
-        const field = item.field.replace(/^\$\./, "");
-        acc[field] = item.message;
+        acc[item.field] = item.message;
         return acc;
       },
       {} as Record<string, unknown>,
     );
-    return flatFormDataToArray(name, data) as unknown as [];
+    return flatFormDataToArray(name, warningMap) as unknown as [];
   }
-  const warningsforField = filter(
-    warnings,
-    (warning) => warning.field.indexOf(name) !== -1,
-  );
+  const warningsforField = getWarningsForField(name, required, warnings);
   return warningsforField.map((warning) => {
     return warning.message;
   });
@@ -600,17 +627,72 @@ export const shapeFormData = <T extends object>(
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
+const removePropertyPaths = (path: string): string => {
+  return path.replace(/properties\//g, "").replace(/^\//, "");
+};
+
+const getKeyParentPath = (key: string, parentPath?: string) => {
+  const keyParent = parentPath ? `${parentPath}/${key}` : key;
+  return removePropertyPaths(keyParent);
+};
+
+/*
+  gets an array of all paths to required fields in the form schema, not
+  including any intermediate paths that do not represent actual fields
+  assumes a dereferenced but not condensed schema (property paths will still be in place)
+
+  does not do conditionals. For that we'd have to first:
+  - gather all conditional rules
+  - check all conditional rules against form state / values
+  - re-annotate the form schema with new "required" designations
+  At that point we're basically running validation
+*/
+export const getRequiredProperties = (
+  formSchema: RJSFSchema,
+  parentPath?: string,
+): string[] => {
+  return Object.entries(formSchema).reduce((requiredPaths, [key, value]) => {
+    let acc = requiredPaths;
+    if (key === "required") {
+      (value as []).forEach((requiredPropertyKey: string) => {
+        if (!formSchema?.properties) {
+          console.error("Error finding required properties, malformed schema?");
+          return;
+        }
+        const requiredProperty = formSchema.properties[requiredPropertyKey];
+        if ((requiredProperty as RJSFSchema).type === "object") {
+          const nestedRequiredProperties = getRequiredProperties(
+            requiredProperty as RJSFSchema,
+            getKeyParentPath(requiredPropertyKey, parentPath),
+          );
+          acc = acc.concat(nestedRequiredProperties);
+          return;
+        }
+        acc.push(getKeyParentPath(requiredPropertyKey, parentPath));
+      });
+    }
+    return acc;
+  }, [] as string[]);
+};
+
+const isFieldRequired = (
+  definition: string,
+  requiredFields: string[],
+): boolean => {
+  const path = removePropertyPaths(definition);
+  return requiredFields.indexOf(path) > -1;
+};
+
 // arrays from the html look like field_[row]_item
 const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   return Object.entries(data).reduce(
-    (values: Array<Record<string, unknown>>, CV) => {
-      const value = CV[1];
-      const fieldSplit = CV[0].split(/\[\d+\]\./);
+    (values: Array<Record<string, unknown>>, [key, value]) => {
+      const fieldSplit = key.split(/\[\d+\]\./);
       const fieldName = fieldSplit[0];
       const itemName = fieldSplit[1];
 
       if (fieldName === field && value) {
-        const match = CV[0].match(/[0-9]+/);
+        const match = key.match(/[0-9]+/);
         const arrayNumber = match ? Number(match[0]) : -1;
         if (!values[arrayNumber]) {
           values[arrayNumber] = {};

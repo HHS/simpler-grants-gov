@@ -92,8 +92,8 @@ class TestPdfGenerationService:
         call_args = mock_create_jwt.call_args
         expires_at = call_args[1]["expires_at"]
         expected_expires_at = datetime(
-            2024, 1, 1, 12, 15, 0, tzinfo=expires_at.tzinfo
-        )  # 15 minutes later with same timezone
+            2024, 1, 1, 13, 0, 0, tzinfo=expires_at.tzinfo
+        )  # 60 minutes later with same timezone
         assert expires_at == expected_expires_at
 
         # Note: commit is no longer called within the token generation function
