@@ -48,8 +48,9 @@ async function FormPage({ params }: formPageProps) {
   }
 
   const {
+    applicationName,
+    applicationAttachments,
     applicationResponse,
-    applicationFormData,
     formId,
     formName,
     formSchema,
@@ -65,12 +66,12 @@ async function FormPage({ params }: formPageProps) {
           breadcrumbList={[
             { title: "home", path: "/" },
             {
-              title: applicationFormData.application_name,
-              path: `/workspace/applications/application/${applicationFormData.application_id}`,
+              title: applicationName,
+              path: `/workspace/applications/application/${applicationId}`,
             },
             {
-              title: "Form",
-              path: `/workspace/applications/application/${applicationFormData.application_id}/form/${applicationId}`,
+              title: formName,
+              path: `/workspace/applications/application/${applicationId}/form/${formId}`,
             },
           ]}
         />
@@ -82,6 +83,7 @@ async function FormPage({ params }: formPageProps) {
           formSchema={formSchema}
           uiSchema={formUiSchema}
           formId={formId}
+          attachments={applicationAttachments}
         />
       </GridContainer>
     </>
