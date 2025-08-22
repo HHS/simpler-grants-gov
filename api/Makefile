@@ -287,10 +287,10 @@ openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
 openapi-spec-common-grants:
-	$(PY_RUN_CMD) python src/common_grants/scripts/generate_openapi.py > ./openapi-cg.generated.yaml
+	$(PY_RUN_CMD) python src/common_grants/scripts/generate_openapi.py > ./openapi-cg.generated.yml
 
 check-spec: openapi-spec-common-grants
-	cg check spec ./openapi-cg.generated.yaml
+	cg check spec ./openapi-cg.generated.yml
 
 
 copy-oracle-data:
