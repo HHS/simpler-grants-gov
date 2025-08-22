@@ -21,7 +21,7 @@ import { Pill } from "src/components/Pill";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
-function toArray(selectedValue: unknown): string[] {
+function toStringArray(selectedValue: unknown): string[] {
   if (Array.isArray(selectedValue)) return selectedValue.map(String);
   if (selectedValue == null || selectedValue === "") return [];
   return [String(selectedValue)];
@@ -52,7 +52,7 @@ export default function MultiSelect<
     enumDisabled?: Array<string | number>;
   };
   // Future:
-  // allows us to inforce the minimum number
+  // allows us to enforce the minimum number
   // we can later pass it as prop if design likes the idea
   // this will be used for some dropdowns that have the possibility of having one option
   // example would be starting an application and it is defaulted to "individual" and no other options are available
@@ -60,13 +60,15 @@ export default function MultiSelect<
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const allOptions: ComboBoxOption[] = useMemo(() => opts ?? [], [opts]);
 
-  const [selected, setSelected] = React.useState<string[]>(toArray(value));
+  const [selected, setSelected] = React.useState<string[]>(
+    toStringArray(value),
+  );
 
   const comboRef = useRef<ComboBoxRef>(null);
 
   const maxSelections = typeof maxItems === "number" ? maxItems : 3;
   const minSelectionsEff = typeof minItems === "number" ? minItems : 0;
-  const atCap = selected.length >= maxSelections;
+  const atMaxSelection = selected.length >= maxSelections;
 
   const isOptDisabled = useCallback(
     (opt: ComboBoxOption) =>
@@ -78,7 +80,8 @@ export default function MultiSelect<
   const availableOptions = useMemo(
     () =>
       allOptions.filter(
-        (o) => !selected.includes(String(o.value)) && !isOptDisabled(o),
+        (option) =>
+          !selected.includes(String(option.value)) && !isOptDisabled(option),
       ),
     [allOptions, selected, isOptDisabled],
   );
@@ -97,37 +100,36 @@ export default function MultiSelect<
     );
   };
 
-  const addByLabelOrValue = (raw: string): boolean => {
-    const txt = raw.trim();
-    if (!txt || atCap) return false;
+  const addByLabelOrValue = (raw: string): void => {
+    const text = raw.trim();
+    if (!text || atMaxSelection) return;
 
     const match =
       allOptions.find(
-        (o) => String(o.label).toLowerCase() === txt.toLowerCase(),
+        (option) => String(option.label).toLowerCase() === text.toLowerCase(),
       ) ??
       allOptions.find(
-        (o) => String(o.value).toLowerCase() === txt.toLowerCase(),
+        (option) => String(option.value).toLowerCase() === text.toLowerCase(),
       );
 
-    if (!match) return false;
+    if (!match) return;
 
-    const v = String(match.value);
-    if (selected.includes(v)) return false;
+    const selectValue = String(match.value);
+    if (selected.includes(selectValue)) return;
 
-    const next = [...selected, v];
+    const next = [...selected, selectValue];
     syncUpstream(next);
     comboRef.current?.clearSelection();
-    return true;
   };
 
-  const removeValue = (v: string) => {
-    const next = selected.filter((s) => s !== v);
+  const removeValue = (value: string) => {
+    const next = selected.filter((selectedValue) => selectedValue !== value);
     if (enforceMinInUI && next.length < minSelectionsEff) return;
     syncUpstream(next);
   };
 
-  const getLabelForValue = (v: string) =>
-    allOptions.find((o) => String(o.value) === v)?.label ?? v;
+  const getLabelForValue = (value: string) =>
+    allOptions.find((option) => String(option.value) === value)?.label ?? value;
 
   return (
     <FormGroup error={error} key={`form-group__uswds-combomulti--${id}`}>
@@ -162,7 +164,7 @@ export default function MultiSelect<
         id={`${id}__combobox`}
         name={`${id}__combobox_input`}
         options={availableOptions}
-        disabled={disabled || readonly || atCap}
+        disabled={disabled || readonly || atMaxSelection}
         onChange={(val?: string) => {
           if (!val) return;
           addByLabelOrValue(val);
@@ -170,7 +172,7 @@ export default function MultiSelect<
         inputProps={{
           autoFocus: autofocus,
           "aria-describedby": describedBy,
-          placeholder: atCap
+          placeholder: atMaxSelection
             ? `Maximum ${maxSelections} selected`
             : "Type to search and press Enter to add",
           onKeyDown: (e) => {
