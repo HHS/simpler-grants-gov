@@ -309,8 +309,8 @@ class LoadOpportunitiesToIndex(Task):
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                     ~exists(
-                        select(ExcludedOpportunityReview.opportunity_id).where(
-                            ExcludedOpportunityReview.opportunity_id
+                        select(ExcludedOpportunityReview.legacy_opportunity_id).where(
+                            ExcludedOpportunityReview.legacy_opportunity_id
                             == Opportunity.legacy_opportunity_id
                         )
                     ),

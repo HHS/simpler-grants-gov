@@ -132,7 +132,7 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         # Setup data
         posted_agency = AgencyFactory.create(agency_name="ABC")
         opp = OpportunityFactory.create(agency_code=posted_agency.agency_code)  # POSTED
-        ExcludedOpportunityReviewFactory.create(opportunity_id=opp.legacy_opportunity_id)
+        ExcludedOpportunityReviewFactory.create(legacy_opportunity_id=opp.legacy_opportunity_id)
 
         load_agencies_to_index.index_name = (
             load_agencies_to_index.index_name + "-review-status-data"
@@ -157,7 +157,9 @@ class TestLoadAgenciesToIndex(BaseTestClass):
         opp_posted = OpportunityFactory.create(agency_code=agency.agency_code)  # POSTED
         OpportunityFactory.create(agency_code=agency.agency_code, is_closed_summary=True)  # CLOSED
 
-        ExcludedOpportunityReviewFactory.create(opportunity_id=opp_posted.legacy_opportunity_id)
+        ExcludedOpportunityReviewFactory.create(
+            legacy_opportunity_id=opp_posted.legacy_opportunity_id
+        )
 
         load_agencies_to_index.index_name = (
             load_agencies_to_index.index_name + "-review-status-multi-data"
