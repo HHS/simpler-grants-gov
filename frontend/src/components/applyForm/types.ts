@@ -7,7 +7,6 @@ import {
   UIOptionsType,
 } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
-import { Attachment } from "src/types/attachmentTypes";
 
 import { HTMLAttributes } from "react";
 
@@ -108,7 +107,6 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
-  attachments?: Attachment[];
   id: string;
   value?: string | Array<T> | unknown;
   type?: string;

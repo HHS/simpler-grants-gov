@@ -6,9 +6,8 @@ export type AttachmentUploadResponse = {
   application_attachment_id?: string;
 };
 
-export interface Attachment {
+export interface BasicAttachment {
   application_attachment_id: string;
-  download_path: string;
   created_at: string;
   file_name: string;
   file_size_bytes: number;
@@ -17,6 +16,12 @@ export interface Attachment {
   status?: UploadStatus;
   cancelToken?: AbortController;
 }
+
+// note that in most cases the download_path may not actually available but we're typing things as Attachments for now and will deal with that later
+export interface Attachment extends BasicAttachment {
+  download_path: string;
+}
+
 export interface AttachmentCardItem extends Attachment {
   id: string;
   file: File;
