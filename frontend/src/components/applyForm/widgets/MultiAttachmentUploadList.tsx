@@ -1,5 +1,4 @@
 import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
-import { Attachment } from "src/types/attachmentTypes";
 
 import { Icon } from "@trussworks/react-uswds";
 
@@ -8,7 +7,6 @@ import { UploadedFile } from "src/components/applyForm/types";
 interface Props {
   handleRemove: (index: number) => void;
   uploadedFiles: UploadedFile[];
-  attachments?: Attachment[];
 }
 
 export const MultipleAttachmentUploadList = ({
