@@ -1,7 +1,6 @@
 import logging
 
 from apiflask import HTTPTokenAuth
-from flask import current_app
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -48,7 +47,7 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         add_extra_data_to_current_request_logs(
             {
                 "auth.user_id": api_key.user_id,
-                "auth.api_key_id": strapi_key.api_key_id,
+                "auth.api_key_id": str(api_key.api_key_id),
             }
         )
 
