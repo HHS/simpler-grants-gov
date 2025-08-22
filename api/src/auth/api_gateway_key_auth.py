@@ -40,8 +40,8 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         # Update last_used timestamp
         api_key.last_used = datetime_util.utcnow()
         db_session.add(api_key)
-        # Note: We don't commit here as the transaction will be managed
-        # by the calling context (e.g., @flask_db.with_db_session)
+        db_session.commit()
+
 
         add_extra_data_to_current_request_logs(
             {

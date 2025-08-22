@@ -67,7 +67,9 @@ def test_validate_api_key_in_db_key_inactive(enable_factory_create, db_session):
 def test_api_gateway_key_auth_happy_path(mini_app, enable_factory_create, db_session):
     """Test successful API Gateway key authentication"""
     user = UserFactory.create()
-    UserApiKeyFactory.create(user=user, key_id="valid-gateway-key", is_active=True, last_used=None)
+    api_key = UserApiKeyFactory.create(
+        user=user, key_id="valid-gateway-key", is_active=True, last_used=None
+    )
     db_session.commit()
 
     resp = mini_app.test_client().get(
@@ -77,8 +79,8 @@ def test_api_gateway_key_auth_happy_path(mini_app, enable_factory_create, db_ses
     assert resp.status_code == 200
     assert resp.get_json()["message"] == "ok"
 
-    # Note: last_used timestamp is updated during authentication but not committed
-    # in the test environment due to transaction management
+    db_session.refresh(api_key)
+    assert api_key.last_used is not None
 
 
 def test_api_gateway_key_auth_invalid_key(mini_app, enable_factory_create, db_session):
@@ -121,8 +123,8 @@ def test_api_gateway_key_auth_empty_key_header(mini_app, enable_factory_create, 
 def test_api_gateway_key_auth_multiple_active_keys(mini_app, enable_factory_create, db_session):
     """Test that different API keys for the same user work independently"""
     user = UserFactory.create()
-    UserApiKeyFactory.create(user=user, key_id="user-key-1", is_active=True)
-    UserApiKeyFactory.create(user=user, key_id="user-key-2", is_active=True)
+    api_key1 = UserApiKeyFactory.create(user=user, key_id="user-key-1", is_active=True)
+    api_key2 = UserApiKeyFactory.create(user=user, key_id="user-key-2", is_active=True)
     db_session.commit()
 
     resp1 = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-API-Key": "user-key-1"})
@@ -131,5 +133,8 @@ def test_api_gateway_key_auth_multiple_active_keys(mini_app, enable_factory_crea
     resp2 = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-API-Key": "user-key-2"})
     assert resp2.status_code == 200
 
-    # Note: last_used timestamps are updated during authentication but not committed
-    # in the test environment due to transaction management
+    # Verify both keys had their last_used updated
+    db_session.refresh(api_key1)
+    db_session.refresh(api_key2)
+    assert api_key1.last_used is not None
+    assert api_key2.last_used is not None
