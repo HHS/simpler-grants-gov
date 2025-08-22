@@ -34,7 +34,7 @@ const MultipleAttachmentUploadWidget = ({
   onChange,
 }: UswdsWidgetProps) => {
   const attachments = useApplicationAttachments();
-  console.log("~~~ reading attachments", attachments);
+
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();

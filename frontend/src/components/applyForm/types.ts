@@ -7,7 +7,6 @@ import {
   UIOptionsType,
 } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
-import { Attachment } from "src/types/attachmentTypes";
 
 import { HTMLAttributes } from "react";
 

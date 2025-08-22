@@ -3,18 +3,19 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
+import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import { BasicAttachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { JSX, useActionState, useMemo } from "react";
+import { useActionState, useMemo } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
+import { FormFields } from "./FormFields";
 import { FormValidationWarning, UiSchema } from "./types";
-import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
-import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
+import { getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
   applicationId,
@@ -67,24 +68,6 @@ const ApplyForm = ({
     );
   }
 
-  let fields: JSX.Element[] = [];
-  try {
-    fields = buildFormTreeRecursive({
-      errors: saved ? validationWarnings : null,
-      formData: formObject,
-      schema: formSchema,
-      uiSchema,
-    });
-  } catch (e) {
-    console.error(e);
-    return (
-      <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
-        Error rendering form
-      </Alert>
-    );
-  }
-
-  console.log("~~~ setting attachments", attachments);
   return (
     <form
       className="flex-1 margin-top-2 simpler-apply-form"
@@ -111,9 +94,14 @@ const ApplyForm = ({
             error={error}
             validationWarnings={validationWarnings}
           />
-            <AttachmentsProvider value={attachments}>
-    {fields}
-  </AttachmentsProvider>
+          <AttachmentsProvider value={attachments}>
+            <FormFields
+              errors={saved ? validationWarnings : null}
+              formData={formObject}
+              schema={formSchema}
+              uiSchema={uiSchema}
+            />
+          </AttachmentsProvider>
         </FormGroup>
         <ApplyFormNav title={t("navTitle")} fields={navFields} />
       </div>
