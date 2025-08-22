@@ -19,6 +19,7 @@ The CommonGrants Protocol provides standardized access to grant opportunity data
 - **Transformation**: `src/services/common_grants/transformation.py` - Data mapping
 - **Dependency**: `common-grants-sdk = "^0.2.2"` - Protocol schemas and validation
 - **OpenAPI Generation**: `src/common_grants/scripts/generate_openapi.py` - Schema generation
+- **Linter**: `src/common_grants/scripts/lint_openapi.py` - Validates Flask API vs FastAPI mirror
 
 ### Data Flow
 
@@ -126,13 +127,17 @@ Content-Type: application/json
 - Pagination support
 - Returns `OpportunitiesSearchResponse`
 
-## OpenAPI Specification Generation
+## OpenAPI Specification Generation & Validation
 
-The integration includes tools for generating OpenAPI specifications for the CommonGrants Protocol endpoints.
+The integration includes tools for generating and validating OpenAPI specifications for the CommonGrants Protocol endpoints.
 
 ### Generation Script
 
-A dedicated script exists at `src/common_grants/scripts/generate_openapi.py` that creates a FastAPI app mirroring the CommonGrants routes for proper OpenAPI schema generation.
+The script `src/common_grants/scripts/generate_openapi.py` creates a FastAPI app mirroring the CommonGrants routes and uses it for OpenAPI schema generation.
+
+### Consistency Validation
+
+To address potential inconsistencies between the actual Flask API and the generated OpenAPI spec, a linter (`src/common_grants/scripts/lint_openapi.py`) compares the two specifications and reports any differences.
 
 ### Makefile Targets
 
@@ -140,7 +145,7 @@ A dedicated script exists at `src/common_grants/scripts/generate_openapi.py` tha
 # Generate OpenAPI spec for CommonGrants endpoints only
 make openapi-spec-common-grants
 
-# Validate the generated spec using the CommonGrants CLI
+# Validate the OpenAPI spec
 make check-spec
 ```
 
@@ -160,6 +165,9 @@ make openapi-spec-common-grants
 
 # The spec will be written to ./openapi-cg.generated.yaml
 # You can then use this for documentation, client generation, or validation
+
+# Validate both protocol compliance and consistency
+make check-spec
 ```
 
 ## Implementation Details
@@ -235,4 +243,4 @@ make lint-mypy
 
 ## Status
 
-The integration is fully implemented and enabled by default. All endpoints follow the CommonGrants Protocol specification and provide standardized access to opportunity data. OpenAPI specification generation is available for documentation and client generation purposes.
+The integration is fully implemented and enabled by default. All endpoints follow the CommonGrants Protocol specification and provide standardized access to opportunity data. OpenAPI specification generation is available for documentation and client generation purposes. The integration includes automated consistency validation to prevent spec drift between the Flask API implementation and the generated OpenAPI specification.
