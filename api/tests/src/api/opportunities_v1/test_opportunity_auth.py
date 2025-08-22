@@ -78,7 +78,9 @@ def test_opportunity_get_legacy_success_with_api_user_key(
     assert user_api_key.last_used is not None
 
 
-def test_opportunity_get_success_with_api_user_key(client, enable_factory_create, db_session, user_api_key, user_api_key_id):
+def test_opportunity_get_success_with_api_user_key(
+    client, enable_factory_create, db_session, user_api_key, user_api_key_id
+):
     """Test opportunity get endpoint with valid API user key"""
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
@@ -120,7 +122,8 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
     db_session.commit()
 
     response = client.get(
-        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": inactive_api_key.key_id}
+        f"/v1/opportunities/{opportunity.opportunity_id}",
+        headers={"X-API-Key": inactive_api_key.key_id},
     )
 
     assert response.status_code == 401

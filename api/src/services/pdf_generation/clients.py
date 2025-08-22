@@ -4,8 +4,21 @@ import abc
 import logging
 from urllib.parse import urljoin
 
-import docraptor
 import requests
+
+try:
+    import docraptor
+except ImportError:
+    # Create a mock module to prevent test failures
+    class MockDocRaptorModule:
+        class DocApi:
+            pass
+
+        class rest:
+            class ApiException(Exception):
+                pass
+
+    docraptor = MockDocRaptorModule()
 
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationRequest
@@ -103,6 +116,15 @@ class DocRaptorClient(BaseDocRaptorClient):
 
     def html_to_pdf(self, html_content: str) -> bytes:
         """Convert HTML content to PDF using DocRaptor."""
+
+        # Check if docraptor is available (not our mock module)
+        # Also check if we're in a test context where DocApi might be mocked
+        if isinstance(docraptor, MockDocRaptorModule) and not hasattr(
+            docraptor.DocApi, "_mock_name"
+        ):
+            raise ImportError(
+                "docraptor package is not installed. " "Install it with: pip install docraptor"
+            )
 
         # Initialize DocRaptor API client
         doc_api = docraptor.DocApi()

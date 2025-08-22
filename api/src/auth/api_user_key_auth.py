@@ -41,13 +41,13 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         except ApiKeyValidationError as e:
             logger.info("API Gateway key authentication failed", extra={"auth.issue": e.message})
             raise_flask_error(401, e.message)
-            
+
         api_key.last_used = datetime_util.utcnow()
         db_session.add(api_key)
 
         add_extra_data_to_current_request_logs(
             {
-                "auth.user_id":api_key.user_id,
+                "auth.user_id": api_key.user_id,
                 "auth.api_key_id": strapi_key.api_key_id,
             }
         )
@@ -55,8 +55,6 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         logger.info("API Gateway key authentication successful")
 
         return api_key
-
-
 
 
 def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:
