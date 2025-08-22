@@ -1,5 +1,6 @@
 import logging
 
+from apiflask import HTTPTokenAuth
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -7,7 +8,6 @@ import src.util.datetime_util as datetime_util
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
-from apiflask import HTTPTokenAuth
 from src.db.models.user_models import UserApiKey
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
@@ -41,7 +41,6 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         with db_session.begin():
             api_key.last_used = datetime_util.utcnow()
             db_session.add(api_key)
-
 
         add_extra_data_to_current_request_logs(
             {
