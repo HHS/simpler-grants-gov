@@ -27,6 +27,7 @@ import Budget424aSectionF from "./widgets/budget/Budget424aSectionF";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
+import MultiSelectWidget from "./widgets/MultiSelectWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
@@ -158,38 +159,56 @@ export const determineFieldType = ({
   uiFieldObject: UiSchemaField;
   fieldSchema: RJSFSchema;
 }): WidgetTypes => {
-  const { widget } = uiFieldObject;
-  if (widget) return widget;
-
-  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
-    return "Attachment";
+  if ('widget' in uiFieldObject && uiFieldObject.widget) {
+    return uiFieldObject.widget;
   }
 
-  if (fieldSchema.type === "array" && fieldSchema.items) {
+  // 1) Single attachment
+  if (fieldSchema.type === 'string' && fieldSchema.format === 'uuid') {
+    return 'Attachment';
+  }
+
+  // 2) Arrays
+  if (fieldSchema.type === 'array' && fieldSchema.items) {
     const item = Array.isArray(fieldSchema.items)
       ? fieldSchema.items[0]
       : fieldSchema.items;
 
-    if (
-      typeof item === "object" &&
-      item !== null &&
-      item.type === "string" &&
-      item.format === "uuid"
-    ) {
-      return "AttachmentArray";
+    if (item && typeof item === 'object') {
+      const itemSchema = item as RJSFSchema;
+
+      // 2a) Attachment array
+      if (itemSchema.type === 'string' && itemSchema.format === 'uuid') {
+        return 'AttachmentArray';
+      }
+
+      // 2b) Enum array -> MultiSelect
+      if (Array.isArray(itemSchema.enum) && itemSchema.enum.length > 0) {
+        return 'MultiSelect';
+      }
     }
+
+    // 2c) Fallback for other arrays
+    return 'Select';
   }
 
-  if (fieldSchema.enum?.length) {
-    return "Select";
-  } else if (fieldSchema.type === "boolean") {
-    return "Checkbox";
-  } else if (fieldSchema.maxLength && fieldSchema.maxLength > 255) {
-    return "TextArea";
-  } else if (fieldSchema.type === "array") {
-    return "Select";
+  // 3) Single enum -> Select
+  if (Array.isArray(fieldSchema.enum) && fieldSchema.enum.length > 0) {
+    return 'Select';
   }
-  return "Text";
+
+  // 4) Boolean
+  if (fieldSchema.type === 'boolean') {
+    return 'Checkbox';
+  }
+
+  // 5) Long text
+  if (typeof fieldSchema.maxLength === 'number' && fieldSchema.maxLength > 255) {
+    return 'TextArea';
+  }
+
+  // 6) Default
+  return 'Text';
 };
 
 // either schema or definition is required, and schema fields take precedence
@@ -259,6 +278,8 @@ const widgetComponents: Record<
   TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
+  MultiSelect: (widgetProps: UswdsWidgetProps) =>
+    MultiSelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
   Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
   AttachmentArray: (widgetProps: UswdsWidgetProps) =>
@@ -383,30 +404,37 @@ export const buildField = ({
   // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
   let options = {};
-  let enums: unknown[] = [];
-  if (type === "Select") {
+
+  if (type === "Select" || type === "MultiSelect") {
+    let enums: string[] = [];
+
     if (fieldSchema.type === "array") {
+      const item = Array.isArray(fieldSchema.items)
+        ? fieldSchema.items[0]
+        : fieldSchema.items;
       if (
-        fieldSchema.items &&
-        typeof fieldSchema.items === "object" &&
-        "enum" in fieldSchema.items &&
-        Array.isArray((fieldSchema.items as { enum?: unknown[] }).enum)
+        item &&
+        typeof item === "object" &&
+        Array.isArray((item as { enum?: unknown[] }).enum)
       ) {
-        enums = (fieldSchema.items as { enum?: unknown[] }).enum ?? [];
+        enums = ((item as { enum?: unknown[] }).enum ?? []).map(String);
       }
-    } else {
-      enums = fieldSchema.enum ?? [];
+    } else if (Array.isArray(fieldSchema.enum)) {
+      enums = fieldSchema.enum.map(String);
     }
-    options = {
-      enumOptions: enums.map((label) => ({
-        value: String(label),
-        label: getSimpleTranslationsSync({
-          nameSpace: "Form",
-          translateableString: String(label),
-        }),
-      })),
-      emptyValue: "- Select -",
-    };
+
+    const enumOptions = enums.map((label) => ({
+      value: String(label),
+      label: getSimpleTranslationsSync({
+        nameSpace: "Form",
+        translateableString: String(label),
+      }),
+    }));
+
+    options =
+      type === "Select"
+        ? { enumOptions, emptyValue: "- Select -" }
+        : { enumOptions };
   }
 
   const Widget = widgetComponents[type];
