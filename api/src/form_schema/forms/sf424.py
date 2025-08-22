@@ -133,7 +133,7 @@ FORM_JSON_SCHEMA = {
         },
         "date_received": {
             "type": "string",
-            "title": "Date Received Header",
+            "title": "Date Received",
             "description": "Completed by Grants.gov upon submission.",
             "format": "date",
         },
