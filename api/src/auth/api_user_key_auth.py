@@ -1,6 +1,7 @@
 import logging
 
 from apiflask import HTTPTokenAuth
+from flask import current_app
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -16,8 +17,8 @@ logger = logging.getLogger(__name__)
 # Initialize the authorization context for API Gateway key authentication
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
-api_gateway_key_auth = HTTPTokenAuth(
-    "ApiKey", header="X-API-Key", security_scheme_name="ApiGatewayKeyAuth"
+api_user_key_auth = HTTPTokenAuth(
+    "ApiKey", header="X-API-Key", security_scheme_name="ApiUserKeyAuth"
 )
 
 
@@ -29,33 +30,42 @@ class ApiKeyValidationError(Exception):
         super().__init__(message)
 
 
-@api_gateway_key_auth.verify_token
-@flask_db.with_db_session()
-def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
+@api_user_key_auth.verify_token
+def verify_api_key(token: str) -> UserApiKey:
     logger.info("Authenticating API Gateway key")
 
-    try:
-        api_key = validate_api_key_in_db(token, db_session)
+    # Get database session
+    with flask_db.get_db(current_app).get_session() as db_session:
+        try:
+            api_key = validate_api_key_in_db(token, db_session)
 
-        # Update last_used timestamp
-        with db_session.begin():
-            api_key.last_used = datetime_util.utcnow()
-            db_session.add(api_key)
+            # Update last_used timestamp in a transaction
+            # Check if we're already in a transaction
+            if db_session.in_transaction():
+                # Already in a transaction, just add and commit
+                api_key.last_used = datetime_util.utcnow()
+                db_session.add(api_key)
+                db_session.commit()
+            else:
+                # Start a new transaction
+                with db_session.begin():
+                    api_key.last_used = datetime_util.utcnow()
+                    db_session.add(api_key)
 
-        add_extra_data_to_current_request_logs(
-            {
-                "auth.user_id": str(api_key.user_id),
-                "auth.api_key_id": str(api_key.api_key_id),
-            }
-        )
+            add_extra_data_to_current_request_logs(
+                {
+                    "auth.user_id": str(api_key.user_id),
+                    "auth.api_key_id": str(api_key.api_key_id),
+                }
+            )
 
-        logger.info("API Gateway key authentication successful")
+            logger.info("API Gateway key authentication successful")
 
-        return api_key
+            return api_key
 
-    except ApiKeyValidationError as e:
-        logger.info("API Gateway key authentication failed", extra={"auth.issue": e.message})
-        raise_flask_error(401, e.message)
+        except ApiKeyValidationError as e:
+            logger.info("API Gateway key authentication failed", extra={"auth.issue": e.message})
+            raise_flask_error(401, e.message)
 
 
 def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:

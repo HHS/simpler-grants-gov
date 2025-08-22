@@ -4754,7 +4754,7 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
-    ApiGatewayKeyAuth:
+    ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key

@@ -3,9 +3,9 @@ from freezegun import freeze_time
 
 import src.app as app_entry
 import src.logging
-from src.auth.api_gateway_key_auth import (
+from src.auth.api_user_key_auth import (
     ApiKeyValidationError,
-    api_gateway_key_auth,
+    api_user_key_auth,
     validate_api_key_in_db,
 )
 from src.db.models.user_models import UserApiKey
@@ -23,10 +23,10 @@ def mini_app(monkeypatch_module):
     mini_app = app_entry.create_app()
 
     @mini_app.get("/dummy_auth_endpoint")
-    @mini_app.auth_required(api_gateway_key_auth)
+    @mini_app.auth_required(api_user_key_auth)
     def dummy_endpoint():
-        assert api_gateway_key_auth.current_user is not None
-        assert isinstance(api_gateway_key_auth.current_user, UserApiKey)
+        assert api_user_key_auth.current_user is not None
+        assert isinstance(api_user_key_auth.current_user, UserApiKey)
 
         return {"message": "ok"}
 
@@ -64,7 +64,7 @@ def test_validate_api_key_in_db_key_inactive(enable_factory_create, db_session):
 
 
 @freeze_time("2024-11-14 12:00:00", tz_offset=0)
-def test_api_gateway_key_auth_happy_path(mini_app, enable_factory_create, db_session):
+def test_api_user_key_auth_happy_path(mini_app, enable_factory_create, db_session):
     """Test successful API Gateway key authentication"""
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(
@@ -83,7 +83,7 @@ def test_api_gateway_key_auth_happy_path(mini_app, enable_factory_create, db_ses
     assert api_key.last_used is not None
 
 
-def test_api_gateway_key_auth_invalid_key(mini_app, enable_factory_create, db_session):
+def test_api_user_key_auth_invalid_key(mini_app, enable_factory_create, db_session):
     """Test API Gateway key authentication with invalid key"""
     resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-API-Key": "invalid-key"})
 
@@ -91,7 +91,7 @@ def test_api_gateway_key_auth_invalid_key(mini_app, enable_factory_create, db_se
     assert resp.get_json()["message"] == "Invalid API key"
 
 
-def test_api_gateway_key_auth_inactive_key(mini_app, enable_factory_create, db_session):
+def test_api_user_key_auth_inactive_key(mini_app, enable_factory_create, db_session):
     """Test API Gateway key authentication with inactive key"""
     user = UserFactory.create()
     UserApiKeyFactory.create(user=user, key_id="inactive-gateway-key", is_active=False)
@@ -105,14 +105,14 @@ def test_api_gateway_key_auth_inactive_key(mini_app, enable_factory_create, db_s
     assert resp.get_json()["message"] == "API key is inactive"
 
 
-def test_api_gateway_key_auth_no_key_header(mini_app, enable_factory_create, db_session):
+def test_api_user_key_auth_no_key_header(mini_app, enable_factory_create, db_session):
     """Test API Gateway key authentication with missing header"""
     resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={})
 
     assert resp.status_code == 401
 
 
-def test_api_gateway_key_auth_empty_key_header(mini_app, enable_factory_create, db_session):
+def test_api_user_key_auth_empty_key_header(mini_app, enable_factory_create, db_session):
     """Test API Gateway key authentication with empty header"""
     resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-API-Key": ""})
 
@@ -120,7 +120,7 @@ def test_api_gateway_key_auth_empty_key_header(mini_app, enable_factory_create, 
     assert resp.get_json()["message"] == "Invalid API key"
 
 
-def test_api_gateway_key_auth_multiple_active_keys(mini_app, enable_factory_create, db_session):
+def test_api_user_key_auth_multiple_active_keys(mini_app, enable_factory_create, db_session):
     """Test that different API keys for the same user work independently"""
     user = UserFactory.create()
     api_key1 = UserApiKeyFactory.create(user=user, key_id="user-key-1", is_active=True)
