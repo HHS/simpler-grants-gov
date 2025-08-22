@@ -22,12 +22,14 @@ type FormDataResult =
       error?: never;
       data: {
         applicationResponse: ApplicationResponseDetail;
-        applicationFormData: ApplicationFormDetail;
+        // applicationId: string;
+        applicationName: string;
         formId: string;
         formName: string;
         formSchema: RJSFSchema;
         formUiSchema: UiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
+        applicationAttachments: unknown[]; // need to model this better
       };
     };
 
@@ -75,13 +77,16 @@ export default async function getFormData({
     }
 
     applicationFormData = response.data;
-    formData = response.data.form;
+    formData = applicationFormData.form;
     if (!formData) {
       console.error(
         `No form data found for applicationID (${applicationId}), appFormId (${appFormId}))`,
       );
       return { error: "TopLevelError" };
     }
+    // if (applicationFormData.application_attachments.length) {
+    //   // fetch attachment filenames
+    // }
 
     if (applicationFormData.application_form_id !== appFormId) {
       console.error(`Application form ids do not match`);
@@ -120,7 +125,6 @@ export default async function getFormData({
 
   let formSchema = {};
   try {
-    // creates single object for json schema from references
     formSchema = await processFormSchema(form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
@@ -128,8 +132,9 @@ export default async function getFormData({
   }
   return {
     data: {
+      applicationAttachments: applicationFormData.application_attachments,
       applicationResponse,
-      applicationFormData,
+      applicationName: applicationFormData.application_name,
       formId,
       formName,
       formSchema,
