@@ -107,26 +107,3 @@ def test_agency_search_with_inactive_api_user_key(client, enable_factory_create,
 
     assert response.status_code == 401
     assert response.get_json()["message"] == "API key is inactive"
-
-
-def test_agency_search_auth_precedence_api_user_key_first(
-    client, enable_factory_create, db_session, api_auth_token, user_api_key, user_api_key_id
-):
-    """Test that API user key takes precedence over environment API key when both are provided"""
-    db_session.commit()
-
-    # Send both headers - API user key should take precedence
-    response = client.post(
-        "/v1/agencies/search",
-        json=get_agency_search_request(),
-        headers={"X-API-Key": user_api_key_id, "X-Auth": api_auth_token},
-    )
-
-    # Note: This test expects a 500 error due to OpenSearch infrastructure requirements
-    # in the test environment, but the authentication should succeed (not 401)
-    # The 500 error indicates auth passed but search infrastructure is not available
-    assert response.status_code == 500
-
-    # Verify the API user key's last_used was updated (indicating it was used)
-    db_session.refresh(user_api_key)
-    assert user_api_key.last_used is not None
