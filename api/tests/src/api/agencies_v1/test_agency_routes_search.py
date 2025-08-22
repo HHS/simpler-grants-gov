@@ -22,23 +22,8 @@ AGENCIES = [DOA, DOD, DOD_HRE, DOD_MCO, HHS, HHS_DOC, HHS_NIH, HHS_OMHA]
 
 
 class TestAgencyRoutesSearch(BaseTestClass):
-    @pytest.fixture(scope="class")
-    def test_agency_index_alias(self, monkeypatch_class):
-        # Create a unique alias for this test class
-        import uuid
-
-        alias = f"test-agency-routes-search-alias-{uuid.uuid4().int}"
-        monkeypatch_class.setenv("AGENCY_SEARCH_INDEX_ALIAS", alias)
-        return alias
-
     @pytest.fixture(scope="class", autouse=True)
-    def setup_search_data(self, agency_index, test_agency_index_alias, search_client):
-        # Delete and recreate the index to ensure clean state
-        search_client.delete_index(agency_index)
-        search_client.create_index(
-            agency_index, mappings={"properties": {"opportunity_statuses": {"type": "keyword"}}}
-        )
-
+    def setup_search_data(self, agency_index, agency_index_alias, search_client):
         # load agencies into search index
         schema = AgencyV1Schema()
         json_records = [schema.dump(agency) for agency in AGENCIES]
@@ -62,7 +47,7 @@ class TestAgencyRoutesSearch(BaseTestClass):
         )
 
         # Swap the search index alias
-        search_client.swap_alias_index(agency_index, test_agency_index_alias)
+        search_client.swap_alias_index(agency_index, agency_index_alias)
 
     @pytest.mark.parametrize(
         "search_request,expected_result",
