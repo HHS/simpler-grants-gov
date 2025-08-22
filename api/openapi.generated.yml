@@ -99,6 +99,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
       tags:
       - Agency v1
       summary: Agencies Get
@@ -117,6 +123,8 @@ paths:
                       sort_direction: descending
                     page_offset: 1
                     page_size: 25
+      security:
+      - ApiKeyAuth: []
   /v1/users/login:
     get:
       parameters: []
@@ -4758,14 +4766,14 @@ components:
           description: The HTTP status code
           example: 200
   securitySchemes:
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
     ApiKeyAuth:
       type: apiKey
       in: header
       name: X-Auth
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
     InternalApiJwtAuth:
       type: apiKey
       in: header
