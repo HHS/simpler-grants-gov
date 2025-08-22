@@ -13,7 +13,7 @@ class OpportunityTables(StrEnum):
     CURRENT_OPPORTUNITY_SUMMARY = "current_opportunity_summary"
     USER_SAVED_OPPORTUNITY = "user_saved_opportunity"
     USER_SAVED_SEARCH = "user_saved_search"
-    USER = "user"
+    USER_DATA = "user_data"
 
 
 LK_OPPORTUNITY_STATUS_COLS = (
@@ -129,5 +129,11 @@ MAP_TABLES_TO_COLS: dict[OpportunityTables, tuple[str, ...]] = {
     OpportunityTables.CURRENT_OPPORTUNITY_SUMMARY: CURRENT_OPPORTUNITY_SUMMARY_COLS,
     OpportunityTables.USER_SAVED_OPPORTUNITY: USER_SAVED_OPPORTUNITY_COLS,
     OpportunityTables.USER_SAVED_SEARCH: USER_SAVED_SEARCH_COLS,
-    OpportunityTables.USER: USER_COLS,
+    OpportunityTables.USER_DATA: USER_COLS,
+}
+
+# Optional mapping for cases where file name differs from table name
+# If a table is not in this mapping, the file name will be the same as the table name
+MAP_TABLE_TO_FILE_NAME: dict[OpportunityTables, str] = {
+    OpportunityTables.USER_DATA: "user",
 }
