@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Initialize the authorization context for API Gateway key authentication
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
-api_gateway_key_auth = JwtUserHttpTokenAuth(
+api_gateway_key_auth = HttpTokenAuth(
     "ApiKey", header="X-API-Key", security_scheme_name="ApiGatewayKeyAuth"
 )
 
