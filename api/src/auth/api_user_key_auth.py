@@ -70,5 +70,4 @@ def validate_api_key_in_db(api_key: str, db_session: db.Session) -> UserApiKey:
     if not user_api_key.is_active:
         raise ApiKeyValidationError("API key is inactive")
 
-
     return user_api_key
