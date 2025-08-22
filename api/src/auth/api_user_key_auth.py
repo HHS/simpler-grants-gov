@@ -38,9 +38,9 @@ def verify_api_key(token: str) -> UserApiKey:
     with flask_db.get_db(current_app).get_session() as db_session:
         try:
             api_key = validate_api_key_in_db(token, db_session)
-            with db_session.begin():
-                api_key.last_used = datetime_util.utcnow()
-                db_session.add(api_key)
+            api_key.last_used = datetime_util.utcnow()
+            db_session.add(api_key)
+            db_session.commit()
 
             add_extra_data_to_current_request_logs(
                 {
