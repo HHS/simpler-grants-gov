@@ -14,7 +14,7 @@ from .internal_jwt_auth import internal_jwt_auth
 
 class AuthType(StrEnum):
     API_KEY_AUTH = "api_key_auth"
-    api_user_key_auth = "api_user_key_auth"
+    API_USER_KEY_AUTH = "api_user_key_auth"
     USER_JWT_AUTH = "user_jwt_auth"
     INTERNAL_JWT_AUTH = "internal_jwt_auth"
 
