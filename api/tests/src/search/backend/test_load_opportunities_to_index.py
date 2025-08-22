@@ -249,7 +249,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         # Add the excluded opportunities to the ExcludedOpportunityReview table
         for opportunity in excluded_opportunities:
             ExcludedOpportunityReviewFactory.create(
-                opportunity_id=opportunity.legacy_opportunity_id
+                legacy_opportunity_id=opportunity.legacy_opportunity_id
             )
 
         # Ensure we have a unique index name for this test to avoid conflicts
