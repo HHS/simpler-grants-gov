@@ -676,13 +676,15 @@ describe("getRequiredProperties", () => {
 });
 
 describe("formatFieldWarnings", () => {
-  const name = "field_name";
-  it.only("returns an empty array if there are not any warnings", () => {
-    expect(formatFieldWarnings([], name, "string", false)).toEqual([]);
-    expect(formatFieldWarnings(null, name, "string", false)).toEqual([]);
+  it("returns an empty array if there are not any warnings", () => {
+    expect(formatFieldWarnings([], "field_name", "string", false)).toEqual([]);
+    expect(formatFieldWarnings(null, "field_name", "string", false)).toEqual(
+      [],
+    );
   });
-  it("does something with arrays?", () => {});
-  it.only("returns warnings that directly reference the field name", () => {
+  // eslint-disable-next-line
+  it.skip("does something with arrays?", () => {});
+  it("returns warnings that directly reference the field name", () => {
     expect(
       formatFieldWarnings(
         [
@@ -693,11 +695,27 @@ describe("formatFieldWarnings", () => {
             value: "not sure",
           },
         ],
-        name,
+        "field_name",
         "string",
         false,
       ),
     ).toEqual(["something went wrong"]);
   });
-  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {});
+  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
+    expect(
+      formatFieldWarnings(
+        [
+          {
+            field: "parent",
+            message: "parent is required",
+            type: "required",
+            value: "not sure",
+          },
+        ],
+        "parent/field_name",
+        "string",
+        true,
+      ),
+    ).toEqual(["parent is required"]);
+  });
 });
