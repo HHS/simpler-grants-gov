@@ -1,5 +1,6 @@
 "use client";
 
+import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
@@ -26,9 +27,9 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     schema,
     rawErrors = [],
     disabled,
-    attachments,
   } = props;
 
+  const attachments = useApplicationAttachments();
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();

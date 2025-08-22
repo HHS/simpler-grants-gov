@@ -33,136 +33,6 @@ import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
 
-export function buildFormTreeRecursive({
-  errors,
-  formData,
-  schema,
-  uiSchema,
-}: {
-  errors: FormValidationWarning[] | null;
-  formData: object;
-  schema: RJSFSchema;
-  uiSchema: UiSchema;
-}) {
-  let acc: JSX.Element[] = [];
-  // json schema describes arrays with dots, our html uses --
-  const formattedErrors = errors?.map((error) => {
-    error.field = error.field.replace("$.", "").replace(/\./g, "--");
-    return error;
-  });
-
-  const requiredFieldPaths = getRequiredProperties(schema);
-
-  const buildFormTree = (
-    uiSchema:
-      | UiSchema
-      | {
-          children: UiSchema;
-          label: string;
-          name: string;
-          description?: string;
-        },
-    parent: { label: string; name: string; description?: string } | null,
-  ) => {
-    if (
-      !Array.isArray(uiSchema) &&
-      typeof uiSchema === "object" &&
-      "children" in uiSchema
-    ) {
-      buildFormTree(uiSchema.children, {
-        label: uiSchema.label,
-        name: uiSchema.name,
-        description: uiSchema.description,
-      });
-    } else if (Array.isArray(uiSchema)) {
-      uiSchema.forEach((node) => {
-        if ("children" in node) {
-          buildFormTree(node.children as unknown as UiSchema, {
-            label: node.label,
-            name: node.name,
-            description: node.description,
-          });
-        } else if (!parent && ("definition" in node || "schema" in node)) {
-          const requiredField = isFieldRequired(
-            (node.definition || node.schema.title || "") as string,
-            requiredFieldPaths,
-          );
-          const field = buildField({
-            uiFieldObject: node,
-            formSchema: schema,
-            errors: formattedErrors ?? null,
-            formData,
-            requiredField,
-          });
-          if (field) {
-            acc = [
-              ...acc,
-              <React.Fragment key={node.name}>{field}</React.Fragment>,
-            ];
-          }
-        }
-      });
-      if (parent) {
-        const childAcc: JSX.Element[] = [];
-        const keys: number[] = [];
-        const row = uiSchema.map((node) => {
-          if ("children" in node) {
-            acc.forEach((item, key) => {
-              if (item) {
-                if (item.key === `${node.name}-wrapper`) {
-                  keys.push(key);
-                }
-              }
-            });
-            return null;
-          } else {
-            const requiredField = isFieldRequired(
-              (node.definition || node.schema.title || "") as string,
-              requiredFieldPaths,
-            );
-            return buildField({
-              uiFieldObject: node,
-              formSchema: schema,
-              errors: formattedErrors ?? null,
-              formData,
-              requiredField,
-            });
-          }
-        });
-        if (keys.length) {
-          keys.forEach((key) => {
-            childAcc.push(acc[key]);
-            delete acc[key];
-          });
-          acc = [
-            ...acc,
-            wrapSection({
-              label: parent.label,
-              fieldName: parent.name,
-              description: parent.description,
-              tree: <>{childAcc}</>,
-            }),
-          ];
-        } else {
-          acc = [
-            ...acc,
-            wrapSection({
-              label: parent.label,
-              fieldName: parent.name,
-              tree: <>{row}</>,
-              description: parent.description,
-            }),
-          ];
-        }
-      }
-    }
-  };
-
-  buildFormTree(uiSchema, null);
-
-  return acc;
-}
-
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
@@ -287,30 +157,22 @@ export const getFieldPath = (fieldName: string) =>
 
 const widgetComponents: Record<
   WidgetTypes,
-  (widgetProps: UswdsWidgetProps) => JSX.Element
+  React.ComponentType<UswdsWidgetProps>
 > = {
-  Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
-  TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
-  Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
-  Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
-  MultiSelect: (widgetProps: UswdsWidgetProps) =>
-    MultiSelectWidget(widgetProps),
-  Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
-  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
-  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    AttachmentArrayWidget(widgetProps),
-  Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionA(widgetProps),
-  Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionB(widgetProps),
-  Budget424aSectionC: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionC(widgetProps),
-  Budget424aSectionD: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionD(widgetProps),
-  Budget424aSectionE: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionE(widgetProps),
-  Budget424aSectionF: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionF(widgetProps),
+  Text: TextWidget,
+  TextArea: TextAreaWidget,
+  Radio: RadioWidget,
+  Select: SelectWidget,
+  MultiSelect: MultiSelectWidget,
+  Checkbox: CheckboxWidget,
+  Attachment: AttachmentWidget,
+  AttachmentArray: AttachmentArrayWidget,
+  Budget424aSectionA,
+  Budget424aSectionB,
+  Budget424aSectionC,
+  Budget424aSectionD,
+  Budget424aSectionE,
+  Budget424aSectionF,
 };
 
 export const getByPointer = (target: object, path: string): unknown => {
@@ -449,24 +311,28 @@ export const buildField = ({
 
   const Widget = widgetComponents[type];
 
-  // light debugging for unknown widgets
-  if (typeof Widget !== "function") {
+  if (!Widget) {
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return Widget({
-    id: name,
-    key: name,
-    disabled,
-    required: requiredField,
-    minLength: fieldSchema?.minLength,
-    maxLength: fieldSchema?.maxLength,
-    schema: fieldSchema,
-    rawErrors,
-    value,
-    options,
-  });
+  // IMPORTANT:
+  // return a React element so hooks execute during render,
+  // under the AttachmentsProvider context.
+  return (
+    <Widget
+      id={name}
+      key={name}
+      disabled={disabled}
+      required={requiredField}
+      minLength={fieldSchema?.minLength}
+      maxLength={fieldSchema?.maxLength}
+      schema={fieldSchema}
+      rawErrors={rawErrors}
+      value={value}
+      options={options}
+    />
+  );
 };
 
 const getNestedWarningsForField = (
@@ -540,7 +406,7 @@ export function getFieldsForNav(
   return results;
 }
 
-const wrapSection = ({
+export const wrapSection = ({
   label,
   fieldName,
   tree,
@@ -675,7 +541,7 @@ export const getRequiredProperties = (
   }, [] as string[]);
 };
 
-const isFieldRequired = (
+export const isFieldRequired = (
   definition: string,
   requiredFields: string[],
 ): boolean => {
@@ -706,7 +572,9 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
-// resolve and "allOf" references within "properties" or "$defs" fields
+// dereferences all def links so that all necessary property definitions
+// can be found directly within the property without referencing $defs.
+// also resolves "allOf" references within "properties" or "$defs" fields.
 // not merging the entire schema because many schemas have top level
 // "allOf" blocks that often contain "if"/"then" statements or other things
 // that the mergeAllOf library can't handle out of the box, and we don't need
