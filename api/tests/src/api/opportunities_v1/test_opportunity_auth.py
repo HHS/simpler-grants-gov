@@ -1,7 +1,7 @@
 import pytest
 
 from tests.src.api.opportunities_v1.conftest import get_search_request
-from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory, UserFactory
+from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
 
 
 @pytest.mark.parametrize(
@@ -58,17 +58,15 @@ def test_opportunity_unauthorized_401_no_auth(client, method, url, body):
 
 
 def test_opportunity_get_legacy_success_with_api_user_key(
-    client, enable_factory_create, db_session
+    client, enable_factory_create, db_session, user_api_key, user_api_key_id
 ):
     """Test legacy opportunity get endpoint with valid API user key"""
-    user = UserFactory.create()
-    api_key = UserApiKeyFactory.create(user=user, key_id="valid-legacy-get-key", is_active=True)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
 
     response = client.get(
         f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
-        headers={"X-API-Key": "valid-legacy-get-key"},
+        headers={"X-API-Key": user_api_key_id},
     )
 
     assert response.status_code == 200
@@ -76,20 +74,18 @@ def test_opportunity_get_legacy_success_with_api_user_key(
     assert response.get_json()["data"]["opportunity_id"] == str(opportunity.opportunity_id)
 
     # Verify the API key's last_used was updated
-    db_session.refresh(api_key)
-    assert api_key.last_used is not None
+    db_session.refresh(user_api_key)
+    assert user_api_key.last_used is not None
 
 
-def test_opportunity_get_success_with_api_user_key(client, enable_factory_create, db_session):
+def test_opportunity_get_success_with_api_user_key(client, enable_factory_create, db_session, user_api_key, user_api_key_id):
     """Test opportunity get endpoint with valid API user key"""
-    user = UserFactory.create()
-    api_key = UserApiKeyFactory.create(user=user, key_id="valid-get-key", is_active=True)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
     db_session.commit()
 
     response = client.get(
-        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": "valid-get-key"}
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": user_api_key_id}
     )
 
     assert response.status_code == 200
@@ -97,20 +93,19 @@ def test_opportunity_get_success_with_api_user_key(client, enable_factory_create
     assert response.get_json()["data"]["opportunity_id"] == str(opportunity.opportunity_id)
 
     # Verify the API key's last_used was updated
-    db_session.refresh(api_key)
-    assert api_key.last_used is not None
+    db_session.refresh(user_api_key)
+    assert user_api_key.last_used is not None
 
 
 def test_opportunity_search_with_inactive_api_user_key(client, enable_factory_create, db_session):
     """Test opportunity search endpoint with inactive API user key"""
-    user = UserFactory.create()
-    UserApiKeyFactory.create(user=user, key_id="inactive-search-key", is_active=False)
+    inactive_api_key = UserApiKeyFactory.create(is_active=False)
     db_session.commit()
 
     response = client.post(
         "/v1/opportunities/search",
         json=get_search_request(),
-        headers={"X-API-Key": "inactive-search-key"},
+        headers={"X-API-Key": inactive_api_key.key_id},
     )
 
     assert response.status_code == 401
@@ -119,14 +114,13 @@ def test_opportunity_search_with_inactive_api_user_key(client, enable_factory_cr
 
 def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_create, db_session):
     """Test opportunity get endpoint with inactive API user key"""
-    user = UserFactory.create()
-    UserApiKeyFactory.create(user=user, key_id="inactive-get-key", is_active=False)
+    inactive_api_key = UserApiKeyFactory.create(is_active=False)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
     db_session.commit()
 
     response = client.get(
-        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": "inactive-get-key"}
+        f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": inactive_api_key.key_id}
     )
 
     assert response.status_code == 401
@@ -134,11 +128,9 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
 
 
 def test_opportunity_auth_precedence_api_user_key_first(
-    client, enable_factory_create, db_session, api_auth_token
+    client, enable_factory_create, db_session, api_auth_token, user_api_key, user_api_key_id
 ):
     """Test that API user key takes precedence over environment API key when both are provided"""
-    user = UserFactory.create()
-    api_key = UserApiKeyFactory.create(user=user, key_id="precedence-test-key", is_active=True)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
     db_session.commit()
@@ -146,12 +138,12 @@ def test_opportunity_auth_precedence_api_user_key_first(
     # Send both headers - API user key should take precedence
     response = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}",
-        headers={"X-API-Key": "precedence-test-key", "X-Auth": api_auth_token},
+        headers={"X-API-Key": user_api_key_id, "X-Auth": api_auth_token},
     )
 
     assert response.status_code == 200
     assert response.get_json()["message"] == "Success"
 
     # Verify the API user key's last_used was updated (indicating it was used)
-    db_session.refresh(api_key)
-    assert api_key.last_used is not None
+    db_session.refresh(user_api_key)
+    assert user_api_key.last_used is not None
