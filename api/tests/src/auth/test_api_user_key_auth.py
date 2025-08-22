@@ -3,9 +3,9 @@ from freezegun import freeze_time
 
 import src.app as app_entry
 import src.logging
-from src.auth. import (
-    api_user_key_auth,
+from src.auth.api_user_key_auth import (
     ApiKeyValidationError,
+    api_user_key_auth,
     validate_api_key_in_db,
 )
 from src.db.models.user_models import UserApiKey
