@@ -12,7 +12,7 @@ import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
-from src.auth.multi_auth import api_key_multi_auth
+from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
@@ -183,6 +183,7 @@ examples = {
 @api_key_multi_auth.login_required
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
+    security=api_key_multi_auth_security_schemes,
     # This adds a file response schema
     # in addition to the one added by the output decorator
     responses={200: {"content": {"application/octet-stream": {}}}},  # type: ignore
@@ -229,7 +230,9 @@ def opportunity_search(
 @opportunity_blueprint.get("/opportunities/<int:legacy_opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
 @api_key_multi_auth.login_required
-@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
+@opportunity_blueprint.doc(
+    description=SHARED_ALPHA_DESCRIPTION, security=api_key_multi_auth_security_schemes
+)
 @flask_db.with_db_session()
 def opportunity_get_legacy(
     db_session: db.Session, legacy_opportunity_id: int
@@ -245,7 +248,9 @@ def opportunity_get_legacy(
 @opportunity_blueprint.get("/opportunities/<uuid:opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
 @api_key_multi_auth.login_required
-@opportunity_blueprint.doc(description=SHARED_ALPHA_DESCRIPTION)
+@opportunity_blueprint.doc(
+    description=SHARED_ALPHA_DESCRIPTION, security=api_key_multi_auth_security_schemes
+)
 @flask_db.with_db_session()
 def opportunity_get(db_session: db.Session, opportunity_id: UUID) -> response.ApiResponse:
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
