@@ -189,4 +189,3 @@ class MockDocRaptorClient(BaseDocRaptorClient):
             extra={"html_length": len(html_content)},
         )
         return self.mock_pdf_data
-        
