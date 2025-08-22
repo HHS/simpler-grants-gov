@@ -65,6 +65,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
       tags:
       - Extract v1
       summary: Extract Metadata Get
@@ -83,6 +89,9 @@ paths:
                       sort_direction: descending
                     page_offset: 1
                     page_size: 25
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /v1/agencies:
     post:
       parameters: []
@@ -168,6 +177,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
       tags:
       - Agency v1
       summary: Agency Search
@@ -203,6 +218,9 @@ paths:
                       sort_direction: descending
                     page_offset: 1
                     page_size: 25
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /v1/users/token/logout:
     post:
       parameters: []
@@ -262,6 +280,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
       tags:
       - Opportunity v1
       summary: Opportunity Search
@@ -409,6 +433,9 @@ paths:
                       sort_direction: descending
                     - order_by: opportunity_id
                       sort_direction: ascending
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /v1/users/{user_id}:
     get:
       parameters:
@@ -759,6 +786,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OpportunityGetResponseV1'
           description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
         '404':
           content:
             application/json:
@@ -784,6 +817,9 @@ paths:
         for further details.
 
         '
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -1059,6 +1095,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OpportunityGetResponseV1'
           description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
         '404':
           content:
             application/json:
@@ -1084,6 +1126,9 @@ paths:
         for further details.
 
         '
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
