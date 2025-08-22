@@ -15,7 +15,7 @@ def get_flask_spec() -> Dict[str, Any]:
     """Get OpenAPI spec from Flask API."""
     app = create_app()
     if hasattr(app, 'spec'):
-        return app.spec.to_dict()
+        return app.spec if isinstance(app.spec, dict) else app.spec.to_dict()
     else:
         return app.openapi()
 
@@ -89,7 +89,7 @@ def lint_specs() -> bool:
             print(f"  - {issue}")
         return False
     else:
-        print("✅ No inconsistencies found")
+        print("No inconsistencies found")
         return True
 
 
