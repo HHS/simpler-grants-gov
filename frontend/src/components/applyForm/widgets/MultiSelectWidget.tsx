@@ -51,12 +51,12 @@ export default function MultiSelect<
     enumOptions?: ComboBoxOption[];
     enumDisabled?: Array<string | number>;
   };
-// Future:
-// allows us to inforce the minimum number
-// we can later pass it as prop if design likes the idea
-// this will be used for some dropdowns that have the possibility of having one option
-// example would be starting an application and it is defaulted to "individual" and no other options are available
-const enforceMinInUI = false;
+  // Future:
+  // allows us to inforce the minimum number
+  // we can later pass it as prop if design likes the idea
+  // this will be used for some dropdowns that have the possibility of having one option
+  // example would be starting an application and it is defaulted to "individual" and no other options are available
+  const enforceMinInUI = false;
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   const allOptions: ComboBoxOption[] = useMemo(() => opts ?? [], [opts]);
 
@@ -65,7 +65,7 @@ const enforceMinInUI = false;
   const comboRef = useRef<ComboBoxRef>(null);
 
   const maxSelections = typeof maxItems === "number" ? maxItems : 3;
-    const minSelectionsEff = typeof minItems === 'number' ? minItems : 0;
+  const minSelectionsEff = typeof minItems === "number" ? minItems : 0;
   const atCap = selected.length >= maxSelections;
 
   const isOptDisabled = useCallback(
@@ -120,11 +120,11 @@ const enforceMinInUI = false;
     return true;
   };
 
-const removeValue = (v: string) => {
-  const next = selected.filter((s) => s !== v);
-  if (enforceMinInUI && next.length < minSelectionsEff) return;
-  syncUpstream(next);
-};
+  const removeValue = (v: string) => {
+    const next = selected.filter((s) => s !== v);
+    if (enforceMinInUI && next.length < minSelectionsEff) return;
+    syncUpstream(next);
+  };
 
   const getLabelForValue = (v: string) =>
     allOptions.find((o) => String(o.value) === v)?.label ?? v;

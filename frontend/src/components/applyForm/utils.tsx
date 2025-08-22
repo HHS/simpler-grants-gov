@@ -159,56 +159,59 @@ export const determineFieldType = ({
   uiFieldObject: UiSchemaField;
   fieldSchema: RJSFSchema;
 }): WidgetTypes => {
-  if ('widget' in uiFieldObject && uiFieldObject.widget) {
+  if ("widget" in uiFieldObject && uiFieldObject.widget) {
     return uiFieldObject.widget;
   }
 
   // 1) Single attachment
-  if (fieldSchema.type === 'string' && fieldSchema.format === 'uuid') {
-    return 'Attachment';
+  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
+    return "Attachment";
   }
 
   // 2) Arrays
-  if (fieldSchema.type === 'array' && fieldSchema.items) {
+  if (fieldSchema.type === "array" && fieldSchema.items) {
     const item = Array.isArray(fieldSchema.items)
       ? fieldSchema.items[0]
       : fieldSchema.items;
 
-    if (item && typeof item === 'object') {
+    if (item && typeof item === "object") {
       const itemSchema = item as RJSFSchema;
 
       // 2a) Attachment array
-      if (itemSchema.type === 'string' && itemSchema.format === 'uuid') {
-        return 'AttachmentArray';
+      if (itemSchema.type === "string" && itemSchema.format === "uuid") {
+        return "AttachmentArray";
       }
 
       // 2b) Enum array -> MultiSelect
       if (Array.isArray(itemSchema.enum) && itemSchema.enum.length > 0) {
-        return 'MultiSelect';
+        return "MultiSelect";
       }
     }
 
     // 2c) Fallback for other arrays
-    return 'Select';
+    return "Select";
   }
 
   // 3) Single enum -> Select
   if (Array.isArray(fieldSchema.enum) && fieldSchema.enum.length > 0) {
-    return 'Select';
+    return "Select";
   }
 
   // 4) Boolean
-  if (fieldSchema.type === 'boolean') {
-    return 'Checkbox';
+  if (fieldSchema.type === "boolean") {
+    return "Checkbox";
   }
 
   // 5) Long text
-  if (typeof fieldSchema.maxLength === 'number' && fieldSchema.maxLength > 255) {
-    return 'TextArea';
+  if (
+    typeof fieldSchema.maxLength === "number" &&
+    fieldSchema.maxLength > 255
+  ) {
+    return "TextArea";
   }
 
   // 6) Default
-  return 'Text';
+  return "Text";
 };
 
 // either schema or definition is required, and schema fields take precedence
