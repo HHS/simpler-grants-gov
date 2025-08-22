@@ -58,7 +58,7 @@ locals {
       task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour
       schedule_expression = "cron(0 * * * ? *)"
-      state               = "ENABLED"
+      state               = "DISABLED"
     }
     load-search-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]

@@ -49,7 +49,7 @@ locals {
       second_octet                 = 9               # The second octet our the VPC CIDR block
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the training origin Oracle database for Grants.gov is located
       domain_config = {
-        manage_dns  = true
+        manage_dns  = false
         hosted_zone = "training.simpler.grants.gov"
 
         certificate_configs = {}
