@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Initialize the authorization context for API Gateway key authentication
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
-api_user_key_auth = HTTPTokenAuth(
+API_USER_KEY_AUTH = HTTPTokenAuth(
     "ApiKey", header="X-API-Key", security_scheme_name="ApiUserKeyAuth"
 )
 
@@ -29,7 +29,7 @@ class ApiKeyValidationError(Exception):
         super().__init__(message)
 
 
-@api_user_key_auth.verify_token
+@API_USER_KEY_AUTH.verify_token
 @flask_db.with_db_session()
 def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
     logger.info("Authenticating API Gateway key")
