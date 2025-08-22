@@ -125,7 +125,6 @@ def test_api_user_key_auth_multiple_active_keys(mini_app, enable_factory_create,
     user = UserFactory.create()
     api_key1 = UserApiKeyFactory.create(user=user, key_id="user-key-1", is_active=True)
     api_key2 = UserApiKeyFactory.create(user=user, key_id="user-key-2", is_active=True)
-    db_session.commit()
 
     resp1 = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-API-Key": "user-key-1"})
     assert resp1.status_code == 200

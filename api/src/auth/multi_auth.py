@@ -6,9 +6,9 @@ from flask_httpauth import MultiAuth
 
 from ..db.models.competition_models import ShortLivedInternalToken
 from ..db.models.user_models import UserApiKey, UserTokenSession
-from .api_user_key_auth import api_user_key_auth
 from .api_jwt_auth import api_jwt_auth
 from .api_key_auth import ApiKeyUser, api_key_auth
+from .api_user_key_auth import api_user_key_auth
 from .internal_jwt_auth import internal_jwt_auth
 
 
