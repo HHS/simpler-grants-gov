@@ -8,13 +8,13 @@ from ..db.models.competition_models import ShortLivedInternalToken
 from ..db.models.user_models import UserApiKey, UserTokenSession
 from .api_jwt_auth import api_jwt_auth
 from .api_key_auth import ApiKeyUser, api_key_auth
-from .API_USER_KEY_AUTH import API_USER_KEY_AUTH
+from .api_user_key_auth import api_user_key_auth
 from .internal_jwt_auth import internal_jwt_auth
 
 
 class AuthType(StrEnum):
     API_KEY_AUTH = "api_key_auth"
-    API_USER_KEY_AUTH = "API_USER_KEY_AUTH"
+    API_USER_KEY_AUTH = "api_user_key_auth"
     USER_JWT_AUTH = "user_jwt_auth"
     INTERNAL_JWT_AUTH = "internal_jwt_auth"
 
@@ -68,8 +68,8 @@ jwt_key_or_internal_multi_auth = MultiHttpTokenAuth(api_jwt_auth, internal_jwt_a
 # * Database-based API Gateway Key Auth (X-API-Key header)
 # * Environment-based API Key Auth (X-Auth header)
 #
-# Note that the order matters - API_USER_KEY_AUTH will take precedence if both headers are present
-api_key_multi_auth = MultiHttpTokenAuth(API_USER_KEY_AUTH, api_key_auth)
+# Note that the order matters - api_user_key_auth will take precedence if both headers are present
+api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
 
 
 # Helper function to format security schemes for OpenAPI
@@ -97,7 +97,7 @@ jwt_key_or_internal_security_schemes = _get_security_requirement(
 # List of security scheme names for API key multi-auth
 api_key_multi_auth_security_schemes = _get_security_requirement(
     [
-        API_USER_KEY_AUTH.security_scheme_name,
+        api_user_key_auth.security_scheme_name,
         api_key_auth.security_scheme_name,
     ]
 )
