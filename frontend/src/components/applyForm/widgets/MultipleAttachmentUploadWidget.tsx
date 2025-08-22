@@ -4,6 +4,7 @@ import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
+import { Attachment } from "src/types/attachmentTypes";
 
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -188,7 +189,6 @@ const MultipleAttachmentUploadWidget = ({
 
       {uploadedFiles.length > 0 && (
         <MultipleAttachmentUploadList
-          attachments={attachments}
           uploadedFiles={uploadedFiles}
           handleRemove={(index) => handleRemove(index)}
         />

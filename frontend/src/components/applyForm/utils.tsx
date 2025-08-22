@@ -135,28 +135,21 @@ export const getFieldPath = (fieldName: string) =>
 
 const widgetComponents: Record<
   WidgetTypes,
-  (widgetProps: UswdsWidgetProps) => JSX.Element
+  React.ComponentType<UswdsWidgetProps>
 > = {
-  Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
-  TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
-  Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
-  Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
-  Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
-  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
-  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    AttachmentArrayWidget(widgetProps),
-  Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionA(widgetProps),
-  Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionB(widgetProps),
-  Budget424aSectionC: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionC(widgetProps),
-  Budget424aSectionD: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionD(widgetProps),
-  Budget424aSectionE: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionE(widgetProps),
-  Budget424aSectionF: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionF(widgetProps),
+  Text: TextWidget,
+  TextArea: TextAreaWidget,
+  Radio: RadioWidget,
+  Select: SelectWidget,
+  Checkbox: CheckboxWidget,
+  Attachment: AttachmentWidget,
+  AttachmentArray: AttachmentArrayWidget,
+  Budget424aSectionA,
+  Budget424aSectionB,
+  Budget424aSectionC,
+  Budget424aSectionD,
+  Budget424aSectionE,
+  Budget424aSectionF,
 };
 
 export const getByPointer = (target: object, path: string): unknown => {
@@ -288,24 +281,28 @@ export const buildField = ({
 
   const Widget = widgetComponents[type];
 
-  // light debugging for unknown widgets
-  if (typeof Widget !== "function") {
+  if (!Widget) {
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return Widget({
-    id: name,
-    key: name,
-    disabled,
-    required: requiredField,
-    minLength: fieldSchema?.minLength,
-    maxLength: fieldSchema?.maxLength,
-    schema: fieldSchema,
-    rawErrors,
-    value,
-    options,
-  });
+  // IMPORTANT:
+  // return a React element so hooks execute during render,
+  // under the AttachmentsProvider context.
+  return (
+    <Widget
+      id={name}
+      key={name}
+      disabled={disabled}
+      required={requiredField}
+      minLength={fieldSchema?.minLength}
+      maxLength={fieldSchema?.maxLength}
+      schema={fieldSchema}
+      rawErrors={rawErrors}
+      value={value}
+      options={options}
+    />
+  );
 };
 
 const getNestedWarningsForField = (

@@ -1,3 +1,4 @@
+import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { Icon } from "@trussworks/react-uswds";
@@ -13,8 +14,8 @@ interface Props {
 export const MultipleAttachmentUploadList = ({
   handleRemove,
   uploadedFiles,
-  attachments,
 }: Props) => {
+  const attachments = useApplicationAttachments();
   return (
     <ul className="usa-list usa-list--unstyled margin-top-2">
       {uploadedFiles.map((file, index) => {

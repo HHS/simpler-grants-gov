@@ -94,7 +94,7 @@ const ApplyForm = ({
             error={error}
             validationWarnings={validationWarnings}
           />
-          <AttachmentsProvider value={attachments}>
+          <AttachmentsProvider value={attachments ?? []}>
             <FormFields
               errors={saved ? validationWarnings : null}
               formData={formObject}

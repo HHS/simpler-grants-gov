@@ -4,11 +4,11 @@ import type { Attachment } from "src/types/attachmentTypes";
 
 import { createContext, PropsWithChildren, useContext } from "react";
 
-const AttachmentsContext = createContext<Attachment[] | undefined>(undefined);
+const AttachmentsContext = createContext<Attachment[] | null>(null);
 
 export const useApplicationAttachments = () => {
   const ctx = useContext(AttachmentsContext);
-  if (ctx === undefined) {
+  if (ctx === null) {
     throw new Error(
       "useApplicationAttachments must be used within <AttachmentsProvider>",
     );
@@ -19,9 +19,10 @@ export const useApplicationAttachments = () => {
 export function AttachmentsProvider({
   value,
   children,
-}: PropsWithChildren<{ value: Attachment[] }>) {
+}: PropsWithChildren<{ value?: Attachment[] }>) {
+  const safe = Array.isArray(value) ? value : [];
   return (
-    <AttachmentsContext.Provider value={value}>
+    <AttachmentsContext.Provider value={safe}>
       {children}
     </AttachmentsContext.Provider>
   );
