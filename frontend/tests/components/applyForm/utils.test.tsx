@@ -1,5 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
@@ -7,8 +8,10 @@ import {
   buildFormTreeRecursive,
   condenseFormSchemaProperties,
   determineFieldType,
+  formatFieldWarnings,
   getFieldName,
   getFieldSchema,
+  getRequiredProperties,
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
@@ -164,6 +167,7 @@ describe("buildField", () => {
       formSchema,
       errors,
       formData,
+      requiredField: true,
     });
     render(BuiltField);
 
@@ -211,6 +215,7 @@ describe("buildField", () => {
       formSchema,
       errors,
       formData,
+      requiredField: false,
     });
     render(BuiltField);
 
@@ -635,5 +640,82 @@ describe("condenseFormSchemaProperties", () => {
         },
       }),
     ).toEqual(noProperties);
+  });
+});
+
+describe("getRequiredProperties", () => {
+  it("returns an empty array for a schema with no required fields", () => {
+    expect(
+      getRequiredProperties({
+        properties: {
+          something: {
+            type: "string",
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+  it("returns a list of all unconditionally required property paths within a schema", () => {
+    expect(getRequiredProperties(sflllSchema as RJSFSchema)).toEqual([
+      "federal_action_type",
+      "federal_action_status",
+      "report_type",
+      "reporting_entity/entity_type",
+      "reporting_entity/applicant_reporting_entity/organization_name",
+      "reporting_entity/applicant_reporting_entity/address/street1",
+      "reporting_entity/applicant_reporting_entity/address/city",
+      "federal_agency_department",
+      "lobbying_registrant/individual/first_name",
+      "lobbying_registrant/individual/last_name",
+      "individual_performing_service/individual/first_name",
+      "individual_performing_service/individual/last_name",
+      "signature_block/name/first_name",
+      "signature_block/name/last_name",
+    ]);
+  });
+});
+
+describe("formatFieldWarnings", () => {
+  it("returns an empty array if there are not any warnings", () => {
+    expect(formatFieldWarnings([], "field_name", "string", false)).toEqual([]);
+    expect(formatFieldWarnings(null, "field_name", "string", false)).toEqual(
+      [],
+    );
+  });
+  // eslint-disable-next-line
+  it.skip("does something with arrays?", () => {});
+  it("returns warnings that directly reference the field name", () => {
+    expect(
+      formatFieldWarnings(
+        [
+          {
+            field: "field_name",
+            message: "something went wrong",
+            type: "generic",
+            value: "not sure",
+          },
+        ],
+        "field_name",
+        "string",
+        false,
+      ),
+    ).toEqual(["something went wrong"]);
+  });
+  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
+    expect(
+      formatFieldWarnings(
+        [
+          {
+            field: "parent",
+            message: "parent is required",
+            type: "required",
+            value: "not sure",
+          },
+        ],
+        "parent/field_name",
+        "string",
+        true,
+      ),
+    ).toEqual(["parent is required"]);
   });
 });
