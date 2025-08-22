@@ -248,7 +248,7 @@ FORM_JSON_SCHEMA = {
                 "suffix": {
                     "type": "string",
                     "title": "Suffix",
-                    "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
+                    "description": "Enter the suffix (e.g., Jr. Sr., PhD), if appropriate",
                     "minLength": 1,
                     "maxLength": 10,
                 },
