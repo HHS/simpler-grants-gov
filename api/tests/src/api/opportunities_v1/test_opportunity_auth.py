@@ -65,7 +65,6 @@ def test_opportunity_get_legacy_success_with_api_user_key(
     api_key = UserApiKeyFactory.create(user=user, key_id="valid-legacy-get-key", is_active=True)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
-    db_session.commit()
 
     response = client.get(
         f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
