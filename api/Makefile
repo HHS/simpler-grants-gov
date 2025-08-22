@@ -291,6 +291,7 @@ openapi-spec-common-grants:
 
 check-spec: openapi-spec-common-grants
 	cg check spec ./openapi-cg.generated.yml
+	$(PY_RUN_CMD) python src/common_grants/scripts/lint_openapi.py
 
 
 copy-oracle-data:
