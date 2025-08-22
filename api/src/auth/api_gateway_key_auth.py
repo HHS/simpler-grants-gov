@@ -7,7 +7,7 @@ import src.util.datetime_util as datetime_util
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
-from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
+from apiflask import HTTPTokenAuth
 from src.db.models.user_models import UserApiKey
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Initialize the authorization context for API Gateway key authentication
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
-api_gateway_key_auth = HttpTokenAuth(
+api_gateway_key_auth = HTTPTokenAuth(
     "ApiKey", header="X-API-Key", security_scheme_name="ApiGatewayKeyAuth"
 )
 
@@ -38,9 +38,9 @@ def verify_api_key(db_session: db.Session, token: str) -> UserApiKey:
         api_key = validate_api_key_in_db(token, db_session)
 
         # Update last_used timestamp
-        api_key.last_used = datetime_util.utcnow()
-        db_session.add(api_key)
-        db_session.commit()
+        with db_session.begin():
+            api_key.last_used = datetime_util.utcnow()
+            db_session.add(api_key)
 
 
         add_extra_data_to_current_request_logs(
