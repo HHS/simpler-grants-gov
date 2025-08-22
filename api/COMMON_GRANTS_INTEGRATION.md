@@ -151,7 +151,7 @@ make check-spec
 
 ### Generated Output
 
-The script generates a YAML file (`openapi-cg.generated.yaml`) containing:
+The script generates a YAML file (`openapi-cg.generated.yml`) containing:
 - Complete OpenAPI 3.1.0 specification
 - All three CommonGrants endpoints with proper schemas
 - Request/response models using Pydantic schemas from the SDK
@@ -163,7 +163,7 @@ The script generates a YAML file (`openapi-cg.generated.yaml`) containing:
 # Generate the OpenAPI spec
 make openapi-spec-common-grants
 
-# The spec will be written to ./openapi-cg.generated.yaml
+# The spec will be written to ./openapi-cg.generated.yml
 # You can then use this for documentation, client generation, or validation
 
 # Validate both protocol compliance and consistency
