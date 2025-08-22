@@ -84,7 +84,6 @@ def test_opportunity_get_success_with_api_user_key(
     """Test opportunity get endpoint with valid API user key"""
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
-    db_session.commit()
 
     response = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}", headers={"X-API-Key": user_api_key_id}
