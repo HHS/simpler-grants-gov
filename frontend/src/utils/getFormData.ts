@@ -6,6 +6,7 @@ import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
+import { BasicAttachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import {
@@ -22,14 +23,13 @@ type FormDataResult =
       error?: never;
       data: {
         applicationResponse: ApplicationResponseDetail;
-        // applicationId: string;
         applicationName: string;
         formId: string;
         formName: string;
         formSchema: RJSFSchema;
         formUiSchema: UiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
-        applicationAttachments: unknown[]; // need to model this better
+        applicationAttachments: BasicAttachment[];
       };
     };
 

@@ -49,8 +49,8 @@ async function FormPage({ params }: formPageProps) {
 
   const {
     applicationName,
-    // applicationId,
-    // applicationFormData,
+    applicationAttachments,
+    applicationResponse,
     formId,
     formName,
     formSchema,
@@ -83,6 +83,7 @@ async function FormPage({ params }: formPageProps) {
           formSchema={formSchema}
           uiSchema={formUiSchema}
           formId={formId}
+          attachments={applicationAttachments}
         />
       </GridContainer>
     </>
