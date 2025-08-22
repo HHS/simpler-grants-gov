@@ -84,9 +84,6 @@ export default async function getFormData({
       );
       return { error: "TopLevelError" };
     }
-    // if (applicationFormData.application_attachments.length) {
-    //   // fetch attachment filenames
-    // }
 
     if (applicationFormData.application_form_id !== appFormId) {
       console.error(`Application form ids do not match`);
