@@ -3,7 +3,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
-import { AttachmentsContext } from "src/hooks/useApplicationAttachments";
 import { BasicAttachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
@@ -15,6 +14,7 @@ import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormValidationWarning, UiSchema } from "./types";
 import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
+import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 
 const ApplyForm = ({
   applicationId,
@@ -111,7 +111,9 @@ const ApplyForm = ({
             error={error}
             validationWarnings={validationWarnings}
           />
-          <AttachmentsContext value={attachments}>{fields}</AttachmentsContext>
+            <AttachmentsProvider value={attachments}>
+    {fields}
+  </AttachmentsProvider>
         </FormGroup>
         <ApplyFormNav title={t("navTitle")} fields={navFields} />
       </div>
