@@ -18,6 +18,7 @@ The CommonGrants Protocol provides standardized access to grant opportunity data
 - **Service**: `src/services/common_grants/opportunity_service.py` - Business logic
 - **Transformation**: `src/services/common_grants/transformation.py` - Data mapping
 - **Dependency**: `common-grants-sdk = "^0.2.2"` - Protocol schemas and validation
+- **OpenAPI Generation**: `src/common_grants/scripts/generate_openapi.py` - Schema generation
 
 ### Data Flow
 
@@ -125,6 +126,42 @@ Content-Type: application/json
 - Pagination support
 - Returns `OpportunitiesSearchResponse`
 
+## OpenAPI Specification Generation
+
+The integration includes tools for generating OpenAPI specifications for the CommonGrants Protocol endpoints.
+
+### Generation Script
+
+A dedicated script exists at `src/common_grants/scripts/generate_openapi.py` that creates a FastAPI app mirroring the CommonGrants routes for proper OpenAPI schema generation.
+
+### Makefile Targets
+
+```bash
+# Generate OpenAPI spec for CommonGrants endpoints only
+make openapi-spec-common-grants
+
+# Validate the generated spec using the CommonGrants CLI
+make check-spec
+```
+
+### Generated Output
+
+The script generates a YAML file (`openapi-cg.generated.yaml`) containing:
+- Complete OpenAPI 3.1.0 specification
+- All three CommonGrants endpoints with proper schemas
+- Request/response models using Pydantic schemas from the SDK
+- Parameter validation and documentation
+
+### Usage
+
+```bash
+# Generate the OpenAPI spec
+make openapi-spec-common-grants
+
+# The spec will be written to ./openapi-cg.generated.yaml
+# You can then use this for documentation, client generation, or validation
+```
+
 ## Implementation Details
 
 ### Service Architecture
@@ -167,9 +204,35 @@ make run-logs
 ### Testing
 
 ```bash
+# Run all tests (formatting, linting, migrations, tests)
 make check
+
+# Run tests only
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# Run specific test file
+make test args="tests/src/api/common_grants/test_common_grants_routes.py"
+```
+
+### Code Quality
+
+```bash
+# Format code
+make format
+
+# Check formatting
+make format-check
+
+# Lint code
+make lint
+
+# Type checking
+make lint-mypy
 ```
 
 ## Status
 
-The integration is fully implemented and enabled by default. All endpoints follow the CommonGrants Protocol specification and provide standardized access to opportunity data.
+The integration is fully implemented and enabled by default. All endpoints follow the CommonGrants Protocol specification and provide standardized access to opportunity data. OpenAPI specification generation is available for documentation and client generation purposes.
