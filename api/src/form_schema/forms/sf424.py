@@ -975,7 +975,7 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "definition": "/properties/delinquent_federal_debt",
-                "title": "If 'Yes,' provide explanation in attachment."
+                "widget": "Radio"
             },
             {
                 "type": "field",
