@@ -431,6 +431,9 @@ export const wrapSection = ({
 };
 
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
   return (
     !!mightBeAnObject &&
     !isArray(mightBeAnObject) &&
