@@ -81,11 +81,7 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
         stripped,
         formSchema,
       );
-      // eslint-disable-next-line no-console
-      console.log(
-        "[ApplyForm] hydrated from FormData → shaped object:",
-        shaped,
-      );
+
       return shaped;
     }
     return formData as object;
