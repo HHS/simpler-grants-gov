@@ -362,17 +362,6 @@ export const buildField = ({
         : ({ enumOptions } as WidgetOptions);
   }
 
-  // DEBUG: trace the debt radio wiring (safe to remove)
-  if (name === "delinquent_federal_debt") {
-    // eslint-disable-next-line no-console
-    console.log("[424] debt field", {
-      type,
-      schemaType: fieldSchema.type,
-      value,
-      options,
-    });
-  }
-
   const Widget = widgetComponents[type];
   if (!Widget) {
     // eslint-disable-next-line no-console
