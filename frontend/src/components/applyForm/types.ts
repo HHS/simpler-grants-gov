@@ -56,6 +56,7 @@ export type WidgetTypes =
   | "TextArea"
   | "Radio"
   | "Select"
+  | "MultiSelect"
   | "Budget424aSectionA"
   | "Budget424aSectionB"
   | "Budget424aSectionC"
