@@ -1,20 +1,16 @@
+"use client";
+
 import {
   ariaDescribedByIds,
   FormContextType,
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-
-import { ChangeEvent, FocusEvent, useCallback } from "react";
+import React, { ChangeEvent, FocusEvent, useCallback, useEffect, useState } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 
-/** The `CheckBoxWidget` is a widget for rendering boolean properties.
- *  It is typically used to represent a boolean.
- *
- * @param props - The `WidgetProps` for this component
- */
 function CheckboxWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -29,13 +25,22 @@ function CheckboxWidget<
   schema,
   autofocus = false,
   rawErrors = [],
-  // passing on* functions made optional
-  onChange = () => ({}),
+  onChange,
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title } = schema;
+  const { title, description } = schema;
   const error = rawErrors.length ? true : undefined;
+
+  // Local controlled state for instant UI and resilience on remounts
+  const [checked, setChecked] = useState<boolean>(Boolean(value));
+
+  // Only sync from parent when it truly sends a boolean (avoid clobber with undefined)
+  useEffect(() => {
+    if (typeof value === "boolean") {
+      setChecked(value);
+    }
+  }, [value]);
 
   const handleBlur = useCallback(
     (event: FocusEvent<HTMLInputElement>) => onBlur(id, event.target.checked),
@@ -43,7 +48,11 @@ function CheckboxWidget<
   );
 
   const handleChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.checked),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const next = event.target.checked;
+      setChecked(next);
+      if (typeof onChange === "function") onChange(next);
+    },
     [onChange],
   );
 
@@ -51,7 +60,6 @@ function CheckboxWidget<
     (event: FocusEvent<HTMLInputElement>) => onFocus(id, event.target.checked),
     [onFocus, id],
   );
-  const description = options?.description ?? schema.description;
 
   const label = required ? (
     <>
@@ -64,14 +72,15 @@ function CheckboxWidget<
 
   return (
     <FormGroup error={error} key={`form-group__checkbox--${id}`}>
+      <input type="hidden" name={id} value={checked ? "true" : "false"} />
+
       <Checkbox
         id={id}
         label={label}
-        labelDescription={description}
-        name={id}
-        // for a single checkbox, the value is always true
-        value={"true"}
-        defaultChecked={Boolean(value)}
+        labelDescription={(options?.description ?? description) as string | undefined}
+        name={`${id}__display`} // avoid duplicate name collisions with hidden input
+        value="true"
+        checked={checked}
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}

@@ -371,15 +371,9 @@ export const buildField = ({
   if (name === "delinquent_federal_debt") {
     // eslint-disable-next-line no-console
     console.log("[424] debt field", {
-<<<<<<< Updated upstream
-      type,
-      schemaType: fieldSchema.type,
-      value,
-=======
       type, // e.g. "Radio"
       schemaType: fieldSchema.type, // "boolean"
       value, // true | false | undefined
->>>>>>> Stashed changes
       options,
     });
   }
@@ -498,13 +492,6 @@ export const wrapSection = ({
   );
 };
 
-<<<<<<< Updated upstream
-const isBasicallyAnObject = (mightBeAnObject: unknown): boolean =>
-  !!mightBeAnObject &&
-  !isArray(mightBeAnObject) &&
-  !isString(mightBeAnObject) &&
-  !isNumber(mightBeAnObject);
-=======
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   if (typeof mightBeAnObject === "boolean") {
     return false;
@@ -516,7 +503,6 @@ const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
     !isNumber(mightBeAnObject)
   );
 };
->>>>>>> Stashed changes
 
 const isEmptyField = (mightBeEmpty: unknown): boolean => {
   if (mightBeEmpty === undefined) {

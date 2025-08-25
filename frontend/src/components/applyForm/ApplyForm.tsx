@@ -3,19 +3,19 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
-import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
-import { Attachment } from "src/types/attachmentTypes";
-
 import { useTranslations } from "next-intl";
 import { useActionState, useMemo } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
+
+import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
+import { Attachment } from "src/types/attachmentTypes";
 
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormFields } from "./FormFields";
 import { FormValidationWarning, UiSchema } from "./types";
-import { getFieldsForNav } from "./utils";
+import { getFieldsForNav, shapeFormData } from "./utils";
 
 const ApplyForm = ({
   applicationId,
@@ -36,6 +36,7 @@ const ApplyForm = ({
 }) => {
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
+
   const required = t.rich("required", {
     abr: (content) => (
       <abbr
@@ -57,7 +58,20 @@ const ApplyForm = ({
 
   const { formData, error, saved } = formState;
 
-  const formObject = !isEmpty(formData) ? formData : savedFormData;
+  const hydratedFormObject = useMemo(() => {
+    if (formData instanceof FormData) {
+      let hasEntries = false;
+      for (const _ of formData.entries()) {
+        hasEntries = true;
+        break;
+      }
+      if (hasEntries) {
+        return shapeFormData<Record<string, unknown>>(formData, formSchema);
+      }
+    }
+    return savedFormData;
+  }, [formData, formSchema, savedFormData]);
+
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
 
   if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
@@ -72,7 +86,6 @@ const ApplyForm = ({
     <form
       className="flex-1 margin-top-2 simpler-apply-form"
       action={formAction}
-      // turns off html5 validation so all error displays are consistent
       noValidate
     >
       <div className="display-flex flex-justify">
@@ -87,6 +100,7 @@ const ApplyForm = ({
           {pending ? "Saving..." : "Save"}
         </Button>
       </div>
+
       <div className="usa-in-page-nav-container">
         <FormGroup className="order-2 width-full">
           <ApplyFormMessage
@@ -97,7 +111,7 @@ const ApplyForm = ({
           <AttachmentsProvider value={attachments ?? []}>
             <FormFields
               errors={saved ? validationWarnings : null}
-              formData={formObject}
+              formData={hydratedFormObject}
               schema={formSchema}
               uiSchema={uiSchema}
             />
