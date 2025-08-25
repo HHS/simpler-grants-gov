@@ -5,6 +5,7 @@ import {
   optionId,
   RJSFSchema,
   StrictRJSFSchema,
+  EnumOptionsType,
 } from "@rjsf/utils";
 
 import { FocusEvent, useCallback, useMemo } from "react";
@@ -14,10 +15,8 @@ import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
-/** The `RadioWidget` is a widget for rendering a radio group.
- *  It is typically used with a string property constrained with enum options.
- *
- * @param props - The `WidgetProps` for this component
+/** The `RadioWidget` renders a radio group.
+ *  It now prefers options.enumOptions (supplied by our utils), and falls back to schema.enum.
  */
 function RadioWidget<
   T = unknown,
@@ -34,34 +33,53 @@ function RadioWidget<
   autofocus = false,
   rawErrors = [],
   updateOnInput = false,
-  // passing on* functions made optional
   onChange = () => ({}),
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const { title, enum: enumFromSchema, description } = schema;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { enumDisabled, emptyValue } = options;
+  const { enumDisabled, emptyValue } = options as {
+    enumDisabled?: unknown[];
+    emptyValue?: unknown;
+  };
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
-  const enumOptions = useMemo(
-    () =>
-      (enumFromSchema ?? []).map((value) => ({
-        label: String(value),
-        value,
+  // Prefer options.enumOptions (can hold boolean values), else fall back to schema.enum
+  const enumOptions = useMemo<EnumOptionsType<S>[]>(() => {
+    const uiEnum = (options as any)?.enumOptions as EnumOptionsType<S>[] | undefined;
+    if (Array.isArray(uiEnum) && uiEnum.length) {
+      return uiEnum;
+    }
+    const fromSchema =
+      Array.isArray(enumFromSchema) && enumFromSchema.length
+        ? enumFromSchema.map((v) => ({ label: String(v), value: v }))
+        : [];
+    return fromSchema as EnumOptionsType<S>[];
+  }, [options, enumFromSchema]);
+
+  // DEBUG (safe to remove):
+  if (id === "delinquent_federal_debt") {
+    // should show two options with boolean values true/false
+    // and current value either true/false/undefined
+    // eslint-disable-next-line no-console
+    console.log("[RadioWidget] debt field", {
+      id,
+      value,
+      valueType: typeof value,
+      enumOptions: enumOptions.map((o) => ({
+        label: o.label,
+        value: o.value,
+        valueType: typeof o.value,
       })),
-    [enumFromSchema],
-  );
+    });
+  }
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) =>
       onBlur(
         id,
-        enumOptionsValueForIndex<S>(
-          target && target.value,
-          enumOptions,
-          emptyValue,
-        ),
+        enumOptionsValueForIndex<S>(target && target.value, enumOptions, emptyValue),
       ),
     [onBlur, id, enumOptions, emptyValue],
   );
@@ -70,14 +88,11 @@ function RadioWidget<
     ({ target }: FocusEvent<HTMLInputElement>) =>
       onFocus(
         id,
-        enumOptionsValueForIndex<S>(
-          target && target.value,
-          enumOptions,
-          emptyValue,
-        ),
+        enumOptionsValueForIndex<S>(target && target.value, enumOptions, emptyValue),
       ),
     [onFocus, id, enumOptions, emptyValue],
   );
+
   const error = rawErrors.length ? true : undefined;
   const describedby = error
     ? `error-for-${id}`
@@ -99,11 +114,12 @@ function RadioWidget<
         <ErrorMessage>
           {typeof rawErrors[0] === "string"
             ? rawErrors[0]
-            : Object.values(rawErrors[0])
-                .map((value) => value)
+            : Object.values(rawErrors[0] as Record<string, string>)
+                .map((v) => v)
                 .join(",")}
         </ErrorMessage>
       )}
+
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
           const checked = enumOptionsIsSelected<S>(option.value, value);
