@@ -53,6 +53,7 @@ export const UiJsonSchema: RJSFSchema = {
             "TextArea",
             "Radio",
             "Select",
+            "MultiSelect",
             "Budget424a",
             "Budget424aSectionA",
             "Budget424aSectionB",
