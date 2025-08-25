@@ -8,7 +8,6 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
-import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +59,6 @@ async function FormPage({ params }: formPageProps) {
 
   return (
     <>
-      <BookmarkBanner containerClasses="margin-y-3" />
       <GridContainer>
         <Breadcrumbs
           breadcrumbList={[
