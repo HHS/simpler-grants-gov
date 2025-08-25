@@ -7,7 +7,13 @@ import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
-import React, { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -71,9 +77,15 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
   const clientHydratedData: object = useMemo(() => {
     if (typeof FormData !== "undefined" && formData instanceof FormData) {
       const stripped = stripIndexPrefix(formData);
-      const shaped = shapeFormData<Record<string, unknown>>(stripped, formSchema);
+      const shaped = shapeFormData<Record<string, unknown>>(
+        stripped,
+        formSchema,
+      );
       // eslint-disable-next-line no-console
-      console.log("[ApplyForm] hydrated from FormData → shaped object:", shaped);
+      console.log(
+        "[ApplyForm] hydrated from FormData → shaped object:",
+        shaped,
+      );
       return shaped;
     }
     return formData as object;
@@ -94,7 +106,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
       setFormVersion((v) => v + 1);
     }
   }, [formState.formData]);
-
 
   const boolSignature = useMemo(() => {
     try {
@@ -118,7 +129,11 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
 
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
 
-  if (!formSchema || !("properties" in formSchema) || isEmpty(formSchema.properties)) {
+  if (
+    !formSchema ||
+    !("properties" in formSchema) ||
+    isEmpty(formSchema.properties)
+  ) {
     return (
       <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
         Error rendering form
