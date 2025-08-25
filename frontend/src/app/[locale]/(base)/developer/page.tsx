@@ -3,6 +3,8 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
+import DeveloperPageSections from "src/components/developer/DeveloperSections";
+
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -13,13 +15,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export default async function Developer({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Developer" });
-
-  return (
-    <>
-      <h1>{t("pageTitle")}</h1>
-    </>
-  );
+export default function Developer() {
+  return <DeveloperPageSections />;
 }
