@@ -1,4 +1,3 @@
-import { getSession } from "src/services/auth/session";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiKey } from "src/types/apiKeyTypes";
 
@@ -60,33 +59,3 @@ export const handleRenameApiKey = async (
   });
   return (await response.json()) as ApiKeyResponse;
 };
-
-// Fetch API keys for a user (server-side)
-export const fetchApiKeys = async (): Promise<ApiKey[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    return [];
-  }
-  
-  const response = await fetchUserWithMethod("POST")({
-    subPath: `${session.user_id}/api-keys/list`,
-    additionalHeaders: {
-      "X-SGG-Token": session.token,
-    },
-    body: {},
-  });
-  
-  const json = (await response.json()) as ApiKeyListResponse;
-  return json.data;
-};
-
-// Client-side API key fetching helper for use with useClientFetch
-export const getApiKeysEndpoint = () => "/api/user/api-keys/list";
-
-export const getApiKeysRequestConfig = () => ({
-  method: "POST" as const,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({}),
-});

@@ -5,7 +5,7 @@ import { useUser } from "src/services/auth/useUser";
 import { 
   getApiKeysEndpoint, 
   getApiKeysRequestConfig 
-} from "src/services/fetch/fetchers/apiKeyFetcher";
+} from "src/services/fetch/fetchers/apiKeyClientHelpers";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
