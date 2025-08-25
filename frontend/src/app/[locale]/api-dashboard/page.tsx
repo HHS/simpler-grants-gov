@@ -4,7 +4,7 @@ import { LocalizedPageProps } from "src/types/intl";
 import Head from "next/head";
 import { getTranslations } from "next-intl/server";
 
-import ApiDashboard from "src/components/dev/ApiDashboard";
+import ApiDashboard from "src/components/developer/apiDashboard/ApiDashboard";
 import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {

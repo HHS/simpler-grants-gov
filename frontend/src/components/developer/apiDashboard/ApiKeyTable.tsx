@@ -10,7 +10,7 @@ import {
 } from "src/components/TableWithResponsiveHeader";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { ApiKey } from "./ApiDashboard";
-import EditApiKeyModal from "./EditApiKeyModal";
+import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableProps {
   apiKeys: ApiKey[];
@@ -60,9 +60,10 @@ const EditActionDisplay = ({
 }) => {
   return (
     <div className="display-flex flex-align-center">
-      <EditApiKeyModal 
+      <ApiKeyModal 
+        mode="edit"
         apiKey={apiKey}
-        onApiKeyRenamed={onApiKeyRenamed}
+        onApiKeyUpdated={onApiKeyRenamed}
       />
     </div>
   );

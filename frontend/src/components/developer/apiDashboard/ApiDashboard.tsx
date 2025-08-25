@@ -9,7 +9,7 @@ import { Button } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 import ApiKeyTable from "./ApiKeyTable";
-import CreateApiKeyModal from "./CreateApiKeyModal";
+import ApiKeyModal from "./ApiKeyModal";
 
 export interface ApiKey {
   api_key_id: string;
@@ -96,7 +96,7 @@ export default function ApiDashboard() {
     <div className="grid-container">
       <div className="display-flex flex-justify margin-bottom-4">
         <h1 className="margin-y-0">API Dashboard</h1>
-        <CreateApiKeyModal onApiKeyCreated={handleApiKeyCreated} />
+        <ApiKeyModal mode="create" onApiKeyUpdated={handleApiKeyCreated} />
       </div>
       
       <ApiKeyTable 
