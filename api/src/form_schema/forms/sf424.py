@@ -166,7 +166,7 @@ FORM_JSON_SCHEMA = {
         },
         "state_receive_date": {
             # A user will never fill this in, it's just on the form for agencies to use
-            "type": "null",
+            "type": "string",
             "title": "Date Received By State",
             "description": "Enter the date received by the state, if applicable.",
             "format": "date",
@@ -174,7 +174,7 @@ FORM_JSON_SCHEMA = {
         },
         "state_application_id": {
             # A user will never fill this in, it's just on the form for agencies to use
-            "type": "null",
+            "type": "string",
             "title": "State Application Identifier",
             "description": "Enter the identifier assigned by the state, if applicable.",
             "minLength": 0,
@@ -481,14 +481,14 @@ FORM_JSON_SCHEMA = {
             "description": "Enter a valid email Address.",
         },
         "aor_signature": {
-            "type": "null",
+            "type": "string",
             "title": "AOR Signature",
             "description": "Completed by Grants.gov upon submission.",
             "minLength": 1,
             "maxLength": 144,
         },
         "date_signed": {
-            "type": "null",
+            "type": "string",
             "format": "date",
             "title": "Date Signed",
             "description": "Completed by Grants.gov upon submission.",
@@ -975,7 +975,6 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "definition": "/properties/delinquent_federal_debt",
-                "widget": "Radio",
             },
             {
                 "type": "field",
