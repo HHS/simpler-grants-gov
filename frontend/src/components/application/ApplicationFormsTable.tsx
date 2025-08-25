@@ -246,8 +246,6 @@ const CompetitionStatus = ({
         {t("complete")}
       </div>
     );
-  } else {
-    return <>-</>;
   }
 };
 
