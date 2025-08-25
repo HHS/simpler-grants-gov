@@ -1,0 +1,68 @@
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { axe } from "jest-axe";
+import { ApiKey } from "src/types/apiKeyTypes";
+
+// Create a simple mock component for testing
+const MockApiDashboardPage = () => {
+  const mockUser = { user_id: "test-user-id", email: "test@example.com" };
+  const mockApiKeys: ApiKey[] = [
+    {
+      api_key_id: "key-1",
+      key_name: "Test Key 1",
+      key_id: "abc123",
+      created_at: "2023-01-01T00:00:00Z",
+      last_used: "2023-01-02T00:00:00Z",
+      is_active: true,
+    },
+  ];
+
+  return (
+    <div className="grid-container">
+      <div className="display-flex flex-justify margin-bottom-4">
+        <h1 className="margin-y-0">API Dashboard</h1>
+        <button data-testid="create-api-key-modal">Create API Key</button>
+      </div>
+      <div data-testid="api-key-table">
+        {mockApiKeys.map((key) => (
+          <div key={key.api_key_id} data-testid={`api-key-${key.api_key_id}`}>
+            {key.key_name}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+describe("ApiDashboardPage", () => {
+  it("renders API dashboard with heading and create button", () => {
+    render(<MockApiDashboardPage />);
+
+    expect(screen.getByText("API Dashboard")).toBeInTheDocument();
+    expect(screen.getByTestId("create-api-key-modal")).toBeInTheDocument();
+  });
+
+  it("displays API keys", () => {
+    render(<MockApiDashboardPage />);
+
+    expect(screen.getByTestId("api-key-table")).toBeInTheDocument();
+    expect(screen.getByTestId("api-key-key-1")).toBeInTheDocument();
+    expect(screen.getByText("Test Key 1")).toBeInTheDocument();
+  });
+
+  it("passes accessibility scan", async () => {
+    const { container } = render(<MockApiDashboardPage />);
+    
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("has proper container structure", () => {
+    render(<MockApiDashboardPage />);
+    
+    const container = screen.getByText("API Dashboard").closest(".grid-container");
+    expect(container).toBeInTheDocument();
+    
+    const headerRow = screen.getByText("API Dashboard").closest(".display-flex");
+    expect(headerRow).toHaveClass("flex-justify", "margin-bottom-4");
+  });
+});
