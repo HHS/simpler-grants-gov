@@ -90,6 +90,7 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/agencies:
     post:
@@ -218,6 +219,7 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/token/logout:
     post:
@@ -432,6 +434,7 @@ paths:
                     - order_by: opportunity_id
                       sort_direction: ascending
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}:
     get:
@@ -815,6 +818,7 @@ paths:
 
         '
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
@@ -1123,6 +1127,7 @@ paths:
 
         '
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
@@ -1263,6 +1268,48 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserApiKeyRenameRequest'
+      security:
+      - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: api_key_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiKeyDeleteResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Delete (deactivate) an API key for the authenticated user
       security:
       - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
@@ -4558,6 +4605,19 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserApiKeyDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAttachmentCreateRequest:
       type: object
       properties:
@@ -4818,4 +4878,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
 
