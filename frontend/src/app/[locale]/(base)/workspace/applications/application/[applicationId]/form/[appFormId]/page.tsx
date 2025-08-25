@@ -57,6 +57,8 @@ async function FormPage({ params }: formPageProps) {
     formValidationWarnings,
   } = data;
 
+  console.log(data.applicationResponse)
+
   return (
     <>
       <GridContainer>

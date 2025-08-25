@@ -1,5 +1,5 @@
 import $Refparser from "@apidevtools/json-schema-ref-parser";
-import { RJSFSchema } from "@rjsf/utils";
+import { RJSFSchema, EnumOptionsType } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
@@ -32,6 +32,8 @@ import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
+
+type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -146,7 +148,7 @@ export const getFieldName = ({
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+      .join("--");
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -177,13 +179,11 @@ const widgetComponents: Record<
 
 export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
-    return;
+    return undefined;
   }
   try {
     return getSchemaObjectFromPointer(target, path);
   } catch (e) {
-    // this is not ideal, but it seems like the desired behavior is to return undefined if the
-    // path is not found on the target, and the library throws an error instead
     if ((e as Error).message.includes("Invalid reference token:")) {
       return undefined;
     }
@@ -209,13 +209,13 @@ export const buildField = ({
 
   let fieldSchema = {} as RJSFSchema;
   let name = "";
-  let value = "" as string | number | object | undefined;
+  let value: unknown = undefined;
   let rawErrors: string[] | FormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
     name = uiFieldObject.name ? uiFieldObject.name : "";
     if (!name) {
-      console.error("name misssing from multiField definition");
+      console.error("name missing from multiField definition");
       throw new Error("Could not build field");
     }
     fieldSchema = definition
@@ -233,8 +233,6 @@ export const buildField = ({
         (acc, value) => ({ ...acc, ...value }),
         {},
       );
-    // multifield needs to retain field location for errors.
-    // this may not work with nested required fields
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -248,14 +246,35 @@ export const buildField = ({
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
-    value = getByPointer(formData, path) as string | number | undefined;
-    const fieldType =
+
+    const rawVal = getByPointer(formData, path) as unknown;
+    const schemaType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "";
-    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
+
+    // Normalize value by type (widget override only affects *display*, keep the underlying type)
+    if (schemaType === "boolean") {
+      value =
+        typeof rawVal === "boolean"
+          ? rawVal
+          : typeof rawVal === "string"
+            ? rawVal === "true"
+            : undefined;
+    } else if (schemaType === "array") {
+      value = Array.isArray(rawVal)
+        ? (rawVal as unknown[]).map((v: unknown) => String(v))
+        : [];
+    } else {
+      value =
+        typeof rawVal === "string" || typeof rawVal === "number"
+          ? (rawVal as string | number)
+          : undefined;
+    }
+
+    rawErrors = formatFieldWarnings(errors, name, schemaType, requiredField);
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -263,24 +282,35 @@ export const buildField = ({
     throw new Error("Invalid or missing field schema");
   }
 
-  // fields that have no definition won't have a name, but will havea schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
-  // should filter and match warnings to field earlier in the process
-
   const type = determineFieldType({ uiFieldObject, fieldSchema });
+
+  // If someone configures a boolean as Radio, ensure the schema has enum so the widget renders
+  if (type === "Radio" && fieldSchema.type !== "boolean") {
+    console.warn(`Radio widget expects a boolean schema: ${name}`, fieldSchema);
+  }
+  if (type === "Radio" && fieldSchema.type === "boolean" && !fieldSchema.enum) {
+    fieldSchema = { ...fieldSchema, enum: [true, false] };
+  }
+  if (type === "Select" && fieldSchema.type === "array") {
+    console.warn(`Array schema detected; did you intend MultiSelect? ${name}`);
+  }
 
   // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
-  let options = {};
+  let options: WidgetOptions = {};
 
-  if (type === "Select" || type === "MultiSelect") {
+  // Provide enumOptions for Select, MultiSelect, and Radio (even if Radio doesn't consume them today)
+  if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
-    if (fieldSchema.type === "array") {
+    if (fieldSchema.type === "boolean") {
+      enums = ["true", "false"];
+    } else if (fieldSchema.type === "array") {
       const item = Array.isArray(fieldSchema.items)
         ? fieldSchema.items[0]
         : fieldSchema.items;
@@ -292,21 +322,42 @@ export const buildField = ({
         enums = ((item as { enum?: unknown[] }).enum ?? []).map(String);
       }
     } else if (Array.isArray(fieldSchema.enum)) {
-      enums = fieldSchema.enum.map(String);
+      // If we injected [true,false], keep labels friendly
+      enums = fieldSchema.enum.map((v: unknown) => String(v));
     }
 
-    const enumOptions = enums.map((label) => ({
-      value: String(label),
-      label: getSimpleTranslationsSync({
-        nameSpace: "Form",
-        translateableString: String(label),
-      }),
-    }));
+    const enumOptions: EnumOptionsType<RJSFSchema>[] = enums.map(
+      (str: string): EnumOptionsType<RJSFSchema> => {
+        const label =
+          fieldSchema.type === "boolean"
+            ? str === "true"
+              ? "Yes"
+              : "No"
+            : getSimpleTranslationsSync({
+                nameSpace: "Form",
+                translateableString: str,
+              });
+        return { value: str, label };
+      },
+    );
 
     options =
       type === "Select"
-        ? { enumOptions, emptyValue: "- Select -" }
-        : { enumOptions };
+        ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
+        : ({ enumOptions } as WidgetOptions);
+  }
+
+  // Debug consoles for the SF-424 delinquent debt field
+  if (name === "delinquent_federal_debt") {
+    console.log("[424] debt field", {
+      type,                         // e.g. "Radio"
+      schemaType: fieldSchema.type, // "boolean"
+      value,                        // true | false | undefined
+      options,
+    });
+    if (type !== "Radio") {
+      throw new Error("delinquent_federal_debt must render as Radio");
+    }
   }
 
   const Widget = widgetComponents[type];
@@ -316,9 +367,7 @@ export const buildField = ({
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  // IMPORTANT:
-  // return a React element so hooks execute during render,
-  // under the AttachmentsProvider context.
+  // Return an element so hooks execute under the AttachmentsProvider context.
   return (
     <Widget
       id={name}
@@ -452,7 +501,6 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
 };
 
 // if a nested field contains no defined items, remove it from the data
-// this may not be necessary, as JSON.stringify probably does the same thing
 export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
@@ -502,17 +550,6 @@ const getKeyParentPath = (key: string, parentPath?: string) => {
   return removePropertyPaths(keyParent);
 };
 
-/*
-  gets an array of all paths to required fields in the form schema, not
-  including any intermediate paths that do not represent actual fields
-  assumes a dereferenced but not condensed schema (property paths will still be in place)
-
-  does not do conditionals. For that we'd have to first:
-  - gather all conditional rules
-  - check all conditional rules against form state / values
-  - re-annotate the form schema with new "required" designations
-  At that point we're basically running validation
-*/
 export const getRequiredProperties = (
   formSchema: RJSFSchema,
   parentPath?: string,
@@ -572,13 +609,7 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
-// dereferences all def links so that all necessary property definitions
-// can be found directly within the property without referencing $defs.
-// also resolves "allOf" references within "properties" or "$defs" fields.
-// not merging the entire schema because many schemas have top level
-// "allOf" blocks that often contain "if"/"then" statements or other things
-// that the mergeAllOf library can't handle out of the box, and we don't need
-// to condense in any case
+// dereference/condense schema for easy lookup
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
@@ -600,15 +631,6 @@ export const processFormSchema = async (
   }
 };
 
-/*
-  this will flatten any properties objects so that we can directly reference field paths
-  within a json schema without traversing nested "properties". Any other object attributes
-  and values are unchanged
-
-  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
-      { path: { nested: 'value' } }
-*/
-
 export const condenseFormSchemaProperties = (schema: object): object => {
   return Object.entries(schema).reduce(
     (condensed: Record<string, unknown>, [key, value]: [string, unknown]) => {
@@ -628,19 +650,3 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     {},
   );
 };
-
-// This is only needed when extracting an application response from the application endpoint's
-// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
-// the application detail contains an empty array for the form response if no
-// forms have been saved or an application_response with a form_id
-// export const getApplicationResponse = (
-//   forms: [] | ApplicationFormDetail[],
-//   formId: string,
-// ): ApplicationResponseDetail | object => {
-//   if (forms.length > 0) {
-//     const form = forms.find((form) => form?.form_id === formId);
-//     return form?.application_response || {};
-//   } else {
-//     return {};
-//   }
-// };
