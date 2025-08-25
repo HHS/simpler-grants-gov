@@ -51,8 +51,11 @@ function ApiKeyInput({
   return (
     <FormGroup error={!!validationError}>
       <label htmlFor={inputId}>
-        {t("apiKeyNameLabel")}{" "}
-        <span className="usa-hint usa-hint--required">{t("required")}</span>
+        {t.rich("apiKeyNameLabel", {
+          required: (chunks) => (
+            <span className="usa-hint usa-hint--required">{chunks}</span>
+          ),
+        })}
       </label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
@@ -292,12 +295,13 @@ export default function ApiKeyModal({
           />
         ) : (
           <>
+            <p>{isCreate ? t("createDescription") : t("editDescription")}</p>
             {apiError && (
               <SimplerAlert
-                type="error"
-                buttonId="error-alert-close"
-                messageText={isCreate ? t("createErrorMessage") : t("editErrorMessage")}
                 alertClick={() => setApiError(false)}
+                buttonId="apiKeyModalApiError"
+                messageText={isCreate ? t("createErrorMessage") : t("editErrorMessage")}
+                type="error"
               />
             )}
             <ApiKeyInput
@@ -307,34 +311,31 @@ export default function ApiKeyModal({
               mode={mode}
             />
             <ModalFooter>
-              {isCreate ? (
-                <Button
-                  type="button"
-                  disabled={loading}
-                  onClick={handleSubmit}
-                  data-testid="create-api-key-submit-button"
-                >
-                  {loading ? t("creating") : t("createButtonText")}
-                </Button>
+              {loading ? (
+                <LoadingButton 
+                  id={`${mode}-api-key-button`} 
+                  message={isCreate ? t("creating") : t("saving")} 
+                />
               ) : (
-                <Button
-                  type="button"
-                  disabled={loading}
-                  onClick={handleSubmit}
-                  data-testid="edit-api-key-submit-button"
-                >
-                  {loading ? t("saving") : t("saveChanges")}
-                </Button>
+                <>
+                  <Button
+                    type="button"
+                    onClick={handleSubmit}
+                    data-testid={`${mode}-api-key-submit-button`}
+                  >
+                    {isCreate ? t("createButtonText") : t("saveChanges")}
+                  </Button>
+                  <ModalToggleButton
+                    modalRef={modalRef}
+                    closer
+                    unstyled
+                    className="padding-105 text-center"
+                    onClick={onClose}
+                  >
+                    {t("cancel")}
+                  </ModalToggleButton>
+                </>
               )}
-              <ModalToggleButton
-                modalRef={modalRef}
-                closer
-                unstyled
-                className="padding-105 text-center"
-                data-testid={`cancel-${mode}-api-key-button`}
-              >
-                {t("cancel")}
-              </ModalToggleButton>
             </ModalFooter>
           </>
         )}
