@@ -63,7 +63,13 @@ export default async function FormPage({ params }: FormPageProps) {
     return <TopLevelError />;
   }
 
-  const { applicationResponse, formName, formSchema, formUiSchema } = data;
+  const {
+    applicationResponse,
+    formName,
+    formSchema,
+    formUiSchema,
+    applicationAttachments,
+  } = data;
 
   return (
     <>
@@ -72,6 +78,7 @@ export default async function FormPage({ params }: FormPageProps) {
         savedFormData={applicationResponse}
         formSchema={formSchema}
         uiSchema={formUiSchema}
+        attachments={applicationAttachments}
       />
     </>
   );
