@@ -10,7 +10,7 @@ import { OptionalStringDict } from "src/types/generalTypes";
 
 export const renameApiKeyHandler = async (
   request: Request,
-  { params }: { params: Promise<{ apiKeyId: string }> }
+  { params }: { params: Promise<{ apiKeyId: string }> },
 ) => {
   try {
     const session = await getSession();
@@ -36,7 +36,7 @@ export const renameApiKeyHandler = async (
       apiKeyId,
       apiKeyBody.key_name,
     );
-    
+
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
         `Error renaming API key: ${response.message}`,
@@ -44,7 +44,7 @@ export const renameApiKeyHandler = async (
         response.status_code,
       );
     }
-    
+
     return Response.json({
       message: "API key renamed successfully",
       data: response.data,

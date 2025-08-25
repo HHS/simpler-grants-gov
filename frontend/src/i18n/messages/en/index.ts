@@ -557,17 +557,22 @@ export const messages = {
       required: "*",
       placeholder: "e.g., Production API Key",
       createTitle: "Create New API Key",
-      createDescription: "Create a new key for use with the Simpler.Grants.gov API",
+      createDescription:
+        "Create a new key for use with the Simpler.Grants.gov API",
       editDescription: "Change the name of your Simpler.Grants.gov API key",
       createSuccessHeading: "API Key Created Successfully",
       editSuccessHeading: "API Key Renamed Successfully",
       successAlert: "Success!",
-      createSuccessMessage: "Your API key \"{keyName}\" has been created successfully.",
-      editSuccessMessage: "Your API key has been renamed from \"{originalName}\" to \"{keyName}\".",
+      createSuccessMessage:
+        'Your API key "{keyName}" has been created successfully.',
+      editSuccessMessage:
+        'Your API key has been renamed from "{originalName}" to "{keyName}".',
       close: "Close",
       errorHeading: "Error",
-      createErrorMessage: "There was an error creating your API key. Please try again.",
-      editErrorMessage: "There was an error renaming your API key. Please try again.",
+      createErrorMessage:
+        "There was an error creating your API key. Please try again.",
+      editErrorMessage:
+        "There was an error renaming your API key. Please try again.",
       nameRequiredError: "API key name is required",
       nameChangedError: "Please enter a different name",
       editTitle: "Rename API Key",

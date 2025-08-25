@@ -2,19 +2,20 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
-import { 
-  getApiKeysEndpoint, 
-  getApiKeysRequestConfig 
+import {
+  getApiKeysEndpoint,
+  getApiKeysRequestConfig,
 } from "src/services/fetch/fetchers/apiKeyClientHelpers";
+import { ApiKey } from "src/types/apiKeyTypes";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
-import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
 import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
-import { ApiKey } from "src/types/apiKeyTypes";
+import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
+import { USWDSIcon } from "src/components/USWDSIcon";
+import Spinner from "src/components/Spinner";
 
 export default function ApiDashboardPage() {
   const { user } = useUser();
@@ -24,19 +25,19 @@ export default function ApiDashboardPage() {
 
   const { clientFetch } = useClientFetch<{ data: ApiKey[] }>(
     "Error fetching API keys",
-    { authGatedRequest: true }
+    { authGatedRequest: true },
   );
 
   const fetchApiKeys = async () => {
     if (!user?.user_id) return;
-    
+
     try {
       setLoading(true);
       const response = await clientFetch(
         getApiKeysEndpoint(),
-        getApiKeysRequestConfig()
+        getApiKeysRequestConfig(),
       );
-      
+
       if (response?.data) {
         setApiKeys(response.data);
       }
@@ -61,12 +62,7 @@ export default function ApiDashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="grid-container">
-        <h1>API Dashboard</h1>
-        <div>Loading API keys...</div>
-      </div>
-    );
+    return <Spinner />;
   }
 
   if (error) {
@@ -88,11 +84,8 @@ export default function ApiDashboardPage() {
         <h1 className="margin-y-0">API Dashboard</h1>
         <ApiKeyModal mode="create" onApiKeyUpdated={handleApiKeyCreated} />
       </div>
-      
-      <ApiKeyTable 
-        apiKeys={apiKeys} 
-        onApiKeyRenamed={handleApiKeyRenamed}
-      />
+
+      <ApiKeyTable apiKeys={apiKeys} onApiKeyRenamed={handleApiKeyRenamed} />
     </div>
   );
 }

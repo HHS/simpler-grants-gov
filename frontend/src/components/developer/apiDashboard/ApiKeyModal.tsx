@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { ApiKey } from "src/types/apiKeyTypes";
 
 import { useTranslations } from "next-intl";
 import { RefObject, useCallback, useRef, useState } from "react";
@@ -21,7 +22,6 @@ import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { ApiKey } from "src/types/apiKeyTypes";
 
 interface ApiKeyModalProps {
   mode: "create" | "edit";
@@ -95,8 +95,10 @@ function SuccessContent({
 }) {
   const isCreate = mode === "create";
   const t = useTranslations("ApiDashboard.modal");
-  const heading = isCreate ? t("createSuccessHeading") : t("editSuccessHeading");
-  
+  const heading = isCreate
+    ? t("createSuccessHeading")
+    : t("editSuccessHeading");
+
   let message: string;
   if (isCreate) {
     message = t("createSuccessMessage", { keyName });
@@ -106,9 +108,7 @@ function SuccessContent({
 
   return (
     <>
-      <ModalHeading id={`${modalId}-heading`}>
-        {heading}
-      </ModalHeading>
+      <ModalHeading id={`${modalId}-heading`}>{heading}</ModalHeading>
       <SimplerAlert
         type="success"
         buttonId="success-alert-close"
@@ -129,11 +129,11 @@ function SuccessContent({
   );
 }
 
-export default function ApiKeyModal({ 
-  mode, 
-  apiKey, 
+export default function ApiKeyModal({
+  mode,
+  apiKey,
   onApiKeyUpdated,
-  triggerButtonProps = {}
+  triggerButtonProps = {},
 }: ApiKeyModalProps) {
   const modalRef = useRef<ModalRef>(null);
   const { user } = useUser();
@@ -155,13 +155,13 @@ export default function ApiKeyModal({
   }
 
   const { clientFetch } = useClientFetch<{ data: any }>(
-    `Error ${isCreate ? 'creating' : 'renaming'} API key`,
-    { authGatedRequest: true }
+    `Error ${isCreate ? "creating" : "renaming"} API key`,
+    { authGatedRequest: true },
   );
 
   const handleSubmit = useCallback(async () => {
     const nameToSubmit = apiKeyName?.trim() || (isEdit ? apiKey?.key_name : "");
-    
+
     if (!nameToSubmit) {
       setValidationError(t("nameRequiredError"));
       return;
@@ -185,7 +185,7 @@ export default function ApiKeyModal({
 
       let url: string;
       let method: string;
-      
+
       if (isCreate) {
         url = "/api/user/api-keys";
         method = "POST";
@@ -213,11 +213,22 @@ export default function ApiKeyModal({
       }
     } catch (error) {
       setApiError(true);
-      console.error(`Error ${isCreate ? 'creating' : 'renaming'} API key:`, error);
+      console.error(
+        `Error ${isCreate ? "creating" : "renaming"} API key:`,
+        error,
+      );
     } finally {
       setLoading(false);
     }
-  }, [apiKeyName, apiKey, user?.user_id, clientFetch, onApiKeyUpdated, isCreate, isEdit]);
+  }, [
+    apiKeyName,
+    apiKey,
+    user?.user_id,
+    clientFetch,
+    onApiKeyUpdated,
+    isCreate,
+    isEdit,
+  ]);
 
   const onClose = useCallback(() => {
     setValidationError(undefined);
@@ -227,10 +238,14 @@ export default function ApiKeyModal({
     setApiKeyName("");
   }, []);
 
-  const modalId = isCreate ? "create-api-key" : `edit-api-key-${apiKey?.api_key_id}`;
-  const titleText = success ? undefined : (
-    isCreate ? t("createTitle") : t("editTitle", { keyName: apiKey?.key_name })
-  );
+  const modalId = isCreate
+    ? "create-api-key"
+    : `edit-api-key-${apiKey?.api_key_id}`;
+  const titleText = success
+    ? undefined
+    : isCreate
+      ? t("createTitle")
+      : t("editTitle", { keyName: apiKey?.key_name });
 
   // Default trigger button configurations
   const defaultTriggerProps = {
@@ -273,7 +288,7 @@ export default function ApiKeyModal({
         type="button"
         {...finalTriggerProps}
       />
-      
+
       <SimplerModal
         modalRef={modalRef}
         className="text-wrap"
@@ -300,7 +315,9 @@ export default function ApiKeyModal({
               <SimplerAlert
                 alertClick={() => setApiError(false)}
                 buttonId="apiKeyModalApiError"
-                messageText={isCreate ? t("createErrorMessage") : t("editErrorMessage")}
+                messageText={
+                  isCreate ? t("createErrorMessage") : t("editErrorMessage")
+                }
                 type="error"
               />
             )}
@@ -312,9 +329,9 @@ export default function ApiKeyModal({
             />
             <ModalFooter>
               {loading ? (
-                <LoadingButton 
-                  id={`${mode}-api-key-button`} 
-                  message={isCreate ? t("creating") : t("saving")} 
+                <LoadingButton
+                  id={`${mode}-api-key-button`}
+                  message={isCreate ? t("creating") : t("saving")}
                 />
               ) : (
                 <>

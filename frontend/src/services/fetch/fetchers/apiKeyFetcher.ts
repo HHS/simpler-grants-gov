@@ -1,8 +1,7 @@
-import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiKey } from "src/types/apiKeyTypes";
+import { APIResponse } from "src/types/apiResponseTypes";
 
 import { fetchUserWithMethod } from "./fetchers";
-
 
 interface ApiKeyResponse extends APIResponse {
   data: ApiKey;

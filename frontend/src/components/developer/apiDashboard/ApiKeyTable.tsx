@@ -1,5 +1,6 @@
 "use client";
 
+import { ApiKey } from "src/types/apiKeyTypes";
 import { toShortMonthDate } from "src/utils/dateUtil";
 
 import { Button } from "@trussworks/react-uswds";
@@ -9,7 +10,6 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { ApiKey } from "src/types/apiKeyTypes";
 import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableProps {
@@ -17,11 +17,11 @@ interface ApiKeyTableProps {
   onApiKeyRenamed: () => void;
 }
 
-const ApiKeyNameDisplay = ({ 
-  apiKey, 
-  onApiKeyRenamed 
-}: { 
-  apiKey: ApiKey; 
+const ApiKeyNameDisplay = ({
+  apiKey,
+  onApiKeyRenamed,
+}: {
+  apiKey: ApiKey;
   onApiKeyRenamed: () => void;
 }) => {
   return (
@@ -29,9 +29,7 @@ const ApiKeyNameDisplay = ({
       <div className="font-sans-md text-bold margin-bottom-05">
         {apiKey.key_name}
       </div>
-      <div className="font-sans-xs text-base-dark">
-        {apiKey.key_id}
-      </div>
+      <div className="font-sans-xs text-base-dark">{apiKey.key_id}</div>
     </div>
   );
 };
@@ -51,16 +49,16 @@ const DateDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   );
 };
 
-const EditActionDisplay = ({ 
-  apiKey, 
-  onApiKeyRenamed 
-}: { 
-  apiKey: ApiKey; 
+const EditActionDisplay = ({
+  apiKey,
+  onApiKeyRenamed,
+}: {
+  apiKey: ApiKey;
   onApiKeyRenamed: () => void;
 }) => {
   return (
     <div className="display-flex flex-align-center">
-      <ApiKeyModal 
+      <ApiKeyModal
         mode="edit"
         apiKey={apiKey}
         onApiKeyUpdated={onApiKeyRenamed}
@@ -79,10 +77,7 @@ const DeleteActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
         disabled
         title="Delete functionality coming soon"
       >
-        <USWDSIcon
-          className="usa-icon margin-right-05"
-          name="delete"
-        />
+        <USWDSIcon className="usa-icon margin-right-05" name="delete" />
         Delete Key
       </Button>
     </div>
@@ -91,15 +86,12 @@ const DeleteActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
 
 const toApiKeyTableRow = (
   apiKey: ApiKey,
-  onApiKeyRenamed: () => void
+  onApiKeyRenamed: () => void,
 ): TableCellData[] => {
   return [
     {
       cellData: (
-        <ApiKeyNameDisplay 
-          apiKey={apiKey} 
-          onApiKeyRenamed={onApiKeyRenamed}
-        />
+        <ApiKeyNameDisplay apiKey={apiKey} onApiKeyRenamed={onApiKeyRenamed} />
       ),
       stackOrder: 0,
     },
@@ -109,10 +101,7 @@ const toApiKeyTableRow = (
     },
     {
       cellData: (
-        <EditActionDisplay 
-          apiKey={apiKey} 
-          onApiKeyRenamed={onApiKeyRenamed}
-        />
+        <EditActionDisplay apiKey={apiKey} onApiKeyRenamed={onApiKeyRenamed} />
       ),
       stackOrder: 2,
     },
@@ -123,13 +112,17 @@ const toApiKeyTableRow = (
   ];
 };
 
-export default function ApiKeyTable({ apiKeys, onApiKeyRenamed }: ApiKeyTableProps) {
+export default function ApiKeyTable({
+  apiKeys,
+  onApiKeyRenamed,
+}: ApiKeyTableProps) {
   if (!apiKeys.length) {
     return (
       <div className="usa-alert usa-alert--info">
         <div className="usa-alert__body">
           <p className="usa-alert__text">
-            You don't have any API keys yet. Create your first API key to get started.
+            You don't have any API keys yet. Create your first API key to get
+            started.
           </p>
         </div>
       </div>
@@ -144,7 +137,7 @@ export default function ApiKeyTable({ apiKeys, onApiKeyRenamed }: ApiKeyTablePro
   ];
 
   const tableRowData = apiKeys.map((apiKey) =>
-    toApiKeyTableRow(apiKey, onApiKeyRenamed)
+    toApiKeyTableRow(apiKey, onApiKeyRenamed),
   );
 
   return (

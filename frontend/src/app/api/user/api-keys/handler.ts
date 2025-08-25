@@ -17,7 +17,7 @@ export const createApiKeyHandler = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session to create API key");
     }
-    
+
     const apiKeyBody = (await request.json()) as OptionalStringDict;
 
     if (!apiKeyBody.key_name) {
@@ -29,7 +29,7 @@ export const createApiKeyHandler = async (request: Request) => {
       session.user_id,
       apiKeyBody.key_name,
     );
-    
+
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
         `Error creating API key: ${response.message}`,
@@ -37,7 +37,7 @@ export const createApiKeyHandler = async (request: Request) => {
         response.status_code,
       );
     }
-    
+
     return Response.json({
       message: "API key created successfully",
       data: response.data,
@@ -61,7 +61,7 @@ export const renameApiKeyHandler = async (request: Request) => {
     }
 
     const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/');
+    const pathSegments = url.pathname.split("/");
     const apiKeyId = pathSegments[pathSegments.length - 1];
 
     if (!apiKeyId) {
@@ -80,7 +80,7 @@ export const renameApiKeyHandler = async (request: Request) => {
       apiKeyId,
       apiKeyBody.key_name,
     );
-    
+
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
         `Error renaming API key: ${response.message}`,
@@ -88,7 +88,7 @@ export const renameApiKeyHandler = async (request: Request) => {
         response.status_code,
       );
     }
-    
+
     return Response.json({
       message: "API key renamed successfully",
       data: response.data,

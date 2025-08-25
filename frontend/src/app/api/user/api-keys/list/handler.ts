@@ -1,8 +1,4 @@
-import {
-  ApiRequestError,
-  readError,
-  UnauthorizedError,
-} from "src/errors";
+import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
 
@@ -13,11 +9,8 @@ export const listApiKeysHandler = async (request: Request) => {
       throw new UnauthorizedError("No active session to list API keys");
     }
 
-    const response = await handleListApiKeys(
-      session.token,
-      session.user_id,
-    );
-    
+    const response = await handleListApiKeys(session.token, session.user_id);
+
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(
         `Error listing API keys: ${response.message}`,
@@ -25,7 +18,7 @@ export const listApiKeysHandler = async (request: Request) => {
         response.status_code,
       );
     }
-    
+
     return Response.json({
       message: "API keys retrieved successfully",
       data: response.data,

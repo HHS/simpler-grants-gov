@@ -1,12 +1,17 @@
 "use client";
 
-import { UswdsIconNames } from "src/types/generalTypes";
 import { useUser } from "src/services/auth/useUser";
+import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRef } from "react";
-import { Button, Grid, ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
+import {
+  Button,
+  Grid,
+  ModalRef,
+  ModalToggleButton,
+} from "@trussworks/react-uswds";
 
 import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
