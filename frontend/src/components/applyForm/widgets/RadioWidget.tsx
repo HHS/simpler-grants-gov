@@ -1,13 +1,15 @@
-"use client"
+"use client";
 
 import {
+  enumOptionsIsSelected,
   EnumOptionsType,
+  enumOptionsValueForIndex,
   FormContextType,
   optionId,
   RJSFSchema,
   StrictRJSFSchema,
-  enumOptionsValueForIndex,
 } from "@rjsf/utils";
+
 import React, {
   FocusEvent,
   useCallback,
@@ -59,8 +61,11 @@ function RadioWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const { title, enum: enumFromSchema, description } = schema;
-  const { enumDisabled, emptyValue, enumOptions: uiEnumOptions } =
-    (options as LocalOptions<S>) ?? {};
+  const {
+    enumDisabled,
+    emptyValue,
+    enumOptions: uiEnumOptions,
+  } = (options as LocalOptions<S>) ?? {};
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   // Prefer options.enumOptions (provided by our utils), else fall back to schema.enum (rare)
@@ -168,8 +173,10 @@ function RadioWidget<
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
           // Our utils supply string values "true"/"false" for booleans
-          const optionValue = String(option.value) as "true" | "false";
-          const checked = picked === optionValue;
+          const checked = enumOptionsIsSelected<S>(
+            option.value,
+            value.toString(),
+          );
 
           const itemDisabled =
             Array.isArray(enumDisabled) &&
