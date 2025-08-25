@@ -4,16 +4,21 @@
 
 import { renameApiKeyHandler } from "src/app/api/user/api-keys/[apiKeyId]/handler";
 import { ApiKey } from "src/types/apiKeyTypes";
+import { UserSession } from "src/types/authTypes";
 
 import { NextRequest } from "next/server";
 
 // Mock the session
-const mockSession = {
+const mockSession: UserSession = {
   token: "test-token",
   user_id: "test-user-id",
+  email: "test@example.com",
+  session_duration_minutes: 60,
 };
 
-const mockGetSession = jest.fn(() => Promise.resolve(mockSession));
+const mockGetSession = jest.fn<Promise<UserSession | null>, []>(() =>
+  Promise.resolve(mockSession),
+);
 
 jest.mock("src/services/auth/session", () => ({
   getSession: () => mockGetSession(),
@@ -100,7 +105,9 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   });
 
   it("returns 401 when session has no token", async () => {
-    mockGetSession.mockResolvedValueOnce({ user_id: "test-user-id" });
+    mockGetSession.mockResolvedValueOnce({
+      user_id: "test-user-id",
+    } as Partial<UserSession> as UserSession);
 
     const request = new NextRequest(
       "http://localhost:3000/api/user/api-keys/test-key-id",
