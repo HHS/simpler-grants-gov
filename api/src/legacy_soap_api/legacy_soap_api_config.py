@@ -85,7 +85,7 @@ class SOAPOperationConfig:
     # are derived from the namespaces attribute in this class. The data in this
     # config should align with what the existing GG SOAP response namespaces. Not all tags have
     # namespaces or namespace prefixes.
-    namespace_keymap: dict[str, str] = field(default_factory=dict)
+    namespace_keymap: dict[str, str | None] = field(default_factory=dict)
 
 
 SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConfig]] = {
@@ -104,6 +104,14 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
                 "OpeningDate": "ns5",
                 "ClosingDate": "ns5",
                 "OfferingAgency": "ns4",
+                "AgencyContactInfo": None,  # No namespace prefix
+                "CompetitionID": None,  # No namespace prefix
+                "CompetitionTitle": None,  # No namespace prefix
+                "FundingOpportunityTitle": None,  # No namespace prefix
+                "FundingOpportunityNumber": None,  # No namespace prefix
+                "IsMultiProject": None,  # No namespace prefix
+                "PackageID": None,  # No namespace prefix
+                "SchemaURL": None,  # No namespace prefix
             },
         )
     },

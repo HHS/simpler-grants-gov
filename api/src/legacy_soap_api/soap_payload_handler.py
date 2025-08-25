@@ -232,16 +232,23 @@ def get_envelope_dict(soap_xml_dict: dict, operation_name: str) -> dict:
 def build_xml_from_dict(
     operation_name: str,
     xml_dict: dict[str, Any],
-    key_namespace_config: dict[str, str],
+    key_namespace_config: dict[str, str | None],
     namespaces: dict[str | None, str],
 ) -> bytes:
     soap_ns = namespaces.get("soap")
     envelope = Element(QName(soap_ns, "Envelope"), nsmap={"soap": soap_ns})
     body = SubElement(envelope, QName(soap_ns, "Body"))
+
+    # Get the namespace prefix for the root operation element
     element_tag_prefix = key_namespace_config.get(operation_name)
     element_tag_ns_uri = namespaces.get(element_tag_prefix)
     element = QName(element_tag_ns_uri, operation_name)
-    root_element = SubElement(body, element, nsmap=namespaces)
+
+    # Create the root element with proper namespace mapping
+    # We need to create a namespace map that excludes 'soap' since it's already on the envelope
+    root_nsmap = {k: v for k, v in namespaces.items() if k != "soap"}
+    root_element = SubElement(body, element, nsmap=root_nsmap)
+
     _build_xml_elements(root_element, xml_dict, key_namespace_config, namespaces)
     return etree.tostring(envelope, encoding="utf-8", xml_declaration=False)
 
@@ -249,14 +256,19 @@ def build_xml_from_dict(
 def _build_xml_elements(
     parent: etree._Element,
     xml_dict: dict[str, Any],
-    key_namespace_config: dict[str, str],
+    key_namespace_config: dict[str, str | None],
     namespaces: dict[str | None, str],
 ) -> None:
     for key, value in xml_dict.items():
-        ns_uri = namespaces.get(key_namespace_config.get(key))
+        # Get the namespace prefix for this element
+        ns_prefix = key_namespace_config.get(key)
+        ns_uri = namespaces.get(ns_prefix) if ns_prefix else None
 
-        # Add the namespace uri if it exists in the namespaces.
-        tag = QName(ns_uri, key) if ns_uri else key
+        # Create the element tag with proper namespace
+        if ns_uri:
+            tag = QName(ns_uri, key)
+        else:
+            tag = key
 
         if isinstance(value, dict):
             child = SubElement(parent, tag)
