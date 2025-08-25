@@ -9,7 +9,7 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { ApiKey } from "./ApiDashboard";
+import { ApiKey } from "src/types/apiTypes";
 import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableProps {
