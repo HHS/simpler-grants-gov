@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Developer from "src/app/[locale]/developer/page";
+import Developer from "src/app/[locale]/(base)/developer/page";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({
@@ -35,7 +35,7 @@ jest.mock("src/components/developer/DeveloperSections", () => {
 
 describe("Developer Page", () => {
   it("renders developer page sections", () => {
-    render(Developer());
+    render(<Developer />);
 
     expect(screen.getByTestId("developer-sections")).toBeInTheDocument();
     expect(screen.getByText("Developer Portal")).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe("Developer Page", () => {
   });
 
   it("passes accessibility scan", async () => {
-    const { container } = render(Developer());
+    const { container } = render(<Developer />);
     const results = await waitFor(() => axe(container));
 
     expect(results).toHaveNoViolations();
