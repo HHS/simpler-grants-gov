@@ -1270,6 +1270,48 @@ paths:
               $ref: '#/components/schemas/UserApiKeyRenameRequest'
       security:
       - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: api_key_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserApiKeyDeleteResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Delete (deactivate) an API key for the authenticated user
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
     post:
       parameters:
@@ -4559,6 +4601,19 @@ components:
           type:
           - object
           $ref: '#/components/schemas/UserApiKey'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserApiKeyDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code

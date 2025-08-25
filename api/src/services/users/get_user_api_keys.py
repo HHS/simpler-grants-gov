@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.adapters import db
+from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import UserApiKey
 
 logger = logging.getLogger(__name__)
@@ -29,3 +30,34 @@ def get_user_api_keys(db_session: db.Session, user_id: UUID) -> list[UserApiKey]
     )
 
     return api_keys
+
+
+def get_user_api_key(db_session: db.Session, user_id: UUID, api_key_id: UUID) -> UserApiKey:
+    """Get a specific API key for a user"""
+    logger.info(
+        "Getting specific API key for user",
+        extra={
+            "user_id": user_id,
+            "api_key_id": api_key_id,
+        },
+    )
+
+    api_key = db_session.execute(
+        select(UserApiKey).filter(
+            UserApiKey.api_key_id == api_key_id,
+            UserApiKey.user_id == user_id,
+        )
+    ).scalar_one_or_none()
+
+    if api_key is None:
+        raise_flask_error(404, "API key not found")
+
+    logger.info(
+        "Retrieved specific API key for user",
+        extra={
+            "user_id": user_id,
+            "api_key_id": api_key_id,
+        },
+    )
+
+    return api_key
