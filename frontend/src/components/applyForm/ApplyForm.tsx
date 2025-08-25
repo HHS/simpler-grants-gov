@@ -155,7 +155,6 @@ const ApplyForm: React.FC<ApplyFormProps> = ({
           {pending ? "Saving..." : "Save"}
         </Button>
       </div>
-
       <div className="usa-in-page-nav-container">
         <FormGroup className="order-2 width-full">
           <ApplyFormMessage

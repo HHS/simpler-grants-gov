@@ -608,7 +608,13 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) =>
     [] as Array<Record<string, unknown>>,
   );
 
-// dereference/condense schema for easy lookup
+// dereferences all def links so that all necessary property definitions
+// can be found directly within the property without referencing $defs.
+// also resolves "allOf" references within "properties" or "$defs" fields.
+// not merging the entire schema because many schemas have top level
+// "allOf" blocks that often contain "if"/"then" statements or other things
+// that the mergeAllOf library can't handle out of the box, and we don't need
+// to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
