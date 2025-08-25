@@ -629,4 +629,5 @@ export const condenseFormSchemaProperties = (schema: object): object => {
       return condensed;
     },
     {},
-  )};
+  );
+};
