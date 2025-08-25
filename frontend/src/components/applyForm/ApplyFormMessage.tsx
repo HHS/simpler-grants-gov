@@ -3,6 +3,9 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { FormValidationWarning } from "./types";
 
+const removeLeadingFieldPathCruft = (fieldName: string): string =>
+  fieldName.replace(/^\$\./, "");
+
 export const ApplyFormMessage = ({
   error,
   validationWarnings,
@@ -44,7 +47,9 @@ export const ApplyFormMessage = ({
         <ul>
           {validationWarnings.map((warning, index) => (
             <li key={index}>
-              <a href={`#${warning.field}`}>{warning.message}</a>
+              <a href={`#${removeLeadingFieldPathCruft(warning.field)}`}>
+                {warning.message}
+              </a>
             </li>
           ))}
         </ul>
