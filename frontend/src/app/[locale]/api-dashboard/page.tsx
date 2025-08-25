@@ -1,29 +1,26 @@
 import { Metadata } from "next";
+import { LocalizedPageProps } from "src/types/intl";
 
 import Head from "next/head";
-
+import { getTranslations } from "next-intl/server";
 
 import ApiDashboard from "src/components/dev/ApiDashboard";
 import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 
-export function generateMetadata() {
+export async function generateMetadata({ params }: LocalizedPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ApiDashboard" });
   const meta: Metadata = {
-    title: "API Dashboard | Simpler.Grants.gov",
-    description: "Manage your API keys for Simpler.Grants.gov",
+    title: t("pageTitle"),
+    description: t("metaDescription"),
   };
 
   return meta;
 }
 
-/**
- * View for managing API keys
- */
 export default function ApiDashboardPage() {
   return (
     <AuthenticationGate>
-      <Head>
-        <title>API Dashboard</title>
-      </Head>
       <div className="grid-container">
         <ApiDashboard />
       </div>

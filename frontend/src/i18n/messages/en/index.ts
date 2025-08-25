@@ -530,7 +530,7 @@ export const messages = {
     cantDoHeader: "Current limitations",
     cantDoParagraph:
       "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren’t available yet.</p>",
-    featureFlagsLink: "Manage API Keys",
+    apiDashboardLink: "Manage API Keys",
     iconSections: [
       {
         description:
@@ -548,6 +548,10 @@ export const messages = {
         title: "API reference",
       },
     ],
+  },
+  ApiDashboard: {
+    pageTitle: "API Dashboard | Simpler.Grants.gov",
+    metaDescription: "Manage your API keys for Simpler.Grants.gov",
   },
   Header: {
     navLinks: {

@@ -26,13 +26,13 @@ const DeveloperInfoContent = () => {
       <h4>{t("canDoSubHeader")}</h4>
       <p>{t("canDoParagraph")}</p>
       {user?.token ? (
-        <Link href="/dev/api-dashboard">
+        <Link href="/api-dashboard">
           <Button
             className="margin-y-2 usa-button--secondary"
             type="button"
             size="big"
           >
-            {t("featureFlagsLink")}
+            {t("apiDashboardLink")}
           </Button>
         </Link>
       ) : (
@@ -43,7 +43,7 @@ const DeveloperInfoContent = () => {
             className="margin-y-2 usa-button usa-button--secondary usa-button--big"
             type="button"
           >
-            {t("featureFlagsLink")}
+            {t("apiDashboardLink")}
           </ModalToggleButton>
           <LoginModal
             modalRef={modalRef as React.RefObject<ModalRef>}
