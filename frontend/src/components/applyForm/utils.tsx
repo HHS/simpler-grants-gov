@@ -629,6 +629,7 @@ export const condenseFormSchemaProperties = (schema: object): object => {
       return condensed;
     },
     {},
+<<<<<<< HEAD
   );
 };
 
@@ -647,3 +648,6 @@ export const condenseFormSchemaProperties = (schema: object): object => {
 //     return {};
 //   }
 // };
+=======
+  );
+>>>>>>> 32dabcdb2 (fix: form hydration issue)
