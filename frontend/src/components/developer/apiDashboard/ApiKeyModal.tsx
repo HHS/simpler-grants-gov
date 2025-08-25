@@ -154,7 +154,7 @@ export default function ApiKeyModal({
     throw new Error("ApiKey is required when mode is 'edit'");
   }
 
-  const { clientFetch } = useClientFetch<{ data: any }>(
+  const { clientFetch } = useClientFetch<{ data: ApiKey }>(
     `Error ${isCreate ? "creating" : "renaming"} API key`,
     { authGatedRequest: true },
   );
@@ -190,7 +190,7 @@ export default function ApiKeyModal({
         url = "/api/user/api-keys";
         method = "POST";
       } else {
-        url = `/api/user/api-keys/${apiKey!.api_key_id}`;
+        url = `/api/user/api-keys/${apiKey?.api_key_id ?? ""}`;
         method = "PUT";
       }
 
@@ -228,6 +228,7 @@ export default function ApiKeyModal({
     onApiKeyUpdated,
     isCreate,
     isEdit,
+    t,
   ]);
 
   const onClose = useCallback(() => {
@@ -240,12 +241,12 @@ export default function ApiKeyModal({
 
   const modalId = isCreate
     ? "create-api-key"
-    : `edit-api-key-${apiKey?.api_key_id}`;
+    : `edit-api-key-${apiKey?.api_key_id ?? "unknown"}`;
   const titleText = success
     ? undefined
     : isCreate
       ? t("createTitle")
-      : t("editTitle", { keyName: apiKey?.key_name });
+      : t("editTitle", { keyName: apiKey?.key_name ?? "" });
 
   // Default trigger button configurations
   const defaultTriggerProps = {
@@ -271,7 +272,7 @@ export default function ApiKeyModal({
         </>
       ),
       unstyled: true,
-      "data-testid": `open-edit-api-key-modal-button-${apiKey?.api_key_id}`,
+      "data-testid": `open-edit-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
     },
   };
 
@@ -295,7 +296,7 @@ export default function ApiKeyModal({
         modalId={modalId}
         titleText={titleText}
         onKeyDown={(e) => {
-          if (e.key === "Enter") handleSubmit();
+          if (e.key === "Enter") handleSubmit().catch(console.error);
         }}
         onClose={onClose}
       >
@@ -337,7 +338,9 @@ export default function ApiKeyModal({
                 <>
                   <Button
                     type="button"
-                    onClick={handleSubmit}
+                    onClick={() => {
+                      handleSubmit().catch(console.error);
+                    }}
                     data-testid={`${mode}-api-key-submit-button`}
                   >
                     {isCreate ? t("createButtonText") : t("saveChanges")}

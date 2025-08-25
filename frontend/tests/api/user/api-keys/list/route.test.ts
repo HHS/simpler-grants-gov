@@ -4,6 +4,7 @@
 
 import { listApiKeysHandler } from "src/app/api/user/api-keys/list/handler";
 import { ApiKey } from "src/types/apiKeyTypes";
+
 import { NextRequest } from "next/server";
 
 // Mock the session
@@ -22,8 +23,18 @@ jest.mock("src/services/auth/session", () => ({
 const mockHandleListApiKeys = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/apiKeyFetcher", () => ({
-  handleListApiKeys: (...args: unknown[]) => mockHandleListApiKeys(...args),
+  handleListApiKeys: (...args: unknown[]) =>
+    mockHandleListApiKeys(...args) as Promise<{
+      status_code: number;
+      data?: ApiKey[];
+      message: string;
+    }>,
 }));
+
+interface JsonData {
+  message: string;
+  data?: ApiKey[];
+}
 
 const mockApiKeys: ApiKey[] = [
   {
@@ -55,33 +66,39 @@ describe("POST /api/user/api-keys/list", () => {
   });
 
   it("lists API keys successfully", async () => {
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/list", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/list",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
 
     const response = await listApiKeysHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(200);
     expect(data.message).toBe("API keys retrieved successfully");
     expect(data.data).toEqual(mockApiKeys);
     expect(mockHandleListApiKeys).toHaveBeenCalledWith(
       "test-token",
-      "test-user-id"
+      "test-user-id",
     );
   });
 
   it("returns 401 when no session exists", async () => {
     mockGetSession.mockResolvedValueOnce(null);
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/list", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/list",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
 
     const response = await listApiKeysHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(401);
     expect(data.message).toContain("No active session to list API keys");
@@ -91,13 +108,16 @@ describe("POST /api/user/api-keys/list", () => {
   it("returns 401 when session has no token", async () => {
     mockGetSession.mockResolvedValueOnce({ user_id: "test-user-id" });
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/list", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/list",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
 
     const response = await listApiKeysHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(401);
     expect(data.message).toContain("No active session to list API keys");
@@ -110,13 +130,16 @@ describe("POST /api/user/api-keys/list", () => {
       message: "Internal server error",
     });
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/list", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/list",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
 
     const response = await listApiKeysHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error listing API keys");
@@ -125,13 +148,16 @@ describe("POST /api/user/api-keys/list", () => {
   it("handles unexpected errors", async () => {
     mockHandleListApiKeys.mockRejectedValueOnce(new Error("Network error"));
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/list", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/list",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
 
     const response = await listApiKeysHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error attempting to list API keys");
@@ -144,13 +170,16 @@ describe("POST /api/user/api-keys/list", () => {
       message: "Success",
     });
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/list", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/list",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      },
+    );
 
     const response = await listApiKeysHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(200);
     expect(data.data).toEqual([]);

@@ -20,7 +20,7 @@ interface ApiKeyTableProps {
 
 const ApiKeyNameDisplay = ({
   apiKey,
-  onApiKeyRenamed,
+  onApiKeyRenamed: _onApiKeyRenamed,
 }: {
   apiKey: ApiKey;
   onApiKeyRenamed: () => void;
@@ -70,7 +70,7 @@ const EditActionDisplay = ({
   );
 };
 
-const DeleteActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
+const DeleteActionDisplay = ({ apiKey: _apiKey }: { apiKey: ApiKey }) => {
   const t = useTranslations("ApiDashboard.table");
 
   return (

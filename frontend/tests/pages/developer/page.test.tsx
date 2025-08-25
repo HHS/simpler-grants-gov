@@ -39,7 +39,9 @@ describe("Developer Page", () => {
 
     expect(screen.getByTestId("developer-sections")).toBeInTheDocument();
     expect(screen.getByText("Developer Portal")).toBeInTheDocument();
-    expect(screen.getByText("Welcome to the developer portal")).toBeInTheDocument();
+    expect(
+      screen.getByText("Welcome to the developer portal"),
+    ).toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {

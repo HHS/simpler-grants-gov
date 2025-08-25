@@ -4,6 +4,7 @@
 
 import { renameApiKeyHandler } from "src/app/api/user/api-keys/[apiKeyId]/handler";
 import { ApiKey } from "src/types/apiKeyTypes";
+
 import { NextRequest } from "next/server";
 
 // Mock the session
@@ -22,8 +23,18 @@ jest.mock("src/services/auth/session", () => ({
 const mockHandleRenameApiKey = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/apiKeyFetcher", () => ({
-  handleRenameApiKey: (...args: unknown[]) => mockHandleRenameApiKey(...args),
+  handleRenameApiKey: (...args: unknown[]) =>
+    mockHandleRenameApiKey(...args) as Promise<{
+      status_code: number;
+      data?: ApiKey;
+      message: string;
+    }>,
 }));
+
+interface JsonData {
+  message: string;
+  data?: ApiKey;
+}
 
 const mockApiKeyResponse: ApiKey = {
   api_key_id: "test-key-id",
@@ -45,14 +56,17 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   });
 
   it("renames an API key successfully", async () => {
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "Renamed API Key" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Renamed API Key" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(200);
     expect(data.message).toBe("API key renamed successfully");
@@ -61,21 +75,24 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
       "test-token",
       "test-user-id",
       "test-key-id",
-      "Renamed API Key"
+      "Renamed API Key",
     );
   });
 
   it("returns 401 when no session exists", async () => {
     mockGetSession.mockResolvedValueOnce(null);
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "Renamed API Key" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Renamed API Key" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(401);
     expect(data.message).toContain("No active session to rename API key");
@@ -85,14 +102,17 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   it("returns 401 when session has no token", async () => {
     mockGetSession.mockResolvedValueOnce({ user_id: "test-user-id" });
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "Renamed API Key" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Renamed API Key" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(401);
     expect(data.message).toContain("No active session to rename API key");
@@ -100,14 +120,17 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   });
 
   it("returns 400 when no API key ID is provided", async () => {
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "Renamed API Key" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Renamed API Key" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(400);
     expect(data.message).toContain("No API key ID provided");
@@ -115,14 +138,17 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   });
 
   it("returns 400 when no key name is provided", async () => {
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({}),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({}),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(400);
     expect(data.message).toContain("No key name supplied for API key");
@@ -130,14 +156,17 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   });
 
   it("returns 400 when key name is empty", async () => {
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(400);
     expect(data.message).toContain("No key name supplied for API key");
@@ -150,14 +179,17 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
       message: "API key not found",
     });
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "Renamed API Key" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Renamed API Key" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(404);
     expect(data.message).toContain("Error renaming API key");
@@ -166,28 +198,34 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
   it("handles unexpected errors", async () => {
     mockHandleRenameApiKey.mockRejectedValueOnce(new Error("Network error"));
 
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: JSON.stringify({ key_name: "Renamed API Key" }),
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: JSON.stringify({ key_name: "Renamed API Key" }),
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error attempting to rename API key");
   });
 
   it("handles invalid JSON in request body", async () => {
-    const request = new NextRequest("http://localhost:3000/api/user/api-keys/test-key-id", {
-      method: "PUT",
-      body: "invalid json",
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/user/api-keys/test-key-id",
+      {
+        method: "PUT",
+        body: "invalid json",
+      },
+    );
 
     const params = Promise.resolve({ apiKeyId: "test-key-id" });
     const response = await renameApiKeyHandler(request, { params });
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error attempting to rename API key");

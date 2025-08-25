@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { noop } from "lodash";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -63,7 +62,6 @@ const UserDropdown = ({
   logout: () => Promise<void>;
 }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
-  const t = useTranslations("Header.navLinks");
 
   const logoutNavItem = (
     <a

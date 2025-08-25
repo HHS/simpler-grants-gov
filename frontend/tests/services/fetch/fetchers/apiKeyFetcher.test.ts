@@ -8,7 +8,7 @@ import { ApiKey } from "src/types/apiKeyTypes";
 const mockFetchUserWithMethod = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchUserWithMethod: (method: string) => mockFetchUserWithMethod,
+  fetchUserWithMethod: (_method: string) => mockFetchUserWithMethod,
 }));
 
 const mockApiKey: ApiKey = {
@@ -40,16 +40,21 @@ describe("apiKeyFetcher", () => {
   describe("handleCreateApiKey", () => {
     it("creates an API key successfully", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 200,
-          data: mockApiKey,
-          message: "Success",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 200,
+            data: mockApiKey,
+            message: "Success",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleCreateApiKey("test-token", "test-user-id", "Test API Key");
+      const result = await handleCreateApiKey(
+        "test-token",
+        "test-user-id",
+        "Test API Key",
+      );
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
         subPath: "test-user-id/api-keys",
@@ -65,10 +70,11 @@ describe("apiKeyFetcher", () => {
 
     it("handles API key creation failure", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 400,
-          message: "Invalid key name",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 400,
+            message: "Invalid key name",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -83,7 +89,7 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        handleCreateApiKey("test-token", "test-user-id", "Test API Key")
+        handleCreateApiKey("test-token", "test-user-id", "Test API Key"),
       ).rejects.toThrow("Network error");
     });
   });
@@ -91,11 +97,12 @@ describe("apiKeyFetcher", () => {
   describe("handleListApiKeys", () => {
     it("lists API keys successfully", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 200,
-          data: mockApiKeys,
-          message: "Success",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 200,
+            data: mockApiKeys,
+            message: "Success",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -116,11 +123,12 @@ describe("apiKeyFetcher", () => {
 
     it("returns empty list when no API keys exist", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 200,
-          data: [],
-          message: "Success",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 200,
+            data: [],
+            message: "Success",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -133,10 +141,11 @@ describe("apiKeyFetcher", () => {
 
     it("handles listing failure", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 401,
-          message: "Unauthorized",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 401,
+            message: "Unauthorized",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -151,7 +160,7 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        handleListApiKeys("test-token", "test-user-id")
+        handleListApiKeys("test-token", "test-user-id"),
       ).rejects.toThrow("Network error");
     });
   });
@@ -160,11 +169,12 @@ describe("apiKeyFetcher", () => {
     it("renames an API key successfully", async () => {
       const renamedApiKey = { ...mockApiKey, key_name: "Renamed API Key" };
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 200,
-          data: renamedApiKey,
-          message: "Success",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 200,
+            data: renamedApiKey,
+            message: "Success",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -173,7 +183,7 @@ describe("apiKeyFetcher", () => {
         "test-token",
         "test-user-id",
         "test-key-id",
-        "Renamed API Key"
+        "Renamed API Key",
       );
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
@@ -190,10 +200,11 @@ describe("apiKeyFetcher", () => {
 
     it("handles API key not found", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 404,
-          message: "API key not found",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 404,
+            message: "API key not found",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -202,7 +213,7 @@ describe("apiKeyFetcher", () => {
         "test-token",
         "test-user-id",
         "invalid-key-id",
-        "New Name"
+        "New Name",
       );
 
       expect(result.status_code).toBe(404);
@@ -211,10 +222,11 @@ describe("apiKeyFetcher", () => {
 
     it("handles invalid key name", async () => {
       const mockResponse = {
-        json: () => Promise.resolve({
-          status_code: 400,
-          message: "Invalid key name",
-        }),
+        json: () =>
+          Promise.resolve({
+            status_code: 400,
+            message: "Invalid key name",
+          }),
       };
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
@@ -223,7 +235,7 @@ describe("apiKeyFetcher", () => {
         "test-token",
         "test-user-id",
         "test-key-id",
-        ""
+        "",
       );
 
       expect(result.status_code).toBe(400);
@@ -234,7 +246,12 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        handleRenameApiKey("test-token", "test-user-id", "test-key-id", "New Name")
+        handleRenameApiKey(
+          "test-token",
+          "test-user-id",
+          "test-key-id",
+          "New Name",
+        ),
       ).rejects.toThrow("Network error");
     });
   });

@@ -2,7 +2,7 @@ import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { handleListApiKeys } from "src/services/fetch/fetchers/apiKeyFetcher";
 
-export const listApiKeysHandler = async (request: Request) => {
+export const listApiKeysHandler = async (_request: Request) => {
   try {
     const session = await getSession();
     if (!session || !session.token) {

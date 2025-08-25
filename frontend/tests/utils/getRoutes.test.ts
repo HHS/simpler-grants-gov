@@ -8,6 +8,7 @@ describe("getNextRoutes", () => {
     const result = getNextRoutes("src/app");
 
     expect(result).toEqual([
+      "/api-dashboard",
       "/dev/feature-flags",
       "/developer",
       "/error",

@@ -4,6 +4,7 @@
 
 import { createApiKeyHandler } from "src/app/api/user/api-keys/handler";
 import { ApiKey } from "src/types/apiKeyTypes";
+
 import { NextRequest } from "next/server";
 
 // Mock the session
@@ -22,8 +23,18 @@ jest.mock("src/services/auth/session", () => ({
 const mockHandleCreateApiKey = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/apiKeyFetcher", () => ({
-  handleCreateApiKey: (...args: unknown[]) => mockHandleCreateApiKey(...args),
+  handleCreateApiKey: (...args: unknown[]) =>
+    mockHandleCreateApiKey(...args) as Promise<{
+      status_code: number;
+      data?: ApiKey;
+      message: string;
+    }>,
 }));
+
+interface JsonData {
+  message: string;
+  data?: ApiKey;
+}
 
 const mockApiKeyResponse: ApiKey = {
   api_key_id: "test-key-id",
@@ -51,7 +62,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(200);
     expect(data.message).toBe("API key created successfully");
@@ -59,7 +70,7 @@ describe("POST /api/user/api-keys", () => {
     expect(mockHandleCreateApiKey).toHaveBeenCalledWith(
       "test-token",
       "test-user-id",
-      "Test API Key"
+      "Test API Key",
     );
   });
 
@@ -72,7 +83,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(401);
     expect(data.message).toContain("No active session to create API key");
@@ -88,7 +99,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(401);
     expect(data.message).toContain("No active session to create API key");
@@ -102,7 +113,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(400);
     expect(data.message).toContain("No key name supplied for API key");
@@ -116,7 +127,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(400);
     expect(data.message).toContain("No key name supplied for API key");
@@ -135,7 +146,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error creating API key");
@@ -150,7 +161,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error attempting to create API key");
@@ -163,7 +174,7 @@ describe("POST /api/user/api-keys", () => {
     });
 
     const response = await createApiKeyHandler(request);
-    const data = await response.json();
+    const data = (await response.json()) as JsonData;
 
     expect(response.status).toBe(500);
     expect(data.message).toContain("Error attempting to create API key");
