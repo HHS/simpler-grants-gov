@@ -447,7 +447,7 @@ FORM_JSON_SCHEMA = {
         "delinquent_federal_debt": {
             "type": "boolean",
             "title": "Applicant Delinquent on Federal Debt",
-            "description": "A selection is required.",
+            "description": "If 'Yes,' provide explanation in attachment.",
         },
         "debt_explanation": {
             "allOf": [{"$ref": "#/$defs/attachment_field"}],
@@ -457,7 +457,7 @@ FORM_JSON_SCHEMA = {
         "certification_agree": {
             "type": "boolean",
             "title": "Certification Agree",
-            "description": "Check to select.",
+            "description": "By signing this application, I certify (1) to the statements contained in the list of certifications* and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances** and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
         },
         "authorized_representative": {
             "allOf": [{"$ref": "#/$defs/person_name"}],
@@ -975,7 +975,7 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "definition": "/properties/delinquent_federal_debt",
-                "title": "If 'Yes,' provide explanation in attachment."
+                "widget": "Radio"
             },
             {
                 "type": "field",
@@ -1027,8 +1027,8 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/authorized_representative_phone_number"},
             {"type": "field", "definition": "/properties/authorized_representative_fax"},
             {"type": "field", "definition": "/properties/authorized_representative_email"},
-            {"type": "field", "definition": "/properties/aor_signature"},
-            {"type": "field", "definition": "/properties/date_signed"},
+            {"type": "null", "definition": "/properties/aor_signature"},
+            {"type": "null", "definition": "/properties/date_signed"},
         ],
     },
 ]
