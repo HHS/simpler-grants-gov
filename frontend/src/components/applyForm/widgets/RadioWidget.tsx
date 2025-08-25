@@ -6,7 +6,6 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-
 import React, {
   ChangeEvent,
   FocusEvent,
@@ -23,21 +22,20 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 type LocalOptions<S extends StrictRJSFSchema> = {
   enumDisabled?: Array<string | number | boolean>;
-  emptyValue?: unknown;
   enumOptions?: EnumOptionsType<S>[];
   "widget-label"?: unknown;
 };
 
-/** Normalize any incoming value to "true" | "false" | "" for DOM rendering. */
-function toBoolString(v: unknown): "" | "true" | "false" {
+function isBooleanLike(v: unknown): boolean {
+  return v === true || v === false || v === "true" || v === "false";
+}
+function str(v: unknown): string {
+  return typeof v === "string" || typeof v === "number" ? String(v) : "";
+}
+function boolStr(v: unknown): "" | "true" | "false" {
   if (v === true || v === "true") return "true";
   if (v === false || v === "false") return "false";
   return "";
-}
-
-/** Convert an option.value to "true"/"false" (Radio enum should be boolean). */
-function optionToBoolString(v: unknown): "true" | "false" {
-  return v === true || v === "true" ? "true" : "false";
 }
 
 function RadioWidget<
@@ -63,11 +61,9 @@ function RadioWidget<
     (options as LocalOptions<S>) ?? {};
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
-  // Prefer enumOptions provided by utils (boolean values); fall back to schema.enum if present
+  // Prefer options.enumOptions if provided (from utils)
   const enumOptions = useMemo<EnumOptionsType<S>[]>(() => {
-    if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) {
-      return uiEnumOptions;
-    }
+    if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) return uiEnumOptions;
     const fromSchema =
       Array.isArray(enumFromSchema) && enumFromSchema.length
         ? enumFromSchema.map((v) => ({ label: String(v), value: v }))
@@ -75,42 +71,51 @@ function RadioWidget<
     return fromSchema as EnumOptionsType<S>[];
   }, [uiEnumOptions, enumFromSchema]);
 
-  // Local selection
-  const [picked, setPicked] = useState<"" | "true" | "false">(() =>
-    toBoolString(value),
+  const booleanMode = useMemo(
+    () => enumOptions.length > 0 && enumOptions.every((o) => isBooleanLike(o.value)),
+    [enumOptions],
   );
 
-  // Only sync from parent when it actually supplies a boolean string/boolean.
-  // If parent transiently sends undefined during a save/remount, keep local pick.
+  // Controlled selection string
+  const [picked, setPicked] = useState<string>(() =>
+    booleanMode ? boolStr(value) : str(value),
+  );
+
+  // Sync from parent when it provides a concrete value
   useEffect(() => {
-    const next = toBoolString(value);
-    if (next !== "") {
-      setPicked(next);
-    }
-  }, [value]);
+    const next = booleanMode ? boolStr(value) : str(value);
+    if (next !== "") setPicked(next);
+  }, [value, booleanMode]);
 
   const handleBlur = useCallback(
-    ({ target }: FocusEvent<HTMLInputElement>) =>
-      onBlur(id, target?.value === "true"),
-    [onBlur, id],
+    ({ target }: FocusEvent<HTMLInputElement>) => {
+      const v = target?.value;
+      onBlur(id, booleanMode ? v === "true" : (v as unknown as T));
+    },
+    [onBlur, id, booleanMode],
   );
 
   const handleFocus = useCallback(
-    ({ target }: FocusEvent<HTMLInputElement>) =>
-      onFocus(id, target?.value === "true"),
-    [onFocus, id],
+    ({ target }: FocusEvent<HTMLInputElement>) => {
+      const v = target?.value;
+      onFocus(id, booleanMode ? v === "true" : (v as unknown as T));
+    },
+    [onFocus, id, booleanMode],
   );
 
-  // When user selects a radio, update local state and notify parent with a boolean
   const handlePick = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      const nextStr = e.target.value as "true" | "false";
+      const nextStr = e.target.value;
       setPicked(nextStr);
       if (typeof onChange === "function") {
-        onChange(nextStr === "true");
+        if (booleanMode) {
+          onChange(nextStr === "true");
+        } else {
+          onChange(nextStr as unknown as T);
+        }
       }
     },
-    [onChange],
+    [onChange, booleanMode],
   );
 
   const error = rawErrors.length ? true : undefined;
@@ -138,34 +143,31 @@ function RadioWidget<
         </ErrorMessage>
       )}
 
-      {/* Hidden input ensures a single, normalized value is always posted */}
-      <input type="hidden" name={id} value={picked} />
+      {enumOptions.map((option, i) => {
+        const optionStr = booleanMode ? boolStr(option.value) : str(option.value);
+        const checked = picked === optionStr;
+        const itemDisabled =
+          Array.isArray(enumDisabled) &&
+          enumDisabled.indexOf(option.value as TextTypes) !== -1;
 
-      {Array.isArray(enumOptions) &&
-        enumOptions.map((option, i) => {
-          const optionStr = optionToBoolString(option.value);
-          const checked = picked === optionStr;
-          const itemDisabled =
-            Array.isArray(enumDisabled) &&
-            enumDisabled.indexOf(option.value as TextTypes) !== -1;
-
-          return (
-            <Radio
-              label={option.label}
-              id={`${id}-${i}`}
-              key={`${id}-${i}`}
-              name={id}
-              disabled={disabled || itemDisabled || readonly}
-              autoFocus={autofocus && i === 0}
-              aria-describedby={describedby}
-              checked={checked}
-              value={optionStr}
-              onChange={handlePick}
-              onBlur={handleBlur}
-              onFocus={handleFocus}
-            />
-          );
-        })}
+        return (
+          <Radio
+            label={option.label}
+            id={`${id}-${i}`}
+            key={`${id}-${i}`}
+            name={id}
+            required={required}
+            disabled={disabled || itemDisabled || readonly}
+            autoFocus={autofocus && i === 0}
+            aria-describedby={describedby}
+            checked={checked}
+            value={optionStr}
+            onChange={handlePick}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+          />
+        );
+      })}
     </FormGroup>
   );
 }
