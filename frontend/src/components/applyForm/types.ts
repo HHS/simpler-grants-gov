@@ -7,7 +7,6 @@ import {
   UIOptionsType,
 } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
-import { Attachment } from "src/types/attachmentTypes";
 
 import { HTMLAttributes } from "react";
 
@@ -57,6 +56,7 @@ export type WidgetTypes =
   | "TextArea"
   | "Radio"
   | "Select"
+  | "MultiSelect"
   | "Budget424aSectionA"
   | "Budget424aSectionB"
   | "Budget424aSectionC"
@@ -108,7 +108,6 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
-  attachments?: Attachment[];
   id: string;
   value?: string | Array<T> | unknown;
   type?: string;

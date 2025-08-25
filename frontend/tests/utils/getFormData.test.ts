@@ -89,6 +89,8 @@ describe("getFormData", () => {
         },
         application_form_id: "form1",
         application_response: { foo: "bar" },
+        application_name: "cool application",
+        application_attachments: ["fake attachment"],
       },
       warnings: [],
     });
@@ -99,16 +101,8 @@ describe("getFormData", () => {
     expect(result).toEqual({
       data: {
         applicationResponse: { foo: "bar" },
-        applicationFormData: {
-          form: {
-            form_id: "form1",
-            form_name: "Test",
-            form_json_schema: {},
-            form_ui_schema: {},
-          },
-          application_form_id: "form1",
-          application_response: { foo: "bar" },
-        },
+        applicationName: "cool application",
+        applicationAttachments: ["fake attachment"],
         formId: "form1",
         formName: "Test",
         formSchema: {},
