@@ -7,6 +7,7 @@ import {
   buildField,
   condenseFormSchemaProperties,
   determineFieldType,
+  flatFormDataToArray,
   formatFieldWarnings,
   getFieldName,
   getFieldSchema,
@@ -566,5 +567,54 @@ describe("formatFieldWarnings", () => {
         true,
       ),
     ).toEqual(["parent is required"]);
+  });
+});
+
+describe("flatFormDataToArray", () => {
+  it("returns array with single value if field exists directly", () => {
+    const data = { foo: "bar" };
+    expect(flatFormDataToArray("foo", data)).toEqual(["bar"]);
+  });
+
+  it("returns array of objects for indexed keys", () => {
+    const data = {
+      "tasks[0].title": "Task 1",
+      "tasks[1].title": "Task 2",
+    };
+    expect(flatFormDataToArray("tasks", data)).toEqual([
+      { title: "Task 1" },
+      { title: "Task 2" },
+    ]);
+  });
+
+  it("returns empty array if field not present", () => {
+    const data = { something: 123 };
+    expect(flatFormDataToArray("notfound", data)).toEqual([]);
+  });
+
+  it("handles sparse arrays", () => {
+    const data = {
+      "items[2].name": "third",
+      "items[0].name": "first",
+    };
+    expect(flatFormDataToArray("items", data)).toEqual([
+      { name: "first" },
+      undefined,
+      { name: "third" },
+    ]);
+  });
+
+  it("ignores falsy values", () => {
+    const data = {
+      "arr[0].val": null,
+      "arr[1].val": undefined,
+      "arr[2].val": "ok",
+    };
+
+    expect(flatFormDataToArray("arr", data)).toEqual([
+      undefined,
+      undefined,
+      { val: "ok" },
+    ]);
   });
 });

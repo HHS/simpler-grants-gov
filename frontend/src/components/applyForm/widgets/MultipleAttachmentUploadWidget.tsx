@@ -25,7 +25,6 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
 
 const MultipleAttachmentUploadWidget = ({
-  error,
   id,
   value: initialValue,
   required,
@@ -159,7 +158,7 @@ const MultipleAttachmentUploadWidget = ({
         labelType={labelType}
       />
 
-      {error && (
+      {hasError && (
         <ErrorMessage id={`error-for-${id}`}>
           {String(rawErrors[0])}
         </ErrorMessage>
