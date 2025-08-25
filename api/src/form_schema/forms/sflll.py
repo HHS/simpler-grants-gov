@@ -248,7 +248,7 @@ FORM_JSON_SCHEMA = {
                 "suffix": {
                     "type": "string",
                     "title": "Suffix",
-                    "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
+                    "description": "Enter the suffix (e.g., Jr. Sr., PhD), if appropriate",
                     "minLength": 1,
                     "maxLength": 10,
                 },
@@ -558,7 +558,7 @@ FORM_UI_SCHEMA = [
         "name": "Signature",
         "children": [
             # Signature block
-            {"type": "field", "definition": "/properties/signature_block/properties/signature"},
+            {"type": "null", "definition": "/properties/signature_block/properties/signature"},
             {
                 "type": "field",
                 "definition": "/properties/signature_block/properties/name/properties/first_name",
@@ -579,7 +579,7 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/signature_block/properties/name/properties/suffix",
             },
-            {"type": "field", "definition": "/properties/signature_block/properties/signed_date"},
+            {"type": "null", "definition": "/properties/signature_block/properties/signed_date"},
         ],
     },
 ]

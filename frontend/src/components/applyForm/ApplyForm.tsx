@@ -3,16 +3,19 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
+import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
+import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { JSX, useActionState, useMemo } from "react";
+import { useActionState, useMemo } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
+import { FormFields } from "./FormFields";
 import { FormValidationWarning, UiSchema } from "./types";
-import { buildFormTreeRecursive, getFieldsForNav } from "./utils";
+import { getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
   applicationId,
@@ -21,6 +24,7 @@ const ApplyForm = ({
   savedFormData,
   validationWarnings,
   uiSchema,
+  attachments,
 }: {
   applicationId: string;
   formId: string;
@@ -28,6 +32,7 @@ const ApplyForm = ({
   savedFormData: object;
   uiSchema: UiSchema;
   validationWarnings: FormValidationWarning[] | null;
+  attachments: Attachment[];
 }) => {
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
@@ -63,56 +68,44 @@ const ApplyForm = ({
     );
   }
 
-  let fields: JSX.Element[] = [];
-  try {
-    fields = buildFormTreeRecursive({
-      errors: saved ? validationWarnings : null,
-      formData: formObject,
-      schema: formSchema,
-      uiSchema,
-    });
-  } catch (e) {
-    console.error(e);
-    return (
-      <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
-        Error rendering form
-      </Alert>
-    );
-  }
-
   return (
-    <>
-      <form
-        className="flex-1 margin-top-2 simpler-apply-form"
-        action={formAction}
-        // turns off html5 validation so all error displays are consistent
-        noValidate
-      >
-        <div className="display-flex flex-justify">
-          <div>{required}</div>
-          <Button
-            data-testid="apply-form-save"
-            type="submit"
-            name="apply-form-button"
-            className="margin-top-0"
-            value="save"
-          >
-            {pending ? "Saving..." : "Save"}
-          </Button>
-        </div>
-        <div className="usa-in-page-nav-container">
-          <FormGroup className="order-2 width-full">
-            <ApplyFormMessage
-              saved={saved}
-              error={error}
-              validationWarnings={validationWarnings}
+    <form
+      className="flex-1 margin-top-2 simpler-apply-form"
+      action={formAction}
+      // turns off html5 validation so all error displays are consistent
+      noValidate
+    >
+      <div className="display-flex flex-justify">
+        <div>{required}</div>
+        <Button
+          data-testid="apply-form-save"
+          type="submit"
+          name="apply-form-button"
+          className="margin-top-0"
+          value="save"
+        >
+          {pending ? "Saving..." : "Save"}
+        </Button>
+      </div>
+      <div className="usa-in-page-nav-container">
+        <FormGroup className="order-2 width-full">
+          <ApplyFormMessage
+            saved={saved}
+            error={error}
+            validationWarnings={validationWarnings}
+          />
+          <AttachmentsProvider value={attachments ?? []}>
+            <FormFields
+              errors={saved ? validationWarnings : null}
+              formData={formObject}
+              schema={formSchema}
+              uiSchema={uiSchema}
             />
-            {fields}
-          </FormGroup>
-          <ApplyFormNav title={t("navTitle")} fields={navFields} />
-        </div>
-      </form>
-    </>
+          </AttachmentsProvider>
+        </FormGroup>
+        <ApplyFormNav title={t("navTitle")} fields={navFields} />
+      </div>
+    </form>
   );
 };
 

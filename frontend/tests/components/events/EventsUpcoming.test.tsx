@@ -1,4 +1,4 @@
-import EventsUpcoming from "src/app/[locale]/events/EventsUpcoming";
+import EventsUpcoming from "src/app/[locale]/(base)/events/EventsUpcoming";
 import { render, screen } from "tests/react-utils";
 
 describe("Events Upcoming Content", () => {

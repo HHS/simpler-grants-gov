@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import NotFound from "src/app/[locale]/not-found";
+import NotFound from "src/app/[locale]/(base)/not-found";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";

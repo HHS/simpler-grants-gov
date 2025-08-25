@@ -3,7 +3,7 @@
  */
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import FeatureFlags from "src/app/[locale]/dev/feature-flags/page";
+import FeatureFlags from "src/app/[locale]/(base)/dev/feature-flags/page";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const MOCK_DEFAULT_FEATURE_FLAGS = {

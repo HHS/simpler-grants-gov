@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/error/page";
-import NotFound from "src/app/[locale]/not-found";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
+import NotFound from "src/app/[locale]/(base)/not-found";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import getFormData from "src/utils/getFormData";
 
@@ -8,7 +8,6 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
-import BookmarkBanner from "src/components/BookmarkBanner";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -48,8 +47,9 @@ async function FormPage({ params }: formPageProps) {
   }
 
   const {
+    applicationName,
+    applicationAttachments,
     applicationResponse,
-    applicationFormData,
     formId,
     formName,
     formSchema,
@@ -59,18 +59,17 @@ async function FormPage({ params }: formPageProps) {
 
   return (
     <>
-      <BookmarkBanner containerClasses="margin-y-3" />
       <GridContainer>
         <Breadcrumbs
           breadcrumbList={[
             { title: "home", path: "/" },
             {
-              title: applicationFormData.application_name,
-              path: `/workspace/applications/application/${applicationFormData.application_id}`,
+              title: applicationName,
+              path: `/workspace/applications/application/${applicationId}`,
             },
             {
-              title: "Form",
-              path: `/workspace/applications/application/${applicationFormData.application_id}/form/${applicationId}`,
+              title: formName,
+              path: `/workspace/applications/application/${applicationId}/form/${formId}`,
             },
           ]}
         />
@@ -82,6 +81,7 @@ async function FormPage({ params }: formPageProps) {
           formSchema={formSchema}
           uiSchema={formUiSchema}
           formId={formId}
+          attachments={applicationAttachments}
         />
       </GridContainer>
     </>
