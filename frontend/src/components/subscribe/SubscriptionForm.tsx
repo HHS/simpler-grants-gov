@@ -1,6 +1,6 @@
 "use client";
 
-import { subscribeEmail } from "src/app/[locale]/subscribe/actions";
+import { subscribeEmail } from "src/app/[locale]/(base)/subscribe/actions";
 
 import { useTranslations } from "next-intl";
 import React, { useActionState } from "react";

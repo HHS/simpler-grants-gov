@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/error/page";
-import NotFound from "src/app/[locale]/not-found";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
+import NotFound from "src/app/[locale]/(base)/not-found";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
@@ -19,15 +19,17 @@ export async function generateMetadata({
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
-  const { data } = await getFormData({
-    applicationId,
-    appFormId,
-    internalToken,
-  });
+  if (internalToken) {
+    const { data } = await getFormData({
+      applicationId,
+      appFormId,
+      internalToken,
+    });
 
-  if (data) {
-    const { formName } = data;
-    title = formName;
+    if (data) {
+      const { formName } = data;
+      title = formName;
+    }
   }
 
   const meta: Metadata = {
@@ -44,6 +46,11 @@ export default async function FormPage({ params }: FormPageProps) {
   const { applicationId, appFormId } = await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
+
+  if (internalToken === undefined) {
+    console.error("Internal token not supplied");
+    return <TopLevelError />;
+  }
 
   const { data, error } = await getFormData({
     applicationId,

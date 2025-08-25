@@ -1,6 +1,6 @@
 import { identity } from "lodash";
 import { Response } from "node-fetch";
-import { subscribeEmailAction } from "src/app/[locale]/subscribe/actions";
+import { subscribeEmailAction } from "src/app/[locale]/(base)/subscribe/actions";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const original = console.error;

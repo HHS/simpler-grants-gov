@@ -1,0 +1,495 @@
+{
+  "required": [
+    "federal_action_type",
+    "federal_action_status",
+    "report_type",
+    "reporting_entity",
+    "federal_agency_department",
+    "lobbying_registrant",
+    "individual_performing_service",
+    "signature_block"
+  ],
+  "properties": {
+    "assistance_listing_number": {
+      "description": "If known, the full Assistance Listing Number for grants, cooperative agreements, loans and loan commitments.",
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Assistance Listing Number",
+      "type": "string"
+    },
+    "award_amount": {
+      "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
+      "title": "Award Amount",
+      "maxLength": 14,
+      "pattern": "^\\\\d*([.]\\\\d{2})?$",
+      "type": "string"
+    },
+    "federal_action_number": {
+      "description": "Enter the most appropriate Federal identifying number available for the Federal action, identified in item 1 (e.g., Request for Proposal (RFP) number, invitation for Bid (IFB) number, grant announcement number, the contract, grant, or loan award number, the application/proposal control number assigned by the Federal agency). Include prefixes, e.g.,",
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Federal Action Number",
+      "type": "string"
+    },
+    "federal_action_status": {
+      "description": "Identify the status of the covered Federal action.",
+      "enum": ["BidOffer", "InitialAward", "PostAward"],
+      "title": "Status of Federal Action",
+      "type": "string"
+    },
+    "federal_action_type": {
+      "description": "Identify the type of covered Federal action for which lobbying activity is and/or has been secured to influence the outcome of a covered Federal action.",
+      "enum": [
+        "Contract",
+        "Grant",
+        "CoopAgree",
+        "Loan",
+        "LoanGuarantee",
+        "LoanInsurance"
+      ],
+      "title": "Type of Federal Action",
+      "type": "string"
+    },
+    "federal_agency_department": {
+      "description": "Enter the name of the Federal Department or Agency making the award or loan commitment.",
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Federal Department/Agency",
+      "type": "string"
+    },
+    "federal_program_name": {
+      "description": "Federal Program Name/Description: Federal program name or description for the covered Federal action.",
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Federal Program Name/Description",
+      "type": "string"
+    },
+    "individual_performing_service": {
+      "required": ["individual"],
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "Enter an address.",
+          "required": ["street1", "city"],
+          "title": "Address",
+          "type": "object",
+          "properties": {
+            "city": {
+              "description": "Enter the city.",
+              "maxLength": 35,
+              "minLength": 1,
+              "title": "City",
+              "type": "string"
+            },
+            "state": {
+              "description": "Enter the state.",
+              "title": "State",
+              "enum": ["AL: Alabama", "AK: Alaska"],
+              "type": "string"
+            },
+            "street1": {
+              "description": "Enter the first line of the Street Address.",
+              "maxLength": 55,
+              "minLength": 1,
+              "title": "Street 1",
+              "type": "string"
+            },
+            "street2": {
+              "description": "Enter the second line of the Street Address.",
+              "maxLength": 55,
+              "minLength": 1,
+              "title": "Street 2",
+              "type": "string"
+            },
+            "zip_code": {
+              "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
+              "maxLength": 30,
+              "minLength": 1,
+              "title": "Zip / Postal Code",
+              "type": "string"
+            }
+          }
+        },
+        "individual": {
+          "required": ["first_name", "last_name"],
+          "type": "object",
+          "properties": {
+            "first_name": {
+              "description": "Enter the First Name.",
+              "maxLength": 35,
+              "minLength": 1,
+              "title": "First Name",
+              "type": "string"
+            },
+            "last_name": {
+              "description": "Enter the Last Name.",
+              "maxLength": 60,
+              "minLength": 1,
+              "title": "Last Name",
+              "type": "string"
+            },
+            "middle_name": {
+              "description": "Enter the Middle Name.",
+              "maxLength": 25,
+              "minLength": 1,
+              "title": "Middle Name",
+              "type": "string"
+            },
+            "prefix": {
+              "maxLength": 10,
+              "minLength": 1,
+              "title": "Prefix",
+              "type": "string"
+            },
+            "suffix": {
+              "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
+              "maxLength": 10,
+              "minLength": 1,
+              "title": "Suffix",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "last_report_date": {
+      "description": "Enter the date of the previously submitted report by this reporting entity for this covered Federal action.",
+      "format": "date",
+      "title": "Material Change Date of Last Report",
+      "type": "string"
+    },
+    "lobbying_registrant": {
+      "required": ["individual"],
+      "type": "object",
+      "properties": {
+        "address": {
+          "description": "Enter an address.",
+          "required": ["street1", "city"],
+          "title": "Address",
+          "type": "object",
+          "properties": {
+            "city": {
+              "description": "Enter the city.",
+              "maxLength": 35,
+              "minLength": 1,
+              "title": "City",
+              "type": "string"
+            },
+            "state": {
+              "description": "Enter the state.",
+              "title": "State",
+              "enum": ["AL: Alabama", "AK: Alaska"],
+              "type": "string"
+            },
+            "street1": {
+              "description": "Enter the first line of the Street Address.",
+              "maxLength": 55,
+              "minLength": 1,
+              "title": "Street 1",
+              "type": "string"
+            },
+            "street2": {
+              "description": "Enter the second line of the Street Address.",
+              "maxLength": 55,
+              "minLength": 1,
+              "title": "Street 2",
+              "type": "string"
+            },
+            "zip_code": {
+              "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
+              "maxLength": 30,
+              "minLength": 1,
+              "title": "Zip / Postal Code",
+              "type": "string"
+            }
+          }
+        },
+        "individual": {
+          "required": ["first_name", "last_name"],
+          "type": "object",
+          "properties": {
+            "first_name": {
+              "description": "Enter the First Name.",
+              "maxLength": 35,
+              "minLength": 1,
+              "title": "First Name",
+              "type": "string"
+            },
+            "last_name": {
+              "description": "Enter the Last Name.",
+              "maxLength": 60,
+              "minLength": 1,
+              "title": "Last Name",
+              "type": "string"
+            },
+            "middle_name": {
+              "description": "Enter the Middle Name.",
+              "maxLength": 25,
+              "minLength": 1,
+              "title": "Middle Name",
+              "type": "string"
+            },
+            "prefix": {
+              "maxLength": 10,
+              "minLength": 1,
+              "title": "Prefix",
+              "type": "string"
+            },
+            "suffix": {
+              "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
+              "maxLength": 10,
+              "minLength": 1,
+              "title": "Suffix",
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "material_change_quarter": {
+      "description": "If this is a follow up report caused by a material change to the information previously reported, enter the quarter in which the change occurred.",
+      "maximum": 4,
+      "minimum": 1,
+      "title": "Material Change Quarter",
+      "type": "integer"
+    },
+    "material_change_year": {
+      "description": "If this is a follow up report caused by a material change to the information previously reported, enter the year in which the change occurred.",
+      "pattern": "^[1-9][0-9]{3}$",
+      "title": "Material Change Year",
+      "type": "string"
+    },
+    "report_type": {
+      "description": "Identify the appropriate classification of this report.  If this is a follow up report caused by a material change to the information previously reported, enter the year and quarter in which the change occurred.  Enter the date of the previously submitted report by this reporting entity for this covered Federal action.",
+      "enum": ["MaterialChange", "InitialFiling"],
+      "title": "Report Type",
+      "type": "string"
+    },
+    "reporting_entity": {
+      "required": ["entity_type", "applicant_reporting_entity"],
+      "type": "object",
+      "if": {
+        "properties": {
+          "entity_type": {
+            "const": "SubAwardee"
+          }
+        },
+        "required": ["entity_type"]
+      },
+      "then": {
+        "required": ["tier", "prime_reporting_entity"]
+      },
+      "properties": {
+        "applicant_reporting_entity": {
+          "required": ["organization_name", "address"],
+          "type": "object",
+          "properties": {
+            "address": {
+              "description": "Enter an address.",
+              "required": ["street1", "city"],
+              "title": "Address",
+              "type": "object",
+              "properties": {
+                "city": {
+                  "description": "Enter the city.",
+                  "maxLength": 35,
+                  "minLength": 1,
+                  "title": "City",
+                  "type": "string"
+                },
+                "state": {
+                  "description": "Enter the state.",
+                  "title": "State",
+                  "enum": ["AL: Alabama", "AK: Alaska"],
+                  "type": "string"
+                },
+                "street1": {
+                  "description": "Enter the first line of the Street Address.",
+                  "maxLength": 55,
+                  "minLength": 1,
+                  "title": "Street 1",
+                  "type": "string"
+                },
+                "street2": {
+                  "description": "Enter the second line of the Street Address.",
+                  "maxLength": 55,
+                  "minLength": 1,
+                  "title": "Street 2",
+                  "type": "string"
+                },
+                "zip_code": {
+                  "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
+                  "maxLength": 30,
+                  "minLength": 1,
+                  "title": "Zip / Postal Code",
+                  "type": "string"
+                }
+              }
+            },
+            "congressional_district": {
+              "description": "Enter the Congressional District in the format: 2 character state Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district.",
+              "maxLength": 6,
+              "minLength": 1,
+              "title": "Congressional District",
+              "type": "string"
+            },
+            "organization_name": {
+              "maxLength": 60,
+              "minLength": 1,
+              "title": "Organization Name",
+              "type": "string"
+            }
+          }
+        },
+        "entity_type": {
+          "description": "Check the appropriate classification of the reporting entity that designates if it is, or expects to be, a prime subaward recipient.",
+          "enum": ["Prime", "SubAwardee"],
+          "title": "Entity Type",
+          "type": "string"
+        },
+        "prime_reporting_entity": {
+          "required": ["organization_name", "address"],
+          "type": "object",
+          "properties": {
+            "address": {
+              "description": "Enter an address.",
+              "required": ["street1", "city"],
+              "title": "Address",
+              "type": "object",
+              "properties": {
+                "city": {
+                  "description": "Enter the city.",
+                  "maxLength": 35,
+                  "minLength": 1,
+                  "title": "City",
+                  "type": "string"
+                },
+                "state": {
+                  "description": "Enter the state.",
+                  "title": "State",
+                  "enum": ["AL: Alabama", "AK: Alaska"],
+                  "type": "string"
+                },
+                "street1": {
+                  "description": "Enter the first line of the Street Address.",
+                  "maxLength": 55,
+                  "minLength": 1,
+                  "title": "Street 1",
+                  "type": "string"
+                },
+                "street2": {
+                  "description": "Enter the second line of the Street Address.",
+                  "maxLength": 55,
+                  "minLength": 1,
+                  "title": "Street 2",
+                  "type": "string"
+                },
+                "zip_code": {
+                  "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
+                  "maxLength": 30,
+                  "minLength": 1,
+                  "title": "Zip / Postal Code",
+                  "type": "string"
+                }
+              }
+            },
+            "congressional_district": {
+              "description": "Enter the Congressional District in the format: 2 character state Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district.",
+              "maxLength": 6,
+              "minLength": 1,
+              "title": "Congressional District",
+              "type": "string"
+            },
+            "organization_name": {
+              "maxLength": 60,
+              "minLength": 1,
+              "title": "Organization Name",
+              "type": "string"
+            }
+          }
+        },
+        "tier": {
+          "description": "Identify the tier of the subawardee, e.g., the first subawardee of the prime is the 1st tier.",
+          "maximum": 99,
+          "minimum": 1,
+          "title": "Reporting Entity Tier",
+          "type": "integer"
+        }
+      }
+    },
+    "signature_block": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "required": ["first_name", "last_name"],
+          "type": "object",
+          "properties": {
+            "first_name": {
+              "description": "Enter the First Name.",
+              "maxLength": 35,
+              "minLength": 1,
+              "title": "First Name",
+              "type": "string"
+            },
+            "last_name": {
+              "description": "Enter the Last Name.",
+              "maxLength": 60,
+              "minLength": 1,
+              "title": "Last Name",
+              "type": "string"
+            },
+            "middle_name": {
+              "description": "Enter the Middle Name.",
+              "maxLength": 25,
+              "minLength": 1,
+              "title": "Middle Name",
+              "type": "string"
+            },
+            "prefix": {
+              "maxLength": 10,
+              "minLength": 1,
+              "title": "Prefix",
+              "type": "string"
+            },
+            "suffix": {
+              "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
+              "maxLength": 10,
+              "minLength": 1,
+              "title": "Suffix",
+              "type": "string"
+            }
+          }
+        },
+        "signature": {
+          "description": "Completed by Grants.gov upon submission.",
+          "maxLength": 144,
+          "minLength": 1,
+          "title": "Signature",
+          "type": "string"
+        },
+        "signed_date": {
+          "description": "Completed by Grants.gov upon submission.",
+          "format": "date",
+          "title": "Signature Date",
+          "type": "string"
+        },
+        "telephone": {
+          "description": "Enter the telephone number of the certifying official.",
+          "maxLength": 25,
+          "minLength": 1,
+          "title": "Signature Telephone Number",
+          "type": "string"
+        },
+        "title": {
+          "description": "Enter the title of the Certifying Official.",
+          "maxLength": 45,
+          "minLength": 1,
+          "title": "Signature Title",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "type": "object"
+}

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import TopLevelError from "src/app/[locale]/error/page";
-import NotFound from "src/app/[locale]/not-found";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
+import NotFound from "src/app/[locale]/(base)/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -15,6 +15,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
+import BookmarkBanner from "src/components/BookmarkBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
 
   return (
     <>
+      <BookmarkBanner containerClasses="margin-y-3" />
       <GridContainer>
         <h1>{t("title")}</h1>
         <ApplicationContainer
