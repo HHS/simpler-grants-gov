@@ -37,7 +37,7 @@ const ApiKeyNameDisplay = ({
 
 const DateDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   const t = useTranslations("ApiDashboard.table.dateLabels");
-  
+
   return (
     <div>
       <div className="margin-bottom-05">
@@ -72,7 +72,7 @@ const EditActionDisplay = ({
 
 const DeleteActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   const t = useTranslations("ApiDashboard.table");
-  
+
   return (
     <div className="display-flex flex-align-center">
       <Button
@@ -122,14 +122,12 @@ export default function ApiKeyTable({
   onApiKeyRenamed,
 }: ApiKeyTableProps) {
   const t = useTranslations("ApiDashboard.table");
-  
+
   if (!apiKeys.length) {
     return (
       <div className="usa-alert usa-alert--info">
         <div className="usa-alert__body">
-          <p className="usa-alert__text">
-            {t("emptyState")}
-          </p>
+          <p className="usa-alert__text">{t("emptyState")}</p>
         </div>
       </div>
     );

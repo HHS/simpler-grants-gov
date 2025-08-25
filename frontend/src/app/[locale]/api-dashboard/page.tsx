@@ -14,8 +14,8 @@ import { Button } from "@trussworks/react-uswds";
 
 import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
 import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
-import { USWDSIcon } from "src/components/USWDSIcon";
 import Spinner from "src/components/Spinner";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 export default function ApiDashboardPage() {
   const { user } = useUser();

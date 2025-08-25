@@ -563,7 +563,8 @@ export const messages = {
       },
       deleteButton: "Delete Key",
       deleteButtonTitle: "Delete functionality coming soon",
-      emptyState: "You don't have any API keys yet. Create your first API key to get started.",
+      emptyState:
+        "You don't have any API keys yet. Create your first API key to get started.",
     },
     modal: {
       apiKeyNameLabel: "Name <required>(required)</required>",
