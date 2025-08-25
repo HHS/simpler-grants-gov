@@ -6,6 +6,7 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
+
 import React, {
   ChangeEvent,
   FocusEvent,
@@ -63,7 +64,8 @@ function RadioWidget<
 
   // Prefer options.enumOptions if provided (from utils)
   const enumOptions = useMemo<EnumOptionsType<S>[]>(() => {
-    if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) return uiEnumOptions;
+    if (Array.isArray(uiEnumOptions) && uiEnumOptions.length)
+      return uiEnumOptions;
     const fromSchema =
       Array.isArray(enumFromSchema) && enumFromSchema.length
         ? enumFromSchema.map((v) => ({ label: String(v), value: v }))
@@ -72,7 +74,9 @@ function RadioWidget<
   }, [uiEnumOptions, enumFromSchema]);
 
   const booleanMode = useMemo(
-    () => enumOptions.length > 0 && enumOptions.every((o) => isBooleanLike(o.value)),
+    () =>
+      enumOptions.length > 0 &&
+      enumOptions.every((o) => isBooleanLike(o.value)),
     [enumOptions],
   );
 
@@ -144,7 +148,9 @@ function RadioWidget<
       )}
 
       {enumOptions.map((option, i) => {
-        const optionStr = booleanMode ? boolStr(option.value) : str(option.value);
+        const optionStr = booleanMode
+          ? boolStr(option.value)
+          : str(option.value);
         const checked = picked === optionStr;
         const itemDisabled =
           Array.isArray(enumDisabled) &&
