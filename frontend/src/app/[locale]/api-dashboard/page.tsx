@@ -19,6 +19,7 @@ import Spinner from "src/components/Spinner";
 
 export default function ApiDashboardPage() {
   const { user } = useUser();
+  const t = useTranslations("ApiDashboard");
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export default function ApiDashboardPage() {
         setApiKeys(response.data);
       }
     } catch (err) {
-      setError("Failed to load API keys");
+      setError(t("errorLoadingKeys"));
       console.error("Error fetching API keys:", err);
     } finally {
       setLoading(false);
@@ -68,7 +69,6 @@ export default function ApiDashboardPage() {
   if (error) {
     return (
       <div className="grid-container">
-        <h1>API Dashboard</h1>
         <div className="usa-alert usa-alert--error">
           <div className="usa-alert__body">
             <p className="usa-alert__text">{error}</p>
@@ -81,7 +81,7 @@ export default function ApiDashboardPage() {
   return (
     <div className="grid-container">
       <div className="display-flex flex-justify margin-bottom-4">
-        <h1 className="margin-y-0">API Dashboard</h1>
+        <h1 className="margin-y-0">{t("heading")}</h1>
         <ApiKeyModal mode="create" onApiKeyUpdated={handleApiKeyCreated} />
       </div>
 

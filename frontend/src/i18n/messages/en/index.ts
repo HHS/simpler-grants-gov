@@ -517,11 +517,6 @@ export const messages = {
     pageTitle: "Developer Portal | Simpler.Grants.gov",
     pageDescription:
       "Tools and resources for developers working on Simpler.Grants.gov",
-    description:
-      "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
-    pageHeaderTitle: "Developer Portal",
-    pageHeaderParagraph:
-      "Access developer tools, resources, and documentation to contribute to Simpler.Grants.gov. Build with us to create a better grants experience.",
     infoTitle: "API tools & management",
     canDoHeader: "What's available for developers",
     canDoSubHeader: "What you can do with an API key now",
@@ -529,7 +524,7 @@ export const messages = {
       "You can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials to create, view, rotate, and revoke API keys.",
     cantDoHeader: "Current limitations",
     cantDoParagraph:
-      "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren’t available yet.</p>",
+      "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren't available yet.</p>",
     apiDashboardLink: "Manage API Keys",
     iconSections: [
       {
@@ -552,9 +547,26 @@ export const messages = {
   ApiDashboard: {
     pageTitle: "API Dashboard | Simpler.Grants.gov",
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
+    heading: "API Dashboard",
+    errorLoadingKeys: "Failed to load API keys",
+    table: {
+      headers: {
+        apiKey: "API Key",
+        dates: "Dates",
+        editName: "Edit Name",
+        deleteKey: "Delete Key",
+      },
+      dateLabels: {
+        created: "Created:",
+        lastUsed: "Last used:",
+        never: "Never",
+      },
+      deleteButton: "Delete Key",
+      deleteButtonTitle: "Delete functionality coming soon",
+      emptyState: "You don't have any API keys yet. Create your first API key to get started.",
+    },
     modal: {
       apiKeyNameLabel: "Name <required>(required)</required>",
-      required: "*",
       placeholder: "e.g., Production API Key",
       createTitle: "Create New API Key",
       createDescription:
@@ -562,13 +574,11 @@ export const messages = {
       editDescription: "Change the name of your Simpler.Grants.gov API key",
       createSuccessHeading: "API Key Created Successfully",
       editSuccessHeading: "API Key Renamed Successfully",
-      successAlert: "Success!",
       createSuccessMessage:
         'Your API key "{keyName}" has been created successfully.',
       editSuccessMessage:
         'Your API key has been renamed from "{originalName}" to "{keyName}".',
       close: "Close",
-      errorHeading: "Error",
       createErrorMessage:
         "There was an error creating your API key. Please try again.",
       editErrorMessage:
