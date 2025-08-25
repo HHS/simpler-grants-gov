@@ -47,6 +47,16 @@ def user_auth_token(user, db_session):
     return token
 
 
+@pytest.fixture
+def user_api_key(enable_factory_create):
+    return factories.UserApiKeyFactory.create()
+
+
+@pytest.fixture
+def user_api_key_id(user_api_key):
+    return user_api_key.key_id
+
+
 @pytest.fixture(scope="session", autouse=True)
 def env_vars():
     """

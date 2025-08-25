@@ -8,5 +8,6 @@ import src.task.notifications.email_notification  # noqa: F401 E402 isort:skip
 import src.task.sam_extracts.sam_extract_cli  # noqa: F401 E402 isort:skip
 import src.task.apply.create_application_submission_task  # noqa: F401 E402 isort:skip
 import src.task.generate_internal_token  # noqa: F401 E402 isort:skip
+import src.task.forms.update_form_task  # noqa: F401 E402 isort:skip
 
 __all__ = ["task_blueprint"]

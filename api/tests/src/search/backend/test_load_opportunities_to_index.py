@@ -18,6 +18,7 @@ from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
+    ExcludedOpportunityReviewFactory,
     OpportunityAttachmentFactory,
     OpportunityChangeAuditFactory,
     OpportunityFactory,
@@ -225,6 +226,64 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         assert attachments[0]["filename"] == filename_1
         # assert data was b64encoded
         assert attachments[0]["attachment"]["content"] == content  # decoded b64encoded attachment
+
+    def test_excluded_opportunities_not_indexed(
+        self,
+        db_session,
+        enable_factory_create,
+        search_client,
+        opportunity_index_alias,
+        load_opportunities_to_index,
+    ):
+
+        # Create opportunities that should be indexed (not excluded)
+        included_opportunities = OpportunityFactory.create_batch(
+            size=3, is_posted_summary=True, opportunity_attachments=[]
+        )
+
+        # Create opportunities that should be excluded from indexing
+        excluded_opportunities = OpportunityFactory.create_batch(
+            size=2, is_posted_summary=True, opportunity_attachments=[]
+        )
+
+        # Add the excluded opportunities to the ExcludedOpportunityReview table
+        for opportunity in excluded_opportunities:
+            ExcludedOpportunityReviewFactory.create(
+                legacy_opportunity_id=opportunity.legacy_opportunity_id
+            )
+
+        # Ensure we have a unique index name for this test to avoid conflicts
+        load_opportunities_to_index.index_name = (
+            load_opportunities_to_index.index_name + "-excluded-test"
+        )
+
+        # Run the indexing process
+        load_opportunities_to_index.run()
+
+        # Get all indexed opportunities from the search index
+        resp = search_client.search(opportunity_index_alias, {"size": 100})
+        all_indexed_opportunity_ids = set([record["opportunity_id"] for record in resp.records])
+
+        # Convert our test opportunities to string IDs for comparison
+        expected_included_ids = set([str(opp.opportunity_id) for opp in included_opportunities])
+        expected_excluded_ids = set([str(opp.opportunity_id) for opp in excluded_opportunities])
+
+        # Verify that ALL of our expected opportunities are present in the index
+        missing_included = expected_included_ids - all_indexed_opportunity_ids
+        assert (
+            not missing_included
+        ), f"Expected opportunities missing from index: {missing_included}"
+
+        # Verify that NONE of our excluded opportunities are present in the index
+        incorrectly_included = expected_excluded_ids & all_indexed_opportunity_ids
+        assert (
+            not incorrectly_included
+        ), f"Excluded opportunities found in index: {incorrectly_included}"
+
+        # Additional verification: ensure the sets are disjoint (no overlap)
+        assert expected_included_ids.isdisjoint(
+            expected_excluded_ids
+        ), "Test setup error: included and excluded sets overlap"
 
 
 class TestLoadOpportunitiesToIndexPartialRefresh(BaseTestClass):
