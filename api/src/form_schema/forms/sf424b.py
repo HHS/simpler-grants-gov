@@ -52,7 +52,7 @@ FORM_JSON_SCHEMA = {
     "required": ["title", "applicant_organization"],
     "properties": {
         "signature": {
-            "type": "null",
+            "type": "string",
             "title": "Signature of the Authorized Certifying Official",
             "description": "Completed by Grants.gov upon submission.",
             "minLength": 1,
@@ -75,7 +75,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 60,
         },
         "date_signed": {
-            "type": "null",
+            "type": "string",
             "format": "date",
             "title": "Date Signed",
             "description": "Completed by Grants.gov upon submission.",
