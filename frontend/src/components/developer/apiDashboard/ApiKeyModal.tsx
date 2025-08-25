@@ -21,7 +21,7 @@ import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { ApiKey } from "src/types/apiTypes";
+import { ApiKey } from "src/types/apiKeyTypes";
 
 interface ApiKeyModalProps {
   mode: "create" | "edit";

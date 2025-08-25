@@ -1,24 +1,16 @@
 import { getSession } from "src/services/auth/session";
 import { APIResponse } from "src/types/apiResponseTypes";
-import { ApiKey } from "src/types/apiTypes";
+import { ApiKey } from "src/types/apiKeyTypes";
 
 import { fetchUserWithMethod } from "./fetchers";
 
-export interface ApiKeyData {
-  api_key_id: string;
-  key_name: string;
-  key_id: string;
-  created_at: string;
-  last_used: string | null;
-  is_active: boolean;
-}
 
 interface ApiKeyResponse extends APIResponse {
-  data: ApiKeyData;
+  data: ApiKey;
 }
 
 interface ApiKeyListResponse extends APIResponse {
-  data: ApiKeyData[];
+  data: ApiKey[];
 }
 
 // Create a new API key
