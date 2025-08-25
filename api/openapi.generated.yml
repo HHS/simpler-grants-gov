@@ -90,6 +90,7 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/agencies:
     post:
@@ -218,6 +219,7 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/token/logout:
     post:
@@ -432,6 +434,7 @@ paths:
                     - order_by: opportunity_id
                       sort_direction: ascending
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}:
     get:
@@ -815,6 +818,7 @@ paths:
 
         '
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
@@ -1123,6 +1127,7 @@ paths:
 
         '
       security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
@@ -4818,4 +4823,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
 
