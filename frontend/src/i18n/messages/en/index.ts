@@ -524,12 +524,12 @@ export const messages = {
       "Access developer tools, resources, and documentation to contribute to Simpler.Grants.gov. Build with us to create a better grants experience.",
     infoTitle: "API tools & management",
     canDoHeader: "What's available for developers",
-    canDoSubHeader: "What you can do now",
+    canDoSubHeader: "What you can do with an API key now",
     canDoParagraph:
-      "With an API key, you can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials—create, view, rotate, and revoke API keys—via the API dashboard.",
-    cantDoHeader: "What you can’t do quite yet",
+      "You can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials to create, view, rotate, and revoke API keys.",
+    cantDoHeader: "Current limitations",
     cantDoParagraph:
-      "Before you get started there are a few limitations to be aware of. Inactive API keys are automatically disabled after 30 days without use. Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API. Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options. Additional management features (such as organization-level projects and roles) are on the roadmap but aren’t available yet. ",
+      "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren’t available yet.</p>",
     featureFlagsLink: "Manage API Keys",
     iconSections: [
       {
@@ -542,7 +542,7 @@ export const messages = {
       },
       {
         description: "Learn more about integrating our API into your project.",
-        http: "/dev/feature-flags",
+        http: "https://api.simpler.grants.gov/docs#/Opportunity%20v1/post_v1_opportunities_search",
         iconName: "local_library",
         link: "Read the docs",
         title: "API reference",
