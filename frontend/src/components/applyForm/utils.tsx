@@ -35,7 +35,7 @@ import TextWidget from "./widgets/TextWidget";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
-// json schema doesn't describe UI so types are infered if widget not supplied
+// json schema doesn't describe UI so types are inferred if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -148,7 +148,7 @@ export const getFieldName = ({
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--");
+      .join("--"); // hyphens for html-friendly ids
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -187,6 +187,7 @@ export const getByPointer = (target: object, path: string): unknown => {
     if ((e as Error).message.includes("Invalid reference token:")) {
       return undefined;
     }
+    // eslint-disable-next-line no-console
     console.error("error referencing schema path", e, target, path);
     throw e;
   }
@@ -215,12 +216,13 @@ export const buildField = ({
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
     name = uiFieldObject.name ? uiFieldObject.name : "";
     if (!name) {
+      // eslint-disable-next-line no-console
       console.error("name missing from multiField definition");
       throw new Error("Could not build field");
     }
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
-      .reduce((acc, schema) => ({ ...acc, ...schema }), {});
+      .reduce((acc, schemaPart) => ({ ...acc, ...schemaPart }), {});
     value = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -230,7 +232,7 @@ export const buildField = ({
           : {};
       })
       .reduce<Record<string, unknown>>(
-        (acc, value) => ({ ...acc, ...value }),
+        (acc, v) => ({ ...acc, ...v }),
         {},
       );
     rawErrors = definition
@@ -255,18 +257,33 @@ export const buildField = ({
           ? (fieldSchema.type[0] ?? "")
           : "";
 
-    // Normalize value by type (widget override only affects *display*, keep the underlying type)
+    // Normalize value by type (and widget override when it matters)
+    const widgetOverride =
+      "widget" in uiFieldObject ? uiFieldObject.widget : undefined;
+
     if (schemaType === "boolean") {
-      value =
-        typeof rawVal === "boolean"
-          ? rawVal
-          : typeof rawVal === "string"
-            ? rawVal === "true"
-            : undefined;
+      // If rendered as Radio, use "true"/"false" strings; else keep boolean for Checkbox
+      if (
+        (widgetOverride ??
+          determineFieldType({ uiFieldObject, fieldSchema })) === "Radio"
+      ) {
+        value =
+          typeof rawVal === "boolean"
+            ? String(rawVal)
+            : typeof rawVal === "string" &&
+                (rawVal === "true" || rawVal === "false")
+              ? rawVal
+              : undefined;
+      } else {
+        value =
+          typeof rawVal === "boolean"
+            ? rawVal
+            : typeof rawVal === "string"
+              ? rawVal === "true"
+              : undefined;
+      }
     } else if (schemaType === "array") {
-      value = Array.isArray(rawVal)
-        ? (rawVal as unknown[]).map((v: unknown) => String(v))
-        : [];
+      value = Array.isArray(rawVal) ? rawVal.map((v) => String(v)) : [];
     } else {
       value =
         typeof rawVal === "string" || typeof rawVal === "number"
@@ -278,37 +295,41 @@ export const buildField = ({
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
+    // eslint-disable-next-line no-console
     console.error("Invalid field schema for:", definition);
     throw new Error("Invalid or missing field schema");
   }
 
   if ((!name || !fieldSchema) && definition) {
+    // eslint-disable-next-line no-console
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
-  // If someone configures a boolean as Radio, ensure the schema has enum so the widget renders
+  // Optional guardrails for misconfig
   if (type === "Radio" && fieldSchema.type !== "boolean") {
+    // eslint-disable-next-line no-console
     console.warn(`Radio widget expects a boolean schema: ${name}`, fieldSchema);
   }
-  if (type === "Radio" && fieldSchema.type === "boolean" && !fieldSchema.enum) {
-    fieldSchema = { ...fieldSchema, enum: [true, false] };
-  }
   if (type === "Select" && fieldSchema.type === "array") {
-    console.warn(`Array schema detected; did you intend MultiSelect? ${name}`);
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Array schema detected; did you intend MultiSelect? ${name}`,
+    );
   }
 
   // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
   let options: WidgetOptions = {};
 
-  // Provide enumOptions for Select, MultiSelect, and Radio (even if Radio doesn't consume them today)
+  // Provide enumOptions for Select, MultiSelect, and Radio
   if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
     if (fieldSchema.type === "boolean") {
+      // Keep as strings to align with RadioWidget hidden input/value handling
       enums = ["true", "false"];
     } else if (fieldSchema.type === "array") {
       const item = Array.isArray(fieldSchema.items)
@@ -322,22 +343,21 @@ export const buildField = ({
         enums = ((item as { enum?: unknown[] }).enum ?? []).map(String);
       }
     } else if (Array.isArray(fieldSchema.enum)) {
-      // If we injected [true,false], keep labels friendly
-      enums = fieldSchema.enum.map((v: unknown) => String(v));
+      enums = fieldSchema.enum.map(String);
     }
 
     const enumOptions: EnumOptionsType<RJSFSchema>[] = enums.map(
-      (str: string): EnumOptionsType<RJSFSchema> => {
-        const label =
+      (label: string) => {
+        const display =
           fieldSchema.type === "boolean"
-            ? str === "true"
+            ? label === "true"
               ? "Yes"
               : "No"
             : getSimpleTranslationsSync({
                 nameSpace: "Form",
-                translateableString: str,
+                translateableString: label,
               });
-        return { value: str, label };
+        return { value: label, label: display };
       },
     );
 
@@ -347,22 +367,20 @@ export const buildField = ({
         : ({ enumOptions } as WidgetOptions);
   }
 
-  // Debug consoles for the SF-424 delinquent debt field
+  // DEBUG: trace the debt radio wiring (safe to remove)
   if (name === "delinquent_federal_debt") {
+    // eslint-disable-next-line no-console
     console.log("[424] debt field", {
-      type,                         // e.g. "Radio"
-      schemaType: fieldSchema.type, // "boolean"
-      value,                        // true | false | undefined
+      type,
+      schemaType: fieldSchema.type,
+      value,
       options,
     });
-    if (type !== "Radio") {
-      throw new Error("delinquent_federal_debt must render as Radio");
-    }
   }
 
   const Widget = widgetComponents[type];
-
   if (!Widget) {
+    // eslint-disable-next-line no-console
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
@@ -387,11 +405,8 @@ export const buildField = ({
 const getNestedWarningsForField = (
   fieldName: string,
   warnings: FormValidationWarning[],
-): FormValidationWarning[] => {
-  return warnings.filter(({ field, type }) => {
-    return type === "required" && fieldName.includes(field);
-  });
-};
+): FormValidationWarning[] =>
+  warnings.filter(({ field, type }) => type === "required" && fieldName.includes(field));
 
 const getWarningsForField = (
   fieldName: string,
@@ -427,9 +442,7 @@ export const formatFieldWarnings = (
     return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
-  return warningsforField.map((warning) => {
-    return warning.message;
-  });
+  return warningsforField.map((warning) => warning.message);
 };
 
 export function getFieldsForNav(
@@ -479,14 +492,11 @@ export const wrapSection = ({
   );
 };
 
-const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
-  return (
-    !!mightBeAnObject &&
-    !isArray(mightBeAnObject) &&
-    !isString(mightBeAnObject) &&
-    !isNumber(mightBeAnObject)
-  );
-};
+const isBasicallyAnObject = (mightBeAnObject: unknown): boolean =>
+  !!mightBeAnObject &&
+  !isArray(mightBeAnObject) &&
+  !isString(mightBeAnObject) &&
+  !isNumber(mightBeAnObject);
 
 const isEmptyField = (mightBeEmpty: unknown): boolean => {
   if (mightBeEmpty === undefined) {
@@ -501,8 +511,8 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
 };
 
 // if a nested field contains no defined items, remove it from the data
-export const pruneEmptyNestedFields = (structuredFormData: object): object => {
-  return Object.entries(structuredFormData).reduce(
+export const pruneEmptyNestedFields = (structuredFormData: object): object =>
+  Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
       if (!isBasicallyAnObject(value) && value !== undefined) {
         acc[key] = value;
@@ -517,7 +527,6 @@ export const pruneEmptyNestedFields = (structuredFormData: object): object => {
     },
     {} as { [key: string]: unknown },
   );
-};
 
 // filters, orders, and nests the form data to match the form schema
 export const shapeFormData = <T extends object>(
@@ -541,9 +550,8 @@ export const shapeFormData = <T extends object>(
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
-const removePropertyPaths = (path: string): string => {
-  return path.replace(/properties\//g, "").replace(/^\//, "");
-};
+const removePropertyPaths = (path: string): string =>
+  path.replace(/properties\//g, "").replace(/^\//, "");
 
 const getKeyParentPath = (key: string, parentPath?: string) => {
   const keyParent = parentPath ? `${parentPath}/${key}` : key;
@@ -553,12 +561,13 @@ const getKeyParentPath = (key: string, parentPath?: string) => {
 export const getRequiredProperties = (
   formSchema: RJSFSchema,
   parentPath?: string,
-): string[] => {
-  return Object.entries(formSchema).reduce((requiredPaths, [key, value]) => {
+): string[] =>
+  Object.entries(formSchema).reduce((requiredPaths, [key, value]) => {
     let acc = requiredPaths;
     if (key === "required") {
-      (value as []).forEach((requiredPropertyKey: string) => {
+      (value as string[]).forEach((requiredPropertyKey: string) => {
         if (!formSchema?.properties) {
+          // eslint-disable-next-line no-console
           console.error("Error finding required properties, malformed schema?");
           return;
         }
@@ -576,7 +585,6 @@ export const getRequiredProperties = (
     }
     return acc;
   }, [] as string[]);
-};
 
 export const isFieldRequired = (
   definition: string,
@@ -587,8 +595,11 @@ export const isFieldRequired = (
 };
 
 // arrays from the html look like field_[row]_item
-const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
-  return Object.entries(data).reduce(
+const flatFormDataToArray = (
+  field: string,
+  data: Record<string, unknown>,
+) =>
+  Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
       const fieldName = fieldSplit[0];
@@ -607,7 +618,6 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
     },
     [] as Array<Record<string, unknown>>,
   );
-};
 
 // dereference/condense schema for easy lookup
 export const processFormSchema = async (
@@ -626,13 +636,14 @@ export const processFormSchema = async (
     };
     return condensed as RJSFSchema;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error("Error processing schema");
     throw e;
   }
 };
 
-export const condenseFormSchemaProperties = (schema: object): object => {
-  return Object.entries(schema).reduce(
+export const condenseFormSchemaProperties = (schema: object): object =>
+  Object.entries(schema).reduce(
     (condensed: Record<string, unknown>, [key, value]: [string, unknown]) => {
       if (key === "properties") {
         return {
@@ -649,4 +660,3 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     },
     {},
   );
-};
