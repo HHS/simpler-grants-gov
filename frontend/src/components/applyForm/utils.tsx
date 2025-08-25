@@ -1,5 +1,5 @@
 import $Refparser from "@apidevtools/json-schema-ref-parser";
-import { RJSFSchema, EnumOptionsType } from "@rjsf/utils";
+import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
@@ -210,7 +210,7 @@ export const buildField = ({
 
   let fieldSchema = {} as RJSFSchema;
   let name = "";
-  let value: unknown = undefined;
+  let value: unknown;
   let rawErrors: string[] | FormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
@@ -231,10 +231,7 @@ export const buildField = ({
           ? (result as Record<string, unknown>)
           : {};
       })
-      .reduce<Record<string, unknown>>(
-        (acc, v) => ({ ...acc, ...v }),
-        {},
-      );
+      .reduce<Record<string, unknown>>((acc, v) => ({ ...acc, ...v }), {});
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -249,7 +246,7 @@ export const buildField = ({
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
 
-    const rawVal = getByPointer(formData, path) as unknown;
+    const rawVal = getByPointer(formData, path);
     const schemaType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
@@ -287,7 +284,7 @@ export const buildField = ({
     } else {
       value =
         typeof rawVal === "string" || typeof rawVal === "number"
-          ? (rawVal as string | number)
+          ? rawVal
           : undefined;
     }
 
@@ -315,9 +312,7 @@ export const buildField = ({
   }
   if (type === "Select" && fieldSchema.type === "array") {
     // eslint-disable-next-line no-console
-    console.warn(
-      `Array schema detected; did you intend MultiSelect? ${name}`,
-    );
+    console.warn(`Array schema detected; did you intend MultiSelect? ${name}`);
   }
 
   // TODO: move schema mutations to own function
@@ -406,7 +401,9 @@ const getNestedWarningsForField = (
   fieldName: string,
   warnings: FormValidationWarning[],
 ): FormValidationWarning[] =>
-  warnings.filter(({ field, type }) => type === "required" && fieldName.includes(field));
+  warnings.filter(
+    ({ field, type }) => type === "required" && fieldName.includes(field),
+  );
 
 const getWarningsForField = (
   fieldName: string,
@@ -492,11 +489,17 @@ export const wrapSection = ({
   );
 };
 
-const isBasicallyAnObject = (mightBeAnObject: unknown): boolean =>
-  !!mightBeAnObject &&
-  !isArray(mightBeAnObject) &&
-  !isString(mightBeAnObject) &&
-  !isNumber(mightBeAnObject);
+const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
+  return (
+    !!mightBeAnObject &&
+    !isArray(mightBeAnObject) &&
+    !isString(mightBeAnObject) &&
+    !isNumber(mightBeAnObject)
+  );
+};
 
 const isEmptyField = (mightBeEmpty: unknown): boolean => {
   if (mightBeEmpty === undefined) {
@@ -595,10 +598,7 @@ export const isFieldRequired = (
 };
 
 // arrays from the html look like field_[row]_item
-const flatFormDataToArray = (
-  field: string,
-  data: Record<string, unknown>,
-) =>
+const flatFormDataToArray = (field: string, data: Record<string, unknown>) =>
   Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
