@@ -1,5 +1,5 @@
 import $Refparser from "@apidevtools/json-schema-ref-parser";
-import { RJSFSchema, EnumOptionsType } from "@rjsf/utils";
+import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
@@ -210,7 +210,7 @@ export const buildField = ({
 
   let fieldSchema = {} as RJSFSchema;
   let name = "";
-  let value: unknown = undefined;
+  let value: unknown;
   let rawErrors: string[] | FormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
@@ -249,7 +249,7 @@ export const buildField = ({
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
 
-    const rawVal = getByPointer(formData, path) as unknown;
+    const rawVal = getByPointer(formData, path);
     const schemaType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
@@ -287,7 +287,7 @@ export const buildField = ({
     } else {
       value =
         typeof rawVal === "string" || typeof rawVal === "number"
-          ? (rawVal as string | number)
+          ? rawVal
           : undefined;
     }
 
@@ -371,9 +371,15 @@ export const buildField = ({
   if (name === "delinquent_federal_debt") {
     // eslint-disable-next-line no-console
     console.log("[424] debt field", {
+<<<<<<< Updated upstream
       type,
       schemaType: fieldSchema.type,
       value,
+=======
+      type, // e.g. "Radio"
+      schemaType: fieldSchema.type, // "boolean"
+      value, // true | false | undefined
+>>>>>>> Stashed changes
       options,
     });
   }
@@ -492,11 +498,25 @@ export const wrapSection = ({
   );
 };
 
+<<<<<<< Updated upstream
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean =>
   !!mightBeAnObject &&
   !isArray(mightBeAnObject) &&
   !isString(mightBeAnObject) &&
   !isNumber(mightBeAnObject);
+=======
+const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
+  return (
+    !!mightBeAnObject &&
+    !isArray(mightBeAnObject) &&
+    !isString(mightBeAnObject) &&
+    !isNumber(mightBeAnObject)
+  );
+};
+>>>>>>> Stashed changes
 
 const isEmptyField = (mightBeEmpty: unknown): boolean => {
   if (mightBeEmpty === undefined) {

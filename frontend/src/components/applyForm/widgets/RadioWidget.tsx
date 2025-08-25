@@ -1,12 +1,21 @@
 "use client"
 
 import {
+<<<<<<< Updated upstream
   EnumOptionsType,
+=======
+  enumOptionsIsSelected,
+  EnumOptionsType,
+  enumOptionsValueForIndex,
+>>>>>>> Stashed changes
   FormContextType,
   optionId,
   RJSFSchema,
   StrictRJSFSchema,
+<<<<<<< Updated upstream
   enumOptionsValueForIndex,
+=======
+>>>>>>> Stashed changes
 } from "@rjsf/utils";
 import React, {
   FocusEvent,
@@ -65,8 +74,16 @@ function RadioWidget<
 
   // Prefer options.enumOptions (provided by our utils), else fall back to schema.enum (rare)
   const enumOptions = useMemo<EnumOptionsType<S>[]>(() => {
+<<<<<<< Updated upstream
     if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) {
       return uiEnumOptions;
+=======
+    const uiEnum = (options as any)?.enumOptions as
+      | EnumOptionsType<S>[]
+      | undefined;
+    if (Array.isArray(uiEnum) && uiEnum.length) {
+      return uiEnum;
+>>>>>>> Stashed changes
     }
     const fromSchema =
       Array.isArray(enumFromSchema) && enumFromSchema.length
@@ -167,10 +184,17 @@ function RadioWidget<
 
       {Array.isArray(enumOptions) &&
         enumOptions.map((option, i) => {
+<<<<<<< Updated upstream
           // Our utils supply string values "true"/"false" for booleans
           const optionValue = String(option.value) as "true" | "false";
           const checked = picked === optionValue;
 
+=======
+          const checked = enumOptionsIsSelected<S>(
+            option.value,
+            value.toString(),
+          );
+>>>>>>> Stashed changes
           const itemDisabled =
             Array.isArray(enumDisabled) &&
             enumDisabled.indexOf(option.value as TextTypes) !== -1;
