@@ -554,6 +554,7 @@ export const messages = {
       about: "About",
       community: "Community",
       developer: "Developer Portal",
+      developers: "Developers",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",

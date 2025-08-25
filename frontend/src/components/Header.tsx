@@ -93,6 +93,7 @@ const NavLinks = ({
   const { checkFeatureFlag } = useFeatureFlags();
   const showSavedSearch = checkFeatureFlag("savedSearchesOn");
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
+  const showDeveloperPortal = !checkFeatureFlag("developerPageOff");
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -110,6 +111,7 @@ const NavLinks = ({
         children: [
           { text: t("subscribe"), href: "/subscribe" },
           { text: t("events"), href: "/events" },
+          ...(showDeveloperPortal ? [{ text: t("developers"), href: "/developer" }] : []),
           { text: t("wiki"), href: wikiLink },
           { text: t("forum"), href: forumLink },
         ],
@@ -137,7 +139,7 @@ const NavLinks = ({
       text: t("workspace"),
       children: workspaceSubNavs,
     });
-  }, [t, path, getSearchLink, user, showSavedOpportunities, showSavedSearch]);
+  }, [t, path, getSearchLink, user, showSavedOpportunities, showSavedSearch, showDeveloperPortal]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {
