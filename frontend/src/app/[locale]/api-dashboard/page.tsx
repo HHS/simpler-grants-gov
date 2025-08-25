@@ -2,6 +2,10 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { 
+  getApiKeysEndpoint, 
+  getApiKeysRequestConfig 
+} from "src/services/fetch/fetchers/apiKeyFetcher";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -29,14 +33,8 @@ export default function ApiDashboardPage() {
     try {
       setLoading(true);
       const response = await clientFetch(
-        "/api/user/api-keys/list",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({}),
-        }
+        getApiKeysEndpoint(),
+        getApiKeysRequestConfig()
       );
       
       if (response?.data) {
