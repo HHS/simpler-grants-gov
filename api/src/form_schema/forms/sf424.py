@@ -730,11 +730,11 @@ FORM_UI_SCHEMA = [
                 "definition": "/properties/federal_award_identifier",
             },
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/state_receive_date",
             },
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/state_application_id",
             },
         ],
