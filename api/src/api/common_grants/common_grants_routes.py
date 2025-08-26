@@ -12,7 +12,7 @@ import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
-from src.api.schemas.common_grants_schemas import (
+from src.api.schemas.common_grants_schema import (
     PaginatedQueryParamsSchema,
     OpportunitiesListResponseSchema,
     OpportunityResponseSchema,
