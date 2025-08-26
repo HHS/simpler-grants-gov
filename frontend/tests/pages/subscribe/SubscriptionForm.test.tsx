@@ -10,7 +10,7 @@ jest.mock("next-intl", () => ({
   useMessages: () => mockMessages,
 }));
 
-jest.mock("src/app/[locale]/(base)/subscribe/actions", () => ({
+jest.mock("src/app/[locale]/(base)/newsletter/actions", () => ({
   subscribeEmail: (...args: unknown[]): unknown => mockSubscribeEmail(...args),
 }));
 

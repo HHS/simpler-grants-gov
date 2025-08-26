@@ -49,10 +49,10 @@ jest.mock("src/services/sessionStorage/sessionStorage", () => {
 });
 
 describe("Subscribe", () => {
-  it("renders intro text", () => {
+  it("renders title text", () => {
     render(Subscribe({ params: localeParams }));
 
-    const content = screen.getByText("intro");
+    const content = screen.getByText("title");
 
     expect(content).toBeInTheDocument();
   });

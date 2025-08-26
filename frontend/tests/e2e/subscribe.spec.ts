@@ -6,7 +6,7 @@ import {
 
 function mockAPIEndpoints(next: NextFixture, responseText = "1") {
   next.onFetch((request: Request) => {
-    if (request.url.endsWith("/subscribe") && request.method === "POST") {
+    if (request.url.endsWith("/newsletter") && request.method === "POST") {
       return new Response(responseText, {
         status: 200,
         headers: {
@@ -19,7 +19,7 @@ function mockAPIEndpoints(next: NextFixture, responseText = "1") {
   });
 }
 test.beforeEach(async ({ page }) => {
-  await page.goto("/subscribe");
+  await page.goto("/newsletter");
 });
 
 test.afterEach(async ({ context }) => {

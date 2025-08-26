@@ -20,10 +20,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-/* TODO
-  - change url
-  - redirect all pages
-*/
 export default function Subscribe({ params }: LocalizedPageProps) {
   const { locale } = use(params);
   setRequestLocale(locale);
