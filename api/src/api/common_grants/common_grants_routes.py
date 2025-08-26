@@ -7,29 +7,37 @@ from apiflask import HTTPError
 from common_grants_sdk.schemas import OpportunityResponse
 from common_grants_sdk.schemas.requests.opportunity import OpportunitySearchRequest
 from common_grants_sdk.schemas.pagination import PaginatedQueryParams
-from flask import request
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
+from src.api.schemas.common_grants_schemas import (
+    PaginatedQueryParamsSchema,
+    OpportunitiesListResponseSchema,
+    OpportunityResponseSchema,
+    OpportunitiesSearchResponseSchema,
+    OpportunitySearchRequestSchema,
+)
 
 logger = logging.getLogger(__name__)
 
 
 @common_grants_blueprint.get("/opportunities")
+@common_grants_blueprint.input(PaginatedQueryParamsSchema, location="query")
+@common_grants_blueprint.output(OpportunitiesListResponseSchema)
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
 )
 @flask_db.with_db_session()
-def list_opportunities(db_session: db.Session) -> tuple[dict, int]:
+def list_opportunities(db_session: db.Session, query: dict) -> tuple[dict, int]:
     """Get a paginated list of opportunities."""
     # Parse pagination parameters using PySDK classes
     try:
         pagination_params = PaginatedQueryParams.model_validate({
-            "page": request.args.get("page", 1, type=int),
-            "pageSize": request.args.get("pageSize", 10, type=int),
+            "page": query.get("page", 1),
+            "pageSize": query.get("page_size", 10),
         })
     except Exception as e:
         raise HTTPError(400, message=f"Invalid pagination parameters: {str(e)}") from e
@@ -44,6 +52,7 @@ def list_opportunities(db_session: db.Session) -> tuple[dict, int]:
 
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
+@common_grants_blueprint.output(OpportunityResponseSchema)
 @common_grants_blueprint.doc(
     summary="View opportunity",
     description="View additional details about an opportunity",
@@ -77,6 +86,8 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 
 
 @common_grants_blueprint.post("/opportunities/search")
+@common_grants_blueprint.input(OpportunitySearchRequestSchema)
+@common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
@@ -86,13 +97,11 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     },
 )
 @flask_db.with_db_session()
-def search_opportunities(db_session: db.Session) -> tuple[dict, int]:
+def search_opportunities(db_session: db.Session, json: dict) -> tuple[dict, int]:
     """Search for opportunities based on the provided filters."""
     # Parse request body
     try:
-        request_data = request.get_json()
-        if not request_data:
-            request_data = {}
+        request_data = json if json else {}
 
         # Create search request object
         search_request = OpportunitySearchRequest.model_validate(request_data)
