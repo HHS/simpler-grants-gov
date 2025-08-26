@@ -141,7 +141,7 @@ def _handle_mock_import_response(
 
     logger.info(
         "Mock API key import",
-        extra={"mock_key_id": response.id, "name": name, "usage_plan_id": usage_plan_id},
+        extra={"mock_key_id": response.id, "key_name": name, "usage_plan_id": usage_plan_id},
     )
 
     return response

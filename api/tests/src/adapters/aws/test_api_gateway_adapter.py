@@ -55,7 +55,7 @@ class TestGetBotoApiGatewayClient:
 class TestImportApiKeyFunction:
     """Test the main import_api_key function."""
 
-    def setUp(self):
+    def setup_method(self):
         """Clear mock responses before each test."""
         _clear_mock_import_responses()
 
@@ -206,7 +206,13 @@ class TestImportApiKeyFunction:
 
         # Verify warning was logged
         assert "API Gateway import warnings" in caplog.text
-        assert "Key already exists" in caplog.text
+        # Verify warning details are in the log records
+        warning_records = [
+            record for record in caplog.records if "API Gateway import warnings" in record.message
+        ]
+        assert len(warning_records) > 0
+        assert hasattr(warning_records[0], "warnings")
+        assert "Key already exists" in warning_records[0].warnings
 
         assert response.id == "api-key-123"
 
@@ -255,6 +261,10 @@ class TestImportApiKeyFunction:
 
 class TestMockResponseHelpers:
     """Test the mock response helper functions."""
+
+    def setup_method(self):
+        """Clear mock responses before each test."""
+        _clear_mock_import_responses()
 
     def test_clear_mock_responses(self):
         """Test that mock responses can be cleared."""

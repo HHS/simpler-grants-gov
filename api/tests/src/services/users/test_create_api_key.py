@@ -12,7 +12,7 @@ from src.services.users.create_api_key import (
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_success(mock_import_api_key, enable_factory_create, db_session: db.Session):
     """Test that create_api_key successfully creates a new API key with auto-generated key_id."""
     user = UserFactory.create()
@@ -53,7 +53,7 @@ def test_create_api_key_success(mock_import_api_key, enable_factory_create, db_s
     assert api_key.updated_at is not None
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_default_active(
     mock_import_api_key, enable_factory_create, db_session: db.Session
 ):
@@ -70,7 +70,7 @@ def test_create_api_key_default_active(
     assert api_key.is_active is True
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_inactive(
     mock_import_api_key, enable_factory_create, db_session: db.Session
 ):
@@ -87,7 +87,7 @@ def test_create_api_key_inactive(
     assert api_key.is_active is True
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_generates_unique_key_ids(
     mock_import_api_key, enable_factory_create, db_session: db.Session
 ):
@@ -110,7 +110,7 @@ def test_create_api_key_generates_unique_key_ids(
     assert all(len(key_id) == 25 for key_id in key_ids)
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_collision_detection(
     mock_import_api_key, enable_factory_create, db_session: db.Session
 ):
@@ -137,7 +137,7 @@ def test_create_api_key_collision_detection(
         assert mock_generate.call_count == 2
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_max_retries_exceeded(
     mock_import_api_key, enable_factory_create, db_session: db.Session
 ):
@@ -164,7 +164,7 @@ def test_create_api_key_max_retries_exceeded(
         assert mock_generate.call_count == MAX_KEY_GENERATION_RETRIES
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_logging_success(
     mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
 ):
@@ -193,7 +193,7 @@ def test_create_api_key_logging_success(
     assert log_record.key_name == key_name
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_logging_max_retries(
     mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
 ):
@@ -249,7 +249,7 @@ def test_create_api_key_uses_key_generator(
     assert api_key.key_id == "TestGeneratedKey123456789"
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_aws_gateway_error_handling(
     mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
 ):
@@ -281,7 +281,7 @@ def test_create_api_key_aws_gateway_error_handling(
     assert "AWS API Gateway unavailable" in caplog.text
 
 
-@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+@patch("src.services.users.create_api_key.import_api_key")
 def test_create_api_key_multiple_keys_same_user(
     mock_import_api_key, enable_factory_create, db_session: db.Session
 ):
