@@ -120,7 +120,7 @@ def format_post_description(
         summary = re.sub(r"!\[.*?\]\(.*?\)", "", description).strip()
 
     # Format with GitHub link and summary
-    return f"{summary}\n\nFor more technical details, see the [GitHub issue]({url})"
+    return f"{summary}\n\n**Technical details**\nFor more information, see the [GitHub issue]({url})"
 
 
 def format_issue_body(
