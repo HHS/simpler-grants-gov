@@ -185,3 +185,9 @@ variable "service_override_extra_environment_variables" {
   EOT
   default     = {}
 }
+
+variable "secondary_domain_names" {
+  type        = list(string)
+  description = "A list of domain names the ALB can also use"
+  default     = []
+}
