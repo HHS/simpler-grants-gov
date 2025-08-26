@@ -1844,6 +1844,17 @@ class TfundinstrFactory(BaseFactory):
     last_upd_id = factory.Faker("first_name")
 
 
+class VOpportunitySummaryFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    opportunity_id = factory.Sequence(lambda n: n)
+    is_draft = True
+    fo_last_upd_dt = factory.Faker("date_time_between", start_date="-5y", end_date="-5y")
+    omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-5y")
+    omb_review_status_display: None
+
+
 ####################################
 # Staging Table Factories
 ####################################
@@ -2302,6 +2313,13 @@ class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
 
     opportunity = factory.SubFactory(ForeignTopportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class ForeignVopportunitySummaryFactory(VOpportunitySummaryFactory):
+    class Meta:
+        model = foreign.opportunity.VOpportunitySummary
+
+    opportunity_id = factory.Sequence(lambda n: n)
 
 
 class TuserAccountFactory(BaseFactory):
