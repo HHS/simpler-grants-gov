@@ -65,6 +65,8 @@ def get_application(
             selectinload(Application.competition).selectinload(
                 Competition.link_competition_open_to_applicant
             ),
+            # Load opportunity for agency_code access
+            selectinload(Application.competition).selectinload(Competition.opportunity),
         )
         .where(Application.application_id == application_id)
     )

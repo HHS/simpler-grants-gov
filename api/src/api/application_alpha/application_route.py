@@ -31,7 +31,7 @@ from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
 from src.services.applications.delete_application_attachment import delete_application_attachment
-from src.services.applications.get_application import get_application_with_warnings
+from src.services.applications.get_application import get_application_with_warnings, get_application
 from src.services.applications.get_application_attachment import get_application_attachment
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
@@ -40,6 +40,17 @@ from src.services.applications.update_application_attachment import update_appli
 from src.services.applications.update_application_form import update_application_form
 
 logger = logging.getLogger(__name__)
+
+
+def _add_application_metadata_to_logs(application) -> None:
+    """Add application metadata to the current request logs for New Relic dashboards."""
+    extra_data = {
+        "organization_id": application.organization_id,
+        "competition_id": application.competition_id,
+        "opportunity_id": application.competition.opportunity_id if application.competition and application.competition.opportunity else None,
+        "agency_code": application.competition.opportunity.agency_code if application.competition and application.competition.opportunity else None,
+    }
+    add_extra_data_to_current_request_logs(extra_data)
 
 
 @application_blueprint.post("/applications/start")
@@ -66,6 +77,9 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
         application = create_application(
             db_session, competition_id, user, application_name, organization_id
         )
+        
+        # Add application metadata to logs after creation
+        _add_application_metadata_to_logs(application)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
@@ -251,6 +265,13 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     user = token_session.user
 
     with db_session.begin():
+        # Get the application first to extract metadata for logging
+        application = get_application(db_session, application_id, user)
+        
+        # Add application metadata to logs
+        _add_application_metadata_to_logs(application)
+        
+        # Submit the application
         submit_application(db_session, application_id, user)
 
     # Return success response

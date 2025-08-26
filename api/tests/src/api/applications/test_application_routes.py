@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import date, timedelta
 
@@ -76,6 +77,51 @@ def test_application_start_success(
     assert application is not None
     assert str(application.competition_id) == competition_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+
+def test_application_start_logging_enhancement(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    """Test that the Start Application endpoint adds application metadata to logs for New Relic dashboards"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    # Create a competition with an opportunity that has an agency_code
+    opportunity = OpportunityFactory.create(agency_code="TEST")
+    competition = CompetitionFactory.create(
+        opening_date=today, 
+        closing_date=future_date,
+        opportunity=opportunity
+    )
+
+    competition_id = str(competition.competition_id)
+    request_data = {"competition_id": competition_id}
+
+    # Set log level to capture INFO messages
+    caplog.set_level(logging.INFO)
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
+
+    # Verify that the application metadata was added to the logs
+    application_id = response.json["data"]["application_id"]
+    
+    # Check that the log messages contain the expected metadata
+    log_records = [record for record in caplog.records if "application" in record.getMessage().lower()]
+    
+    # Should find at least one log message with the application metadata
+    found_metadata = False
+    for record in log_records:
+        if hasattr(record, 'organization_id') or hasattr(record, 'competition_id') or hasattr(record, 'opportunity_id') or hasattr(record, 'agency_code'):
+            found_metadata = True
+            break
+    
+    assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
 
 def test_application_start_null_opening_date(
@@ -1667,6 +1713,72 @@ def test_application_submit_success(
     # Verify application status was updated
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
+
+
+def test_application_submit_logging_enhancement(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    """Test that the Submit Application endpoint adds application metadata to logs for New Relic dashboards"""
+    # Create a competition with a future closing date and opportunity with agency_code
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+    
+    opportunity = OpportunityFactory.create(agency_code="TEST")
+    competition = CompetitionFactory.create(
+        closing_date=future_date, 
+        competition_forms=[],
+        opportunity=opportunity
+    )
+
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+
+    competition_form = CompetitionFormFactory.create(
+        competition=competition,
+        form=form,
+    )
+
+    # Create an application in the IN_PROGRESS state
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    )
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+
+    application_id = str(application.application_id)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Set log level to capture INFO messages
+    caplog.set_level(logging.INFO)
+
+    response = client.post(
+        f"/alpha/applications/{application_id}/submit",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert response
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify application status was updated
+    db_session.refresh(application)
+    assert application.application_status == ApplicationStatus.SUBMITTED
+
+    # Check that the log messages contain the expected metadata
+    log_records = [record for record in caplog.records if "application" in record.getMessage().lower()]
+    
+    # Should find at least one log message with the application metadata
+    found_metadata = False
+    for record in log_records:
+        if hasattr(record, 'organization_id') or hasattr(record, 'competition_id') or hasattr(record, 'opportunity_id') or hasattr(record, 'agency_code'):
+            found_metadata = True
+            break
+    
+    assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
 
 def test_application_submit_validation_issues(

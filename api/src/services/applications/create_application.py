@@ -141,7 +141,10 @@ def create_application(
     competition = db_session.execute(
         select(Competition)
         .where(Competition.competition_id == competition_id)
-        .options(selectinload(Competition.competition_forms))
+        .options(
+            selectinload(Competition.competition_forms),
+            selectinload(Competition.opportunity)
+        )
     ).scalar_one_or_none()
 
     if not competition:
@@ -218,5 +221,8 @@ def create_application(
             "organization_id": organization_id,
         },
     )
+
+    # Ensure the competition relationship is loaded for the returned application
+    application.competition = competition
 
     return application
