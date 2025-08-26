@@ -138,7 +138,6 @@ export function Search({ searchParams, params }: SearchPageProps) {
       <div className="grid-container">
         <SearchResults
           searchParams={convertedSearchParams}
-          loadingMessage={t("loading")}
           searchResultsPromise={searchResultsPromise}
         ></SearchResults>
       </div>

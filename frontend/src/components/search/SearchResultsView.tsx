@@ -13,6 +13,8 @@ type SearchResultsViewProps = {
   searchResults: SearchAPIResponse;
 };
 
+// given the issues with suspense mentioned in this ticket, this won't show up
+// https://github.com/HHS/simpler-grants-gov/issues/4930
 export const SearchResultsSkeleton = () => {
   return (
     <>
