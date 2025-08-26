@@ -1,11 +1,7 @@
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
-import Loading from "src/components/Loading";
-import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
 import SearchPagination from "./SearchPagination";
 import { SearchResultsControls } from "./SearchResultsControls/SearchResultsControls";
-import SearchResultsHeader from "./SearchResultsHeader";
-import SearchResultsList from "./SearchResultsList";
 import { SearchResultsTable } from "./SearchResultsTable";
 
 type SearchResultsViewProps = {
@@ -17,86 +13,10 @@ type SearchResultsViewProps = {
   searchResults: SearchAPIResponse;
 };
 
-type SearchResultsSkeletonProps = {
-  sortby: string | null;
-  page: number;
-  query?: string | null;
-  loadingMessage: string;
-};
-
-export const SearchResultsListSkeleton = ({
-  sortby,
-  page,
-  query,
-  loadingMessage,
-}: SearchResultsSkeletonProps) => {
-  return (
-    <>
-      <SearchResultsHeader sortby={sortby} />
-      <div className="search-results-content">
-        <div className="tablet-lg:display-flex">
-          <SearchPagination
-            loading={true}
-            page={page}
-            query={query}
-            className="desktop:grid-col-fill desktop:display-flex flex-justify-center"
-          />
-        </div>
-        <Loading message={loadingMessage} />
-        <SearchPagination
-          loading={true}
-          page={page}
-          query={query}
-          className="desktop:grid-col-fill desktop:display-flex flex-justify-center"
-        />
-      </div>
-    </>
-  );
-};
-
 export const SearchResultsSkeleton = () => {
   return (
     <>
       <div>Loading the table...</div>
-    </>
-  );
-};
-
-export const SearchResultsListView = ({
-  sortby,
-  page,
-  query,
-  totalResults,
-  totalPages,
-  searchResults,
-}: SearchResultsViewProps) => {
-  return (
-    <>
-      <SearchResultsHeader
-        queryTerm={query}
-        sortby={sortby}
-        totalFetchedResults={totalResults}
-      />
-      <div className="search-results-content">
-        <div className="tablet-lg:display-flex">
-          <ExportSearchResultsButton className="desktop:grid-col-4 desktop:display-flex flex-align-self-center" />
-          <SearchPagination
-            totalPages={totalPages}
-            page={page}
-            query={query}
-            totalResults={totalResults}
-            className="desktop:grid-col-fill desktop:display-flex flex-justify-center"
-          />
-        </div>
-        <SearchResultsList searchResults={searchResults} page={page} />
-        <SearchPagination
-          totalPages={totalPages}
-          page={page}
-          query={query}
-          totalResults={totalResults}
-          scroll={true}
-        />
-      </div>
     </>
   );
 };
@@ -129,13 +49,3 @@ export const SearchResultsView = ({
     </>
   );
 };
-
-// export const SearchResultsView = withFeatureFlag<
-//   SearchResultsViewProps,
-//   ReactNode
-// >(SearchResultsListView, "searchTableOn", SearchResultsTableView);
-
-// export const SearchResultsSkeleton = withFeatureFlag<
-//   SearchResultsSkeletonProps,
-//   ReactNode
-// >(SearchResultsLegacySkeleton, "searchTableOn", SearchResultsTableSkeleton);
