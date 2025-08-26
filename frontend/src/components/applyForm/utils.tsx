@@ -279,7 +279,7 @@ export const buildField = ({
   const disabled = fieldType === "null";
   let options = {};
 
- // Provide enumOptions for Select, MultiSelect, and Radio
+  // Provide enumOptions for Select, MultiSelect, and Radio
   if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 

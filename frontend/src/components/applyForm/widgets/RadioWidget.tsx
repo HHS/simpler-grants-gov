@@ -2,13 +2,13 @@
 
 import {
   enumOptionsIsSelected,
-  enumOptionsValueForIndex,
+  EnumOptionsType,
   FormContextType,
   optionId,
   RJSFSchema,
   StrictRJSFSchema,
-  EnumOptionsType,
 } from "@rjsf/utils";
+
 import React, { FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 
@@ -18,7 +18,7 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /**
  * The portion of `options` we care about here, with safe typing.
- * we shape our data since RJSF’s options are loosely typed.
+ * We shape our data since RJSF’s options are loosely typed.
  */
 type LocalOptions<S extends StrictRJSFSchema> = {
   enumDisabled?: Array<string | number | boolean>;
@@ -29,7 +29,7 @@ type LocalOptions<S extends StrictRJSFSchema> = {
 
 /**
  * normalizeForCompare
- * 
+ *
  * Given an option’s value and the current field value, we force the current value type
  * so it compares correctly with the option's representation.
  */
@@ -41,28 +41,28 @@ function normalizeForCompare(optionValue: unknown, current: unknown): unknown {
     if (current === "true" || current === "false") return current;
     return undefined;
   }
-
   return current;
 }
 
 /**
  * parseFromInputValue
- * 
- * Convert an HTML input value (always a string) to the type we want to emit
- * in events (`onChange`, `onBlur`, `onFocus`).
  *
- * If this radio group represents a boolean (options include "true"/"false"),
- * return a *boolean* true/false.
- * Otherwise, return the raw string value.
+ * Convert an HTML input value (always a string) to either a boolean (for
+ * boolean radio groups) or the original enum value if we can find it.
  */
-function parseFromInputValue<S extends StrictRJSFSchema>(
+function coerceFromString<S extends StrictRJSFSchema>(
   raw: string,
   enumOptions: ReadonlyArray<EnumOptionsType<S>>,
-): boolean | string {
+): unknown {
   const usesBoolStrings = enumOptions.some(
     (option) => option.value === "true" || option.value === "false",
   );
-  return usesBoolStrings ? raw === "true" : raw;
+  if (usesBoolStrings) {
+    return raw === "true";
+  }
+  // For non-boolean radios, return the actual enum value (could be number/string)
+  const hit = enumOptions.find((option) => String(option.value) === raw);
+  return hit ? hit.value : raw;
 }
 
 function RadioWidget<
@@ -87,13 +87,14 @@ function RadioWidget<
   const { title, enum: enumFromSchema, description } = schema;
 
   // Extract and safely type the options we use
-  const { enumDisabled, emptyValue, enumOptions: uiEnumOptions } =
+  const { enumDisabled, enumOptions: uiEnumOptions } =
     (options as LocalOptions<S>) ?? {};
 
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   /**
-   * Determine our list of options
+   * Determine our list of options:
+   * Prefer ui-provided enumOptions (already shaped), else fall back to schema.enum.
    */
   const enumOptions: EnumOptionsType<S>[] = useMemo(() => {
     if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) {
@@ -101,48 +102,13 @@ function RadioWidget<
     }
     const fromSchema =
       Array.isArray(enumFromSchema) && enumFromSchema.length
-        ? enumFromSchema.map((v) => ({ label: String(v), value: v }))
+        ? enumFromSchema.map((enumValue) => ({
+            label: String(enumValue),
+            value: enumValue,
+          }))
         : [];
     return fromSchema as EnumOptionsType<S>[];
   }, [uiEnumOptions, enumFromSchema]);
-
-  /**
-   * Event helpers: 
-   * 
-   * convert the input string to a value 
-   * before passing to RJSF handlers.
-   */
-  const handleBlur = useCallback(
-    ({ target }: FocusEvent<HTMLInputElement>) => {
-      const next = enumOptionsValueForIndex<S>(
-        target?.value,
-        enumOptions,
-        emptyValue,
-      );
-      const coerced =
-        typeof next === "undefined"
-          ? (parseFromInputValue(String(target?.value ?? ""), enumOptions) as T)
-          : (next as T);
-      onBlur(id, coerced);
-    },
-    [onBlur, id, enumOptions, emptyValue],
-  );
-
-  const handleFocus = useCallback(
-    ({ target }: FocusEvent<HTMLInputElement>) => {
-      const next = enumOptionsValueForIndex<S>(
-        target?.value,
-        enumOptions,
-        emptyValue,
-      );
-      const coerced =
-        typeof next === "undefined"
-          ? (parseFromInputValue(String(target?.value ?? ""), enumOptions) as T)
-          : (next as T);
-      onFocus(id, coerced);
-    },
-    [onFocus, id, enumOptions, emptyValue],
-  );
 
   const error = rawErrors.length ? true : undefined;
   const describedby = error
@@ -150,6 +116,28 @@ function RadioWidget<
     : title
       ? `label-for-${id}`
       : undefined;
+
+  const handleBlur = useCallback(
+    ({ target }: FocusEvent<HTMLInputElement>) => {
+      const next = coerceFromString<S>(
+        String(target?.value ?? ""),
+        enumOptions,
+      ) as T;
+      onBlur(id, next);
+    },
+    [onBlur, id, enumOptions],
+  );
+
+  const handleFocus = useCallback(
+    ({ target }: FocusEvent<HTMLInputElement>) => {
+      const next = coerceFromString<S>(
+        String(target?.value ?? ""),
+        enumOptions,
+      ) as T;
+      onFocus(id, next);
+    },
+    [onFocus, id, enumOptions],
+  );
 
   return (
     <FormGroup error={error} key={`form-group__radio--${id}`}>
@@ -170,13 +158,14 @@ function RadioWidget<
       )}
 
       {enumOptions.map((option, index) => {
-        // Normalize the current value so 
-        // it can match "true"/"false" string options
+        // Normalize the current value so it can match "true"/"false" string options
         const currentForCompare = normalizeForCompare(option.value, value);
 
-        // Compute checked using RJSF helper 
-        // works for both strings and numbers
-        const checked = enumOptionsIsSelected<S>(option.value, currentForCompare);
+        // Works for booleans, strings, and numbers
+        const checked = enumOptionsIsSelected<S>(
+          option.value,
+          currentForCompare,
+        );
 
         const itemDisabled =
           Array.isArray(enumDisabled) &&
@@ -184,7 +173,7 @@ function RadioWidget<
 
         const handleChange = () => {
           const raw = String(option.value);
-          const toEmit = parseFromInputValue<S>(raw, enumOptions) as T;
+          const toEmit = coerceFromString<S>(raw, enumOptions) as T;
           onChange(toEmit);
         };
 
@@ -200,12 +189,6 @@ function RadioWidget<
             aria-describedby={describedby}
             checked={updateOnInput ? checked : undefined}
             defaultChecked={updateOnInput ? undefined : checked}
-            /**
-             * Value handling:
-             * 
-             * Radios always submit a string value. We turn that string into a boolean (for
-             * "true"/"false") in our event handlers so the form data remains typed correctly.
-             */
             value={updateOnInput ? String(option.value) : undefined}
             defaultValue={updateOnInput ? undefined : String(option.value)}
             onChange={updateOnInput ? handleChange : undefined}
