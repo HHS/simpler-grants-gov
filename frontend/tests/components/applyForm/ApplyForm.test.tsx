@@ -125,6 +125,7 @@ describe("ApplyForm", () => {
         savedFormData={{ name: "myself" }}
         uiSchema={uiSchema}
         validationWarnings={[]}
+        attachments={[]}
       />,
     );
 
@@ -186,6 +187,7 @@ describe("ApplyForm", () => {
         savedFormData={{}}
         uiSchema={uiSchema}
         validationWarnings={[]}
+        attachments={[]}
       />,
     );
 
@@ -223,6 +225,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         savedFormData={{}}
         validationWarnings={[]}
+        attachments={[]}
       />,
     );
     const alert = screen.getByTestId("alert");
@@ -247,6 +250,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         formId="test"
         validationWarnings={[]}
+        attachments={[]}
       />,
     );
 
@@ -272,6 +276,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         formId="test"
         validationWarnings={[]}
+        attachments={[]}
       />,
     );
 
@@ -307,6 +312,7 @@ describe("ApplyForm", () => {
             type: "",
           },
         ]}
+        attachments={[]}
       />,
     );
     const button = screen.getByTestId("apply-form-save");
@@ -346,6 +352,7 @@ describe("ApplyForm", () => {
             type: "",
           },
         ]}
+        attachments={[]}
       />,
     );
     const button = screen.getByTestId("apply-form-save");
@@ -382,6 +389,7 @@ describe("ApplyForm", () => {
         savedFormData={{ name: "myself" }}
         uiSchema={uiSchema}
         validationWarnings={[]}
+        attachments={[]}
       />,
     );
     const button = screen.getByTestId("apply-form-save");

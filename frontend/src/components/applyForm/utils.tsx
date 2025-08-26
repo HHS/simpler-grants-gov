@@ -27,140 +27,11 @@ import Budget424aSectionF from "./widgets/budget/Budget424aSectionF";
 import CheckboxWidget from "./widgets/CheckboxWidget";
 import { FieldsetWidget } from "./widgets/FieldsetWidget";
 import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
+import MultiSelectWidget from "./widgets/MultiSelectWidget";
 import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
-
-export function buildFormTreeRecursive({
-  errors,
-  formData,
-  schema,
-  uiSchema,
-}: {
-  errors: FormValidationWarning[] | null;
-  formData: object;
-  schema: RJSFSchema;
-  uiSchema: UiSchema;
-}) {
-  let acc: JSX.Element[] = [];
-  // json schema describes arrays with dots, our html uses --
-  const formattedErrors = errors?.map((error) => {
-    error.field = error.field.replace("$.", "").replace(/\./g, "--");
-    return error;
-  });
-
-  const requiredFieldPaths = getRequiredProperties(schema);
-
-  const buildFormTree = (
-    uiSchema:
-      | UiSchema
-      | {
-          children: UiSchema;
-          label: string;
-          name: string;
-          description?: string;
-        },
-    parent: { label: string; name: string; description?: string } | null,
-  ) => {
-    if (
-      !Array.isArray(uiSchema) &&
-      typeof uiSchema === "object" &&
-      "children" in uiSchema
-    ) {
-      buildFormTree(uiSchema.children, {
-        label: uiSchema.label,
-        name: uiSchema.name,
-        description: uiSchema.description,
-      });
-    } else if (Array.isArray(uiSchema)) {
-      uiSchema.forEach((node) => {
-        if ("children" in node) {
-          buildFormTree(node.children as unknown as UiSchema, {
-            label: node.label,
-            name: node.name,
-            description: node.description,
-          });
-        } else if (!parent && ("definition" in node || "schema" in node)) {
-          const requiredField = isFieldRequired(
-            (node.definition || node.schema.title || "") as string,
-            requiredFieldPaths,
-          );
-          const field = buildField({
-            uiFieldObject: node,
-            formSchema: schema,
-            errors: formattedErrors ?? null,
-            formData,
-            requiredField,
-          });
-          if (field) {
-            acc = [
-              ...acc,
-              <React.Fragment key={node.name}>{field}</React.Fragment>,
-            ];
-          }
-        }
-      });
-      if (parent) {
-        const childAcc: JSX.Element[] = [];
-        const keys: number[] = [];
-        const row = uiSchema.map((node) => {
-          if ("children" in node) {
-            acc.forEach((item, key) => {
-              if (item) {
-                if (item.key === `${node.name}-wrapper`) {
-                  keys.push(key);
-                }
-              }
-            });
-            return null;
-          } else {
-            const requiredField = isFieldRequired(
-              (node.definition || node.schema.title || "") as string,
-              requiredFieldPaths,
-            );
-            return buildField({
-              uiFieldObject: node,
-              formSchema: schema,
-              errors: formattedErrors ?? null,
-              formData,
-              requiredField,
-            });
-          }
-        });
-        if (keys.length) {
-          keys.forEach((key) => {
-            childAcc.push(acc[key]);
-            delete acc[key];
-          });
-          acc = [
-            ...acc,
-            wrapSection({
-              label: parent.label,
-              fieldName: parent.name,
-              description: parent.description,
-              tree: <>{childAcc}</>,
-            }),
-          ];
-        } else {
-          acc = [
-            ...acc,
-            wrapSection({
-              label: parent.label,
-              fieldName: parent.name,
-              tree: <>{row}</>,
-              description: parent.description,
-            }),
-          ];
-        }
-      }
-    }
-  };
-
-  buildFormTree(uiSchema, null);
-
-  return acc;
-}
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -170,37 +41,58 @@ export const determineFieldType = ({
   uiFieldObject: UiSchemaField;
   fieldSchema: RJSFSchema;
 }): WidgetTypes => {
-  const { widget } = uiFieldObject;
-  if (widget) return widget;
+  if ("widget" in uiFieldObject && uiFieldObject.widget) {
+    return uiFieldObject.widget;
+  }
 
+  // 1) Single attachment
   if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
     return "Attachment";
   }
 
+  // 2) Arrays
   if (fieldSchema.type === "array" && fieldSchema.items) {
     const item = Array.isArray(fieldSchema.items)
       ? fieldSchema.items[0]
       : fieldSchema.items;
 
-    if (
-      typeof item === "object" &&
-      item !== null &&
-      item.type === "string" &&
-      item.format === "uuid"
-    ) {
-      return "AttachmentArray";
+    if (item && typeof item === "object") {
+      const itemSchema = item as RJSFSchema;
+
+      // 2a) Attachment array
+      if (itemSchema.type === "string" && itemSchema.format === "uuid") {
+        return "AttachmentArray";
+      }
+
+      // 2b) Enum array -> MultiSelect
+      if (Array.isArray(itemSchema.enum) && itemSchema.enum.length > 0) {
+        return "MultiSelect";
+      }
     }
+
+    // 2c) Fallback for other arrays
+    return "Select";
   }
 
-  if (fieldSchema.enum?.length) {
-    return "Select";
-  } else if (fieldSchema.type === "boolean") {
-    return "Checkbox";
-  } else if (fieldSchema.maxLength && fieldSchema.maxLength > 255) {
-    return "TextArea";
-  } else if (fieldSchema.type === "array") {
+  // 3) Single enum -> Select
+  if (Array.isArray(fieldSchema.enum) && fieldSchema.enum.length > 0) {
     return "Select";
   }
+
+  // 4) Boolean
+  if (fieldSchema.type === "boolean") {
+    return "Checkbox";
+  }
+
+  // 5) Long text
+  if (
+    typeof fieldSchema.maxLength === "number" &&
+    fieldSchema.maxLength > 255
+  ) {
+    return "TextArea";
+  }
+
+  // 6) Default
   return "Text";
 };
 
@@ -265,28 +157,22 @@ export const getFieldPath = (fieldName: string) =>
 
 const widgetComponents: Record<
   WidgetTypes,
-  (widgetProps: UswdsWidgetProps) => JSX.Element
+  React.ComponentType<UswdsWidgetProps>
 > = {
-  Text: (widgetProps: UswdsWidgetProps) => TextWidget(widgetProps),
-  TextArea: (widgetProps: UswdsWidgetProps) => TextAreaWidget(widgetProps),
-  Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
-  Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
-  Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
-  Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
-  AttachmentArray: (widgetProps: UswdsWidgetProps) =>
-    AttachmentArrayWidget(widgetProps),
-  Budget424aSectionA: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionA(widgetProps),
-  Budget424aSectionB: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionB(widgetProps),
-  Budget424aSectionC: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionC(widgetProps),
-  Budget424aSectionD: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionD(widgetProps),
-  Budget424aSectionE: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionE(widgetProps),
-  Budget424aSectionF: (widgetProps: UswdsWidgetProps) =>
-    Budget424aSectionF(widgetProps),
+  Text: TextWidget,
+  TextArea: TextAreaWidget,
+  Radio: RadioWidget,
+  Select: SelectWidget,
+  MultiSelect: MultiSelectWidget,
+  Checkbox: CheckboxWidget,
+  Attachment: AttachmentWidget,
+  AttachmentArray: AttachmentArrayWidget,
+  Budget424aSectionA,
+  Budget424aSectionB,
+  Budget424aSectionC,
+  Budget424aSectionD,
+  Budget424aSectionE,
+  Budget424aSectionF,
 };
 
 export const getByPointer = (target: object, path: string): unknown => {
@@ -390,52 +276,63 @@ export const buildField = ({
   // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
   let options = {};
-  let enums: unknown[] = [];
-  if (type === "Select") {
+
+  if (type === "Select" || type === "MultiSelect") {
+    let enums: string[] = [];
+
     if (fieldSchema.type === "array") {
+      const item = Array.isArray(fieldSchema.items)
+        ? fieldSchema.items[0]
+        : fieldSchema.items;
       if (
-        fieldSchema.items &&
-        typeof fieldSchema.items === "object" &&
-        "enum" in fieldSchema.items &&
-        Array.isArray((fieldSchema.items as { enum?: unknown[] }).enum)
+        item &&
+        typeof item === "object" &&
+        Array.isArray((item as { enum?: unknown[] }).enum)
       ) {
-        enums = (fieldSchema.items as { enum?: unknown[] }).enum ?? [];
+        enums = ((item as { enum?: unknown[] }).enum ?? []).map(String);
       }
-    } else {
-      enums = fieldSchema.enum ?? [];
+    } else if (Array.isArray(fieldSchema.enum)) {
+      enums = fieldSchema.enum.map(String);
     }
-    options = {
-      enumOptions: enums.map((label) => ({
-        value: String(label),
-        label: getSimpleTranslationsSync({
-          nameSpace: "Form",
-          translateableString: String(label),
-        }),
-      })),
-      emptyValue: "- Select -",
-    };
+
+    const enumOptions = enums.map((label) => ({
+      value: String(label),
+      label: getSimpleTranslationsSync({
+        nameSpace: "Form",
+        translateableString: String(label),
+      }),
+    }));
+
+    options =
+      type === "Select"
+        ? { enumOptions, emptyValue: "- Select -" }
+        : { enumOptions };
   }
 
   const Widget = widgetComponents[type];
 
-  // light debugging for unknown widgets
-  if (typeof Widget !== "function") {
+  if (!Widget) {
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return Widget({
-    id: name,
-    key: name,
-    disabled,
-    required: requiredField,
-    minLength: fieldSchema?.minLength,
-    maxLength: fieldSchema?.maxLength,
-    schema: fieldSchema,
-    rawErrors,
-    value,
-    options,
-  });
+  // IMPORTANT:
+  // return a React element so hooks execute during render,
+  // under the AttachmentsProvider context.
+  return (
+    <Widget
+      id={name}
+      key={name}
+      disabled={disabled}
+      required={requiredField}
+      minLength={fieldSchema?.minLength}
+      maxLength={fieldSchema?.maxLength}
+      schema={fieldSchema}
+      rawErrors={rawErrors}
+      value={value}
+      options={options}
+    />
+  );
 };
 
 const getNestedWarningsForField = (
@@ -478,6 +375,7 @@ export const formatFieldWarnings = (
       },
       {} as Record<string, unknown>,
     );
+
     return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
@@ -509,7 +407,7 @@ export function getFieldsForNav(
   return results;
 }
 
-const wrapSection = ({
+export const wrapSection = ({
   label,
   fieldName,
   tree,
@@ -534,6 +432,9 @@ const wrapSection = ({
 };
 
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
   return (
     !!mightBeAnObject &&
     !isArray(mightBeAnObject) &&
@@ -644,7 +545,7 @@ export const getRequiredProperties = (
   }, [] as string[]);
 };
 
-const isFieldRequired = (
+export const isFieldRequired = (
   definition: string,
   requiredFields: string[],
 ): boolean => {
@@ -652,8 +553,12 @@ const isFieldRequired = (
   return requiredFields.indexOf(path) > -1;
 };
 
-// arrays from the html look like field_[row]_item
-const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
+// arrays from the html look like field_[row]_item or are simply the field name
+export const flatFormDataToArray = (
+  field: string,
+  data: Record<string, unknown>,
+) => {
+  if (field in data) return [data[field]];
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
@@ -675,7 +580,9 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
-// resolve and "allOf" references within "properties" or "$defs" fields
+// dereferences all def links so that all necessary property definitions
+// can be found directly within the property without referencing $defs.
+// also resolves "allOf" references within "properties" or "$defs" fields.
 // not merging the entire schema because many schemas have top level
 // "allOf" blocks that often contain "if"/"then" statements or other things
 // that the mergeAllOf library can't handle out of the box, and we don't need
