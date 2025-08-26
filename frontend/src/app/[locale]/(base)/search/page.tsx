@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { environment } from "src/constants/environments";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -5,10 +6,11 @@ import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
+import { LocalizedPageProps } from "src/types/intl";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Suspense, use } from "react";
 
@@ -30,6 +32,16 @@ type SearchPageProps = {
   searchParams: Promise<OptionalStringDict>;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: LocalizedPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  const meta: Metadata = {
+    title: t("Search.title"),
+    description: t("Search.metaDescription"),
+  };
+  return meta;
+}
 
 export function Search({ searchParams, params }: SearchPageProps) {
   const { locale } = use(params);
@@ -67,7 +79,6 @@ export function Search({ searchParams, params }: SearchPageProps) {
       <div className="bg-base-lightest">
         <BetaAlert
           containerClasses="padding-top-5"
-          heading={t("betaAlert.alertTitle")}
           alertMessage={t.rich("betaAlert.alert", {
             ethnioSurveyLink: (chunks) => (
               <a
@@ -98,7 +109,7 @@ export function Search({ searchParams, params }: SearchPageProps) {
                 <DrawerUnit
                   drawerId="search-filter-drawer"
                   closeText={t("drawer.submit")}
-                  openText={t("filterDisplayToggle.drawer")}
+                  openText={t("drawer.toggleButton")}
                   headingText={<SearchDrawerHeading />}
                   iconName="filter_list"
                   buttonClass="tablet:margin-x-auto"
