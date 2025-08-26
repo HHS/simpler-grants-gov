@@ -1,6 +1,10 @@
 "use client";
 
-import { subscribeEmail } from "src/app/[locale]/(base)/subscribe/actions";
+<<<<<<< HEAD:frontend/src/components/subscribe/SubscriptionForm.tsx
+import { subscribeEmail } from "src/app/[locale]/(base)/newsletter/actions";
+=======
+import { subscribeEmail } from "src/app/[locale]/newsletter/actions";
+>>>>>>> 0d3c59a08 (move subscribe -> newsletter):frontend/src/components/newsletter/SubscriptionForm.tsx
 
 import { useTranslations } from "next-intl";
 import React, { useActionState } from "react";

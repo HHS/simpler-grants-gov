@@ -27,7 +27,7 @@ export const messages = {
           {
             description:
               "Our newsletter delivers the latest news straight to your inbox.",
-            http: "/subscribe",
+            http: "/newsletter",
             iconName: "mail",
             link: "Subscribe to our newsletter",
             title: "Be the first to hear about new features.",
@@ -535,7 +535,7 @@ export const messages = {
       savedOpportunities: "Saved opportunities",
       savedSearches: "Saved search queries",
       search: "Search",
-      subscribe: "Subscribe",
+      newsletter: "Newsletter",
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",

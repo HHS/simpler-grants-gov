@@ -9,7 +9,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
-import { ValidationErrors } from "src/components/subscribe/SubscriptionForm";
+import { ValidationErrors } from "src/components/newsletter/SubscriptionForm";
 
 type sendyResponse = {
   validationErrors: ValidationErrors;
@@ -30,7 +30,7 @@ export async function subscribeEmail(_prevState: unknown, formData: FormData) {
     };
   }
   // Navigate to the sub confirmation page if no error returns short circuit the function
-  redirect(`/subscribe/confirmation`);
+  redirect(`/newsletter/confirmation`);
 }
 
 export async function subscribeEmailAction(

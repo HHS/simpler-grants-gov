@@ -38,7 +38,7 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
         <Grid row gap className="flex-align-start">
           <Grid>
             <p>{t("paragraph")}</p>
-            <Link className="usa-button margin-bottom-4" href="/subscribe">
+            <Link className="usa-button margin-bottom-4" href="/newsletter">
               {t("buttonResub")}
             </Link>
           </Grid>

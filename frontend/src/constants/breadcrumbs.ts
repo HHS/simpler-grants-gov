@@ -1,18 +1,18 @@
 import { Breadcrumb } from "src/components/Breadcrumbs";
 
 const HOME: Breadcrumb = { title: "Home", path: "/" };
-const SUBSCRIBE: Breadcrumb = { title: "Subscribe", path: "/subscribe/" };
+const SUBSCRIBE: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
 const SEARCH: Breadcrumb = {
   title: "Search",
   path: "/search",
 };
 export const SUBSCRIBE_CONFIRMATION: Breadcrumb = {
   title: "Confirmation",
-  path: "/subscribe/confirmation/",
+  path: "/newsletter/confirmation/",
 };
 const UNSUBSCRIBE: Breadcrumb = {
   title: "Unsubscribe",
-  path: "/subscribe/unsubscribe/",
+  path: "/newsletter/unsubscribe/",
 };
 const SAVED_OPPORTUNITIES: Breadcrumb = {
   title: "Saved opportunities",

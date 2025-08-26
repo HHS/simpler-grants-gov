@@ -7,7 +7,7 @@ import Image from "next/image";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
+import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -23,7 +23,6 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 /* TODO
   - change url
   - redirect all pages
-  - error messages?
 */
 export default function Subscribe({ params }: LocalizedPageProps) {
   const { locale } = use(params);

@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import SubscriptionForm from "src/components/subscribe/SubscriptionForm";
+import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
 
 const mockSubscribeEmail = jest.fn();
 
