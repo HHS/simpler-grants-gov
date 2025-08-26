@@ -37,7 +37,7 @@ export default function SubscriptionForm() {
   return (
     <form action={formAction}>
       <FormGroup error={showError("name")}>
-        <Label htmlFor="name">
+        <Label htmlFor="name" className="maxw-full">
           {t("form.name") + " "}
           <span title="required" className="usa-hint usa-hint--required">
             ({t("form.req")})
@@ -50,17 +50,28 @@ export default function SubscriptionForm() {
         ) : (
           <></>
         )}
-        <TextInput aria-required type="text" name="name" id="name" />
+        <TextInput
+          aria-required
+          type="text"
+          name="name"
+          id="name"
+          className="maxw-full"
+        />
       </FormGroup>
-      <Label htmlFor="LastName">
+      <Label htmlFor="LastName" className="maxw-full">
         {t("form.lastName") + " "}
         <span title="optional" className="usa-hint usa-hint--optional ">
           ({t("form.opt")})
         </span>
       </Label>
-      <TextInput type="text" name="LastName" id="LastName" />
+      <TextInput
+        type="text"
+        name="LastName"
+        id="LastName"
+        className="maxw-full"
+      />
       <FormGroup error={showError("email")}>
-        <Label htmlFor="email">
+        <Label htmlFor="email" className="maxw-full">
           {t("form.email") + " "}
           <span title="required" className="usa-hint usa-hint--required ">
             ({t("form.req")})
@@ -73,7 +84,13 @@ export default function SubscriptionForm() {
         ) : (
           <></>
         )}
-        <TextInput aria-required type="email" name="email" id="email" />
+        <TextInput
+          aria-required
+          type="email"
+          name="email"
+          id="email"
+          className="maxw-full"
+        />
       </FormGroup>
       <div className="display-none">
         <Label htmlFor="hp">HP</Label>
