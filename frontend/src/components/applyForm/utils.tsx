@@ -375,6 +375,7 @@ export const formatFieldWarnings = (
       },
       {} as Record<string, unknown>,
     );
+
     return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
@@ -552,8 +553,12 @@ export const isFieldRequired = (
   return requiredFields.indexOf(path) > -1;
 };
 
-// arrays from the html look like field_[row]_item
-const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
+// arrays from the html look like field_[row]_item or are simply the field name
+export const flatFormDataToArray = (
+  field: string,
+  data: Record<string, unknown>,
+) => {
+  if (field in data) return [data[field]];
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
