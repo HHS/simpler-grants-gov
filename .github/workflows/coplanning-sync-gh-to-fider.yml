@@ -12,7 +12,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: ./linters/coplanning
+    working-directory: ./.github/linters/coplanning
 
 jobs:
   sync:
