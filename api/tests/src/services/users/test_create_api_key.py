@@ -12,7 +12,8 @@ from src.services.users.create_api_key import (
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
-def test_create_api_key_success(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_success(mock_import_api_key, enable_factory_create, db_session: db.Session):
     """Test that create_api_key successfully creates a new API key with auto-generated key_id."""
     user = UserFactory.create()
     json_data = {"key_name": "Test API Key"}
@@ -21,6 +22,15 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
         db_session=db_session,
         user_id=user.user_id,
         json_data=json_data,
+    )
+
+    # Verify that the AWS API Gateway import was called
+    mock_import_api_key.assert_called_once_with(
+        api_key=api_key.key_id,
+        name=api_key.key_name,
+        description=f"API key for user {api_key.user_id}",
+        enabled=api_key.is_active,
+        usage_plan_id=None,  # No default usage plan configured in test
     )
 
     # Verify the API key was created correctly
@@ -43,7 +53,10 @@ def test_create_api_key_success(enable_factory_create, db_session: db.Session):
     assert api_key.updated_at is not None
 
 
-def test_create_api_key_default_active(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_default_active(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
     """Test that create_api_key defaults is_active to True."""
     user = UserFactory.create()
     json_data = {"key_name": "Default Active Key"}
@@ -57,7 +70,10 @@ def test_create_api_key_default_active(enable_factory_create, db_session: db.Ses
     assert api_key.is_active is True
 
 
-def test_create_api_key_inactive(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_inactive(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
     """Test that create_api_key can create inactive keys."""
     user = UserFactory.create()
     json_data = {"key_name": "Inactive Key"}
@@ -71,7 +87,10 @@ def test_create_api_key_inactive(enable_factory_create, db_session: db.Session):
     assert api_key.is_active is True
 
 
-def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_generates_unique_key_ids(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
     """Test that create_api_key generates unique key_ids for each API key."""
     user = UserFactory.create()
 
@@ -91,7 +110,10 @@ def test_create_api_key_generates_unique_key_ids(enable_factory_create, db_sessi
     assert all(len(key_id) == 25 for key_id in key_ids)
 
 
-def test_create_api_key_collision_detection(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_collision_detection(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
     """Test that create_api_key handles key_id collisions by retrying."""
     user = UserFactory.create()
 
@@ -115,7 +137,10 @@ def test_create_api_key_collision_detection(enable_factory_create, db_session: d
         assert mock_generate.call_count == 2
 
 
-def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_max_retries_exceeded(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
     """Test that create_api_key raises KeyGenerationError when max retries exceeded."""
     user = UserFactory.create()
 
@@ -139,7 +164,10 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
         assert mock_generate.call_count == MAX_KEY_GENERATION_RETRIES
 
 
-def test_create_api_key_logging_success(enable_factory_create, db_session: db.Session, caplog):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_logging_success(
+    mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
+):
     """Test that create_api_key logs appropriate success messages."""
     user = UserFactory.create()
     key_name = "Logging Test Key"
@@ -165,7 +193,10 @@ def test_create_api_key_logging_success(enable_factory_create, db_session: db.Se
     assert log_record.key_name == key_name
 
 
-def test_create_api_key_logging_max_retries(enable_factory_create, db_session: db.Session, caplog):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_logging_max_retries(
+    mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
+):
     """Test that create_api_key logs error when max retries exceeded."""
     user = UserFactory.create()
 
@@ -218,7 +249,42 @@ def test_create_api_key_uses_key_generator(
     assert api_key.key_id == "TestGeneratedKey123456789"
 
 
-def test_create_api_key_multiple_keys_same_user(enable_factory_create, db_session: db.Session):
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_aws_gateway_error_handling(
+    mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
+):
+    """Test that API key creation succeeds even when AWS API Gateway import fails."""
+    # Configure the mock to raise an exception
+    mock_import_api_key.side_effect = Exception("AWS API Gateway unavailable")
+
+    user = UserFactory.create()
+    json_data = {"key_name": "Test API Key"}
+
+    # This should still succeed despite the AWS error
+    api_key = create_api_key(
+        db_session=db_session,
+        user_id=user.user_id,
+        json_data=json_data,
+    )
+
+    # Verify the API key was still created
+    assert api_key.api_key_id is not None
+    assert api_key.user_id == user.user_id
+    assert api_key.key_name == "Test API Key"
+    assert api_key.is_active is True
+
+    # Verify that the AWS import was attempted
+    mock_import_api_key.assert_called_once()
+
+    # Verify the error was logged
+    assert "Failed to import API key to AWS API Gateway" in caplog.text
+    assert "AWS API Gateway unavailable" in caplog.text
+
+
+@patch("src.adapters.aws.api_gateway_adapter.import_api_key")
+def test_create_api_key_multiple_keys_same_user(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
     """Test that the same user can have multiple API keys with different names."""
     user = UserFactory.create()
 
