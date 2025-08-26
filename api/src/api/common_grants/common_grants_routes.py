@@ -6,6 +6,7 @@ from uuid import UUID
 from apiflask import HTTPError
 from common_grants_sdk.schemas import OpportunityResponse
 from common_grants_sdk.schemas.requests.opportunity import OpportunitySearchRequest
+from common_grants_sdk.schemas.pagination import PaginatedQueryParams
 from flask import request
 
 import src.adapters.db as db
@@ -24,19 +25,21 @@ logger = logging.getLogger(__name__)
 @flask_db.with_db_session()
 def list_opportunities(db_session: db.Session) -> tuple[dict, int]:
     """Get a paginated list of opportunities."""
-    # Get query parameters
-    page = request.args.get("page", 1, type=int)
-    page_size = request.args.get("pageSize", 10, type=int)
-
-    # Validate parameters
-    if page < 1:
-        raise HTTPError(400, message="Page must be greater than 0")
-    if page_size < 1:
-        raise HTTPError(400, message="Page size must be greater than 0")
+    # Parse pagination parameters using PySDK classes
+    try:
+        pagination_params = PaginatedQueryParams.model_validate({
+            "page": request.args.get("page", 1, type=int),
+            "pageSize": request.args.get("pageSize", 10, type=int),
+        })
+    except Exception as e:
+        raise HTTPError(400, message=f"Invalid pagination parameters: {str(e)}") from e
 
     # Create service and get opportunities
     opportunity_service = CommonGrantsOpportunityService(db_session)
-    response = opportunity_service.list_opportunities(page=page, page_size=page_size)
+    response = opportunity_service.list_opportunities(
+        page=pagination_params.page, 
+        page_size=pagination_params.page_size
+    )
     return response.model_dump(mode="json"), 200
 
 
