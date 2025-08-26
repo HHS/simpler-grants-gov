@@ -1,7 +1,4 @@
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
-
-import { ReactNode } from "react";
 
 import Loading from "src/components/Loading";
 import { ExportSearchResultsButton } from "./ExportSearchResultsButton";
@@ -27,7 +24,7 @@ type SearchResultsSkeletonProps = {
   loadingMessage: string;
 };
 
-const SearchResultsLegacySkeleton = ({
+export const SearchResultsListSkeleton = ({
   sortby,
   page,
   query,
@@ -57,7 +54,7 @@ const SearchResultsLegacySkeleton = ({
   );
 };
 
-const SearchResultsTableSkeleton = () => {
+export const SearchResultsSkeleton = () => {
   return (
     <>
       <div>Loading the table...</div>
@@ -65,7 +62,7 @@ const SearchResultsTableSkeleton = () => {
   );
 };
 
-const SearchResultsListView = ({
+export const SearchResultsListView = ({
   sortby,
   page,
   query,
@@ -104,7 +101,7 @@ const SearchResultsListView = ({
   );
 };
 
-const SearchResultsTableView = ({
+export const SearchResultsView = ({
   sortby,
   page,
   query,
@@ -133,12 +130,12 @@ const SearchResultsTableView = ({
   );
 };
 
-export const SearchResultsView = withFeatureFlag<
-  SearchResultsViewProps,
-  ReactNode
->(SearchResultsListView, "searchTableOn", SearchResultsTableView);
+// export const SearchResultsView = withFeatureFlag<
+//   SearchResultsViewProps,
+//   ReactNode
+// >(SearchResultsListView, "searchTableOn", SearchResultsTableView);
 
-export const SearchResultsSkeleton = withFeatureFlag<
-  SearchResultsSkeletonProps,
-  ReactNode
->(SearchResultsLegacySkeleton, "searchTableOn", SearchResultsTableSkeleton);
+// export const SearchResultsSkeleton = withFeatureFlag<
+//   SearchResultsSkeletonProps,
+//   ReactNode
+// >(SearchResultsLegacySkeleton, "searchTableOn", SearchResultsTableSkeleton);
