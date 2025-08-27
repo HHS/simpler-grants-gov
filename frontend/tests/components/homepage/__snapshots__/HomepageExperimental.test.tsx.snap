@@ -109,7 +109,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
               </p>
               <p>
                 <a
-                  href="/subscribe"
+                  href="/newsletter"
                 >
                   Subscribe to our newsletter
                 </a>
