@@ -15,6 +15,8 @@ import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
+import { normalizeForCompare } from "src/utils/normalizeForCompare";
+import { fromBooleanString, isBooleanString } from "src/utils/booleanStrings";
 
 /**
  * The portion of `options` we care about here, with safe typing.
@@ -27,25 +29,10 @@ type LocalOptions<S extends StrictRJSFSchema> = {
   "widget-label"?: unknown;
 };
 
-/**
- * normalizeForCompare
- *
- * Given an option’s value and the current field value, we force the current value type
- * so it compares correctly with the option's representation.
- */
-function normalizeForCompare(optionValue: unknown, current: unknown): unknown {
-  const optionIsBoolString = optionValue === "true" || optionValue === "false";
-  if (optionIsBoolString) {
-    if (current === true) return "true";
-    if (current === false) return "false";
-    if (current === "true" || current === "false") return current;
-    return undefined;
-  }
-  return current;
-}
+
 
 /**
- * parseFromInputValue
+ * coerceFromString
  *
  * Convert an HTML input value (always a string) to either a boolean (for
  * boolean radio groups) or the original enum value if we can find it.
@@ -158,13 +145,11 @@ function RadioWidget<
       )}
 
       {enumOptions.map((option, index) => {
-        // Normalize the current value so it can match "true"/"false" string options
-        const currentForCompare = normalizeForCompare(option.value, value);
+        const normalizedCurrent = normalizeForCompare(option.value, value);
 
-        // Works for booleans, strings, and numbers
         const checked = enumOptionsIsSelected<S>(
           option.value,
-          currentForCompare,
+          normalizedCurrent,
         );
 
         const itemDisabled =
@@ -173,8 +158,11 @@ function RadioWidget<
 
         const handleChange = () => {
           const raw = String(option.value);
-          const toEmit = coerceFromString<S>(raw, enumOptions) as T;
-          onChange(toEmit);
+          const next =
+            isBooleanString(option.value)
+              ? (fromBooleanString(raw) as T)
+              : (raw as T)
+          onChange(next);
         };
 
         return (
