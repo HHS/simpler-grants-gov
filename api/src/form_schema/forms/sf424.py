@@ -975,6 +975,7 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "definition": "/properties/delinquent_federal_debt",
+                "widget": "Radio",
             },
             {
                 "type": "field",
