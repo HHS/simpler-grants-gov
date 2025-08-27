@@ -670,6 +670,7 @@ export const messages = {
       title: "Filters",
       submit: "View results",
       clearFilters: "Clear filters",
+      toggleButton: "Filters",
     },
     callToAction: {
       title: "Search funding opportunities",
@@ -677,15 +678,6 @@ export const messages = {
     opportunitySaved: "Saved",
     resultsHeader: {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
-    },
-    resultsListFetch: {
-      noResultsTitle: "Your search did not return any results.",
-      noResultsBody: [
-        "Check any terms you've, entered for typos",
-        "Try different keywords",
-        "Make sure you've selected the right statuses",
-        "Try resetting filters or selecting fewer options",
-      ],
     },
     resultsListItem: {
       status: {
@@ -724,11 +716,6 @@ export const messages = {
       clear: "Clear All",
     },
     loading: "Loading Results",
-    filterDisplayToggle: {
-      showFilters: "Show Filters",
-      hideFilters: "Hide Filters",
-      drawer: "Filters",
-    },
     genericErrorCta: "Please try your search again.",
     validationError: "Search Validation Error",
     tooLongError: "Search terms must be no longer than 100 characters.",

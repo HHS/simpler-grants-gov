@@ -11,23 +11,6 @@ interface SearchBarProps {
   tableView?: boolean;
 }
 
-export function LegacySearchLabel() {
-  const t = useTranslations("Search.bar");
-  return (
-    <label
-      htmlFor="query"
-      className="font-sans-lg display-block margin-bottom-2"
-    >
-      {t.rich("label", {
-        strong: (chunks) => <span className="text-bold">{chunks}</span>,
-        small: (chunks) => (
-          <small className="font-sans-sm display-inline-block">{chunks}</small>
-        ),
-      })}
-    </label>
-  );
-}
-
 export function SearchLabel() {
   const t = useTranslations("Search.bar");
   return (
@@ -41,20 +24,7 @@ export function SearchLabel() {
   );
 }
 
-export const LegacySearchBar = ({
-  queryTermFromParent,
-  tableView = false,
-}: SearchBarProps) => {
-  return (
-    <SearchBar
-      queryTermFromParent={queryTermFromParent}
-      tableView={tableView}
-      LabelComponent={LegacySearchLabel}
-    />
-  );
-};
-
-export const NewSearchBar = ({
+export const SearchBarWithLabel = ({
   queryTermFromParent,
   tableView = false,
 }: SearchBarProps) => {

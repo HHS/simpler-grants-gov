@@ -1,20 +1,10 @@
 import { fireEvent } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { initialFilterOptions } from "src/utils/testing/fixtures";
 import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import SearchFilterAccordion, {
-  BasicSearchFilterAccordion,
-} from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
-
-const fakeFacetCounts = {
-  grant: 1,
-  other: 1,
-  procurement_contract: 1,
-  cooperative_agreement: 1,
-};
+import { BasicSearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 
 const mockUpdateQueryParams = jest.fn();
 
@@ -26,136 +16,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 
 const title = "Test Accordion";
 const queryParamKey = "fundingInstrument";
-
-describe("SearchFilterAccordion", () => {
-  it("should not have basic accessibility issues", async () => {
-    const { container } = render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set()}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it("displays the correct checkbox labels", () => {
-    render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set()}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    expect(screen.getByText("Cooperative Agreement")).toBeInTheDocument();
-    expect(screen.getByText("Grant")).toBeInTheDocument();
-    expect(screen.getByText("Procurement Contract")).toBeInTheDocument();
-    expect(screen.getByText("Other")).toBeInTheDocument();
-  });
-
-  it("has hidden attribute when collapsed", () => {
-    render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={"status"}
-        query={new Set()}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    const accordionToggleButton = screen.getByTestId(
-      "accordionButton_opportunity-filter-status",
-    );
-    const contentDiv = screen.getByTestId(
-      "accordionItem_opportunity-filter-status",
-    );
-    expect(contentDiv).toHaveAttribute("hidden");
-
-    // Toggle the accordion and the hidden attribute should be removed
-    fireEvent.click(accordionToggleButton);
-    expect(contentDiv).not.toHaveAttribute("hidden");
-  });
-
-  it("updates heading background color when options are selected", () => {
-    const { rerender } = render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set("")}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    const updatedQuery = new Set("");
-    updatedQuery.add("Cooperative Agreement");
-    updatedQuery.add("Grant");
-    rerender(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={updatedQuery}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    // Verify the background updates after selecting options
-    // actual checkbox state is tested in AccordionContent
-    const titleHeading = screen.getByRole("heading");
-    expect(titleHeading).toHaveClass("simpler-selected-filter");
-  });
-  it("adds an any option checkbox by default", () => {
-    render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set("")}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-    const accordionToggleButton = screen.getByRole("button");
-    fireEvent.click(accordionToggleButton);
-    const anyCheckbox = screen.getByRole("checkbox", {
-      name: "Any test accordion",
-    });
-    expect(anyCheckbox).toBeInTheDocument();
-  });
-  it("ensures the component contents scroll", () => {
-    render(
-      <SearchFilterAccordion
-        filterOptions={initialFilterOptions}
-        title={title}
-        queryParamKey={queryParamKey}
-        query={new Set("")}
-        facetCounts={fakeFacetCounts}
-      />,
-    );
-
-    const scrollableContainer = screen.getByTestId(
-      `accordionItem_opportunity-filter-${queryParamKey}`,
-    );
-
-    expect(scrollableContainer).toHaveClass("overflow-auto");
-
-    const initialScrollTop = scrollableContainer.scrollTop;
-
-    fireEvent.scroll(scrollableContainer, { target: { scrollTop: 100 } });
-
-    expect(scrollableContainer.scrollTop).toBeGreaterThan(initialScrollTop);
-
-    // Assert that the document body has not scrolled
-    expect(window.scrollY).toBe(0);
-  });
-});
 
 describe("BasicSearchFilterAccordion", () => {
   it("should not have basic accessibility issues", async () => {
