@@ -398,10 +398,10 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="/subscribe"
+                  href="/newsletter"
                 >
                   <div>
-                    Subscribe
+                    Newsletter
                   </div>
                 </a>
               </li>
@@ -914,10 +914,10 @@ exports[`Header About renders Community submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="/subscribe"
+                  href="/newsletter"
                 >
                   <div>
-                    Subscribe
+                    Newsletter
                   </div>
                 </a>
               </li>
@@ -1431,10 +1431,10 @@ exports[`Header renders Header navbar menu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
-                  href="/subscribe"
+                  href="/newsletter"
                 >
                   <div>
-                    Subscribe
+                    Newsletter
                   </div>
                 </a>
               </li>

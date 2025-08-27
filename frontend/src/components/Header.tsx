@@ -108,7 +108,7 @@ const NavLinks = ({
       {
         text: t("community"),
         children: [
-          { text: t("subscribe"), href: "/subscribe" },
+          { text: t("newsletter"), href: "/newsletter" },
           { text: t("events"), href: "/events" },
           { text: t("wiki"), href: wikiLink },
           { text: t("forum"), href: forumLink },
