@@ -41,6 +41,7 @@ type ConditionalRule = {
   thenRequired: string[];
 };
 
+// json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -91,6 +92,7 @@ export const determineFieldType = ({
     return "Checkbox";
   }
 
+  // 5) Long text
   if (
     typeof fieldSchema.maxLength === "number" &&
     fieldSchema.maxLength > 255
@@ -102,6 +104,7 @@ export const determineFieldType = ({
   return "Text";
 };
 
+// either schema or definition is required, and schema fields take precedence
 export const getFieldSchema = ({
   definition,
   schema,
@@ -362,11 +365,13 @@ export const buildField = ({
     throw new Error("Invalid or missing field schema");
   }
 
+  // fields that have no definition won't have a name, but will havea schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
+  // should filter and match warnings to field earlier in the process
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   const disabled = fieldType === "null";
@@ -377,6 +382,7 @@ export const buildField = ({
     let enums: string[] = [];
 
     if (fieldSchema.type === "boolean") {
+      // Keep as strings to align with RadioWidget hidden input/value handling
       enums = ["true", "false"];
     } else if (fieldSchema.type === "array") {
       const item = Array.isArray(fieldSchema.items)
@@ -417,11 +423,13 @@ export const buildField = ({
   const Widget = widgetComponents[type];
 
   if (!Widget) {
-    // eslint-disable-next-line no-console
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
 
+  // IMPORTANT:
+  // return a React element so hooks execute during render,
+  // under the AttachmentsProvider context.
   return (
     <Widget
       id={name}
@@ -438,7 +446,6 @@ export const buildField = ({
   );
 };
 
-/** ---------- Warnings / nav / wrapping / shaping helpers ---------- */
 const getNestedWarningsForField = (
   fieldName: string,
   warnings: FormValidationWarning[],
@@ -554,10 +561,13 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
     if (isBasicallyAnObject(nestedValue)) {
       return isEmptyField(nestedValue);
     }
+
     return !nestedValue;
   });
 };
 
+// if a nested field contains no defined items, remove it from the data
+// this may not be necessary, as JSON.stringify probably does the same thing
 export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
@@ -576,6 +586,7 @@ export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   );
 };
 
+// filters, orders, and nests the form data to match the form schema
 export const shapeFormData = <T extends object>(
   formData: FormData,
   formSchema: RJSFSchema,
@@ -606,6 +617,16 @@ const getKeyParentPath = (key: string, parentPath?: string) => {
   return removePropertyPaths(keyParent);
 };
 
+/*
+  gets an array of all paths to required fields in the form schema, not
+  including any intermediate paths that do not represent actual fields
+  assumes a dereferenced but not condensed schema (property paths will still be in place)
+  does not do conditionals. For that we'd have to first:
+  - gather all conditional rules
+  - check all conditional rules against form state / values
+  - re-annotate the form schema with new "required" designations
+  At that point we're basically running validation
+*/
 export const getRequiredProperties = (
   formSchema: RJSFSchema,
   parentPath?: string,
@@ -615,7 +636,6 @@ export const getRequiredProperties = (
     if (key === "required") {
       (value as []).forEach((requiredPropertyKey: string) => {
         if (!formSchema?.properties) {
-          // eslint-disable-next-line no-console
           console.error("Error finding required properties, malformed schema?");
           return;
         }
@@ -643,6 +663,7 @@ export const isFieldRequired = (
   return requiredFields.indexOf(path) > -1;
 };
 
+// arrays from the html look like field_[row]_item or are simply the field name
 const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
@@ -665,6 +686,13 @@ const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   );
 };
 
+// dereferences all def links so that all necessary property definitions
+// can be found directly within the property without referencing $defs.
+// also resolves "allOf" references within "properties" or "$defs" fields.
+// not merging the entire schema because many schemas have top level
+// "allOf" blocks that often contain "if"/"then" statements or other things
+// that the mergeAllOf library can't handle out of the box, and we don't need
+// to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
@@ -681,11 +709,18 @@ export const processFormSchema = async (
     };
     return condensed as RJSFSchema;
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("Error processing schema");
     throw e;
   }
 };
+
+/*
+  this will flatten any properties objects so that we can directly reference field paths
+  within a json schema without traversing nested "properties". Any other object attributes
+  and values are unchanged
+  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
+      { path: { nested: 'value' } }
+*/
 
 export const condenseFormSchemaProperties = (schema: object): object => {
   return Object.entries(schema).reduce(
@@ -706,3 +741,19 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     {},
   );
 };
+
+// This is only needed when extracting an application response from the application endpoint's
+// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
+// the application detail contains an empty array for the form response if no
+// forms have been saved or an application_response with a form_id
+// export const getApplicationResponse = (
+//   forms: [] | ApplicationFormDetail[],
+//   formId: string,
+// ): ApplicationResponseDetail | object => {
+//   if (forms.length > 0) {
+//     const form = forms.find((form) => form?.form_id === formId);
+//     return form?.application_response || {};
+//   } else {
+//     return {};
+//   }
+// };
