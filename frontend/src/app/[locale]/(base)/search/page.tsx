@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
   return meta;
 }
 
-export function Search({ searchParams, params }: SearchPageProps) {
+function Search({ searchParams, params }: SearchPageProps) {
   const { locale } = use(params);
   const resolvedSearchParams = use(searchParams);
   setRequestLocale(locale);
