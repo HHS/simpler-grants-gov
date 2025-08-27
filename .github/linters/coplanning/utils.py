@@ -87,6 +87,11 @@ def make_request(
 # #######################################################
 
 
+def format_title(title: str) -> str:
+    """Format the title to remove extra whitespace and '[]' prefixes."""
+    return re.sub(r"^\[.*\]", "", title).strip()
+
+
 def format_post_description(
     url: str,
     description: str,

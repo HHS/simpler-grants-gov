@@ -36,6 +36,7 @@ class CliArgs:
     sync_direction: str = "github-to-platform"
     state: str = "open"
     batch: int = 100
+    update_existing: bool = False
     dry_run: bool = False
 
 
@@ -66,6 +67,11 @@ def parse_args() -> CliArgs:
     )
     parser.add_argument("--state", default="open", help="GitHub issue state")
     parser.add_argument("--batch", type=int, default=100, help="Batch size")
+    parser.add_argument(
+        "--update-existing",
+        action="store_true",
+        help="Update the description and title of existing posts on the platform",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
 
     args = parser.parse_args()
@@ -78,6 +84,7 @@ def parse_args() -> CliArgs:
         sync_direction=args.sync_direction,
         state=args.state,
         batch=args.batch,
+        update_existing=args.update_existing,
         dry_run=args.dry_run,
     )
 
@@ -102,11 +109,13 @@ def sync_github_to_fider(args: CliArgs) -> None:
     fider_posts = fider.fetch_posts()
 
     # Check which GitHub issues need to be added
-    log("Checking which GitHub issues need to be added to Fider")
-    fider.insert_new_posts(
+    log("Checking which GitHub issues need to be added or updated in Fider")
+    log(f"Update existing: {args.update_existing}")
+    fider.upsert_posts(
         github_issues=github_issues,
-        post_urls=set(fider_posts.keys()),
+        fider_posts=fider_posts,
         issue_section=args.issue_section,
+        update_existing=args.update_existing,
         dry_run=args.dry_run,
     )
 

@@ -6,7 +6,7 @@ import json
 import re
 
 from github import GithubIssueData, PostData
-from utils import format_post_description, get_env, log, make_request
+from utils import format_post_description, format_title, get_env, log, make_request
 
 FIDER_API_TOKEN = get_env("FIDER_API_TOKEN")
 BOARD = get_env("FIDER_BOARD")
@@ -52,6 +52,7 @@ def parse_posts(posts: list[dict], fider_url: str) -> dict[str, PostData]:
         fider_url = f"{FIDER_URL}/posts/{post.get('number')}"
         posts_dict[github_url] = PostData(
             url=fider_url,
+            number=post.get("number", 0),
             vote_count=post.get("votesCount", 0),
             github_url=github_url,
         )
@@ -65,8 +66,13 @@ def parse_posts(posts: list[dict], fider_url: str) -> dict[str, PostData]:
 # #######################################################
 
 
-def create_post(title: str, description: str) -> None:
+def create_post(title: str, description: str, *, dry_run: bool = False) -> None:
     """Create a new Fider post."""
+    if dry_run:
+        log(f"DRY RUN: Would create post with title: {title}")
+        log(f"DRY RUN: Formatted description: {description}")
+        return
+
     url = f"https://{BOARD}.fider.io/api/v1/posts"
     headers = {
         "Content-Type": "application/json",
@@ -79,40 +85,82 @@ def create_post(title: str, description: str) -> None:
     log("Created Fider post successfully")
 
 
-def insert_new_posts(
+# #######################################################
+# Fider - update post
+# #######################################################
+
+
+def update_post(
+    post_number: int,
+    title: str,
+    description: str,
+    *,
+    dry_run: bool = False,
+) -> None:
+    """Update an existing Fider post."""
+    if dry_run:
+        log(f"DRY RUN: Would update post with title: {title}")
+        log(f"DRY RUN: Formatted description: {description}")
+        return
+
+    url = f"https://{BOARD}.fider.io/api/v1/posts/{post_number}"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {FIDER_API_TOKEN}",
+    }
+
+    data = {"title": title, "description": description}
+
+    make_request(url, headers, method="PUT", data=json.dumps(data))
+    log("Updated Fider post successfully")
+
+
+# #######################################################
+# Fider - upsert posts
+# #######################################################
+
+
+def upsert_posts(
     github_issues: dict[str, GithubIssueData],
-    post_urls: set[str],
+    fider_posts: dict[str, PostData],
     issue_section: str = "Summary",
     *,
-    dry_run: bool,
+    update_existing: bool = False,
+    dry_run: bool = False,
 ) -> None:
-    """Insert new Fider posts."""
+    """Insert new Fider posts or update existing ones."""
     for issue_url, issue_data in github_issues.items():
-        # Skip if already in Fider
-        if issue_url in post_urls:
-            log(f"Skipping {issue_url} - already exists in Fider")
+        existing_post = fider_posts.get(issue_url)
+
+        # Skip if already exists and we don't want to update
+        if existing_post and not update_existing:
+            log(
+                f"Skipping {issue_url} - already exists in Fider and we don't want to update it"
+            )
             continue
 
-        # Create new Fider post
-        log(f"Creating new Fider post for {issue_url}")
-        title = issue_data.title
-        description = issue_data.body
-
-        # Format the description using the parsing logic
+        # Format the description (shared between create and update)
+        formatted_title = format_title(issue_data.title)
         formatted_description = format_post_description(
             issue_url,
-            description,
+            issue_data.body,
             issue_section,
         )
 
-        # Dry run
-        if dry_run:
-            log(f"DRY RUN: Would create post with title: {title}")
-            log(f"DRY RUN: Formatted description: {formatted_description}")
-            continue
-
-        # Create new Fider post
-        create_post(
-            title=title,
-            description=formatted_description,
-        )
+        if existing_post:
+            # Update existing post
+            log(f"Updating existing Fider post {existing_post.url} for {issue_url}")
+            update_post(
+                post_number=existing_post.number,
+                title=formatted_title,
+                description=formatted_description,
+                dry_run=dry_run,
+            )
+        else:
+            # Create new post
+            log(f"Creating new Fider post for {issue_url}")
+            create_post(
+                title=formatted_title,
+                description=formatted_description,
+                dry_run=dry_run,
+            )

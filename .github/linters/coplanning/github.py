@@ -28,6 +28,7 @@ class PostData:
     """Data class for Fider or FeatureBase post data."""
 
     url: str
+    number: int
     vote_count: int
     github_url: str
 
