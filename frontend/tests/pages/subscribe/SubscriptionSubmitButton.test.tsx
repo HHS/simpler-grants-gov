@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { SubscriptionSubmitButton } from "src/components/subscribe/SubscriptionSubmitButton";
+import { SubscriptionSubmitButton } from "src/components/newsletter/SubscriptionSubmitButton";
 
 jest.mock("react-dom", () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
