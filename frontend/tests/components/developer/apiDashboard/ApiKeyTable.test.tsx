@@ -1,12 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { NextIntlClientProvider } from "next-intl";
-
-import { ApiKey } from "src/types/apiKeyTypes";
-import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { ApiKey } from "src/types/apiKeyTypes";
+
+import { NextIntlClientProvider } from "next-intl";
+
+import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
 
 // Mock dependencies
 const mockClientFetch = jest.fn();
@@ -142,7 +143,19 @@ describe("ApiKeyTable", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseUser.mockReturnValue({ user: mockUser });
+    mockUseUser.mockReturnValue({
+      user: mockUser,
+      isLoading: false,
+      refreshUser: jest.fn(),
+      hasBeenLoggedOut: false,
+      logoutLocalUser: jest.fn(),
+      resetHasBeenLoggedOut: jest.fn(),
+      refreshIfExpired: jest.fn(),
+      refreshIfExpiring: jest.fn(),
+      featureFlags: {},
+      userFeatureFlags: {},
+      defaultFeatureFlags: {},
+    });
     mockUseClientFetch.mockReturnValue({ clientFetch: mockClientFetch });
   });
 
@@ -214,7 +227,10 @@ describe("ApiKeyTable", () => {
       await user.click(deleteButton);
 
       // Find the specific modal heading by text content
-      const deleteHeadings = screen.getAllByRole('heading', { level: 2, name: /Delete API Key/i });
+      const deleteHeadings = screen.getAllByRole("heading", {
+        level: 2,
+        name: /Delete API Key/i,
+      });
       expect(deleteHeadings.length).toBeGreaterThan(0);
 
       expect(screen.getByText('"Production API Key"')).toBeInTheDocument();
@@ -378,7 +394,10 @@ describe("ApiKeyTable", () => {
       await user.click(editButton);
 
       // Find the specific modal heading by text content
-      const editHeadings = screen.getAllByRole('heading', { level: 2, name: /Rename API Key/i });
+      const editHeadings = screen.getAllByRole("heading", {
+        level: 2,
+        name: /Rename API Key/i,
+      });
       expect(editHeadings.length).toBeGreaterThan(0);
 
       expect(
@@ -490,7 +509,7 @@ describe("ApiKeyTable", () => {
 
       // Check if we can focus on buttons and navigate
       // Verify we can find buttons and that one is focused
-      const buttons = screen.getAllByRole('button');
+      const buttons = screen.getAllByRole("button");
       expect(buttons.length).toBeGreaterThan(0);
       // Verify at least one button exists
       expect(buttons[0]).toBeInstanceOf(HTMLButtonElement);
@@ -500,8 +519,10 @@ describe("ApiKeyTable", () => {
 
       // Should have opened some modal (either edit or delete)
       // Check that at least one modal is visible (not hidden)
-      const dialogs = screen.getAllByRole('dialog');
-      const visibleDialog = dialogs.find(dialog => !dialog.classList.contains('is-hidden'));
+      const dialogs = screen.getAllByRole("dialog");
+      const visibleDialog = dialogs.find(
+        (dialog) => !dialog.classList.contains("is-hidden"),
+      );
       expect(visibleDialog).toBeInTheDocument();
     });
   });

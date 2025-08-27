@@ -1,12 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { NextIntlClientProvider } from "next-intl";
-
-import { ApiKey } from "src/types/apiKeyTypes";
-import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
+import { ApiKey } from "src/types/apiKeyTypes";
+
+import { NextIntlClientProvider } from "next-intl";
+
+import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
 
 // Mock dependencies
 const mockClientFetch = jest.fn();
@@ -115,7 +116,19 @@ describe("ApiKeyModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockToggleModal.mockClear();
-    mockUseUser.mockReturnValue({ user: mockUser });
+    mockUseUser.mockReturnValue({
+      user: mockUser,
+      isLoading: false,
+      refreshUser: jest.fn(),
+      hasBeenLoggedOut: false,
+      logoutLocalUser: jest.fn(),
+      resetHasBeenLoggedOut: jest.fn(),
+      refreshIfExpired: jest.fn(),
+      refreshIfExpiring: jest.fn(),
+      featureFlags: {},
+      userFeatureFlags: {},
+      defaultFeatureFlags: {},
+    });
     mockUseClientFetch.mockReturnValue({ clientFetch: mockClientFetch });
   });
 
@@ -268,7 +281,9 @@ describe("ApiKeyModal", () => {
 
     it("shows loading state during deletion", async () => {
       const user = userEvent.setup();
-      let resolveDelete: (value: { message: string }) => void;
+      let resolveDelete: (value: { message: string }) => void = () => {
+        // This will be assigned in the Promise constructor below
+      };
       const deletePromise = new Promise<{ message: string }>((resolve) => {
         resolveDelete = resolve;
       });
@@ -335,8 +350,8 @@ describe("ApiKeyModal", () => {
       // Wait for modal to be hidden (it stays in DOM but gets hidden class)
       await waitFor(() => {
         // Check that modal has the hidden class
-        const dialog = screen.getByRole('dialog', { hidden: true });
-        expect(dialog).toHaveClass('is-hidden');
+        const dialog = screen.getByRole("dialog", { hidden: true });
+        expect(dialog).toHaveClass("is-hidden");
       });
 
       // Reopen modal
@@ -347,8 +362,8 @@ describe("ApiKeyModal", () => {
       // Wait for modal to be visible again
       await waitFor(() => {
         // Check that modal does not have the hidden class
-        const dialog = screen.getByRole('dialog');
-        expect(dialog).not.toHaveClass('is-hidden');
+        const dialog = screen.getByRole("dialog");
+        expect(dialog).not.toHaveClass("is-hidden");
       });
 
       // The validation error should be cleared when modal reopens
@@ -541,8 +556,19 @@ describe("ApiKeyModal", () => {
 
     it("shows error when user is not authenticated", async () => {
       const user = userEvent.setup();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      mockUseUser.mockReturnValue({ user: null });
+      mockUseUser.mockReturnValue({
+        user: undefined,
+        isLoading: false,
+        refreshUser: jest.fn(),
+        hasBeenLoggedOut: false,
+        logoutLocalUser: jest.fn(),
+        resetHasBeenLoggedOut: jest.fn(),
+        refreshIfExpired: jest.fn(),
+        refreshIfExpiring: jest.fn(),
+        featureFlags: {},
+        userFeatureFlags: {},
+        defaultFeatureFlags: {},
+      });
 
       renderModal("create");
 
