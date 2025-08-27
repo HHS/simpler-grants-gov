@@ -8,6 +8,10 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
+import {
+  normalizeForCompare,
+  parseFromInputValue,
+} from "src/utils/valueNormalizationUtils";
 
 import React, { FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
@@ -15,8 +19,6 @@ import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
-import { normalizeForCompare } from "src/utils/normalizeForCompare";
-import { fromBooleanString, isBooleanString } from "src/utils/booleanStrings";
 
 /**
  * The portion of `options` we care about here, with safe typing.
@@ -28,29 +30,6 @@ type LocalOptions<S extends StrictRJSFSchema> = {
   enumOptions?: EnumOptionsType<S>[];
   "widget-label"?: unknown;
 };
-
-
-
-/**
- * coerceFromString
- *
- * Convert an HTML input value (always a string) to either a boolean (for
- * boolean radio groups) or the original enum value if we can find it.
- */
-function coerceFromString<S extends StrictRJSFSchema>(
-  raw: string,
-  enumOptions: ReadonlyArray<EnumOptionsType<S>>,
-): unknown {
-  const usesBoolStrings = enumOptions.some(
-    (option) => option.value === "true" || option.value === "false",
-  );
-  if (usesBoolStrings) {
-    return raw === "true";
-  }
-  // For non-boolean radios, return the actual enum value (could be number/string)
-  const hit = enumOptions.find((option) => String(option.value) === raw);
-  return hit ? hit.value : raw;
-}
 
 function RadioWidget<
   T = unknown,
@@ -81,7 +60,7 @@ function RadioWidget<
 
   /**
    * Determine our list of options:
-   * Prefer ui-provided enumOptions (already shaped), else fall back to schema.enum.
+   * Prefer ui-provided enumOptions, else fall back to schema.enum.
    */
   const enumOptions: EnumOptionsType<S>[] = useMemo(() => {
     if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) {
@@ -106,7 +85,7 @@ function RadioWidget<
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) => {
-      const next = coerceFromString<S>(
+      const next = parseFromInputValue<S>(
         String(target?.value ?? ""),
         enumOptions,
       ) as T;
@@ -117,7 +96,7 @@ function RadioWidget<
 
   const handleFocus = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) => {
-      const next = coerceFromString<S>(
+      const next = parseFromInputValue<S>(
         String(target?.value ?? ""),
         enumOptions,
       ) as T;
@@ -146,7 +125,6 @@ function RadioWidget<
 
       {enumOptions.map((option, index) => {
         const normalizedCurrent = normalizeForCompare(option.value, value);
-
         const checked = enumOptionsIsSelected<S>(
           option.value,
           normalizedCurrent,
@@ -158,10 +136,7 @@ function RadioWidget<
 
         const handleChange = () => {
           const raw = String(option.value);
-          const next =
-            isBooleanString(option.value)
-              ? (fromBooleanString(raw) as T)
-              : (raw as T)
+          const next = parseFromInputValue<S>(raw, enumOptions) as T;
           onChange(next);
         };
 

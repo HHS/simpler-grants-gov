@@ -5,6 +5,7 @@ import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
+import { stringifyOrEmpty } from "src/utils/valueNormalizationUtils";
 
 import React, { JSX } from "react";
 
@@ -34,8 +35,12 @@ import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
+type ConditionalRule = {
+  triggerField: string;
+  triggerConst?: unknown;
+  thenRequired: string[];
+};
 
-// json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -86,7 +91,6 @@ export const determineFieldType = ({
     return "Checkbox";
   }
 
-  // 5) Long text
   if (
     typeof fieldSchema.maxLength === "number" &&
     fieldSchema.maxLength > 255
@@ -98,7 +102,6 @@ export const determineFieldType = ({
   return "Text";
 };
 
-// either schema or definition is required, and schema fields take precedence
 export const getFieldSchema = ({
   definition,
   schema,
@@ -136,7 +139,6 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
-// new, not used in multifield
 export const getFieldName = ({
   definition,
   schema,
@@ -148,7 +150,7 @@ export const getFieldName = ({
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+      .join("--");
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -194,6 +196,51 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
+const conditionalRuleCache = new WeakMap<object, ConditionalRule[]>();
+
+function collectConditionalRules(
+  node: unknown,
+  acc: ConditionalRule[] = [],
+): ConditionalRule[] {
+  if (!node || typeof node !== "object") return acc;
+  const obj = node as Record<string, unknown>;
+
+  if ("if" in obj && "then" in obj) {
+    const ifObj = obj.if as Record<string, unknown>;
+    const thenObj = obj.then as Record<string, unknown>;
+
+    const props = (ifObj?.properties ?? {}) as Record<string, unknown>;
+    const thenReq = Array.isArray((thenObj as { required?: unknown }).required)
+      ? ((thenObj as { required: string[] }).required ?? [])
+      : [];
+
+    if (thenReq.length && props && typeof props === "object") {
+      for (const [field, condition] of Object.entries(props)) {
+        const condObj = (condition ?? {}) as Record<string, unknown>;
+        const constVal = condObj.const;
+        acc.push({
+          triggerField: field,
+          triggerConst: constVal,
+          thenRequired: thenReq.slice(),
+        });
+      }
+    }
+  }
+
+  for (const child of Object.values(obj)) {
+    collectConditionalRules(child, acc);
+  }
+  return acc;
+}
+
+function getConditionalRulesCached(formSchema: RJSFSchema): ConditionalRule[] {
+  const cached = conditionalRuleCache.get(formSchema as object);
+  if (cached) return cached;
+  const rules = collectConditionalRules(formSchema);
+  conditionalRuleCache.set(formSchema as object, rules);
+  return rules;
+}
+
 export const buildField = ({
   errors,
   formSchema,
@@ -211,18 +258,18 @@ export const buildField = ({
 
   let fieldSchema = {} as RJSFSchema;
   let name = "";
-  let value = "" as string | number | object | undefined;
+  let value = "" as string | number | boolean | object | undefined;
   let rawErrors: string[] | FormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
     name = uiFieldObject.name ? uiFieldObject.name : "";
     if (!name) {
-      console.error("name misssing from multiField definition");
+      console.error("name missing from multiField definition");
       throw new Error("Could not build field");
     }
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
-      .reduce((acc, schema) => ({ ...acc, ...schema }), {});
+      .reduce((acc, schemaPiece) => ({ ...acc, ...schemaPiece }), {});
     value = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -231,12 +278,7 @@ export const buildField = ({
           ? (result as Record<string, unknown>)
           : {};
       })
-      .reduce<Record<string, unknown>>(
-        (acc, value) => ({ ...acc, ...value }),
-        {},
-      );
-    // multifield needs to retain field location for errors.
-    // this may not work with nested required fields
+      .reduce<Record<string, unknown>>((acc, v) => ({ ...acc, ...v }), {});
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -250,14 +292,69 @@ export const buildField = ({
     fieldSchema = getFieldSchema({ definition, schema, formSchema });
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
-    value = getByPointer(formData, path) as string | number | undefined;
-    const fieldType =
+    value = getByPointer(formData, path) as
+      | string
+      | number
+      | boolean
+      | undefined;
+
+    const types =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "";
-    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
+
+    rawErrors = formatFieldWarnings(errors, name, types, requiredField);
+
+    /**
+     * Dynamic conditional error mirroring
+     *
+     * If there is a then.required error for some field(s) and this field is
+     * the trigger in an if.properties.<name>.const rule that is satisfied
+     * by the current value, mirror the server-provided error messages
+     * onto this field for visibility.
+     */
+    const rules = getConditionalRulesCached(formSchema);
+    const triggeredByThisField = rules.filter(
+      (rule) => rule.triggerField === name,
+    );
+    if (triggeredByThisField.length && Array.isArray(errors)) {
+      const currentString = stringifyOrEmpty(value);
+      for (const rule of triggeredByThisField) {
+        const constString =
+          rule.triggerConst === undefined
+            ? undefined
+            : stringifyOrEmpty(rule.triggerConst);
+        const conditionSatisfied =
+          constString === undefined
+            ? currentString !== ""
+            : currentString === constString;
+
+        if (!conditionSatisfied) continue;
+
+        const missingRequiredWarnings = errors.filter(
+          (warning) =>
+            warning.type === "required" &&
+            rule.thenRequired.includes(warning.field),
+        );
+
+        if (missingRequiredWarnings.length) {
+          const serverMessages = Array.from(
+            new Set(
+              missingRequiredWarnings
+                .map((warning) =>
+                  typeof warning.message === "string"
+                    ? warning.message
+                    : String(warning.message),
+                )
+                .filter(Boolean),
+            ),
+          );
+          rawErrors = [...rawErrors, ...serverMessages];
+        }
+      }
+    }
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -265,26 +362,21 @@ export const buildField = ({
     throw new Error("Invalid or missing field schema");
   }
 
-  // fields that have no definition won't have a name, but will havea schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
-  // should filter and match warnings to field earlier in the process
-
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
-  // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
-  let options = {};
+  let options: WidgetOptions = {};
 
   // Provide enumOptions for Select, MultiSelect, and Radio
   if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
     if (fieldSchema.type === "boolean") {
-      // Keep as strings to align with RadioWidget hidden input/value handling
       enums = ["true", "false"];
     } else if (fieldSchema.type === "array") {
       const item = Array.isArray(fieldSchema.items)
@@ -325,13 +417,11 @@ export const buildField = ({
   const Widget = widgetComponents[type];
 
   if (!Widget) {
+    // eslint-disable-next-line no-console
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  // IMPORTANT:
-  // return a React element so hooks execute during render,
-  // under the AttachmentsProvider context.
   return (
     <Widget
       id={name}
@@ -348,6 +438,7 @@ export const buildField = ({
   );
 };
 
+/** ---------- Warnings / nav / wrapping / shaping helpers ---------- */
 const getNestedWarningsForField = (
   fieldName: string,
   warnings: FormValidationWarning[],
@@ -388,7 +479,6 @@ export const formatFieldWarnings = (
       },
       {} as Record<string, unknown>,
     );
-
     return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
@@ -468,8 +558,6 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
   });
 };
 
-// if a nested field contains no defined items, remove it from the data
-// this may not be necessary, as JSON.stringify probably does the same thing
 export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
@@ -488,7 +576,6 @@ export const pruneEmptyNestedFields = (structuredFormData: object): object => {
   );
 };
 
-// filters, orders, and nests the form data to match the form schema
 export const shapeFormData = <T extends object>(
   formData: FormData,
   formSchema: RJSFSchema,
@@ -519,17 +606,6 @@ const getKeyParentPath = (key: string, parentPath?: string) => {
   return removePropertyPaths(keyParent);
 };
 
-/*
-  gets an array of all paths to required fields in the form schema, not
-  including any intermediate paths that do not represent actual fields
-  assumes a dereferenced but not condensed schema (property paths will still be in place)
-
-  does not do conditionals. For that we'd have to first:
-  - gather all conditional rules
-  - check all conditional rules against form state / values
-  - re-annotate the form schema with new "required" designations
-  At that point we're basically running validation
-*/
 export const getRequiredProperties = (
   formSchema: RJSFSchema,
   parentPath?: string,
@@ -539,6 +615,7 @@ export const getRequiredProperties = (
     if (key === "required") {
       (value as []).forEach((requiredPropertyKey: string) => {
         if (!formSchema?.properties) {
+          // eslint-disable-next-line no-console
           console.error("Error finding required properties, malformed schema?");
           return;
         }
@@ -566,12 +643,7 @@ export const isFieldRequired = (
   return requiredFields.indexOf(path) > -1;
 };
 
-// arrays from the html look like field_[row]_item or are simply the field name
-export const flatFormDataToArray = (
-  field: string,
-  data: Record<string, unknown>,
-) => {
-  if (field in data) return [data[field]];
+const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
@@ -593,13 +665,6 @@ export const flatFormDataToArray = (
   );
 };
 
-// dereferences all def links so that all necessary property definitions
-// can be found directly within the property without referencing $defs.
-// also resolves "allOf" references within "properties" or "$defs" fields.
-// not merging the entire schema because many schemas have top level
-// "allOf" blocks that often contain "if"/"then" statements or other things
-// that the mergeAllOf library can't handle out of the box, and we don't need
-// to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
@@ -616,19 +681,11 @@ export const processFormSchema = async (
     };
     return condensed as RJSFSchema;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error("Error processing schema");
     throw e;
   }
 };
-
-/*
-  this will flatten any properties objects so that we can directly reference field paths
-  within a json schema without traversing nested "properties". Any other object attributes
-  and values are unchanged
-
-  ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
-      { path: { nested: 'value' } }
-*/
 
 export const condenseFormSchemaProperties = (schema: object): object => {
   return Object.entries(schema).reduce(
@@ -649,19 +706,3 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     {},
   );
 };
-
-// This is only needed when extracting an application response from the application endpoint's
-// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
-// the application detail contains an empty array for the form response if no
-// forms have been saved or an application_response with a form_id
-// export const getApplicationResponse = (
-//   forms: [] | ApplicationFormDetail[],
-//   formId: string,
-// ): ApplicationResponseDetail | object => {
-//   if (forms.length > 0) {
-//     const form = forms.find((form) => form?.form_id === formId);
-//     return form?.application_response || {};
-//   } else {
-//     return {};
-//   }
-// };
