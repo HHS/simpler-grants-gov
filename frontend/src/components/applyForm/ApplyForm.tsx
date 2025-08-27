@@ -47,6 +47,8 @@ const ApplyForm = ({
     ),
   });
 
+  console.log(validationWarnings);
+
   const [formState, formAction] = useActionState(handleFormAction, {
     applicationId,
     error: false,

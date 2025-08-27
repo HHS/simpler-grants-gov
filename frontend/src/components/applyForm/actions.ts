@@ -57,6 +57,7 @@ export async function handleFormAction(
     session.token,
   );
   if (saveSuccess) {
+    console.log(applicationFormData);
     return {
       applicationId,
       error: false,

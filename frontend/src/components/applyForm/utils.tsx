@@ -1,7 +1,7 @@
 import $Refparser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
-import { JSONSchema7 } from "json-schema";
+import { JSONSchema7, JSONSchema7TypeName } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
@@ -206,6 +206,7 @@ export const buildField = ({
   requiredField: boolean;
 }) => {
   const { definition, schema, type: fieldType } = uiFieldObject;
+  console.log(errors);
 
   let fieldSchema = {} as RJSFSchema;
   let name = "";
@@ -256,6 +257,7 @@ export const buildField = ({
           ? (fieldSchema.type[0] ?? "")
           : "";
     rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
+    console.log(errors, rawErrors);
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -315,6 +317,7 @@ export const buildField = ({
     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
     throw new Error(`Unknown widget type: ${type}`);
   }
+  console.log(rawErrors);
 
   // IMPORTANT:
   // return a React element so hooks execute during render,
@@ -373,7 +376,7 @@ export const formatFieldWarnings = (
         acc[item.field] = item.message;
         return acc;
       },
-      {} as Record<string, unknown>,
+      {} as Record<string, string>,
     );
 
     return flatFormDataToArray(name, warningMap) as unknown as [];
@@ -556,9 +559,9 @@ export const isFieldRequired = (
 // arrays from the html look like field_[row]_item or are simply the field name
 export const flatFormDataToArray = (
   field: string,
-  data: Record<string, unknown>,
+  data: Record<string, string>,
 ) => {
-  if (field in data) return [data[field]];
+  if (field in data) return [{ [field]: data[field] }];
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
@@ -576,7 +579,7 @@ export const flatFormDataToArray = (
 
       return values;
     },
-    [] as Array<Record<string, unknown>>,
+    [] as Array<Record<string, string>>,
   );
 };
 
@@ -652,3 +655,39 @@ export const condenseFormSchemaProperties = (schema: object): object => {
 //     return {};
 //   }
 // };
+
+export const getErrors = ({
+  type,
+  fieldName,
+  rawErrors,
+}: {
+  type: JSONSchema7TypeName | JSONSchema7TypeName[] | undefined;
+  fieldName: string;
+  rawErrors: string[] | Record<string, string>[] | undefined;
+}): React.ReactNode | string | null => {
+  const safeType = Array.isArray(type) && type.length > 0 ? type[0] : type;
+  if (!Array.isArray(rawErrors) || rawErrors.length < 0 || !rawErrors)
+    return null;
+  let errors = rawErrors;
+  if (safeType === "array") {
+    errors = rawErrors
+      .filter(
+        (error): error is Record<string, string> =>
+          typeof error === "object" &&
+          error !== null &&
+          !Array.isArray(error) &&
+          fieldName in error,
+      )
+      .map((error) => error[fieldName]);
+  }
+  if (errors.length > 1) {
+    return (
+      <ul>
+        {errors.map((error, idx) => (
+          <li key={idx}>{String(error)}</li>
+        ))}
+      </ul>
+    );
+  }
+  return String(errors[0]);
+};

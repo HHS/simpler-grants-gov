@@ -8,11 +8,13 @@ import { FormFields } from "./FormFields";
 import { UiSchema } from "./types";
 
 export default function PrintForm({
+  attachments,
   formSchema,
   savedFormData,
   uiSchema,
   attachments,
 }: {
+  attachments: Attachment[];
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
