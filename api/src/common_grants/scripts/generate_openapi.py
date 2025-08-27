@@ -14,13 +14,10 @@ from apiflask.schemas import Schema
 
 # Import the actual CommonGrants routes and schemas
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
-from src.api.schemas.common_grants_schema import (
-    CGPaginatedQueryParamsSchema,
-    CGOpportunitiesListResponseSchema,
-    CGOpportunityResponseSchema,
-    CGOpportunitiesSearchResponseSchema,
-    CGOpportunitySearchRequestSchema,
-)
+# Import the routes to register them with the blueprint
+from src.api.common_grants import common_grants_routes
+# Import the marshmallow schemas from the PySDK
+import common_grants_sdk.schemas.marshmallow as cgmm
 
 
 def create_apiflask_app() -> APIFlask:
