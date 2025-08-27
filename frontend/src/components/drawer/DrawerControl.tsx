@@ -23,6 +23,7 @@ export const DrawerControl = ({
       opener
       outline
       className={clsx("display-block", className)}
+      data-testid="toggle-drawer"
     >
       {iconName && (
         <USWDSIcon
