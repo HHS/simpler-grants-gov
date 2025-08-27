@@ -38,9 +38,10 @@ export const OpportunitySaveUserControl = ({
   const [savedError, setSavedError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const displayAsSaved = useMemo(() => {
-    return locallySaved === null ? opportunitySaved : locallySaved;
-  }, [locallySaved, opportunitySaved]);
+  const displayAsSaved = useMemo(
+    () => (locallySaved === null ? opportunitySaved : locallySaved),
+    [locallySaved, opportunitySaved],
+  );
 
   const closeMessage = () => {
     setshowMessage(false);
@@ -64,6 +65,23 @@ export const OpportunitySaveUserControl = ({
       setLoading(false);
     }
   };
+
+  // // fetch user's saved opportunities
+  // useEffect(() => {
+  //   if (!user?.token) return;
+  //   setLoading(true);
+  //   fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
+  //     .then((data) => {
+  //       data && setSaved(true);
+  //     })
+  //     .catch((e) => {
+  //       console.error(e);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [opportunityId, user?.token]);
 
   const messageText = displayAsSaved
     ? savedError
