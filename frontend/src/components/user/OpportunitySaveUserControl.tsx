@@ -28,9 +28,6 @@ export const OpportunitySaveUserControl = ({
 }) => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
-  const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
-    "Error fetching saved opportunity",
-  );
 
   const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
     "Error updating saved opportunity",
@@ -54,7 +51,7 @@ export const OpportunitySaveUserControl = ({
   const userSavedOppCallback = async () => {
     setLoading(true);
 
-    const method = saved ? "DELETE" : "POST";
+    const method = displayAsSaved ? "DELETE" : "POST";
     try {
       const data = await updateSaved("/api/user/saved-opportunities", {
         method,
@@ -70,24 +67,7 @@ export const OpportunitySaveUserControl = ({
     }
   };
 
-  // // fetch user's saved opportunities
-  // useEffect(() => {
-  //   if (!user?.token) return;
-  //   setLoading(true);
-  //   fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
-  //     .then((data) => {
-  //       data && setSaved(true);
-  //     })
-  //     .catch((e) => {
-  //       console.error(e);
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [opportunityId, user?.token]);
-
-  const messageText = saved
+  const messageText = displayAsSaved
     ? savedError
       ? t("saveMessage.errorUnsave")
       : t.rich("saveMessage.save", {
@@ -113,7 +93,7 @@ export const OpportunitySaveUserControl = ({
               userSavedOppCallback().catch(console.error);
             }}
             loading={loading}
-            saved={locallySaved === null ? opportunitySaved : locallySaved}
+            saved={displayAsSaved}
           />
         ) : (
           <>
@@ -153,7 +133,7 @@ export const OpportunitySaveUserControl = ({
           message={showMessage}
           loading={loading}
           loadingText={t("saveButton.loading")}
-          saved={saved}
+          saved={displayAsSaved}
           savedText={t("saveButton.saved")}
         />
       ) : (

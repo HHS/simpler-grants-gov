@@ -2,9 +2,14 @@ import { Metadata } from "next";
 import NotFound from "src/app/[locale]/(base)/not-found";
 import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import {
+  MinimalOpportunity,
+  OpportunityDetail,
+} from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -23,6 +28,7 @@ import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import SavedOpportunities from "../../saved-opportunities/page";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;
@@ -100,6 +106,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
 
   let opportunityData = {} as OpportunityDetail;
+  let opportunitySaved = false;
   try {
     const response = await getOpportunityDetails(id);
     opportunityData = response.data;
@@ -114,6 +121,22 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
       `/opportunity/${opportunityData.opportunity_id}`,
       RedirectType.push,
     );
+  }
+
+  try {
+    const session = await getSession();
+    if (session?.user_id && session.token) {
+      const savedOpportunity = await getSavedOpportunity(
+        session.token,
+        session.user_id,
+        id,
+      );
+      if (savedOpportunity) {
+        opportunitySaved = true;
+      }
+    }
+  } catch (error) {
+    console.error("Unable to fetch list of saved opportunities", error);
   }
 
   opportunityData.summary = opportunityData?.summary
@@ -140,6 +163,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
           <OpportunitySaveUserControl
             opportunityId={opportunityData.opportunity_id}
             type="button"
+            opportunitySaved={opportunitySaved}
           />
           {opportunityData.competitions &&
             opportunityData.opportunity_title && (
