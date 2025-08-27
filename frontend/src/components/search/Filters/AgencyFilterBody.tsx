@@ -15,7 +15,7 @@ import { useCallback, useContext, useMemo } from "react";
 import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import { SearchAccordionContentProps } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
-import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
+import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection";
 
 interface AgencyFilterBodyProps extends SearchAccordionContentProps {
   referenceOptions?: FilterOption[];
