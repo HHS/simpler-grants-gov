@@ -66,23 +66,6 @@ export const OpportunitySaveUserControl = ({
     }
   };
 
-  // // fetch user's saved opportunities
-  // useEffect(() => {
-  //   if (!user?.token) return;
-  //   setLoading(true);
-  //   fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
-  //     .then((data) => {
-  //       data && setSaved(true);
-  //     })
-  //     .catch((e) => {
-  //       console.error(e);
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [opportunityId, user?.token]);
-
   const messageText = displayAsSaved
     ? savedError
       ? t("saveMessage.errorUnsave")
