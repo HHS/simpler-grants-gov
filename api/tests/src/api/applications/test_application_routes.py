@@ -89,9 +89,7 @@ def test_application_start_logging_enhancement(
     # Create a competition with an opportunity that has an agency_code
     opportunity = OpportunityFactory.create(agency_code="TEST")
     competition = CompetitionFactory.create(
-        opening_date=today, 
-        closing_date=future_date,
-        opportunity=opportunity
+        opening_date=today, closing_date=future_date, opportunity=opportunity
     )
 
     competition_id = str(competition.competition_id)
@@ -109,18 +107,25 @@ def test_application_start_logging_enhancement(
     assert "application_id" in response.json["data"]
 
     # Verify that the application metadata was added to the logs
-    application_id = response.json["data"]["application_id"]
-    
+    _ = response.json["data"]["application_id"]
+
     # Check that the log messages contain the expected metadata
-    log_records = [record for record in caplog.records if "application" in record.getMessage().lower()]
-    
+    log_records = [
+        record for record in caplog.records if "application" in record.getMessage().lower()
+    ]
+
     # Should find at least one log message with the application metadata
     found_metadata = False
     for record in log_records:
-        if hasattr(record, 'organization_id') or hasattr(record, 'competition_id') or hasattr(record, 'opportunity_id') or hasattr(record, 'agency_code'):
+        if (
+            hasattr(record, "organization_id")
+            or hasattr(record, "competition_id")
+            or hasattr(record, "opportunity_id")
+            or hasattr(record, "agency_code")
+        ):
             found_metadata = True
             break
-    
+
     assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
 
@@ -1722,12 +1727,10 @@ def test_application_submit_logging_enhancement(
     # Create a competition with a future closing date and opportunity with agency_code
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
-    
+
     opportunity = OpportunityFactory.create(agency_code="TEST")
     competition = CompetitionFactory.create(
-        closing_date=future_date, 
-        competition_forms=[],
-        opportunity=opportunity
+        closing_date=future_date, competition_forms=[], opportunity=opportunity
     )
 
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
@@ -1769,15 +1772,22 @@ def test_application_submit_logging_enhancement(
     assert application.application_status == ApplicationStatus.SUBMITTED
 
     # Check that the log messages contain the expected metadata
-    log_records = [record for record in caplog.records if "application" in record.getMessage().lower()]
-    
+    log_records = [
+        record for record in caplog.records if "application" in record.getMessage().lower()
+    ]
+
     # Should find at least one log message with the application metadata
     found_metadata = False
     for record in log_records:
-        if hasattr(record, 'organization_id') or hasattr(record, 'competition_id') or hasattr(record, 'opportunity_id') or hasattr(record, 'agency_code'):
+        if (
+            hasattr(record, "organization_id")
+            or hasattr(record, "competition_id")
+            or hasattr(record, "opportunity_id")
+            or hasattr(record, "agency_code")
+        ):
             found_metadata = True
             break
-    
+
     assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
 

@@ -141,10 +141,7 @@ def create_application(
     competition = db_session.execute(
         select(Competition)
         .where(Competition.competition_id == competition_id)
-        .options(
-            selectinload(Competition.competition_forms),
-            selectinload(Competition.opportunity)
-        )
+        .options(selectinload(Competition.competition_forms), selectinload(Competition.opportunity))
     ).scalar_one_or_none()
 
     if not competition:
