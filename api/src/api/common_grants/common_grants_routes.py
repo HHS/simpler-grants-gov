@@ -4,28 +4,21 @@ import logging
 from uuid import UUID
 
 from apiflask import HTTPError
-from common_grants_sdk.schemas import OpportunityResponse
-from common_grants_sdk.schemas.requests.opportunity import OpportunitySearchRequest
-from common_grants_sdk.schemas.pagination import PaginatedQueryParams
+from common_grants_sdk.schemas.pydantic import OpportunityResponse, OpportunitySearchRequest, PaginatedQueryParams
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
-from src.api.schemas.common_grants_schema import (
-    CGPaginatedQueryParamsSchema,
-    CGOpportunitiesListResponseSchema,
-    CGOpportunityResponseSchema,
-    CGOpportunitiesSearchResponseSchema,
-    CGOpportunitySearchRequestSchema,
-)
+import common_grants_sdk.schemas.marshmallow as cgmm
+
 
 logger = logging.getLogger(__name__)
 
 
 @common_grants_blueprint.get("/opportunities")
-@common_grants_blueprint.input(CGPaginatedQueryParamsSchema, location="query")
-@common_grants_blueprint.output(CGOpportunitiesListResponseSchema)
+@common_grants_blueprint.input(cgmm.CGPaginatedBodyParams, location="query")
+@common_grants_blueprint.output(cgmm.CGOpportunitiesListResponse)
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
@@ -53,7 +46,7 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
     json_data = pydantic_response.model_dump(by_alias=True, mode="json")
     
     # Hydrate marshmallow schema
-    schema = CGOpportunitiesListResponseSchema()
+    schema = cgmm.CGOpportunitiesListResponse()
     marshmallow_data = schema.load(json_data)
     
     # Dump marshmallow data to JSON-serializable format
@@ -61,7 +54,7 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
     
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
-@common_grants_blueprint.output(CGOpportunityResponseSchema)
+@common_grants_blueprint.output(cgmm.CGOpportunityResponse)
 @common_grants_blueprint.doc(
     summary="View opportunity",
     description="View additional details about an opportunity",
@@ -96,7 +89,7 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     json_data = response.model_dump(by_alias=True, mode="json")
     
     # Hydrate marshmallow schema
-    schema = CGOpportunityResponseSchema()
+    schema = cgmm.CGOpportunityResponse()
     marshmallow_data = schema.load(json_data)
     
     # Dump marshmallow data to JSON-serializable format
@@ -104,8 +97,8 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 
 
 @common_grants_blueprint.post("/opportunities/search")
-@common_grants_blueprint.input(CGOpportunitySearchRequestSchema)
-@common_grants_blueprint.output(CGOpportunitiesSearchResponseSchema)
+@common_grants_blueprint.input(cgmm.CGOpportunitySearchRequest)
+@common_grants_blueprint.output(cgmm.CGOpportunitiesSearchResponse)
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
@@ -139,7 +132,7 @@ def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict,
     json_data = response.model_dump(by_alias=True, mode="json")
     
     # Hydrate marshmallow schema
-    schema = CGOpportunitiesSearchResponseSchema()
+    schema = cgmm.CGOpportunitiesSearchResponse()
     marshmallow_data = schema.load(json_data)
     
     # Dump marshmallow data to JSON-serializable format

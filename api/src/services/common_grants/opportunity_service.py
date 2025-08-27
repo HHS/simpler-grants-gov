@@ -13,7 +13,7 @@ from common_grants_sdk.schemas import (
     PaginatedResultsInfo,
     SortedResultsInfo,
 )
-from common_grants_sdk.schemas.sorting import OppSortBy, OppSorting
+from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, OppSorting
 from sqlalchemy.orm import Session, selectinload
 
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
@@ -124,7 +124,7 @@ class CommonGrantsOpportunityService:
 
         # Apply status filter if provided
         if filters.status and filters.status.value:
-            from common_grants_sdk.schemas.models.opp_status import OppStatusOptions
+            from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
 
             status_mapping = {
                 OppStatusOptions.FORECASTED: "forecasted",
