@@ -664,26 +664,28 @@ export const isFieldRequired = (
 };
 
 // arrays from the html look like field_[row]_item or are simply the field name
-const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
-  return Object.entries(data).reduce(
-    (values: Array<Record<string, unknown>>, [key, value]) => {
-      const fieldSplit = key.split(/\[\d+\]\./);
-      const fieldName = fieldSplit[0];
-      const itemName = fieldSplit[1];
+export const flatFormDataToArray = (
+  field: string,
+  data: Record<string, unknown>
+): Array<Record<string, unknown> | undefined> => {
+  const out: Array<Record<string, unknown> | undefined> = [];
 
-      if (fieldName === field && value) {
-        const match = key.match(/[0-9]+/);
-        const arrayNumber = match ? Number(match[0]) : -1;
-        if (!values[arrayNumber]) {
-          values[arrayNumber] = {};
-        }
-        values[arrayNumber][itemName] = value;
-      }
+  for (const [key, val] of Object.entries(data)) {
+    // Only accept indexed keys 
+    // like "<field>[<index>].<item>"
+    const match = key.match(/^([^[]+)\[(\d+)\]\.(.+)$/);
+    if (!match) continue;
 
-      return values;
-    },
-    [] as Array<Record<string, unknown>>,
-  );
+    const [, fieldName, indexString, itemName] = match;
+    if (fieldName !== field) continue;
+    if (!val) continue;
+
+    const index = Number(indexString);
+    if (!out[index]) out[index] = {};
+    (out[index] as Record<string, unknown>)[itemName] = val;
+  }
+
+  return out;
 };
 
 // dereferences all def links so that all necessary property definitions

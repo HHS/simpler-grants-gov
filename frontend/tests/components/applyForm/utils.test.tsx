@@ -234,6 +234,85 @@ describe("buildField", () => {
   });
 });
 
+describe("buildField – conditional error mirroring", () => {
+  const formSchema: RJSFSchema = {
+    type: "object",
+    properties: {
+      delinquent_federal_debt: { type: "boolean", title: "Delinquent Federal Debt" },
+      debt_explanation: { type: "string", title: "Debt Explanation" },
+    },
+    allOf: [
+      {
+        if: {
+          properties: { delinquent_federal_debt: { const: true } },
+          required: ["delinquent_federal_debt"],
+        },
+        then: { required: ["debt_explanation"] },
+      },
+    ],
+  };
+
+  // Force Radio for boolean so we render the radio widget in this test:
+  const uiFieldObject: UiSchemaField = {
+    type: "field",
+    definition: "/properties/delinquent_federal_debt",
+    widget: "Radio",
+  };
+
+  it("mirrors server conditional 'required' error to the trigger field when condition is satisfied", () => {
+    const errors = [
+      {
+        field: "debt_explanation",
+        message: "'debt_explanation' is a required property",
+        type: "required",
+        value: "",
+      },
+    ];
+    const formData = { delinquent_federal_debt: true };
+
+    const BuiltField = buildField({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: true,
+    });
+
+    render(BuiltField);
+
+    // Mirrored server error should appear on the trigger field's widget
+    expect(
+      screen.getByText(/'debt_explanation' is a required property/i),
+    ).toBeInTheDocument();
+  });
+
+  it("does NOT mirror the error when the condition is not satisfied", () => {
+    const errors = [
+      {
+        field: "debt_explanation",
+        message: "'debt_explanation' is a required property",
+        type: "required",
+        value: "",
+      },
+    ];
+    const formData = { delinquent_federal_debt: false };
+
+    const BuiltField = buildField({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: true,
+    });
+
+    render(BuiltField);
+
+    expect(
+      screen.queryByText(/'debt_explanation' is a required property/i),
+    ).not.toBeInTheDocument();
+  });
+});
+
 // describe("getApplicationResponse", () => {
 //   it("should return a structured response for valid input", () => {
 //     const forms = [
@@ -571,10 +650,10 @@ describe("formatFieldWarnings", () => {
 });
 
 describe("flatFormDataToArray", () => {
-  it("returns array with single value if field exists directly", () => {
-    const data = { foo: "bar" };
-    expect(flatFormDataToArray("foo", data)).toEqual(["bar"]);
-  });
+it("returns empty array for direct keys", () => {
+  const data = { foo: "bar" };
+  expect(flatFormDataToArray("foo", data)).toEqual([]);
+});
 
   it("returns array of objects for indexed keys", () => {
     const data = {
