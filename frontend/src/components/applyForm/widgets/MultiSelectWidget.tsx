@@ -16,6 +16,7 @@ import {
   type ComboBoxRef,
 } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { Pill } from "src/components/Pill";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
@@ -45,7 +46,7 @@ export default function MultiSelect<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, description, maxItems, minItems } = schema;
+  const { title, description, maxItems, minItems, type } = schema;
 
   const { enumOptions: opts, enumDisabled } = (options ?? {}) as {
     enumOptions?: ComboBoxOption[];
@@ -92,6 +93,10 @@ export default function MultiSelect<
     : title
       ? `label-for-${id}`
       : undefined;
+  const errors = useMemo(
+    () => FieldErrors({ type, fieldName: id, rawErrors }),
+    [type, id, rawErrors],
+  );
 
   const syncUpstream = (next: string[]) => {
     setSelected(next);
@@ -140,15 +145,7 @@ export default function MultiSelect<
         description={description as string}
         labelType={labelType}
       />
-
-      {error && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0]).join(",")}
-        </ErrorMessage>
-      )}
-
+      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
       {/* Hidden inputs so your form posts an array */}
       {selected.map((v, i) => (
         <input

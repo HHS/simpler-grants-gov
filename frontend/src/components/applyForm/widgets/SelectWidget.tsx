@@ -21,6 +21,7 @@ import {
   Select,
 } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -61,7 +62,7 @@ function SelectWidget<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, description } = schema;
+  const { title, description, type } = schema;
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
@@ -115,6 +116,10 @@ function SelectWidget<
     : title
       ? `label-for-${id}`
       : undefined;
+  const errors = useMemo(
+    () => FieldErrors({ type, fieldName: id, rawErrors }),
+    [type, id, rawErrors],
+  );
 
   const Widget = useCombo ? ComboBox : Select;
 
@@ -127,17 +132,7 @@ function SelectWidget<
         description={description as string}
         labelType={labelType}
       />
-
-      {error && (
-        <ErrorMessage>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0])
-                .map((value) => value)
-                .join(",")}
-        </ErrorMessage>
-      )}
-
+      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
         key={selectValue}

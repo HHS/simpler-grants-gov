@@ -12,6 +12,7 @@ import {
 import React, { FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -84,7 +85,7 @@ function RadioWidget<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, enum: enumFromSchema, description } = schema;
+  const { title, enum: enumFromSchema, description, type } = schema;
 
   // Extract and safely type the options we use
   const { enumDisabled, enumOptions: uiEnumOptions } =
@@ -116,6 +117,10 @@ function RadioWidget<
     : title
       ? `label-for-${id}`
       : undefined;
+  const errors = useMemo(
+    () => FieldErrors({ type, fieldName: id, rawErrors }),
+    [type, id, rawErrors],
+  );
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) => {
@@ -148,15 +153,7 @@ function RadioWidget<
         description={description as string}
         labelType={labelType}
       />
-
-      {error && (
-        <ErrorMessage>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0] as Record<string, string>).join(",")}
-        </ErrorMessage>
-      )}
-
+      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
       {enumOptions.map((option, index) => {
         // Normalize the current value so it can match "true"/"false" string options
         const currentForCompare = normalizeForCompare(option.value, value);
