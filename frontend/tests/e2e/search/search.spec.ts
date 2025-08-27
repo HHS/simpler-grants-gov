@@ -167,17 +167,34 @@ test.describe("Search page tests", () => {
 
   test("last result becomes first result when flipping sort order", async ({
     page,
-  }) => {
+  }, { project }) => {
+    const isMobile = !!project.name.match(/[Mm]obile/);
     await page.goto("/search");
 
     await waitForSearchResultsInitialLoad(page);
-    await selectSortBy(page, "opportunityTitleDesc");
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+    await selectSortBy(page, "opportunityTitleDesc", isMobile);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
 
     await clickLastPaginationPage(page);
 
     const lastSearchResultTitle = await getLastSearchResultTitle(page);
 
-    await selectSortBy(page, "opportunityTitleAsc");
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+
+    await selectSortBy(page, "opportunityTitleAsc", isMobile);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
 
     const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
