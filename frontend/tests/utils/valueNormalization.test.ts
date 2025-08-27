@@ -1,12 +1,12 @@
+import type { EnumOptionsType, StrictRJSFSchema } from "@rjsf/utils";
 import {
-  stringifyOrEmpty,
   fromBooleanString,
   isBooleanString,
-  toBooleanString,
   normalizeForCompare,
   parseFromInputValue,
+  stringifyOrEmpty,
+  toBooleanString,
 } from "src/utils/valueNormalizationUtils";
-import type { EnumOptionsType, StrictRJSFSchema } from "@rjsf/utils";
 
 describe("valueNormalization utils", () => {
   describe("stringifyOrEmpty", () => {
@@ -94,11 +94,12 @@ describe("valueNormalization utils", () => {
       { label: "B", value: "B" },
     ];
 
-    const booleanStringOptions: ReadonlyArray<EnumOptionsType<StrictRJSFSchema>> =
-      [
-        { label: "Yes", value: "true" },
-        { label: "No", value: "false" },
-      ];
+    const booleanStringOptions: ReadonlyArray<
+      EnumOptionsType<StrictRJSFSchema>
+    > = [
+      { label: "Yes", value: "true" },
+      { label: "No", value: "false" },
+    ];
 
     it("returns raw string when enum is non-boolean", () => {
       expect(parseFromInputValue<StrictRJSFSchema>("A", stringOptions)).toBe(

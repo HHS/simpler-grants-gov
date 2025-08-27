@@ -666,12 +666,12 @@ export const isFieldRequired = (
 // arrays from the html look like field_[row]_item or are simply the field name
 export const flatFormDataToArray = (
   field: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Array<Record<string, unknown> | undefined> => {
   const out: Array<Record<string, unknown> | undefined> = [];
 
   for (const [key, val] of Object.entries(data)) {
-    // Only accept indexed keys 
+    // Only accept indexed keys
     // like "<field>[<index>].<item>"
     const match = key.match(/^([^[]+)\[(\d+)\]\.(.+)$/);
     if (!match) continue;
@@ -682,7 +682,7 @@ export const flatFormDataToArray = (
 
     const index = Number(indexString);
     if (!out[index]) out[index] = {};
-    (out[index] as Record<string, unknown>)[itemName] = val;
+    out[index][itemName] = val;
   }
 
   return out;

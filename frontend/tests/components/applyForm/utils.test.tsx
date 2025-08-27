@@ -238,7 +238,10 @@ describe("buildField – conditional error mirroring", () => {
   const formSchema: RJSFSchema = {
     type: "object",
     properties: {
-      delinquent_federal_debt: { type: "boolean", title: "Delinquent Federal Debt" },
+      delinquent_federal_debt: {
+        type: "boolean",
+        title: "Delinquent Federal Debt",
+      },
       debt_explanation: { type: "string", title: "Debt Explanation" },
     },
     allOf: [
@@ -650,10 +653,10 @@ describe("formatFieldWarnings", () => {
 });
 
 describe("flatFormDataToArray", () => {
-it("returns empty array for direct keys", () => {
-  const data = { foo: "bar" };
-  expect(flatFormDataToArray("foo", data)).toEqual([]);
-});
+  it("returns empty array for direct keys", () => {
+    const data = { foo: "bar" };
+    expect(flatFormDataToArray("foo", data)).toEqual([]);
+  });
 
   it("returns array of objects for indexed keys", () => {
     const data = {
