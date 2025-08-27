@@ -1,19 +1,32 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable testing-library/no-node-access */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { RJSFSchema } from "@rjsf/utils";
 import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
-import { UiSchemaField } from "src/components/applyForm/types";
+import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
+  buildWarningTree,
   condenseFormSchemaProperties,
   determineFieldType,
   flatFormDataToArray,
   formatFieldWarnings,
   getFieldConfig,
-  getFieldName,
+  getFieldNameForHtml,
+  getFieldPathFromHtml,
   getFieldSchema,
+  getFieldsForNav,
+  getKeyParentPath,
+  getNameFromDef,
   getRequiredProperties,
+  getWarningsForField,
+  isFieldRequired,
+  jsonPathToPointer,
+  jsonPointerToPath,
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
+  wrapSection,
 } from "src/components/applyForm/utils";
 
 const mockDereference = jest.fn();
@@ -163,9 +176,12 @@ describe("getFieldConfig", () => {
     const errors = [
       {
         field: "$.email",
-        message: "Invalid email format",
+        message: "'invalid' email format",
         type: "",
         value: "",
+        htmlField: "email",
+        formatted: "Invalid email format",
+        definition: "/properties/email",
       },
     ];
 
@@ -404,10 +420,10 @@ describe("pruneEmptyNestedFields", () => {
   });
 });
 
-describe("getFieldName", () => {
+describe("getFieldNameForHtml", () => {
   it("returns correct field name based on definition, removing properties and adding delimiter", () => {
     expect(
-      getFieldName({
+      getFieldNameForHtml({
         definition: "/properties/something/properties/somethingElse",
       }),
     ).toEqual("something--somethingElse");
@@ -415,7 +431,7 @@ describe("getFieldName", () => {
   // this may not actually work
   it("returns correct field name based on schema", () => {
     expect(
-      getFieldName({
+      getFieldNameForHtml({
         schema: {
           title: "a bunch of stuff",
         },
@@ -423,7 +439,7 @@ describe("getFieldName", () => {
     ).toEqual("a-bunch-of-stuff");
 
     expect(
-      getFieldName({
+      getFieldNameForHtml({
         schema: {},
       }),
     ).toEqual("untitled");
@@ -540,47 +556,65 @@ describe("getRequiredProperties", () => {
   });
 });
 
-describe("formatFieldWarnings", () => {
+describe("getWarningsForField", () => {
   it("returns an empty array if there are not any warnings", () => {
-    expect(formatFieldWarnings([], "field_name", "string", false)).toEqual([]);
-    expect(formatFieldWarnings(null, "field_name", "string", false)).toEqual(
-      [],
-    );
+    expect(
+      getWarningsForField({
+        errors: [],
+        fieldName: "$.field_name",
+        fieldType: "string",
+        definition: "/properties/field_name",
+      }),
+    ).toEqual([]);
+    expect(
+      getWarningsForField({
+        errors: null,
+        fieldName: "$.field_name",
+        definition: "/properties/field_name",
+        fieldType: "string",
+      }),
+    ).toEqual([]);
   });
   // eslint-disable-next-line
   it.skip("does something with arrays?", () => {});
   it("returns warnings that directly reference the field name", () => {
     expect(
-      formatFieldWarnings(
-        [
+      getWarningsForField({
+        errors: [
           {
-            field: "field_name",
+            field: "$.field_name",
             message: "something went wrong",
+            formatted: "something went wrong",
+            htmlField: "field_name",
             type: "generic",
             value: "not sure",
+            definition: "/properties/field_name",
           },
         ],
-        "field_name",
-        "string",
-        false,
-      ),
+        fieldName: "field_name",
+        definition: "/properties/field_name",
+        fieldType: "string",
+      }),
     ).toEqual(["something went wrong"]);
   });
   it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
     expect(
-      formatFieldWarnings(
-        [
+      getWarningsForField({
+        errors: [
           {
-            field: "parent",
+            field: "$.parent.field_name",
             message: "parent is required",
+            formatted: "parent is required",
+            htmlField: "parent--field_name",
             type: "required",
             value: "not sure",
+            definition: "/properties/parent/properties/field_name",
           },
         ],
-        "parent/field_name",
-        "string",
-        true,
-      ),
+        fieldName: "field_name",
+        definition: "/properties/parent/properties/field_name",
+        fieldType: "string",
+      }),
     ).toEqual(["parent is required"]);
   });
 });
@@ -588,7 +622,7 @@ describe("formatFieldWarnings", () => {
 describe("flatFormDataToArray", () => {
   it("returns array with single value if field exists directly", () => {
     const data = { foo: "bar" };
-    expect(flatFormDataToArray("foo", data)).toEqual(["bar"]);
+    expect(flatFormDataToArray("foo", data)).toEqual([{ foo: "bar" }]);
   });
 
   it("returns array of objects for indexed keys", () => {
@@ -631,5 +665,188 @@ describe("flatFormDataToArray", () => {
       undefined,
       { val: "ok" },
     ]);
+  });
+});
+
+describe("getFieldPathFromHtml", () => {
+  it("converts field name to JSON pointer path", () => {
+    expect(getFieldPathFromHtml("foo--bar")).toBe("/foo/bar");
+  });
+});
+
+describe("jsonPathToPointer", () => {
+  it("converts JSON path to pointer", () => {
+    expect(jsonPathToPointer("$.foo.bar")).toBe(
+      "/properties/foo/properties/bar",
+    );
+  });
+});
+
+describe("jsonPointerToPath", () => {
+  it("converts pointer to JSON path", () => {
+    expect(jsonPointerToPath("/properties/foo/properties/bar")).toBe(
+      "$.foo.bar",
+    );
+  });
+});
+
+describe("getNameFromDef", () => {
+  it("gets name from definition", () => {
+    expect(
+      getNameFromDef({ definition: "/properties/foo", schema: undefined }),
+    ).toBe("foo");
+  });
+  it("gets name from schema title", () => {
+    expect(
+      getNameFromDef({ definition: undefined, schema: { title: "My Field" } }),
+    ).toBe("My-Field");
+  });
+  it("returns 'untitled' if no info", () => {
+    expect(getNameFromDef({ definition: undefined, schema: {} })).toBe(
+      "untitled",
+    );
+  });
+});
+
+describe("wrapSection", () => {
+  it("returns a FieldsetWidget element", () => {
+    const tree = <div>Test</div>;
+    const el = wrapSection({ label: "Label", fieldName: "field", tree });
+    expect(el.props.label).toBe("Label");
+    expect(el.props.fieldName).toBe("field");
+    expect(el.props.children).toBe(tree);
+  });
+});
+
+describe("getFieldsForNav", () => {
+  it("returns nav items for schema", () => {
+    const schema = [
+      { name: "section1", type: "section", label: "Section 1", children: [] },
+      { name: "section2", type: "section", label: "Section 2", children: [] },
+    ] as UiSchema;
+    expect(getFieldsForNav(schema)).toEqual([
+      { href: "form-section-section1", text: "Section 1" },
+      { href: "form-section-section2", text: "Section 2" },
+    ]);
+  });
+  it("returns empty array for non-array input", () => {
+    expect(getFieldsForNav({} as never)).toEqual([]);
+  });
+});
+
+describe("getKeyParentPath", () => {
+  it("returns combined and cleaned path", () => {
+    expect(getKeyParentPath("foo", "parent/properties")).toBe("parent/foo");
+  });
+  it("returns key if no parent", () => {
+    expect(getKeyParentPath("foo")).toBe("foo");
+  });
+});
+
+describe("isFieldRequired", () => {
+  it("returns true if definition is in requiredFields", () => {
+    expect(isFieldRequired("/properties/foo", ["foo"])).toBe(true);
+  });
+  it("returns false if not required", () => {
+    expect(isFieldRequired("/properties/bar", ["foo"])).toBe(false);
+  });
+  it("handles array of definitions", () => {
+    expect(
+      isFieldRequired(["/properties/foo", "/properties/bar"], ["bar"]),
+    ).toBe(true);
+  });
+});
+
+describe("buildWarningTree", () => {
+  it("returns formatted warnings for matching fields", () => {
+    const formUiSchema = [
+      {
+        type: "field" as const,
+        definition: "/properties/name" as const,
+        schema: { title: "Name", type: "string" },
+      },
+      {
+        type: "field" as const,
+        definition: "/properties/email" as const,
+        schema: { title: "Email", type: "string" },
+      },
+    ];
+    const formValidationWarnings = [
+      {
+        field: "$.name",
+        message: "Name is required",
+        formatted: "Name is required",
+        htmlField: "name",
+        type: "required",
+        value: "",
+        definition: "/properties/name",
+      },
+      {
+        field: "$.email",
+        message: "Email is invalid",
+        formatted: "Email is invalid",
+        htmlField: "email",
+        type: "format",
+        value: "",
+        definition: "/properties/email",
+      },
+    ];
+    const formSchema = {
+      type: "object" as const,
+      properties: {
+        name: { type: "string" as const, title: "Name" },
+        email: { type: "string" as const, title: "Email" },
+      },
+    };
+    const result = buildWarningTree(
+      formUiSchema,
+      formValidationWarnings,
+      formSchema,
+    );
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          field: "$.name",
+          formatted: "Name is required",
+        }),
+        expect.objectContaining({
+          field: "$.email",
+          formatted: "Email is invalid",
+        }),
+      ]),
+    );
+  });
+
+  it("returns empty array if no matching warnings", () => {
+    const formUiSchema = [
+      {
+        type: "field" as const,
+        definition: "/properties/age" as const,
+        schema: { title: "Age", type: "number" },
+      },
+    ];
+    const formValidationWarnings = [
+      {
+        field: "$.name",
+        message: "Name is required",
+        formatted: "Name is required",
+        htmlField: "name",
+        type: "required",
+        value: "",
+        definition: "/properties/name",
+      },
+    ];
+    const formSchema = {
+      type: "object" as const,
+      properties: {
+        age: { type: "number" as const, title: "Age" },
+      },
+    };
+    const result = buildWarningTree(
+      formUiSchema,
+      formValidationWarnings,
+      formSchema,
+    );
+    expect(result).toEqual([]);
   });
 });

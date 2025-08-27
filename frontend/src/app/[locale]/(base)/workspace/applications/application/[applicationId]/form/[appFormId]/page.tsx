@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
+import { buildWarningTree } from "src/components/applyForm/utils";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +58,10 @@ async function FormPage({ params }: formPageProps) {
     formValidationWarnings,
   } = data;
 
+  const warnings = formValidationWarnings
+    ? buildWarningTree(formUiSchema, formValidationWarnings, formSchema)
+    : [];
+
   return (
     <>
       <GridContainer>
@@ -76,7 +81,7 @@ async function FormPage({ params }: formPageProps) {
         <h1>{formName}</h1>
         <ApplyForm
           applicationId={applicationId}
-          validationWarnings={formValidationWarnings}
+          validationWarnings={warnings}
           savedFormData={applicationResponse}
           formSchema={formSchema}
           uiSchema={formUiSchema}

@@ -48,6 +48,12 @@ export type FormValidationWarning = {
   value: string;
 };
 
+export type FormattedFormValidationWarning = FormValidationWarning & {
+  htmlField: string;
+  formatted: string;
+  definition: string | undefined;
+};
+
 export type WidgetTypes =
   | "Attachment"
   | "AttachmentArray"

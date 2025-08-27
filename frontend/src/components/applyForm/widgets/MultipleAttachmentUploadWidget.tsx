@@ -15,6 +15,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import {
   SchemaWithLabelOption,
   UploadedFile,
@@ -33,12 +34,18 @@ const MultipleAttachmentUploadWidget = ({
   onChange,
 }: UswdsWidgetProps) => {
   const attachments = useApplicationAttachments();
+  const { type } = schema;
+
+  const errors = FieldErrors({
+    type,
+    fieldName: id,
+    rawErrors,
+  });
 
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();
-  const hasError = rawErrors.length > 0;
-  const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
+  const describedBy = errors ? `error-for-${id}` : `${id}-hint`;
   const { description, title, options } = schema as SchemaWithLabelOption;
   const { uploadAttachment } = useAttachmentUpload();
   const { deleteState, deletePending, deleteAttachment } =
@@ -149,7 +156,10 @@ const MultipleAttachmentUploadWidget = ({
   };
 
   return (
-    <FormGroup key={`form-group__multi-file-upload--${id}`} error={hasError}>
+    <FormGroup
+      key={`form-group__multi-file-upload--${id}`}
+      error={errors !== "undefined"}
+    >
       <DynamicFieldLabel
         idFor={id}
         title={title}
@@ -158,10 +168,8 @@ const MultipleAttachmentUploadWidget = ({
         labelType={labelType}
       />
 
-      {hasError && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {String(rawErrors[0])}
-        </ErrorMessage>
+      {errors !== "undefined" && (
+        <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>
       )}
 
       <FileInput
