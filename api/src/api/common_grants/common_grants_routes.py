@@ -91,7 +91,16 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
         message="Success",
         data=opportunity,
     )
-    return response.model_dump(mode="json"), 200
+    
+    # Convert Pydantic response to JSON
+    json_data = response.model_dump(by_alias=True, mode="json")
+    
+    # Hydrate marshmallow schema
+    schema = CGOpportunityResponseSchema()
+    marshmallow_data = schema.load(json_data)
+    
+    # Dump marshmallow data to JSON-serializable format
+    return schema.dump(marshmallow_data), 200
 
 
 @common_grants_blueprint.post("/opportunities/search")
@@ -106,11 +115,11 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     },
 )
 @flask_db.with_db_session()
-def search_opportunities(db_session: db.Session, json: dict) -> tuple[dict, int]:
+def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict, int]:
     """Search for opportunities based on the provided filters."""
     # Parse request body
     try:
-        request_data = json if json else {}
+        request_data = json_data if json_data else {}
 
         # Create search request object
         search_request = OpportunitySearchRequest.model_validate(request_data)
@@ -125,4 +134,13 @@ def search_opportunities(db_session: db.Session, json: dict) -> tuple[dict, int]
         pagination=search_request.pagination,
         search=search_request.search,
     )
-    return response.model_dump(mode="json"), 200
+    
+    # Convert Pydantic response to JSON
+    json_data = response.model_dump(by_alias=True, mode="json")
+    
+    # Hydrate marshmallow schema
+    schema = CGOpportunitiesSearchResponseSchema()
+    marshmallow_data = schema.load(json_data)
+    
+    # Dump marshmallow data to JSON-serializable format
+    return schema.dump(marshmallow_data), 200
