@@ -7,7 +7,7 @@ import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTyp
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
@@ -20,9 +20,11 @@ const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
 export const OpportunitySaveUserControl = ({
   opportunityId,
   type = "button",
+  opportunitySaved,
 }: {
   opportunityId: string;
   type?: "button" | "icon";
+  opportunitySaved: boolean;
 }) => {
   const t = useTranslations("OpportunityListing");
   const modalRef = useRef<ModalRef>(null);
@@ -35,10 +37,15 @@ export const OpportunitySaveUserControl = ({
   );
 
   const { user } = useUser();
-  const [saved, setSaved] = useState(false);
+  const [locallySaved, setLocallySaved] = useState<boolean | null>(null);
   const [showMessage, setshowMessage] = useState(false);
   const [savedError, setSavedError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const displayAsSaved = useMemo(
+    () => (locallySaved === null ? opportunitySaved : locallySaved),
+    [locallySaved, opportunitySaved],
+  );
 
   const closeMessage = () => {
     setshowMessage(false);
@@ -53,7 +60,7 @@ export const OpportunitySaveUserControl = ({
         method,
         body: JSON.stringify({ opportunityId }),
       });
-      setSaved(data.type === "save");
+      setLocallySaved(data.type === "save");
     } catch (e) {
       setSavedError(true);
       console.error(e);
@@ -63,22 +70,22 @@ export const OpportunitySaveUserControl = ({
     }
   };
 
-  // fetch user's saved opportunities
-  useEffect(() => {
-    if (!user?.token) return;
-    setLoading(true);
-    fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
-      .then((data) => {
-        data && setSaved(true);
-      })
-      .catch((e) => {
-        console.error(e);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opportunityId, user?.token]);
+  // // fetch user's saved opportunities
+  // useEffect(() => {
+  //   if (!user?.token) return;
+  //   setLoading(true);
+  //   fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
+  //     .then((data) => {
+  //       data && setSaved(true);
+  //     })
+  //     .catch((e) => {
+  //       console.error(e);
+  //     })
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [opportunityId, user?.token]);
 
   const messageText = saved
     ? savedError
@@ -106,7 +113,7 @@ export const OpportunitySaveUserControl = ({
               userSavedOppCallback().catch(console.error);
             }}
             loading={loading}
-            saved={saved}
+            saved={locallySaved === null ? opportunitySaved : locallySaved}
           />
         ) : (
           <>
