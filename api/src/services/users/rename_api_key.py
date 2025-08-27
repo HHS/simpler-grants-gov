@@ -1,11 +1,9 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select
-
 from src.adapters import db
-from src.api.route_utils import raise_flask_error
 from src.db.models.user_models import UserApiKey
+from src.services.users.get_user_api_keys import get_user_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +21,7 @@ def rename_api_key(
     """Rename an existing API key for a user"""
     params = RenameApiKeyParams(json_data)
 
-    api_key = db_session.execute(
-        select(UserApiKey).filter(
-            UserApiKey.api_key_id == api_key_id,
-            UserApiKey.user_id == user_id,
-        )
-    ).scalar_one_or_none()
-
-    if api_key is None:
-        raise_flask_error(404, "API key not found")
+    api_key = get_user_api_key(db_session, user_id, api_key_id)
 
     api_key.key_name = params.key_name
 

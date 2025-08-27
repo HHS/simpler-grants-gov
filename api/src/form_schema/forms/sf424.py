@@ -133,7 +133,7 @@ FORM_JSON_SCHEMA = {
         },
         "date_received": {
             "type": "string",
-            "title": "Date Received Header",
+            "title": "Date Received",
             "description": "Completed by Grants.gov upon submission.",
             "format": "date",
         },
@@ -183,7 +183,7 @@ FORM_JSON_SCHEMA = {
         },
         "organization_name": {
             "type": "string",
-            "title": "Organization Name",
+            "title": "Legal Name",
             "description": "Enter the legal name of the applicant that will undertake the assistance activity.",
             "minLength": 1,
             "maxLength": 60,
@@ -426,11 +426,11 @@ FORM_JSON_SCHEMA = {
         "total_estimated_funding": {
             "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
             "title": "Total Estimated Funding",
-            "description": "Total dollar amount. This is a calculated field.",
+            "description": "Total dollar amount.",
         },
         "state_review": {
             "type": "string",
-            "title": "Application Subject to Review",
+            "title": "Is Application Subject to Review By State Under Executive Order 12372 Process?",
             "description": "One selection is required.",
             "enum": [
                 "a. This application was made available to the state under the Executive Order 12372 Process for review on",
@@ -440,14 +440,14 @@ FORM_JSON_SCHEMA = {
         },
         "state_review_available_date": {
             "type": "string",
-            "title": "state Review Date",
-            "description": "Enter the date in the format MM/DD/YYYY.",
+            "title": "State Review Date",
+            "description": "If 'a' is selected, enter the date the application was submitted to the State.",
             "format": "date",
         },
         "delinquent_federal_debt": {
             "type": "boolean",
             "title": "Applicant Delinquent on Federal Debt",
-            "description": "A selection is required.",
+            "description": "If 'Yes,' provide explanation in attachment.",
         },
         "debt_explanation": {
             "allOf": [{"$ref": "#/$defs/attachment_field"}],
@@ -457,7 +457,7 @@ FORM_JSON_SCHEMA = {
         "certification_agree": {
             "type": "boolean",
             "title": "Certification Agree",
-            "description": "Check to select.",
+            "description": "By signing this application, I certify (1) to the statements contained in the list of certifications* and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances** and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
         },
         "authorized_representative": {
             "allOf": [{"$ref": "#/$defs/person_name"}],
@@ -688,7 +688,7 @@ FORM_UI_SCHEMA = [
         "label": "Date Received & Applicant ID",
         "children": [
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/date_received",
             },
             {
@@ -730,11 +730,11 @@ FORM_UI_SCHEMA = [
                 "definition": "/properties/federal_award_identifier",
             },
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/state_receive_date",
             },
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/state_application_id",
             },
         ],
@@ -975,6 +975,7 @@ FORM_UI_SCHEMA = [
             {
                 "type": "field",
                 "definition": "/properties/delinquent_federal_debt",
+                "widget": "Radio",
             },
             {
                 "type": "field",
@@ -1026,8 +1027,8 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/authorized_representative_phone_number"},
             {"type": "field", "definition": "/properties/authorized_representative_fax"},
             {"type": "field", "definition": "/properties/authorized_representative_email"},
-            {"type": "field", "definition": "/properties/aor_signature"},
-            {"type": "field", "definition": "/properties/date_signed"},
+            {"type": "null", "definition": "/properties/aor_signature"},
+            {"type": "null", "definition": "/properties/date_signed"},
         ],
     },
 ]

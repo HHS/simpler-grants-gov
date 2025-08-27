@@ -1,24 +1,70 @@
+"use client";
+
 import {
   enumOptionsIsSelected,
-  enumOptionsValueForIndex,
+  EnumOptionsType,
   FormContextType,
   optionId,
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
 
-import { FocusEvent, useCallback, useMemo } from "react";
+import React, { FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
-/** The `RadioWidget` is a widget for rendering a radio group.
- *  It is typically used with a string property constrained with enum options.
- *
- * @param props - The `WidgetProps` for this component
+/**
+ * The portion of `options` we care about here, with safe typing.
+ * We shape our data since RJSF’s options are loosely typed.
  */
+type LocalOptions<S extends StrictRJSFSchema> = {
+  enumDisabled?: Array<string | number | boolean>;
+  emptyValue?: unknown;
+  enumOptions?: EnumOptionsType<S>[];
+  "widget-label"?: unknown;
+};
+
+/**
+ * normalizeForCompare
+ *
+ * Given an option’s value and the current field value, we force the current value type
+ * so it compares correctly with the option's representation.
+ */
+function normalizeForCompare(optionValue: unknown, current: unknown): unknown {
+  const optionIsBoolString = optionValue === "true" || optionValue === "false";
+  if (optionIsBoolString) {
+    if (current === true) return "true";
+    if (current === false) return "false";
+    if (current === "true" || current === "false") return current;
+    return undefined;
+  }
+  return current;
+}
+
+/**
+ * parseFromInputValue
+ *
+ * Convert an HTML input value (always a string) to either a boolean (for
+ * boolean radio groups) or the original enum value if we can find it.
+ */
+function coerceFromString<S extends StrictRJSFSchema>(
+  raw: string,
+  enumOptions: ReadonlyArray<EnumOptionsType<S>>,
+): unknown {
+  const usesBoolStrings = enumOptions.some(
+    (option) => option.value === "true" || option.value === "false",
+  );
+  if (usesBoolStrings) {
+    return raw === "true";
+  }
+  // For non-boolean radios, return the actual enum value (could be number/string)
+  const hit = enumOptions.find((option) => String(option.value) === raw);
+  return hit ? hit.value : raw;
+}
+
 function RadioWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -34,56 +80,64 @@ function RadioWidget<
   autofocus = false,
   rawErrors = [],
   updateOnInput = false,
-  // passing on* functions made optional
   onChange = () => ({}),
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const { title, enum: enumFromSchema, description } = schema;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { enumDisabled, emptyValue } = options;
+
+  // Extract and safely type the options we use
+  const { enumDisabled, enumOptions: uiEnumOptions } =
+    (options as LocalOptions<S>) ?? {};
+
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
-  const enumOptions = useMemo(
-    () =>
-      (enumFromSchema ?? []).map((value) => ({
-        label: String(value),
-        value,
-      })),
-    [enumFromSchema],
-  );
+  /**
+   * Determine our list of options:
+   * Prefer ui-provided enumOptions (already shaped), else fall back to schema.enum.
+   */
+  const enumOptions: EnumOptionsType<S>[] = useMemo(() => {
+    if (Array.isArray(uiEnumOptions) && uiEnumOptions.length) {
+      return uiEnumOptions;
+    }
+    const fromSchema =
+      Array.isArray(enumFromSchema) && enumFromSchema.length
+        ? enumFromSchema.map((enumValue) => ({
+            label: String(enumValue),
+            value: enumValue,
+          }))
+        : [];
+    return fromSchema as EnumOptionsType<S>[];
+  }, [uiEnumOptions, enumFromSchema]);
 
-  const handleBlur = useCallback(
-    ({ target }: FocusEvent<HTMLInputElement>) =>
-      onBlur(
-        id,
-        enumOptionsValueForIndex<S>(
-          target && target.value,
-          enumOptions,
-          emptyValue,
-        ),
-      ),
-    [onBlur, id, enumOptions, emptyValue],
-  );
-
-  const handleFocus = useCallback(
-    ({ target }: FocusEvent<HTMLInputElement>) =>
-      onFocus(
-        id,
-        enumOptionsValueForIndex<S>(
-          target && target.value,
-          enumOptions,
-          emptyValue,
-        ),
-      ),
-    [onFocus, id, enumOptions, emptyValue],
-  );
   const error = rawErrors.length ? true : undefined;
   const describedby = error
     ? `error-for-${id}`
     : title
       ? `label-for-${id}`
       : undefined;
+
+  const handleBlur = useCallback(
+    ({ target }: FocusEvent<HTMLInputElement>) => {
+      const next = coerceFromString<S>(
+        String(target?.value ?? ""),
+        enumOptions,
+      ) as T;
+      onBlur(id, next);
+    },
+    [onBlur, id, enumOptions],
+  );
+
+  const handleFocus = useCallback(
+    ({ target }: FocusEvent<HTMLInputElement>) => {
+      const next = coerceFromString<S>(
+        String(target?.value ?? ""),
+        enumOptions,
+      ) as T;
+      onFocus(id, next);
+    },
+    [onFocus, id, enumOptions],
+  );
 
   return (
     <FormGroup error={error} key={`form-group__radio--${id}`}>
@@ -99,40 +153,50 @@ function RadioWidget<
         <ErrorMessage>
           {typeof rawErrors[0] === "string"
             ? rawErrors[0]
-            : Object.values(rawErrors[0])
-                .map((value) => value)
-                .join(",")}
+            : Object.values(rawErrors[0] as Record<string, string>).join(",")}
         </ErrorMessage>
       )}
-      {Array.isArray(enumOptions) &&
-        enumOptions.map((option, i) => {
-          const checked = enumOptionsIsSelected<S>(option.value, value);
-          const itemDisabled =
-            Array.isArray(enumDisabled) &&
-            enumDisabled.indexOf(option.value as TextTypes) !== -1;
 
-          const handleChange = () => onChange(option.value);
+      {enumOptions.map((option, index) => {
+        // Normalize the current value so it can match "true"/"false" string options
+        const currentForCompare = normalizeForCompare(option.value, value);
 
-          return (
-            <Radio
-              label={option.label}
-              id={optionId(id, i)}
-              checked={updateOnInput ? checked : undefined}
-              defaultChecked={updateOnInput ? undefined : checked}
-              name={id}
-              required={required}
-              key={optionId(id, i)}
-              disabled={disabled || itemDisabled || readonly}
-              autoFocus={autofocus && i === 0}
-              defaultValue={updateOnInput ? undefined : String(option.value)}
-              value={updateOnInput ? String(option.value) : undefined}
-              onChange={updateOnInput ? handleChange : undefined}
-              onBlur={updateOnInput ? handleBlur : undefined}
-              onFocus={updateOnInput ? handleFocus : undefined}
-              aria-describedby={describedby}
-            />
-          );
-        })}
+        // Works for booleans, strings, and numbers
+        const checked = enumOptionsIsSelected<S>(
+          option.value,
+          currentForCompare,
+        );
+
+        const itemDisabled =
+          Array.isArray(enumDisabled) &&
+          enumDisabled.indexOf(option.value as TextTypes) !== -1;
+
+        const handleChange = () => {
+          const raw = String(option.value);
+          const toEmit = coerceFromString<S>(raw, enumOptions) as T;
+          onChange(toEmit);
+        };
+
+        return (
+          <Radio
+            label={option.label}
+            id={optionId(id, index)}
+            key={optionId(id, index)}
+            name={id}
+            required={required}
+            disabled={disabled || itemDisabled || readonly}
+            autoFocus={autofocus && index === 0}
+            aria-describedby={describedby}
+            checked={updateOnInput ? checked : undefined}
+            defaultChecked={updateOnInput ? undefined : checked}
+            value={updateOnInput ? String(option.value) : undefined}
+            defaultValue={updateOnInput ? undefined : String(option.value)}
+            onChange={updateOnInput ? handleChange : undefined}
+            onBlur={updateOnInput ? handleBlur : undefined}
+            onFocus={updateOnInput ? handleFocus : undefined}
+          />
+        );
+      })}
     </FormGroup>
   );
 }

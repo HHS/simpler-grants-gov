@@ -1,5 +1,5 @@
 import $Refparser from "@apidevtools/json-schema-ref-parser";
-import { RJSFSchema } from "@rjsf/utils";
+import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
@@ -32,6 +32,8 @@ import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
+
+type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -277,10 +279,14 @@ export const buildField = ({
   const disabled = fieldType === "null";
   let options = {};
 
-  if (type === "Select" || type === "MultiSelect") {
+  // Provide enumOptions for Select, MultiSelect, and Radio
+  if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
-    if (fieldSchema.type === "array") {
+    if (fieldSchema.type === "boolean") {
+      // Keep as strings to align with RadioWidget hidden input/value handling
+      enums = ["true", "false"];
+    } else if (fieldSchema.type === "array") {
       const item = Array.isArray(fieldSchema.items)
         ? fieldSchema.items[0]
         : fieldSchema.items;
@@ -295,18 +301,25 @@ export const buildField = ({
       enums = fieldSchema.enum.map(String);
     }
 
-    const enumOptions = enums.map((label) => ({
-      value: String(label),
-      label: getSimpleTranslationsSync({
-        nameSpace: "Form",
-        translateableString: String(label),
-      }),
-    }));
+    const enumOptions: EnumOptionsType<RJSFSchema>[] = enums.map(
+      (label: string) => {
+        const display =
+          fieldSchema.type === "boolean"
+            ? label === "true"
+              ? "Yes"
+              : "No"
+            : getSimpleTranslationsSync({
+                nameSpace: "Form",
+                translateableString: label,
+              });
+        return { value: label, label: display };
+      },
+    );
 
     options =
       type === "Select"
-        ? { enumOptions, emptyValue: "- Select -" }
-        : { enumOptions };
+        ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
+        : ({ enumOptions } as WidgetOptions);
   }
 
   const Widget = widgetComponents[type];
@@ -375,6 +388,7 @@ export const formatFieldWarnings = (
       },
       {} as Record<string, unknown>,
     );
+
     return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
@@ -431,6 +445,9 @@ export const wrapSection = ({
 };
 
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
   return (
     !!mightBeAnObject &&
     !isArray(mightBeAnObject) &&
@@ -549,8 +566,12 @@ export const isFieldRequired = (
   return requiredFields.indexOf(path) > -1;
 };
 
-// arrays from the html look like field_[row]_item
-const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
+// arrays from the html look like field_[row]_item or are simply the field name
+export const flatFormDataToArray = (
+  field: string,
+  data: Record<string, unknown>,
+) => {
+  if (field in data) return [data[field]];
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
