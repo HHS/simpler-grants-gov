@@ -2,11 +2,11 @@
 
 import logging
 
-from common_grants_sdk.schemas.fields import SingleDateEvent
-from common_grants_sdk.schemas.models.opp_base import OpportunityBase
-from common_grants_sdk.schemas.models.opp_funding import OppFunding
-from common_grants_sdk.schemas.models.opp_status import OppStatus, OppStatusOptions
-from common_grants_sdk.schemas.models.opp_timeline import OppTimeline
+from common_grants_sdk.schemas.pydantic.fields import SingleDateEvent
+from common_grants_sdk.schemas.pydantic.models import OpportunityBase
+from common_grants_sdk.schemas.pydantic.models import OppFunding
+from common_grants_sdk.schemas.pydantic.models import OppStatus, OppStatusOptions
+from common_grants_sdk.schemas.pydantic.models import OppTimeline
 
 from src.db.models.opportunity_models import Opportunity
 
@@ -88,7 +88,7 @@ def transform_opportunity_to_common_grants(opportunity: Opportunity) -> Opportun
     )
 
     # Create funding info
-    from common_grants_sdk.schemas.fields import Money
+    from common_grants_sdk.schemas.pydantic.fields import Money
 
     # Create Money objects step by step
     total_amount_money = None

@@ -73,7 +73,7 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_custom_pagination(self, service):
         """Test searching opportunities with custom pagination."""
-        from common_grants_sdk.schemas import PaginatedBodyParams
+        from common_grants_sdk.schemas.pydantic import PaginatedBodyParams
 
         pagination = PaginatedBodyParams(page=2, page_size=5)
         response = service.search_opportunities(pagination=pagination)
@@ -86,8 +86,8 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_sorting(self, service):
         """Test searching opportunities with custom sorting."""
-        from common_grants_sdk.schemas import OppSorting
-        from common_grants_sdk.schemas.sorting import OppSortBy, SortOrder
+        from common_grants_sdk.schemas.pydantic import OppSorting
+        from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, SortOrder
 
         sorting = OppSorting(sort_by=OppSortBy.TITLE, sort_order=SortOrder.ASC)
         response = service.search_opportunities(sorting=sorting)
@@ -99,10 +99,10 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_status_filter(self, service):
         """Test searching opportunities with status filter."""
-        from common_grants_sdk.schemas import OppFilters
-        from common_grants_sdk.schemas.filters.base import ArrayOperator
-        from common_grants_sdk.schemas.filters.string import StringArrayFilter
-        from common_grants_sdk.schemas.models.opp_status import OppStatusOptions
+        from common_grants_sdk.schemas.pydantic import OppFilters
+        from common_grants_sdk.schemas.pydantic.filters import ArrayOperator
+        from common_grants_sdk.schemas.pydantic.filters import StringArrayFilter
+        from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
 
         # Fix the status filter format to match the schema requirements
         status_filter = StringArrayFilter(operator=ArrayOperator.IN, value=[OppStatusOptions.OPEN])
@@ -123,11 +123,11 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_all_parameters(self, service):
         """Test searching opportunities with all parameters specified."""
-        from common_grants_sdk.schemas import OppFilters, OppSorting, PaginatedBodyParams
-        from common_grants_sdk.schemas.filters.base import ArrayOperator
-        from common_grants_sdk.schemas.filters.string import StringArrayFilter
-        from common_grants_sdk.schemas.models.opp_status import OppStatusOptions
-        from common_grants_sdk.schemas.sorting import OppSortBy, SortOrder
+        from common_grants_sdk.schemas.pydantic import OppFilters, OppSorting, PaginatedBodyParams
+        from common_grants_sdk.schemas.pydantic.filters import ArrayOperator
+        from common_grants_sdk.schemas.pydantic.filters import StringArrayFilter
+        from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
+        from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, SortOrder
 
         # Fix the status filter format to match the schema requirements
         status_filter = StringArrayFilter(operator=ArrayOperator.IN, value=[OppStatusOptions.OPEN])
