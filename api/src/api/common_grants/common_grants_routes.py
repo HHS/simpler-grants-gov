@@ -13,46 +13,55 @@ import src.adapters.db.flask_db as flask_db
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 from src.api.schemas.common_grants_schema import (
-    PaginatedQueryParamsSchema,
-    OpportunitiesListResponseSchema,
-    OpportunityResponseSchema,
-    OpportunitiesSearchResponseSchema,
-    OpportunitySearchRequestSchema,
+    CGPaginatedQueryParamsSchema,
+    CGOpportunitiesListResponseSchema,
+    CGOpportunityResponseSchema,
+    CGOpportunitiesSearchResponseSchema,
+    CGOpportunitySearchRequestSchema,
 )
 
 logger = logging.getLogger(__name__)
 
 
 @common_grants_blueprint.get("/opportunities")
-@common_grants_blueprint.input(PaginatedQueryParamsSchema, location="query")
-@common_grants_blueprint.output(OpportunitiesListResponseSchema)
+@common_grants_blueprint.input(CGPaginatedQueryParamsSchema, location="query")
+@common_grants_blueprint.output(CGOpportunitiesListResponseSchema)
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
 )
 @flask_db.with_db_session()
-def list_opportunities(db_session: db.Session, query: dict) -> tuple[dict, int]:
+def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, int]:
     """Get a paginated list of opportunities."""
     # Parse pagination parameters using PySDK classes
     try:
         pagination_params = PaginatedQueryParams.model_validate({
-            "page": query.get("page", 1),
-            "pageSize": query.get("page_size", 10),
+            "page": query_data.get("page", 1),
+            "pageSize": query_data.get("pageSize", 10),
         })
     except Exception as e:
         raise HTTPError(400, message=f"Invalid pagination parameters: {str(e)}") from e
 
     # Create service and get opportunities
     opportunity_service = CommonGrantsOpportunityService(db_session)
-    response = opportunity_service.list_opportunities(
+    pydantic_response = opportunity_service.list_opportunities(
         page=pagination_params.page, 
         page_size=pagination_params.page_size
     )
-    return response.model_dump(mode="json"), 200
-
+    
+    # Convert Pydantic response to JSON
+    json_data = pydantic_response.model_dump(by_alias=True, mode="json")
+    
+    # Hydrate marshmallow schema
+    schema = CGOpportunitiesListResponseSchema()
+    marshmallow_data = schema.load(json_data)
+    
+    # Dump marshmallow data to JSON-serializable format
+    return schema.dump(marshmallow_data), 200
+    
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
-@common_grants_blueprint.output(OpportunityResponseSchema)
+@common_grants_blueprint.output(CGOpportunityResponseSchema)
 @common_grants_blueprint.doc(
     summary="View opportunity",
     description="View additional details about an opportunity",
@@ -86,8 +95,8 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 
 
 @common_grants_blueprint.post("/opportunities/search")
-@common_grants_blueprint.input(OpportunitySearchRequestSchema)
-@common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
+@common_grants_blueprint.input(CGOpportunitySearchRequestSchema)
+@common_grants_blueprint.output(CGOpportunitiesSearchResponseSchema)
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
