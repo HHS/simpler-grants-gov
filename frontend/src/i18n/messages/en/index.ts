@@ -562,7 +562,7 @@ export const messages = {
         never: "Never",
       },
       deleteButton: "Delete Key",
-      deleteButtonTitle: "Delete functionality coming soon",
+      deleteButtonTitle: "Delete this API key",
       emptyState:
         "You don't have any API keys yet. Create your first API key to get started.",
     },
@@ -593,6 +593,20 @@ export const messages = {
       saving: "Saving...",
       saveChanges: "Save Changes",
       cancel: "Cancel",
+      deleteTitle: "Delete API Key",
+      deleteDescription:
+        'To confirm deletion, type "delete" in the field below:',
+      deleteConfirmationLabel:
+        'Type "delete" to confirm <required>(required)</required>',
+      deleteConfirmationPlaceholder: "delete",
+      deleteConfirmationError: 'Please type "delete" to confirm deletion',
+      deleteSuccessHeading: "API Key Deleted Successfully",
+      deleteSuccessMessage:
+        'Your API key "{keyName}" has been deleted successfully.',
+      deleteErrorMessage:
+        "There was an error deleting your API key. Please try again.",
+      deleteButtonText: "Delete Key",
+      deleting: "Deleting...",
     },
   },
   Header: {

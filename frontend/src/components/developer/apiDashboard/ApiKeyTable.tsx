@@ -4,18 +4,17 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import { toShortMonthDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
-import { Button } from "@trussworks/react-uswds";
 
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
-import { USWDSIcon } from "src/components/USWDSIcon";
 import ApiKeyModal from "./ApiKeyModal";
 
 interface ApiKeyTableProps {
   apiKeys: ApiKey[];
   onApiKeyRenamed: () => void;
+  onApiKeyDeleted: () => void;
 }
 
 const ApiKeyNameDisplay = ({
@@ -70,21 +69,20 @@ const EditActionDisplay = ({
   );
 };
 
-const DeleteActionDisplay = ({ apiKey: _apiKey }: { apiKey: ApiKey }) => {
-  const t = useTranslations("ApiDashboard.table");
-
+const DeleteActionDisplay = ({
+  apiKey,
+  onApiKeyDeleted,
+}: {
+  apiKey: ApiKey;
+  onApiKeyDeleted: () => void;
+}) => {
   return (
     <div className="display-flex flex-align-center">
-      <Button
-        type="button"
-        className="padding-1 hover:bg-base-lightest"
-        unstyled
-        disabled
-        title={t("deleteButtonTitle")}
-      >
-        <USWDSIcon className="usa-icon margin-right-05" name="delete" />
-        {t("deleteButton")}
-      </Button>
+      <ApiKeyModal
+        mode="delete"
+        apiKey={apiKey}
+        onApiKeyUpdated={onApiKeyDeleted}
+      />
     </div>
   );
 };
@@ -92,6 +90,7 @@ const DeleteActionDisplay = ({ apiKey: _apiKey }: { apiKey: ApiKey }) => {
 const toApiKeyTableRow = (
   apiKey: ApiKey,
   onApiKeyRenamed: () => void,
+  onApiKeyDeleted: () => void,
 ): TableCellData[] => {
   return [
     {
@@ -111,7 +110,12 @@ const toApiKeyTableRow = (
       stackOrder: 2,
     },
     {
-      cellData: <DeleteActionDisplay apiKey={apiKey} />,
+      cellData: (
+        <DeleteActionDisplay
+          apiKey={apiKey}
+          onApiKeyDeleted={onApiKeyDeleted}
+        />
+      ),
       stackOrder: 3,
     },
   ];
@@ -120,6 +124,7 @@ const toApiKeyTableRow = (
 export default function ApiKeyTable({
   apiKeys,
   onApiKeyRenamed,
+  onApiKeyDeleted,
 }: ApiKeyTableProps) {
   const t = useTranslations("ApiDashboard.table");
 
@@ -141,7 +146,7 @@ export default function ApiKeyTable({
   ];
 
   const tableRowData = apiKeys.map((apiKey) =>
-    toApiKeyTableRow(apiKey, onApiKeyRenamed),
+    toApiKeyTableRow(apiKey, onApiKeyRenamed, onApiKeyDeleted),
   );
 
   return (

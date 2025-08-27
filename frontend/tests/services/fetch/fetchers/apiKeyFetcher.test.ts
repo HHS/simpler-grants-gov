@@ -1,5 +1,6 @@
 import {
   handleCreateApiKey,
+  handleDeleteApiKey,
   handleListApiKeys,
   handleRenameApiKey,
 } from "src/services/fetch/fetchers/apiKeyFetcher";
@@ -253,6 +254,119 @@ describe("apiKeyFetcher", () => {
           "New Name",
         ),
       ).rejects.toThrow("Network error");
+    });
+  });
+
+  describe("handleDeleteApiKey", () => {
+    it("deletes an API key successfully", async () => {
+      const mockResponse = {
+        json: () =>
+          Promise.resolve({
+            status_code: 200,
+            message: "Success",
+          }),
+      };
+
+      mockFetchUserWithMethod.mockResolvedValue(mockResponse);
+
+      const result = await handleDeleteApiKey(
+        "test-token",
+        "test-user-id",
+        "test-key-id",
+      );
+
+      expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
+        subPath: "test-user-id/api-keys/test-key-id",
+        additionalHeaders: {
+          "X-SGG-Token": "test-token",
+        },
+      });
+
+      expect(result.status_code).toBe(200);
+      expect(result.message).toBe("Success");
+    });
+
+    it("handles API key deletion failure", async () => {
+      const mockResponse = {
+        json: () =>
+          Promise.resolve({
+            status_code: 404,
+            message: "API key not found",
+          }),
+      };
+
+      mockFetchUserWithMethod.mockResolvedValue(mockResponse);
+
+      const result = await handleDeleteApiKey(
+        "test-token",
+        "test-user-id",
+        "test-key-id",
+      );
+
+      expect(result.status_code).toBe(404);
+      expect(result.message).toBe("API key not found");
+    });
+
+    it("handles network errors", async () => {
+      mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
+
+      await expect(
+        handleDeleteApiKey("test-token", "test-user-id", "test-key-id"),
+      ).rejects.toThrow("Network error");
+    });
+
+    it("makes correct API call with all parameters", async () => {
+      const mockResponse = {
+        json: () =>
+          Promise.resolve({
+            status_code: 200,
+            message: "Success",
+          }),
+      };
+
+      mockFetchUserWithMethod.mockResolvedValue(mockResponse);
+
+      await handleDeleteApiKey("test-token", "test-user-id", "test-key-id");
+
+      expect(mockFetchUserWithMethod).toHaveBeenCalledTimes(1);
+      expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
+        subPath: "test-user-id/api-keys/test-key-id",
+        additionalHeaders: {
+          "X-SGG-Token": "test-token",
+        },
+      });
+    });
+
+    it("handles missing response data", async () => {
+      const mockResponse = {
+        json: () => Promise.resolve(null),
+      };
+
+      mockFetchUserWithMethod.mockResolvedValue(mockResponse);
+
+      const result = await handleDeleteApiKey(
+        "test-token",
+        "test-user-id",
+        "test-key-id",
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it("handles invalid response format", async () => {
+      const mockResponse = {
+        json: () => Promise.resolve({ invalid: "format" }),
+      };
+
+      mockFetchUserWithMethod.mockResolvedValue(mockResponse);
+
+      const result = await handleDeleteApiKey(
+        "test-token",
+        "test-user-id",
+        "test-key-id",
+      );
+
+      expect(result).toEqual({ invalid: "format" });
     });
   });
 });

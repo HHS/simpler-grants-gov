@@ -58,3 +58,18 @@ export const handleRenameApiKey = async (
   });
   return (await response.json()) as ApiKeyResponse;
 };
+
+// Delete an API key
+export const handleDeleteApiKey = async (
+  token: string,
+  userId: string,
+  apiKeyId: string,
+): Promise<APIResponse> => {
+  const response = await fetchUserWithMethod("DELETE")({
+    subPath: `${userId}/api-keys/${apiKeyId}`,
+    additionalHeaders: {
+      "X-SGG-Token": token,
+    },
+  });
+  return (await response.json()) as APIResponse;
+};

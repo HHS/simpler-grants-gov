@@ -60,6 +60,10 @@ export default function ApiDashboardPage() {
     fetchApiKeys().catch(console.error); // Refresh the list
   };
 
+  const handleApiKeyDeleted = () => {
+    fetchApiKeys().catch(console.error); // Refresh the list
+  };
+
   if (loading) {
     return <Spinner />;
   }
@@ -83,7 +87,11 @@ export default function ApiDashboardPage() {
         <ApiKeyModal mode="create" onApiKeyUpdated={handleApiKeyCreated} />
       </div>
 
-      <ApiKeyTable apiKeys={apiKeys} onApiKeyRenamed={handleApiKeyRenamed} />
+      <ApiKeyTable
+        apiKeys={apiKeys}
+        onApiKeyRenamed={handleApiKeyRenamed}
+        onApiKeyDeleted={handleApiKeyDeleted}
+      />
     </div>
   );
 }

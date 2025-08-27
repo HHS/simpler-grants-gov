@@ -5,7 +5,10 @@ import {
   UnauthorizedError,
 } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { handleRenameApiKey } from "src/services/fetch/fetchers/apiKeyFetcher";
+import {
+  handleDeleteApiKey,
+  handleRenameApiKey,
+} from "src/services/fetch/fetchers/apiKeyFetcher";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 export const renameApiKeyHandler = async (
@@ -54,6 +57,50 @@ export const renameApiKeyHandler = async (
     return Response.json(
       {
         message: `Error attempting to rename API key: ${message}`,
+      },
+      { status },
+    );
+  }
+};
+
+export const deleteApiKeyHandler = async (
+  request: Request,
+  { params }: { params: Promise<{ apiKeyId: string }> },
+) => {
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      throw new UnauthorizedError("No active session to delete API key");
+    }
+
+    const { apiKeyId } = await params;
+
+    if (!apiKeyId) {
+      throw new BadRequestError("No API key ID provided");
+    }
+
+    const response = await handleDeleteApiKey(
+      session.token,
+      session.user_id,
+      apiKeyId,
+    );
+
+    if (!response || response.status_code !== 200) {
+      throw new ApiRequestError(
+        `Error deleting API key: ${response.message}`,
+        "APIRequestError",
+        response.status_code,
+      );
+    }
+
+    return Response.json({
+      message: "API key deleted successfully",
+    });
+  } catch (e) {
+    const { status, message } = readError(e as Error, 500);
+    return Response.json(
+      {
+        message: `Error attempting to delete API key: ${message}`,
       },
       { status },
     );

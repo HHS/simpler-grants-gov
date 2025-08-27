@@ -30,3 +30,13 @@ export const renameApiKeyRequestConfig = (keyName: string) => ({
   },
   body: JSON.stringify({ key_name: keyName }),
 });
+
+export const deleteApiKeyEndpoint = (apiKeyId: string) =>
+  `/api/user/api-keys/${apiKeyId}`;
+
+export const deleteApiKeyRequestConfig = () => ({
+  method: "DELETE" as const,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});

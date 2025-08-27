@@ -1,6 +1,8 @@
 import {
   createApiKeyEndpoint,
   createApiKeyRequestConfig,
+  deleteApiKeyEndpoint,
+  deleteApiKeyRequestConfig,
   getApiKeysEndpoint,
   getApiKeysRequestConfig,
   renameApiKeyEndpoint,
@@ -132,6 +134,70 @@ describe("apiKeyClientHelpers", () => {
         },
         body: JSON.stringify({ key_name: newName }),
       });
+    });
+  });
+
+  describe("deleteApiKeyEndpoint", () => {
+    it("returns the correct endpoint for deleting API keys", () => {
+      const apiKeyId = "test-key-id";
+      const endpoint = deleteApiKeyEndpoint(apiKeyId);
+      expect(endpoint).toBe("/api/user/api-keys/test-key-id");
+    });
+
+    it("handles empty API key ID", () => {
+      const endpoint = deleteApiKeyEndpoint("");
+      expect(endpoint).toBe("/api/user/api-keys/");
+    });
+
+    it("handles special characters in API key ID", () => {
+      const apiKeyId = "test-key-id-123_abc";
+      const endpoint = deleteApiKeyEndpoint(apiKeyId);
+      expect(endpoint).toBe("/api/user/api-keys/test-key-id-123_abc");
+    });
+
+    it("handles UUID format API key IDs", () => {
+      const apiKeyId = "550e8400-e29b-41d4-a716-446655440000";
+      const endpoint = deleteApiKeyEndpoint(apiKeyId);
+      expect(endpoint).toBe(
+        "/api/user/api-keys/550e8400-e29b-41d4-a716-446655440000",
+      );
+    });
+  });
+
+  describe("deleteApiKeyRequestConfig", () => {
+    it("returns the correct request configuration for deleting API keys", () => {
+      const config = deleteApiKeyRequestConfig();
+
+      expect(config).toEqual({
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    });
+
+    it("returns consistent configuration on multiple calls", () => {
+      const config1 = deleteApiKeyRequestConfig();
+      const config2 = deleteApiKeyRequestConfig();
+
+      expect(config1).toEqual(config2);
+    });
+
+    it("returns object with correct method", () => {
+      const config = deleteApiKeyRequestConfig();
+      expect(config.method).toBe("DELETE");
+    });
+
+    it("returns object with correct headers", () => {
+      const config = deleteApiKeyRequestConfig();
+      expect(config.headers).toEqual({
+        "Content-Type": "application/json",
+      });
+    });
+
+    it("does not include body in delete request", () => {
+      const config = deleteApiKeyRequestConfig();
+      expect(config).not.toHaveProperty("body");
     });
   });
 });
