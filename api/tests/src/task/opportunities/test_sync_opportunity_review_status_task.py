@@ -1,6 +1,16 @@
+import pytest
+
+from src.db.models.foreign.opportunity import VOpportunitySummary
 from src.db.models.opportunity_models import ExcludedOpportunityReview
 from src.task.opportunities.sync_opportunity_review_status_task import SyncOpportunityReviewStatus
+from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import ForeignVopportunitySummaryFactory
+
+
+@pytest.fixture(autouse=True)
+def clear_data(db_session):
+    cascade_delete_from_db_table(db_session, ExcludedOpportunityReview)
+    cascade_delete_from_db_table(db_session, VOpportunitySummary)
 
 
 def test_sync_opportunity_review_status(db_session, test_api_schema, enable_factory_create):
@@ -32,3 +42,17 @@ def test_sync_opportunity_review_status(db_session, test_api_schema, enable_fact
         reviewable.opportunity_id,
         returned.opportunity_id,
     }
+
+
+def test_sync_opportunity_review_status_empty_result(
+    db_session, test_api_schema, enable_factory_create
+):
+    """Test behavior when no opportunities match the review status criteria."""
+    ForeignVopportunitySummaryFactory.create(omb_review_status_display="APPROVED")
+
+    task = SyncOpportunityReviewStatus(db_session, test_api_schema)
+    task.run()
+
+    result = db_session.query(ExcludedOpportunityReview).all()
+    assert len(result) == 0
+    assert task.metrics[task.Metrics.OPPORTUNITIES_IN_REVIEW] == 0
