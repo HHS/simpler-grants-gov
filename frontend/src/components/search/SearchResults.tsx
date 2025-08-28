@@ -1,3 +1,4 @@
+import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   QueryParamData,
   SearchAPIResponse,
@@ -14,19 +15,28 @@ const ResolvedSearchResults = async ({
   page,
   query,
   searchResultsPromise,
+  savedOpportunitiesPromise,
 }: {
   sortby: string | null;
   page: number;
   query?: string | null;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  savedOpportunitiesPromise: Promise<MinimalOpportunity[]>;
 }) => {
   let searchResults: SearchAPIResponse;
+  let savedOpportunities: MinimalOpportunity[] = [];
 
   try {
     searchResults = await searchResultsPromise;
   } catch (e) {
     const error = e as Error;
     return <SearchError error={error} />;
+  }
+
+  try {
+    savedOpportunities = await savedOpportunitiesPromise;
+  } catch (e) {
+    console.error("Unable to fetch saved opportunities for user", e);
   }
 
   // if there are no results because we've requested a page beyond the number of total pages
@@ -55,6 +65,7 @@ const ResolvedSearchResults = async ({
       totalResults={totalResults}
       totalPages={totalPages}
       searchResults={searchResults}
+      savedOpportunities={savedOpportunities}
     />
   );
 };
@@ -62,9 +73,11 @@ const ResolvedSearchResults = async ({
 export default function SearchResults({
   searchParams,
   searchResultsPromise,
+  savedOpportunitiesPromise,
 }: {
   searchParams: QueryParamData;
   searchResultsPromise: Promise<SearchAPIResponse>;
+  savedOpportunitiesPromise: Promise<MinimalOpportunity[]>;
 }) {
   const { page, sortby, query } = searchParams;
   const suspenseKey = Object.entries(searchParams).join(",");
@@ -76,6 +89,7 @@ export default function SearchResults({
         page={page}
         query={query}
         searchResultsPromise={searchResultsPromise}
+        savedOpportunitiesPromise={savedOpportunitiesPromise}
       />
     </Suspense>
   );
