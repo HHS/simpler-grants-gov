@@ -5,6 +5,7 @@ import {
   handleRenameApiKey,
 } from "src/services/fetch/fetchers/apiKeyFetcher";
 import { ApiKey } from "src/types/apiKeyTypes";
+import { baseApiKey, createMockApiKey } from "src/utils/testing/fixtures";
 
 const mockFetchUserWithMethod = jest.fn();
 
@@ -12,25 +13,17 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchUserWithMethod: (_method: string) => mockFetchUserWithMethod,
 }));
 
-const mockApiKey: ApiKey = {
-  api_key_id: "test-key-id",
-  key_name: "Test API Key",
-  key_id: "abc123",
-  created_at: "2023-01-01T00:00:00Z",
-  last_used: null,
-  is_active: true,
-};
+const mockApiKey: ApiKey = baseApiKey;
 
 const mockApiKeys: ApiKey[] = [
   mockApiKey,
-  {
+  createMockApiKey({
     api_key_id: "test-key-id-2",
     key_name: "Test API Key 2",
     key_id: "def456",
     created_at: "2023-01-02T00:00:00Z",
     last_used: "2023-01-03T00:00:00Z",
-    is_active: true,
-  },
+  }),
 ];
 
 describe("apiKeyFetcher", () => {

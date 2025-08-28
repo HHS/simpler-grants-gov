@@ -4,6 +4,7 @@ import { axe } from "jest-axe";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
+import { baseApiKey } from "src/utils/testing/fixtures";
 
 import { NextIntlClientProvider } from "next-intl";
 
@@ -37,12 +38,8 @@ const mockUser = {
 };
 
 const mockApiKey: ApiKey = {
+  ...baseApiKey,
   api_key_id: "test-api-key-id",
-  key_name: "Test API Key",
-  key_id: "abc123",
-  created_at: "2023-01-01T00:00:00Z",
-  last_used: null,
-  is_active: true,
 };
 
 const messages = {

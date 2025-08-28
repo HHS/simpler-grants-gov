@@ -4,6 +4,11 @@ import { axe } from "jest-axe";
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
+import {
+  createMockApiKey,
+  longNameApiKey,
+  specialCharApiKey,
+} from "src/utils/testing/fixtures";
 
 import { NextIntlClientProvider } from "next-intl";
 
@@ -36,22 +41,18 @@ const mockUser = {
 };
 
 const mockApiKeys: ApiKey[] = [
-  {
+  createMockApiKey({
     api_key_id: "test-api-key-1",
     key_name: "Production API Key",
-    key_id: "abc123",
-    created_at: "2023-01-01T00:00:00Z",
     last_used: "2023-01-02T00:00:00Z",
-    is_active: true,
-  },
-  {
+  }),
+  createMockApiKey({
     api_key_id: "test-api-key-2",
     key_name: "Development API Key",
     key_id: "def456",
     created_at: "2023-01-03T00:00:00Z",
     last_used: null,
-    is_active: true,
-  },
+  }),
 ];
 
 const messages = {
@@ -529,32 +530,15 @@ describe("ApiKeyTable", () => {
 
   describe("Edge Cases", () => {
     it("handles API keys with long names", () => {
-      const longNameApiKey: ApiKey = {
-        ...mockApiKeys[0],
-        key_name:
-          "Very Long API Key Name That Should Still Display Properly Even Though It Is Quite Long",
-      };
-
       renderTable([longNameApiKey]);
 
-      expect(
-        screen.getByText(
-          "Very Long API Key Name That Should Still Display Properly Even Though It Is Quite Long",
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText(longNameApiKey.key_name)).toBeInTheDocument();
     });
 
     it("handles API keys with special characters in names", () => {
-      const specialCharApiKey: ApiKey = {
-        ...mockApiKeys[0],
-        key_name: "API Key with Special Characters! @#$%^&*()",
-      };
-
       renderTable([specialCharApiKey]);
 
-      expect(
-        screen.getByText("API Key with Special Characters! @#$%^&*()"),
-      ).toBeInTheDocument();
+      expect(screen.getByText(specialCharApiKey.key_name)).toBeInTheDocument();
     });
 
     it("handles API keys with null last_used date", () => {

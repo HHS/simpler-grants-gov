@@ -1,18 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { ApiKey } from "src/types/apiKeyTypes";
+import { createMockApiKey } from "src/utils/testing/fixtures";
 
 // Create a simple mock component for testing
 const MockApiDashboardPage = () => {
   const mockApiKeys: ApiKey[] = [
-    {
+    createMockApiKey({
       api_key_id: "key-1",
       key_name: "Test Key 1",
-      key_id: "abc123",
-      created_at: "2023-01-01T00:00:00Z",
       last_used: "2023-01-02T00:00:00Z",
-      is_active: true,
-    },
+    }),
   ];
 
   return (

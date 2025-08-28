@@ -5,6 +5,7 @@
 import { createApiKeyHandler } from "src/app/api/user/api-keys/handler";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { UserSession } from "src/types/authTypes";
+import { baseApiKey } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
 
@@ -41,14 +42,7 @@ interface JsonData {
   data?: ApiKey;
 }
 
-const mockApiKeyResponse: ApiKey = {
-  api_key_id: "test-key-id",
-  key_name: "Test API Key",
-  key_id: "abc123",
-  created_at: "2023-01-01T00:00:00Z",
-  last_used: null,
-  is_active: true,
-};
+const mockApiKeyResponse: ApiKey = baseApiKey;
 
 describe("POST /api/user/api-keys", () => {
   beforeEach(() => {
