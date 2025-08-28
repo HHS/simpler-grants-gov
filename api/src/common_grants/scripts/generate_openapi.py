@@ -16,8 +16,8 @@ from apiflask.schemas import Schema
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 # Import the routes to register them with the blueprint
 from src.api.common_grants import common_grants_routes
-# Import the marshmallow schemas from the PySDK
-import common_grants_sdk.schemas.marshmallow as cgmm
+# Import marshmallow schemas from PySDK
+from common_grants_sdk.schemas.marshmallow import Error, HTTPValidationError
 
 
 def create_apiflask_app() -> APIFlask:
@@ -35,6 +35,10 @@ def create_apiflask_app() -> APIFlask:
     
     # Set description after creation
     app.description = "An implementation of the CommonGrants API specification"
+
+    # Configure APIFlask to use our custom error schemas that match CommonGrants Protocol
+    app.config["HTTP_ERROR_SCHEMA"] = Error
+    app.config["VALIDATION_ERROR_SCHEMA"] = HTTPValidationError
 
     # Register only the CommonGrants blueprint
     app.register_blueprint(common_grants_blueprint)
