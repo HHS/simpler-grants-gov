@@ -510,7 +510,8 @@ export const shapeFormData = <T extends object>(
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
-const removePropertyPaths = (path: string): string => {
+const removePropertyPaths = (path: unknown): string => {
+  if (typeof path !== "string") return "";
   return path.replace(/properties\//g, "").replace(/^\//, "");
 };
 
@@ -559,11 +560,16 @@ export const getRequiredProperties = (
 };
 
 export const isFieldRequired = (
-  definition: string,
+  definition: string | string[] | undefined,
   requiredFields: string[],
 ): boolean => {
-  const path = removePropertyPaths(definition);
-  return requiredFields.indexOf(path) > -1;
+  if (!definition) return false;
+
+  const defs = Array.isArray(definition) ? definition : [definition];
+
+  return defs
+    .map((def) => removePropertyPaths(def))
+    .some((clean) => requiredFields.includes(clean));
 };
 
 // arrays from the html look like field_[row]_item or are simply the field name
