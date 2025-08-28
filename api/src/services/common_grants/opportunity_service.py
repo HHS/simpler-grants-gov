@@ -3,7 +3,7 @@
 import logging
 from uuid import UUID
 
-from common_grants_sdk.schemas import (
+from common_grants_sdk.schemas.pydantic import (
     FilterInfo,
     OppFilters,
     OpportunitiesListResponse,
