@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { noop } from "lodash";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
+
+import { createRef } from "react";
 
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
@@ -28,6 +31,17 @@ jest.mock("next-intl", () => ({
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => ({
     checkFeatureFlag: () => true,
+  }),
+}));
+
+jest.mock("src/services/auth/LoginModalProvider", () => ({
+  useLoginModal: () => ({
+    loginModalRef: createRef(),
+    setButtonText: noop,
+    setCloseText: noop,
+    setDescriptionText: noop,
+    setHelpText: noop,
+    setTitleText: noop,
   }),
 }));
 

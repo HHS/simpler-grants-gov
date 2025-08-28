@@ -2,14 +2,14 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useLoginModal } from "src/services/auth/LoginModalProvider";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
-import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
+import { useMemo, useState } from "react";
+import { ModalToggleButton } from "@trussworks/react-uswds";
 
-import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
 import SaveIcon from "src/components/SaveIcon";
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -26,7 +26,15 @@ export const OpportunitySaveUserControl = ({
   opportunitySaved: boolean;
 }) => {
   const t = useTranslations("OpportunityListing");
-  const modalRef = useRef<ModalRef>(null);
+
+  const {
+    loginModalRef,
+    setButtonText,
+    setCloseText,
+    setDescriptionText,
+    setHelpText,
+    setTitleText,
+  } = useLoginModal();
 
   const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
     "Error updating saved opportunity",
@@ -97,21 +105,19 @@ export const OpportunitySaveUserControl = ({
           <>
             <ModalToggleButton
               id={`save-search-result-${opportunityId}`}
-              modalRef={modalRef}
+              modalRef={loginModalRef}
               opener
               className="usa-button--unstyled"
+              onClick={() => {
+                setHelpText(t("saveloginModal.help"));
+                setButtonText(t("saveloginModal.button"));
+                setCloseText(t("saveloginModal.close"));
+                setDescriptionText(t("saveloginModal.description"));
+                setTitleText(t("saveloginModal.title"));
+              }}
             >
               <SaveIcon saved={false} />
             </ModalToggleButton>
-            <LoginModal
-              modalRef={modalRef as React.RefObject<ModalRef>}
-              helpText={t("saveloginModal.help")}
-              buttonText={t("saveloginModal.button")}
-              closeText={t("saveloginModal.close")}
-              descriptionText={t("saveloginModal.description")}
-              titleText={t("saveloginModal.title")}
-              modalId={`opp-save-login-modal-${opportunityId}`}
-            />
           </>
         )}
       </>
@@ -137,22 +143,20 @@ export const OpportunitySaveUserControl = ({
       ) : (
         <>
           <ModalToggleButton
-            modalRef={modalRef}
+            modalRef={loginModalRef}
             opener
             className="usa-button usa-button--outline"
+            onClick={() => {
+              setHelpText(t("saveloginModal.help"));
+              setButtonText(t("saveloginModal.button"));
+              setCloseText(t("saveloginModal.close"));
+              setDescriptionText(t("saveloginModal.description"));
+              setTitleText(t("saveloginModal.title"));
+            }}
           >
             <USWDSIcon name="star_outline" className="button-icon-large" />
             {t("saveButton.save")}
           </ModalToggleButton>
-          <LoginModal
-            modalRef={modalRef as React.RefObject<ModalRef>}
-            helpText={t("saveloginModal.help")}
-            buttonText={t("saveloginModal.button")}
-            closeText={t("saveloginModal.close")}
-            descriptionText={t("saveloginModal.description")}
-            titleText={t("saveloginModal.title")}
-            modalId={`opp-save-login-modal-${opportunityId}`}
-          />
         </>
       )}
     </>
