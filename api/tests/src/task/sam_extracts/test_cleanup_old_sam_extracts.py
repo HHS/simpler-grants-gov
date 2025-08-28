@@ -1,6 +1,5 @@
 """Tests for the SAM.gov extracts cleanup task."""
 
-import uuid
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
@@ -287,9 +286,8 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
         """Test that the cutoff date is calculated correctly as 45 days ago"""
         with patch("src.task.sam_extracts.cleanup_old_sam_extracts.date") as mock_date:
             mock_date.today.return_value = date(2025, 1, 15)
-            expected_cutoff = date(2024, 12, 1)
 
-            old_files = task._get_old_files_to_cleanup()
+            task._get_old_files_to_cleanup()
 
             # The query should use a cutoff date of 45 days ago
             # This test verifies the logic is correct, even though we can't directly

@@ -6,7 +6,6 @@ Create Date: 2025-08-23 10:00:00.000000
 
 """
 
-import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -34,7 +33,7 @@ def downgrade():
     # Remove the DELETED status from the lookup table
     op.execute(
         """
-        DELETE FROM api.lk_sam_gov_processing_status 
+        DELETE FROM api.lk_sam_gov_processing_status
         WHERE sam_gov_processing_status_id = 4 AND description = 'deleted'
         """
     )
