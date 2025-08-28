@@ -26,6 +26,7 @@ from src.api.application_alpha.application_schemas import (
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
+from src.db.models.competition_models import Application
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
@@ -42,9 +43,11 @@ from src.services.applications.update_application_form import update_application
 logger = logging.getLogger(__name__)
 
 
-def _add_application_metadata_to_logs(application) -> None:
+def _add_application_metadata_to_logs(application: Application) -> None:
     """Add application metadata to the current request logs for New Relic dashboards."""
-    extra_data = {
+    from typing import Dict, Union
+
+    extra_data: Dict[str, Union[str, int, float, bool, UUID, None]] = {
         "organization_id": application.organization_id,
         "competition_id": application.competition_id,
         "opportunity_id": (
@@ -53,8 +56,10 @@ def _add_application_metadata_to_logs(application) -> None:
             else None
         ),
         "agency_code": (
-            application.competition.opportunity.agency_code
-            if application.competition and application.competition.opportunity
+            str(application.competition.opportunity.agency_code)
+            if application.competition
+            and application.competition.opportunity
+            and application.competition.opportunity.agency_code
             else None
         ),
     }
