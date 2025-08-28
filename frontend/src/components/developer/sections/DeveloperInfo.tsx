@@ -13,7 +13,7 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import HomePageSection from "src/components/homepage/homePageSection";
+import DeveloperPageSection from "src/components/developer/DeveloperPageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
 import { LoginModal } from "src/components/LoginModal";
 
@@ -26,7 +26,7 @@ const DeveloperInfoContent = () => {
   const modalRef = useRef<ModalRef>(null);
 
   return (
-    <HomePageSection className="bg-base-white" title={t("infoTitle")}>
+    <DeveloperPageSection className="bg-base-white" title={t("infoTitle")}>
       <h3 data-testid="developer-info">{t("canDoHeader")}</h3>
       <h4>{t("canDoSubHeader")}</h4>
       <p>{t("canDoParagraph")}</p>
@@ -80,7 +80,7 @@ const DeveloperInfoContent = () => {
           </Grid>
         ))}
       </Grid>
-    </HomePageSection>
+    </DeveloperPageSection>
   );
 };
 
