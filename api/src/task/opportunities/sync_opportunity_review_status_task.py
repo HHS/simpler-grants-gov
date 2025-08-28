@@ -1,3 +1,4 @@
+import logging
 from enum import StrEnum
 
 from sqlalchemy import select, text
@@ -10,6 +11,8 @@ from src.task import task_blueprint
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 
+logger = logging.getLogger(__name__)
+
 
 @task_blueprint.cli.command(
     "sync-opportunity-review-status",
@@ -21,6 +24,8 @@ def sync_opportunity_review_status(db_session: db.Session) -> None:
     SyncOpportunityReviewStatus(db_session).run()
 
 
+# Business-defined list of review statuses that should be included.
+# Values come from omb_review_status_display in VOpportunitySummary
 REVIEW_STATUS = ["REVIEWABLE", "RETURNED"]
 
 
@@ -37,6 +42,7 @@ class SyncOpportunityReviewStatus(Task):
             self.process_opportunities()
 
     def process_opportunities(self) -> None:
+        logger.info(f"Truncating table {self.schema}.excluded_opportunity_review")
         # Truncate table
         self.db_session.execute(text(f"TRUNCATE TABLE {self.schema}.excluded_opportunity_review"))
         # Query foreign data
@@ -50,8 +56,13 @@ class SyncOpportunityReviewStatus(Task):
             .all()
         )
 
-        # Insert filtered fields into excluded_opportunity_review
+        # Insert filtered records into excluded_opportunity_review
         for row in result:
+            logger.info(
+                "Adding opportunity in review to database",
+                extra={"legacy_opportunity_id": row.opportunity_id},
+            )
+
             record = ExcludedOpportunityReview(
                 legacy_opportunity_id=row.opportunity_id,
                 omb_review_status_display=row.omb_review_status_display,
