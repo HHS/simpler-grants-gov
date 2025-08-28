@@ -1,11 +1,15 @@
+import unittest
+
 import pytest
 
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPEnvelopeData,
     SOAPPayload,
+    build_xml_from_dict,
     get_envelope_dict,
     get_soap_envelope_from_payload,
 )
+from tests.util.minifiers import minify_xml
 
 MOCK_SOAP_OPERATION_NAME = "GetOpportunityListResponse"
 MOCK_SOAP_ENVELOPE = f"""<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -159,3 +163,63 @@ Content-ID: <root.message@cxf.apache.org>"""
 
     # test no envelope
     assert get_soap_envelope_from_payload("noenvelope") == SOAPEnvelopeData()
+
+
+class TestBuildXMLFromDict(unittest.TestCase):
+    def setUp(self):
+        self.operation_name = "Operation1"
+        self.namespaces = {
+            "soap": "http://schemas.xmlsoap.org/soap/envelope/",
+            "ns0": "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
+            "ns1": "http://nsuri.gov/app",
+            None: "http://default_ns_uri.gov/",
+        }
+        self.namespace_keymap = {
+            self.operation_name: "ns1",
+            "DataWithNS": "ns0",
+        }
+
+    def test_basic_xml_to_dict_with_ns(self):
+        xml_dict = {self.operation_name: {"DataWithNS": "a"}}
+        result = build_xml_from_dict(
+            self.operation_name, xml_dict, self.namespace_keymap, self.namespaces
+        )
+        assert (
+            result
+            == minify_xml(
+                """
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<ns1:Operation1 xmlns:ns0="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:ns1="http://nsuri.gov/app" xmlns="http://default_ns_uri.gov/">
+			<ns1:Operation1>
+				<ns0:DataWithNS>a</ns0:DataWithNS>
+			</ns1:Operation1>
+		</ns1:Operation1>
+	</soap:Body>
+</soap:Envelope>
+        """
+            ).encode()
+        )
+
+    def test_lists_xml_to_dict_with_ns(self):
+        xml_dict = {self.operation_name: {"DataWithNS": ["10", "10"]}}
+        result = build_xml_from_dict(
+            self.operation_name, xml_dict, self.namespace_keymap, self.namespaces
+        )
+        assert (
+            result
+            == minify_xml(
+                """
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<ns1:Operation1 xmlns:ns0="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:ns1="http://nsuri.gov/app" xmlns="http://default_ns_uri.gov/">
+			<ns1:Operation1>
+				<ns0:DataWithNS>10</ns0:DataWithNS>
+				<ns0:DataWithNS>10</ns0:DataWithNS>
+			</ns1:Operation1>
+		</ns1:Operation1>
+	</soap:Body>
+</soap:Envelope>
+        """
+            ).encode()
+        )

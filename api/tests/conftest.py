@@ -97,6 +97,9 @@ def set_env_var_defaults(monkeypatch_session):
     # Some loggers are noisy/buggy in our tests, so adjust them
     monkeypatch_session.setenv("LOG_LEVEL_OVERRIDES", "newrelic.core.agent=ERROR")
 
+    # We will set this to false so we skip logs during unit tests and keep enabled during dev.
+    monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
+
 
 ####################
 # Test DB session
