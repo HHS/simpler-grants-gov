@@ -6,7 +6,7 @@ import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
-import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection/SearchFilterSection";
+import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection";
 
 const AllOptionCheckboxMock = jest.fn();
 

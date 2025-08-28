@@ -14,7 +14,7 @@ import {
   refreshPageWithCurrentURL,
   selectSortBy,
   toggleCheckboxes,
-  toggleMobileSearchFilters,
+  toggleFilterDrawer,
   waitForFilterOptions,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
@@ -43,21 +43,26 @@ test.describe("Search page tests", () => {
   test("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
+    const isMobile = !!project.name.match(/[Mm]obile/);
     const agencyCheckboxes: { [key: string]: string } = {};
     await page.goto("/search");
+    //     if (project.name.match(/[Mm]obile/)) {
+    //   await toggleFilterDrawer(page);
+    // }
 
-    if (project.name.match(/[Mm]obile/)) {
-      await toggleMobileSearchFilters(page);
-    }
-    await Promise.all([
-      waitForSearchResultsInitialLoad(page),
-      waitForFilterOptions(page, "agency"),
-    ]);
-
-    await selectSortBy(page, "awardCeilingDesc");
-    await expectSortBy(page, "awardCeilingDesc");
-
+    await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page);
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+    await selectSortBy(page, "awardCeilingDesc", isMobile);
+    await expectSortBy(page, "awardCeilingDesc", isMobile);
+
+    if (!isMobile) {
+      await toggleFilterDrawer(page);
+      // await toggleFilterDrawer(page);
+    }
+    await waitForFilterOptions(page, "agency");
 
     await toggleCheckboxes(
       page,
@@ -100,15 +105,12 @@ test.describe("Search page tests", () => {
 
     await refreshPageWithCurrentURL(page);
 
-    if (project.name.match(/[Mm]obile/)) {
-      await toggleMobileSearchFilters(page);
-    }
-
     // Expect search inputs are retained in the new tab
-    await expectSortBy(page, "awardCeilingDesc");
+    await expectSortBy(page, "awardCeilingDesc", isMobile);
     const searchInput = getSearchInput(page);
     await expect(searchInput).toHaveValue(searchTerm);
 
+    await toggleFilterDrawer(page);
     for (const [checkboxID] of Object.entries(statusCheckboxes)) {
       await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
     }
@@ -127,9 +129,7 @@ test.describe("Search page tests", () => {
     }
   });
 
-  test("resets page back to 1 when choosing a filter", async ({ page }, {
-    project,
-  }) => {
+  test("resets page back to 1 when choosing a filter", async ({ page }) => {
     await page.goto("/search?status=none");
     await clickPaginationPageNumber(page, 2);
 
@@ -144,9 +144,7 @@ test.describe("Search page tests", () => {
       "status-closed": "closed",
     };
 
-    if (project.name.match(/[Mm]obile/)) {
-      await toggleMobileSearchFilters(page);
-    }
+    await toggleFilterDrawer(page);
 
     await clickAccordionWithTitle(page, "Opportunity status");
     await toggleCheckboxes(page, statusCheckboxes, "status");
@@ -170,24 +168,33 @@ test.describe("Search page tests", () => {
   test("last result becomes first result when flipping sort order", async ({
     page,
   }, { project }) => {
+    const isMobile = !!project.name.match(/[Mm]obile/);
     await page.goto("/search");
 
-    if (project.name.match(/[Mm]obile/)) {
-      await toggleMobileSearchFilters(page);
+    await waitForSearchResultsInitialLoad(page);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
     }
+    await selectSortBy(page, "opportunityTitleDesc", isMobile);
 
-    await Promise.all([
-      waitForSearchResultsInitialLoad(page),
-      waitForFilterOptions(page, "agency"),
-    ]);
-
-    await selectSortBy(page, "opportunityTitleDesc");
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
 
     await clickLastPaginationPage(page);
 
     const lastSearchResultTitle = await getLastSearchResultTitle(page);
 
-    await selectSortBy(page, "opportunityTitleAsc");
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+
+    await selectSortBy(page, "opportunityTitleAsc", isMobile);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
 
     const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
@@ -196,7 +203,7 @@ test.describe("Search page tests", () => {
 
   test("number of results is the same with none or all opportunity status checked", async ({
     page,
-  }, { project }) => {
+  }) => {
     await page.goto("/search?status=none");
     const initialSearchResultsCount =
       await getNumberOfOpportunitySearchResults(page);
@@ -209,10 +216,7 @@ test.describe("Search page tests", () => {
       "status-archived": "archived",
     };
 
-    if (project.name.match(/[Mm]obile/)) {
-      await toggleMobileSearchFilters(page);
-    }
-
+    await toggleFilterDrawer(page);
     await clickAccordionWithTitle(page, "Opportunity status");
     await toggleCheckboxes(page, statusCheckboxes, "status");
 
