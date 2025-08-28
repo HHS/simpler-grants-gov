@@ -24,7 +24,7 @@ locals {
     API_JWT_AUDIENCE                 = "simpler-grants-api-${var.environment}"
     API_JWT_TOKEN_EXPIRATION_MINUTES = 15
 
-    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
+    TEST_AGENCY_PREFIXES = "GDIT,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
 
     # grants.gov services/applications URI.
     # Both staging and dev environments both point to trainingws subdomain.
