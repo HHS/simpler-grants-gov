@@ -1,5 +1,6 @@
 import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import { envFeatureFlags } from "src/constants/environments";
+import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 import UserProvider from "src/services/auth/UserProvider";
 import { assignBaseFlags } from "src/services/featureFlags/featureFlagHelpers";
 

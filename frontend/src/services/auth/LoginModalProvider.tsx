@@ -15,6 +15,11 @@ import { LoginModal } from "src/components/LoginModal";
 
 type LoginModalContextValue = {
   loginModalRef: RefObject<ModalRef | null>;
+  setHelpText: (text: string) => void;
+  setTitleText: (text: string) => void;
+  setDescriptionText: (text: string) => void;
+  setButtonText: (text: string) => void;
+  setCloseText: (text: string) => void;
 };
 
 const LoginModalContext = createContext<LoginModalContextValue | null>(null);
