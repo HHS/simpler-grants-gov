@@ -38,10 +38,9 @@ export const OpportunitySaveUserControl = ({
   const [savedError, setSavedError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const displayAsSaved = useMemo(
-    () => (locallySaved === null ? opportunitySaved : locallySaved),
-    [locallySaved, opportunitySaved],
-  );
+  const displayAsSaved = useMemo(() => {
+    return locallySaved === null ? opportunitySaved : locallySaved;
+  }, [locallySaved, opportunitySaved]);
 
   const closeMessage = () => {
     setshowMessage(false);
