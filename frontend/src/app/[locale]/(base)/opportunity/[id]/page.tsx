@@ -6,10 +6,7 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
-import {
-  MinimalOpportunity,
-  OpportunityDetail,
-} from "src/types/opportunity/opportunityResponseTypes";
+import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -28,7 +25,6 @@ import OpportunityLink from "src/components/opportunity/OpportunityLink";
 import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
 import { OpportunityCompetitionStart } from "src/components/user/OpportunityCompetitionStart";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
-import SavedOpportunities from "../../saved-opportunities/page";
 
 type OpportunityListingProps = {
   params: Promise<{ id: string }>;

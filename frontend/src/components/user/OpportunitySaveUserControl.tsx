@@ -3,11 +3,10 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
-import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
