@@ -154,6 +154,7 @@ SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
         LookupStr(SamGovProcessingStatus.PENDING, 1),
         LookupStr(SamGovProcessingStatus.COMPLETED, 2),
         LookupStr(SamGovProcessingStatus.FAILED, 3),
+        LookupStr(SamGovProcessingStatus.DELETED, 4),
     ]
 )
 
