@@ -104,9 +104,9 @@ class CleanupOldSamExtractsTask(Task):
         """Cleanup a single SAM.gov extract file"""
         # Delete the file from S3
         file_util.delete_file(sam_extract_file.s3_path)
-        
+
         # Mark the record as deleted in the database
         sam_extract_file.processing_status = SamGovProcessingStatus.DELETED
-        
+
         # Commit the changes
         self.db_session.commit()
