@@ -2,13 +2,14 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useIsSSR } from "src/hooks/useIsSSR";
 import { useLoginModal } from "src/services/auth/LoginModalProvider";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ModalToggleButton } from "@trussworks/react-uswds";
+import { Button, ModalToggleButton } from "@trussworks/react-uswds";
 
 import SaveButton from "src/components/SaveButton";
 import SaveIcon from "src/components/SaveIcon";
@@ -35,6 +36,11 @@ export const OpportunitySaveUserControl = ({
     setHelpText,
     setTitleText,
   } = useLoginModal();
+
+  // Next will try to render this server side without a ref for the login modal,
+  // which causes a hydration error. To work around this, we'll render a dummy button server side
+  // instead
+  const isSSR = useIsSSR();
 
   const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
     "Error updating saved opportunity",
@@ -101,24 +107,24 @@ export const OpportunitySaveUserControl = ({
             loading={loading}
             saved={displayAsSaved}
           />
+        ) : isSSR ? (
+          <Button type="button">dummy ssr button</Button>
         ) : (
-          <>
-            <ModalToggleButton
-              id={`save-search-result-${opportunityId}`}
-              modalRef={loginModalRef}
-              opener
-              className="usa-button--unstyled"
-              onClick={() => {
-                setHelpText(t("saveloginModal.help"));
-                setButtonText(t("saveloginModal.button"));
-                setCloseText(t("saveloginModal.close"));
-                setDescriptionText(t("saveloginModal.description"));
-                setTitleText(t("saveloginModal.title"));
-              }}
-            >
-              <SaveIcon saved={false} />
-            </ModalToggleButton>
-          </>
+          <ModalToggleButton
+            id={`save-search-result-${opportunityId}`}
+            modalRef={loginModalRef}
+            opener
+            className="usa-button--unstyled"
+            onClick={() => {
+              setHelpText(t("saveloginModal.help"));
+              setButtonText(t("saveloginModal.button"));
+              setCloseText(t("saveloginModal.close"));
+              setDescriptionText(t("saveloginModal.description"));
+              setTitleText(t("saveloginModal.title"));
+            }}
+          >
+            <SaveIcon saved={false} />
+          </ModalToggleButton>
         )}
       </>
     );
@@ -140,24 +146,24 @@ export const OpportunitySaveUserControl = ({
           saved={displayAsSaved}
           savedText={t("saveButton.saved")}
         />
+      ) : isSSR ? (
+        <Button type="button">dummy ssr button</Button>
       ) : (
-        <>
-          <ModalToggleButton
-            modalRef={loginModalRef}
-            opener
-            className="usa-button usa-button--outline"
-            onClick={() => {
-              setHelpText(t("saveloginModal.help"));
-              setButtonText(t("saveloginModal.button"));
-              setCloseText(t("saveloginModal.close"));
-              setDescriptionText(t("saveloginModal.description"));
-              setTitleText(t("saveloginModal.title"));
-            }}
-          >
-            <USWDSIcon name="star_outline" className="button-icon-large" />
-            {t("saveButton.save")}
-          </ModalToggleButton>
-        </>
+        <ModalToggleButton
+          modalRef={loginModalRef}
+          opener
+          className="usa-button usa-button--outline"
+          onClick={() => {
+            setHelpText(t("saveloginModal.help"));
+            setButtonText(t("saveloginModal.button"));
+            setCloseText(t("saveloginModal.close"));
+            setDescriptionText(t("saveloginModal.description"));
+            setTitleText(t("saveloginModal.title"));
+          }}
+        >
+          <USWDSIcon name="star_outline" className="button-icon-large" />
+          {t("saveButton.save")}
+        </ModalToggleButton>
       )}
     </>
   );
