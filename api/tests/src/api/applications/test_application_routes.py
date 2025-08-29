@@ -1022,6 +1022,8 @@ def test_application_form_get_success(
     assert (
         response.json["data"]["application_name"] == application_form.application.application_name
     )
+    # Verify application_status field is included and has the expected value
+    assert response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS.value
 
 
 def test_application_form_get_application_not_found(
@@ -3490,3 +3492,34 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
 
     # Pre-population should override user input
     assert existing_form.application_response["opportunity_number_field"] == "PRESERVE-OPP-789"
+
+
+def test_application_form_get_with_submitted_application_status(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that application_status field correctly reflects submitted application status"""
+    # Create an application with SUBMITTED status
+    application = ApplicationFactory.create(application_status=ApplicationStatus.SUBMITTED)
+
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    CompetitionFormFactory.create(
+        competition=application_form.application.competition,
+        form=application_form.form,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application_form.application)
+
+    response = client.get(
+        f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    # Verify application_status field reflects the submitted status
+    assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED.value
