@@ -17,7 +17,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
+      "--store-version",
       "--sync"
     ],
     staging = [
@@ -29,7 +29,7 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
+      "--store-version",
       "--sync"
     ],
     prod = [
