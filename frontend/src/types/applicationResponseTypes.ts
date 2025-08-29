@@ -35,6 +35,7 @@ export interface FormValidationErrors {
 }
 
 export interface ApplicationFormDetail {
+  application_attachments: Attachment[];
   application_form_id: string;
   application_form_status: "not_started" | "in_progress" | "complete";
   application_id: string;
@@ -42,6 +43,8 @@ export interface ApplicationFormDetail {
   form_id: string;
   form: FormDetail;
   application_name: string;
+  is_required: boolean;
+  is_included_in_submission?: boolean | null;
 }
 
 export interface ApplicationDetail {

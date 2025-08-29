@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Events from "src/app/[locale]/events/page";
+import Events from "src/app/[locale]/(base)/events/page";
 import {
   localeParams,
   mockMessages,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
@@ -24,15 +25,15 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
 
 const MultipleAttachmentUploadWidget = ({
-  error,
   id,
   value: initialValue,
   required,
   rawErrors = [],
   schema,
   onChange,
-  attachments,
 }: UswdsWidgetProps) => {
+  const attachments = useApplicationAttachments();
+
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();
@@ -157,7 +158,7 @@ const MultipleAttachmentUploadWidget = ({
         labelType={labelType}
       />
 
-      {error && (
+      {hasError && (
         <ErrorMessage id={`error-for-${id}`}>
           {String(rawErrors[0])}
         </ErrorMessage>
@@ -186,7 +187,6 @@ const MultipleAttachmentUploadWidget = ({
 
       {uploadedFiles.length > 0 && (
         <MultipleAttachmentUploadList
-          attachments={attachments}
           uploadedFiles={uploadedFiles}
           handleRemove={(index) => handleRemove(index)}
         />

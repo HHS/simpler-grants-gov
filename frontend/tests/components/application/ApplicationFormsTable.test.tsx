@@ -7,6 +7,20 @@ import competitionMock from "stories/components/application/competition.mock.jso
 
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 
+const clientFetchMock = jest.fn();
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+  }),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: jest.fn(),
+  }),
+}));
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
@@ -47,5 +61,16 @@ describe("CompetitionFormsTable", () => {
     expect(tables[1]).toHaveTextContent("DEF Project Form");
     expect(tables[1]).toHaveTextContent("complete");
     expect(tables[1]).toHaveTextContent("downloadInstructions");
+  });
+  it("matches snapshot", () => {
+    const { container } = render(
+      <ApplicationFormsTable
+        forms={competitionForms}
+        applicationForms={applicationForms}
+        applicationId={applicationId}
+      />,
+    );
+
+    expect(container).toMatchSnapshot();
   });
 });

@@ -1,4 +1,4 @@
-import EventsHero from "src/app/[locale]/events/EventsHero";
+import EventsHero from "src/app/[locale]/(base)/events/EventsHero";
 import { render, screen } from "tests/react-utils";
 
 describe("Events Hero Content", () => {
