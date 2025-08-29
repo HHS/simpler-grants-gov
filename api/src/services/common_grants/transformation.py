@@ -3,10 +3,13 @@
 import logging
 
 from common_grants_sdk.schemas.pydantic.fields import SingleDateEvent
-from common_grants_sdk.schemas.pydantic.models import OpportunityBase
-from common_grants_sdk.schemas.pydantic.models import OppFunding
-from common_grants_sdk.schemas.pydantic.models import OppStatus, OppStatusOptions
-from common_grants_sdk.schemas.pydantic.models import OppTimeline
+from common_grants_sdk.schemas.pydantic.models import (
+    OppFunding,
+    OpportunityBase,
+    OppStatus,
+    OppStatusOptions,
+    OppTimeline,
+)
 
 from src.db.models.opportunity_models import Opportunity
 
