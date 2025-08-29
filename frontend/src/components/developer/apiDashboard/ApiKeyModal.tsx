@@ -162,12 +162,7 @@ function SuccessContent({
   return (
     <>
       <ModalHeading id={`${modalId}-heading`}>{heading}</ModalHeading>
-      <SimplerAlert
-        type="success"
-        buttonId="success-alert-close"
-        messageText={message}
-        alertClick={onClose}
-      />
+      <p>{message}</p>
       <ModalFooter>
         <ModalToggleButton
           modalRef={modalRef}

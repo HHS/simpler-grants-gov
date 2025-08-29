@@ -1,75 +1,136 @@
+import "server-only";
+
+import { getSession } from "src/services/auth/session";
+import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { APIResponse } from "src/types/apiResponseTypes";
 
-import { fetchUserWithMethod } from "./fetchers";
+export const fetchApiKeys = async (): Promise<ApiKey[]> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    return [];
+  }
 
-interface ApiKeyResponse extends APIResponse {
-  data: ApiKey;
-}
+  const ssgToken = {
+    "X-SGG-Token": session.token,
+  };
 
-interface ApiKeyListResponse extends APIResponse {
-  data: ApiKey[];
-}
+  const body = {
+    pagination: {
+      page_offset: 1,
+      page_size: 25,
+      sort_order: [
+        {
+          order_by: "created_at",
+          sort_direction: "descending",
+        },
+      ],
+    },
+  };
 
-// Create a new API key
+  const subPath = `${session.user_id}/api-keys/list`;
+  const resp = await fetchUserWithMethod("POST")({
+    subPath,
+    additionalHeaders: ssgToken,
+    body,
+  });
+
+  const json = (await resp.json()) as { data: ApiKey[] };
+  return json.data;
+};
+
+export const handleListApiKeys = async (
+  token: string,
+  userId: string,
+): Promise<APIResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const body = {
+    pagination: {
+      page_offset: 1,
+      page_size: 25,
+      sort_order: [
+        {
+          order_by: "created_at",
+          sort_direction: "descending",
+        },
+      ],
+    },
+  };
+
+  const subPath = `${userId}/api-keys/list`;
+  const resp = await fetchUserWithMethod("POST")({
+    subPath,
+    additionalHeaders: ssgToken,
+    body,
+  });
+
+  return (await resp.json()) as APIResponse;
+};
+
 export const handleCreateApiKey = async (
   token: string,
   userId: string,
   keyName: string,
-): Promise<ApiKeyResponse> => {
-  const response = await fetchUserWithMethod("POST")({
-    subPath: `${userId}/api-keys`,
-    additionalHeaders: {
-      "X-SGG-Token": token,
-    },
-    body: { key_name: keyName },
+): Promise<APIResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const body = {
+    key_name: keyName,
+  };
+
+  const subPath = `${userId}/api-keys`;
+  const resp = await fetchUserWithMethod("POST")({
+    subPath,
+    additionalHeaders: ssgToken,
+    body,
   });
-  return (await response.json()) as ApiKeyResponse;
+
+  return (await resp.json()) as APIResponse;
 };
 
-// List all API keys for a user
-export const handleListApiKeys = async (
-  token: string,
-  userId: string,
-): Promise<ApiKeyListResponse> => {
-  const response = await fetchUserWithMethod("POST")({
-    subPath: `${userId}/api-keys/list`,
-    additionalHeaders: {
-      "X-SGG-Token": token,
-    },
-    body: {},
-  });
-  return (await response.json()) as ApiKeyListResponse;
-};
-
-// Rename an API key
 export const handleRenameApiKey = async (
   token: string,
   userId: string,
   apiKeyId: string,
-  newName: string,
-): Promise<ApiKeyResponse> => {
-  const response = await fetchUserWithMethod("PUT")({
-    subPath: `${userId}/api-keys/${apiKeyId}`,
-    additionalHeaders: {
-      "X-SGG-Token": token,
-    },
-    body: { key_name: newName },
+  keyName: string,
+): Promise<APIResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const body = {
+    key_name: keyName,
+  };
+
+  const subPath = `${userId}/api-keys/${apiKeyId}`;
+  const resp = await fetchUserWithMethod("PUT")({
+    subPath,
+    additionalHeaders: ssgToken,
+    body,
   });
-  return (await response.json()) as ApiKeyResponse;
+
+  return (await resp.json()) as APIResponse;
 };
 
-// Delete an API key
 export const handleDeleteApiKey = async (
   token: string,
   userId: string,
   apiKeyId: string,
 ): Promise<APIResponse> => {
-  const response = await fetchUserWithMethod("DELETE")({
-    subPath: `${userId}/api-keys/${apiKeyId}`,
-    additionalHeaders: {
-      "X-SGG-Token": token,
-    },
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const subPath = `${userId}/api-keys/${apiKeyId}`;
+  const resp = await fetchUserWithMethod("DELETE")({
+    subPath,
+    additionalHeaders: ssgToken,
   });
-  return (await response.json()) as APIResponse;
+
+  return (await resp.json()) as APIResponse;
 };
