@@ -18,6 +18,7 @@ on:
         type: choice
         options:
           - dev
+          - training
           - prod
       version:
         description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
