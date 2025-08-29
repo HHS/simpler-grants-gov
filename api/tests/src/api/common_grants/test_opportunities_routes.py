@@ -380,6 +380,7 @@ class TestSearchOpportunities:
         assert data["status"] == 200
         assert "Opportunities searched successfully" in data["message"]
 
+
 class TestResponseSchemaValidation:
     """Test that responses conform to the expected marshmallow schema format."""
 

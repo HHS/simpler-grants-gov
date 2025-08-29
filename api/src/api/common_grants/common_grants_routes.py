@@ -2,21 +2,24 @@
 
 import logging
 
-from common_grants_sdk.schemas.pydantic.requests.opportunity import OpportunitySearchRequest
+from common_grants_sdk.schemas.marshmallow import Error as ErrorSchema
 from common_grants_sdk.schemas.marshmallow import (
-    Error as ErrorSchema,
     OpportunitiesListResponse as OpportunitiesListResponseSchema,
+)
+from common_grants_sdk.schemas.marshmallow import (
     OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
-    OpportunityResponse as OpportunityResponseSchema,
-    PaginatedQueryParams as PaginatedQueryParamsSchema,
+)
+from common_grants_sdk.schemas.marshmallow import OpportunityResponse as OpportunityResponseSchema
+from common_grants_sdk.schemas.marshmallow import (
     OpportunitySearchRequest as OpportunitySearchRequestSchema,
 )
+from common_grants_sdk.schemas.marshmallow import PaginatedQueryParams as PaginatedQueryParamsSchema
+from common_grants_sdk.schemas.pydantic.requests.opportunity import OpportunitySearchRequest
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
-
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +39,9 @@ def generate_422_error(e: Exception) -> tuple[dict, int]:
     )
 
 
-def generate_404_error(field: str, message: str = "The server cannot find the requested resource") -> tuple[dict, int]:
+def generate_404_error(
+    field: str, message: str = "The server cannot find the requested resource"
+) -> tuple[dict, int]:
     """Generate a 404 error response for resource not found."""
     error_schema = ErrorSchema()
     return (
@@ -72,8 +77,8 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
     # Hydrate response model
     response_json = response_object.model_dump(by_alias=True, mode="json")
     response_schema = OpportunitiesListResponseSchema()
-    validated_data = response_schema.load(response_json)
-    return validated_data, 200
+    validated_response = response_schema.load(response_json)
+    return validated_response, 200
 
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
@@ -98,8 +103,8 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     # Hydrate response model
     response_json = response_object.model_dump(by_alias=True, mode="json")
     response_schema = OpportunityResponseSchema()
-    validated_data = response_schema.load(response_json)
-    return validated_data, 200
+    validated_response = response_schema.load(response_json)
+    return validated_response, 200
 
 
 @common_grants_blueprint.post("/opportunities/search")
@@ -117,8 +122,8 @@ def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict,
     # Validate input
     request_schema = OpportunitySearchRequestSchema()
     try:
-        request_object = request_schema.load(json_data)
-        search_request = OpportunitySearchRequest(**request_object)
+        validated_input = request_schema.load(json_data)
+        search_request = OpportunitySearchRequest(**validated_input)
     except Exception as e:
         return generate_422_error(e)
 
@@ -134,5 +139,5 @@ def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict,
     # Hydrate schema
     response_json = response_object.model_dump(by_alias=True, mode="json")
     response_schema = OpportunitiesSearchResponseSchema()
-    validated_data = response_schema.load(response_json)
-    return validated_data, 200
+    validated_response = response_schema.load(response_json)
+    return validated_response, 200

@@ -10,14 +10,9 @@ for OpenAPI schema generation.
 from typing import Any
 
 from apiflask import APIFlask
-
-# Import the actual CommonGrants routes and schemas
-from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
-
-# Import the routes to register them with the blueprint
-
-# Import marshmallow schemas from PySDK
 from common_grants_sdk.schemas.marshmallow import Error, HTTPValidationError
+
+from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 
 
 def create_apiflask_app() -> APIFlask:
@@ -46,7 +41,7 @@ def create_apiflask_app() -> APIFlask:
     return app
 
 
-def get_common_grants_openapi_schema() -> dict[str, Any]:
+def get_common_grants_openapi_schema() -> dict[str, Any] | str:
     """
     Generate OpenAPI schema for CommonGrants API routes using APIFlask.
 
