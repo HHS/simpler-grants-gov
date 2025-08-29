@@ -9,7 +9,7 @@ import { useUser } from "src/services/auth/useUser";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Button, ModalToggleButton } from "@trussworks/react-uswds";
+import { ModalToggleButton } from "@trussworks/react-uswds";
 
 import SaveButton from "src/components/SaveButton";
 import SaveIcon from "src/components/SaveIcon";
@@ -108,7 +108,7 @@ export const OpportunitySaveUserControl = ({
             saved={displayAsSaved}
           />
         ) : isSSR ? (
-          <Button type="button">dummy ssr button</Button>
+          <SaveIcon saved={false} />
         ) : (
           <ModalToggleButton
             id={`save-search-result-${opportunityId}`}
@@ -147,7 +147,7 @@ export const OpportunitySaveUserControl = ({
           savedText={t("saveButton.saved")}
         />
       ) : isSSR ? (
-        <Button type="button">dummy ssr button</Button>
+        <SaveIcon saved={false} />
       ) : (
         <ModalToggleButton
           modalRef={loginModalRef}
