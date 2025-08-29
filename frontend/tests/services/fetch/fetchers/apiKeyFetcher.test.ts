@@ -13,6 +13,11 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchUserWithMethod: (_method: string) => mockFetchUserWithMethod,
 }));
 
+// Mock the session module to avoid jose dependency
+jest.mock("src/services/auth/session", () => ({
+  getSession: jest.fn(),
+}));
+
 const mockApiKey: ApiKey = baseApiKey;
 
 const mockApiKeys: ApiKey[] = [
@@ -108,7 +113,18 @@ describe("apiKeyFetcher", () => {
         additionalHeaders: {
           "X-SGG-Token": "test-token",
         },
-        body: {},
+        body: {
+          pagination: {
+            page_offset: 1,
+            page_size: 25,
+            sort_order: [
+              {
+                order_by: "created_at",
+                sort_direction: "descending",
+              },
+            ],
+          },
+        },
       });
 
       expect(result.status_code).toBe(200);

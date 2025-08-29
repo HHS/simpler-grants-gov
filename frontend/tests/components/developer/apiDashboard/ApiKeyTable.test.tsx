@@ -25,6 +25,19 @@ jest.mock("src/services/auth/useUser", () => ({
   useUser: jest.fn(),
 }));
 
+// Mock Next.js navigation
+const mockRefresh = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(() => ({
+    refresh: mockRefresh,
+    push: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  })),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock("react", () => ({
   ...jest.requireActual("react"),
@@ -120,22 +133,11 @@ const messages = {
 };
 
 const renderTable = (apiKeys: ApiKey[] = mockApiKeys) => {
-  const onApiKeyRenamed = jest.fn();
-  const onApiKeyDeleted = jest.fn();
-
-  return {
-    ...render(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <ApiKeyTable
-          apiKeys={apiKeys}
-          onApiKeyRenamed={onApiKeyRenamed}
-          onApiKeyDeleted={onApiKeyDeleted}
-        />
-      </NextIntlClientProvider>,
-    ),
-    onApiKeyRenamed,
-    onApiKeyDeleted,
-  };
+  return render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <ApiKeyTable apiKeys={apiKeys} />
+    </NextIntlClientProvider>,
+  );
 };
 
 describe("ApiKeyTable", () => {
@@ -144,6 +146,7 @@ describe("ApiKeyTable", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRefresh.mockClear();
     mockUseUser.mockReturnValue({
       user: mockUser,
       isLoading: false,
@@ -256,11 +259,11 @@ describe("ApiKeyTable", () => {
       expect(screen.getByText('"Development API Key"')).toBeInTheDocument();
     });
 
-    it("successfully deletes API key and calls callback", async () => {
+    it("successfully deletes API key and refreshes page", async () => {
       const user = userEvent.setup();
       mockClientFetch.mockResolvedValue({ message: "Success" });
 
-      const { onApiKeyDeleted } = renderTable();
+      renderTable();
 
       // Open delete modal for first API key
       const deleteButton = screen.getByTestId(
@@ -277,7 +280,7 @@ describe("ApiKeyTable", () => {
       );
       await user.click(submitButtons[0]);
 
-      // Wait for API call and callback
+      // Wait for API call and router refresh
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mockClientFetch).toHaveBeenCalledWith(
@@ -290,7 +293,7 @@ describe("ApiKeyTable", () => {
         },
       );
 
-      expect(onApiKeyDeleted).toHaveBeenCalled();
+      expect(mockRefresh).toHaveBeenCalled();
     });
 
     it("validates delete confirmation input", async () => {
@@ -406,12 +409,12 @@ describe("ApiKeyTable", () => {
       ).toBeInTheDocument();
     });
 
-    it("successfully renames API key and calls callback", async () => {
+    it("successfully renames API key and refreshes page", async () => {
       const user = userEvent.setup();
       const renamedApiKey = { ...mockApiKeys[0], key_name: "Renamed API Key" };
       mockClientFetch.mockResolvedValue({ data: renamedApiKey });
 
-      const { onApiKeyRenamed } = renderTable();
+      renderTable();
 
       // Open edit modal
       const editButton = screen.getByTestId(
@@ -428,7 +431,7 @@ describe("ApiKeyTable", () => {
       const submitButtons = screen.getAllByTestId("edit-api-key-submit-button");
       await user.click(submitButtons[0]); // Click the first one (they're both identical)
 
-      // Wait for API call and callback
+      // Wait for API call and router refresh
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(mockClientFetch).toHaveBeenCalledWith(
@@ -444,7 +447,7 @@ describe("ApiKeyTable", () => {
         },
       );
 
-      expect(onApiKeyRenamed).toHaveBeenCalled();
+      expect(mockRefresh).toHaveBeenCalled();
     });
   });
 
