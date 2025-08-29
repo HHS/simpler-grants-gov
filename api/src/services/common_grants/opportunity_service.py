@@ -51,7 +51,7 @@ class CommonGrantsOpportunityService:
                 return None
 
             opportunity_data = transform_opportunity_to_common_grants(opportunity)
-            
+
             return OpportunityResponse(
                 status=200,
                 message="Success",
@@ -119,16 +119,14 @@ class CommonGrantsOpportunityService:
         if pagination is None:
             pagination = PaginatedBodyParams()
 
-        # Build search query using existing search functionality
-        # This is a simplified approach - in practice, you'd want to map
-        # CommonGrants filters to the existing search system
+        # Build search query
         query = self.db_session.query(Opportunity)
 
-        # Apply search text if provided
+        # Apply search text
         if search:
             query = query.filter(Opportunity.opportunity_title.ilike(f"%{search}%"))
 
-        # Apply status filter if provided
+        # Apply status filter
         if filters.status and filters.status.value:
             from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
 
@@ -143,18 +141,16 @@ class CommonGrantsOpportunityService:
             status_value = filters.status.value[0] if filters.status.value else None
             db_status = status_mapping.get(status_value)
             if db_status:
+                # Map string to enum
                 from src.constants.lookup_constants import OpportunityStatus
 
-                # Map the string back to the enum
-                status_enum = None
-                if db_status == "forecasted":
-                    status_enum = OpportunityStatus.FORECASTED
-                elif db_status == "posted":
-                    status_enum = OpportunityStatus.POSTED
-                elif db_status == "closed":
-                    status_enum = OpportunityStatus.CLOSED
-                elif db_status == "archived":
-                    status_enum = OpportunityStatus.ARCHIVED
+                status_mapping = {
+                    "forecasted": OpportunityStatus.FORECASTED,
+                    "posted": OpportunityStatus.POSTED,
+                    "closed": OpportunityStatus.CLOSED,
+                    "archived": OpportunityStatus.ARCHIVED,
+                }
+                status_enum = status_mapping.get(db_status)
 
                 if status_enum:
                     query = query.join(CurrentOpportunitySummary).filter(
@@ -204,7 +200,9 @@ class CommonGrantsOpportunityService:
             if filters.close_date_range is not None:
                 applied_filters["closeDateRange"] = filters.close_date_range.model_dump()
             if filters.total_funding_available_range is not None:
-                applied_filters["totalFundingAvailableRange"] = filters.total_funding_available_range.model_dump()
+                applied_filters["totalFundingAvailableRange"] = (
+                    filters.total_funding_available_range.model_dump()
+                )
             if filters.min_award_amount_range is not None:
                 applied_filters["minAwardAmountRange"] = filters.min_award_amount_range.model_dump()
             if filters.max_award_amount_range is not None:

@@ -157,7 +157,7 @@ def transform_opportunity_to_common_grants(opportunity: Opportunity) -> Opportun
             )
             else None
         ),
-        custom_fields=None,
+        custom_fields={},
         createdAt=opportunity.created_at,
         lastModifiedAt=opportunity.updated_at,
     )
