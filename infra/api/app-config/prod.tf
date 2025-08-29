@@ -6,6 +6,7 @@ module "prod_config" {
   environment                     = "prod"
   network_name                    = "prod"
   domain_name                     = "api.simpler.grants.gov"
+  secondary_domain_names          = ["alb.simpler.grants.gov"]
   enable_https                    = true
   s3_cdn_domain_name              = "files.simpler.grants.gov"
   mtls_domain_name                = "soap.simpler.grants.gov"

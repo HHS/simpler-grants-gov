@@ -27,6 +27,7 @@ output "service_config" {
     instance_memory                 = var.instance_memory
     service_name                    = "${local.prefix}${var.app_name}-${var.environment}"
     domain_name                     = var.domain_name
+    secondary_domain_names          = var.secondary_domain_names
     s3_cdn_domain_name              = var.s3_cdn_domain_name
     mtls_domain_name                = var.mtls_domain_name
     enable_https                    = var.enable_https
