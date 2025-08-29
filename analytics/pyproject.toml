@@ -31,6 +31,7 @@ boto3-stubs = "^1.35.56"
 psycopg = "^3.2.3"
 smart-open = "^7.0.5"
 newrelic = "10.16.0"
+jupyterlab = "^4.4.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
