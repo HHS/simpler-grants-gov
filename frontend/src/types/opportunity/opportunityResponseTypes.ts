@@ -82,6 +82,10 @@ export interface OpportunityApiResponse extends APIResponse {
   data: OpportunityDetail;
 }
 
+export interface PossiblySavedBaseOpportunity extends BaseOpportunity {
+  opportunitySaved?: boolean;
+}
+
 export type OpportunityOverview = Pick<
   BaseOpportunity,
   | "opportunity_title"

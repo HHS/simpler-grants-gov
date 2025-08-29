@@ -1,3 +1,4 @@
+import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 
 import SearchPagination from "./SearchPagination";
@@ -11,6 +12,7 @@ type SearchResultsViewProps = {
   totalResults: string;
   totalPages: number;
   searchResults: SearchAPIResponse;
+  savedOpportunities: MinimalOpportunity[];
 };
 
 // given the issues with suspense mentioned in this ticket, this won't show up
@@ -30,6 +32,7 @@ export const SearchResultsView = ({
   totalResults,
   totalPages,
   searchResults,
+  savedOpportunities,
 }: SearchResultsViewProps) => {
   return (
     <>
@@ -40,7 +43,11 @@ export const SearchResultsView = ({
         totalResults={totalResults}
         totalPages={totalPages}
       />
-      <SearchResultsTable searchResults={searchResults.data} page={page} />
+      <SearchResultsTable
+        searchResults={searchResults.data}
+        page={page}
+        savedOpportunities={savedOpportunities}
+      />
       <SearchPagination
         totalPages={totalPages}
         page={page}

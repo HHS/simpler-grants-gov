@@ -39,6 +39,7 @@ describe("SearchResultsTable", () => {
 
   it("passes accessibility test", async () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -49,6 +50,7 @@ describe("SearchResultsTable", () => {
 
   it("matches snapshot", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -67,6 +69,7 @@ describe("SearchResultsTable", () => {
     ];
 
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: opportunities,
       page: 1,
     });
@@ -75,17 +78,26 @@ describe("SearchResultsTable", () => {
     // Verify the mock component was called for each opportunity
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledTimes(2);
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      {
+        opportunityId: mockOpportunity.opportunity_id,
+        type: "icon",
+        opportunitySaved: false,
+      },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "second-opportunity-id", type: "icon" },
+      {
+        opportunityId: "second-opportunity-id",
+        type: "icon",
+        opportunitySaved: false,
+      },
       undefined,
     );
   });
 
   it("renders save control in correct layout structure", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -100,13 +112,18 @@ describe("SearchResultsTable", () => {
 
     // Verify the mock was called
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      {
+        opportunityId: mockOpportunity.opportunity_id,
+        type: "icon",
+        opportunitySaved: false,
+      },
       undefined,
     );
   });
 
   it("displays headings for all columns as expected", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -136,6 +153,7 @@ describe("SearchResultsTable", () => {
   // Jest doesn't know that these header values should be hidden :shrug:
   it("displays data for all columns as expected", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [
         {
           ...mockOpportunity,
@@ -165,7 +183,11 @@ describe("SearchResultsTable", () => {
 
     // Verify that the save control component was called for this opportunity
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      {
+        opportunityId: mockOpportunity.opportunity_id,
+        type: "icon",
+        opportunitySaved: false,
+      },
       undefined,
     );
 
@@ -188,6 +210,7 @@ describe("SearchResultsTable", () => {
 
   it("handles display of empty values", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [
         {
           ...mockOpportunity,
@@ -228,6 +251,7 @@ describe("SearchResultsTable", () => {
 
   it("displays a proper message when there are no results", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [],
       page: 1,
     });
@@ -248,6 +272,7 @@ describe("SearchResultsTable", () => {
     ];
 
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: opportunities,
       page: 1,
     });
@@ -265,15 +290,15 @@ describe("SearchResultsTable", () => {
 
     // Verify each opportunity ID was called
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "opp-1", type: "icon" },
+      { opportunityId: "opp-1", type: "icon", opportunitySaved: false },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "opp-2", type: "icon" },
+      { opportunityId: "opp-2", type: "icon", opportunitySaved: false },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "opp-3", type: "icon" },
+      { opportunityId: "opp-3", type: "icon", opportunitySaved: false },
       undefined,
     );
   });
@@ -285,6 +310,7 @@ describe("SearchResultsTable", () => {
     ];
 
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: opportunities,
       page: 1,
     });
@@ -295,17 +321,18 @@ describe("SearchResultsTable", () => {
 
     // Check that the mock was called with the correct opportunity IDs
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "unique-id-1", type: "icon" },
+      { opportunityId: "unique-id-1", type: "icon", opportunitySaved: false },
       undefined,
     );
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: "unique-id-2", type: "icon" },
+      { opportunityId: "unique-id-2", type: "icon", opportunitySaved: false },
       undefined,
     );
   });
 
   it("passes type='icon' to OpportunitySaveUserControl components", () => {
     const component = SearchResultsTable({
+      savedOpportunities: [],
       searchResults: [mockOpportunity],
       page: 1,
     });
@@ -313,7 +340,39 @@ describe("SearchResultsTable", () => {
 
     // Verify that type="icon" was passed to the component
     expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
-      { opportunityId: mockOpportunity.opportunity_id, type: "icon" },
+      {
+        opportunityId: mockOpportunity.opportunity_id,
+        type: "icon",
+        opportunitySaved: false,
+      },
+      undefined,
+    );
+  });
+  it("correctly determines previously saved opportunities", () => {
+    const component = SearchResultsTable({
+      savedOpportunities: [mockOpportunity],
+      searchResults: [
+        mockOpportunity,
+        { ...mockOpportunity, opportunity_id: "unsaved-id" },
+      ],
+      page: 1,
+    });
+    render(component);
+
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      {
+        opportunityId: mockOpportunity.opportunity_id,
+        type: "icon",
+        opportunitySaved: true,
+      },
+      undefined,
+    );
+    expect(mockOpportunitySaveUserControl).toHaveBeenCalledWith(
+      {
+        opportunityId: "unsaved-id",
+        type: "icon",
+        opportunitySaved: false,
+      },
       undefined,
     );
   });
