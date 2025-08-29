@@ -1,5 +1,5 @@
 import $Refparser from "@apidevtools/json-schema-ref-parser";
-import { RJSFSchema } from "@rjsf/utils";
+import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
@@ -32,6 +32,8 @@ import RadioWidget from "./widgets/RadioWidget";
 import SelectWidget from "./widgets/SelectWidget";
 import TextAreaWidget from "./widgets/TextAreaWidget";
 import TextWidget from "./widgets/TextWidget";
+
+type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -277,10 +279,14 @@ export const buildField = ({
   const disabled = fieldType === "null";
   let options = {};
 
-  if (type === "Select" || type === "MultiSelect") {
+  // Provide enumOptions for Select, MultiSelect, and Radio
+  if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
-    if (fieldSchema.type === "array") {
+    if (fieldSchema.type === "boolean") {
+      // Keep as strings to align with RadioWidget hidden input/value handling
+      enums = ["true", "false"];
+    } else if (fieldSchema.type === "array") {
       const item = Array.isArray(fieldSchema.items)
         ? fieldSchema.items[0]
         : fieldSchema.items;
@@ -295,18 +301,25 @@ export const buildField = ({
       enums = fieldSchema.enum.map(String);
     }
 
-    const enumOptions = enums.map((label) => ({
-      value: String(label),
-      label: getSimpleTranslationsSync({
-        nameSpace: "Form",
-        translateableString: String(label),
-      }),
-    }));
+    const enumOptions: EnumOptionsType<RJSFSchema>[] = enums.map(
+      (label: string) => {
+        const display =
+          fieldSchema.type === "boolean"
+            ? label === "true"
+              ? "Yes"
+              : "No"
+            : getSimpleTranslationsSync({
+                nameSpace: "Form",
+                translateableString: label,
+              });
+        return { value: label, label: display };
+      },
+    );
 
     options =
       type === "Select"
-        ? { enumOptions, emptyValue: "- Select -" }
-        : { enumOptions };
+        ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
+        : ({ enumOptions } as WidgetOptions);
   }
 
   const Widget = widgetComponents[type];
@@ -375,6 +388,7 @@ export const formatFieldWarnings = (
       },
       {} as Record<string, unknown>,
     );
+
     return flatFormDataToArray(name, warningMap) as unknown as [];
   }
   const warningsforField = getWarningsForField(name, required, warnings);
@@ -496,7 +510,8 @@ export const shapeFormData = <T extends object>(
   return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
-const removePropertyPaths = (path: string): string => {
+const removePropertyPaths = (path: unknown): string => {
+  if (typeof path !== "string") return "";
   return path.replace(/properties\//g, "").replace(/^\//, "");
 };
 
@@ -545,15 +560,24 @@ export const getRequiredProperties = (
 };
 
 export const isFieldRequired = (
-  definition: string,
+  definition: string | string[] | undefined,
   requiredFields: string[],
 ): boolean => {
-  const path = removePropertyPaths(definition);
-  return requiredFields.indexOf(path) > -1;
+  if (!definition) return false;
+
+  const defs = Array.isArray(definition) ? definition : [definition];
+
+  return defs
+    .map((def) => removePropertyPaths(def))
+    .some((clean) => requiredFields.includes(clean));
 };
 
-// arrays from the html look like field_[row]_item
-const flatFormDataToArray = (field: string, data: Record<string, unknown>) => {
+// arrays from the html look like field_[row]_item or are simply the field name
+export const flatFormDataToArray = (
+  field: string,
+  data: Record<string, unknown>,
+) => {
+  if (field in data) return [data[field]];
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);

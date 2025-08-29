@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { toggleCheckbox, toggleMobileSearchFilters } from "./searchSpecUtil";
+import { toggleCheckbox, toggleFilterDrawer } from "./searchSpecUtil";
 
 test.describe("Search error page", () => {
   test("should return an error page when expected", async ({ page }) => {
@@ -12,13 +12,10 @@ test.describe("Search error page", () => {
 
   test("should allow for performing a new search from error state", async ({
     page,
-  }, { project }) => {
+  }) => {
     await page.goto("/search?status=not_a_status");
 
-    if (project.name.match(/[Mm]obile/)) {
-      await toggleMobileSearchFilters(page);
-    }
-
+    await toggleFilterDrawer(page);
     await toggleCheckbox(page, "status-closed");
 
     await page.waitForURL(/closed/, {

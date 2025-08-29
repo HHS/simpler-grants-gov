@@ -186,6 +186,21 @@ const nextConfig = {
         destination: "/roadmap",
         permanent: false,
       },
+      {
+        source: "/subscribe",
+        destination: "/newsletter",
+        permanent: false,
+      },
+      {
+        source: "/subscribe/confirmation",
+        destination: "/newsletter/confirmation",
+        permanent: false,
+      },
+      {
+        source: "/subscribe/unsubscribe",
+        destination: "/newsletter/unsubscribe",
+        permanent: false,
+      },
     ];
   },
 };

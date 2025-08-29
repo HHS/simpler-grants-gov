@@ -61,28 +61,16 @@ const ResolvedSearchResults = async ({
 
 export default function SearchResults({
   searchParams,
-  loadingMessage,
   searchResultsPromise,
 }: {
   searchParams: QueryParamData;
-  loadingMessage: string;
   searchResultsPromise: Promise<SearchAPIResponse>;
 }) {
   const { page, sortby, query } = searchParams;
   const suspenseKey = Object.entries(searchParams).join(",");
 
   return (
-    <Suspense
-      key={suspenseKey}
-      fallback={
-        <SearchResultsSkeleton
-          sortby={sortby}
-          page={page}
-          query={query}
-          loadingMessage={loadingMessage}
-        />
-      }
-    >
+    <Suspense key={suspenseKey} fallback={<SearchResultsSkeleton />}>
       <ResolvedSearchResults
         sortby={sortby}
         page={page}
