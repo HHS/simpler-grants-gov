@@ -42,8 +42,8 @@ python-pptx = "^1.0.2"
 openpyxl = "^3.1.5"
 defusedxml = "^0.7.1"
 xmltodict = "^0.14.2"
-fastapi = {extras = ["standard"], version = "^0.115.11"}
 common-grants-sdk = "^0.3.1"
+fastapi = {extras = ["standard"], version = "^0.115.11"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
