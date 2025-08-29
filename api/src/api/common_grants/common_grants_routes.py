@@ -4,12 +4,12 @@ import logging
 
 from common_grants_sdk.schemas.pydantic.requests.opportunity import OpportunitySearchRequest
 from common_grants_sdk.schemas.marshmallow import (
-    Error as ErrorSchema, 
-    OpportunitiesListResponse as OpportunitiesListResponseSchema, 
+    Error as ErrorSchema,
+    OpportunitiesListResponse as OpportunitiesListResponseSchema,
     OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
-    OpportunityResponse as OpportunityResponseSchema, 
+    OpportunityResponse as OpportunityResponseSchema,
     PaginatedQueryParams as PaginatedQueryParamsSchema,
-    OpportunitySearchRequest as OpportunitySearchRequestSchema
+    OpportunitySearchRequest as OpportunitySearchRequestSchema,
 )
 
 import src.adapters.db as db
@@ -24,11 +24,31 @@ logger = logging.getLogger(__name__)
 def generate_422_error(e: Exception) -> tuple[dict, int]:
     """Generate a 422 error response for validation failures."""
     error_schema = ErrorSchema()
-    return error_schema.dump({
-        "status": 422,
-        "message": "The server cannot parse the request",
-        "errors": [{"field": "request", "message": str(e)}]
-    }), 422
+    return (
+        error_schema.dump(
+            {
+                "status": 422,
+                "message": "The server cannot parse the request",
+                "errors": [{"field": "request", "message": str(e)}],
+            }
+        ),
+        422,
+    )
+
+
+def generate_404_error(field: str, message: str = "The server cannot find the requested resource") -> tuple[dict, int]:
+    """Generate a 404 error response for resource not found."""
+    error_schema = ErrorSchema()
+    return (
+        error_schema.dump(
+            {
+                "status": 404,
+                "message": message,
+                "errors": [{"field": field, "message": message}],
+            }
+        ),
+        404,
+    )
 
 
 @common_grants_blueprint.get("/opportunities")
@@ -37,9 +57,7 @@ def generate_422_error(e: Exception) -> tuple[dict, int]:
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
-    responses={
-        200: {"model": OpportunitiesListResponseSchema, "description": "Success"},
-    },
+    responses=[200],
 )
 @flask_db.with_db_session()
 def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, int]:
@@ -48,10 +66,9 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
     # Create service and get query result
     service = CommonGrantsOpportunityService(db_session)
     response_object = service.list_opportunities(
-        page=int(query_data.get("page", 1)),
-        page_size=int(query_data.get("pageSize", 10))
+        page=int(query_data.get("page", 1)), page_size=int(query_data.get("pageSize", 10))
     )
-    
+
     # Hydrate response model
     response_json = response_object.model_dump(by_alias=True, mode="json")
     response_schema = OpportunitiesListResponseSchema()
@@ -64,10 +81,7 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
 @common_grants_blueprint.doc(
     summary="View opportunity details",
     description="View details about an opportunity",
-    responses={
-        200: {"model": OpportunityResponseSchema, "description": "Success"},
-        404: {"model": ErrorSchema, "description": "The server cannot find the requested resource"},
-    },
+    responses=[200, 404],
 )
 @flask_db.with_db_session()
 def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
@@ -79,13 +93,7 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 
     # Check for not found condition
     if not response_object:
-        message = "The server cannot find the requested resource"
-        error_schema = ErrorSchema()
-        return error_schema.dump({
-            "status": 404,
-            "message": message,
-            "errors": [{"field": "oppId", "message": message}]
-        }), 404
+        return generate_404_error("oppId")
 
     # Hydrate response model
     response_json = response_object.model_dump(by_alias=True, mode="json")
@@ -100,10 +108,7 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
-    responses={
-        200: {"model": OpportunitiesSearchResponseSchema, "description": "Success"},
-        422: {"model": ErrorSchema, "description": "The server cannot parse the request"},
-    },
+    responses=[200],
 )
 @flask_db.with_db_session()
 def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict, int]:
@@ -116,7 +121,7 @@ def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict,
         search_request = OpportunitySearchRequest(**request_object)
     except Exception as e:
         return generate_422_error(e)
-    
+
     # Create service and get query result
     service = CommonGrantsOpportunityService(db_session)
     response_object = service.search_opportunities(
@@ -125,7 +130,7 @@ def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict,
         pagination=search_request.pagination,
         search=search_request.search,
     )
-    
+
     # Hydrate schema
     response_json = response_object.model_dump(by_alias=True, mode="json")
     response_schema = OpportunitiesSearchResponseSchema()
