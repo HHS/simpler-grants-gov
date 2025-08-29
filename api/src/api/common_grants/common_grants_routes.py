@@ -1,13 +1,14 @@
 """CommonGrants Protocol routes."""
 
 import logging
-from uuid import UUID
 
-from apiflask import HTTPError
-from common_grants_sdk.schemas.pydantic import OpportunityResponse, OpportunitySearchRequest, PaginatedQueryParams
+from common_grants_sdk.schemas.pydantic.requests.opportunity import OpportunitySearchRequest
 from common_grants_sdk.schemas.marshmallow import (
-    Error, HTTPValidationError, OpportunitiesListResponse, OpportunitiesSearchResponse,
-    OpportunityResponse as OpportunityResponseSchema, PaginatedQueryParams as PaginatedQueryParamsSchema,
+    Error as ErrorSchema, 
+    OpportunitiesListResponse as OpportunitiesListResponseSchema, 
+    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+    OpportunityResponse as OpportunityResponseSchema, 
+    PaginatedQueryParams as PaginatedQueryParamsSchema,
     OpportunitySearchRequest as OpportunitySearchRequestSchema
 )
 
@@ -20,155 +21,113 @@ from src.services.common_grants.opportunity_service import CommonGrantsOpportuni
 logger = logging.getLogger(__name__)
 
 
+def generate_422_error(e: Exception) -> tuple[dict, int]:
+    """Generate a 422 error response for validation failures."""
+    error_schema = ErrorSchema()
+    return error_schema.dump({
+        "status": 422,
+        "message": "The server cannot parse the request",
+        "errors": [{"field": "request", "message": str(e)}]
+    }), 422
+
+
 @common_grants_blueprint.get("/opportunities")
 @common_grants_blueprint.input(PaginatedQueryParamsSchema, location="query")
-@common_grants_blueprint.output(OpportunitiesListResponse)
+@common_grants_blueprint.output(OpportunitiesListResponseSchema)
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
     responses={
-        200: {"model": OpportunitiesListResponse, "description": "Success"},
-        422: {"model": HTTPValidationError, "description": "Validation error"},
+        200: {"model": OpportunitiesListResponseSchema, "description": "Success"},
     },
 )
 @flask_db.with_db_session()
 def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, int]:
     """Get a paginated list of opportunities."""
-    # Parse pagination parameters using PySDK classes
-    try:
-        pagination_params = PaginatedQueryParams.model_validate({
-            "page": query_data.get("page", 1),
-            "pageSize": query_data.get("pageSize", 10),
-        })
-    except Exception as e:
-        # Return proper CommonGrants error format
-        error_response = {
-            "status": 400,
-            "message": f"Invalid pagination parameters: {str(e)}",
-            "errors": [{"field": "pagination", "message": str(e), "type": "validation_error"}]
-        }
-        return error_response, 400
 
-    # Create service and get opportunities
-    opportunity_service = CommonGrantsOpportunityService(db_session)
-    pydantic_response = opportunity_service.list_opportunities(
-        page=pagination_params.page, 
-        page_size=pagination_params.page_size
+    # Create service and get query result
+    service = CommonGrantsOpportunityService(db_session)
+    response_object = service.list_opportunities(
+        page=int(query_data.get("page", 1)),
+        page_size=int(query_data.get("pageSize", 10))
     )
     
-    # Convert Pydantic response to JSON
-    json_data = pydantic_response.model_dump(by_alias=True, mode="json")
-    
-    # Hydrate marshmallow schema
-    schema = OpportunitiesListResponse()
-    marshmallow_data = schema.load(json_data)
-    
-    # Dump marshmallow data to JSON-serializable format
-    return schema.dump(marshmallow_data), 200
-    
+    # Hydrate response model
+    response_json = response_object.model_dump(by_alias=True, mode="json")
+    response_schema = OpportunitiesListResponseSchema()
+    validated_data = response_schema.load(response_json)
+    return validated_data, 200
+
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
 @common_grants_blueprint.output(OpportunityResponseSchema)
 @common_grants_blueprint.doc(
-    summary="View opportunity",
-    description="View additional details about an opportunity",
+    summary="View opportunity details",
+    description="View details about an opportunity",
     responses={
         200: {"model": OpportunityResponseSchema, "description": "Success"},
-        404: {"model": Error, "description": "Opportunity not found"},
-        400: {"model": Error, "description": "Bad request"},
-        422: {"model": HTTPValidationError, "description": "Validation error"},
+        404: {"model": ErrorSchema, "description": "The server cannot find the requested resource"},
     },
 )
 @flask_db.with_db_session()
 def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     """Get a specific opportunity by ID."""
-    try:
-        # Validate UUID format
-        UUID(oppId)
-    except ValueError as err:
-        # Return proper CommonGrants error format
-        error_response = {
-            "status": 400,
-            "message": "Invalid opportunity ID format",
-            "errors": [{"field": "oppId", "message": "Invalid UUID format", "type": "invalid"}]
-        }
-        return error_response, 400
 
-    # Create service and get opportunity
-    opportunity_service = CommonGrantsOpportunityService(db_session)
-    opportunity = opportunity_service.get_opportunity(oppId)
+    # Create service and get query result
+    service = CommonGrantsOpportunityService(db_session)
+    response_object = service.get_opportunity(oppId)
 
-    if not opportunity:
-        # Return proper CommonGrants error format
-        error_response = {
+    # Check for not found condition
+    if not response_object:
+        message = "The server cannot find the requested resource"
+        error_schema = ErrorSchema()
+        return error_schema.dump({
             "status": 404,
-            "message": "Opportunity not found",
-            "errors": [{"field": "oppId", "message": "Opportunity not found", "type": "not_found"}]
-        }
-        return error_response, 404
+            "message": message,
+            "errors": [{"field": "oppId", "message": message}]
+        }), 404
 
-    response = OpportunityResponse(
-        status=200,
-        message="Success",
-        data=opportunity,
-    )
-    
-    # Convert Pydantic response to JSON
-    json_data = response.model_dump(by_alias=True, mode="json")
-    
-    # Hydrate marshmallow schema
-    schema = OpportunityResponseSchema()
-    marshmallow_data = schema.load(json_data)
-    
-    # Dump marshmallow data to JSON-serializable format
-    return schema.dump(marshmallow_data), 200
+    # Hydrate response model
+    response_json = response_object.model_dump(by_alias=True, mode="json")
+    response_schema = OpportunityResponseSchema()
+    validated_data = response_schema.load(response_json)
+    return validated_data, 200
 
 
 @common_grants_blueprint.post("/opportunities/search")
 @common_grants_blueprint.input(OpportunitySearchRequestSchema)
-@common_grants_blueprint.output(OpportunitiesSearchResponse)
+@common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
     responses={
-        200: {"model": OpportunitiesSearchResponse, "description": "Success"},
-        400: {"model": Error, "description": "Bad request"},
-        422: {"model": HTTPValidationError, "description": "Validation error"},
+        200: {"model": OpportunitiesSearchResponseSchema, "description": "Success"},
+        422: {"model": ErrorSchema, "description": "The server cannot parse the request"},
     },
 )
 @flask_db.with_db_session()
 def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict, int]:
     """Search for opportunities based on the provided filters."""
-    # Parse request body
+
+    # Validate input
+    request_schema = OpportunitySearchRequestSchema()
     try:
-        request_data = json_data if json_data else {}
-
-        # Create search request object
-        search_request = OpportunitySearchRequest.model_validate(request_data)
+        request_object = request_schema.load(json_data)
+        search_request = OpportunitySearchRequest(**request_object)
     except Exception as e:
-        # Return proper CommonGrants error format
-        error_response = {
-            "status": 400,
-            "message": f"Invalid request format: {str(e)}",
-            "errors": [{"field": "request", "message": str(e), "type": "validation_error"}]
-        }
-        return error_response, 400
-
-    # Create service and search opportunities
-    opportunity_service = CommonGrantsOpportunityService(db_session)
-    response = opportunity_service.search_opportunities(
+        return generate_422_error(e)
+    
+    # Create service and get query result
+    service = CommonGrantsOpportunityService(db_session)
+    response_object = service.search_opportunities(
         filters=search_request.filters,
         sorting=search_request.sorting,
         pagination=search_request.pagination,
         search=search_request.search,
     )
     
-    # Convert Pydantic response to JSON
-    json_data = response.model_dump(by_alias=True, mode="json")
-    
-    # Hydrate marshmallow schema
-    schema = OpportunitiesSearchResponse()
-    marshmallow_data = schema.load(json_data)
-    
-    # Dump marshmallow data to JSON-serializable format
-    return schema.dump(marshmallow_data), 200
+    # Hydrate schema
+    response_json = response_object.model_dump(by_alias=True, mode="json")
+    response_schema = OpportunitiesSearchResponseSchema()
+    validated_data = response_schema.load(response_json)
+    return validated_data, 200
