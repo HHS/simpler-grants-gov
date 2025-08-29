@@ -3,17 +3,17 @@
 import logging
 from uuid import UUID
 
-from common_grants_sdk.schemas import (
+from common_grants_sdk.schemas.pydantic import (
     FilterInfo,
     OppFilters,
     OpportunitiesListResponse,
     OpportunitiesSearchResponse,
-    OpportunityBase,
+    OpportunityResponse,
     PaginatedBodyParams,
     PaginatedResultsInfo,
     SortedResultsInfo,
 )
-from common_grants_sdk.schemas.sorting import OppSortBy, OppSorting
+from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, OppSorting
 from sqlalchemy.orm import Session, selectinload
 
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
@@ -30,7 +30,7 @@ class CommonGrantsOpportunityService:
         """Initialize the service."""
         self.db_session = db_session
 
-    def get_opportunity(self, opportunity_id: str) -> OpportunityBase | None:
+    def get_opportunity(self, opportunity_id: str) -> OpportunityResponse | None:
         """Get a specific opportunity by ID."""
         try:
             opportunity_uuid = UUID(opportunity_id)
@@ -50,7 +50,13 @@ class CommonGrantsOpportunityService:
             if not opportunity:
                 return None
 
-            return transform_opportunity_to_common_grants(opportunity)
+            opportunity_data = transform_opportunity_to_common_grants(opportunity)
+
+            return OpportunityResponse(
+                status=200,
+                message="Success",
+                data=opportunity_data,
+            )
         except ValueError:
             return None
 
@@ -113,18 +119,16 @@ class CommonGrantsOpportunityService:
         if pagination is None:
             pagination = PaginatedBodyParams()
 
-        # Build search query using existing search functionality
-        # This is a simplified approach - in practice, you'd want to map
-        # CommonGrants filters to the existing search system
+        # Build search query
         query = self.db_session.query(Opportunity)
 
-        # Apply search text if provided
+        # Apply search text
         if search:
             query = query.filter(Opportunity.opportunity_title.ilike(f"%{search}%"))
 
-        # Apply status filter if provided
+        # Apply status filter
         if filters.status and filters.status.value:
-            from common_grants_sdk.schemas.models.opp_status import OppStatusOptions
+            from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
 
             status_mapping = {
                 OppStatusOptions.FORECASTED: "forecasted",
@@ -137,18 +141,16 @@ class CommonGrantsOpportunityService:
             status_value = filters.status.value[0] if filters.status.value else None
             db_status = status_mapping.get(status_value)
             if db_status:
+                # Map string to enum
                 from src.constants.lookup_constants import OpportunityStatus
 
-                # Map the string back to the enum
-                status_enum = None
-                if db_status == "forecasted":
-                    status_enum = OpportunityStatus.FORECASTED
-                elif db_status == "posted":
-                    status_enum = OpportunityStatus.POSTED
-                elif db_status == "closed":
-                    status_enum = OpportunityStatus.CLOSED
-                elif db_status == "archived":
-                    status_enum = OpportunityStatus.ARCHIVED
+                status_mapping = {
+                    "forecasted": OpportunityStatus.FORECASTED,
+                    "posted": OpportunityStatus.POSTED,
+                    "closed": OpportunityStatus.CLOSED,
+                    "archived": OpportunityStatus.ARCHIVED,
+                }
+                status_enum = status_mapping.get(db_status)
 
                 if status_enum:
                     query = query.join(CurrentOpportunitySummary).filter(
@@ -185,12 +187,32 @@ class CommonGrantsOpportunityService:
         )
 
         sorted_info = SortedResultsInfo(
-            sort_by=sorting.sort_by,
+            sort_by=sorting.sort_by.value,  # Convert enum to string
             sort_order=sorting.sort_order,
+            errors=[],
         )
 
+        # Build applied filters using the utility function pattern
+        applied_filters = {}
+        if filters:
+            if filters.status is not None:
+                applied_filters["status"] = filters.status.model_dump()
+            if filters.close_date_range is not None:
+                applied_filters["closeDateRange"] = filters.close_date_range.model_dump()
+            if filters.total_funding_available_range is not None:
+                applied_filters["totalFundingAvailableRange"] = (
+                    filters.total_funding_available_range.model_dump()
+                )
+            if filters.min_award_amount_range is not None:
+                applied_filters["minAwardAmountRange"] = filters.min_award_amount_range.model_dump()
+            if filters.max_award_amount_range is not None:
+                applied_filters["maxAwardAmountRange"] = filters.max_award_amount_range.model_dump()
+            if filters.custom_filters is not None:
+                applied_filters["customFilters"] = filters.custom_filters
+
         filter_info = FilterInfo(
-            filters=filters.model_dump() if filters else {},
+            filters=applied_filters,
+            errors=[],
         )
 
         return OpportunitiesSearchResponse(
