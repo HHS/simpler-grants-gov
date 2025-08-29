@@ -8,7 +8,7 @@ from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunitiesListResponse,
     OpportunitiesSearchResponse,
-    OpportunityBase,
+    OpportunityResponse,
     PaginatedBodyParams,
     PaginatedResultsInfo,
     SortedResultsInfo,
@@ -30,7 +30,7 @@ class CommonGrantsOpportunityService:
         """Initialize the service."""
         self.db_session = db_session
 
-    def get_opportunity(self, opportunity_id: str) -> OpportunityBase | None:
+    def get_opportunity(self, opportunity_id: str) -> OpportunityResponse | None:
         """Get a specific opportunity by ID."""
         try:
             opportunity_uuid = UUID(opportunity_id)
@@ -50,7 +50,13 @@ class CommonGrantsOpportunityService:
             if not opportunity:
                 return None
 
-            return transform_opportunity_to_common_grants(opportunity)
+            opportunity_data = transform_opportunity_to_common_grants(opportunity)
+            
+            return OpportunityResponse(
+                status=200,
+                message="Success",
+                data=opportunity_data,
+            )
         except ValueError:
             return None
 
@@ -185,12 +191,30 @@ class CommonGrantsOpportunityService:
         )
 
         sorted_info = SortedResultsInfo(
-            sort_by=sorting.sort_by,
+            sort_by=sorting.sort_by.value,  # Convert enum to string
             sort_order=sorting.sort_order,
+            errors=[],
         )
 
+        # Build applied filters using the utility function pattern
+        applied_filters = {}
+        if filters:
+            if filters.status is not None:
+                applied_filters["status"] = filters.status.model_dump()
+            if filters.close_date_range is not None:
+                applied_filters["closeDateRange"] = filters.close_date_range.model_dump()
+            if filters.total_funding_available_range is not None:
+                applied_filters["totalFundingAvailableRange"] = filters.total_funding_available_range.model_dump()
+            if filters.min_award_amount_range is not None:
+                applied_filters["minAwardAmountRange"] = filters.min_award_amount_range.model_dump()
+            if filters.max_award_amount_range is not None:
+                applied_filters["maxAwardAmountRange"] = filters.max_award_amount_range.model_dump()
+            if filters.custom_filters is not None:
+                applied_filters["customFilters"] = filters.custom_filters
+
         filter_info = FilterInfo(
-            filters=filters.model_dump() if filters else {},
+            filters=applied_filters,
+            errors=[],
         )
 
         return OpportunitiesSearchResponse(
