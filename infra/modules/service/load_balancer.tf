@@ -112,7 +112,7 @@ resource "aws_lb_listener" "alb_listener_https" {
 resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs" {
   for_each = toset(var.enable_load_balancer ? var.optional_extra_alb_certs : [])
 
-  listener_arn    = aws_lb_listener.alb_listener_https[1].arn
+  listener_arn    = aws_lb_listener.alb_listener_https[0].arn
   certificate_arn = each.value
 }
 
