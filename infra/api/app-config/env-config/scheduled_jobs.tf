@@ -18,6 +18,7 @@ locals {
       "--transform",
       "--set-current",
       "--store-version"
+      "--sync"
     ],
     staging = [
       "poetry",
@@ -29,6 +30,7 @@ locals {
       "--transform",
       "--set-current",
       "--store-version"
+      "--sync"
     ],
     prod = [
       "poetry",
