@@ -13,16 +13,16 @@ This CLI script supports two major syncing workflows:
 
 To populate the Fider board with GitHub issues that have the label `Coplanning Proposal`, you can manually trigger the "Co-planning: Sync GitHub to Fider" workflow.
 
-Behind the scenes this workflow makes the following CLI calls:
+Behind the scenes this workflow makes the following CLI call:
 
 ```bash
 python run.py \
     --org "HHS" \
     --repo "simpler-grants-gov" \
     --label "Coplanning Proposal" \
-    --issue-section Summary \
-    --platform fider \
-    --sync-direction github-to-platform \
+    --issue-section "Summary" \
+    --platform "fider" \
+    --sync-direction "github-to-platform" \
     --update-existing
 ```
 
@@ -30,17 +30,16 @@ python run.py \
 
 By default, this workflow will run once a day at 12:00 AM UTC. You can manually trigger the "Co-planning: Sync Fider to GitHub" workflow to update the GitHub issue description with the Fider post description and the vote count.
 
-Behind the scenes this workflow makes the following CLI calls:
+Behind the scenes this workflow makes the following CLI call. Note that it's basically the same as the GitHub to Fider sync workflow but with the sync direction reversed (i.e. `platform-to-github`).
 
 ```bash
 python run.py \
     --org "HHS" \
     --repo "simpler-grants-gov" \
     --label "Coplanning Proposal" \
-    --issue-section Summary \
-    --platform fider \
-    --sync-direction platform-to-github \
-    --update-existing
+    --issue-section "Summary" \
+    --platform "fider" \
+    --sync-direction "platform-to-github"
 ```
 
 ## Configuring the sync behavior
