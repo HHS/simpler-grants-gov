@@ -28,10 +28,11 @@ def log(message: str) -> None:
     logger.info(message)
 
 
-def err(message: str) -> None:
+def err(message: str, *, exit: bool = True) -> None:
     """Log an error message and exit."""
     logger.error(message)
-    sys.exit(1)
+    if exit:
+        sys.exit(1)
 
 
 # #######################################################
@@ -44,7 +45,6 @@ def get_env(name: str) -> str:
     value = os.environ.get(name)
     if not value:
         err(f"{name} environment variable must be set")
-        sys.exit(1)
     return value
 
 
@@ -73,13 +73,10 @@ def make_request(
             return json.loads(response.read().decode())
     except urllib.request.HTTPError as e:
         err(f"HTTP request failed: {e.code} - {e.reason}")
-        sys.exit(1)
     except json.JSONDecodeError:
         err("Failed to parse JSON response")
-        sys.exit(1)
     except Exception as e:
         err(f"Request failed: {e}")
-        sys.exit(1)
 
 
 # #######################################################
