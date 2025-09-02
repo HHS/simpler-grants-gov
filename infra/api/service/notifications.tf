@@ -1,19 +1,19 @@
 locals {
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
-#   domain_identity_arn = local.notifications_config != null ? (
-#     !local.is_temporary ?
-    domain_identity_arn = null
-#     module.notifications_email_domain[0].domain_identity_arn :
-#     module.existing_notifications_email_domain[0].domain_identity_arn
-#   ) : null
-#   notifications_environment_variables = local.notifications_config != null ? {
-#     AWS_PINPOINT_APP_ID = module.notifications[0].app_id
-#   } : {}
+  #   domain_identity_arn = local.notifications_config != null ? (
+  #     !local.is_temporary ?
+  domain_identity_arn = null
+  #     module.notifications_email_domain[0].domain_identity_arn :
+  #     module.existing_notifications_email_domain[0].domain_identity_arn
+  #   ) : null
+  #   notifications_environment_variables = local.notifications_config != null ? {
+  #     AWS_PINPOINT_APP_ID = module.notifications[0].app_id
+  #   } : {}
   notifications_environment_variables = {}
-  notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
-#   pinpoint_app_id        = module.notifications[0].app_id
-pinpoint_app_id       = 0
-  ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
+  notifications_app_name              = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
+  #   pinpoint_app_id        = module.notifications[0].app_id
+  pinpoint_app_id       = 0
+  ses_configuration_set = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
 }
 

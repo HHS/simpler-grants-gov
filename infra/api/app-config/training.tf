@@ -9,6 +9,7 @@ module "training_config" {
   s3_cdn_domain_name              = "files.training.simpler.grants.gov"
   mtls_domain_name                = "soap.training.simpler.grants.gov"
   enable_https                    = true
+  database_engine_version         = "15.10"
   has_database                    = true
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service

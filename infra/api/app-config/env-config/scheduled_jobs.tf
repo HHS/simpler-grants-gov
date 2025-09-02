@@ -31,15 +31,15 @@ locals {
       "--store-version"
     ],
     training = [
-#       "poetry",
-#       "run",
-#       "flask",
-#       "data-migration",
-#       "load-transform",
-#       "--load",
-#       "--transform",
-#       "--set-current",
-#       "--store-version"
+            "poetry",
+            "run",
+            "flask",
+            "data-migration",
+            "load-transform",
+            "--load",
+            "--transform",
+            "--set-current",
+            "--store-version"
     ],
     prod = [
       "poetry",
@@ -58,7 +58,7 @@ locals {
       task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour
       schedule_expression = "cron(0 * * * ? *)"
-      state               = "DISABLED"
+      state               = "ENABLED"
     }
     load-search-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]

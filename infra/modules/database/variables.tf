@@ -108,3 +108,9 @@ variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
 }
+
+variable "engine_version" {
+  type        = string
+  description = "Postgres database engine version"
+  default     = "15.4"
+}

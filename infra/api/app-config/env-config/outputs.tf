@@ -23,6 +23,7 @@ output "service_config" {
     instance_desired_instance_count = var.instance_desired_instance_count
     instance_scaling_max_capacity   = var.instance_scaling_max_capacity
     instance_scaling_min_capacity   = var.instance_scaling_min_capacity
+    database_engine_version         = var.database_engine_version
     instance_cpu                    = var.instance_cpu
     instance_memory                 = var.instance_memory
     service_name                    = "${local.prefix}${var.app_name}-${var.environment}"
