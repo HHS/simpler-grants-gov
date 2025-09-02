@@ -22,7 +22,7 @@ from tests.src.form_schema.rule_processing.conftest import setup_context
         # Agency name falls back to agency code if no agency
         ({"rule": "agency_name"}, {"has_agency": False, "agency_code": "XYZ-ABC"}, "XYZ-ABC"),
         # No organization get a generic INDV UEI
-        ({"rule": "uei"}, {"has_organization": False}, "000000000INDV"),
+        ({"rule": "uei"}, {"has_organization": False}, "00000000INDV"),
         # Having an organization gets the UEI
         ({"rule": "uei"}, {"has_organization": True, "uei": "123456789"}, "123456789"),
         ({"rule": "assistance_listing_number"}, {"has_assistance_listing_number": False}, None),
