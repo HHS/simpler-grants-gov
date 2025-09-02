@@ -32,6 +32,9 @@ def validate_copied_value(
         assert destination_record.transformed_at is None
         assert destination_record.deleted_at is not None
         return
+    else:
+        assert destination_record.is_deleted is False
+        assert destination_record.deleted_at is None
 
     mismatches = []
 
@@ -104,7 +107,12 @@ class TestLoadOracleData(BaseTestClass):
             opportunity_id=4, oppnumber="A-4", cfdas=[], last_upd_date=time1
         )
         StagingTopportunityFactory.create(
-            opportunity_id=6, oppnumber="A-6", cfdas=[], last_upd_date=None
+            opportunity_id=6,
+            oppnumber="A-6",
+            cfdas=[],
+            last_upd_date=None,
+            deleted_at=time1,
+            is_deleted=True,
         )
         # delete:
         StagingTopportunityFactory.create(
