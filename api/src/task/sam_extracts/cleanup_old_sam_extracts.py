@@ -61,8 +61,6 @@ class CleanupOldSamExtractsTask(Task):
                     )
 
                 except Exception:
-                    error_count += 1
-                    self.increment(self.Metrics.ERRORS_ENCOUNTERED)
                     logger.exception(
                         "Failed to cleanup old SAM.gov extract file",
                         extra={
@@ -78,8 +76,6 @@ class CleanupOldSamExtractsTask(Task):
                 "Completed cleanup of old SAM.gov extract files",
                 extra={
                     "total_files_processed": len(old_files),
-                    "files_deleted": deleted_count,
-                    "errors_encountered": error_count,
                 },
             )
 
