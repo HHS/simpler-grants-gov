@@ -326,6 +326,10 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
     def application_name(self) -> str | None:
         return self.application.application_name
 
+    @property
+    def application_status(self) -> "ApplicationStatus | None":
+        return self.application.application_status
+
 
 class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     __tablename__ = "application_attachment"
