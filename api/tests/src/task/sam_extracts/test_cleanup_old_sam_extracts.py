@@ -278,11 +278,10 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
         db_session.refresh(old_file2)
         assert old_file2.processing_status == SamGovProcessingStatus.COMPLETED
 
-        # Verify metrics were incremented for both attempts
-        assert task.increment.call_count == 2
-        # One success, one error
-        task.increment.assert_any_call(task.Metrics.FILES_DELETED_COUNT)
-        task.increment.assert_any_call(task.Metrics.ERRORS_ENCOUNTERED)
+        # Verify only the success metric was incremented (before the failure)
+        assert task.increment.call_count == 1
+        # Only the successful file cleanup incremented the metric
+        task.increment.assert_called_with(task.Metrics.FILES_DELETED_COUNT)
 
     def test_cutoff_date_calculation(self, task):
         """Test that the cutoff date is calculated correctly as 45 days ago"""

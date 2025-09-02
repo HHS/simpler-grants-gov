@@ -21,7 +21,6 @@ class CleanupOldSamExtractsTask(Task):
 
     class Metrics(StrEnum):
         FILES_DELETED_COUNT = "files_deleted_count"
-        ERRORS_ENCOUNTERED = "errors_encountered"
 
     def __init__(self, db_session: db.Session) -> None:
         super().__init__(db_session)
@@ -42,7 +41,6 @@ class CleanupOldSamExtractsTask(Task):
             logger.info(f"Found {len(old_files)} old files to cleanup")
 
             deleted_count = 0
-            error_count = 0
 
             for sam_extract_file in old_files:
                 try:
