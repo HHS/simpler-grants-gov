@@ -1,10 +1,13 @@
 import { SAVED_SEARCHES_CRUMBS } from "src/constants/breadcrumbs";
+import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
+import { FilterOption } from "src/types/search/searchFilterTypes";
 import {
   ValidSearchQueryParam,
   validSearchQueryParamKeys,
 } from "src/types/search/searchQueryTypes";
+import { agencyToFilterOption } from "src/utils/search/filterUtils";
 import { searchToQueryParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
@@ -47,6 +50,7 @@ export default async function SavedSearchQueries({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "SavedSearches" });
   let savedSearches;
+  let agencyOptions: FilterOption[] = [];
 
   const paramDisplayMapping = validSearchQueryParamKeys.reduce(
     (mapping, key) => {
@@ -71,11 +75,20 @@ export default async function SavedSearchQueries({
     );
   }
 
+  try {
+    const agencies = await performAgencySearch();
+    agencyOptions = agencies.map(agencyToFilterOption);
+  } catch (e) {
+    console.error("Unable to fetch agencies list for saved search display", e);
+  }
+
   const formattedSavedSearches = savedSearches.map((search) => ({
     searchParams: searchToQueryParams(search.search_query),
     name: search.name,
     id: search.saved_search_id,
   }));
+
+  // fetch agencies list and pass down, hopefully it will be cached if already fetched from search page
 
   return (
     <>
@@ -92,6 +105,7 @@ export default async function SavedSearchQueries({
             paramDisplayMapping={paramDisplayMapping}
             editText={t("edit")}
             deleteText={t("delete")}
+            agencyOptions={agencyOptions}
           />
         ) : (
           <NoSavedSearches />

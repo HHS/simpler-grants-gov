@@ -1,9 +1,15 @@
 import { omit } from "lodash";
+import { allFilterOptions } from "src/constants/searchFilterOptions";
+import {
+  FilterOption,
+  HardcodedFrontendFilterNames,
+} from "src/types/search/searchFilterTypes";
 import {
   ValidSearchQueryParam,
   ValidSearchQueryParamData,
 } from "src/types/search/searchQueryTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
+import { getFilterOptionLabel } from "src/utils/search/filterUtils";
 
 import Link from "next/link";
 
@@ -11,20 +17,56 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSearchModal";
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 
+type ParamMapping = { [key in ValidSearchQueryParam]: string };
+
+const toSavedSearchFilterDisplayValues = (
+  mapping: ParamMapping,
+  backendFilterValues: ValidSearchQueryParamData,
+  agencyOptions: FilterOption[],
+): { [filterKey: string]: string } => {
+  return Object.entries(omit(mapping, ["page"])).reduce(
+    (acc, [key, paramDisplay]) => {
+      const value = backendFilterValues[key as ValidSearchQueryParam];
+      if (!value) {
+        return acc;
+      }
+      let displayValue = "";
+      if (key === "query" || key === "andOr") {
+        displayValue = value;
+      } else {
+        // might get a number here
+        const rawValues = value?.toString().split(",");
+        const displayOptions = key.toLowerCase().includes("agency")
+          ? agencyOptions
+          : allFilterOptions[key as HardcodedFrontendFilterNames];
+        const displayValues = rawValues?.map((value) =>
+          getFilterOptionLabel(value, displayOptions),
+        );
+        displayValue = displayValues.join(", ");
+      }
+      acc[paramDisplay] = displayValue;
+      return acc;
+    },
+    {} as { [filterKey: string]: string },
+  );
+};
+
 export const SavedSearchesList = ({
   savedSearches,
   paramDisplayMapping,
   editText,
   deleteText,
+  agencyOptions,
 }: {
   savedSearches: {
     name: string;
     id: string;
     searchParams: ValidSearchQueryParamData;
   }[];
-  paramDisplayMapping: { [key in ValidSearchQueryParam]: string };
+  paramDisplayMapping: ParamMapping;
   editText: string;
   deleteText: string;
+  agencyOptions: FilterOption[];
 }) => {
   return (
     <ul className="usa-list--unstyled grid-container">
@@ -69,18 +111,20 @@ export const SavedSearchesList = ({
               className="grid-row flex-column"
               data-testid="saved-search-definition"
             >
-              {Object.entries(omit(paramDisplayMapping, "page")).map(
-                ([key, paramDisplay]) => {
-                  const value =
-                    savedSearch.searchParams[key as ValidSearchQueryParam];
-                  return value ? (
-                    <div key={key}>
-                      <span className="text-bold">{paramDisplay}: </span>
-                      <span>{value.toString().replaceAll(",", ", ")}</span>
-                    </div>
-                  ) : null;
-                },
-              )}
+              {Object.entries(
+                toSavedSearchFilterDisplayValues(
+                  paramDisplayMapping,
+                  savedSearch.searchParams,
+                  agencyOptions,
+                ),
+              ).map(([key, value]) => {
+                return (
+                  <div key={key}>
+                    <span className="text-bold">{key}: </span>
+                    <span>{value}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </li>

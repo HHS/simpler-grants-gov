@@ -133,7 +133,7 @@ export const getFilterOptionLabel = (
 ) => {
   const option = options.find((option) => option.value === value);
   if (!option) {
-    console.error(`Pill label not found for ${value}`);
+    console.error(`Label not found for ${value}`);
     return "";
   }
   return option.label;
