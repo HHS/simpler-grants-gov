@@ -142,9 +142,6 @@ def sync_fider_to_github(args: CliArgs) -> None:
         dry_run=args.dry_run,
     )
 
-    if args.dry_run:
-        log("Dry run: Would update GitHub issues from Fider posts")
-
 
 # #######################################################
 # Main
