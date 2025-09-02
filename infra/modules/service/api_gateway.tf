@@ -113,6 +113,7 @@ resource "aws_api_gateway_rest_api" "api" {
     }
   })
   # checkov:skip=CKV_AWS_237: Create before destroy is defined in deployment below
+  put_rest_api_mode = "merge"
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
@@ -121,10 +122,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
 
   triggers = {
-    redeployment = sha1(
-      # Redeploys whenever this file is changed
-      filesha1("${abspath(path.module)}/api_gateway.tf")
-    )
+    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.api[0].body))
   }
 
   lifecycle {
