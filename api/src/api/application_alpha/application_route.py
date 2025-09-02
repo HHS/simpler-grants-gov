@@ -251,7 +251,6 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     user = token_session.user
 
     with db_session.begin():
-        # Submit the application
         submit_application(db_session, application_id, user)
 
     # Return success response
