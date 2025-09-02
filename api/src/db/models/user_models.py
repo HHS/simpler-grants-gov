@@ -297,9 +297,8 @@ class LinkRoleRoleType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_role_role_type"
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
-    # role_type_id: Mapped[int] = mapped_column(ForeignKey(LkRoleType.role_type_id), primary_key=True)
-
     role: Mapped[Role] = relationship(Role)
+
     role_type: Mapped[RoleType] = mapped_column(
         "role_type_id",
         LookupColumn(LkRoleType),
@@ -313,11 +312,8 @@ class LinkRolePrivilege(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_role_privilege"
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
-    # privilege_id: Mapped[uuid.UUID] = mapped_column(
-    #     ForeignKey(LkPrivilege.privilege_id), primary_key=True
-    # )
-
     role: Mapped[Role] = relationship(Role)
+
     privilege: Mapped[Privilege] = mapped_column(
         "privilege_id",
         LookupColumn(LkPrivilege),
