@@ -154,8 +154,9 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
             s3_path="s3://bucket/path/to/file.zip",
         )
 
-        # Cleanup the file
-        task._cleanup_file(old_file)
+        # Cleanup the file within a transaction context
+        with db_session.begin():
+            task._cleanup_file(old_file)
 
         # Verify the file was deleted from S3
         mock_delete_file.assert_called_once_with("s3://bucket/path/to/file.zip")
@@ -240,7 +241,7 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
 
     @patch("src.util.file_util.delete_file")
     def test_run_task_with_mixed_success_and_failure(self, mock_delete_file, task, db_session):
-        """Test running the task with some files succeeding and some failing"""
+        """Test running the task fails fast when any file cleanup fails"""
         # Create old files
         old_date = date.today() - timedelta(days=50)
         old_file1 = SamExtractFileFactory.create(
@@ -265,14 +266,15 @@ class TestCleanupOldSamExtractsTask(BaseTestClass):
 
         mock_delete_file.side_effect = delete_file_side_effect
 
-        # Run the task
-        task.run_task()
+        # Run the task and expect it to raise an exception
+        with pytest.raises(Exception, match="S3 error"):
+            task.run_task()
 
-        # Verify first file was processed successfully
+        # Verify that both files remain in their original state due to transaction rollback
+        # When an exception occurs within the transaction, all changes are rolled back
         db_session.refresh(old_file1)
-        assert old_file1.processing_status == SamGovProcessingStatus.DELETED
+        assert old_file1.processing_status == SamGovProcessingStatus.COMPLETED
 
-        # Verify second file was not processed (due to error)
         db_session.refresh(old_file2)
         assert old_file2.processing_status == SamGovProcessingStatus.COMPLETED
 

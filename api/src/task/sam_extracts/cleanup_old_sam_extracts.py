@@ -30,54 +30,58 @@ class CleanupOldSamExtractsTask(Task):
         """Main task logic to cleanup old SAM.gov extract files"""
         logger.info("Starting cleanup of old SAM.gov extract files")
 
-        # Get files older than 45 days that aren't already deleted
-        old_files = self._get_old_files_to_cleanup()
+        with self.db_session.begin():
 
-        if not old_files:
-            logger.info("No old files found to cleanup")
-            return
+            # Get files older than 45 days that aren't already deleted
+            old_files = self._get_old_files_to_cleanup()
 
-        logger.info(f"Found {len(old_files)} old files to cleanup")
+            if not old_files:
+                logger.info("No old files found to cleanup")
+                return
 
-        deleted_count = 0
-        error_count = 0
+            logger.info(f"Found {len(old_files)} old files to cleanup")
 
-        for sam_extract_file in old_files:
-            try:
-                self._cleanup_file(sam_extract_file)
-                deleted_count += 1
-                self.increment(self.Metrics.FILES_DELETED_COUNT)
+            deleted_count = 0
+            error_count = 0
 
-                logger.info(
-                    "Successfully cleaned up old SAM.gov extract file",
-                    extra={
-                        "sam_extract_file_id": sam_extract_file.sam_extract_file_id,
-                        "s3_path": sam_extract_file.s3_path,
-                        "extract_date": sam_extract_file.extract_date,
-                        "extract_type": sam_extract_file.extract_type,
-                    },
-                )
+            for sam_extract_file in old_files:
+                try:
+                    self._cleanup_file(sam_extract_file)
+                    deleted_count += 1
+                    self.increment(self.Metrics.FILES_DELETED_COUNT)
 
-            except Exception:
-                logger.exception(
-                    "Failed to cleanup old SAM.gov extract file",
-                    extra={
-                        "sam_extract_file_id": sam_extract_file.sam_extract_file_id,
-                        "s3_path": sam_extract_file.s3_path,
-                        "extract_date": sam_extract_file.extract_date,
-                        "extract_type": sam_extract_file.extract_type,
-                    },
-                )
-                raise
+                    logger.info(
+                        "Successfully cleaned up old SAM.gov extract file",
+                        extra={
+                            "sam_extract_file_id": sam_extract_file.sam_extract_file_id,
+                            "s3_path": sam_extract_file.s3_path,
+                            "extract_date": sam_extract_file.extract_date,
+                            "extract_type": sam_extract_file.extract_type,
+                        },
+                    )
 
-        logger.info(
-            "Completed cleanup of old SAM.gov extract files",
-            extra={
-                "total_files_processed": len(old_files),
-                "files_deleted": deleted_count,
-                "errors_encountered": error_count,
-            },
-        )
+                except Exception:
+                    error_count += 1
+                    self.increment(self.Metrics.ERRORS_ENCOUNTERED)
+                    logger.exception(
+                        "Failed to cleanup old SAM.gov extract file",
+                        extra={
+                            "sam_extract_file_id": sam_extract_file.sam_extract_file_id,
+                            "s3_path": sam_extract_file.s3_path,
+                            "extract_date": sam_extract_file.extract_date,
+                            "extract_type": sam_extract_file.extract_type,
+                        },
+                    )
+                    raise
+
+            logger.info(
+                "Completed cleanup of old SAM.gov extract files",
+                extra={
+                    "total_files_processed": len(old_files),
+                    "files_deleted": deleted_count,
+                    "errors_encountered": error_count,
+                },
+            )
 
     def _get_old_files_to_cleanup(self) -> Sequence[SamExtractFile]:
         """Fetch all SAM.gov extract files older than 45 days that aren't already deleted"""
@@ -103,6 +107,3 @@ class CleanupOldSamExtractsTask(Task):
 
         # Mark the record as deleted in the database
         sam_extract_file.processing_status = SamGovProcessingStatus.DELETED
-
-        # Commit the changes
-        self.db_session.commit()
