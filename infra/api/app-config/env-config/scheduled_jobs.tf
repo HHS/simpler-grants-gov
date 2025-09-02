@@ -85,5 +85,11 @@ locals {
       schedule_expression = "cron(0 13 * * ? *)"
       state               = "DISABLED"
     }
+    create-application-submission = {
+      task_command = ["poetry", "run", "flask", "task", "create-application-submission"]
+      # Every day at 2am Eastern Time during DST. 3am during non-DST.
+      schedule_expression = "cron(0 7 * * ? *)"
+      state               = "ENABLED"
+    }
   }
 }
