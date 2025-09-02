@@ -77,10 +77,10 @@ export const fakeSavedSearch = {
 export const fakeSearchQueryParamData: ValidSearchQueryParamData = {
   query: "search term",
   status: "forecasted,closed",
-  fundingInstrument: "Cooperative Agreement",
-  eligibility: "Individuals",
+  fundingInstrument: "cooperative_agreement",
+  eligibility: "individuals",
   agency: "DOC-EDA",
-  category: "Recovery Act",
+  category: "recovery_act",
   page: "1",
   sortby: "relevancy",
 };

@@ -76,7 +76,7 @@ describe("SavedSearchesList", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  it.only("renders an list item for each search result", () => {
+  it("renders an list item for each search result", () => {
     render(
       <SavedSearchesList
         agencyOptions={fakeAgencyOptions}
@@ -119,7 +119,7 @@ describe("SavedSearchesList", () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute(
       "href",
-      "/search?query=search term&status=forecasted,closed&fundingInstrument=Cooperative Agreement&eligibility=Individuals&agency=Economic Development Administration&category=Recovery Act&page=1&sortby=relevancy&savedSearch=1",
+      "/search?query=search term&status=forecasted,closed&fundingInstrument=cooperative_agreement&eligibility=individuals&agency=DOC-EDA&category=recovery_act&page=1&sortby=relevancy&savedSearch=1",
     );
 
     expect(links[1]).toHaveAttribute(
@@ -136,7 +136,7 @@ describe("SavedSearchesList", () => {
           makeSavedSearchResult({
             searchParams: {
               query: "another search term",
-              category: "Arts",
+              category: "arts",
             },
             id: "2",
           }),
@@ -154,7 +154,7 @@ describe("SavedSearchesList", () => {
     );
 
     expect(definitionOne).toHaveTextContent("query: search term");
-    expect(definitionOne).toHaveTextContent("status: forecasted, closed");
+    expect(definitionOne).toHaveTextContent("status: Forecasted, Closed");
     expect(definitionOne).toHaveTextContent(
       "fundingInstrument: Cooperative Agreement",
     );

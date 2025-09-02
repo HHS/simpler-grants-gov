@@ -218,27 +218,52 @@ export const sortOptions: FilterOption[] = [
   {
     label: "Most relevant (Default)",
     value: "relevancy",
+    id: "relevancy",
   },
-  { label: "Close date (Furthest)", value: "closeDateDesc" },
-  { label: "Close date (Soonest)", value: "closeDateAsc" },
-  { label: "Posted date (Newest)", value: "postedDateDesc" },
-  { label: "Posted date (Oldest)", value: "postedDateAsc" },
+  {
+    label: "Close date (Furthest)",
+    value: "closeDateDesc",
+    id: "closeDateDesc",
+  },
+  { label: "Close date (Soonest)", value: "closeDateAsc", id: "closeDateAsc" },
+  {
+    label: "Posted date (Newest)",
+    value: "postedDateDesc",
+    id: "postedDateDesc",
+  },
+  {
+    label: "Posted date (Oldest)",
+    value: "postedDateAsc",
+    id: "postedDateAsc",
+  },
   {
     label: "Opportunity title (A to Z)",
     value: "opportunityTitleAsc",
+    id: "opportunityTitleAsc",
   },
   {
     label: "Opportunity title (Z to A)",
     value: "opportunityTitleDesc",
+    id: "opportunityTitleDesc",
   },
-  { label: "Award minimum (Lowest)", value: "awardFloorAsc" },
-  { label: "Award minimum (Highest)", value: "awardFloorDesc" },
+  {
+    label: "Award minimum (Lowest)",
+    value: "awardFloorAsc",
+    id: "awardFloorAsc",
+  },
+  {
+    label: "Award minimum (Highest)",
+    value: "awardFloorDesc",
+    id: "awardFloorDesc",
+  },
   {
     label: "Award maximum (Lowest)",
     value: "awardCeilingAsc",
+    id: "awardCeilingAsc",
   },
   {
     label: "Award maximum (Highest)",
     value: "awardCeilingDesc",
+    id: "awardCeilingDesc",
   },
 ];

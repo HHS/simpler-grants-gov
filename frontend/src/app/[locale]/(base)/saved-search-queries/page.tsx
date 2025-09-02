@@ -88,8 +88,6 @@ export default async function SavedSearchQueries({
     id: search.saved_search_id,
   }));
 
-  // fetch agencies list and pass down, hopefully it will be cached if already fetched from search page
-
   return (
     <>
       <GridContainer>

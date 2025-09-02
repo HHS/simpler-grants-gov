@@ -1,5 +1,3 @@
-import { omit } from "lodash";
-import { allFilterOptions } from "src/constants/searchFilterOptions";
 import {
   FilterOption,
   HardcodedFrontendFilterNames,
@@ -27,7 +25,6 @@ const toSavedSearchFilterDisplayValues = (
   backendFilterValues: ValidSearchQueryParamData,
   agencyOptions: FilterOption[],
 ): { [filterKey: string]: string } => {
-  // const relevantMapping: ParamMapping = omit(mapping, ["page"]);
   return Object.entries(mapping).reduce(
     (acc, [key, paramDisplay]) => {
       const value = backendFilterValues[key as ValidSearchQueryParam];

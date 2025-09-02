@@ -2,7 +2,6 @@
 
 import { sortOptions } from "src/constants/searchFilterOptions";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { SortOption } from "src/types/search/searchSortTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
