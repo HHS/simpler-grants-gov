@@ -49,17 +49,8 @@ def _add_application_metadata_to_logs(application: Application) -> None:
     extra_data: dict[str, str | UUID | None]] = {
         "organization_id": application.organization_id,
         "competition_id": application.competition_id,
-        "opportunity_id": (
-            application.competition.opportunity_id
-            if application.competition and application.competition.opportunity
-            else None
-        ),
-        "agency_code": (
-            str(application.competition.opportunity.agency_code)
-            if application.competition
-            and application.competition.opportunity
-            and application.competition.opportunity.agency_code
-            else None
+        "opportunity_id": application.competition.opportunity_id
+        "agency_code": application.competition.opportunity.agency_code
         ),
     }
     add_extra_data_to_current_request_logs(extra_data)
