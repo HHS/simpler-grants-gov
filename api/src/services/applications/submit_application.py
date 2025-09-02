@@ -11,6 +11,7 @@ from src.services.applications.application_validation import (
     validate_competition_open,
     validate_forms,
 )
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
@@ -33,5 +34,8 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     # Update application status
     application.application_status = ApplicationStatus.SUBMITTED
     logger.info("Application successfully submitted")
+
+    # Add application metadata to logs
+    add_application_metadata_to_logs(application)
 
     return application

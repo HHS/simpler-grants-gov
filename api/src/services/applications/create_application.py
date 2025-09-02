@@ -20,6 +20,7 @@ from src.services.applications.application_validation import (
     validate_application_form,
     validate_competition_open,
 )
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
@@ -221,5 +222,8 @@ def create_application(
 
     # Ensure the competition relationship is loaded for the returned application
     application.competition = competition
+
+    # Add application metadata to logs
+    add_application_metadata_to_logs(application)
 
     return application

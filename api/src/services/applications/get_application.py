@@ -20,6 +20,7 @@ from src.services.applications.application_validation import (
     get_application_form_errors,
     is_form_required,
 )
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.auth_utils import check_user_application_access
 
 
@@ -85,6 +86,9 @@ def get_application(
     # Check if the user has access to the application (skip for internal users or when user is None)
     if not is_internal_user and user is not None:
         check_user_application_access(application, user)
+
+    # Add application metadata to logs
+    add_application_metadata_to_logs(application)
 
     return application
 
