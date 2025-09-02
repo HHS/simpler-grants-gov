@@ -15,12 +15,12 @@ from src.constants.lookup_constants import (
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, OrganizationUser, User
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
     validate_competition_open,
 )
-from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)

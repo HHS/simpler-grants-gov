@@ -5,13 +5,13 @@ import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_in_progress,
     validate_competition_open,
     validate_forms,
 )
-from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)

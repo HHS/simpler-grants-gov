@@ -15,12 +15,12 @@ from src.db.models.competition_models import (
 )
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
     is_form_required,
 )
-from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.auth_utils import check_user_application_access
 
 
