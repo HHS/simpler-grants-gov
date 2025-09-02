@@ -58,21 +58,17 @@ class CleanupOldSamExtractsTask(Task):
                     },
                 )
 
-            except Exception as e:
-                error_count += 1
-                self.increment(self.Metrics.ERRORS_ENCOUNTERED)
-
-                logger.error(
+            except Exception:
+                logger.exception(
                     "Failed to cleanup old SAM.gov extract file",
                     extra={
                         "sam_extract_file_id": sam_extract_file.sam_extract_file_id,
                         "s3_path": sam_extract_file.s3_path,
                         "extract_date": sam_extract_file.extract_date,
                         "extract_type": sam_extract_file.extract_type,
-                        "error": str(e),
                     },
-                    exc_info=True,
                 )
+                raise
 
         logger.info(
             "Completed cleanup of old SAM.gov extract files",
