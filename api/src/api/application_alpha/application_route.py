@@ -45,9 +45,8 @@ logger = logging.getLogger(__name__)
 
 def _add_application_metadata_to_logs(application: Application) -> None:
     """Add application metadata to the current request logs for New Relic dashboards."""
-    from typing import Dict, Union
 
-    extra_data: Dict[str, Union[str, int, float, bool, UUID, None]] = {
+    extra_data: dict[str, str | UUID | None]] = {
         "organization_id": application.organization_id,
         "competition_id": application.competition_id,
         "opportunity_id": (
