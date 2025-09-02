@@ -79,11 +79,19 @@ export const fakeSearchQueryParamData: ValidSearchQueryParamData = {
   status: "forecasted,closed",
   fundingInstrument: "Cooperative Agreement",
   eligibility: "Individuals",
-  agency: "Economic Development Administration",
+  agency: "DOC-EDA",
   category: "Recovery Act",
   page: "1",
   sortby: "relevancy",
 };
+
+export const fakeAgencyOptions: FilterOption[] = [
+  {
+    id: "1",
+    label: "Economic Development Administration",
+    value: "DOC-EDA",
+  },
+];
 
 const fakePaginationInfo: PaginationInfo = {
   order_by: "opportunity_number",
@@ -159,6 +167,7 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+
 export const filterOptionsWithChildren = [
   {
     id: "AGNC",

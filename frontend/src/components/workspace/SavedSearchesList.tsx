@@ -9,7 +9,10 @@ import {
   ValidSearchQueryParamData,
 } from "src/types/search/searchQueryTypes";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
-import { getFilterOptionLabel } from "src/utils/search/filterUtils";
+import {
+  getFilterOptionLabel,
+  optionsForSearchParamKey,
+} from "src/utils/search/filterUtils";
 
 import Link from "next/link";
 
@@ -24,10 +27,11 @@ const toSavedSearchFilterDisplayValues = (
   backendFilterValues: ValidSearchQueryParamData,
   agencyOptions: FilterOption[],
 ): { [filterKey: string]: string } => {
-  return Object.entries(omit(mapping, ["page"])).reduce(
+  // const relevantMapping: ParamMapping = omit(mapping, ["page"]);
+  return Object.entries(mapping).reduce(
     (acc, [key, paramDisplay]) => {
       const value = backendFilterValues[key as ValidSearchQueryParam];
-      if (!value) {
+      if (!value || key === "page") {
         return acc;
       }
       let displayValue = "";
@@ -36,9 +40,10 @@ const toSavedSearchFilterDisplayValues = (
       } else {
         // might get a number here
         const rawValues = value?.toString().split(",");
-        const displayOptions = key.toLowerCase().includes("agency")
-          ? agencyOptions
-          : allFilterOptions[key as HardcodedFrontendFilterNames];
+        const displayOptions = optionsForSearchParamKey(
+          key as HardcodedFrontendFilterNames,
+          agencyOptions,
+        );
         const displayValues = rawValues?.map((value) =>
           getFilterOptionLabel(value, displayOptions),
         );

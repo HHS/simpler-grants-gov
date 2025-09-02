@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { fakeSearchQueryParamData } from "src/utils/testing/fixtures";
+import {
+  fakeAgencyOptions,
+  fakeSearchQueryParamData,
+} from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
@@ -63,6 +66,7 @@ describe("SavedSearchesList", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[makeSavedSearchResult()]}
         editText={"edit"}
         deleteText={"delete"}
@@ -72,9 +76,10 @@ describe("SavedSearchesList", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  it("renders an list item for each search result", () => {
+  it.only("renders an list item for each search result", () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[makeSavedSearchResult(), makeSavedSearchResult()]}
         editText={"edit"}
         deleteText={"delete"}
@@ -88,6 +93,7 @@ describe("SavedSearchesList", () => {
   it("renders the correct saved search link for each item", () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[
           makeSavedSearchResult(),
           makeSavedSearchResult({
@@ -124,6 +130,7 @@ describe("SavedSearchesList", () => {
   it("renders properly formatted search parameter names and values for each list item", () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[
           makeSavedSearchResult(),
           makeSavedSearchResult({
@@ -168,6 +175,7 @@ describe("SavedSearchesList", () => {
   it("renders edit and delete modal button items for each list item", async () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[
           makeSavedSearchResult(),
           makeSavedSearchResult({

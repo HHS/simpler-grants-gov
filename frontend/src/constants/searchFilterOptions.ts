@@ -213,3 +213,32 @@ export const allFilterOptions = {
   category: categoryOptions,
   fundingInstrument: fundingOptions,
 };
+
+export const sortOptions: FilterOption[] = [
+  {
+    label: "Most relevant (Default)",
+    value: "relevancy",
+  },
+  { label: "Close date (Furthest)", value: "closeDateDesc" },
+  { label: "Close date (Soonest)", value: "closeDateAsc" },
+  { label: "Posted date (Newest)", value: "postedDateDesc" },
+  { label: "Posted date (Oldest)", value: "postedDateAsc" },
+  {
+    label: "Opportunity title (A to Z)",
+    value: "opportunityTitleAsc",
+  },
+  {
+    label: "Opportunity title (Z to A)",
+    value: "opportunityTitleDesc",
+  },
+  { label: "Award minimum (Lowest)", value: "awardFloorAsc" },
+  { label: "Award minimum (Highest)", value: "awardFloorDesc" },
+  {
+    label: "Award maximum (Lowest)",
+    value: "awardCeilingAsc",
+  },
+  {
+    label: "Award maximum (Highest)",
+    value: "awardCeilingDesc",
+  },
+];

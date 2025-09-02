@@ -28,7 +28,7 @@ export type HardcodedFrontendFilterNames = Exclude<
 
 export interface FilterOption {
   children?: FilterOption[];
-  id: string;
+  id?: string;
   isChecked?: boolean;
   label: string;
   value: string;

@@ -1,4 +1,7 @@
-import { allFilterOptions } from "src/constants/searchFilterOptions";
+import {
+  allFilterOptions,
+  sortOptions,
+} from "src/constants/searchFilterOptions";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -8,7 +11,23 @@ import {
   RelevantAgencyRecord,
   searchFilterNames,
 } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+
+export const optionsForSearchParamKey = (
+  key: ValidSearchQueryParam,
+  agencyOptions: FilterOption[],
+): FilterOption[] => {
+  switch (key) {
+    case "agency":
+    case "topLevelAgency":
+      return agencyOptions;
+    case "sortby":
+      return sortOptions;
+    default:
+      return allFilterOptions[key as HardcodedFrontendFilterNames];
+  }
+};
 
 export const alphabeticalOptionSort = (
   firstOption: FilterOption,
