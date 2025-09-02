@@ -1023,7 +1023,7 @@ def test_application_form_get_success(
         response.json["data"]["application_name"] == application_form.application.application_name
     )
     # Verify application_status field is included and has the expected value
-    assert response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS.value
+    assert response.json["data"]["application_status"] == ApplicationStatus.IN_PROGRESS
 
 
 def test_application_form_get_application_not_found(
@@ -3522,4 +3522,4 @@ def test_application_form_get_with_submitted_application_status(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
     # Verify application_status field reflects the submitted status
-    assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED.value
+    assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED
