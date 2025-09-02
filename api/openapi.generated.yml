@@ -4170,6 +4170,16 @@ components:
           type: string
           description: The name of the application
           example: My Research Grant Application
+        application_status:
+          description: Current status of the application
+          example: !!python/object/apply:src.constants.lookup_constants.ApplicationStatus
+          - in_progress
+          enum:
+          - in_progress
+          - submitted
+          - accepted
+          type:
+          - string
     ApplicationUser:
       type: object
       properties:
