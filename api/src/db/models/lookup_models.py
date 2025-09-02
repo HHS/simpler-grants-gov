@@ -14,6 +14,8 @@ from src.constants.lookup_constants import (
     JobStatus,
     OpportunityCategory,
     OpportunityStatus,
+    Privilege,
+    RoleType,
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
@@ -177,6 +179,28 @@ APPLICATION_STATUS_CONFIG = LookupConfig(
         LookupStr(ApplicationStatus.IN_PROGRESS, 1),
         LookupStr(ApplicationStatus.SUBMITTED, 2),
         LookupStr(ApplicationStatus.ACCEPTED, 3),
+    ]
+)
+
+PRIVILEGE_CONFIG = LookupConfig(
+    [
+        LookupStr(Privilege.MANAGE_ORG_MEMBERS, 1),
+        LookupStr(Privilege.MANAGE_ORG_ADMIN_MEMBERS, 2),
+        LookupStr(Privilege.VIEW_ORG_MEMBERSHIP, 3),
+        LookupStr(Privilege.START_APPLICATION, 4),
+        LookupStr(Privilege.LIST_APPLICATION, 5),
+        LookupStr(Privilege.VIEW_APPLICATION, 6),
+        LookupStr(Privilege.MODIFY_APPLICATION, 7),
+        LookupStr(Privilege.SUBMIT_APPLICATION, 8),
+    ]
+)
+
+ROLE_TYPE_CONFIG = LookupConfig(
+    [
+        LookupStr(RoleType.ORGANIZATION, 1),
+        LookupStr(RoleType.AGENCY, 2),
+        LookupStr(RoleType.INTERNAL, 3),
+        LookupStr(RoleType.APPLICATION, 4),
     ]
 )
 
@@ -400,3 +424,27 @@ class LkApplicationStatus(LookupTable, TimestampMixin):
         return LkApplicationStatus(
             application_status_id=lookup.lookup_val, description=lookup.get_description()
         )
+
+
+@LookupRegistry.register_lookup(PRIVILEGE_CONFIG)
+class LkPrivilege(LookupTable, TimestampMixin):
+    __tablename__ = "lk_privilege"
+
+    privilege_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkPrivilege":
+        return LkPrivilege(privilege_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(ROLE_TYPE_CONFIG)
+class LkRoleType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_role_type"
+
+    role_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkRoleType":
+        return LkRoleType(role_type_id=lookup.lookup_val, description=lookup.get_description())

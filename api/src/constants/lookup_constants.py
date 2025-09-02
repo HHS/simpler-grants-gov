@@ -195,3 +195,21 @@ class ApplicationFormStatus(StrEnum):
     NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
+
+
+class Privilege(StrEnum):
+    MANAGE_ORG_MEMBERS = "manage_org_members"
+    MANAGE_ORG_ADMIN_MEMBERS = "manage_org_admin_members"
+    VIEW_ORG_MEMBERSHIP = "view_org_membership"
+    START_APPLICATION = "start_application"
+    LIST_APPLICATION = "list_application"
+    VIEW_APPLICATION = "view_application"
+    MODIFY_APPLICATION = "modify_application"
+    SUBMIT_APPLICATION = "submit_application"
+
+
+class RoleType(StrEnum):
+    ORGANIZATION = "organization"
+    AGENCY = "agency"
+    INTERNAL = "internal"
+    APPLICATION = "application"

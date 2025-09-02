@@ -3,15 +3,16 @@ from datetime import datetime
 
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import ExternalUserType
+from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.lookup_models import LkExternalUserType
+from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
 
@@ -265,3 +266,62 @@ class UserApiKey(ApiSchemaTable, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     user: Mapped[User] = relationship(User, back_populates="api_keys", uselist=False)
+
+
+class Role(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "role"
+
+    role_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    role_name: Mapped[str]
+    is_core: Mapped[bool] = mapped_column(default=False)
+    link_privileges: Mapped[list["LinkRolePrivilege"]] = relationship(
+        back_populates="role", uselist=True, cascade="all, delete-orphan"
+    )
+    link_role_types: Mapped[list["LinkRoleRoleType"]] = relationship(
+        back_populates="role", uselist=True, cascade="all, delete-orphan"
+    )
+
+    privileges: AssociationProxy[set[Privilege]] = association_proxy(
+        "link_privileges",
+        "privilege",
+        creator=lambda obj: LinkRolePrivilege(privilege=obj),
+    )
+    role_types: AssociationProxy[set[RoleType]] = association_proxy(
+        "link_role_types",
+        "role_type",
+        creator=lambda obj: LinkRoleRoleType(role_type=obj),
+    )
+
+
+class LinkRoleRoleType(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "link_role_role_type"
+
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
+    # role_type_id: Mapped[int] = mapped_column(ForeignKey(LkRoleType.role_type_id), primary_key=True)
+
+    role: Mapped[Role] = relationship(Role)
+    role_type: Mapped[RoleType] = mapped_column(
+        "role_type_id",
+        LookupColumn(LkRoleType),
+        ForeignKey(LkRoleType.role_type_id),
+        primary_key=True,
+        index=True,
+    )
+
+
+class LinkRolePrivilege(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "link_role_privilege"
+
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
+    # privilege_id: Mapped[uuid.UUID] = mapped_column(
+    #     ForeignKey(LkPrivilege.privilege_id), primary_key=True
+    # )
+
+    role: Mapped[Role] = relationship(Role)
+    privilege: Mapped[Privilege] = mapped_column(
+        "privilege_id",
+        LookupColumn(LkPrivilege),
+        ForeignKey(LkPrivilege.privilege_id),
+        primary_key=True,
+        index=True,
+    )
