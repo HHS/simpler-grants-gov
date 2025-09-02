@@ -254,6 +254,13 @@ Prod login.gov does not update immediately, and you must [request a deployment](
 
 For Prod, assume it will take at least two weeks from creating the certificate, before it is available for the API, and until it is, do not change the API's configured key.
 
+## JWT Signing Certificate
+
+To sign the JWTs the API uses to track authentication with requests from the FE we need a public/private key. You can see the steps run via the Makefile for the [setup-env-overide-file.sh](https://github.com/HHS/simpler-grants-gov/blob/4c7364f051a4656a7bf2ffcfb0c8933b74b250e7/api/bin/setup-env-override-file.sh#L1) that does this locally.
+1. Generate a new public/private key pair
+2. Set them in the /api/<env>/api-jwt-private-key and /api/<env>/api-jwt-public-key parameters in the Parameter Store.
+3. Force redeploy the API Service to pick up the new values.
+
 ## New Relic
 
 There are three ways to interact with New Relic: UI, CLI, or API. Most interactions will be done via the UI.
