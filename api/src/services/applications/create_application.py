@@ -188,7 +188,7 @@ def create_application(
     # Create a new application
     application = Application(
         application_id=uuid.uuid4(),
-        competition_id=competition_id,
+        competition=competition,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
         organization_id=organization_id,  # Set the organization ID if provided
@@ -219,9 +219,6 @@ def create_application(
             "organization_id": organization_id,
         },
     )
-
-    # Ensure the competition relationship is loaded for the returned application
-    application.competition = competition
 
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
