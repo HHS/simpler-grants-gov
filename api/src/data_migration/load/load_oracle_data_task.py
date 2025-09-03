@@ -200,7 +200,14 @@ class LoadOracleDataTask(src.task.task.Task):
         ):
             update_sql = sql.build_update_sql(
                 foreign_table, staging_table, batch_of_update_ids, excluded_columns
-            ).values(transformed_at=None)
+            ).values(
+                transformed_at=None,
+                # Explicitly mark the updated row as not-deleted so that if
+                # a row is deleted and recreated with the same primary key
+                # we'll process the update
+                is_deleted=False,
+                deleted_at=None,
+            )
 
             with self.db_session.begin():
                 self.db_session.execute(update_sql)

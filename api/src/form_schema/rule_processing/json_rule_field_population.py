@@ -7,7 +7,7 @@ from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
-INDIVIDUAL_UEI = "000000000INDV"
+INDIVIDUAL_UEI = "00000000INDV"
 
 
 def get_opportunity_number(context: JsonRuleContext) -> str | None:

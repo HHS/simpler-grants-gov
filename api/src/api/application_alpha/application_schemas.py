@@ -186,6 +186,13 @@ class ApplicationFormGetResponseDataSchema(Schema):
             "example": "My Research Grant Application",
         }
     )
+    application_status = fields.Enum(
+        ApplicationStatus,
+        metadata={
+            "description": "Current status of the application",
+            "example": ApplicationStatus.IN_PROGRESS,
+        },
+    )
 
 
 class ApplicationFormUpdateResponseSchema(AbstractResponseSchema, WarningMixinSchema):
