@@ -18,6 +18,8 @@ class PdfGenerationConfig(PydanticBaseEnvConfig):
     # Whether to use mock clients (for testing/development)
     pdf_generation_use_mocks: bool
 
+    docraptor_enable_javascript: bool = False
+
 
 def get_config() -> PdfGenerationConfig:
     """Get the PDF generation configuration."""

@@ -116,6 +116,7 @@ class DocRaptorClient(BaseDocRaptorClient):
             "prince_options": {
                 "media": "print",
                 "baseurl": self.config.frontend_url,
+                "javascript": self.config.docraptor_enable_javascript,
             },
         }
 
