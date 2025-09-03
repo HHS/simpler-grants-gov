@@ -9,6 +9,7 @@ from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType
+from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
@@ -321,3 +322,60 @@ class LinkRolePrivilege(ApiSchemaTable, TimestampMixin):
         primary_key=True,
         index=True,
     )
+
+
+class InternalUserRole(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "internal_user_role"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), primary_key=True)
+    user: Mapped[User] = relationship(User)
+
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
+    role: Mapped[Role] = relationship(Role)
+
+
+class ApplicationUserRole(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_user_role"
+
+    application_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(ApplicationUser.application_user_id), primary_key=True
+    )
+    application_user: Mapped[User] = relationship(ApplicationUser)
+
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
+    role: Mapped[Role] = relationship(Role)
+
+
+class OrganizationUserRole(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "organization_user_role"
+
+    organization_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(OrganizationUser.organization_user_id), primary_key=True
+    )
+    organization_user: Mapped[User] = relationship(OrganizationUser)
+
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
+    role: Mapped[Role] = relationship(Role)
+
+
+class AgencyUser(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "agency_user"
+
+    agency_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    agency_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Agency.agency_id), index=True)
+    agency: Mapped[Agency] = relationship(Agency, back_populates="agency_users", uselist=False)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User)
+
+
+class AgencyUserRole(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "agency_user_role"
+
+    agency_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(AgencyUser.agency_user_id), primary_key=True
+    )
+    agency_user: Mapped[User] = relationship(AgencyUser)
+
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
+    role: Mapped[Role] = relationship(Role)
