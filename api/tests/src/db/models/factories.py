@@ -1018,6 +1018,26 @@ class RoleFactory(BaseFactory):
     role_types = [RoleType.APPLICATION]
 
 
+class LinkRoleRoleTypeFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkRoleRoleType
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda r: r.role.role_id)
+
+    role_type = factory.Iterator(RoleType)
+
+
+class LinkRolePrivilegeFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkRolePrivilege
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda r: r.role.role_id)
+
+    privilege = factory.Iterator(Privilege)
+
+
 ###################
 # Competition & Form Factories
 ###################
