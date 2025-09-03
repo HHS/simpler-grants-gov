@@ -51,7 +51,7 @@
     "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.21",
     "newrelic": "^12.7.0",
-    "next": "^15.2.4",
+    "next": "^15.4.7",
     "next-intl": "^3.2.1",
     "pino": "^9.6.0",
     "react": "^19.0.0",
