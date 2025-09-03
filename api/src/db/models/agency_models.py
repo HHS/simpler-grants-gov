@@ -1,5 +1,4 @@
 import uuid
-from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -16,9 +15,6 @@ from src.db.models.lookup_models import (
     LkAgencyDownloadFileType,
     LkAgencySubmissionNotificationSetting,
 )
-
-if TYPE_CHECKING:
-    from src.db.models.user_models import AgencyUser
 
 
 class AgencyContactInfo(ApiSchemaTable, TimestampMixin):
@@ -110,10 +106,6 @@ class Agency(ApiSchemaTable, TimestampMixin):
     top_level_agency: Mapped["Agency | None"] = relationship(
         lambda: Agency,
         remote_side=[agency_id],
-    )
-
-    agency_users: Mapped[list["AgencyUser"]] = relationship(
-        "AgencyUser", uselist=True, back_populates="agency", cascade="all, delete-orphan"
     )
 
 
