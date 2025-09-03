@@ -1,5 +1,9 @@
+import re
 from typing import Any
+import jsonpath_ng
+import logging
 
+logger = logging.getLogger(__name__)
 
 def build_path_str(path: list[str], index: int | None = None) -> str:
     """Build a path string for validation issues
@@ -25,7 +29,18 @@ def get_nested_value(data: dict, path: list[str]) -> Any:
                     "some_field": 10
                 },
                 "another_field": "hello"
-            }
+            },
+            "array_field": [
+              {
+                "x": 1,
+                "y": "hello"
+              },
+              {
+                "x": 3,
+                "y": "there",
+                "z": "words"
+              }
+            ]
         }
 
         Passing in the following paths would give the following values:
@@ -33,12 +48,82 @@ def get_nested_value(data: dict, path: list[str]) -> Any:
         ["path", "another_field"] -> "hello"
         [] -> Returns the whole dict back
         ["something", "that", "isn't", "a", "path"] -> None
+
+        Array Cases
+        ["array_field[]", "x"] -> [2, 3]
+        ["array_field[0]", "x"] -> 2
+        ["array_field[]", "y"] -> ["hello", "there"]
+        ["array_field[0]", "y"] -> "hello"
+        ["array_field[]", "z"] -> [None, "there"]
+        ["array_field[0]", "z"] -> None
+        ["array_field[]"] -> [{"x": 2, "y": "hello"}, {"x": 3, "y": "there", "z": "words"}] # Note this is the same as just ["array_field"] with more steps
     """
-    for part in path:
-        if isinstance(data, dict) and part in data:
-            data = data[part]
-        else:
+    if True:
+        if len(path) == 0:
+            return data
+        full_path = ".".join(path)
+        expr = jsonpath_ng.parse(full_path)
+
+        result = expr.find(data)
+        print(result)
+        if len(result) == 0:
             return None
+        if len(result) == 1 and "[*]" not in full_path:
+            return result[0].value
+
+        return [r.value for r in result]
+
+    curr_path = []
+    for part in path:
+        curr_path.append(part)
+
+        # TODO - move this mess into a function
+        match = re.search(r"\[(.*?)]$", part)
+        if match is not None:
+            if not isinstance(data, dict):
+                logger.error("TODO - bad type")
+                return None
+
+
+            field_name = part.split("[")[0]
+            if field_name not in data:
+                return None
+
+            field_value = data[field_name]
+            if not isinstance(field_value, list):
+                return None
+
+
+            print(f"HERE: {data}")
+
+            raw_index = match.group(1)
+            if raw_index == "*": # TODO - consider a * instead?
+                # TODO - iteration via some sort of recursion?
+
+                nested_path = path[len(curr_path):]
+
+                values = []
+                for item in field_value:
+                    # TODO - shortcut if curr_path == path
+                    values.append(get_nested_value(item, nested_path))
+
+                return values
+
+            else:
+                # TODO - error handling
+                index = int(raw_index)
+
+                if index > len(field_value):
+                    logger.error("TODO - bad index")
+                    return None
+
+                data = field_value[index]
+
+        else:
+            if isinstance(data, dict) and part in data:
+                data = data[part]
+            else:
+                return None
 
     return data
 

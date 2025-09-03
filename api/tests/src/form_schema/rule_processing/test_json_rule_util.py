@@ -78,6 +78,34 @@ def test_populate_nested_value_empty_path():
 def test_get_nested_value(json_data, path, expected_value):
     assert get_nested_value(json_data, path) == expected_value
 
+@pytest.mark.parametrize("path,expected_value", [
+    (["array_field[0]", "x"], 1),
+    (["array_field[*]", "x"], [1, 3]),
+    (["array_field[*]", "nested_array[*]", "a"], [10, 15, 5]),
+    (["array_field[*]", "nested_array[*]", "a", "`this`", "a"], [10, 15, 5]),
+])
+def test_get_nested_value_of_arrays(path, expected_value):
+    json_data = {
+            "array_field": [
+              {
+                "x": 1,
+                "y": "hello",
+                "nested_array": [{"a": 10}, {"a": 15}]
+              },
+              {
+                "x": 3,
+                "y": "there",
+                "z": "words",
+                "nested_array": [{"a": 5}]
+              },
+                {
+                    "nested_array": []
+                }
+            ]
+        }
+
+    assert get_nested_value(json_data, path) == expected_value
+
 
 @pytest.mark.parametrize(
     "path,index,expected_str",

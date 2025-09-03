@@ -48,6 +48,16 @@ def _process_rule_schema(context: JsonRuleContext, rule_schema: dict, path: list
         if k in handlers:
             handlers[k](context, v, path)
 
+        # TODO - need to check if the data is an array OR mark that it's an array in the rule schema somehow
+        # OR change how rule schema iteration works and don't recurse
+
+        # Let's assume we knew it was an array here, we'd have to be iterating over the
+        # actual data to know the indexes, we can't just follow the rule schemas structure by itself
+        is_array = True # TODO assume pulled out of rule schema
+        if is_array:
+            # Iterate over the list for indexes?
+            pass
+
         # If the value is a dict, recursively iterate down, extending the path
         elif isinstance(v, dict):
             _process_rule_schema(context=context, rule_schema=v, path=path + [k])
