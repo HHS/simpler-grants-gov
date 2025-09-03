@@ -1018,6 +1018,17 @@ class RoleFactory(BaseFactory):
     role_types = [RoleType.APPLICATION]
 
 
+class InternalUserRoleFactory(BaseFactory):
+    class Meta:
+        model = user_models.InternalUserRole
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda r: r.role.role_id)
+
+
 ###################
 # Competition & Form Factories
 ###################
@@ -1534,6 +1545,18 @@ class AgencyFactory(BaseFactory):
     agency_contact_info_id = factory.LazyAttribute(
         lambda a: a.agency_contact_info.agency_contact_info_id if a.agency_contact_info else None
     )
+
+
+class AgencyUserFactory(BaseFactory):
+    class Meta:
+        model = user_models.AgencyUser
+
+    agency_user_id = Generators.UuidObj
+    agency = factory.SubFactory(AgencyFactory)
+    agency_id = factory.LazyAttribute(lambda a: a.agency.agency_id)
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda u: u.user.user_id)
 
 
 ###################
@@ -2703,3 +2726,36 @@ class ExcludedOpportunityReviewFactory(BaseFactory):
     omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
     omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
     last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+
+
+class ApplicationUserRoleFactory(BaseFactory):
+    class Meta:
+        model = user_models.ApplicationUserRole
+
+    application_user = factory.SubFactory(ApplicationUserFactory)
+    application_user_id = factory.LazyAttribute(lambda o: o.application_user.application_user_id)
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+
+class OrganizationUserRoleFactory(BaseFactory):
+    class Meta:
+        model = user_models.OrganizationUserRole
+
+    organization_user = factory.SubFactory(OrganizationUserFactory)
+    organization_user_id = factory.LazyAttribute(lambda o: o.organization_user.organization_user_id)
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+
+class AgencyUserRoleFactory(BaseFactory):
+    class Meta:
+        model = user_models.AgencyUserRole
+
+    agency_user = factory.SubFactory(AgencyUserFactory)
+    agency_user_id = factory.LazyAttribute(lambda o: o.agency_user.agency_user_id)
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda r: r.role.role_id)
