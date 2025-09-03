@@ -71,7 +71,7 @@ export const messages = {
     demo: {
       title: "Simpler.Grants.gov Big Demo",
       description:
-        "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+        "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
       watchLink: "January 15, 2025",
     },
