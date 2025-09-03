@@ -47,6 +47,8 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    Privilege,
+    RoleType,
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
@@ -999,6 +1001,41 @@ class UserApiKeyFactory(BaseFactory):
 
         # Trait for unused keys
         never_used = factory.Trait(last_used=None)
+
+
+class RoleFactory(BaseFactory):
+    class Meta:
+        model = user_models.Role
+
+    role_id = Generators.UuidObj
+    role_name = factory.Faker("sentence", nb_words=3)
+    is_core = False
+    privileges = [
+        Privilege.VIEW_APPLICATION,
+        Privilege.MODIFY_APPLICATION,
+        Privilege.SUBMIT_APPLICATION,
+    ]
+    role_types = [RoleType.APPLICATION]
+
+
+class LinkRoleRoleTypeFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkRoleRoleType
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda r: r.role.role_id)
+
+    role_type = factory.Iterator(RoleType)
+
+
+class LinkRolePrivilegeFactory(BaseFactory):
+    class Meta:
+        model = user_models.LinkRolePrivilege
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda r: r.role.role_id)
+
+    privilege = factory.Iterator(Privilege)
 
 
 ###################
