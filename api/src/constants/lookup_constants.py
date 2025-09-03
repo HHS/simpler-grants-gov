@@ -177,6 +177,7 @@ class SamGovProcessingStatus(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
+    DELETED = "deleted"
 
 
 class SamGovImportType(StrEnum):
