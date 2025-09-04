@@ -7,7 +7,7 @@ import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useMemo } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -56,6 +56,49 @@ const ApplyForm = ({
   });
 
   const { formData, error, saved } = formState;
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+
+  useEffect(() => {
+    const warningText =
+      "You have unsaved changes - are you sure you wish to leave this page?";
+    const handleBeforeUnload = (event: {
+      preventDefault: () => void;
+      returnValue: string;
+    }) => {
+      console.log("unload!!!!!!!!!!!!")
+
+      if (!isDirty) return;
+      // eslint-disable-next-line no-console
+      console.log("wtf", isDirty);
+      event.preventDefault();
+      event.returnValue = warningText
+      return warningText;
+    };
+
+    const handlePopState = () => {
+      console.log("away!!!!!!!!!!!!")
+      if (!isDirty) return;
+      // eslint-disable-next-line no-alert
+      if (window.confirm(warningText)) return;
+      handleFormAction()
+      throw new Error("routeChange aborted.");
+    };
+    console.log('zzz')
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popState", handlePopState);
+    };
+  }, [isDirty]);
+
+  const handleChange = () => {
+    // eslint-disable-next-line no-console
+    console.log(isDirty);
+    setIsDirty(true);
+  };
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
@@ -72,6 +115,7 @@ const ApplyForm = ({
     <form
       className="flex-1 margin-top-2 simpler-apply-form"
       action={formAction}
+      onChange={handleChange}
       // turns off html5 validation so all error displays are consistent
       noValidate
     >
