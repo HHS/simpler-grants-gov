@@ -10,13 +10,16 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
-    SOAPFaultException,
     diff_soap_dicts,
     get_soap_response,
+    json_formatter,
+    log_local,
     wrap_envelope_dict,
+    xml_formatter,
 )
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPPayload,
+    build_xml_from_dict,
     get_envelope_dict,
     get_soap_operation_dict,
 )
@@ -81,17 +84,27 @@ class BaseSOAPClient:
             return proxy_response_schema_data
 
         try:
-            validated_proxy_response = self._get_simpler_soap_response_schema()(
+            proxy_response_payload = SOAPPayload(
+                proxy_response.data.decode(errors="replace"),
+                operation_name=self.operation_config.response_operation_name,
+                force_list_attributes=self.operation_config.force_list_attributes,
+            )
+
+            # The XML dict that includes namespaces and other attributes prior to normalization and schema validation.
+            proxy_response_dict = proxy_response_payload.to_dict()
+            log_local(
+                msg="proxy response dict pre-validation",
+                data=proxy_response_dict,
+                formatter=json_formatter,
+            )
+
+            # Validated/normalized dict from pydantic schema.
+            proxy_response_schema_dict = self._get_simpler_soap_response_schema()(
                 **get_envelope_dict(
-                    SOAPPayload(
-                        proxy_response.data.decode(errors="replace"),
-                        operation_name=self.operation_config.response_operation_name,
-                        force_list_attributes=self.operation_config.force_list_attributes,
-                    ).to_dict(),
-                    self.operation_config.response_operation_name,
+                    proxy_response_dict, self.operation_config.response_operation_name
                 )
             )  # type: ignore[misc]
-            return validated_proxy_response.to_soap_envelope_dict(
+            return proxy_response_schema_dict.to_soap_envelope_dict(
                 self.operation_config.response_operation_name
             )
         except ValidationError as e:
@@ -146,7 +159,26 @@ class BaseSOAPClient:
         XML soap response from the validated XML dicts.
         """
         proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
+        log_local(
+            msg="proxy response validated dict",
+            data=proxy_response_soap_dict,
+            formatter=json_formatter,
+        )
+
         simpler_response_soap_dict = self.get_soap_response_dict()
+        log_local(
+            msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
+        )
+
+        simpler_response_xml = build_xml_from_dict(
+            operation_name=self.operation_config.response_operation_name,
+            xml_dict=get_envelope_dict(
+                simpler_response_soap_dict, self.operation_config.response_operation_name
+            ),
+            key_namespace_config=self.operation_config.namespace_keymap,
+            namespaces=self.operation_config.namespaces,
+        )
+        log_local(msg="simpler response XML", data=simpler_response_xml, formatter=xml_formatter)
 
         # We will only run diffs for responses that do not match.
         if proxy_response_soap_dict == simpler_response_soap_dict:
@@ -154,32 +186,9 @@ class BaseSOAPClient:
         else:
             self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
 
-        try:
-            simpler_soap_response_payload = SOAPPayload(
-                soap_payload=simpler_response_soap_dict,
-                force_list_attributes=self.operation_config.force_list_attributes,
-                operation_name=self.operation_config.response_operation_name,
-            )
-        except SOAPFaultException as e:
-            # This exception block handles invalid request/response data such as missing input
-            # parameters or data types. We can still compare the error data responses to the proxy
-            # response.
-            logger.info(
-                "simpler_soap_api: Fault",
-                exc_info=True,
-                extra={
-                    "soap_api_event": LegacySoapApiEvent.INVALID_REQUEST_RESPONSE_DATA,
-                    "fault": e.fault.model_dump(),
-                },
-            )
-            simpler_soap_response_payload = SOAPPayload(e.fault.to_xml().decode())
-
-        # This will always be false until the following have been implemented:
-        # https://github.com/HHS/simpler-grants-gov/issues/5224
-        # https://github.com/HHS/simpler-grants-gov/issues/5234
         use_simpler_response = False
         return (
-            get_soap_response(data=simpler_soap_response_payload.envelope_data.envelope.encode()),
+            get_soap_response(data=simpler_response_xml),
             use_simpler_response,
         )
 

@@ -36,7 +36,7 @@ describe("SearchSortBy", () => {
       selected: true,
     });
     expect(defaultOption).toBeVisible();
-    expect(defaultOption).toHaveTextContent("sortBy.options.default");
+    expect(defaultOption).toHaveTextContent("Most relevant (Default)");
 
     expect(screen.getAllByRole("option")).toHaveLength(11);
   });
@@ -48,9 +48,7 @@ describe("SearchSortBy", () => {
       selected: true,
     });
 
-    expect(selectedOption).not.toHaveTextContent(
-      "sortBy.options.opportunityTitleDesc",
-    );
+    expect(selectedOption).not.toHaveTextContent("Opportunity title (Z to A)");
 
     fireEvent.select(screen.getByRole("combobox"), {
       target: { value: "opportunityTitleDesc" },
@@ -60,9 +58,7 @@ describe("SearchSortBy", () => {
       selected: true,
     });
 
-    expect(selectedOption).toHaveTextContent(
-      "sortBy.options.opportunityTitleDesc",
-    );
+    expect(selectedOption).toHaveTextContent("Opportunity title (Z to A)");
   });
 
   it("calls expected search update functions on change", () => {
@@ -86,9 +82,7 @@ describe("SearchSortBy", () => {
       selected: true,
     });
 
-    expect(selectedOption).not.toHaveTextContent(
-      "sortBy.options.opportunityTitleAsc",
-    );
+    expect(selectedOption).not.toHaveTextContent("Opportunity title (A to Z)");
 
     fireEvent.select(screen.getByRole("combobox"), {
       target: { value: "opportunityTitleAsc" },
@@ -98,8 +92,6 @@ describe("SearchSortBy", () => {
       selected: true,
     });
 
-    expect(selectedOption).toHaveTextContent(
-      "sortBy.options.opportunityTitleAsc",
-    );
+    expect(selectedOption).toHaveTextContent("Opportunity title (A to Z)");
   });
 });

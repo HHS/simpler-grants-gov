@@ -173,6 +173,7 @@ class TestDocRaptorClient:
                 "prince_options": {
                     "media": "print",
                     "baseurl": "http://test:3000",
+                    "javascript": False,
                 },
             }
         )
