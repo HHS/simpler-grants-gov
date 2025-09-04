@@ -1,7 +1,7 @@
 "use client";
 
+import { sortOptions } from "src/constants/searchFilterOptions";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
-import { SortOption } from "src/types/search/searchSortTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
@@ -20,35 +20,6 @@ export default function SearchSortBy({
 }: SearchSortByProps) {
   const { updateQueryParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
-
-  const SORT_OPTIONS: SortOption[] = [
-    {
-      label: t("sortBy.options.default"),
-      value: "relevancy",
-    },
-    { label: t("sortBy.options.closeDateDesc"), value: "closeDateDesc" },
-    { label: t("sortBy.options.closeDateAsc"), value: "closeDateAsc" },
-    { label: t("sortBy.options.postedDateDesc"), value: "postedDateDesc" },
-    { label: t("sortBy.options.postedDateAsc"), value: "postedDateAsc" },
-    {
-      label: t("sortBy.options.opportunityTitleAsc"),
-      value: "opportunityTitleAsc",
-    },
-    {
-      label: t("sortBy.options.opportunityTitleDesc"),
-      value: "opportunityTitleDesc",
-    },
-    { label: t("sortBy.options.awardFloorAsc"), value: "awardFloorAsc" },
-    { label: t("sortBy.options.awardFloorDesc"), value: "awardFloorDesc" },
-    {
-      label: t("sortBy.options.awardCeilingAsc"),
-      value: "awardCeilingAsc",
-    },
-    {
-      label: t("sortBy.options.awardCeilingDesc"),
-      value: "awardCeilingDesc",
-    },
-  ];
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -76,7 +47,7 @@ export default function SearchSortBy({
         value={sortby || ""}
         className="tablet:display-inline-block tablet:width-auto"
       >
-        {SORT_OPTIONS.map((option) => (
+        {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

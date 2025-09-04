@@ -10,7 +10,7 @@ on:
     - cron: "0 0 * * *" # run daily at midnight
 
 permissions:
-  issues: read
+  issues: write
 
 defaults:
   run:
