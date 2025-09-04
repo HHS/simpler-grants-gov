@@ -56,6 +56,7 @@ def _process_rule_schema(context: JsonRuleContext, rule_schema: dict, path: list
 
         print(value)
         print(len(value))
+        return
 
     # Iterate over this layer of the rule schema
     for k, v in rule_schema.items():

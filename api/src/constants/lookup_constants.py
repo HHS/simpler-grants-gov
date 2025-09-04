@@ -190,7 +190,6 @@ class ApplicationStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     SUBMITTED = "submitted"
     ACCEPTED = "accepted"
-    SOMETHING = "something"
 
 
 class ApplicationFormStatus(StrEnum):

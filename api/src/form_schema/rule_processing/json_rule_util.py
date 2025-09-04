@@ -147,28 +147,39 @@ def populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
     if len(path) == 0:
         raise ValueError("Unable to populate nested value, empty path given")
 
-    # Iterate down the path, creating dicts if one
-    # does not already exist.
-    data = json_data
-    for part in path[:-1]:
-        if part in data:
-            data = data[part]
-        else:
-            data = data.setdefault(part, {})
+    if True:
+        full_path = ".".join(path)
+        expr = jsonpath_ng.parse(full_path)
 
-        # If the data we pulled out is not a dictionary
-        # error because it means the data/configuration
-        # is out of sync
-        # For example, assume a dictionary of {"my_field": 10}
-        # and a path of ["my_field", "nested_field"] were passed in
-        # we wouldn't want to change "my_field" to a dict and erase a users answer.
-        # This is likely a configurational issue we should be alerted to.
-        if not isinstance(data, dict):
-            raise ValueError(
-                f"Unable to populate nested value, value in path is not a dictionary: {'.'.join(path)}"
-            )
+        expr.update_or_create(json_data, value)
+        print(json_data)
 
-    # Set (and override) the value
-    data[path[-1]] = value
+    # TODO - see if jsonpath can do something?
+
+    else:
+        # Iterate down the path, creating dicts if one
+        # does not already exist.
+        data = json_data
+        for part in path[:-1]:
+
+            if part in data:
+                data = data[part]
+            else:
+                data = data.setdefault(part, {})
+
+            # If the data we pulled out is not a dictionary
+            # error because it means the data/configuration
+            # is out of sync
+            # For example, assume a dictionary of {"my_field": 10}
+            # and a path of ["my_field", "nested_field"] were passed in
+            # we wouldn't want to change "my_field" to a dict and erase a users answer.
+            # This is likely a configurational issue we should be alerted to.
+            if not isinstance(data, dict):
+                raise ValueError(
+                    f"Unable to populate nested value, value in path is not a dictionary: {'.'.join(path)}"
+                )
+
+        # Set (and override) the value
+        data[path[-1]] = value
 
     return json_data

@@ -30,6 +30,10 @@ from src.form_schema.rule_processing.json_rule_util import (
         ),
         # Values can be replaced
         ({"my_name": "Sam"}, ["my_name"], "Samuel", {"my_name": "Samuel"}),
+        # Arrays can be updated
+        ({"my_array": [1, 2, 3]}, ["my_array[1]"], 25, {"my_array": [1, 25, 3]}),
+        # All values in an array can be updated
+        ({"my_array": [1, 2, 3]}, ["my_array[*]"], 25, {"my_array": [1, 25, 3]}),
     ],
 )
 def test_populate_nested_value(existing_json, path, value, expected_json):
