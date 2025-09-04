@@ -1019,26 +1019,31 @@ class RoleFactory(BaseFactory):
 
     class Params:
         is_org_role = factory.Trait(
-            privileges=[Privilege.VIEW_APPLICATION, Privilege.MODIFY_APPLICATION, Privilege.SUBMIT_APPLICATION,
-                        Privilege.MANAGE_ORG_MEMBERS, Privilege.MANAGE_ORG_ADMIN_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP],
-            role_types = [RoleType.ORGANIZATION]
+            privileges=[
+                Privilege.VIEW_APPLICATION,
+                Privilege.MODIFY_APPLICATION,
+                Privilege.SUBMIT_APPLICATION,
+                Privilege.MANAGE_ORG_MEMBERS,
+                Privilege.MANAGE_ORG_ADMIN_MEMBERS,
+                Privilege.VIEW_ORG_MEMBERSHIP,
+            ],
+            role_types=[RoleType.ORGANIZATION],
         )
 
         is_application_role = factory.Trait(
-            privileges=[Privilege.VIEW_APPLICATION, Privilege.MODIFY_APPLICATION, Privilege.SUBMIT_APPLICATION],
-            role_types=[RoleType.APPLICATION]
+            privileges=[
+                Privilege.VIEW_APPLICATION,
+                Privilege.MODIFY_APPLICATION,
+                Privilege.SUBMIT_APPLICATION,
+            ],
+            role_types=[RoleType.APPLICATION],
         )
 
         # Have yet to be defined
-        is_agency_role = factory.Trait(
-            privileges=[],
-            role_types=[RoleType.AGENCY]
-        )
+        is_agency_role = factory.Trait(privileges=[], role_types=[RoleType.AGENCY])
 
-        is_internal_role = factory.Trait(
-            privileges=[],
-            role_types=[RoleType.INTERNAL]
-        )
+        is_internal_role = factory.Trait(privileges=[], role_types=[RoleType.INTERNAL])
+
 
 class LinkRoleRoleTypeFactory(BaseFactory):
     class Meta:
@@ -1070,9 +1075,11 @@ class InternalUserRoleFactory(BaseFactory):
     role = factory.SubFactory(RoleFactory, is_internal_role=True)
     role_id = factory.LazyAttribute(lambda r: r.role.role_id)
 
+
 ###################
 # Competition & Form Factories
 ###################
+
 
 class CompetitionFactory(BaseFactory):
     class Meta:
@@ -1516,6 +1523,7 @@ class ApplicationSubmissionFactory(BaseFactory):
 
         return submission
 
+
 class ApplicationUserFactory(BaseFactory):
     class Meta:
         model = user_models.ApplicationUser
@@ -1536,8 +1544,9 @@ class ApplicationUserRoleFactory(BaseFactory):
     application_user = factory.SubFactory(ApplicationUserFactory)
     application_user_id = factory.LazyAttribute(lambda o: o.application_user.application_user_id)
 
-    role = factory.SubFactory(RoleFactory, is_application_role = True)
+    role = factory.SubFactory(RoleFactory, is_application_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
 
 ###################
 # Agency Factories
@@ -1620,6 +1629,7 @@ class AgencyUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
 
+
 class AgencyUserRoleFactory(BaseFactory):
     class Meta:
         model = user_models.AgencyUserRole
@@ -1627,8 +1637,9 @@ class AgencyUserRoleFactory(BaseFactory):
     agency_user = factory.SubFactory(AgencyUserFactory)
     agency_user_id = factory.LazyAttribute(lambda o: o.agency_user.agency_user_id)
 
-    role = factory.SubFactory(RoleFactory, is_agency_role = True)
+    role = factory.SubFactory(RoleFactory, is_agency_role=True)
     role_id = factory.LazyAttribute(lambda r: r.role.role_id)
+
 
 ###################
 # Misc Factories
@@ -2763,6 +2774,7 @@ class OrganizationUserFactory(BaseFactory):
 
     is_organization_owner = True
 
+
 class OrganizationUserRoleFactory(BaseFactory):
     class Meta:
         model = user_models.OrganizationUserRole
@@ -2772,6 +2784,7 @@ class OrganizationUserRoleFactory(BaseFactory):
 
     role = factory.SubFactory(RoleFactory, is_organization_owner=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
 
 class SuppressedEmailFactory(BaseFactory):
     class Meta:

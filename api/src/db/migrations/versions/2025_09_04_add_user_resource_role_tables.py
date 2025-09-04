@@ -1,8 +1,8 @@
 """add_user_resource_role_tables
 
-Revision ID: b5d233989e07
+Revision ID: 61578095938e
 Revises: 92d99b3c3e68
-Create Date: 2025-09-04 14:37:59.450536
+Create Date: 2025-09-04 17:01:16.636349
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "b5d233989e07"
+revision = "61578095938e"
 down_revision = "92d99b3c3e68"
 branch_labels = None
 depends_on = None
