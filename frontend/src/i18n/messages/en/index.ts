@@ -696,19 +696,6 @@ export const messages = {
       floor: "Minimum: ",
     },
     sortBy: {
-      options: {
-        postedDateDesc: "Posted date (Newest)",
-        postedDateAsc: "Posted date (Oldest)",
-        closeDateDesc: "Close date (Furthest)",
-        closeDateAsc: "Close date (Soonest)",
-        awardFloorAsc: "Award minimum (Lowest)",
-        awardFloorDesc: "Award minimum (Highest)",
-        awardCeilingAsc: "Award maximum (Lowest)",
-        awardCeilingDesc: "Award maximum (Highest)",
-        opportunityTitleAsc: "Opportunity title (A to Z)",
-        opportunityTitleDesc: "Opportunity title (Z to A)",
-        default: "Most relevant (Default)",
-      },
       label: "Sort by",
     },
     filterToggleAll: {
