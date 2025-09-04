@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  generateSpoofedSession,
   openMobileNav,
   performSignIn,
   waitForURLChange,
@@ -17,11 +18,18 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
 });
 
 // reenable after https://github.com/HHS/simpler-grants-gov/issues/3791
-test.skip("shows save / search cta if logged in", async ({ page }, {
+test("shows save / search cta if logged in", async ({ page, context }, {
   project,
 }) => {
+  await context.addCookies([
+    {
+      name: "session",
+      value: generateSpoofedSession(),
+      url: "http://localhost:3000",
+    },
+  ]);
   await page.goto("http://localhost:3000/?_ff=authOn:true");
-  await performSignIn(page, project);
+  // await performSignIn(page, project);
 
   if (project.name.match(/[Mm]obile/)) {
     await openMobileNav(page);
