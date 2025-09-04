@@ -392,3 +392,32 @@ def test_bad_rule_schema_at_top_level_validation(enable_factory_create, caplog):
 
     # Verify we logged a message for an unexpected type
     assert "Unexpected type found when validating attachment ID: dict" in caplog.messages
+
+
+
+def test_thing(enable_factory_create):
+    rule_schema = {
+        "x": {
+            "y": {
+                "gg_is_array": True,
+                "z": {
+                    "gg_pre_population": {
+                        "rule": "opportunity_title"
+                    }
+                }
+            }
+        }
+    }
+
+    data = {
+        "x": {
+            "y": [{"z": "something", "diff_field": 123}, {"diff_field": 456}]
+        }
+    }
+
+    context = setup_context(data, rule_schema=rule_schema, opportunity_title="The opp title")
+
+    process_rule_schema_for_context(context)
+
+    print("--------")
+    print(context.json_data)

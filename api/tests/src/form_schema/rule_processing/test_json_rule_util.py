@@ -106,6 +106,14 @@ def test_get_nested_value_of_arrays(path, expected_value):
 
     assert get_nested_value(json_data, path) == expected_value
 
+import jsonpath_ng
+def test_thing():
+    my_json = {}
+
+    jsonpath_expr = jsonpath_ng.parse("foo[*].baz")
+
+    result = jsonpath_expr.update_or_create(my_json, 3)
+    print(result)
 
 @pytest.mark.parametrize(
     "path,index,expected_str",

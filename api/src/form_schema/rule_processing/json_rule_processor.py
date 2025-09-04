@@ -7,6 +7,7 @@ from src.form_schema.rule_processing.json_rule_field_population import (
     PRE_POPULATION_MAPPER,
     handle_field_population,
 )
+from src.form_schema.rule_processing.json_rule_util import get_nested_value
 from src.form_schema.rule_processing.json_rule_validator import handle_validation
 
 logger = logging.getLogger(__name__)
@@ -42,21 +43,24 @@ def process_rule_schema_for_context(context: JsonRuleContext) -> None:
 def _process_rule_schema(context: JsonRuleContext, rule_schema: dict, path: list[str]) -> None:
     """Recursively process a rule schema."""
 
+    if "gg_is_array" in rule_schema:
+        value = get_nested_value(context.json_data, path)
+
+        sub_rule_schema = rule_schema.copy()
+        sub_rule_schema.pop("gg_is_array")
+        for i in range(len(value)):
+            subpath = path.copy()
+            subpath[-1] = subpath[-1] + f"[{i}]"
+            _process_rule_schema(context=context, rule_schema=sub_rule_schema, path=subpath)
+
+
+        print(value)
+        print(len(value))
+
     # Iterate over this layer of the rule schema
     for k, v in rule_schema.items():
-        # If the key is a known rule, process it
         if k in handlers:
             handlers[k](context, v, path)
-
-        # TODO - need to check if the data is an array OR mark that it's an array in the rule schema somehow
-        # OR change how rule schema iteration works and don't recurse
-
-        # Let's assume we knew it was an array here, we'd have to be iterating over the
-        # actual data to know the indexes, we can't just follow the rule schemas structure by itself
-        is_array = True # TODO assume pulled out of rule schema
-        if is_array:
-            # Iterate over the list for indexes?
-            pass
 
         # If the value is a dict, recursively iterate down, extending the path
         elif isinstance(v, dict):
