@@ -376,7 +376,7 @@ class AgencyUserRole(ApiSchemaTable, TimestampMixin):
     agency_user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(AgencyUser.agency_user_id), primary_key=True
     )
-    agency_user: Mapped[User] = relationship(AgencyUser)
+    agency_user: Mapped[AgencyUser] = relationship(AgencyUser)
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
     role: Mapped[Role] = relationship(Role)
