@@ -77,13 +77,21 @@ export const fakeSavedSearch = {
 export const fakeSearchQueryParamData: ValidSearchQueryParamData = {
   query: "search term",
   status: "forecasted,closed",
-  fundingInstrument: "Cooperative Agreement",
-  eligibility: "Individuals",
-  agency: "Economic Development Administration",
-  category: "Recovery Act",
+  fundingInstrument: "cooperative_agreement",
+  eligibility: "individuals",
+  agency: "DOC-EDA",
+  category: "recovery_act",
   page: "1",
   sortby: "relevancy",
 };
+
+export const fakeAgencyOptions: FilterOption[] = [
+  {
+    id: "1",
+    label: "Economic Development Administration",
+    value: "DOC-EDA",
+  },
+];
 
 const fakePaginationInfo: PaginationInfo = {
   order_by: "opportunity_number",
@@ -159,6 +167,7 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+
 export const filterOptionsWithChildren = [
   {
     id: "AGNC",

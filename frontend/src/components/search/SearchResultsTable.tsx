@@ -2,7 +2,9 @@ import clsx from "clsx";
 import { isNil } from "lodash";
 import {
   BaseOpportunity,
+  MinimalOpportunity,
   OpportunityStatus,
+  PossiblySavedBaseOpportunity,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 import { toShortMonthDate } from "src/utils/dateUtil";
@@ -23,6 +25,20 @@ const statusColorClasses = {
   forecasted: "bg-accent-warm-lightest",
   closed: "bg-base-lightest",
   archived: "bg-base-lightest",
+};
+
+const indicateWhichSearchResultsAreSaved = (
+  searchResults: SearchResponseData,
+  savedOpportunities: MinimalOpportunity[],
+) => {
+  const savedIds = savedOpportunities.map(
+    ({ opportunity_id }) => opportunity_id,
+  );
+  return searchResults.map((result) =>
+    savedIds.includes(result.opportunity_id)
+      ? { ...result, opportunitySaved: true }
+      : result,
+  );
 };
 
 const SearchTableStatusDisplay = ({
@@ -53,7 +69,7 @@ const TitleDisplay = ({
   page,
   index,
 }: {
-  opportunity: BaseOpportunity;
+  opportunity: PossiblySavedBaseOpportunity;
   page: number;
   index: number;
 }) => {
@@ -65,6 +81,7 @@ const TitleDisplay = ({
           <OpportunitySaveUserControl
             opportunityId={opportunity.opportunity_id}
             type="icon"
+            opportunitySaved={opportunity.opportunitySaved || false}
           />
         </div>
         <div className="grid-col-fill">
@@ -106,7 +123,7 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
 };
 
 const toSearchResultsTableRow = (
-  result: BaseOpportunity,
+  result: PossiblySavedBaseOpportunity,
   page: number,
   index: number,
 ): TableCellData[] => {
@@ -147,15 +164,20 @@ const toSearchResultsTableRow = (
 export const SearchResultsTable = ({
   searchResults,
   page,
+  savedOpportunities,
 }: {
   searchResults: SearchResponseData;
   page: number;
+  savedOpportunities: MinimalOpportunity[];
 }) => {
   const t = useTranslations("Search.table");
 
   if (!searchResults.length) {
     return <FilterSearchNoResults useHeading={true} />;
   }
+
+  const searchResultsWithSavedOpportunities =
+    indicateWhichSearchResultsAreSaved(searchResults, savedOpportunities);
 
   const headerContent: TableCellData[] = [
     { cellData: t("headings.closeDate") },
@@ -165,8 +187,8 @@ export const SearchResultsTable = ({
     { cellData: t("headings.awardMin") },
     { cellData: t("headings.awardMax") },
   ];
-  const tableRowData = searchResults.map((result, index) =>
-    toSearchResultsTableRow(result, page, index),
+  const tableRowData = searchResultsWithSavedOpportunities.map(
+    (result, index) => toSearchResultsTableRow(result, page, index),
   );
   return (
     <TableWithResponsiveHeader
