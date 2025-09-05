@@ -250,7 +250,6 @@ class Application(ApiSchemaTable, TimestampMixin):
         LookupColumn(LkApplicationStatus),
         ForeignKey(LkApplicationStatus.application_status_id),
     )
-    my_new_column: Mapped[str | None]
 
     application_name: Mapped[str | None]
 
