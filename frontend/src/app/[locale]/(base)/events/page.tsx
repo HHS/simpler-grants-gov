@@ -7,7 +7,6 @@ import { use } from "react";
 import EventsCoding from "./EventsCoding";
 import EventsDemo from "./EventsDemo";
 import EventsHero from "./EventsHero";
-import EventsUpcoming from "./EventsUpcoming";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -26,11 +25,8 @@ export default function Events({ params }: LocalizedPageProps) {
   return (
     <>
       <EventsHero />
-      <EventsUpcoming />
-      <div className="bg-base-lightest">
-        <EventsDemo />
-        <EventsCoding />
-      </div>
+      <EventsDemo />
+      <EventsCoding />
     </>
   );
 }

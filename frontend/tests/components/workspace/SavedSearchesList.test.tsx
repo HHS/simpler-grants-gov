@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { fakeSearchQueryParamData } from "src/utils/testing/fixtures";
+import {
+  fakeAgencyOptions,
+  fakeSearchQueryParamData,
+} from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
@@ -63,6 +66,7 @@ describe("SavedSearchesList", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[makeSavedSearchResult()]}
         editText={"edit"}
         deleteText={"delete"}
@@ -75,6 +79,7 @@ describe("SavedSearchesList", () => {
   it("renders an list item for each search result", () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[makeSavedSearchResult(), makeSavedSearchResult()]}
         editText={"edit"}
         deleteText={"delete"}
@@ -88,6 +93,7 @@ describe("SavedSearchesList", () => {
   it("renders the correct saved search link for each item", () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[
           makeSavedSearchResult(),
           makeSavedSearchResult({
@@ -113,7 +119,7 @@ describe("SavedSearchesList", () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute(
       "href",
-      "/search?query=search term&status=forecasted,closed&fundingInstrument=Cooperative Agreement&eligibility=Individuals&agency=Economic Development Administration&category=Recovery Act&page=1&sortby=relevancy&savedSearch=1",
+      "/search?query=search term&status=forecasted,closed&fundingInstrument=cooperative_agreement&eligibility=individuals&agency=DOC-EDA&category=recovery_act&page=1&sortby=relevancy&savedSearch=1",
     );
 
     expect(links[1]).toHaveAttribute(
@@ -124,12 +130,13 @@ describe("SavedSearchesList", () => {
   it("renders properly formatted search parameter names and values for each list item", () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[
           makeSavedSearchResult(),
           makeSavedSearchResult({
             searchParams: {
               query: "another search term",
-              category: "Arts",
+              category: "arts",
             },
             id: "2",
           }),
@@ -147,7 +154,7 @@ describe("SavedSearchesList", () => {
     );
 
     expect(definitionOne).toHaveTextContent("query: search term");
-    expect(definitionOne).toHaveTextContent("status: forecasted, closed");
+    expect(definitionOne).toHaveTextContent("status: Forecasted, Closed");
     expect(definitionOne).toHaveTextContent(
       "fundingInstrument: Cooperative Agreement",
     );
@@ -168,6 +175,7 @@ describe("SavedSearchesList", () => {
   it("renders edit and delete modal button items for each list item", async () => {
     render(
       <SavedSearchesList
+        agencyOptions={fakeAgencyOptions}
         savedSearches={[
           makeSavedSearchResult(),
           makeSavedSearchResult({
