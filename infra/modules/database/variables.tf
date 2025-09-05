@@ -112,5 +112,5 @@ variable "vpc_id" {
 variable "engine_version" {
   type        = string
   description = "Postgres database engine version"
-  default     = "15.4"
+  default     = "15.10"
 }
