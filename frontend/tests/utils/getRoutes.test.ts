@@ -9,6 +9,7 @@ describe("getNextRoutes", () => {
 
     expect(result).toEqual([
       "/(base)/[...not-found]",
+      "/(base)/api-dashboard",
       "/(base)/dev/feature-flags",
       "/(base)/developer",
       "/(base)/error",
