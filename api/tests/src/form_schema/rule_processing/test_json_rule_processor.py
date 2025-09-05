@@ -259,6 +259,14 @@ def test_process_rule_schema_nested(enable_factory_create):
     ]
 
 
+def test_process_rule_schema_with_arrays():
+    pass
+
+    # TODO - validation logic
+    # TODO - order of operations
+    # TODO - summation
+
+
 def test_process_null_rule_schema(enable_factory_create):
     # Null rule schema means nothing will get processed
     context = setup_context({}, None)

@@ -15,6 +15,17 @@ class JsonRuleConfig:
     do_field_validation: bool = True
 
 
+@dataclass
+class JsonRule:
+    """Container for holding a JSON rule that we're going to process"""
+
+    handler: str
+    rule: dict
+    path: list[str]
+
+    order: int = 1
+
+
 class JsonRuleContext:
 
     def __init__(self, application_form: ApplicationForm, config: JsonRuleConfig):
@@ -26,6 +37,8 @@ class JsonRuleContext:
         self.json_data = copy.deepcopy(self.application_form.application_response)
 
         self.validation_issues: list[ValidationErrorDetail] = []
+
+        self.rules: list[JsonRule] = []
 
     @property
     def opportunity(self) -> Opportunity:
