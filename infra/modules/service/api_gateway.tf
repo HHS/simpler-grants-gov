@@ -6,68 +6,123 @@ resource "aws_api_gateway_rest_api" "api" {
     types = ["REGIONAL"]
   }
 
-  # checkov:skip=CKV_AWS_237: Address in future work
-}
-
-resource "aws_api_gateway_resource" "api_proxy" {
-  count = var.enable_api_gateway ? 1 : 0
-
-  rest_api_id = aws_api_gateway_rest_api.api[0].id
-  parent_id   = aws_api_gateway_rest_api.api[0].root_resource_id
-  path_part   = "{proxy+}"
-}
-
-resource "aws_api_gateway_method" "api_proxy_method" {
-  count = var.enable_api_gateway ? 1 : 0
-
-  rest_api_id = aws_api_gateway_rest_api.api[0].id
-  resource_id = aws_api_gateway_resource.api_proxy[0].id
-  http_method = "ANY"
-
-  request_parameters = {
-    "method.request.path.proxy" = true
-  }
-
-  # We are not using a custom authorization setup at this point, it is handled with the API key
-  authorization    = "NONE"
-  api_key_required = true
-
-  # checkov:skip=CKV2_AWS_53:This is a full proxy, request validation would add complexity
-}
-
-resource "aws_api_gateway_integration" "api_proxy_integration" {
-  count = var.enable_api_gateway ? 1 : 0
-
-  rest_api_id = aws_api_gateway_rest_api.api[0].id
-  resource_id = aws_api_gateway_resource.api_proxy[0].id
-  http_method = aws_api_gateway_method.api_proxy_method[0].http_method
-
-  integration_http_method = aws_api_gateway_method.api_proxy_method[0].http_method
-  type                    = "HTTP_PROXY"
-  # This will be changed to use a new ALB DNS and cert
-  uri = "https://${var.domain_name}/{proxy}"
-
-  request_parameters = {
-    "integration.request.path.proxy" = "method.request.path.proxy"
-  }
-
-  timeout_milliseconds = 29000
+  body = jsonencode({
+    "openapi" : "3.0.1",
+    "paths" : {
+      "/health" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/health",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/{proxy+}" : {
+        "x-amazon-apigateway-any-method" : {
+          "parameters" : [
+            {
+              "name" : "proxy",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "security" : [
+            {
+              "api_key" : []
+            }
+          ],
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "ANY",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/{proxy}",
+            "requestParameters" : {
+              "integration.request.path.proxy" : "method.request.path.proxy"
+            },
+            "passthroughBehavior" : "when_no_match",
+            "timeoutInMillis" : 29000
+          }
+        }
+      },
+      "/v1/users/login" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login",
+            "requestParameters" : {
+              "integration.request.header.Host" : "'${var.domain_name}'"
+            },
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/v1/users/login/callback" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/callback",
+            "requestParameters" : {
+              "integration.request.header.Host" : "'${var.domain_name}'"
+            },
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/docs" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/docs",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/static/{proxy+}" : {
+        "get" : {
+          "parameters" : [
+            {
+              "name" : "proxy",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/static/{proxy}",
+            "requestParameters" : {
+              "integration.request.path.proxy" : "method.request.path.proxy"
+            },
+            "passthroughBehavior" : "when_no_match",
+            "cacheKeyParameters" : [
+              "method.request.path.proxy"
+            ]
+          }
+        }
+      }
+    }
+  })
+  # checkov:skip=CKV_AWS_237: Create before destroy is defined in deployment below
+  put_rest_api_mode = "merge"
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
   count = var.enable_api_gateway ? 1 : 0
 
-  depends_on = [
-    aws_api_gateway_method.api_proxy_method
-  ]
-
   rest_api_id = aws_api_gateway_rest_api.api[0].id
 
   triggers = {
-    redeployment = sha1(
-      # Redeploys whenever this file is changed
-      filesha1("${abspath(path.module)}/api_gateway.tf")
-    )
+    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.api[0].body))
   }
 
   lifecycle {
@@ -84,18 +139,16 @@ resource "aws_api_gateway_stage" "api_v1_stage" {
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
   stage_name    = "v1"
 
-  # access_log_settings {
-  #   destination_arn = aws_cloudwatch_log_group.api_gateway_logs[0].arn
-  #   format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\",\"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"apiKeyId\":\"$context.identity.apiKeyId\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\", \"responseLatency\": \"$context.responseLatency\" }"
-  # }
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway_logs[0].arn
+    format          = "{ \"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\",\"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"apiKeyId\":\"$context.identity.apiKeyId\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\", \"responseLatency\": \"$context.responseLatency\" }"
+  }
 
   # checkov:skip=CKV_AWS_73:X-Ray can increase costs greatly, and aren't always necessary
   # checkov:skip=CKV2_AWS_29:WAF can be enabled at a later time if needed
   # checkov:skip=CKV2_AWS_51:Mutual TLS increases complexity for downstream systems
   # checkov:skip=CKV2_AWS_4:Log level and format is already set
   # checkov:skip=CKV_AWS_120:Cache disabled for now, will be followed up in a future ticket
-  # TEMP
-  # checkov:skip=CKV_AWS_76:Logging is dependent on a role being created in the infra/accounts playbook, but that isn't running first
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
@@ -117,7 +170,7 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
 
   settings {
     metrics_enabled = true
-    # logging_level   = "INFO"
+    logging_level   = "INFO"
   }
   # checkov:skip=CKV2_AWS_4:Log level set to info
   # checkov:skip=CKV_AWS_225:Cache disabled for now, will be followed up in a future ticket
@@ -136,12 +189,12 @@ resource "aws_api_gateway_domain_name" "api" {
   # checkov:skip=CKV_AWS_206: Address in future work
 }
 
-# Leave disabled until the domain name is figured for ALB vs API gateway above
-# resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping" {
-#   count                    = var.enable_api_gateway ? 1 : 0
-#   api_id      = aws_api_gateway_rest_api.api[0].id
-#   domain_name = aws_api_gateway_domain_name.api[0].domain_name
-# }
+resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping_v1" {
+  count       = var.enable_api_gateway ? 1 : 0
+  api_id      = aws_api_gateway_rest_api.api[0].id
+  domain_name = aws_api_gateway_domain_name.api[0].domain_name
+  stage_name  = aws_api_gateway_stage.api_v1_stage[0].stage_name
+}
 
 resource "aws_api_gateway_usage_plan" "api_public_usage_plan" {
   count = var.enable_api_gateway ? 1 : 0
