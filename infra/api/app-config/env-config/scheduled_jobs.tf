@@ -18,7 +18,7 @@ locals {
       "--transform",
       "--set-current",
       "--store-version",
-      "--sync"
+      "--sync-status"
     ],
     staging = [
       "poetry",
@@ -30,7 +30,7 @@ locals {
       "--transform",
       "--set-current",
       "--store-version",
-      "--sync"
+      "--sync-status"
     ],
     training = [
       "poetry",
