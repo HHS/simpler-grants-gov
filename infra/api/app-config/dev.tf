@@ -6,6 +6,7 @@ module "dev_config" {
   environment                     = "dev"
   network_name                    = "dev"
   domain_name                     = "api.dev.simpler.grants.gov"
+  secondary_domain_names          = ["alb.dev.simpler.grants.gov"]
   s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
   mtls_domain_name                = "soap.dev.simpler.grants.gov"
   enable_https                    = true
