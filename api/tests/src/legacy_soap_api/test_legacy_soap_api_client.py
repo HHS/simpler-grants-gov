@@ -164,6 +164,8 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             opportunity=OpportunityFactory.build(
                 opportunity_title=funding_opportunity_title,
                 opportunity_number=funding_opportunity_number,
+                agency_code="TEST",
+                agency_record=None,
             ),
         )
 
