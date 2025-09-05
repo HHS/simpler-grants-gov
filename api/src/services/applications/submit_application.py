@@ -5,6 +5,7 @@ import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_in_progress,
@@ -33,5 +34,8 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     # Update application status
     application.application_status = ApplicationStatus.SUBMITTED
     logger.info("Application successfully submitted")
+
+    # Add application metadata to logs
+    add_application_metadata_to_logs(application)
 
     return application

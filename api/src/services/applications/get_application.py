@@ -15,6 +15,7 @@ from src.db.models.competition_models import (
 )
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, User
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
@@ -65,6 +66,8 @@ def get_application(
             selectinload(Application.competition).selectinload(
                 Competition.link_competition_open_to_applicant
             ),
+            # Load opportunity for agency_code access
+            selectinload(Application.competition).selectinload(Competition.opportunity),
         )
         .where(Application.application_id == application_id)
     )
@@ -83,6 +86,9 @@ def get_application(
     # Check if the user has access to the application (skip for internal users or when user is None)
     if not is_internal_user and user is not None:
         check_user_application_access(application, user)
+
+    # Add application metadata to logs
+    add_application_metadata_to_logs(application)
 
     return application
 

@@ -15,6 +15,7 @@ from src.constants.lookup_constants import (
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, OrganizationUser, User
+from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -141,7 +142,7 @@ def create_application(
     competition = db_session.execute(
         select(Competition)
         .where(Competition.competition_id == competition_id)
-        .options(selectinload(Competition.competition_forms))
+        .options(selectinload(Competition.competition_forms), selectinload(Competition.opportunity))
     ).scalar_one_or_none()
 
     if not competition:
@@ -187,7 +188,7 @@ def create_application(
     # Create a new application
     application = Application(
         application_id=uuid.uuid4(),
-        competition_id=competition_id,
+        competition=competition,
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
         organization_id=organization_id,  # Set the organization ID if provided
@@ -218,5 +219,8 @@ def create_application(
             "organization_id": organization_id,
         },
     )
+
+    # Add application metadata to logs
+    add_application_metadata_to_logs(application)
 
     return application
