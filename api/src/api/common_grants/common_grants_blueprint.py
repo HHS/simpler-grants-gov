@@ -17,7 +17,7 @@ common_grants_blueprint = APIBlueprint(
 @click.option(
     "--output", "-o", "output_file", type=click.Path(), help="The file path to the spec file"
 )
-def generate_common_grants_spec(output_file: str | None) -> None:
+def generate_openapi_spec(output_file: str | None) -> None:
     """Generate OpenAPI specification for CommonGrants API routes."""
     import sys
 
