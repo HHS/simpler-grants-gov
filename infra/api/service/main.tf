@@ -103,6 +103,13 @@ data "aws_acm_certificate" "cert" {
   most_recent = true
 }
 
+data "aws_acm_certificate" "secondary_certs" {
+  # Get secondary domain names if they exists
+  for_each    = toset(lookup(local.service_config, "secondary_domain_names", []))
+  domain      = each.value
+  most_recent = true
+}
+
 data "aws_acm_certificate" "s3_cdn_cert" {
   count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
   domain      = local.service_config.s3_cdn_domain_name
@@ -183,11 +190,15 @@ module "service" {
 
   file_upload_jobs     = local.service_config.file_upload_jobs
   enable_s3_cdn        = true
-  enable_api_gateway   = true
   s3_cdn_bucket_name   = "public-files"
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = true
+
+  # API Gateway variables
+  enable_api_gateway         = true
+  optional_extra_alb_domains = toset(lookup(local.service_config, "secondary_domain_names", []))
+  optional_extra_alb_certs   = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids

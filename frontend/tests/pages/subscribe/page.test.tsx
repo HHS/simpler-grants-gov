@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Subscribe from "src/app/[locale]/subscribe/page";
+import Subscribe from "src/app/[locale]/(base)/newsletter/page";
 import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const mockSetItem = jest.fn();
@@ -49,10 +49,10 @@ jest.mock("src/services/sessionStorage/sessionStorage", () => {
 });
 
 describe("Subscribe", () => {
-  it("renders intro text", () => {
+  it("renders title text", () => {
     render(Subscribe({ params: localeParams }));
 
-    const content = screen.getByText("intro");
+    const content = screen.getByText("title");
 
     expect(content).toBeInTheDocument();
   });

@@ -5,21 +5,23 @@ from typing import Any, Sequence, cast
 from flask_httpauth import MultiAuth
 
 from ..db.models.competition_models import ShortLivedInternalToken
-from ..db.models.user_models import UserTokenSession
+from ..db.models.user_models import UserApiKey, UserTokenSession
 from .api_jwt_auth import api_jwt_auth
 from .api_key_auth import ApiKeyUser, api_key_auth
+from .api_user_key_auth import api_user_key_auth
 from .internal_jwt_auth import internal_jwt_auth
 
 
 class AuthType(StrEnum):
     API_KEY_AUTH = "api_key_auth"
+    API_USER_KEY_AUTH = "api_user_key_auth"
     USER_JWT_AUTH = "user_jwt_auth"
     INTERNAL_JWT_AUTH = "internal_jwt_auth"
 
 
 @dataclass
 class MultiAuthUser:
-    user: UserTokenSession | ApiKeyUser | ShortLivedInternalToken
+    user: UserTokenSession | ApiKeyUser | UserApiKey | ShortLivedInternalToken
     auth_type: AuthType
 
 
@@ -30,6 +32,9 @@ class MultiHttpTokenAuth(MultiAuth):
 
         if isinstance(current_user, ApiKeyUser):
             return MultiAuthUser(current_user, AuthType.API_KEY_AUTH)
+
+        elif isinstance(current_user, UserApiKey):
+            return MultiAuthUser(current_user, AuthType.API_USER_KEY_AUTH)
 
         elif isinstance(current_user, UserTokenSession):
             return MultiAuthUser(current_user, AuthType.USER_JWT_AUTH)
@@ -59,6 +64,14 @@ jwt_or_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_key_auth)
 jwt_key_or_internal_multi_auth = MultiHttpTokenAuth(api_jwt_auth, internal_jwt_auth)
 
 
+# Define the multi auth that supports both API key authentication methods:
+# * Database-based API Gateway Key Auth (X-API-Key header)
+# * Environment-based API Key Auth (X-Auth header)
+#
+# Note that the order matters - api_user_key_auth will take precedence if both headers are present
+api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
+
+
 # Helper function to format security schemes for OpenAPI
 def _get_security_requirement(schemes: Sequence[str | None]) -> list[str | dict[str, list[Any]]]:
     # Only include scheme names that are not None and cast to the expected type
@@ -78,5 +91,13 @@ jwt_key_or_internal_security_schemes = _get_security_requirement(
     [
         api_jwt_auth.security_scheme_name,
         internal_jwt_auth.security_scheme_name,
+    ]
+)
+
+# List of security scheme names for API key multi-auth
+api_key_multi_auth_security_schemes = _get_security_requirement(
+    [
+        api_user_key_auth.security_scheme_name,
+        api_key_auth.security_scheme_name,
     ]
 )

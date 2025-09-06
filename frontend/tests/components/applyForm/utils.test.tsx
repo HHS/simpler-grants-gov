@@ -1,13 +1,17 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
-import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
+import { UiSchemaField } from "src/components/applyForm/types";
 import {
   buildField,
-  buildFormTreeRecursive,
+  condenseFormSchemaProperties,
   determineFieldType,
+  flatFormDataToArray,
+  formatFieldWarnings,
   getFieldName,
   getFieldSchema,
+  getRequiredProperties,
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
@@ -80,7 +84,7 @@ describe("shapeFormData", () => {
     formData.append("name", "test");
     formData.append("state", "PA");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
 
     expect(data).toMatchObject(shapedFormData);
   });
@@ -130,7 +134,7 @@ describe("shapeFormData", () => {
     formData.append("todos[0]", "email");
     formData.append("todos[1]", "write");
 
-    const data = shapeFormData(formData);
+    const data = shapeFormData(formData, {});
     expect(data).toMatchObject(shapedFormData);
   });
 });
@@ -163,6 +167,7 @@ describe("buildField", () => {
       formSchema,
       errors,
       formData,
+      requiredField: true,
     });
     render(BuiltField);
 
@@ -210,6 +215,7 @@ describe("buildField", () => {
       formSchema,
       errors,
       formData,
+      requiredField: false,
     });
     render(BuiltField);
 
@@ -225,156 +231,6 @@ describe("buildField", () => {
     const field = screen.getByTestId("email");
     expect(field).toBeInTheDocument();
     expect(error).toHaveClass("usa-error-message");
-  });
-});
-
-describe("buildFormTreeRecursive", () => {
-  it("should build a tree for a simple schema", () => {
-    const schema: RJSFSchema = {
-      type: "object",
-      properties: {
-        name: { type: "string", title: "Name" },
-        age: { type: "number", title: "Age" },
-      },
-    };
-
-    const uiSchema: UiSchema = [
-      { type: "field", definition: "/properties/name" },
-      { type: "field", definition: "/properties/age" },
-    ];
-
-    const errors = null;
-    const formData = { name: "John", age: 30 };
-
-    const result = buildFormTreeRecursive({
-      errors,
-      formData,
-      schema,
-      uiSchema,
-    });
-
-    // render the result
-    render(<>{result}</>);
-
-    // assert field inputs
-    const nameField = screen.getByTestId("name");
-    expect(nameField).toBeInTheDocument();
-    expect(nameField).toHaveValue("John");
-
-    const ageField = screen.getByTestId("age");
-    expect(ageField).toBeInTheDocument();
-    expect(ageField).toHaveValue(30);
-  });
-
-  it("should build a tree for a nested schema", () => {
-    const schema: RJSFSchema = {
-      type: "object",
-      properties: {
-        address: {
-          type: "object",
-          properties: {
-            street: { type: "string", title: "Street" },
-            city: { type: "string", title: "City" },
-          },
-        },
-      },
-    };
-
-    const uiSchema: UiSchema = [
-      {
-        name: "address",
-        type: "section",
-        label: "Address",
-        children: [
-          {
-            type: "field",
-            definition: "/properties/address/properties/street",
-          },
-          { type: "field", definition: "/properties/address/properties/city" },
-        ],
-      },
-    ];
-
-    const errors = null;
-    const formData = { address: { street: "123 Main St", city: "Metropolis" } };
-
-    const result = buildFormTreeRecursive({
-      errors,
-      formData,
-      schema,
-      uiSchema,
-    });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("address-fieldset");
-  });
-
-  it("should handle empty uiSchema gracefully", () => {
-    const schema: RJSFSchema = {
-      type: "object",
-      properties: {
-        name: { type: "string", title: "Name" },
-      },
-    };
-
-    const uiSchema: UiSchema = [];
-    const errors = null;
-    const formData = { name: "John" };
-
-    const result = buildFormTreeRecursive({
-      errors,
-      formData,
-      schema,
-      uiSchema,
-    });
-
-    expect(result).toEqual([]);
-  });
-
-  it("should handle nested children in uiSchema", () => {
-    const schema: RJSFSchema = {
-      type: "object",
-      properties: {
-        section: {
-          type: "object",
-          properties: {
-            field1: { type: "string", title: "Field 1" },
-            field2: { type: "string", title: "Field 2" },
-          },
-        },
-      },
-    };
-
-    const uiSchema: UiSchema = [
-      {
-        name: "section",
-        type: "section",
-        label: "Section",
-        children: [
-          {
-            type: "field",
-            definition: "/properties/section/properties/field1",
-          },
-          {
-            type: "field",
-            definition: "/properties/section/properties/field2",
-          },
-        ],
-      },
-    ];
-
-    const errors = null;
-    const formData = { section: { field1: "Value 1", field2: "Value 2" } };
-
-    const result = buildFormTreeRecursive({
-      errors,
-      formData,
-      schema,
-      uiSchema,
-    });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("section-fieldset");
   });
 });
 
@@ -477,32 +333,34 @@ describe("getFieldSchema", () => {
 });
 
 describe("pruneEmptyNestedFields", () => {
-  it("returns flat object unchanged", () => {
+  it("returns flat object with undefined fields removed", () => {
     const flat = {
       thing: 1,
       another: "string",
-      bad: null,
+      bad: undefined,
       stuff: [2, "hi"],
     };
-    expect(pruneEmptyNestedFields(flat)).toEqual(flat);
+    expect(pruneEmptyNestedFields(flat)).toEqual({
+      thing: 1,
+      another: "string",
+      stuff: [2, "hi"],
+    });
   });
   it("returns empty object if passed an empty object or object with only undefined fields", () => {
     const empty = {};
     expect(pruneEmptyNestedFields(empty)).toEqual(empty);
   });
-  it("prunes only top level empty objects", () => {
+  it("prunes all empty objects and objects containing only undefined properties", () => {
     const undefinedFields = {
       whatever: {
         again: { something: undefined },
         another: undefined,
-        more: { stuff: undefined },
+        more: {},
       },
     };
-    expect(pruneEmptyNestedFields(undefinedFields)).toEqual({
-      whatever: { another: undefined },
-    });
+    expect(pruneEmptyNestedFields(undefinedFields)).toEqual({});
   });
-  it("removes nested objects containing only undefined properties", () => {
+  it("removes nested objects containing only undefined properties or objects with only undefined properties", () => {
     expect(
       pruneEmptyNestedFields({
         thing: "stuff",
@@ -522,7 +380,6 @@ describe("pruneEmptyNestedFields", () => {
       }),
     ).toEqual({
       thing: "stuff",
-      another: {},
       keepMe: {
         here: {
           ok: "sure",
@@ -599,5 +456,165 @@ describe("processFormSchema", () => {
         dereferenced: "stuff",
       },
     });
+  });
+});
+
+describe("condenseFormSchemaProperties", () => {
+  const noProperties = {
+    path: {
+      thing: {
+        cool: "value",
+      },
+      list: ["of", "stuff"],
+    },
+    secondary: 2,
+  };
+  it("leaves an object with no 'properties' unchanged", () => {
+    expect(condenseFormSchemaProperties(noProperties)).toEqual(noProperties);
+  });
+  it("brings contents of 'properties' attributes up one level", () => {
+    expect(
+      condenseFormSchemaProperties({
+        path: {
+          properties: {
+            thing: {
+              cool: "value",
+            },
+            properties: {
+              list: ["of", "stuff"],
+            },
+          },
+        },
+        properties: {
+          secondary: 2,
+        },
+      }),
+    ).toEqual(noProperties);
+  });
+});
+
+describe("getRequiredProperties", () => {
+  it("returns an empty array for a schema with no required fields", () => {
+    expect(
+      getRequiredProperties({
+        properties: {
+          something: {
+            type: "string",
+          },
+        },
+      }),
+    ).toEqual([]);
+  });
+  it("returns a list of all unconditionally required property paths within a schema", () => {
+    expect(getRequiredProperties(sflllSchema as RJSFSchema)).toEqual([
+      "federal_action_type",
+      "federal_action_status",
+      "report_type",
+      "reporting_entity/entity_type",
+      "reporting_entity/applicant_reporting_entity/organization_name",
+      "reporting_entity/applicant_reporting_entity/address/street1",
+      "reporting_entity/applicant_reporting_entity/address/city",
+      "federal_agency_department",
+      "lobbying_registrant/individual/first_name",
+      "lobbying_registrant/individual/last_name",
+      "individual_performing_service/individual/first_name",
+      "individual_performing_service/individual/last_name",
+      "signature_block/name/first_name",
+      "signature_block/name/last_name",
+    ]);
+  });
+});
+
+describe("formatFieldWarnings", () => {
+  it("returns an empty array if there are not any warnings", () => {
+    expect(formatFieldWarnings([], "field_name", "string", false)).toEqual([]);
+    expect(formatFieldWarnings(null, "field_name", "string", false)).toEqual(
+      [],
+    );
+  });
+  // eslint-disable-next-line
+  it.skip("does something with arrays?", () => {});
+  it("returns warnings that directly reference the field name", () => {
+    expect(
+      formatFieldWarnings(
+        [
+          {
+            field: "field_name",
+            message: "something went wrong",
+            type: "generic",
+            value: "not sure",
+          },
+        ],
+        "field_name",
+        "string",
+        false,
+      ),
+    ).toEqual(["something went wrong"]);
+  });
+  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
+    expect(
+      formatFieldWarnings(
+        [
+          {
+            field: "parent",
+            message: "parent is required",
+            type: "required",
+            value: "not sure",
+          },
+        ],
+        "parent/field_name",
+        "string",
+        true,
+      ),
+    ).toEqual(["parent is required"]);
+  });
+});
+
+describe("flatFormDataToArray", () => {
+  it("returns array with single value if field exists directly", () => {
+    const data = { foo: "bar" };
+    expect(flatFormDataToArray("foo", data)).toEqual(["bar"]);
+  });
+
+  it("returns array of objects for indexed keys", () => {
+    const data = {
+      "tasks[0].title": "Task 1",
+      "tasks[1].title": "Task 2",
+    };
+    expect(flatFormDataToArray("tasks", data)).toEqual([
+      { title: "Task 1" },
+      { title: "Task 2" },
+    ]);
+  });
+
+  it("returns empty array if field not present", () => {
+    const data = { something: 123 };
+    expect(flatFormDataToArray("notfound", data)).toEqual([]);
+  });
+
+  it("handles sparse arrays", () => {
+    const data = {
+      "items[2].name": "third",
+      "items[0].name": "first",
+    };
+    expect(flatFormDataToArray("items", data)).toEqual([
+      { name: "first" },
+      undefined,
+      { name: "third" },
+    ]);
+  });
+
+  it("ignores falsy values", () => {
+    const data = {
+      "arr[0].val": null,
+      "arr[1].val": undefined,
+      "arr[2].val": "ok",
+    };
+
+    expect(flatFormDataToArray("arr", data)).toEqual([
+      undefined,
+      undefined,
+      { val: "ok" },
+    ]);
   });
 });

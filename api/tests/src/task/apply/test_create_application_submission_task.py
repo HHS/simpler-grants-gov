@@ -6,6 +6,7 @@ from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
+from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     CreateApplicationSubmissionTask,
     FileMetadata,
@@ -14,7 +15,11 @@ from src.task.apply.create_application_submission_task import (
 )
 from src.util import file_util
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ApplicationAttachmentFactory, ApplicationFactory
+from tests.src.db.models.factories import (
+    ApplicationAttachmentFactory,
+    ApplicationFactory,
+    ApplicationFormFactory,
+)
 
 
 def validate_manifest_contents(contents_of_manifest: str, expected_files: list[str]):
@@ -59,7 +64,16 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
     @pytest.fixture
     def create_submission_task(self, db_session, s3_config):
-        return CreateApplicationSubmissionTask(db_session)
+        # Create a mock PDF generation config to avoid requiring environment variables
+        pdf_config = PdfGenerationConfig(
+            frontend_url="http://localhost:3000",
+            docraptor_api_key="test-key",
+            docraptor_test_mode=True,
+            docraptor_api_url="https://docraptor.com/docs",
+            short_lived_token_expiration_minutes=60,
+            pdf_generation_use_mocks=True,  # Use mocks in tests
+        )
+        return CreateApplicationSubmissionTask(db_session, pdf_generation_config=pdf_config)
 
     def test_run_task(self, db_session, create_submission_task):
         application_without_attachments = ApplicationFactory.create(
@@ -69,6 +83,14 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             f"{f.form.short_form_name}.pdf"
             for f in application_without_attachments.application_forms
         ]
+        # Add another application form that is not required and was marked to not be included in submission
+        skipped_app_form = ApplicationFormFactory.create(
+            application=application_without_attachments,
+            competition_form__competition=application_without_attachments.competition,
+            competition_form__is_required=False,
+            is_included_in_submission=False,
+        )
+        application_without_attachments.application_forms.append(skipped_app_form)
 
         application_with_attachments = ApplicationFactory.create(
             with_forms=True, application_status=ApplicationStatus.SUBMITTED
@@ -149,9 +171,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
         assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 4
         apps_processed = [application_with_attachments, application_without_attachments]
-        assert metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT] == sum(
-            [len(app.application_forms) for app in apps_processed]
-        )
+        assert (
+            metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
+            == sum([len(app.application_forms) for app in apps_processed]) - 1
+        )  # Not counting the one app form that we skip
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch

@@ -113,7 +113,7 @@ def test_extract_copy_opportunity_data(
 
         assert (
             conn.execute(
-                text('SELECT COUNT(*) FROM "user" ;'),
+                text("SELECT COUNT(*) FROM user_data ;"),
             ).fetchone()[0]
             == 7
         )

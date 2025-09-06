@@ -47,6 +47,16 @@ def user_auth_token(user, db_session):
     return token
 
 
+@pytest.fixture
+def user_api_key(enable_factory_create):
+    return factories.UserApiKeyFactory.create()
+
+
+@pytest.fixture
+def user_api_key_id(user_api_key):
+    return user_api_key.key_id
+
+
 @pytest.fixture(scope="session", autouse=True)
 def env_vars():
     """
@@ -86,6 +96,9 @@ def set_env_var_defaults(monkeypatch_session):
     monkeypatch_session.setenv("API_JWT_TOKEN_EXPIRATION_MINUTES", "30")
     # Some loggers are noisy/buggy in our tests, so adjust them
     monkeypatch_session.setenv("LOG_LEVEL_OVERRIDES", "newrelic.core.agent=ERROR")
+
+    # We will set this to false so we skip logs during unit tests and keep enabled during dev.
+    monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
 
 
 ####################

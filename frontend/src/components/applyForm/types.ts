@@ -7,7 +7,6 @@ import {
   UIOptionsType,
 } from "@rjsf/utils";
 import { ErrorObject } from "ajv";
-import { Attachment } from "src/types/attachmentTypes";
 
 import { HTMLAttributes } from "react";
 
@@ -57,8 +56,13 @@ export type WidgetTypes =
   | "TextArea"
   | "Radio"
   | "Select"
+  | "MultiSelect"
   | "Budget424aSectionA"
-  | "Budget424aSectionB";
+  | "Budget424aSectionB"
+  | "Budget424aSectionC"
+  | "Budget424aSectionD"
+  | "Budget424aSectionE"
+  | "Budget424aSectionF";
 
 export type UiSchemaField = {
   type: "field" | "multiField" | "null";
@@ -104,7 +108,6 @@ export interface UswdsWidgetProps<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
-  attachments?: Attachment[];
   id: string;
   value?: string | Array<T> | unknown;
   type?: string;

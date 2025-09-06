@@ -6,6 +6,7 @@ import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
+import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
 import {
@@ -22,12 +23,13 @@ type FormDataResult =
       error?: never;
       data: {
         applicationResponse: ApplicationResponseDetail;
-        applicationFormData: ApplicationFormDetail;
+        applicationName: string;
         formId: string;
         formName: string;
         formSchema: RJSFSchema;
         formUiSchema: UiSchema;
         formValidationWarnings: FormValidationWarning[] | null;
+        applicationAttachments: Attachment[];
       };
     };
 
@@ -75,7 +77,7 @@ export default async function getFormData({
     }
 
     applicationFormData = response.data;
-    formData = response.data.form;
+    formData = applicationFormData.form;
     if (!formData) {
       console.error(
         `No form data found for applicationID (${applicationId}), appFormId (${appFormId}))`,
@@ -120,7 +122,6 @@ export default async function getFormData({
 
   let formSchema = {};
   try {
-    // creates single object for json schema from references
     formSchema = await processFormSchema(form_json_schema);
   } catch (e) {
     console.error("Error parsing JSON schema", e);
@@ -128,8 +129,9 @@ export default async function getFormData({
   }
   return {
     data: {
+      applicationAttachments: applicationFormData.application_attachments,
       applicationResponse,
-      applicationFormData,
+      applicationName: applicationFormData.application_name,
       formId,
       formName,
       formSchema,

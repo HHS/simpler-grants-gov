@@ -51,6 +51,7 @@ export default defineConfig({
       name: "firefox",
       use: {
         ...devices["Desktop Firefox"], // firefox doesn't support clipboard-write or clipboard-read
+        permissions: [],
       },
     },
 

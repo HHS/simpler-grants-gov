@@ -17,9 +17,22 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
+      "--store-version",
+      "--sync-status"
     ],
     staging = [
+      "poetry",
+      "run",
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version",
+      "--sync-status"
+    ],
+    training = [
       "poetry",
       "run",
       "flask",
@@ -83,7 +96,13 @@ locals {
       task_command = ["poetry", "run", "flask", "task", "sam-extracts"]
       # Every day at 8am Eastern Time during DST. 9am during non-DST.
       schedule_expression = "cron(0 13 * * ? *)"
-      state               = "DISABLED"
+      state               = "ENABLED"
+    }
+    create-application-submission = {
+      task_command = ["poetry", "run", "flask", "task", "create-application-submission"]
+      # Every day at 2am Eastern Time during DST. 3am during non-DST.
+      schedule_expression = "cron(0 7 * * ? *)"
+      state               = "ENABLED"
     }
   }
 }

@@ -29,6 +29,7 @@ RUN apt-get update \
         wget \
         libgnutls30 \
         linux-libc-dev \
+        libxslt1.1 \
     # Reduce the image size by clear apt cached lists
     # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
     && apt-get clean \

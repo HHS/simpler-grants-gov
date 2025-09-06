@@ -12,7 +12,7 @@ export function FilterSearchNoResults({
     t("suggestions.2"),
   ];
   return (
-    <div>
+    <div data-testid="no-search-results">
       {useHeading ? (
         <h2 className="margin-top-4">{t("title")}</h2>
       ) : (

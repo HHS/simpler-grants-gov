@@ -27,7 +27,7 @@ export const messages = {
           {
             description:
               "Our newsletter delivers the latest news straight to your inbox.",
-            http: "/subscribe",
+            http: "/newsletter",
             iconName: "mail",
             link: "Subscribe to our newsletter",
             title: "Be the first to hear about new features.",
@@ -71,7 +71,7 @@ export const messages = {
     demo: {
       title: "Simpler.Grants.gov Big Demo",
       description:
-        "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+        "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
       watchLink: "January 15, 2025",
     },
@@ -448,16 +448,15 @@ export const messages = {
     },
   },
   Subscribe: {
-    pageTitle: "Subscribe | Simpler.Grants.gov",
+    pageTitle: "Newsletter | Simpler.Grants.gov",
     metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
-    title: "Subscribe to project updates",
-    intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
+    title: "Simpler Grants Newsletter",
     paragraph1:
-      "If you sign up for the Simpler.Grants.gov product updates, we'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "Sign up to get project updates delivered to your inbox every few weeks.",
+    paragraph2:
+      "You'll be the first to hear about feature launches, upcoming events, user research, and more.",
+    formLabel: "Subscribe to our newsletter",
     form: {
       name: "First Name",
       lastName: "Last Name",
@@ -536,7 +535,7 @@ export const messages = {
       savedOpportunities: "Saved opportunities",
       savedSearches: "Saved search queries",
       search: "Search",
-      subscribe: "Subscribe",
+      newsletter: "Newsletter",
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
@@ -567,6 +566,7 @@ export const messages = {
       roadmap: "Roadmap",
       events: "Events",
       newsletter: "Newsletter",
+      subscribe: "Subscribe",
     },
     feedback: "To give feedback, contact: <email>simpler@grants.gov</email>",
     supportCenter: "Grants.gov Support Center",
@@ -670,6 +670,7 @@ export const messages = {
       title: "Filters",
       submit: "View results",
       clearFilters: "Clear filters",
+      toggleButton: "Filters",
     },
     callToAction: {
       title: "Search funding opportunities",
@@ -677,15 +678,6 @@ export const messages = {
     opportunitySaved: "Saved",
     resultsHeader: {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
-    },
-    resultsListFetch: {
-      noResultsTitle: "Your search did not return any results.",
-      noResultsBody: [
-        "Check any terms you've, entered for typos",
-        "Try different keywords",
-        "Make sure you've selected the right statuses",
-        "Try resetting filters or selecting fewer options",
-      ],
     },
     resultsListItem: {
       status: {
@@ -704,19 +696,6 @@ export const messages = {
       floor: "Minimum: ",
     },
     sortBy: {
-      options: {
-        postedDateDesc: "Posted date (Newest)",
-        postedDateAsc: "Posted date (Oldest)",
-        closeDateDesc: "Close date (Furthest)",
-        closeDateAsc: "Close date (Soonest)",
-        awardFloorAsc: "Award minimum (Lowest)",
-        awardFloorDesc: "Award minimum (Highest)",
-        awardCeilingAsc: "Award maximum (Lowest)",
-        awardCeilingDesc: "Award maximum (Highest)",
-        opportunityTitleAsc: "Opportunity title (A to Z)",
-        opportunityTitleDesc: "Opportunity title (Z to A)",
-        default: "Most relevant (Default)",
-      },
       label: "Sort by",
     },
     filterToggleAll: {
@@ -724,11 +703,6 @@ export const messages = {
       clear: "Clear All",
     },
     loading: "Loading Results",
-    filterDisplayToggle: {
-      showFilters: "Show Filters",
-      hideFilters: "Hide Filters",
-      drawer: "Filters",
-    },
     genericErrorCta: "Please try your search again.",
     validationError: "Search Validation Error",
     tooLongError: "Search terms must be no longer than 100 characters.",

@@ -439,14 +439,16 @@ button.usa-pagination__button.usa-button {
         color: white;
       }
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
+        mask-image:
+          url("/uswds/img/usa-icons/expand_less.svg"),
           linear-gradient(transparent, transparent);
         background-color: white;
       }
     }
     button[aria-expanded="false"] {
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
+        mask-image:
+          url("/uswds/img/usa-icons/expand_more.svg"),
           linear-gradient(transparent, transparent);
       }
     }
@@ -519,6 +521,18 @@ button.usa-pagination__button.usa-button {
       }
     }
   }
+}
+
+.table-layout-auto {
+  table-layout: auto !important;
+}
+
+.verticle-align-bottom {
+  vertical-align: bottom;
+}
+
+.verticle-align-top {
+  vertical-align: top;
 }
 
 // Accordions
@@ -695,6 +709,22 @@ dl {
   tr[id^="form"] {
     @include at-media("desktop") {
       scroll-margin-top: 6rem;
+    }
+  }
+}
+
+// SF 424 A Budget Form
+.sf424a__row {
+  height: fit-content;
+  .sf424a__cell {
+    height: inherit;
+    vertical-align: bottom;
+
+    &--row-headers {
+      span {
+        margin-top: auto;
+        padding-bottom: 0.5rem;
+      }
     }
   }
 }

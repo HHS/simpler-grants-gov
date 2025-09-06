@@ -18,7 +18,7 @@ locals {
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
   db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.db.cluster_resource_id}"
 
-  engine_version       = "15.4"
+  engine_version       = var.engine_version
   engine_major_version = regex("^\\d+", local.engine_version)
 }
 

@@ -108,6 +108,14 @@ resource "aws_lb_listener" "alb_listener_https" {
   }
 }
 
+# Optional resource, used for if the ALB has multiple certificates
+resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs" {
+  for_each = toset(var.enable_load_balancer ? var.optional_extra_alb_certs : [])
+
+  listener_arn    = aws_lb_listener.alb_listener_https[0].arn
+  certificate_arn = each.value
+}
+
 resource "aws_lb_listener_rule" "app_https_forward" {
   # we need an identical https forward, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true

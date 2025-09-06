@@ -6,6 +6,7 @@ module "dev_config" {
   environment                     = "dev"
   network_name                    = "dev"
   domain_name                     = "api.dev.simpler.grants.gov"
+  secondary_domain_names          = ["alb.dev.simpler.grants.gov"]
   s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
   mtls_domain_name                = "soap.dev.simpler.grants.gov"
   enable_https                    = true
@@ -50,6 +51,10 @@ module "dev_config" {
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
 
+    # PDF Generation - Dev overrides
+    FRONTEND_URL             = "https://dev.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE      = "true"
+    PDF_GENERATION_USE_MOCKS = "false"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
