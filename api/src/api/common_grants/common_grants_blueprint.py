@@ -19,7 +19,6 @@ common_grants_blueprint = APIBlueprint(
 )
 def generate_openapi_spec(output_file: str | None) -> None:
     """Generate OpenAPI specification for CommonGrants API routes."""
-    import sys
 
     # Create app and register only the CommonGrants blueprint
     app = APIFlask(
@@ -39,4 +38,5 @@ def generate_openapi_spec(output_file: str | None) -> None:
         with open(output_file, "w") as f:
             f.write(yaml_content)
     else:
+        import sys
         sys.stdout.write(yaml_content)
