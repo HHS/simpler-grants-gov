@@ -1,4 +1,3 @@
-
 import click
 import yaml
 from apiflask import APIBlueprint, APIFlask
@@ -39,4 +38,5 @@ def generate_openapi_spec(output_file: str | None) -> None:
             f.write(yaml_content)
     else:
         import sys
+
         sys.stdout.write(yaml_content)
