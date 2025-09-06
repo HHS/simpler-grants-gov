@@ -19,6 +19,7 @@ from common_grants_sdk.schemas.pydantic.requests.opportunity import OpportunityS
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
+from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 
 logger = logging.getLogger(__name__)
@@ -59,9 +60,11 @@ def generate_404_error(
 @common_grants_blueprint.get("/opportunities")
 @common_grants_blueprint.input(PaginatedQueryParamsSchema, location="query")
 @common_grants_blueprint.output(OpportunitiesListResponseSchema)
+@api_key_multi_auth.login_required
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
+    security=api_key_multi_auth_security_schemes,
     responses=[200],
 )
 @flask_db.with_db_session()
@@ -83,9 +86,11 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
 @common_grants_blueprint.output(OpportunityResponseSchema)
+@api_key_multi_auth.login_required
 @common_grants_blueprint.doc(
     summary="View opportunity details",
     description="View details about an opportunity",
+    security=api_key_multi_auth_security_schemes,
     responses=[200, 404],
 )
 @flask_db.with_db_session()
@@ -110,9 +115,11 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 @common_grants_blueprint.post("/opportunities/search")
 @common_grants_blueprint.input(OpportunitySearchRequestSchema)
 @common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
+@api_key_multi_auth.login_required
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
+    security=api_key_multi_auth_security_schemes,
     responses=[200],
 )
 @flask_db.with_db_session()
