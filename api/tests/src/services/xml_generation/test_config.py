@@ -1,7 +1,5 @@
 """Tests for XML generation configuration."""
 
-import pytest
-
 from src.services.xml_generation.config import XMLTransformationConfig
 
 
@@ -11,12 +9,12 @@ class TestXMLTransformationConfig:
     def test_load_sf424_config(self):
         """Test loading SF-424 transformation configuration."""
         config = XMLTransformationConfig("SF424_4_0")
-        
+
         # Verify field mappings are loaded
         field_mappings = config.get_field_mappings()
         assert isinstance(field_mappings, dict)
         assert len(field_mappings) > 0
-        
+
         # Verify some specific mappings
         assert field_mappings.get("submission_type") == "SubmissionType"
         assert field_mappings.get("organization_name") == "OrganizationName"
@@ -25,7 +23,7 @@ class TestXMLTransformationConfig:
     def test_get_xml_structure(self):
         """Test getting XML structure configuration."""
         config = XMLTransformationConfig("SF424_4_0")
-        
+
         xml_structure = config.get_xml_structure()
         assert isinstance(xml_structure, dict)
         assert xml_structure.get("root_element") == "SF424_4_0"
@@ -34,7 +32,7 @@ class TestXMLTransformationConfig:
     def test_get_namespace_config(self):
         """Test getting namespace configuration."""
         config = XMLTransformationConfig("SF424_4_0")
-        
+
         namespace_config = config.get_namespace_config()
         assert isinstance(namespace_config, dict)
         assert "default" in namespace_config
@@ -43,7 +41,7 @@ class TestXMLTransformationConfig:
     def test_unknown_form_name(self):
         """Test handling of unknown form name."""
         config = XMLTransformationConfig("UNKNOWN_FORM")
-        
+
         # Should return empty configurations
         assert config.get_field_mappings() == {}
         assert config.get_xml_structure() == {}
@@ -53,7 +51,7 @@ class TestXMLTransformationConfig:
         """Test that form name matching is case insensitive."""
         config_upper = XMLTransformationConfig("SF424_4_0")
         config_lower = XMLTransformationConfig("sf424_4_0")
-        
+
         # Both should load the same configuration
         assert config_upper.get_field_mappings() == config_lower.get_field_mappings()
         assert config_upper.get_xml_structure() == config_lower.get_xml_structure()

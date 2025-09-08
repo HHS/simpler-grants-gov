@@ -17,10 +17,10 @@ class BaseTransformer:
 
     def transform(self, source_data: Dict[str, Any]) -> Dict[str, Any]:
         """Transform source data according to configuration rules.
-        
+
         Args:
             source_data: The input JSON data to transform
-            
+
         Returns:
             Transformed data ready for XML generation
         """
@@ -28,7 +28,7 @@ class BaseTransformer:
             return {}
 
         transformed_data = {}
-        
+
         # Apply field mappings
         for source_field, target_field in self.field_mappings.items():
             if source_field in source_data:
@@ -36,5 +36,7 @@ class BaseTransformer:
                 transformed_data[target_field] = value
                 logger.debug(f"Mapped {source_field} -> {target_field}: {value}")
 
-        logger.info(f"Transformed {len(transformed_data)} fields from {len(source_data)} input fields")
+        logger.info(
+            f"Transformed {len(transformed_data)} fields from {len(source_data)} input fields"
+        )
         return transformed_data

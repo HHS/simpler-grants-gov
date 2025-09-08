@@ -18,6 +18,7 @@ class XMLTransformationConfig:
         try:
             if self.form_name.upper() == "SF424_4_0":
                 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+
                 logger.info(f"Loaded transformation config for {self.form_name} from sf424.py")
                 return FORM_XML_TRANSFORM_RULES
             else:

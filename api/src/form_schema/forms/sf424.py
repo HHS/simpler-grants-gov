@@ -1062,28 +1062,17 @@ FORM_XML_TRANSFORM_RULES = {
     "description": "Basic transformation rules for converting Simpler SF-424 JSON to Grants.gov XML format",
     "version": "1.0",
     "form_name": "SF424_4_0",
-    
-    "namespaces": {
-        "default": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
-        "prefix": ""
-    },
-
-    "xml_structure": {
-        "root_element": "SF424_4_0",
-        "version": "4.0"
-    },
-
+    "namespaces": {"default": "http://apply.grants.gov/forms/SF424_4_0-V4.0", "prefix": ""},
+    "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
     "field_mappings": {
         # Core application information
         "submission_type": "SubmissionType",
         "application_type": "ApplicationType",
         "date_received": "DateReceived",
-        
         # Applicant information
         "organization_name": "OrganizationName",
         "employer_taxpayer_identification_number": "EmployerTaxpayerIdentificationNumber",
         "sam_uei": "SAMUniqueEntityIdentifier",
-        
         # Address information
         "address_line_1": "AddressLine1",
         "address_line_2": "AddressLine2",
@@ -1093,26 +1082,22 @@ FORM_XML_TRANSFORM_RULES = {
         "country_code": "CountryCode",
         "zip_code": "ZipCode",
         "zip_code_plus4": "ZipCodePlus4",
-        
         # Contact information
         "phone_number": "PhoneNumber",
         "fax_number": "FaxNumber",
         "email": "Email",
-        
         # Opportunity information
         "agency_name": "AgencyName",
         "assistance_listing_number": "AssistanceListingNumber",
         "assistance_listing_program_title": "AssistanceListingProgramTitle",
         "funding_opportunity_number": "FundingOpportunityNumber",
         "funding_opportunity_title": "FundingOpportunityTitle",
-        
         # Project information
         "project_title": "ProjectTitle",
         "congressional_district_applicant": "CongressionalDistrictApplicant",
         "congressional_district_program_project": "CongressionalDistrictProgramProject",
         "project_start_date": "ProjectStartDate",
         "project_end_date": "ProjectEndDate",
-        
         # Funding information
         "federal_estimated_funding": "FederalEstimatedFunding",
         "applicant_estimated_funding": "ApplicantEstimatedFunding",
@@ -1121,19 +1106,17 @@ FORM_XML_TRANSFORM_RULES = {
         "other_estimated_funding": "OtherEstimatedFunding",
         "program_income_estimated_funding": "ProgramIncomeEstimatedFunding",
         "total_estimated_funding": "TotalEstimatedFunding",
-        
         # Review and certification
         "state_review": "StateReview",
         "state_review_available_date": "StateReviewAvailableDate",
         "delinquent_federal_debt": "DelinquentFederalDebt",
         "certification_agree": "CertificationAgree",
-        
         # Authorized representative
         "authorized_representative_title": "AuthorizedRepresentativeTitle",
         "authorized_representative_phone_number": "AuthorizedRepresentativePhoneNumber",
         "authorized_representative_email": "AuthorizedRepresentativeEmail",
-        "date_signed": "DateSigned"
-    }
+        "date_signed": "DateSigned",
+    },
 }
 
 
