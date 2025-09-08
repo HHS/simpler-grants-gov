@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { generateSpoofedSession } from "./loginUtils";
+import { createSpoofedCookie, generateSpoofedSession } from "./loginUtils";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 
 test.afterEach(async ({ context }) => {
@@ -17,21 +17,18 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
 test("shows save / search cta if logged in", async ({ page, context }, {
   project,
 }) => {
-  const clientJwt = await generateSpoofedSession();
-  await context.addCookies([
-    {
-      name: "session",
-      value: clientJwt,
-      url: "http://localhost:3000",
-    },
-  ]);
+  await createSpoofedCookie(context);
   await page.goto("http://localhost:3000/?_ff=authOn:true");
-  // await performSignIn(page, project);
 
   if (project.name.match(/[Mm]obile/)) {
     await openMobileNav(page);
   }
-  const savedOpportunitiesNavItem = page.locator(".usa-nav li:nth-child(3)");
+  const dropDownButton = page.locator("#nav-dropdown-button-4");
+  await dropDownButton.click();
+
+  const savedOpportunitiesNavItem = page.locator(
+    "ul#Workspace li:nth-child(1)",
+  );
   await expect(savedOpportunitiesNavItem).toHaveText("Saved opportunities");
   await savedOpportunitiesNavItem.click();
 

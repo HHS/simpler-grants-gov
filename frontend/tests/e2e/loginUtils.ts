@@ -1,4 +1,5 @@
-import { createPublicKey, KeyObject } from "crypto";
+import { createPrivateKey, createPublicKey, KeyObject } from "crypto";
+import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
 
 /*
@@ -8,8 +9,8 @@ import { SignJWT } from "jose";
 const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
-const clientSessionSecret = "11111111";
-const apiSessionSecret = process.env.API_JWT_PUBLIC_KEY;
+const clientSessionSecret = process.env.SESSION_SECRET;
+const apiSessionSecret = process.env.LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY;
 
 let clientJwtKey: Uint8Array;
 let loginGovJwtKey: KeyObject;
@@ -25,8 +26,8 @@ export const initializeSessionSecrets = () => {
   }
   // eslint-disable-next-line
   console.debug("Initializing Session Secrets");
-  clientJwtKey = encodeText(clientSessionSecret);
-  loginGovJwtKey = createPublicKey(apiSessionSecret);
+  clientJwtKey = encodeText(clientSessionSecret || "");
+  loginGovJwtKey = createPrivateKey(apiSessionSecret);
 };
 
 // 5 minute expiration, could probably do less but just in case a test runs really long
@@ -54,7 +55,7 @@ export const generateSpoofedSession = async (): Promise<string> => {
   const fakeServerToken = await new SignJWT(fakeServerTokenPayload)
     .setProtectedHeader({ alg: API_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
-    // .setProtectedHeader({ alg: API_JWT_ENCRYPTION_ALGORITHM })
+    // .setExpirationTime(newExpirationDate())
     .sign(loginGovJwtKey);
   const fakeToken = await new SignJWT({ token: fakeServerToken })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
@@ -63,6 +64,17 @@ export const generateSpoofedSession = async (): Promise<string> => {
     .sign(clientJwtKey);
 
   return fakeToken;
+};
+
+export const createSpoofedCookie = async (context: BrowserContext) => {
+  const token = await generateSpoofedSession();
+  await context.addCookies([
+    {
+      name: "session",
+      value: token,
+      url: "http://localhost:3000",
+    },
+  ]);
 };
 
 initializeSessionSecrets();
