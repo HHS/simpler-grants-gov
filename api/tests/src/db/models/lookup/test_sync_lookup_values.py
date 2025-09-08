@@ -9,9 +9,9 @@ from sqlalchemy import inspect
 import src.adapters.db as db
 import src.db.models as db_models
 from src.constants.lookup_constants import Privilege, RoleType
-from src.constants.static_role_values import CORE_ROLES, ORG_MEMBER, APPLICATION_CONTRIBUTOR
+from src.constants.static_role_values import APPLICATION_CONTRIBUTOR, CORE_ROLES, ORG_MEMBER
 from src.db.models.lookup import LookupConfig, LookupRegistry, LookupStr, LookupTable
-from src.db.models.lookup.sync_lookup_values import _sync_roles, sync_lookup_values
+from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.lookup_models import LkOpportunityCategory
 from src.db.models.user_models import Role
 from tests.lib import db_testing
@@ -133,14 +133,18 @@ def test_sync_roles(schema_no_lookup, caplog):
         assert db_session.query(Role).count() == 0
 
     sync_lookup_values(schema_no_lookup)
-    db_static_values = db_session.query(Role).all()
-
-    assert len(db_static_values) == len(CORE_ROLES)
+    with schema_no_lookup.get_session() as db_session:
+        db_static_values = db_session.query(Role).all()
+        assert len(db_static_values) == len(CORE_ROLES)
 
     # Assert no changes when run again
     sync_lookup_values(schema_no_lookup)
 
     assert caplog.text.count("No modified values for role") == 4
+
+    # Save original static values
+    original_org_member_privs = ORG_MEMBER.privileges[:]
+    original_app_cont_types = APPLICATION_CONTRIBUTOR.role_types[:]
 
     # Make updates to static roles
     ORG_MEMBER.privileges = [Privilege.VIEW_ORG_MEMBERSHIP]
@@ -152,7 +156,6 @@ def test_sync_roles(schema_no_lookup, caplog):
     assert "Updated role: Organization Member" in caplog.text
     assert "Updated role: Application Contributor" in caplog.text
 
-
-
-
-
+    # Restore original static values
+    ORG_MEMBER.privileges = original_org_member_privs
+    ORG_MEMBER.role_types = original_app_cont_types

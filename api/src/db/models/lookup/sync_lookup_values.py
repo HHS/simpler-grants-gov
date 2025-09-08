@@ -1,11 +1,10 @@
 import logging
-from typing import TYPE_CHECKING, Optional, Type
+from typing import Optional, Type
 
 import src.adapters.db as db
 from src.adapters.db import PostgresDBClient
 from src.adapters.db.clients.postgres_config import get_db_config
 from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
-
 
 logger = logging.getLogger(__name__)
 
@@ -70,4 +69,3 @@ def _sync_roles(db_session: db.Session) -> None:
             logger.info("Updated role: %s", role.role_name)
         else:
             logger.info("No modified values for role `%s`", role.role_name)
-
