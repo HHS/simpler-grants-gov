@@ -3,7 +3,10 @@ import uuid
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.user_models import LinkRolePrivilege, LinkRoleRoleType, Role
 
-# --- Static Role Definitions ---
+# The association proxy relationships (`privileges` and `role_types`) are not set up during
+# object initialization, so when defining static Role instances, we need to explicitly
+# define the underlying relationships (`link_privileges` and `link_role_types`) to ensure
+# proper linkage and persistence.
 
 ORG_ADMIN_ID = uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142")
 ORG_ADMIN = Role(
