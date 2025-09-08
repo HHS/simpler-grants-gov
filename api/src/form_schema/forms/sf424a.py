@@ -4,7 +4,15 @@ from src.db.models.competition_models import Form
 
 FORM_JSON_SCHEMA = {
     "type": "object",
-    "required": ["activity_line_items", "confirmation"],
+    "required": [
+        "activity_line_items",
+        "total_budget_summary",
+        "total_budget_categories",
+        "total_non_federal_resources",
+        "forecasted_cash_needs",
+        "total_federal_fund_estimates",
+        "confirmation",
+    ],
     "properties": {
         "activity_line_items": {
             "type": "array",
@@ -12,6 +20,14 @@ FORM_JSON_SCHEMA = {
             "maxItems": 4,
             "items": {
                 "type": "object",
+                "required": [
+                    "activity_title",
+                    "assistance_listing_number",
+                    "budget_summary",
+                    "budget_categories",
+                    "non_federal_resources",
+                    "federal_fund_estimates",
+                ],
                 "properties": {
                     "activity_title": {
                         # Activity title appears in multiple places on the form
@@ -48,28 +64,19 @@ FORM_JSON_SCHEMA = {
                     },
                 },
             },
-            "contains": {
-                "type": "object",
-                "required": [
-                    "activity_title",  # Column A
-                    "assistance_listing_number",  # Column B
-                    "budget_summary",  # Column G lives inside this object
-                ],
-                "properties": {
-                    "budget_summary": {
-                        "allOf": [
-                            {"$ref": "#/$defs/budget_summary"},
-                            {"type": "object", "required": ["total_amount"]},
-                        ]
-                    }
-                },
-            },
-            "minContains": 1,
         },
         "total_budget_summary": {
             # Section A - Total Row (Column 5)
             "allOf": [{"$ref": "#/$defs/budget_summary"}],
-            # No additional required fields here
+            # In the total budget summary, all fields are required
+            "required": [
+                "federal_estimated_unobligated_amount",
+                "non_federal_estimated_unobligated_amount",
+                "federal_new_or_revised_amount",
+                "non_federal_new_or_revised_amount",
+                # total_amount is already required in the base definition
+                # don't include it again or it gets added as an error twice.
+            ],
         },
         "total_budget_categories": {
             # Section B - Total Column (Column 5)
@@ -78,12 +85,23 @@ FORM_JSON_SCHEMA = {
         "total_non_federal_resources": {
             # Section C - Total Row (Line 12)
             "allOf": [{"$ref": "#/$defs/non_federal_resources"}],
-            # No additional required fields here
+            # In the total non-federal resources, all fields are required
+            "required": [
+                "applicant_amount",
+                "state_amount",
+                "other_amount",
+                # total_amount is already required in the base definition
+                # don't include it again or it gets added as an error twice.
+            ],
         },
         "forecasted_cash_needs": {
             # Section D
             "type": "object",
-            # No additional required fields here
+            "required": [
+                "federal_forecasted_cash_needs",
+                "non_federal_forecasted_cash_needs",
+                "total_forecasted_cash_needs",
+            ],
             "properties": {
                 "federal_forecasted_cash_needs": {
                     # Section D - Line 13
@@ -102,7 +120,13 @@ FORM_JSON_SCHEMA = {
         "total_federal_fund_estimates": {
             # Section E - Total Row (Line 20)
             "allOf": [{"$ref": "#/$defs/federal_fund_estimates"}],
-            # No additional required fields here
+            # In the total federal fund estimates, all fields are required
+            "required": [
+                "first_year_amount",
+                "second_year_amount",
+                "third_year_amount",
+                "fourth_year_amount",
+            ],
         },
         "direct_charges_explanation": {
             # Line 21
@@ -151,6 +175,7 @@ FORM_JSON_SCHEMA = {
         "budget_summary": {
             # Represents a row from Section A
             "type": "object",
+            "required": ["total_amount"],
             "properties": {
                 "federal_estimated_unobligated_amount": {
                     # Column C
@@ -177,6 +202,7 @@ FORM_JSON_SCHEMA = {
         "budget_categories": {
             # Represents a column from Section B
             "type": "object",
+            "required": ["total_direct_charge_amount", "total_amount"],
             "properties": {
                 "personnel_amount": {
                     # Row A
@@ -231,6 +257,7 @@ FORM_JSON_SCHEMA = {
         "non_federal_resources": {
             # Represents a row from Section C
             "type": "object",
+            "required": ["total_amount"],
             "properties": {
                 "applicant_amount": {
                     # Column B
@@ -388,18 +415,18 @@ FORM_UI_SCHEMA = [
         "label": "Section F - Other budget information",
         "children": [
             {
-                "type": "multiField",
-                "name": "Budget424aSectionF",
-                "widget": "Budget424aSectionF",
-                "definition": [
-                    "/properties/direct_charges_explanation",
-                    "/properties/indirect_charges_explanation",
-                    "/properties/remarks",
-                    "/properties/confirmation"
-                ],
+            "type": "multiField",
+            "name": "Budget424aSectionF",
+            "widget": "Budget424aSectionF",
+            "definition": [
+                "/properties/direct_charges_explanation",
+                "/properties/indirect_charges_explanation",
+                "/properties/remarks",
+                "/properties/confirmation"
+            ],
             }
         ],
-    },
+        }
 ]
 
 SF424a_v1_0 = Form(
