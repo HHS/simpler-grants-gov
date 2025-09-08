@@ -158,4 +158,4 @@ def test_sync_roles(schema_no_lookup, caplog):
 
     # Restore original static values
     ORG_MEMBER.privileges = original_org_member_privs
-    ORG_MEMBER.role_types = original_app_cont_types
+    APPLICATION_CONTRIBUTOR.role_types = original_app_cont_types
