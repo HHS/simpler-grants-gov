@@ -14,6 +14,7 @@ output "service_config" {
     instance_scaling_min_capacity   = var.instance_scaling_min_capacity
     instance_cpu                    = var.instance_cpu
     instance_memory                 = var.instance_memory
+    database_engine_version         = var.database_engine_version
     service_name                    = "${local.prefix}${var.app_name}-${var.environment}"
     domain_name                     = var.domain_name
     enable_https                    = var.enable_https
