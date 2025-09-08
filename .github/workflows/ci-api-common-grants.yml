@@ -22,5 +22,13 @@ jobs:
       - name: Initialize the docker containers
         run: make init
 
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install CommonGrants CLI
+        run: npm install -g @common-grants/cli
+
       - name: Generate and validate spec
         run: make check-spec
