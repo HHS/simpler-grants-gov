@@ -1,10 +1,11 @@
 import logging
-from typing import Optional, Type
+from typing import TYPE_CHECKING, Optional, Type
 
 import src.adapters.db as db
 from src.adapters.db import PostgresDBClient
 from src.adapters.db.clients.postgres_config import get_db_config
 from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,8 @@ def sync_lookup_values(db_client: Optional[PostgresDBClient] = None) -> None:
         for table, lookup_config in sync_values.items():
             _sync_lookup_for_table(table, lookup_config.get_lookups(), db_session)
 
+        _sync_roles(db_session)
+
 
 def _sync_lookup_for_table(
     table: Type[LookupTable], lookups: list[Lookup], db_session: db.Session
@@ -44,7 +47,7 @@ def _sync_lookup_for_table(
 
     has_modification = False
     for lookup in lookups:
-        instance = db_session.merge(table.from_lookup(lookup))
+        instance: LookupTable = db_session.merge(table.from_lookup(lookup))
         if db_session.is_modified(instance):
             logger.info("Updated lookup value in table %s to %r", table.get_table_name(), lookup)
             has_modification = True
@@ -53,3 +56,18 @@ def _sync_lookup_for_table(
         # This is just to make the logs clearer instead of seeing
         # several "Syncing lookup values for table .." and then nothing in-between
         logger.info("No modified lookup values for table %s", table.get_table_name())
+
+
+def _sync_roles(db_session: db.Session) -> None:
+    from src.constants.static_role_values import CORE_ROLES
+
+    logger.info("Syncing static CORE_ROLES")
+    for role in CORE_ROLES:
+        instance = db_session.merge(role)
+
+        if db_session.is_modified(instance):
+
+            logger.info("Updated role: %s", role.role_name)
+        else:
+            logger.info("No modified values for role `%s`", role.role_name)
+

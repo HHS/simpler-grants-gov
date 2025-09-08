@@ -8,9 +8,12 @@ from sqlalchemy import inspect
 
 import src.adapters.db as db
 import src.db.models as db_models
+from src.constants.lookup_constants import Privilege, RoleType
+from src.constants.static_role_values import CORE_ROLES, ORG_MEMBER, APPLICATION_CONTRIBUTOR
 from src.db.models.lookup import LookupConfig, LookupRegistry, LookupStr, LookupTable
-from src.db.models.lookup.sync_lookup_values import sync_lookup_values
+from src.db.models.lookup.sync_lookup_values import _sync_roles, sync_lookup_values
 from src.db.models.lookup_models import LkOpportunityCategory
+from src.db.models.user_models import Role
 from tests.lib import db_testing
 
 
@@ -102,6 +105,7 @@ def test_sync_lookup_for_table(schema_no_lookup, caplog: pytest.LogCaptureFixtur
     # Running sync again won't cause any change
     caplog.clear()
     sync_lookup_values(schema_no_lookup)
+
     assert "No modified lookup values for table lk_opportunity_category" in caplog.text
 
     # Modify the lookup values used for one of the lookups
@@ -121,3 +125,34 @@ def test_sync_lookup_for_table(schema_no_lookup, caplog: pytest.LogCaptureFixtur
 
     finally:
         LookupRegistry._lookup_registry[LkOpportunityCategory] = existing_suffix_config
+
+
+def test_sync_roles(schema_no_lookup, caplog):
+    caplog.set_level(logging.INFO)
+    with schema_no_lookup.get_session() as db_session:
+        assert db_session.query(Role).count() == 0
+
+    sync_lookup_values(schema_no_lookup)
+    db_static_values = db_session.query(Role).all()
+
+    assert len(db_static_values) == len(CORE_ROLES)
+
+    # Assert no changes when run again
+    sync_lookup_values(schema_no_lookup)
+
+    assert caplog.text.count("No modified values for role") == 4
+
+    # Make updates to static roles
+    ORG_MEMBER.privileges = [Privilege.VIEW_ORG_MEMBERSHIP]
+    APPLICATION_CONTRIBUTOR.role_types = [RoleType.INTERNAL]
+
+    caplog.clear()
+    sync_lookup_values(schema_no_lookup)
+
+    assert "Updated role: Organization Member" in caplog.text
+    assert "Updated role: Application Contributor" in caplog.text
+
+
+
+
+
