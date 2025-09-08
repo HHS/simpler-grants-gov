@@ -95,12 +95,13 @@ const ApplyForm = ({
             validationWarnings={validationWarnings}
           />
           <AttachmentsProvider value={attachments ?? []}>
-            <FormFields
-              errors={saved ? validationWarnings : null}
-              formData={formObject}
-              schema={formSchema}
-              uiSchema={uiSchema}
-            />
+<FormFields
+  key={saved ? "after-save" : "before-save"}
+  errors={saved ? validationWarnings : null}
+  formData={formObject}
+  schema={formSchema}
+  uiSchema={uiSchema}
+/>
           </AttachmentsProvider>
         </FormGroup>
         <ApplyFormNav title={t("navTitle")} fields={navFields} />
