@@ -48,18 +48,25 @@ Currently supports **37 field mappings** including:
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.models import XMLGenerationRequest
 
+# Application data
+application_data = {
+    "submission_type": "Application",
+    "organization_name": "Test University", 
+    "project_title": "Research Project",
+    # ... other fields
+}
+
 # Create service
 service = XMLGenerationService()
 
 # Create request
 request = XMLGenerationRequest(
-    application_id=application_id,
-    application_form_id=application_form_id,
+    application_data=application_data,
     form_name="SF424_4_0"
 )
 
 # Generate XML
-response = service.generate_xml(db_session, request)
+response = service.generate_xml(request)
 
 if response.success:
     print("XML generated successfully:")

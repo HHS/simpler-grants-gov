@@ -15,8 +15,12 @@ class TestXMLTransformationConfig:
         assert isinstance(field_mappings, dict)
         assert len(field_mappings) > 0
 
-        # Verify some specific mappings
-        assert field_mappings.get("submission_type") == "SubmissionType"
+        # Verify some specific mappings (now objects with "name" field)
+        submission_type_mapping = field_mappings.get("submission_type")
+        assert isinstance(submission_type_mapping, dict)
+        assert submission_type_mapping.get("name") == "SubmissionType"
+
+        # Test legacy string mappings (backward compatibility)
         assert field_mappings.get("organization_name") == "OrganizationName"
         assert field_mappings.get("project_title") == "ProjectTitle"
 

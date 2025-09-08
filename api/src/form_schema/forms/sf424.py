@@ -1066,13 +1066,13 @@ FORM_XML_TRANSFORM_RULES = {
     "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
     "field_mappings": {
         # Core application information
-        "submission_type": "SubmissionType",
-        "application_type": "ApplicationType",
-        "date_received": "DateReceived",
+        "submission_type": {"name": "SubmissionType"},
+        "application_type": {"name": "ApplicationType"},
+        "date_received": {"name": "DateReceived"},
         # Applicant information
         "organization_name": "OrganizationName",
         "employer_taxpayer_identification_number": "EmployerTaxpayerIdentificationNumber",
-        "sam_uei": "SAMUniqueEntityIdentifier",
+        "sam_uei": "SAMUEI",
         # Address information
         "address_line_1": "AddressLine1",
         "address_line_2": "AddressLine2",

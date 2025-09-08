@@ -1,9 +1,5 @@
 """Tests for XML generation service."""
 
-from unittest.mock import Mock, patch
-from uuid import uuid4
-
-from src.db.models.competition_models import ApplicationForm
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -13,9 +9,8 @@ class TestXMLGenerationService:
 
     def test_generate_xml_basic_success(self):
         """Test basic XML generation with simple data."""
-        # Mock application form with basic data
-        mock_application_form = Mock(spec=ApplicationForm)
-        mock_application_form.application_response = {
+        # Test data
+        application_data = {
             "submission_type": "Application",
             "organization_name": "Test University",
             "project_title": "Research Project",
@@ -25,15 +20,9 @@ class TestXMLGenerationService:
 
         # Create service and request
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_id=uuid4(), application_form_id=uuid4(), form_name="SF424_4_0"
-        )
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
 
-        # Mock database session and query
-        mock_db_session = Mock()
-
-        with patch.object(service, "_get_application_form", return_value=mock_application_form):
-            response = service.generate_xml(mock_db_session, request)
+        response = service.generate_xml(request)
 
         # Verify response
         assert response.success is True
@@ -48,60 +37,44 @@ class TestXMLGenerationService:
         assert "<ProjectTitle>Research Project</ProjectTitle>" in xml_data
         assert "<FederalEstimatedFunding>50000</FederalEstimatedFunding>" in xml_data
 
-    def test_generate_xml_application_form_not_found(self):
-        """Test XML generation when application form is not found."""
-        service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_id=uuid4(), application_form_id=uuid4(), form_name="SF424_4_0"
-        )
-
-        mock_db_session = Mock()
-
-        with patch.object(service, "_get_application_form", return_value=None):
-            response = service.generate_xml(mock_db_session, request)
-
-        # Verify error response
-        assert response.success is False
-        assert response.xml_data is None
-        assert "Application form not found" in response.error_message
-
     def test_generate_xml_no_application_data(self):
-        """Test XML generation when application has no response data."""
-        mock_application_form = Mock(spec=ApplicationForm)
-        mock_application_form.application_response = None
-
+        """Test XML generation when no application data is provided."""
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_id=uuid4(), application_form_id=uuid4(), form_name="SF424_4_0"
-        )
+        request = XMLGenerationRequest(application_data={}, form_name="SF424_4_0")
 
-        mock_db_session = Mock()
-
-        with patch.object(service, "_get_application_form", return_value=mock_application_form):
-            response = service.generate_xml(mock_db_session, request)
+        response = service.generate_xml(request)
 
         # Verify error response
         assert response.success is False
         assert response.xml_data is None
-        assert "No application response data found" in response.error_message
+        assert "No application data provided" in response.error_message
+
+    def test_generate_xml_with_none_application_data(self):
+        """Test XML generation when application data is None (validation error)."""
+        from pydantic import ValidationError
+
+        # Pydantic should prevent None values for application_data
+        try:
+            XMLGenerationRequest(
+                application_data=None, form_name="SF424_4_0"  # type: ignore[arg-type]
+            )
+            raise AssertionError("Expected ValidationError for None application_data")
+        except ValidationError as e:
+            # Verify that Pydantic correctly validates the input
+            assert "dict_type" in str(e)
+            assert "application_data" in str(e)
 
     def test_generate_xml_with_namespace(self):
         """Test XML generation includes proper namespace."""
-        mock_application_form = Mock(spec=ApplicationForm)
-        mock_application_form.application_response = {
+        application_data = {
             "submission_type": "Application",
             "organization_name": "Test Organization",
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_id=uuid4(), application_form_id=uuid4(), form_name="SF424_4_0"
-        )
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
 
-        mock_db_session = Mock()
-
-        with patch.object(service, "_get_application_form", return_value=mock_application_form):
-            response = service.generate_xml(mock_db_session, request)
+        response = service.generate_xml(request)
 
         # Verify response and namespace
         assert response.success is True
@@ -110,8 +83,7 @@ class TestXMLGenerationService:
 
     def test_generate_xml_handles_none_values(self):
         """Test XML generation properly handles None values."""
-        mock_application_form = Mock(spec=ApplicationForm)
-        mock_application_form.application_response = {
+        application_data = {
             "submission_type": "Application",
             "organization_name": None,  # None value should be skipped
             "project_title": "Test Project",
@@ -119,14 +91,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_id=uuid4(), application_form_id=uuid4(), form_name="SF424_4_0"
-        )
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
 
-        mock_db_session = Mock()
-
-        with patch.object(service, "_get_application_form", return_value=mock_application_form):
-            response = service.generate_xml(mock_db_session, request)
+        response = service.generate_xml(request)
 
         # Verify response
         assert response.success is True
@@ -142,8 +109,7 @@ class TestXMLGenerationService:
 
     def test_unmapped_fields_excluded(self):
         """Test that unmapped fields are excluded from XML output."""
-        mock_application_form = Mock(spec=ApplicationForm)
-        mock_application_form.application_response = {
+        application_data = {
             "submission_type": "Application",
             "organization_name": "Test Org",
             "project_title": "Test Project",
@@ -151,14 +117,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(
-            application_id=uuid4(), application_form_id=uuid4(), form_name="SF424_4_0"
-        )
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
 
-        mock_db_session = Mock()
-
-        with patch.object(service, "_get_application_form", return_value=mock_application_form):
-            response = service.generate_xml(mock_db_session, request)
+        response = service.generate_xml(request)
 
         # Verify response
         assert response.success is True
