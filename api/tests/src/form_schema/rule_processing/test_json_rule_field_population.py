@@ -94,6 +94,12 @@ def test_handle_field_population_pre_population(
             {"x": "101.01", "y": "0.23"},
             "101.24",
         ),
+        # Can handle negative numbers
+        (
+            {"rule": "sum_monetary", "fields": ["x", "y"]},
+            {"x": "10.01", "y": "-21.50"},
+            "-11.49",
+        ),
     ],
 )
 def test_handle_field_population_pre_population_sum_monetary(
@@ -118,17 +124,16 @@ def test_handle_field_population_pre_population_sum_monetary(
     ],
 )
 def test_handle_field_population_pre_population_sum_monetary_not_a_monetary_amount(
-    rule, json_data, enable_factory_create, caplog
+    rule, json_data, enable_factory_create
 ):
-    # Non-monetary amounts will be skipped, others will be summed still
+    # Non-monetary amounts will be skipped resulting in 0.00 for all of these scenarios.
     context = setup_context(json_data, {"my_field": rule})
     handle_field_population(
         context,
         JsonRule(handler="gg_pre_population", rule=rule, path=["my_field"]),
         PRE_POPULATION_MAPPER,
     )
-    assert json_data.get("my_field") is None
-    assert "Failed to handle field population" in caplog.messages
+    assert context.json_data["my_field"] == "0.00"
 
 
 @pytest.mark.parametrize(

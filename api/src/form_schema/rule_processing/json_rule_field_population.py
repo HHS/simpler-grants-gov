@@ -137,6 +137,7 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     for value in values:
         if value is None:
             continue
+
         # If a field cannot be converted to a monetary amount, we just
         # won't add it to the amount. These fields should have validation
         # on them that would flag it to a user.
