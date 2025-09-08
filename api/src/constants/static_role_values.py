@@ -4,10 +4,7 @@ from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.user_models import LinkRolePrivilege, LinkRoleRoleType, Role
 
 # --- Static Role Definitions ---
-# Assign privileges and role types after role_id is set
-# If `privileges` or `role_types` are assigned before `role_id` is set,
-# the generated link objects will have `role_id=None`, which causes issues
-# with SQLAlchemy's merge logic
+
 ORG_ADMIN_ID = uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142")
 ORG_ADMIN = Role(
     role_id=uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142"),
