@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.opportunity_models import Opportunity
+from src.form_schema.rule_processing.json_rule_util import build_path_str
 
 
 @dataclass
@@ -24,6 +25,13 @@ class JsonRule:
     path: list[str]
 
     order: int = 1
+
+    def get_log_context(self) -> dict:
+        return {
+            "path": build_path_str(self.path),
+            "handler": self.handler,
+            "rule": self.rule.get("rule", "unknown"),
+        }
 
 
 class JsonRuleContext:

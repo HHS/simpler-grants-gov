@@ -97,10 +97,7 @@ def handle_validation(context: JsonRuleContext, json_rule: JsonRule) -> None:
 
     rule_code: str | None = json_rule.rule.get("rule", None)
 
-    log_extra = context.get_log_context() | {
-        "validation_rule": rule_code,
-        "path": ".".join(json_rule.path),
-    }
+    log_extra = context.get_log_context() | json_rule.get_log_context()
 
     if rule_code is None:
         logger.warning("Rule code is null for configuration", extra=log_extra)

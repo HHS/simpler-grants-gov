@@ -137,7 +137,18 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     for value in values:
         if value is None:
             continue
-        result += _convert_monetary_field(value)
+        # If a field cannot be converted to a monetary amount, we just
+        # won't add it to the amount. These fields should have validation
+        # on them that would flag it to a user.
+        # For example, if a set of fields were 1.00, 2.00, "hello", and 3.00
+        # we'd still want to produce "6.00" from this function as that seems
+        # the most intuitive to a user.
+        try:
+            monetary_value = _convert_monetary_field(value)
+        except ValueError:
+            logger.info("Cannot convert monetary amount entered", extra=json_rule.get_log_context())
+            continue
+        result += monetary_value
 
     return str(result.quantize(result))
 
@@ -167,11 +178,7 @@ def handle_field_population(
 ) -> None:
 
     rule_code: str | None = json_rule.rule.get("rule", None)
-
-    log_extra = context.get_log_context() | {
-        "field_population_rule": rule_code,
-        "path": ".".join(json_rule.path),
-    }
+    log_extra = context.get_log_context() | json_rule.get_log_context()
 
     # If the rule code isn't configured right, log a warning to alert us, but
     # we'll proceed onward and not break the endpoint.

@@ -120,6 +120,7 @@ def test_handle_field_population_pre_population_sum_monetary(
 def test_handle_field_population_pre_population_sum_monetary_not_a_monetary_amount(
     rule, json_data, enable_factory_create, caplog
 ):
+    # Non-monetary amounts will be skipped, others will be summed still
     context = setup_context(json_data, {"my_field": rule})
     handle_field_population(
         context,
