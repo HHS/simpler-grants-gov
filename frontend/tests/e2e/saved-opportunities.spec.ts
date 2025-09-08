@@ -1,11 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  generateSpoofedSession,
-  openMobileNav,
-  performSignIn,
-  waitForURLChange,
-} from "./playwrightUtils";
+import { generateSpoofedSession } from "./loginUtils";
+import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 
 test.afterEach(async ({ context }) => {
   await context.close();
@@ -21,10 +17,11 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
 test("shows save / search cta if logged in", async ({ page, context }, {
   project,
 }) => {
+  const clientJwt = await generateSpoofedSession();
   await context.addCookies([
     {
       name: "session",
-      value: generateSpoofedSession(),
+      value: clientJwt,
       url: "http://localhost:3000",
     },
   ]);

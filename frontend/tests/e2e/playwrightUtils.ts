@@ -4,7 +4,6 @@ import {
   FullProject,
   Page,
 } from "@playwright/test";
-import jwt from "jsonwebtoken";
 
 export interface PageProps {
   page: Page;
@@ -152,11 +151,4 @@ export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   await menuOpener.click();
   return menuOpener;
-};
-
-// we also need to log the user in on the backend
-export const generateSpoofedSession = () => {
-  const fakeJwtPayload = {};
-  const fakeToken = jwt.sign(fakeJwtPayload, clientJwtKey);
-  return fakeToken;
 };
