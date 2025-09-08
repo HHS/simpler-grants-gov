@@ -168,7 +168,7 @@ FORM_JSON_SCHEMA = {
             # A user will never fill this in, it's just on the form for agencies to use
             "type": "string",
             "title": "Date Received By State",
-            "description": "Enter the date received by the state, if applicable.",
+            "description": "Leave blank, to be filled out by state.",
             "format": "date",
             "readOnly": True,
         },
@@ -176,7 +176,7 @@ FORM_JSON_SCHEMA = {
             # A user will never fill this in, it's just on the form for agencies to use
             "type": "string",
             "title": "State Application Identifier",
-            "description": "Enter the identifier assigned by the state, if applicable.",
+            "description": "Leave blank, to be filled out by state.",
             "minLength": 0,
             "maxLength": 30,
             "readOnly": True,
