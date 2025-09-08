@@ -1,4 +1,4 @@
-import { createPrivateKey, KeyObject } from "crypto";
+// import { createPrivateKey, KeyObject } from "crypto";
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
 
@@ -7,19 +7,20 @@ import { SignJWT } from "jose";
 */
 
 const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
-const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
+// const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
+const fakeServerToken = process.env.E2E_API_USER_AUTH_TOKEN;
 const clientSessionSecret = process.env.SESSION_SECRET;
-const apiSessionSecret = process.env.LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY;
+// const apiSessionSecret = process.env.LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY;
 
 let clientJwtKey: Uint8Array;
-let loginGovJwtKey: KeyObject;
+// let loginGovJwtKey: KeyObject;
 
 const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
 
 export const initializeSessionSecrets = () => {
-  if (!apiSessionSecret) {
+  if (!clientSessionSecret) {
     // eslint-disable-next-line
     console.debug("Api session key not present, cannot spoof login");
     return;
@@ -27,7 +28,7 @@ export const initializeSessionSecrets = () => {
   // eslint-disable-next-line
   console.debug("Initializing Session Secrets");
   clientJwtKey = encodeText(clientSessionSecret || "");
-  loginGovJwtKey = createPrivateKey(apiSessionSecret);
+  // loginGovJwtKey = createPrivateKey(apiSessionSecret);
 };
 
 // 5 minute expiration, could probably do less but just in case a test runs really long
@@ -42,23 +43,27 @@ export const newExpirationDate = () => new Date(Date.now() + 5 * 60 * 1000);
   API code or your local db and add them yourself.
 */
 export const generateSpoofedSession = async (): Promise<string> => {
-  if (!loginGovJwtKey || !clientJwtKey) {
+  if (!clientJwtKey) {
     throw new Error("Unable to spoof login, missing auth key(s)");
   }
 
-  // hardcoded values taken from token config in the API
-  const fakeServerTokenPayload = {
-    sub: process.env.E2E_LOGIN_TOKEN_ID,
-    aud: "simpler-grants-api",
-    iss: "simpler-grants-api",
-    email: "fake_mail@mail.com",
-    user_id: process.env.E2E_USER_ID,
-    session_duration_minutes: 30,
-  };
-  const fakeServerToken = await new SignJWT(fakeServerTokenPayload)
-    .setProtectedHeader({ alg: API_JWT_ENCRYPTION_ALGORITHM })
-    .setIssuedAt()
-    .sign(loginGovJwtKey);
+  // instead of all this stuff, just take in the API token from the env
+  // this token will be output from an API side script that will also seed
+  // the user id and token id
+
+  // // hardcoded values taken from token config in the API
+  // const fakeServerTokenPayload = {
+  //   sub: process.env.E2E_LOGIN_TOKEN_ID,
+  //   aud: "simpler-grants-api",
+  //   iss: "simpler-grants-api",
+  //   email: "fake_mail@mail.com",
+  //   user_id: process.env.E2E_USER_ID,
+  //   session_duration_minutes: 30,
+  // };
+  // const fakeServerToken = await new SignJWT(fakeServerTokenPayload)
+  //   .setProtectedHeader({ alg: API_JWT_ENCRYPTION_ALGORITHM })
+  //   .setIssuedAt()
+  //   .sign(loginGovJwtKey);
 
   const fakeToken = await new SignJWT({ token: fakeServerToken })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })

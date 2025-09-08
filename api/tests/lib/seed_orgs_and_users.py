@@ -121,17 +121,17 @@ USER_TWO_ORG_ORG_USER2 = factories.OrganizationUserFactory.build(
     is_organization_owner=True,
 )
 
-###############################
-# User for testing auth gated pages in E2E
-###############################
+# ###############################
+# # User for testing auth gated pages in E2E
+# ###############################
 
-USER_E2E_BASE = factories.UserFactory.build(
-    user_id=uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff")
-)
+# USER_E2E_BASE = factories.UserFactory.build(
+#     user_id=uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff")
+# )
 
-USER_E2E_BASE_AUTH_TOKEN = factories.UserTokenSessionFactory.build(
-    user=USER_E2E_BASE, token_id=uuid.UUID("2dffb470-a01f-40be-ba4b-4ed6007a9cff")
-)
+# USER_E2E_BASE_AUTH_TOKEN = factories.UserTokenSessionFactory.build(
+#     user=USER_E2E_BASE, token_id=uuid.UUID("2dffb470-a01f-40be-ba4b-4ed6007a9cff")
+# )
 
 
 def _build_organizations_and_users(db_session: db.Session) -> None:
@@ -175,12 +175,12 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(USER_TWO_ORG_ORG_USER1, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
 
-    ###############################
-    # User for e2e
-    ###############################
-    logger.info(f"Updating user for e2e: '{USER_E2E_BASE_AUTH_TOKEN.user_id}'")
-    db_session.merge(USER_E2E_BASE, load=True)
-    db_session.merge(USER_E2E_BASE_AUTH_TOKEN, load=True)
+    # ###############################
+    # # User for e2e
+    # ###############################
+    # logger.info(f"Updating user for e2e: '{USER_E2E_BASE_AUTH_TOKEN.user_id}'")
+    # db_session.merge(USER_E2E_BASE, load=True)
+    # db_session.merge(USER_E2E_BASE_AUTH_TOKEN, load=True)
 
 
 def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:

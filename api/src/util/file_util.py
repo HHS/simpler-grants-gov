@@ -202,6 +202,14 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
         return input_file.read()
 
 
+def append_to_file(
+    path: str | Path, content: str, mode: str = "a", encoding: str | None = None
+) -> str:
+    """Simple function for adding a line to end of a file"""
+    with open_stream(path, mode, encoding) as file_to_write_to:
+        return file_to_write_to.write(content)
+
+
 def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Config) -> str:
     """
     Convert an S3 URL to a CDN URL
