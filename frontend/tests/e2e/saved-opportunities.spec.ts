@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { createSpoofedCookie, generateSpoofedSession } from "./loginUtils";
+import { createSpoofedSessionCookie } from "./loginUtils";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 
 test.afterEach(async ({ context }) => {
@@ -17,7 +17,7 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
 test("shows save / search cta if logged in", async ({ page, context }, {
   project,
 }) => {
-  await createSpoofedCookie(context);
+  await createSpoofedSessionCookie(context);
   await page.goto("http://localhost:3000/?_ff=authOn:true");
 
   if (project.name.match(/[Mm]obile/)) {
