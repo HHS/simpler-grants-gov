@@ -415,18 +415,18 @@ FORM_UI_SCHEMA = [
         "label": "Section F - Other budget information",
         "children": [
             {
-            "type": "multiField",
-            "name": "Budget424aSectionF",
-            "widget": "Budget424aSectionF",
-            "definition": [
-                "/properties/direct_charges_explanation",
-                "/properties/indirect_charges_explanation",
-                "/properties/remarks",
-                "/properties/confirmation"
-            ],
+                "type": "multiField",
+                "name": "Budget424aSectionF",
+                "widget": "Budget424aSectionF",
+                "definition": [
+                    "/properties/direct_charges_explanation",
+                    "/properties/indirect_charges_explanation",
+                    "/properties/remarks",
+                    "/properties/confirmation",
+                ],
             }
         ],
-        }
+    },
 ]
 
 SF424a_v1_0 = Form(
