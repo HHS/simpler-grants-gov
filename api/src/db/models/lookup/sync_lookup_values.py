@@ -60,12 +60,11 @@ def _sync_lookup_for_table(
 def _sync_roles(db_session: db.Session) -> None:
     from src.constants.static_role_values import CORE_ROLES
 
-    logger.info("Syncing static CORE_ROLES")
+    logger.info("Syncing static core roles")
     for role in CORE_ROLES:
         instance = db_session.merge(role)
-
+        role_name = role.role_name
         if db_session.is_modified(instance):
-
-            logger.info("Updated role: %s", role.role_name)
+            logger.info("Updated role: %s", role_name)
         else:
-            logger.info("No modified values for role `%s`", role.role_name)
+            logger.info("No modified values for role `%s`", role_name)
