@@ -259,7 +259,8 @@ def _build_xml_elements(
     key_namespace_config: dict[str, str | None],
     namespaces: dict[str | None, str],
 ) -> None:
-    for key, value in xml_dict.items():
+    # Sort keys to ensure consistent XML element ordering across environments
+    for key, value in sorted(xml_dict.items()):
         # Get the namespace prefix for this element
         ns_prefix = key_namespace_config.get(key)
         ns_uri = namespaces.get(ns_prefix) if ns_prefix else None

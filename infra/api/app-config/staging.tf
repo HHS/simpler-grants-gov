@@ -6,6 +6,7 @@ module "staging_config" {
   environment                     = "staging"
   network_name                    = "staging"
   domain_name                     = "api.staging.simpler.grants.gov"
+  secondary_domain_names          = ["alb.staging.simpler.grants.gov"]
   s3_cdn_domain_name              = "files.staging.simpler.grants.gov"
   mtls_domain_name                = "soap.staging.simpler.grants.gov"
   enable_https                    = true

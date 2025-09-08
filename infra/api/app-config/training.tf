@@ -1,29 +1,30 @@
-module "dev_config" {
+module "training_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
-  environment                     = "dev"
-  network_name                    = "dev"
-  domain_name                     = "api.dev.simpler.grants.gov"
-  secondary_domain_names          = ["alb.dev.simpler.grants.gov"]
-  s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
-  mtls_domain_name                = "soap.dev.simpler.grants.gov"
+  environment                     = "training"
+  network_name                    = "training"
+  domain_name                     = "api.training.simpler.grants.gov"
+  s3_cdn_domain_name              = "files.training.simpler.grants.gov"
+  mtls_domain_name                = "soap.training.simpler.grants.gov"
   enable_https                    = true
-  has_database                    = local.has_database
+  database_engine_version         = "15.10"
+  has_database                    = true
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
+  enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = local.enable_notifications
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
-  # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-dev/services/api-dev/health?region=us-east-1
+  # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
-  # instance_desired_instance_count is 2, as a general best pratice.
+  # With a minimum of 2, as a general best pratice.
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 2x the instance_scaling_min_capacity
-  # this is so that we can observe some scaling behavior without burning $$$ for no reason.
+  # this is so that we can see some scaling behavior in dev without burning $$$ for no reason.
   instance_scaling_max_capacity = 4
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
@@ -42,24 +43,15 @@ module "dev_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-
     # Login.gov OAuth
     ENABLE_AUTH_ENDPOINT   = 1
     ENABLE_APPLY_ENDPOINTS = 1
     ENABLE_SOAP_API        = 1
-
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
-
-    # PDF Generation - Dev overrides
-    FRONTEND_URL             = "https://dev.simpler.grants.gov"
-    DOCRAPTOR_TEST_MODE      = "true"
-    PDF_GENERATION_USE_MOCKS = "false"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
-
-  enable_identity_provider = local.enable_identity_provider
 }

@@ -21,6 +21,7 @@ on:
         options:
           - dev
           - staging
+          - training
           - prod
       version:
         required: true

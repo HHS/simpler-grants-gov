@@ -164,6 +164,8 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             opportunity=OpportunityFactory.build(
                 opportunity_title=funding_opportunity_title,
                 opportunity_number=funding_opportunity_number,
+                agency_code="TEST",
+                agency_record=None,
             ),
         )
 
@@ -218,8 +220,8 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
                 <ns5:ClosingDate>{closing_date}</ns5:ClosingDate>
                 <CompetitionID>{competition_id}</CompetitionID>
                 <CompetitionTitle>{competition_title}</CompetitionTitle>
-                <FundingOpportunityTitle>{funding_opportunity_title}</FundingOpportunityTitle>
                 <FundingOpportunityNumber>{funding_opportunity_number}</FundingOpportunityNumber>
+                <FundingOpportunityTitle>{funding_opportunity_title}</FundingOpportunityTitle>
                 <IsMultiProject>true</IsMultiProject>
                 <ns5:OpeningDate>{opening_date}</ns5:OpeningDate>
                 <PackageID>{legacy_package_id}</PackageID>
