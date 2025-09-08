@@ -1073,23 +1073,28 @@ FORM_XML_TRANSFORM_RULES = {
         "organization_name": "OrganizationName",
         "employer_taxpayer_identification_number": "EmployerTaxpayerIdentificationNumber",
         "sam_uei": "SAMUEI",
-        # Address information
-        "address_line_1": "AddressLine1",
-        "address_line_2": "AddressLine2",
-        "city": "City",
-        "county": "County",
-        "state_code": "StateCode",
-        "country_code": "CountryCode",
-        "zip_code": "ZipCode",
-        "zip_code_plus4": "ZipCodePlus4",
+        # Address information (nested under Applicant element)
+        "applicant_address": {
+            "name": "Applicant",
+            "type": "nested_object",
+            "fields": {
+                "address_line_1": "Street1",
+                "address_line_2": "Street2",
+                "city": "City",
+                "county": "County",
+                "state_code": "State",
+                "country_code": "Country",
+                "zip_code": "ZipPostalCode",
+            },
+        },
         # Contact information
         "phone_number": "PhoneNumber",
-        "fax_number": "FaxNumber",
+        "fax_number": "Fax",
         "email": "Email",
         # Opportunity information
         "agency_name": "AgencyName",
-        "assistance_listing_number": "AssistanceListingNumber",
-        "assistance_listing_program_title": "AssistanceListingProgramTitle",
+        "assistance_listing_number": "CFDANumber",
+        "assistance_listing_program_title": "CFDAProgramTitle",
         "funding_opportunity_number": "FundingOpportunityNumber",
         "funding_opportunity_title": "FundingOpportunityTitle",
         # Project information

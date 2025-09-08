@@ -133,3 +133,41 @@ class TestXMLGenerationService:
         # Verify unmapped field is excluded
         assert "unmapped_field" not in xml_data
         assert "This should not appear in output" not in xml_data
+
+    def test_generate_xml_with_nested_address(self):
+        """Test XML generation with nested address structure."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "applicant_address": {
+                "address_line_1": "123 Main Street",
+                "address_line_2": "Suite 100",
+                "city": "Washington",
+                "county": "District of Columbia",
+                "state_code": "DC",
+                "country_code": "US",
+                "zip_code": "20001-1234",
+            },
+            "project_title": "Research Project",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify nested address structure is created correctly
+        assert "<Applicant>" in xml_data
+        assert "<Street1>123 Main Street</Street1>" in xml_data
+        assert "<Street2>Suite 100</Street2>" in xml_data
+        assert "<City>Washington</City>" in xml_data
+        assert "<County>District of Columbia</County>" in xml_data
+        assert "<State>DC</State>" in xml_data
+        assert "<Country>US</Country>" in xml_data
+        assert "<ZipPostalCode>20001-1234</ZipPostalCode>" in xml_data
+        assert "</Applicant>" in xml_data

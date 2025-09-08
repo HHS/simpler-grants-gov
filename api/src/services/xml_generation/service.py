@@ -2,6 +2,7 @@
 
 import logging
 import xml.etree.ElementTree as ET
+from typing import Any
 
 from .config import XMLTransformationConfig
 from .models import XMLGenerationRequest, XMLGenerationResponse
@@ -69,11 +70,23 @@ class XMLGenerationService:
         # Add data elements
         for field_name, value in data.items():
             if value is not None:
-                element = ET.SubElement(root, field_name)
-                element.text = str(value)
+                self._add_element_to_parent(root, field_name, value)
 
         # Generate XML string
         ET.indent(root, space="  ")
         xml_string = ET.tostring(root, encoding="unicode", xml_declaration=True)
 
         return xml_string
+
+    def _add_element_to_parent(self, parent: ET.Element, field_name: str, value: Any) -> None:
+        """Add an element to a parent, handling both simple values and nested dictionaries."""
+        if isinstance(value, dict):
+            # Create nested element for dictionary values
+            nested_element = ET.SubElement(parent, field_name)
+            for nested_field, nested_value in value.items():
+                if nested_value is not None:
+                    self._add_element_to_parent(nested_element, nested_field, nested_value)
+        else:
+            # Simple value - create element with text content
+            element = ET.SubElement(parent, field_name)
+            element.text = str(value)
