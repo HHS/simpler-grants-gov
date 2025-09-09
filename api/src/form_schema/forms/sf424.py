@@ -626,10 +626,11 @@ FORM_JSON_SCHEMA = {
             # to avoid any floating point rounding issues.
             "type": "string",
             # Pattern here effectively says:
+            # * An optional negative sign
             # * Any number of digits
             # * An optional decimal point
             # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^\d*([.]\d{2})?$",
+            "pattern": r"^(-)?\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
         },
