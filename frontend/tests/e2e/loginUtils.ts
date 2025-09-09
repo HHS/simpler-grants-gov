@@ -33,8 +33,12 @@ export const newExpirationDate = () => new Date(Date.now() + 5 * 60 * 1000);
   encrypts an API token passed as an env var into a fake client token
 */
 export const generateSpoofedSession = async (): Promise<string> => {
-  if (!clientJwtKey || !fakeServerToken) {
-    throw new Error("Unable to spoof login, missing auth key or server token");
+  if (!clientJwtKey) {
+    throw new Error("Unable to spoof login, missing auth key");
+  }
+
+  if (!fakeServerToken) {
+    throw new Error("Unable to spoof login, missing server token");
   }
 
   const fakeToken = await new SignJWT({ token: fakeServerToken })

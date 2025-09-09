@@ -58,9 +58,9 @@ jobs:
       - name: Build a prod version of the site
         run: |
           {
+            cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
             cat ../api/e2e_token.tmp
-            cat .env.development
           } >> .env.local
           # Use the localhost url for tests
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://localhost:3000|' .env.local
@@ -71,7 +71,8 @@ jobs:
           CI: true
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
-        run: npm run test:e2e
+        run: |
+          npm run test:e2e
 
       - name: Verify Blob Report Directory
         run: |
