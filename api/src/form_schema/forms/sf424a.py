@@ -6,11 +6,6 @@ FORM_JSON_SCHEMA = {
     "type": "object",
     "required": [
         "activity_line_items",
-        "total_budget_summary",
-        "total_budget_categories",
-        "total_non_federal_resources",
-        "forecasted_cash_needs",
-        "total_federal_fund_estimates",
         "confirmation",
     ],
     "properties": {
@@ -20,14 +15,7 @@ FORM_JSON_SCHEMA = {
             "maxItems": 4,
             "items": {
                 "type": "object",
-                "required": [
-                    "activity_title",
-                    "assistance_listing_number",
-                    "budget_summary",
-                    "budget_categories",
-                    "non_federal_resources",
-                    "federal_fund_estimates",
-                ],
+                "required": ["activity_title"],
                 "properties": {
                     "activity_title": {
                         # Activity title appears in multiple places on the form
@@ -68,15 +56,6 @@ FORM_JSON_SCHEMA = {
         "total_budget_summary": {
             # Section A - Total Row (Column 5)
             "allOf": [{"$ref": "#/$defs/budget_summary"}],
-            # In the total budget summary, all fields are required
-            "required": [
-                "federal_estimated_unobligated_amount",
-                "non_federal_estimated_unobligated_amount",
-                "federal_new_or_revised_amount",
-                "non_federal_new_or_revised_amount",
-                # total_amount is already required in the base definition
-                # don't include it again or it gets added as an error twice.
-            ],
         },
         "total_budget_categories": {
             # Section B - Total Column (Column 5)
@@ -85,23 +64,12 @@ FORM_JSON_SCHEMA = {
         "total_non_federal_resources": {
             # Section C - Total Row (Line 12)
             "allOf": [{"$ref": "#/$defs/non_federal_resources"}],
-            # In the total non-federal resources, all fields are required
-            "required": [
-                "applicant_amount",
-                "state_amount",
-                "other_amount",
-                # total_amount is already required in the base definition
-                # don't include it again or it gets added as an error twice.
-            ],
         },
         "forecasted_cash_needs": {
             # Section D
             "type": "object",
-            "required": [
-                "federal_forecasted_cash_needs",
-                "non_federal_forecasted_cash_needs",
-                "total_forecasted_cash_needs",
-            ],
+            # No required fields
+            "required": [],
             "properties": {
                 "federal_forecasted_cash_needs": {
                     # Section D - Line 13
@@ -120,13 +88,7 @@ FORM_JSON_SCHEMA = {
         "total_federal_fund_estimates": {
             # Section E - Total Row (Line 20)
             "allOf": [{"$ref": "#/$defs/federal_fund_estimates"}],
-            # In the total federal fund estimates, all fields are required
-            "required": [
-                "first_year_amount",
-                "second_year_amount",
-                "third_year_amount",
-                "fourth_year_amount",
-            ],
+            # No required fields
         },
         "direct_charges_explanation": {
             # Line 21
@@ -165,17 +127,17 @@ FORM_JSON_SCHEMA = {
             # to avoid any floating point rounding issues.
             "type": "string",
             # Pattern here effectively says:
+            # * An optional negative sign
             # * Any number of digits
             # * An optional decimal point
             # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^\d*([.]\d{2})?$",
+            "pattern": r"^(-)?\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
         },
         "budget_summary": {
             # Represents a row from Section A
             "type": "object",
-            "required": ["total_amount"],
             "properties": {
                 "federal_estimated_unobligated_amount": {
                     # Column C
@@ -202,7 +164,8 @@ FORM_JSON_SCHEMA = {
         "budget_categories": {
             # Represents a column from Section B
             "type": "object",
-            "required": ["total_direct_charge_amount", "total_amount"],
+            # No required fields
+            "required": [],
             "properties": {
                 "personnel_amount": {
                     # Row A
@@ -257,7 +220,8 @@ FORM_JSON_SCHEMA = {
         "non_federal_resources": {
             # Represents a row from Section C
             "type": "object",
-            "required": ["total_amount"],
+            # No required fields
+            "required": [],
             "properties": {
                 "applicant_amount": {
                     # Column B
@@ -280,7 +244,7 @@ FORM_JSON_SCHEMA = {
         "federal_fund_estimates": {
             # Represents a row from Section E
             "type": "object",
-            # By default, nothing is required
+            # No required fields
             "required": [],
             "properties": {
                 "first_year_amount": {
@@ -304,7 +268,8 @@ FORM_JSON_SCHEMA = {
         "forecasted_cash_needs": {
             # Represents a row from Section D
             "type": "object",
-            "required": ["total_amount"],
+            # No required fields
+            "required": [],
             "properties": {
                 "first_quarter_amount": {
                     # Column 1st Quarter
