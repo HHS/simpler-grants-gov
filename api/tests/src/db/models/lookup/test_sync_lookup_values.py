@@ -162,8 +162,6 @@ def test_sync_roles(schema_no_lookup, caplog):
     assert "Updated role: Organization Member" in caplog.text
     assert "Updated role: Application Contributor" in caplog.text
 
-    assert ORG_MEMBER
-
     # Restore original static values
     ORG_MEMBER.privileges = original_org_member_privs
     APPLICATION_CONTRIBUTOR.role_types = original_app_cont_types
