@@ -147,14 +147,22 @@ def test_sync_roles(schema_no_lookup, caplog):
     original_app_cont_types = APPLICATION_CONTRIBUTOR.role_types[:]
 
     # Make updates to static roles
-    ORG_MEMBER.privileges = [Privilege.VIEW_ORG_MEMBERSHIP]
-    APPLICATION_CONTRIBUTOR.role_types = [RoleType.INTERNAL]
+    new_org_member_privs = [Privilege.VIEW_ORG_MEMBERSHIP]
+    new_app_cont_types = [RoleType.INTERNAL]
+
+    ORG_MEMBER.privileges = new_org_member_privs
+    APPLICATION_CONTRIBUTOR.role_types = new_app_cont_types
+
+    assert ORG_MEMBER.privileges == new_org_member_privs
+    assert APPLICATION_CONTRIBUTOR.role_types == new_app_cont_types
 
     caplog.clear()
     sync_lookup_values(schema_no_lookup)
 
     assert "Updated role: Organization Member" in caplog.text
     assert "Updated role: Application Contributor" in caplog.text
+
+    assert ORG_MEMBER
 
     # Restore original static values
     ORG_MEMBER.privileges = original_org_member_privs
