@@ -20,8 +20,8 @@ from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
-from tests.lib.seed_orgs_and_users import _build_organizations_and_users
 from tests.lib.seed_e2e import _build_users_and_tokens
+from tests.lib.seed_orgs_and_users import _build_organizations_and_users
 
 logger = logging.getLogger(__name__)
 

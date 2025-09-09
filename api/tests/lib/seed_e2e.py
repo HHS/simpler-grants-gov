@@ -1,11 +1,11 @@
-import os
-import tests.src.db.models.factories as factories
 import logging
+import os
 import uuid
-import src.adapters.db as db
-from src.auth.api_jwt_auth import create_jwt_for_user
-from src.auth.api_jwt_auth import initialize_jwt_auth
 from pathlib import Path
+
+import src.adapters.db as db
+import tests.src.db.models.factories as factories
+from src.auth.api_jwt_auth import create_jwt_for_user, initialize_jwt_auth
 from src.util.file_util import append_to_file
 
 logger = logging.getLogger(__name__)
