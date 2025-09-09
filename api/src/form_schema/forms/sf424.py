@@ -1108,21 +1108,64 @@ FORM_XML_TRANSFORM_RULES = {
     },
     "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
     "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
-    # Funding information - direct field mappings
-    "federal_estimated_funding": {"xml_transform": {"target": "FederalEstimatedFunding"}},
-    "applicant_estimated_funding": {"xml_transform": {"target": "ApplicantEstimatedFunding"}},
-    "state_estimated_funding": {"xml_transform": {"target": "StateEstimatedFunding"}},
-    "local_estimated_funding": {"xml_transform": {"target": "LocalEstimatedFunding"}},
-    "other_estimated_funding": {"xml_transform": {"target": "OtherEstimatedFunding"}},
-    "program_income_estimated_funding": {
-        "xml_transform": {"target": "ProgramIncomeEstimatedFunding"}
+    # Funding information - with currency formatting
+    "federal_estimated_funding": {
+        "xml_transform": {
+            "target": "FederalEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
     },
-    "total_estimated_funding": {"xml_transform": {"target": "TotalEstimatedFunding"}},
-    # Review and certification - direct field mappings
+    "applicant_estimated_funding": {
+        "xml_transform": {
+            "target": "ApplicantEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
+    },
+    "state_estimated_funding": {
+        "xml_transform": {
+            "target": "StateEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
+    },
+    "local_estimated_funding": {
+        "xml_transform": {
+            "target": "LocalEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
+    },
+    "other_estimated_funding": {
+        "xml_transform": {
+            "target": "OtherEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
+    },
+    "program_income_estimated_funding": {
+        "xml_transform": {
+            "target": "ProgramIncomeEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
+    },
+    "total_estimated_funding": {
+        "xml_transform": {
+            "target": "TotalEstimatedFunding",
+            "value_transform": {"type": "currency_format", "params": {"ensure_decimal": False}},
+        }
+    },
+    # Review and certification - with value transformations
     "state_review": {"xml_transform": {"target": "StateReview"}},
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
-    "delinquent_federal_debt": {"xml_transform": {"target": "DelinquentFederalDebt"}},
-    "certification_agree": {"xml_transform": {"target": "CertificationAgree"}},
+    "delinquent_federal_debt": {
+        "xml_transform": {
+            "target": "DelinquentFederalDebt",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "certification_agree": {
+        "xml_transform": {
+            "target": "CertificationAgree",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
     # Authorized representative - direct field mappings
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}

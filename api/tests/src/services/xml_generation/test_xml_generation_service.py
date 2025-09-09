@@ -211,3 +211,32 @@ class TestXMLGenerationService:
 
         # Both should have same content but different formatting
         assert len(condensed_xml) < len(pretty_xml)  # Condensed should be shorter
+
+    def test_generate_xml_with_value_transformations(self):
+        """Test XML generation with value transformations."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "federal_estimated_funding": "50000.00",  # Should be formatted as currency
+            "delinquent_federal_debt": True,  # Should become "Yes"
+            "certification_agree": False,  # Should become "No"
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify value transformations were applied
+        assert "<FederalEstimatedFunding>50000.0</FederalEstimatedFunding>" in xml_data
+        assert "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>" in xml_data
+        assert "<CertificationAgree>No</CertificationAgree>" in xml_data
+
+        # Verify non-transformed fields remain unchanged
+        assert "<SubmissionType>Application</SubmissionType>" in xml_data
+        assert "<OrganizationName>Test University</OrganizationName>" in xml_data

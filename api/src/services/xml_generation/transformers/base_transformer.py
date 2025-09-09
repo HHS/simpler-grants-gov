@@ -3,6 +3,8 @@
 import logging
 from typing import Any
 
+from ..value_transformers import ValueTransformationError, apply_value_transformation
+
 logger = logging.getLogger(__name__)
 
 
@@ -112,8 +114,24 @@ class RecursiveXMLTransformer:
 
             return nested_result if nested_result else None
         else:
-            # Simple transformation - just return the value
-            return source_value
+            # Simple transformation - apply value transformation if specified
+            transformed_value = source_value
+
+            # Check if there's a value transformation specified
+            if "value_transform" in transform_rule:
+                try:
+                    transformed_value = apply_value_transformation(
+                        source_value, transform_rule["value_transform"]
+                    )
+                    logger.debug(
+                        f"Applied value transformation at {'.'.join(path)}: {source_value} -> {transformed_value}"
+                    )
+                except ValueTransformationError as e:
+                    logger.warning(f"Value transformation failed at {'.'.join(path)}: {e}")
+                    # Use original value if transformation fails
+                    transformed_value = source_value
+
+            return transformed_value
 
     def _get_nested_value(self, data: dict[str, Any], path: list[str]) -> Any:
         """Get a nested value from a dictionary using a path."""
