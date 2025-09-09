@@ -8,8 +8,6 @@ from src.auth.api_jwt_auth import initialize_jwt_auth
 from pathlib import Path
 from src.util.file_util import append_to_file
 
-# from src.app import get_project_root_dir
-
 logger = logging.getLogger(__name__)
 
 ###############################
@@ -18,11 +16,6 @@ logger = logging.getLogger(__name__)
 # * create an authorization token entry tied to that user, seeding the database accordingly
 # * write the resulting token into the overrides.env file (where it can be retrieved by CI processes for frontend / e2e use)
 ###############################
-
-
-# USER_E2E_BASE_AUTH_TOKEN = factories.UserTokenSessionFactory.build(
-#     user=USER_E2E_BASE, token_id=uuid.UUID("2dffb470-a01f-40be-ba4b-4ed6007a9cff")
-# )
 
 
 def _append_token_to_override(token: str) -> None:
@@ -37,7 +30,6 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         user_id=uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff")
     )
     logger.info(f"Updating user for e2e: '{USER_E2E_BASE.user_id}'")
-    # db_session.merge(USER_E2E_BASE, load=True)
     initialize_jwt_auth()
     token, _user_token_session = create_jwt_for_user(USER_E2E_BASE, db_session)
     _append_token_to_override(token)

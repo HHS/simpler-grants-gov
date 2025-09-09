@@ -1,4 +1,3 @@
-// import { createPrivateKey, KeyObject } from "crypto";
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
 
@@ -7,14 +6,11 @@ import { SignJWT } from "jose";
 */
 
 const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
-// const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
-const fakeServerToken = process.env.E2E_API_USER_AUTH_TOKEN;
+const fakeServerToken = process.env.E2E_USER_AUTH_TOKEN;
 const clientSessionSecret = process.env.SESSION_SECRET;
-// const apiSessionSecret = process.env.LOGIN_GOV_CLIENT_ASSERTION_PRIVATE_KEY;
 
 let clientJwtKey: Uint8Array;
-// let loginGovJwtKey: KeyObject;
 
 const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
@@ -28,42 +24,18 @@ export const initializeSessionSecrets = () => {
   // eslint-disable-next-line
   console.debug("Initializing Session Secrets");
   clientJwtKey = encodeText(clientSessionSecret || "");
-  // loginGovJwtKey = createPrivateKey(apiSessionSecret);
 };
 
 // 5 minute expiration, could probably do less but just in case a test runs really long
 export const newExpirationDate = () => new Date(Date.now() + 5 * 60 * 1000);
 
 /*
-  - creates a fake login gov / api token
-  - encrypts that token into a fake client token
-
-  Note that this relies on E2E_LOGIN_TOKEN_ID and E2E_USER_ID env vars being populated within
-  the .env.local file. In CI these will be provided, locally, you may need to look them up in the
-  API code or your local db and add them yourself.
+  encrypts an API token passed as an env var into a fake client token
 */
 export const generateSpoofedSession = async (): Promise<string> => {
-  if (!clientJwtKey) {
-    throw new Error("Unable to spoof login, missing auth key(s)");
+  if (!clientJwtKey || !fakeServerToken) {
+    throw new Error("Unable to spoof login, missing auth key or server token");
   }
-
-  // instead of all this stuff, just take in the API token from the env
-  // this token will be output from an API side script that will also seed
-  // the user id and token id
-
-  // // hardcoded values taken from token config in the API
-  // const fakeServerTokenPayload = {
-  //   sub: process.env.E2E_LOGIN_TOKEN_ID,
-  //   aud: "simpler-grants-api",
-  //   iss: "simpler-grants-api",
-  //   email: "fake_mail@mail.com",
-  //   user_id: process.env.E2E_USER_ID,
-  //   session_duration_minutes: 30,
-  // };
-  // const fakeServerToken = await new SignJWT(fakeServerTokenPayload)
-  //   .setProtectedHeader({ alg: API_JWT_ENCRYPTION_ALGORITHM })
-  //   .setIssuedAt()
-  //   .sign(loginGovJwtKey);
 
   const fakeToken = await new SignJWT({ token: fakeServerToken })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
@@ -74,6 +46,8 @@ export const generateSpoofedSession = async (): Promise<string> => {
   return fakeToken;
 };
 
+// sets a spoofed login token on the cookie in order to allow for logging in without
+// clicking through the login process
 export const createSpoofedSessionCookie = async (context: BrowserContext) => {
   const token = await generateSpoofedSession();
   await context.addCookies([
