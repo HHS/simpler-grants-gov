@@ -10,7 +10,7 @@ from src.db.models.user_models import LinkRolePrivilege, LinkRoleRoleType, Role
 
 ORG_ADMIN_ID = uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142")
 ORG_ADMIN = Role(
-    role_id=uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142"),
+    role_id=ORG_ADMIN_ID,
     role_name="Organization Admin",
     is_core=True,
     link_privileges=[
