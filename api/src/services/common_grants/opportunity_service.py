@@ -9,13 +9,16 @@ from common_grants_sdk.schemas.pydantic import (
     OpportunitiesListResponse,
     OpportunitiesSearchResponse,
     OpportunityResponse,
+    OppSortBy,
+    OppSorting,
+    OppStatusOptions,
     PaginatedBodyParams,
     PaginatedResultsInfo,
     SortedResultsInfo,
 )
-from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, OppSorting
 from sqlalchemy.orm import Session, selectinload
 
+from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 
 from .transformation import transform_opportunity_to_common_grants
@@ -25,6 +28,14 @@ logger = logging.getLogger(__name__)
 
 class CommonGrantsOpportunityService:
     """Service for managing opportunities in CommonGrants Protocol format."""
+
+    # Mapping from CommonGrants SDK status options to database status enums
+    STATUS_MAPPING = {
+        OppStatusOptions.FORECASTED: OpportunityStatus.FORECASTED,
+        OppStatusOptions.OPEN: OpportunityStatus.POSTED,
+        OppStatusOptions.CLOSED: OpportunityStatus.CLOSED,
+        OppStatusOptions.CUSTOM: OpportunityStatus.ARCHIVED,
+    }
 
     def __init__(self, db_session: Session) -> None:
         """Initialize the service."""
@@ -128,34 +139,14 @@ class CommonGrantsOpportunityService:
 
         # Apply status filter
         if filters.status and filters.status.value:
-            from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
-
-            status_mapping = {
-                OppStatusOptions.FORECASTED: "forecasted",
-                OppStatusOptions.OPEN: "posted",
-                OppStatusOptions.CLOSED: "closed",
-                OppStatusOptions.CUSTOM: "archived",
-            }
-
             # Handle the first status value from the array
             status_value = filters.status.value[0] if filters.status.value else None
-            db_status = status_mapping.get(status_value)
-            if db_status:
-                # Map string to enum
-                from src.constants.lookup_constants import OpportunityStatus
+            db_status_enum = self.STATUS_MAPPING.get(status_value)
 
-                status_mapping = {
-                    "forecasted": OpportunityStatus.FORECASTED,
-                    "posted": OpportunityStatus.POSTED,
-                    "closed": OpportunityStatus.CLOSED,
-                    "archived": OpportunityStatus.ARCHIVED,
-                }
-                status_enum = status_mapping.get(db_status)
-
-                if status_enum:
-                    query = query.join(CurrentOpportunitySummary).filter(
-                        CurrentOpportunitySummary.opportunity_status == status_enum
-                    )
+            if db_status_enum:
+                query = query.join(CurrentOpportunitySummary).filter(
+                    CurrentOpportunitySummary.opportunity_status == db_status_enum
+                )
 
         # Apply sorting
         if sorting.sort_by == OppSortBy.LAST_MODIFIED_AT:

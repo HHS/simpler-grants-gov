@@ -287,7 +287,7 @@ openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
 openapi-spec-common-grants:
-	$(PY_RUN_CMD) python src/common_grants/scripts/generate_openapi.py > ./openapi-cg.generated.yml
+	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml 
 
 check-spec: openapi-spec-common-grants
 	cg check spec ./openapi-cg.generated.yml
