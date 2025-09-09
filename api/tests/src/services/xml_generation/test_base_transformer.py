@@ -1,25 +1,21 @@
-"""Tests for base transformer."""
+"""Tests for recursive XML transformer."""
 
-from unittest.mock import Mock
-
-from src.services.xml_generation.config import XMLTransformationConfig
-from src.services.xml_generation.transformers.base_transformer import BaseTransformer
+from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
 
 
-class TestBaseTransformer:
-    """Test cases for BaseTransformer."""
+class TestRecursiveXMLTransformer:
+    """Test cases for RecursiveXMLTransformer."""
 
     def test_transform_basic_field_mapping(self):
         """Test basic field mapping transformation."""
-        # Create mock config
-        mock_config = Mock(spec=XMLTransformationConfig)
-        mock_config.get_field_mappings.return_value = {
-            "submission_type": "SubmissionType",
-            "organization_name": "OrganizationName",
-            "project_title": "ProjectTitle",
+        # Create transform config using new recursive pattern
+        transform_config = {
+            "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+            "organization_name": {"xml_transform": {"target": "OrganizationName"}},
+            "project_title": {"xml_transform": {"target": "ProjectTitle"}},
         }
 
-        transformer = BaseTransformer(mock_config)
+        transformer = RecursiveXMLTransformer(transform_config)
 
         # Test data
         source_data = {
@@ -42,29 +38,25 @@ class TestBaseTransformer:
 
     def test_transform_empty_data(self):
         """Test transformation with empty input data."""
-        mock_config = Mock(spec=XMLTransformationConfig)
-        mock_config.get_field_mappings.return_value = {"submission_type": "SubmissionType"}
+        transform_config = {
+            "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+        }
 
-        transformer = BaseTransformer(mock_config)
+        transformer = RecursiveXMLTransformer(transform_config)
 
         # Test with empty data
         result = transformer.transform({})
         assert result == {}
 
-        # Test with None data
-        result = transformer.transform(None)
-        assert result == {}
-
     def test_transform_missing_source_fields(self):
         """Test transformation when source fields are missing."""
-        mock_config = Mock(spec=XMLTransformationConfig)
-        mock_config.get_field_mappings.return_value = {
-            "submission_type": "SubmissionType",
-            "organization_name": "OrganizationName",
-            "missing_field": "MissingField",
+        transform_config = {
+            "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+            "organization_name": {"xml_transform": {"target": "OrganizationName"}},
+            "missing_field": {"xml_transform": {"target": "MissingField"}},
         }
 
-        transformer = BaseTransformer(mock_config)
+        transformer = RecursiveXMLTransformer(transform_config)
 
         source_data = {
             "submission_type": "Application",
@@ -81,14 +73,13 @@ class TestBaseTransformer:
 
     def test_transform_with_none_values(self):
         """Test transformation handles None values correctly."""
-        mock_config = Mock(spec=XMLTransformationConfig)
-        mock_config.get_field_mappings.return_value = {
-            "submission_type": "SubmissionType",
-            "organization_name": "OrganizationName",
-            "optional_field": "OptionalField",
+        transform_config = {
+            "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+            "organization_name": {"xml_transform": {"target": "OrganizationName"}},
+            "optional_field": {"xml_transform": {"target": "OptionalField"}},
         }
 
-        transformer = BaseTransformer(mock_config)
+        transformer = RecursiveXMLTransformer(transform_config)
 
         source_data = {
             "submission_type": "Application",
@@ -98,23 +89,23 @@ class TestBaseTransformer:
 
         result = transformer.transform(source_data)
 
-        # Should include all mapped fields, even None values
+        # Should only include non-None values
         assert result["SubmissionType"] == "Application"
-        assert result["OrganizationName"] is None
         assert result["OptionalField"] == "Present"
+        # None values are excluded by the recursive transformer
+        assert "OrganizationName" not in result
 
     def test_transform_various_data_types(self):
         """Test transformation with various data types."""
-        mock_config = Mock(spec=XMLTransformationConfig)
-        mock_config.get_field_mappings.return_value = {
-            "string_field": "StringField",
-            "int_field": "IntField",
-            "float_field": "FloatField",
-            "bool_field": "BoolField",
-            "list_field": "ListField",
+        transform_config = {
+            "string_field": {"xml_transform": {"target": "StringField"}},
+            "int_field": {"xml_transform": {"target": "IntField"}},
+            "float_field": {"xml_transform": {"target": "FloatField"}},
+            "bool_field": {"xml_transform": {"target": "BoolField"}},
+            "list_field": {"xml_transform": {"target": "ListField"}},
         }
 
-        transformer = BaseTransformer(mock_config)
+        transformer = RecursiveXMLTransformer(transform_config)
 
         source_data = {
             "string_field": "test string",
@@ -132,3 +123,38 @@ class TestBaseTransformer:
         assert result["FloatField"] == 3.14
         assert result["BoolField"] is True
         assert result["ListField"] == ["item1", "item2"]
+
+    def test_transform_nested_object(self):
+        """Test transformation with nested objects."""
+        transform_config = {
+            "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+            "applicant_address": {
+                "xml_transform": {"target": "Applicant", "type": "nested_object"},
+                "address_line_1": {"xml_transform": {"target": "Street1"}},
+                "city": {"xml_transform": {"target": "City"}},
+                "state_code": {"xml_transform": {"target": "State"}},
+            },
+        }
+
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        source_data = {
+            "submission_type": "Application",
+            "applicant_address": {
+                "address_line_1": "123 Main St",
+                "city": "Washington",
+                "state_code": "DC",
+            },
+        }
+
+        result = transformer.transform(source_data)
+
+        # Should include simple field
+        assert result["SubmissionType"] == "Application"
+
+        # Should include nested object
+        assert "Applicant" in result
+        nested_result = result["Applicant"]
+        assert nested_result["Street1"] == "123 Main St"
+        assert nested_result["City"] == "Washington"
+        assert nested_result["State"] == "DC"

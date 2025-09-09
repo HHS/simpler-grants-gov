@@ -1,22 +1,19 @@
-"""Base transformer for converting JSON data to XML-ready format."""
+"""Recursive transformer for converting JSON data to XML-ready format."""
 
 import logging
 from typing import Any
 
-from ..config import XMLTransformationConfig
-
 logger = logging.getLogger(__name__)
 
 
-class BaseTransformer:
-    """Base class for transforming JSON data according to configuration rules."""
+class RecursiveXMLTransformer:
+    """Recursive transformer using patterns from JSON rule processing."""
 
-    def __init__(self, config: XMLTransformationConfig):
-        self.config = config
-        self.field_mappings = config.get_field_mappings()
+    def __init__(self, transform_config: dict[str, Any]):
+        self.transform_config = transform_config
 
     def transform(self, source_data: dict[str, Any]) -> dict[str, Any]:
-        """Transform source data according to configuration rules.
+        """Transform source data using recursive rule processing.
 
         Args:
             source_data: The input JSON data to transform
@@ -27,50 +24,103 @@ class BaseTransformer:
         if not source_data:
             return {}
 
-        transformed_data = {}
-
-        # Apply field mappings
-        for source_field, mapping_config in self.field_mappings.items():
-            if source_field in source_data:
-                value = source_data[source_field]
-
-                # Handle object-based mappings
-                if isinstance(mapping_config, dict):  # type: ignore[unreachable]
-                    if mapping_config.get("type") == "nested_object":  # type: ignore[unreachable]
-                        # Handle nested object transformation
-                        nested_data = self._transform_nested_object(value, mapping_config)
-                        if nested_data:
-                            transformed_data[mapping_config["name"]] = nested_data
-                    else:
-                        # Simple object mapping
-                        target_field = mapping_config.get("name", source_field)
-                        transformed_data[target_field] = value
-                        logger.debug(f"Mapped {source_field} -> {target_field}: {value}")
-                elif isinstance(mapping_config, str):
-                    # Legacy string mapping (backward compatibility)
-                    transformed_data[mapping_config] = value
-                    logger.debug(f"Mapped {source_field} -> {mapping_config}: {value}")
+        # Start recursive transformation from root
+        result = self._process_transform_rules(source_data, self.transform_config, [])
 
         logger.info(
-            f"Transformed {len(transformed_data)} fields from {len(source_data)} input fields"
+            f"Transformed {len(result)} fields from {len(source_data)} input fields using recursive pattern"
         )
-        return transformed_data
+        return result
 
-    def _transform_nested_object(
-        self, source_value: Any, mapping_config: dict
-    ) -> dict[str, Any] | None:
-        """Transform a nested object according to field mappings."""
-        if not isinstance(source_value, dict):
-            return None
+    def _process_transform_rules(
+        self, source_data: dict[str, Any], rules: dict[str, Any], path: list[str]
+    ) -> dict[str, Any]:
+        """Recursively process transformation rules, similar to JSON rule processing.
 
-        nested_result = {}
-        field_mappings = mapping_config.get("fields", {})
+        Args:
+            source_data: Input data at this level
+            rules: Transformation rules at this level
+            path: Current path in the data structure
 
-        for source_field, target_field in field_mappings.items():
-            if source_field in source_value and source_value[source_field] is not None:
-                nested_result[target_field] = source_value[source_field]
-                logger.debug(
-                    f"Nested mapping: {source_field} -> {target_field}: {source_value[source_field]}"
-                )
+        Returns:
+            Transformed data at this level
+        """
+        result = {}
 
-        return nested_result if nested_result else None
+        # Iterate over rules at this level
+        for key, rule_config in rules.items():
+            # Skip metadata keys
+            if key.startswith("_"):
+                continue
+
+            # If this is an XML transformation rule, process it
+            if isinstance(rule_config, dict) and "xml_transform" in rule_config:
+                transform_rule = rule_config["xml_transform"]
+                current_path = path + [key]
+
+                # Get the source value from the input data
+                source_value = self._get_nested_value(source_data, current_path)
+                if source_value is not None:
+                    # Apply the transformation
+                    transformed_value = self._apply_transform_rule(
+                        source_value, transform_rule, rule_config, current_path
+                    )
+                    if transformed_value is not None:
+                        target_field = transform_rule["target"]
+                        result[target_field] = transformed_value
+                        logger.debug(
+                            f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                        )
+
+            # If this is a nested structure (dict without xml_transform), recurse
+            elif isinstance(rule_config, dict) and "xml_transform" not in rule_config:
+                # Get source data at this path level
+                nested_source = self._get_nested_value(source_data, path + [key])
+                if isinstance(nested_source, dict):
+                    # Recursively process nested rules
+                    nested_result = self._process_transform_rules(
+                        source_data, rule_config, path + [key]
+                    )
+                    if nested_result:
+                        result.update(nested_result)
+
+        return result
+
+    def _apply_transform_rule(
+        self, source_value: Any, transform_rule: dict, full_rule_config: dict, path: list[str]
+    ) -> Any:
+        """Apply a specific transformation rule to a source value."""
+        transform_type = transform_rule.get("type", "simple")
+
+        if transform_type == "nested_object":
+            # For nested objects, we need to process the child rules
+            if not isinstance(source_value, dict):
+                return None
+
+            nested_result = {}
+            # Process child transformation rules
+            for child_key, child_config in full_rule_config.items():
+                if child_key == "xml_transform":
+                    continue
+                if isinstance(child_config, dict) and "xml_transform" in child_config:
+                    child_transform = child_config["xml_transform"]
+                    if child_key in source_value and source_value[child_key] is not None:
+                        nested_result[child_transform["target"]] = source_value[child_key]
+                        logger.debug(
+                            f"Nested transform: {'.'.join(path)}.{child_key} -> {child_transform['target']}"
+                        )
+
+            return nested_result if nested_result else None
+        else:
+            # Simple transformation - just return the value
+            return source_value
+
+    def _get_nested_value(self, data: dict[str, Any], path: list[str]) -> Any:
+        """Get a nested value from a dictionary using a path."""
+        current = data
+        for part in path:
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                return None
+        return current

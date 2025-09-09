@@ -1,4 +1,4 @@
-# XML Generation Service - Core Foundation (PR #1)
+# XML Generation Service - Core Foundation
 
 ## Overview
 
@@ -62,7 +62,8 @@ service = XMLGenerationService()
 # Create request
 request = XMLGenerationRequest(
     application_data=application_data,
-    form_name="SF424_4_0"
+    form_name="SF424_4_0",
+    pretty_print=True  # True for pretty-print (default), False for condensed
 )
 
 # Generate XML
@@ -74,6 +75,13 @@ if response.success:
 else:
     print(f"Error: {response.error_message}")
 ```
+
+## XML Formatting Options
+
+The service supports two XML formatting modes:
+
+### Pretty-Print Format (Default)
+### Condensed Format
 
 ## Sample Output
 
@@ -144,12 +152,3 @@ FORM_XML_TRANSFORM_RULES = {
     }
 }
 ```
-
-## Success Criteria ✅
-
-- ✅ Basic XML generation service functional
-- ✅ 37 field mappings working correctly
-- ✅ Configuration loads from sf424.py
-- ✅ Well-formed XML output with proper namespaces
-- ✅ Comprehensive unit test coverage
-- ✅ Clean architecture for future enhancements

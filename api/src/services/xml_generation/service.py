@@ -4,9 +4,9 @@ import logging
 import xml.etree.ElementTree as ET
 from typing import Any
 
-from .config import XMLTransformationConfig
+from .config import load_xml_transform_config
 from .models import XMLGenerationRequest, XMLGenerationResponse
-from .transformers.base_transformer import BaseTransformer
+from .transformers.base_transformer import RecursiveXMLTransformer
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +31,16 @@ class XMLGenerationService:
                 )
 
             # Load transformation configuration
-            config = XMLTransformationConfig(request.form_name)
+            transform_config = load_xml_transform_config(request.form_name)
 
-            # Transform the data
-            transformer = BaseTransformer(config)
+            # Transform the data using recursive transformer
+            transformer = RecursiveXMLTransformer(transform_config)
             transformed_data = transformer.transform(request.application_data)
 
             # Generate XML
-            xml_string = self._generate_xml_string(transformed_data, config)
+            xml_string = self._generate_xml_string(
+                transformed_data, transform_config, request.pretty_print
+            )
 
             # Log transformation results for development
             logger.info(
@@ -51,14 +53,17 @@ class XMLGenerationService:
             logger.error(f"XML generation failed: {e}")
             return XMLGenerationResponse(success=False, error_message=str(e))
 
-    def _generate_xml_string(self, data: dict, config: XMLTransformationConfig) -> str:
+    def _generate_xml_string(
+        self, data: dict, transform_config: dict, pretty_print: bool = True
+    ) -> str:
         """Generate XML string from transformed data."""
-        # Get XML structure configuration
-        xml_structure = config.get_xml_structure()
+        # Get XML configuration from the config metadata
+        xml_config = transform_config.get("_xml_config", {})
+        xml_structure = xml_config.get("xml_structure", {})
         root_element_name = xml_structure.get("root_element", "SF424_4_0")
 
         # Get namespace configuration
-        namespace_config = config.get_namespace_config()
+        namespace_config = xml_config.get("namespaces", {})
         default_namespace = namespace_config.get("default", "")
 
         # Create root element
@@ -73,7 +78,8 @@ class XMLGenerationService:
                 self._add_element_to_parent(root, field_name, value)
 
         # Generate XML string
-        ET.indent(root, space="  ")
+        if pretty_print:
+            ET.indent(root, space="  ")
         xml_string = ET.tostring(root, encoding="unicode", xml_declaration=True)
 
         return xml_string

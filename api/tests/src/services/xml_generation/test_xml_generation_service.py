@@ -1,5 +1,7 @@
 """Tests for XML generation service."""
 
+from pydantic import ValidationError
+
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -51,8 +53,6 @@ class TestXMLGenerationService:
 
     def test_generate_xml_with_none_application_data(self):
         """Test XML generation when application data is None (validation error)."""
-        from pydantic import ValidationError
-
         # Pydantic should prevent None values for application_data
         try:
             XMLGenerationRequest(
@@ -171,3 +171,43 @@ class TestXMLGenerationService:
         assert "<Country>US</Country>" in xml_data
         assert "<ZipPostalCode>20001-1234</ZipPostalCode>" in xml_data
         assert "</Applicant>" in xml_data
+
+    def test_generate_xml_pretty_print_vs_condensed(self):
+        """Test XML generation with pretty-print vs condensed formatting."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "project_title": "Research Project",
+        }
+
+        service = XMLGenerationService()
+
+        # Test pretty-print (default)
+        pretty_request = XMLGenerationRequest(
+            application_data=application_data, form_name="SF424_4_0", pretty_print=True
+        )
+        pretty_response = service.generate_xml(pretty_request)
+        assert pretty_response.success is True
+        pretty_xml = pretty_response.xml_data
+
+        # Test condensed format
+        condensed_request = XMLGenerationRequest(
+            application_data=application_data, form_name="SF424_4_0", pretty_print=False
+        )
+        condensed_response = service.generate_xml(condensed_request)
+        assert condensed_response.success is True
+        condensed_xml = condensed_response.xml_data
+
+        # Verify both contain the same content
+        assert "<SubmissionType>Application</SubmissionType>" in pretty_xml
+        assert "<SubmissionType>Application</SubmissionType>" in condensed_xml
+        assert "<OrganizationName>Test University</OrganizationName>" in pretty_xml
+        assert "<OrganizationName>Test University</OrganizationName>" in condensed_xml
+
+        # Verify formatting differences
+        # Pretty-print should have indentation/newlines, condensed should not
+        assert "\n  <SubmissionType>" in pretty_xml  # Indented element
+        assert "\n  <SubmissionType>" not in condensed_xml  # No indentation
+
+        # Both should have same content but different formatting
+        assert len(condensed_xml) < len(pretty_xml)  # Condensed should be shorter

@@ -10,6 +10,7 @@ class XMLGenerationRequest(BaseModel):
 
     application_data: dict[str, Any]
     form_name: str = "SF424_4_0"
+    pretty_print: bool = True  # True for pretty-print, False for condensed
 
 
 class XMLGenerationResponse(BaseModel):
