@@ -20,7 +20,9 @@ RUN apt-get update \
         postgresql \
         wget \
     # Install security updates
-    # https://pythonspeed.com/articles/security-updates-in-docker/
+    # https://pythonspeed.com/articles/security-updates-in-docker/ \
+    # You can check currently installed package versions by running "make login" \
+    # to go into the Docker container, and then apt list --installed | grep <whatever>
     && apt-get upgrade --yes \
     && apt-get install --no-install-recommends --yes \
         build-essential \
