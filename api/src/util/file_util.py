@@ -203,7 +203,7 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
 
 
 def write_to_file(path: str | Path, content: str, encoding: str | None = None) -> str:
-    """Simple function for adding a line to end of a file"""
+    """Simple function for replacing contents of a file"""
     with open_stream(path, "w", encoding) as file_to_write_to:
         return file_to_write_to.write(content)
 
