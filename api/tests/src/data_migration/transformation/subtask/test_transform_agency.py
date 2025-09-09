@@ -118,7 +118,7 @@ class TestTransformAgency(BaseTransformTestClass):
             "UPDATE-AGENCY-2",
             create_existing=True,
             deleted_fields={"AgencyContactEMail2", "ldapGp", "description", "SAMValidation"},
-            source_values={"SAMValidation": "1", "ReviewProcessEnable": "Y"},
+            source_values={"SAMValidation": "1"},
         )
         update_agency3 = setup_agency(
             "UPDATE-AGENCY-3",
@@ -130,6 +130,12 @@ class TestTransformAgency(BaseTransformTestClass):
                 "AgencyContactName",
                 "AgencyContactAddress1",
             },
+        )
+        # Test agency with ReviewProcessEnable field to ensure it's properly ignored
+        update_agency_with_review_process = setup_agency(
+            "UPDATE-AGENCY-REVIEW-PROCESS",
+            create_existing=True,
+            source_values={"ReviewProcessEnable": "Y", "AgencyName": "Agency with Review Process"},
         )
         update_test_agency = setup_agency("SECSCAN", create_existing=True)
 
@@ -175,6 +181,8 @@ class TestTransformAgency(BaseTransformTestClass):
                 "AgencyContactAddress1",
             },
         )
+        # Validate that the agency with ReviewProcessEnable was processed successfully
+        validate_agency(db_session, update_agency_with_review_process)
         validate_agency(db_session, update_test_agency, is_test_agency=True)
 
         validate_agency(db_session, already_processed1, expect_values_to_match=False)
@@ -186,9 +194,9 @@ class TestTransformAgency(BaseTransformTestClass):
         validate_agency(db_session, update_error2, expect_values_to_match=False)
 
         metrics = transform_agency.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 13
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 14
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 5
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 3
 
         # Rerunning does mostly nothing, it will attempt to re-process the three that errored
@@ -196,9 +204,9 @@ class TestTransformAgency(BaseTransformTestClass):
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_agency.run_subtask()
 
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 16
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 17
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 5
         assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 6
 
     def test_process_tgroups_missing_fields_for_insert(self, db_session, transform_agency):
