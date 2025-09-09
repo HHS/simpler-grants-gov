@@ -168,7 +168,7 @@ FORM_JSON_SCHEMA = {
             # A user will never fill this in, it's just on the form for agencies to use
             "type": "string",
             "title": "Date Received By State",
-            "description": "Enter the date received by the state, if applicable.",
+            "description": "Leave blank, to be filled out by state.",
             "format": "date",
             "readOnly": True,
         },
@@ -176,7 +176,7 @@ FORM_JSON_SCHEMA = {
             # A user will never fill this in, it's just on the form for agencies to use
             "type": "string",
             "title": "State Application Identifier",
-            "description": "Enter the identifier assigned by the state, if applicable.",
+            "description": "Leave blank, to be filled out by state.",
             "minLength": 0,
             "maxLength": 30,
             "readOnly": True,
@@ -626,10 +626,11 @@ FORM_JSON_SCHEMA = {
             # to avoid any floating point rounding issues.
             "type": "string",
             # Pattern here effectively says:
+            # * An optional negative sign
             # * Any number of digits
             # * An optional decimal point
             # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^\d*([.]\d{2})?$",
+            "pattern": r"^(-)?\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
         },

@@ -330,3 +330,15 @@ variable "mtls_certificate_arn" {
   type        = string
   default     = null
 }
+
+variable "optional_extra_alb_certs" {
+  description = "Optional: Stores the ARN for extra certs to attach to the ALB"
+  type        = list(string)
+  default     = []
+}
+
+variable "optional_extra_alb_domains" {
+  description = "Optional: Other domains the ALB is configured to accept traffic to. Requires optional_extra_alb_certs to be set"
+  type        = list(string)
+  default     = []
+}

@@ -191,3 +191,9 @@ variable "database_engine_version" {
   description = "Postgres database engine version"
   default     = "15.10"
 }
+
+variable "secondary_domain_names" {
+  type        = list(string)
+  description = "A list of domain names the ALB can also use"
+  default     = []
+}
