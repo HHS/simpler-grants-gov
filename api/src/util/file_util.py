@@ -202,11 +202,9 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
         return input_file.read()
 
 
-def append_to_file(
-    path: str | Path, content: str, mode: str = "a", encoding: str | None = None
-) -> str:
+def write_to_file(path: str | Path, content: str, encoding: str | None = None) -> str:
     """Simple function for adding a line to end of a file"""
-    with open_stream(path, mode, encoding) as file_to_write_to:
+    with open_stream(path, "w", encoding) as file_to_write_to:
         return file_to_write_to.write(content)
 
 

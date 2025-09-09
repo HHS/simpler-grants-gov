@@ -1,12 +1,13 @@
 import logging
 import os
 import uuid
-from pathlib import Path
+
+# from pathlib import Path
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import create_jwt_for_user, initialize_jwt_auth
-from src.util.file_util import append_to_file
+from src.util.file_util import write_to_file
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +18,19 @@ logger = logging.getLogger(__name__)
 # * write the resulting token into the overrides.env file (where it can be retrieved by CI processes for frontend / e2e use)
 ###############################
 
+# USER_E2E_BASE = factories.UserFactory.build(
+#     user_id=uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff")
+# )
+
 
 def _append_token_to_override(token: str) -> None:
-    path_to_override = os.path.join(os.path.dirname(__file__), "..", "..", "override.env")
-    if Path(path_to_override).exists():
-        token_declaration = 'E2E_USER_AUTH_TOKEN="' + token + '"'
-        append_to_file(path_to_override, token_declaration)
+    path_to_tmp_token_file = os.path.join(os.path.dirname(__file__), "..", "..", "e2e_token.tmp")
+    # token_declaration = 'E2E_USER_AUTH_TOKEN="' + token + '"'
+    write_to_file(path_to_tmp_token_file, token)
 
 
 def _build_users_and_tokens(db_session: db.Session) -> None:
+    # db_session.merge(USER_E2E_BASE, load=True)
     USER_E2E_BASE = factories.UserFactory.build(
         user_id=uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff")
     )
