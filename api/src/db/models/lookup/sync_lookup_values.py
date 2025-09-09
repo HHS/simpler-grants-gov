@@ -4,6 +4,7 @@ from typing import Optional, Type
 import src.adapters.db as db
 from src.adapters.db import PostgresDBClient
 from src.adapters.db.clients.postgres_config import get_db_config
+from src.constants.static_role_values import CORE_ROLES
 from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
 
 logger = logging.getLogger(__name__)
@@ -58,8 +59,6 @@ def _sync_lookup_for_table(
 
 
 def _sync_roles(db_session: db.Session) -> None:
-    from src.constants.static_role_values import CORE_ROLES
-
     logger.info("Syncing static core roles")
     for role in CORE_ROLES:
         instance = db_session.merge(role)
