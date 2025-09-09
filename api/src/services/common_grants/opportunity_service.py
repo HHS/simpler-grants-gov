@@ -9,14 +9,13 @@ from common_grants_sdk.schemas.pydantic import (
     OpportunitiesListResponse,
     OpportunitiesSearchResponse,
     OpportunityResponse,
-    OppStatusOptions,
     OppSortBy,
     OppSorting,
+    OppStatusOptions,
     PaginatedBodyParams,
     PaginatedResultsInfo,
     SortedResultsInfo,
 )
-
 from sqlalchemy.orm import Session, selectinload
 
 from src.constants.lookup_constants import OpportunityStatus
@@ -143,7 +142,7 @@ class CommonGrantsOpportunityService:
             # Handle the first status value from the array
             status_value = filters.status.value[0] if filters.status.value else None
             db_status_enum = self.STATUS_MAPPING.get(status_value)
-            
+
             if db_status_enum:
                 query = query.join(CurrentOpportunitySummary).filter(
                     CurrentOpportunitySummary.opportunity_status == db_status_enum
