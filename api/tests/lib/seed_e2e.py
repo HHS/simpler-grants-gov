@@ -29,7 +29,8 @@ LINK_USER_NO_ORGS = factories.LinkExternalUserFactory.build(
 
 def _write_token_to_file(token: str) -> None:
     path_to_tmp_token_file = os.path.join(os.path.dirname(__file__), "..", "..", "e2e_token.tmp")
-    write_to_file(path_to_tmp_token_file, token)
+    token_declaration = 'E2E_USER_AUTH_TOKEN="' + token + '"'
+    write_to_file(path_to_tmp_token_file, token_declaration)
 
 
 def _build_users_and_tokens(db_session: db.Session) -> None:
