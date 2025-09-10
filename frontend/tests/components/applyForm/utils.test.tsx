@@ -7,6 +7,7 @@ import {
   determineFieldType,
   flatFormDataToArray,
   formatFieldWarnings,
+  getFieldConfig,
   getFieldName,
   getFieldSchema,
   getRequiredProperties,
@@ -141,100 +142,156 @@ describe("shapeFormData", () => {
   });
 });
 
-// describe("buildField", () => {
-//   it("should build a field with basic properties", () => {
-//     const uiFieldObject: UiSchemaField = {
-//       type: "field",
-//       definition: "/properties/name",
-//       schema: {
-//         type: "string",
-//         title: "Name",
-//         maxLength: 50,
-//       },
-//     };
+describe("getFieldConfig", () => {
+  // TODO: should add tests around
+  // * radio buttons
+  // * multifield
 
-//     const formSchema: RJSFSchema = {
-//       type: "object",
-//       properties: {
-//         name: { type: "string", title: "Name", maxLength: 50 },
-//       },
-//       required: ["name"],
-//     };
+  it("should build a config with basic properties", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/name",
+      schema: {
+        type: "string",
+        title: "Name",
+        maxLength: 50,
+      },
+    };
 
-//     const errors = null;
-//     const formData = { name: "Jane Doe" };
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name", maxLength: 50 },
+      },
+      required: ["name"],
+    };
 
-//     const BuiltField = buildField({
-//       uiFieldObject,
-//       formSchema,
-//       errors,
-//       formData,
-//       requiredField: true,
-//     });
-//     render(BuiltField);
+    const errors = null;
+    const formData = { name: "Jane Doe" };
 
-//     const label = screen.getByTestId("label");
-//     expect(label).toHaveAttribute("for", "name");
-//     expect(label).toHaveAttribute("id", "label-for-name");
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: true,
+    });
 
-//     const required = screen.getByText("*");
-//     expect(required).toBeInTheDocument();
+    expect(type).toEqual("Text");
+    expect(props).toEqual({
+      id: "name",
+      key: "name",
+      disabled: false,
+      required: true,
+      maxLength: 50,
+      schema: { type: "string", title: "Name", maxLength: 50 },
+      rawErrors: [],
+      value: "Jane Doe",
+      options: {},
+    });
+  });
 
-//     const field = screen.getByTestId("name");
-//     expect(field).toBeInTheDocument();
-//     expect(field).toBeRequired();
-//     expect(field).toHaveAttribute("type", "text");
-//     expect(field).toHaveAttribute("maxLength", "50");
-//     expect(field).toHaveValue("Jane Doe");
-//   });
+  it("should handle fields with errors", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/email",
+    };
 
-//   it("should handle fields with errors", () => {
-//     const uiFieldObject: UiSchemaField = {
-//       type: "field",
-//       definition: "/properties/email",
-//     };
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        email: { type: "string", title: "Email" },
+      },
+    };
 
-//     const formSchema: RJSFSchema = {
-//       type: "object",
-//       properties: {
-//         email: { type: "string", title: "Email" },
-//       },
-//     };
+    const errors = [
+      {
+        field: "$.email",
+        message: "Invalid email format",
+        type: "",
+        value: "",
+      },
+    ];
 
-//     const errors = [
-//       {
-//         field: "$.email",
-//         message: "Invalid email format",
-//         type: "",
-//         value: "",
-//       },
-//     ];
+    const formData = { email: "invalid-email" };
 
-//     const formData = { email: "invalid-email" };
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: false,
+    });
 
-//     const BuiltField = buildField({
-//       uiFieldObject,
-//       formSchema,
-//       errors,
-//       formData,
-//       requiredField: false,
-//     });
-//     render(BuiltField);
+    expect(type).toEqual("Text");
+    expect(props).toEqual({
+      id: "email",
+      key: "email",
+      disabled: false,
+      required: false,
+      schema: { type: "string", title: "Email" },
+      rawErrors: ["Invalid email format"],
+      value: "invalid-email",
+      options: {},
+    });
+  });
 
-//     const label = screen.getByTestId("label");
-//     expect(label).toHaveAttribute("for", "email");
-//     expect(label).toHaveAttribute("id", "label-for-email");
+  it("should handle field types with options", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/pickOneOfTheOptions",
+    };
 
-//     const error = screen.getByTestId("errorMessage");
-//     expect(error).toBeInTheDocument();
-//     expect(error).toHaveAttribute("role", "alert");
-//     expect(error).toHaveTextContent("Invalid email format");
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        pickOneOfTheOptions: {
+          type: "string",
+          title: "select field",
+          enum: ["first option", "second option"],
+        },
+      },
+    };
 
-//     const field = screen.getByTestId("email");
-//     expect(field).toBeInTheDocument();
-//     expect(error).toHaveClass("usa-error-message");
-//   });
-// });
+    const errors = null;
+    const formData = {
+      pickOneOfTheOptions: "first option",
+    };
+
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: false,
+    });
+
+    expect(type).toEqual("Select");
+    expect(props).toEqual({
+      id: "pickOneOfTheOptions",
+      key: "pickOneOfTheOptions",
+      disabled: false,
+      required: false,
+      schema: {
+        type: "string",
+        title: "select field",
+        enum: ["first option", "second option"],
+      },
+      rawErrors: [],
+      value: "first option",
+      options: {
+        enumOptions: [
+          { label: "first option", value: "first option" },
+          {
+            label: "second option",
+            value: "second option",
+          },
+        ],
+        emptyValue: "- Select -",
+      },
+    });
+  });
+});
 
 // describe("getApplicationResponse", () => {
 //   it("should return a structured response for valid input", () => {
@@ -251,156 +308,6 @@ describe("shapeFormData", () => {
 //     const result = getApplicationResponse(forms, "test");
 
 //     expect(result).toEqual({ test: "test" });
-//   });
-// });
-
-// describe("buildFormTreeRecursive", () => {
-//   it("should build a tree for a simple schema", () => {
-//     const schema: RJSFSchema = {
-//       type: "object",
-//       properties: {
-//         name: { type: "string", title: "Name" },
-//         age: { type: "number", title: "Age" },
-//       },
-//     };
-
-//     const uiSchema: UiSchema = [
-//       { type: "field", definition: "/properties/name" },
-//       { type: "field", definition: "/properties/age" },
-//     ];
-
-//     const errors = null;
-//     const formData = { name: "John", age: 30 };
-
-//     const result = buildFormTreeRecursive({
-//       errors,
-//       formData,
-//       schema,
-//       uiSchema,
-//     });
-
-//     // render the result
-//     render(<>{result}</>);
-
-//     // assert field inputs
-//     const nameField = screen.getByTestId("name");
-//     expect(nameField).toBeInTheDocument();
-//     expect(nameField).toHaveValue("John");
-
-//     const ageField = screen.getByTestId("age");
-//     expect(ageField).toBeInTheDocument();
-//     expect(ageField).toHaveValue(30);
-//   });
-
-//   it("should build a tree for a nested schema", () => {
-//     const schema: RJSFSchema = {
-//       type: "object",
-//       properties: {
-//         address: {
-//           type: "object",
-//           properties: {
-//             street: { type: "string", title: "Street" },
-//             city: { type: "string", title: "City" },
-//           },
-//         },
-//       },
-//     };
-
-//     const uiSchema: UiSchema = [
-//       {
-//         name: "address",
-//         type: "section",
-//         label: "Address",
-//         children: [
-//           {
-//             type: "field",
-//             definition: "/properties/address/properties/street",
-//           },
-//           { type: "field", definition: "/properties/address/properties/city" },
-//         ],
-//       },
-//     ];
-
-//     const errors = null;
-//     const formData = { address: { street: "123 Main St", city: "Metropolis" } };
-
-//     const result = buildFormTreeRecursive({
-//       errors,
-//       formData,
-//       schema,
-//       uiSchema,
-//     });
-
-//     expect(result).toHaveLength(1);
-//     expect(result[0].key).toBe("address-fieldset");
-//   });
-
-//   it("should handle empty uiSchema gracefully", () => {
-//     const schema: RJSFSchema = {
-//       type: "object",
-//       properties: {
-//         name: { type: "string", title: "Name" },
-//       },
-//     };
-
-//     const uiSchema: UiSchema = [];
-//     const errors = null;
-//     const formData = { name: "John" };
-
-//     const result = buildFormTreeRecursive({
-//       errors,
-//       formData,
-//       schema,
-//       uiSchema,
-//     });
-
-//     expect(result).toEqual([]);
-//   });
-
-//   it("should handle nested children in uiSchema", () => {
-//     const schema: RJSFSchema = {
-//       type: "object",
-//       properties: {
-//         section: {
-//           type: "object",
-//           properties: {
-//             field1: { type: "string", title: "Field 1" },
-//             field2: { type: "string", title: "Field 2" },
-//           },
-//         },
-//       },
-//     };
-
-//     const uiSchema: UiSchema = [
-//       {
-//         name: "section",
-//         type: "section",
-//         label: "Section",
-//         children: [
-//           {
-//             type: "field",
-//             definition: "/properties/section/properties/field1",
-//           },
-//           {
-//             type: "field",
-//             definition: "/properties/section/properties/field2",
-//           },
-//         ],
-//       },
-//     ];
-
-//     const errors = null;
-//     const formData = { section: { field1: "Value 1", field2: "Value 2" } };
-
-//     const result = buildFormTreeRecursive({
-//       errors,
-//       formData,
-//       schema,
-//       uiSchema,
-//     });
-
-//     expect(result).toHaveLength(1);
-//     expect(result[0].key).toBe("section-fieldset");
 //   });
 // });
 

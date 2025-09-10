@@ -1,3 +1,4 @@
+import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
@@ -522,7 +523,7 @@ export const createMockApiKey = (overrides: Partial<ApiKey> = {}): ApiKey => ({
   ...overrides,
 });
 
-export const fakeFieldSchema = {
+export const fakeFieldSchema: JSONSchema7 = {
   maxLength: 15,
   minLength: 0,
   title: "Description for application",

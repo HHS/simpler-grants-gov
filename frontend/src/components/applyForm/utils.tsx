@@ -228,7 +228,7 @@ export const getFieldConfig = ({
     throw new Error("Invalid or missing field schema");
   }
 
-  // fields that have no definition won't have a name, but will havea schema
+  // fields that have no definition won't have a name, but will have a schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
