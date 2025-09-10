@@ -1,24 +1,22 @@
+"use client";
+
 import {
   ariaDescribedByIds,
   FormContextType,
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
-
-import { ChangeEvent, FocusEvent, useCallback } from "react";
+import React, { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
 import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
-/** The `CheckBoxWidget` is a widget for rendering boolean properties.
- *  It is typically used to represent a boolean.
- *
- * @param props - The `WidgetProps` for this component
- */
 function CheckboxWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never,
+  F extends FormContextType = never
 >({
   id,
   disabled,
@@ -29,48 +27,61 @@ function CheckboxWidget<
   schema,
   autofocus = false,
   rawErrors = [],
-  // passing on* functions made optional
   onChange = () => ({}),
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title } = schema;
-  const error = rawErrors.length ? true : undefined;
+  const hasError = rawErrors.length > 0 ? true : undefined;
+  const description =
+    (options?.description ?? schema.description) as string | undefined;
+  const labelType = getLabelTypeFromOptions(
+    (options?.["widget-label"] as string | undefined) ?? undefined,
+  );
 
-  const handleBlur = useCallback(
-    (event: FocusEvent<HTMLInputElement>) => onBlur(id, event.target.checked),
-    [onBlur, id],
+  const baseTitle = (schema.title ??
+    (options as Record<string, unknown> | undefined)?.label ??
+    "") as string;
+
+  const label = required ? (
+    <DynamicFieldLabel
+      idFor={id}
+      title={baseTitle}
+      required={required}
+      description={description ?? ""}
+      labelType={labelType}
+    />
+  ) : (
+    baseTitle
   );
 
   const handleChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.checked),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onChange(event.target.checked);
+    },
     [onChange],
   );
 
-  const handleFocus = useCallback(
-    (event: FocusEvent<HTMLInputElement>) => onFocus(id, event.target.checked),
-    [onFocus, id],
+  const handleBlur = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => {
+      onBlur(id, event.target.checked);
+    },
+    [onBlur, id],
   );
-  const description = options?.description ?? schema.description;
 
-  const label = required ? (
-    <>
-      {title}{" "}
-      <span className="usa-hint usa-hint--required text-no-underline">*</span>
-    </>
-  ) : (
-    title
+  const handleFocus = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => {
+      onFocus(id, event.target.checked);
+    },
+    [onFocus, id],
   );
 
   return (
-    <FormGroup error={error} key={`form-group__checkbox--${id}`}>
+    <FormGroup error={hasError} key={`form-group__checkbox--${id}`}>
       <Checkbox
         id={id}
+        name={id}
         label={label}
         labelDescription={description}
-        name={id}
-        // for a single checkbox, the value is always true
-        value={"true"}
         defaultChecked={Boolean(value)}
         required={required}
         disabled={disabled || readonly}
