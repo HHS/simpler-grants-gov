@@ -1,6 +1,7 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
 import { RJSFSchema } from "@rjsf/utils";
+
 import { getByPointer, getFieldPath } from "./utils";
 
 // like, this is basically anything lol - DWS
@@ -60,7 +61,9 @@ const getFieldType = (
 ): string => {
   const path = getFieldPath(currentKey);
   const fullPath = parentKey ? `${parentKey}/${path}` : path;
-  const formFieldDefinition = getByPointer(formSchema, fullPath) as { type?: string };
+  const formFieldDefinition = getByPointer(formSchema, fullPath) as {
+    type?: string;
+  };
   return formFieldDefinition?.type || "";
 };
 
@@ -90,14 +93,19 @@ export function formDataToObject(
       if (isArrayKey) {
         const indexStart = chunkName.indexOf("[");
         const indexEnd = chunkName.indexOf("]");
-        const arrayIndex = parseInt(chunkName.substring(indexStart + 1, indexEnd));
+        const arrayIndex = parseInt(
+          chunkName.substring(indexStart + 1, indexEnd),
+        );
 
         if (isNaN(arrayIndex)) {
-          throw new Error(`Invalid form data - cannot retrieve array index: ${arrayIndex}`);
+          throw new Error(
+            `Invalid form data - cannot retrieve array index: ${arrayIndex}`,
+          );
         }
 
         const propertyName = chunkName.substring(0, indexStart);
-        current[propertyName] = (current[propertyName] as unknown[]) ?? ([] as unknown[]);
+        current[propertyName] =
+          (current[propertyName] as unknown[]) ?? ([] as unknown[]);
 
         const currentArray = current[propertyName] as unknown[];
         if (chunkIndex === chunksLength - 1) {

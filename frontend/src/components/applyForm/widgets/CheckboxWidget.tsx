@@ -6,6 +6,7 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
+
 import React, { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
@@ -16,7 +17,7 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 function CheckboxWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never
+  F extends FormContextType = never,
 >({
   id,
   disabled,
@@ -32,8 +33,9 @@ function CheckboxWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const hasError = rawErrors.length > 0 ? true : undefined;
-  const description =
-    (options?.description ?? schema.description) as string | undefined;
+  const description = (options?.description ?? schema.description) as
+    | string
+    | undefined;
   const labelType = getLabelTypeFromOptions(
     (options?.["widget-label"] as string | undefined) ?? undefined,
   );

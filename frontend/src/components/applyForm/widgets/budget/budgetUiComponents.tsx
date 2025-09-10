@@ -70,8 +70,8 @@ export const CurrencyInput: React.FC<{
   />
 );
 
-/** 
- * Display-only title cell 
+/**
+ * Display-only title cell
  * fallback dash
  * */
 export const TitleCell: React.FC<{ items: unknown; rowIndex: number }> = ({
@@ -102,7 +102,7 @@ export const TitleCell: React.FC<{ items: unknown; rowIndex: number }> = ({
 };
 
 /**
- * Decorative equals cell 
+ * Decorative equals cell
  * between totals columns in some sections
  * */
 export const EqualsSpacer: React.FC<{ show?: boolean }> = ({ show }) => (
@@ -122,7 +122,7 @@ export const EmptyHeaderSpacer: React.FC = () => (
   />
 );
 
-/** 
+/**
  * Header cell class helper
  * removes the border class for the last item
  * */
