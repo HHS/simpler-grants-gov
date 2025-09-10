@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.adapters import db
+from src.adapters.aws.api_gateway_adapter import ApiGatewayConfig, import_api_key
 from src.db.models.user_models import UserApiKey
 from src.util.api_key_gen import generate_api_key_id
 
@@ -16,6 +17,12 @@ MAX_KEY_GENERATION_RETRIES = 5
 
 class KeyGenerationError(Exception):
     """Raised when unable to generate a unique API key after multiple retries."""
+
+    pass
+
+
+class ApiGatewayIntegrationError(Exception):
+    """Raised when there's an error integrating with AWS API Gateway."""
 
     pass
 
@@ -36,7 +43,7 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
     # Generate a unique key_id with collision detection
     key_id = _generate_unique_key_id(db_session)
 
-    # Create the new API key
+    # Create the new API key in our database first
     api_key = UserApiKey(
         api_key_id=uuid.uuid4(),
         user_id=user_id,
@@ -45,6 +52,21 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
         is_active=is_active,
     )
     db_session.add(api_key)
+
+    # Import the API key to AWS API Gateway
+    try:
+        _import_api_key_to_aws_gateway(api_key)
+    except Exception as e:
+        # Log the error but don't fail the API key creation
+        # This allows the system to still function if AWS API Gateway is temporarily unavailable
+        logger.error(
+            "Failed to import API key to AWS API Gateway",
+            extra={
+                "api_key_id": api_key.api_key_id,
+                "key_name": key_name,
+                "error": str(e),
+            },
+        )
 
     logger.info(
         "Created new API key",
@@ -57,6 +79,50 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
     )
 
     return api_key
+
+
+def _import_api_key_to_aws_gateway(api_key: UserApiKey) -> None:
+    """Import an API key to AWS API Gateway and associate it with a usage plan"""
+    try:
+        config = ApiGatewayConfig()
+
+        gateway_response = import_api_key(
+            api_key=api_key.key_id,
+            name=api_key.key_name,
+            description=f"API key for user {api_key.user_id}",
+            enabled=api_key.is_active,
+            usage_plan_id=config.default_usage_plan_id,
+        )
+
+        if config.default_usage_plan_id:
+            logger.info(
+                "Successfully imported API key to AWS API Gateway and associated with usage plan",
+                extra={
+                    "api_key_id": api_key.api_key_id,
+                    "gateway_key_id": gateway_response.id,
+                    "usage_plan_id": config.default_usage_plan_id,
+                },
+            )
+        else:
+            logger.info(
+                "Successfully imported API key to AWS API Gateway (no usage plan configured)",
+                extra={
+                    "api_key_id": api_key.api_key_id,
+                    "gateway_key_id": gateway_response.id,
+                },
+            )
+
+    except Exception as e:
+        logger.exception(
+            "Error importing API key to AWS API Gateway",
+            extra={
+                "api_key_id": api_key.api_key_id,
+                "key_name": api_key.key_name,
+            },
+        )
+        raise ApiGatewayIntegrationError(
+            f"Failed to import API key to AWS API Gateway: {str(e)}"
+        ) from e
 
 
 def _generate_unique_key_id(db_session: db.Session) -> str:
