@@ -300,32 +300,6 @@ export const getFieldConfig = ({
   };
 };
 
-//   const Widget = widgetComponents[type];
-
-//   if (!Widget) {
-//     console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
-//     throw new Error(`Unknown widget type: ${type}`);
-//   }
-
-//   // IMPORTANT:
-//   // return a React element so hooks execute during render,
-//   // under the AttachmentsProvider context.
-//   return (
-//     <Widget
-//       id={name}
-//       key={name}
-//       disabled={disabled}
-//       required={requiredField}
-//       minLength={fieldSchema?.minLength}
-//       maxLength={fieldSchema?.maxLength}
-//       schema={fieldSchema}
-//       rawErrors={rawErrors}
-//       value={value}
-//       options={options}
-//     />
-//   );
-// };
-
 const getNestedWarningsForField = (
   fieldName: string,
   warnings: FormValidationWarning[],
