@@ -118,18 +118,13 @@ class RecursiveXMLTransformer:
             transformed_value = source_value
 
             # Check if there's a value transformation specified
-            if "value_transform" in transform_rule:
-                try:
-                    transformed_value = apply_value_transformation(
-                        source_value, transform_rule["value_transform"]
-                    )
-                    logger.debug(
-                        f"Applied value transformation at {'.'.join(path)}: {source_value} -> {transformed_value}"
-                    )
-                except ValueTransformationError as e:
-                    logger.warning(f"Value transformation failed at {'.'.join(path)}: {e}")
-                    # Use original value if transformation fails
-                    transformed_value = source_value
+            rule = transform_rule.get("value_transform")
+            if rule is not None:
+                transformed_value = apply_value_transformation(source_value, rule)
+                logger.debug(
+                    f"Applied value transformation at {'.'.join(path)}: {source_value} -> {transformed_value}"
+                )
+
 
             return transformed_value
 
