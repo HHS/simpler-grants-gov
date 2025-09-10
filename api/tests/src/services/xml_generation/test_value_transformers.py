@@ -3,6 +3,8 @@
 import pytest
 
 from src.services.xml_generation.value_transformers import (
+    NO_VALUE,
+    YES_VALUE,
     ValueTransformationError,
     apply_value_transformation,
     transform_boolean_to_yes_no,
@@ -16,28 +18,30 @@ class TestBooleanTransformations:
     """Test boolean to Yes/No transformations."""
 
     def test_transform_boolean_to_yes_no_true(self):
-        """Test transforming True to Yes."""
+        """Test transforming True to YES_VALUE."""
         result = transform_boolean_to_yes_no(True)
-        assert result == "Yes"
+        assert result == YES_VALUE
 
     def test_transform_boolean_to_yes_no_false(self):
-        """Test transforming False to No."""
+        """Test transforming False to NO_VALUE."""
         result = transform_boolean_to_yes_no(False)
-        assert result == "No"
+        assert result == NO_VALUE
 
     def test_transform_boolean_to_yes_no_string_true(self):
-        """Test transforming string 'true' to Yes."""
-        assert transform_boolean_to_yes_no("true") == "Yes"
-        assert transform_boolean_to_yes_no("TRUE") == "Yes"
-        assert transform_boolean_to_yes_no("yes") == "Yes"
-        assert transform_boolean_to_yes_no("1") == "Yes"
+        """Test transforming string 'true' to YES_VALUE."""
+        assert transform_boolean_to_yes_no("true") == YES_VALUE
+        assert transform_boolean_to_yes_no("TRUE") == YES_VALUE
+        assert transform_boolean_to_yes_no("yes") == YES_VALUE
+        assert transform_boolean_to_yes_no("1") == YES_VALUE
+        assert transform_boolean_to_yes_no("y") == YES_VALUE
 
     def test_transform_boolean_to_yes_no_string_false(self):
-        """Test transforming string 'false' to No."""
-        assert transform_boolean_to_yes_no("false") == "No"
-        assert transform_boolean_to_yes_no("FALSE") == "No"
-        assert transform_boolean_to_yes_no("no") == "No"
-        assert transform_boolean_to_yes_no("0") == "No"
+        """Test transforming string 'false' to NO_VALUE."""
+        assert transform_boolean_to_yes_no("false") == NO_VALUE
+        assert transform_boolean_to_yes_no("FALSE") == NO_VALUE
+        assert transform_boolean_to_yes_no("no") == NO_VALUE
+        assert transform_boolean_to_yes_no("0") == NO_VALUE
+        assert transform_boolean_to_yes_no("n") == NO_VALUE
 
     def test_transform_boolean_to_yes_no_invalid(self):
         """Test error handling for invalid boolean values."""
@@ -51,30 +55,33 @@ class TestBooleanTransformations:
 class TestCurrencyTransformations:
     """Test currency format transformations."""
 
-    def test_transform_currency_integer(self):
-        """Test currency transformation with integer."""
-        result = transform_currency_format(50000, ensure_decimal=True)
+    def test_transform_currency_string_valid(self):
+        """Test currency transformation with valid string."""
+        result = transform_currency_format("50000.00")
         assert result == "50000.00"
 
-    def test_transform_currency_float(self):
-        """Test currency transformation with float."""
-        result = transform_currency_format(50000.5, ensure_decimal=True)
-        assert result == "50000.50"
-
-    def test_transform_currency_string(self):
-        """Test currency transformation with string."""
-        result = transform_currency_format("50000.00", ensure_decimal=False)
-        assert result == "50000.0"
+    def test_transform_currency_string_no_decimal(self):
+        """Test currency transformation with integer string."""
+        result = transform_currency_format("50000")
+        assert result == "50000"
 
     def test_transform_currency_string_with_symbols(self):
         """Test currency transformation with currency symbols."""
-        result = transform_currency_format("$50,000.00", ensure_decimal=True)
+        result = transform_currency_format("$50,000.00")
         assert result == "50000.00"
 
-    def test_transform_currency_no_decimal(self):
-        """Test currency transformation without ensuring decimals."""
-        result = transform_currency_format(50000, ensure_decimal=False)
-        assert result == "50000"
+    def test_transform_currency_single_decimal(self):
+        """Test currency transformation with single decimal place."""
+        result = transform_currency_format("50000.5")
+        assert result == "50000.5"
+
+    def test_transform_currency_non_string_error(self):
+        """Test error handling for non-string input."""
+        with pytest.raises(ValueTransformationError):
+            transform_currency_format(50000)  # Integer not allowed
+
+        with pytest.raises(ValueTransformationError):
+            transform_currency_format(50000.0)  # Float not allowed
 
     def test_transform_currency_invalid(self):
         """Test error handling for invalid currency values."""
@@ -82,7 +89,7 @@ class TestCurrencyTransformations:
             transform_currency_format("not-a-number")
 
         with pytest.raises(ValueTransformationError):
-            transform_currency_format([])
+            transform_currency_format("123.456")  # Too many decimal places
 
 
 class TestStringTransformations:
@@ -150,13 +157,13 @@ class TestApplyValueTransformation:
         """Test applying boolean transformation."""
         config = {"type": "boolean_to_yes_no"}
         result = apply_value_transformation(True, config)
-        assert result == "Yes"
+        assert result == YES_VALUE
 
     def test_apply_value_transformation_with_params(self):
         """Test applying transformation with parameters."""
-        config = {"type": "currency_format", "params": {"ensure_decimal": True}}
-        result = apply_value_transformation(50000, config)
-        assert result == "50000.00"
+        config = {"type": "truncate_string", "params": {"max_length": 5}}
+        result = apply_value_transformation("Hello World", config)
+        assert result == "Hello"
 
     def test_apply_value_transformation_no_type(self):
         """Test applying transformation with no type specified."""
@@ -170,9 +177,9 @@ class TestApplyValueTransformation:
         with pytest.raises(ValueTransformationError):
             apply_value_transformation("value", config)
 
-    def test_apply_value_transformation_graceful_degradation(self):
-        """Test graceful degradation when transformation fails."""
+    def test_apply_value_transformation_error_propagation(self):
+        """Test that transformation errors propagate instead of graceful degradation."""
         config = {"type": "boolean_to_yes_no"}
-        # This should return the original value since transformation will fail
-        result = apply_value_transformation("not-a-boolean", config)
-        assert result == "not-a-boolean"
+        # This should raise an error, not return the original value
+        with pytest.raises(ValueTransformationError):
+            apply_value_transformation("not-a-boolean", config)

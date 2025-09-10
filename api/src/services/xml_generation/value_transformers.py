@@ -6,6 +6,10 @@ from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
+# Grants.gov YesNoDataType constants from GlobalLibrary-V2.0.xsd
+YES_VALUE = "Y: Yes"
+NO_VALUE = "N: No"
+
 
 class ValueTransformationError(Exception):
     """Exception raised when value transformation fails."""
@@ -14,71 +18,62 @@ class ValueTransformationError(Exception):
 
 
 def transform_boolean_to_yes_no(value: Any) -> str:
-    """Transform boolean values to Yes/No strings.
+    """Transform boolean values to YesNoDataType format.
 
     Args:
         value: Boolean value to transform
 
     Returns:
-        "Yes" for True, "No" for False
+        YES_VALUE for True, NO_VALUE for False (per Grants.gov YesNoDataType)
 
     Raises:
         ValueTransformationError: If value is not a boolean
     """
     if isinstance(value, bool):
-        return "Yes" if value else "No"
+        return YES_VALUE if value else NO_VALUE
     elif isinstance(value, str):
         # Handle string representations
-        if value.lower() in ("true", "yes", "1"):
-            return "Yes"
-        elif value.lower() in ("false", "no", "0"):
-            return "No"
+        if value.lower() in ("true", "yes", "1", "y"):
+            return YES_VALUE
+        elif value.lower() in ("false", "no", "0", "n"):
+            return NO_VALUE
 
-    raise ValueTransformationError(f"Cannot convert {value} to Yes/No - expected boolean")
+    raise ValueTransformationError(
+        f"Cannot convert {value} to {YES_VALUE}/{NO_VALUE} - expected boolean"
+    )
 
 
-def transform_currency_format(value: Any, ensure_decimal: bool = True) -> str:
+def transform_currency_format(value: Any) -> str:
     """Transform currency values to proper decimal format.
 
+    Assumes input is already validated monetary string (per SF-424 regex constraints).
+    Only supports string input to avoid float precision issues.
+
     Args:
-        value: Currency value (string or number)
-        ensure_decimal: Whether to ensure .00 decimal places
+        value: Currency value as string (validated upstream)
 
     Returns:
-        Formatted currency string
+        Cleaned currency string (removes symbols, keeps numeric value)
 
     Raises:
-        ValueTransformationError: If currency formatting fails
+        ValueTransformationError: If value is not a string or cannot be parsed
     """
-    if isinstance(value, (int, float)):
-        # Convert number to string with proper decimal places
-        if ensure_decimal:
-            return f"{value:.2f}"
-        else:
-            return str(value)
-
-    elif isinstance(value, str):
-        # Validate and potentially reformat string
-        # Remove any non-numeric characters except decimal point
-        cleaned = re.sub(r"[^\d.]", "", value)
-
-        if not cleaned:
-            raise ValueTransformationError(f"Invalid currency value: '{value}'")
-
-        try:
-            # Convert to float and back to ensure proper format
-            float_value = float(cleaned)
-            if ensure_decimal:
-                return f"{float_value:.2f}"
-            else:
-                return str(float_value)
-        except ValueError as e:
-            raise ValueTransformationError(f"Cannot parse currency value: '{value}'") from e
-
-    else:
+    if not isinstance(value, str):
         raise ValueTransformationError(
-            f"Currency value must be string or number, got {type(value)}"
+            f"Currency value must be string (validated upstream), got {type(value)}"
         )
+
+    # Remove any non-numeric characters except decimal point
+    cleaned = re.sub(r"[^\d.]", "", value)
+
+    if not cleaned:
+        raise ValueTransformationError(f"Invalid currency value: '{value}'")
+
+    # Validate format
+    if not re.match(r"^\d+(\.\d{1,2})?$", cleaned):
+        raise ValueTransformationError(f"Invalid currency format: '{value}'")
+
+    return cleaned
 
 
 def transform_string_case(value: Any, case_type: str) -> str:
@@ -167,9 +162,6 @@ def apply_value_transformation(value: Any, transformation_config: dict) -> Any:
     # Extract additional parameters
     params = transformation_config.get("params", {})
 
-    try:
-        return transformer(value, **params)
-    except Exception as e:
-        logger.warning(f"Value transformation failed for {transform_type}: {e}")
-        # Return original value if transformation fails (graceful degradation)
-        return value
+    # Let transformation errors propagate - no graceful degradation
+    # Configuration or data issues should be caught and fixed, not hidden
+    return transformer(value, **params)

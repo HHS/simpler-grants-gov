@@ -4,6 +4,7 @@ from pydantic import ValidationError
 
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.value_transformers import NO_VALUE, YES_VALUE
 
 
 class TestXMLGenerationService:
@@ -16,7 +17,7 @@ class TestXMLGenerationService:
             "submission_type": "Application",
             "organization_name": "Test University",
             "project_title": "Research Project",
-            "federal_estimated_funding": 50000,
+            "federal_estimated_funding": "50000.00",  # String as expected by currency formatter
             "certification_agree": True,
         }
 
@@ -37,7 +38,8 @@ class TestXMLGenerationService:
         assert "<SubmissionType>Application</SubmissionType>" in xml_data
         assert "<OrganizationName>Test University</OrganizationName>" in xml_data
         assert "<ProjectTitle>Research Project</ProjectTitle>" in xml_data
-        assert "<FederalEstimatedFunding>50000</FederalEstimatedFunding>" in xml_data
+        assert "<FederalEstimatedFunding>50000.00</FederalEstimatedFunding>" in xml_data
+        assert f"<CertificationAgree>{YES_VALUE}</CertificationAgree>" in xml_data
 
     def test_generate_xml_no_application_data(self):
         """Test XML generation when no application data is provided."""
@@ -87,7 +89,7 @@ class TestXMLGenerationService:
             "submission_type": "Application",
             "organization_name": None,  # None value should be skipped
             "project_title": "Test Project",
-            "federal_estimated_funding": 0,  # Zero should be included
+            "federal_estimated_funding": "0.00",  # Zero as string should be included
         }
 
         service = XMLGenerationService()
@@ -102,7 +104,7 @@ class TestXMLGenerationService:
         # Should include non-None values
         assert "<SubmissionType>Application</SubmissionType>" in xml_data
         assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
-        assert "<FederalEstimatedFunding>0</FederalEstimatedFunding>" in xml_data
+        assert "<FederalEstimatedFunding>0.00</FederalEstimatedFunding>" in xml_data
 
         # Should not include None values
         assert "OrganizationName" not in xml_data
@@ -233,10 +235,70 @@ class TestXMLGenerationService:
         xml_data = response.xml_data
 
         # Verify value transformations were applied
-        assert "<FederalEstimatedFunding>50000.0</FederalEstimatedFunding>" in xml_data
-        assert "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>" in xml_data
-        assert "<CertificationAgree>No</CertificationAgree>" in xml_data
+        assert "<FederalEstimatedFunding>50000.00</FederalEstimatedFunding>" in xml_data
+        assert f"<DelinquentFederalDebt>{YES_VALUE}</DelinquentFederalDebt>" in xml_data
+        assert f"<CertificationAgree>{NO_VALUE}</CertificationAgree>" in xml_data
 
         # Verify non-transformed fields remain unchanged
         assert "<SubmissionType>Application</SubmissionType>" in xml_data
         assert "<OrganizationName>Test University</OrganizationName>" in xml_data
+
+    def test_generate_xml_with_none_values_excluded(self):
+        """Test that None values are excluded from XML output (default behavior)."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "federal_estimated_funding": None,  # Should be excluded (default)
+            "delinquent_federal_debt": True,
+            "certification_agree": None,  # Should be excluded (default)
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify None fields are excluded from XML
+        assert "<FederalEstimatedFunding>" not in xml_data
+        assert "<CertificationAgree>" not in xml_data
+
+        # Verify non-None fields are included
+        assert "<SubmissionType>Application</SubmissionType>" in xml_data
+        assert "<OrganizationName>Test University</OrganizationName>" in xml_data
+        assert f"<DelinquentFederalDebt>{YES_VALUE}</DelinquentFederalDebt>" in xml_data
+
+    def test_generate_xml_with_configurable_none_handling(self):
+        """Test configurable None handling behaviors."""
+        application_data = {
+            "submission_type": "Application",
+            "date_received": None,  # include_null configured
+            "state_review": None,  # default_value configured
+            "organization_name": None,  # exclude (default)
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify different None handling behaviors
+        assert (
+            "<DateReceived></DateReceived>" in xml_data
+            or "<DateReceived/>" in xml_data
+            or "<DateReceived />" in xml_data
+        )  # include_null
+        assert f"<StateReview>{NO_VALUE}</StateReview>" in xml_data  # default_value
+        assert "OrganizationName" not in xml_data  # exclude (default)
+
+        # Verify non-None fields are included
+        assert "<SubmissionType>Application</SubmissionType>" in xml_data
