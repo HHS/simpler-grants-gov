@@ -71,7 +71,7 @@ export const messages = {
     demo: {
       title: "Simpler.Grants.gov Big Demo",
       description:
-        "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+        "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
       watchLink: "January 15, 2025",
     },
@@ -516,14 +516,104 @@ export const messages = {
     pageTitle: "Developer Portal | Simpler.Grants.gov",
     pageDescription:
       "Tools and resources for developers working on Simpler.Grants.gov",
-    description:
-      "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
+    infoTitle: "API tools & management",
+    canDoHeader: "What's available for developers",
+    canDoSubHeader: "What you can do with an API key now",
+    canDoParagraph:
+      "You can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials to create, view, rotate, and revoke API keys.",
+    cantDoHeader: "Current limitations",
+    cantDoParagraph:
+      "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren't available yet.</p>",
+    apiDashboardLink: "Manage API Keys",
+    iconSections: [
+      {
+        description:
+          "Make your first API request in minutes. Learn the basics of the Simpler.Grants.gov API.",
+        http: "https://github.com/HHS/simpler-grants-gov/tree/main/documentation",
+        iconName: "code",
+        link: "Get started",
+        title: "Developer quickstart",
+      },
+      {
+        description: "Learn more about integrating our API into your project.",
+        http: "https://api.simpler.grants.gov/docs#/Opportunity%20v1/post_v1_opportunities_search",
+        iconName: "local_library",
+        link: "Read the docs",
+        title: "API reference",
+      },
+    ],
+  },
+  ApiDashboard: {
+    pageTitle: "API Dashboard | Simpler.Grants.gov",
+    metaDescription: "Manage your API keys for Simpler.Grants.gov",
+    heading: "API Dashboard",
+    errorLoadingKeys: "Failed to load API keys",
+    table: {
+      headers: {
+        apiKey: "API Key",
+        dates: "Dates",
+        editName: "Edit Name",
+        deleteKey: "Delete Key",
+      },
+      dateLabels: {
+        created: "Created:",
+        lastUsed: "Last used:",
+        never: "Never",
+      },
+      deleteButton: "Delete Key",
+      deleteButtonTitle: "Delete this API key",
+      emptyState:
+        "You don't have any API keys yet. Create your first API key to get started.",
+    },
+    modal: {
+      apiKeyNameLabel: "Name <required>(required)</required>",
+      placeholder: "e.g., Production API Key",
+      createTitle: "Create New API Key",
+      createDescription:
+        "Create a new key for use with the Simpler.Grants.gov API",
+      editDescription: "Change the name of your Simpler.Grants.gov API key",
+      createSuccessHeading: "API Key Created Successfully",
+      editSuccessHeading: "API Key Renamed Successfully",
+      createSuccessMessage:
+        'Your API key "{keyName}" has been created successfully.',
+      editSuccessMessage:
+        'Your API key has been renamed from "{originalName}" to "{keyName}".',
+      close: "Close",
+      createErrorMessage:
+        "There was an error creating your API key. Please try again.",
+      editErrorMessage:
+        "There was an error renaming your API key. Please try again.",
+      nameRequiredError: "API key name is required",
+      nameChangedError: "Please enter a different name",
+      editTitle: "Rename API Key",
+      createButtonText: "Create API Key",
+      editNameButtonText: "Edit Name",
+      creating: "Creating...",
+      saving: "Saving...",
+      saveChanges: "Save Changes",
+      cancel: "Cancel",
+      deleteTitle: "Delete API Key",
+      deleteDescription:
+        'To confirm deletion, type "delete" in the field below:',
+      deleteConfirmationLabel:
+        'Type "delete" to confirm <required>(required)</required>',
+      deleteConfirmationPlaceholder: "delete",
+      deleteConfirmationError: 'Please type "delete" to confirm deletion',
+      deleteSuccessHeading: "API Key Deleted Successfully",
+      deleteSuccessMessage:
+        'Your API key "{keyName}" has been deleted successfully.',
+      deleteErrorMessage:
+        "There was an error deleting your API key. Please try again.",
+      deleteButtonText: "Delete Key",
+      deleting: "Deleting...",
+    },
   },
   Header: {
     navLinks: {
       about: "About",
       community: "Community",
       developer: "Developer Portal",
+      developers: "Developers",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",
@@ -696,19 +786,6 @@ export const messages = {
       floor: "Minimum: ",
     },
     sortBy: {
-      options: {
-        postedDateDesc: "Posted date (Newest)",
-        postedDateAsc: "Posted date (Oldest)",
-        closeDateDesc: "Close date (Furthest)",
-        closeDateAsc: "Close date (Soonest)",
-        awardFloorAsc: "Award minimum (Lowest)",
-        awardFloorDesc: "Award minimum (Highest)",
-        awardCeilingAsc: "Award maximum (Lowest)",
-        awardCeilingDesc: "Award maximum (Highest)",
-        opportunityTitleAsc: "Opportunity title (A to Z)",
-        opportunityTitleDesc: "Opportunity title (Z to A)",
-        default: "Most relevant (Default)",
-      },
       label: "Sort by",
     },
     filterToggleAll: {

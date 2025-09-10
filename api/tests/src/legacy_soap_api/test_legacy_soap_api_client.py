@@ -12,6 +12,7 @@ from src.legacy_soap_api.applicants.schemas import (
 from src.legacy_soap_api.legacy_soap_api_client import SimplerApplicantsS2SClient
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     CompetitionFactory,
@@ -21,6 +22,7 @@ from tests.src.db.models.factories import (
 from tests.src.legacy_soap_api.soap_request_templates import (
     get_opportunity_list_requests as mock_requests,
 )
+from tests.util.minifiers import minify_xml
 
 
 def get_simpler_applicants_soap_client(request_data, db_session):
@@ -138,13 +140,32 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         program_title = "Fake program title"
         legacy_package_id = "PKG-SOAPPACKAGE"
         is_multi_package = True  # will resolve to "true"
+        closing_date = "9999-10-31"
+        opening_date = "1999-10-31"
+        funding_opportunity_title = "Rando title"
+        funding_opportunity_number = "NOT-648-82"
+        competition_id = "ABC-134-43424"
+        competition_title = "Fake m5 comp"
+        agency_contact_info = "Agency contact info"
+        schema_url = f"http://mock-applicants-soap-api/apply/opportunities/schemas/applicant/{legacy_package_id}.xsd"
 
         mock_competition = CompetitionFactory.create(
+            public_competition_id=competition_id,
             is_multi_package=is_multi_package,
             legacy_package_id=legacy_package_id,
+            opening_date=parse_grants_gov_date(opening_date),
+            closing_date=parse_grants_gov_date(closing_date),
+            competition_title=competition_title,
+            contact_info=agency_contact_info,
             opportunity_assistance_listing=OpportunityAssistanceListingFactory(
                 assistance_listing_number=assistance_listing_number,
                 program_title=program_title,
+            ),
+            opportunity=OpportunityFactory.build(
+                opportunity_title=funding_opportunity_title,
+                opportunity_number=funding_opportunity_number,
+                agency_code="TEST",
+                agency_record=None,
             ),
         )
 
@@ -167,23 +188,57 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
                 OpportunityDetails(
                     is_multi_project="true",
                     cfda_details=CFDADetails(
-                        number=mock_competition.opportunity_assistance_listing.assistance_listing_number,
-                        title=mock_competition.opportunity_assistance_listing.program_title,
+                        number=assistance_listing_number,
+                        title=program_title,
                     ),
                     package_id=mock_competition.legacy_package_id,
                     agency_contact_info=mock_competition.contact_info,
                     offering_agency=mock_competition.opportunity.agency_name,
-                    schema_url=f"http://mock-applicants-soap-api/apply/opportunities/schemas/applicant/{mock_competition.legacy_package_id}.xsd",
-                    funding_opportunity_title=mock_competition.opportunity.opportunity_title,
-                    funding_opportunity_number=mock_competition.opportunity.opportunity_number,
-                    competition_title=mock_competition.competition_title,
-                    competition_id=mock_competition.public_competition_id,
-                    closing_date=mock_competition.closing_date,
-                    opening_date=mock_competition.opening_date,
+                    schema_url=schema_url,
+                    funding_opportunity_title=funding_opportunity_title,
+                    funding_opportunity_number=funding_opportunity_number,
+                    competition_title=competition_title,
+                    competition_id=competition_id,
+                    closing_date=parse_grants_gov_date(closing_date),
+                    opening_date=parse_grants_gov_date(opening_date),
                 )
             ]
         )
 
+        # Expected XML is formatted for visual aid and minified for equality.
+        expected_simpler_soap_response_xml = minify_xml(
+            f"""
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <ns2:GetOpportunityListResponse xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:ns3="http://schemas.xmlsoap.org/wsdl/" xmlns:ns4="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns5="http://apply.grants.gov/system/ApplicantCommonElements-V1.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+            <ns5:OpportunityDetails>
+                <AgencyContactInfo>{agency_contact_info}</AgencyContactInfo>
+                <ns5:CFDADetails>
+                    <ns5:Number>{assistance_listing_number}</ns5:Number>
+                    <ns5:Title>{program_title}</ns5:Title>
+                </ns5:CFDADetails>
+                <ns5:ClosingDate>{closing_date}</ns5:ClosingDate>
+                <CompetitionID>{competition_id}</CompetitionID>
+                <CompetitionTitle>{competition_title}</CompetitionTitle>
+                <FundingOpportunityNumber>{funding_opportunity_number}</FundingOpportunityNumber>
+                <FundingOpportunityTitle>{funding_opportunity_title}</FundingOpportunityTitle>
+                <IsMultiProject>true</IsMultiProject>
+                <ns5:OpeningDate>{opening_date}</ns5:OpeningDate>
+                <PackageID>{legacy_package_id}</PackageID>
+                <SchemaURL>{schema_url}</SchemaURL>
+            </ns5:OpportunityDetails>
+        </ns2:GetOpportunityListResponse>
+    </soap:Body>
+</soap:Envelope>"""
+        )
+
+        # This is only testing the simpler soap response so we can leave proxy response empty.
+        mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
+            mock_proxy_response
+        )
+
+        assert simpler_response.data == expected_simpler_soap_response_xml.encode()
         assert (
             simpler_soap_client.get_soap_response_dict()
             == expected_simpler_data.to_soap_envelope_dict(

@@ -18,7 +18,7 @@ locals {
       "--transform",
       "--set-current",
       "--store-version",
-      "--sync"
+      "--sync-status"
     ],
     staging = [
       "poetry",
@@ -30,7 +30,19 @@ locals {
       "--transform",
       "--set-current",
       "--store-version",
-      "--sync"
+      "--sync-status"
+    ],
+    training = [
+      "poetry",
+      "run",
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version",
+      "--sync-status"
     ],
     prod = [
       "poetry",
@@ -41,7 +53,8 @@ locals {
       "--load",
       "--transform",
       "--set-current",
-      "--store-version"
+      "--store-version",
+      "--sync-status"
     ],
   }
   scheduled_jobs = {

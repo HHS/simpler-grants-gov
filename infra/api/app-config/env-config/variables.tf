@@ -185,3 +185,15 @@ variable "service_override_extra_environment_variables" {
   EOT
   default     = {}
 }
+
+variable "database_engine_version" {
+  type        = string
+  description = "Postgres database engine version"
+  default     = "15.10"
+}
+
+variable "secondary_domain_names" {
+  type        = list(string)
+  description = "A list of domain names the ALB can also use"
+  default     = []
+}

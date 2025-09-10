@@ -1,3 +1,4 @@
+import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
@@ -77,13 +78,21 @@ export const fakeSavedSearch = {
 export const fakeSearchQueryParamData: ValidSearchQueryParamData = {
   query: "search term",
   status: "forecasted,closed",
-  fundingInstrument: "Cooperative Agreement",
-  eligibility: "Individuals",
-  agency: "Economic Development Administration",
-  category: "Recovery Act",
+  fundingInstrument: "cooperative_agreement",
+  eligibility: "individuals",
+  agency: "DOC-EDA",
+  category: "recovery_act",
   page: "1",
   sortby: "relevancy",
 };
+
+export const fakeAgencyOptions: FilterOption[] = [
+  {
+    id: "1",
+    label: "Economic Development Administration",
+    value: "DOC-EDA",
+  },
+];
 
 const fakePaginationInfo: PaginationInfo = {
   order_by: "opportunity_number",
@@ -159,6 +168,7 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+
 export const filterOptionsWithChildren = [
   {
     id: "AGNC",
@@ -441,3 +451,73 @@ export const fakeCompetition = {
   ],
   opportunity_id: "2",
 };
+
+// API Key fixtures
+/**
+ * Base API key fixture that can be used across tests
+ */
+export const baseApiKey: ApiKey = {
+  api_key_id: "test-key-id",
+  key_name: "Test API Key",
+  key_id: "abc123",
+  created_at: "2023-01-01T00:00:00Z",
+  last_used: null,
+  is_active: true,
+};
+
+/**
+ * API key fixture with last_used date
+ */
+export const usedApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "used-key-id",
+  key_name: "Used API Key",
+  key_id: "def456",
+  last_used: "2023-06-01T12:00:00Z",
+};
+
+/**
+ * Inactive API key fixture
+ */
+export const inactiveApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "inactive-key-id",
+  key_name: "Inactive API Key",
+  key_id: "ghi789",
+  is_active: false,
+  last_used: "2023-05-01T10:30:00Z",
+};
+
+/**
+ * API key with long name for testing UI edge cases
+ */
+export const longNameApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "long-name-key-id",
+  key_name:
+    "This is a very long API key name that might cause display issues in the UI",
+  key_id: "jkl012",
+};
+
+/**
+ * API key with special characters for testing
+ */
+export const specialCharApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "special-char-key-id",
+  key_name: "API Key with Special-Characters & Symbols!",
+  key_id: "mno345",
+};
+
+/**
+ * Collection of multiple API keys for testing lists
+ */
+export const mockApiKeys: ApiKey[] = [baseApiKey, usedApiKey, inactiveApiKey];
+
+/**
+ * Helper function to create a custom API key with overrides
+ */
+export const createMockApiKey = (overrides: Partial<ApiKey> = {}): ApiKey => ({
+  ...baseApiKey,
+  ...overrides,
+});

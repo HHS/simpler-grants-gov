@@ -2,15 +2,15 @@
 
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useIsSSR } from "src/hooks/useIsSSR";
+import { useLoginModal } from "src/services/auth/LoginModalProvider";
 import { useUser } from "src/services/auth/useUser";
-import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
+import { useMemo, useState } from "react";
+import { ModalToggleButton } from "@trussworks/react-uswds";
 
-import { LoginModal } from "src/components/LoginModal";
 import SaveButton from "src/components/SaveButton";
 import SaveIcon from "src/components/SaveIcon";
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -20,25 +20,41 @@ const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
 export const OpportunitySaveUserControl = ({
   opportunityId,
   type = "button",
+  opportunitySaved,
 }: {
   opportunityId: string;
   type?: "button" | "icon";
+  opportunitySaved: boolean;
 }) => {
   const t = useTranslations("OpportunityListing");
-  const modalRef = useRef<ModalRef>(null);
-  const { clientFetch: fetchSaved } = useClientFetch<MinimalOpportunity[]>(
-    "Error fetching saved opportunity",
-  );
+
+  const {
+    loginModalRef,
+    setButtonText,
+    setCloseText,
+    setDescriptionText,
+    setHelpText,
+    setTitleText,
+  } = useLoginModal();
+
+  // Next will try to render this server side without a ref for the login modal,
+  // which causes a hydration error. To work around this, we'll render a dummy button server side
+  // instead
+  const isSSR = useIsSSR();
 
   const { clientFetch: updateSaved } = useClientFetch<{ type: string }>(
     "Error updating saved opportunity",
   );
 
   const { user } = useUser();
-  const [saved, setSaved] = useState(false);
+  const [locallySaved, setLocallySaved] = useState<boolean | null>(null);
   const [showMessage, setshowMessage] = useState(false);
   const [savedError, setSavedError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const displayAsSaved = useMemo(() => {
+    return locallySaved === null ? opportunitySaved : locallySaved;
+  }, [locallySaved, opportunitySaved]);
 
   const closeMessage = () => {
     setshowMessage(false);
@@ -47,13 +63,13 @@ export const OpportunitySaveUserControl = ({
   const userSavedOppCallback = async () => {
     setLoading(true);
 
-    const method = saved ? "DELETE" : "POST";
+    const method = displayAsSaved ? "DELETE" : "POST";
     try {
       const data = await updateSaved("/api/user/saved-opportunities", {
         method,
         body: JSON.stringify({ opportunityId }),
       });
-      setSaved(data.type === "save");
+      setLocallySaved(data.type === "save");
     } catch (e) {
       setSavedError(true);
       console.error(e);
@@ -63,24 +79,7 @@ export const OpportunitySaveUserControl = ({
     }
   };
 
-  // fetch user's saved opportunities
-  useEffect(() => {
-    if (!user?.token) return;
-    setLoading(true);
-    fetchSaved(`/api/user/saved-opportunities/${opportunityId}`)
-      .then((data) => {
-        data && setSaved(true);
-      })
-      .catch((e) => {
-        console.error(e);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opportunityId, user?.token]);
-
-  const messageText = saved
+  const messageText = displayAsSaved
     ? savedError
       ? t("saveMessage.errorUnsave")
       : t.rich("saveMessage.save", {
@@ -106,28 +105,26 @@ export const OpportunitySaveUserControl = ({
               userSavedOppCallback().catch(console.error);
             }}
             loading={loading}
-            saved={saved}
+            saved={displayAsSaved}
           />
+        ) : isSSR ? (
+          <SaveIcon saved={false} />
         ) : (
-          <>
-            <ModalToggleButton
-              id={`save-search-result-${opportunityId}`}
-              modalRef={modalRef}
-              opener
-              className="usa-button--unstyled"
-            >
-              <SaveIcon saved={false} />
-            </ModalToggleButton>
-            <LoginModal
-              modalRef={modalRef as React.RefObject<ModalRef>}
-              helpText={t("saveloginModal.help")}
-              buttonText={t("saveloginModal.button")}
-              closeText={t("saveloginModal.close")}
-              descriptionText={t("saveloginModal.description")}
-              titleText={t("saveloginModal.title")}
-              modalId={`opp-save-login-modal-${opportunityId}`}
-            />
-          </>
+          <ModalToggleButton
+            id={`save-search-result-${opportunityId}`}
+            modalRef={loginModalRef}
+            opener
+            className="usa-button--unstyled"
+            onClick={() => {
+              setHelpText(t("saveloginModal.help"));
+              setButtonText(t("saveloginModal.button"));
+              setCloseText(t("saveloginModal.close"));
+              setDescriptionText(t("saveloginModal.description"));
+              setTitleText(t("saveloginModal.title"));
+            }}
+          >
+            <SaveIcon saved={false} />
+          </ModalToggleButton>
         )}
       </>
     );
@@ -146,29 +143,27 @@ export const OpportunitySaveUserControl = ({
           message={showMessage}
           loading={loading}
           loadingText={t("saveButton.loading")}
-          saved={saved}
+          saved={displayAsSaved}
           savedText={t("saveButton.saved")}
         />
+      ) : isSSR ? (
+        <SaveIcon saved={false} />
       ) : (
-        <>
-          <ModalToggleButton
-            modalRef={modalRef}
-            opener
-            className="usa-button usa-button--outline"
-          >
-            <USWDSIcon name="star_outline" className="button-icon-large" />
-            {t("saveButton.save")}
-          </ModalToggleButton>
-          <LoginModal
-            modalRef={modalRef as React.RefObject<ModalRef>}
-            helpText={t("saveloginModal.help")}
-            buttonText={t("saveloginModal.button")}
-            closeText={t("saveloginModal.close")}
-            descriptionText={t("saveloginModal.description")}
-            titleText={t("saveloginModal.title")}
-            modalId={`opp-save-login-modal-${opportunityId}`}
-          />
-        </>
+        <ModalToggleButton
+          modalRef={loginModalRef}
+          opener
+          className="usa-button usa-button--outline"
+          onClick={() => {
+            setHelpText(t("saveloginModal.help"));
+            setButtonText(t("saveloginModal.button"));
+            setCloseText(t("saveloginModal.close"));
+            setDescriptionText(t("saveloginModal.description"));
+            setTitleText(t("saveloginModal.title"));
+          }}
+        >
+          <USWDSIcon name="star_outline" className="button-icon-large" />
+          {t("saveButton.save")}
+        </ModalToggleButton>
       )}
     </>
   );
