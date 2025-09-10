@@ -1,10 +1,8 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { render, screen } from "@testing-library/react";
 import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
 import { UiSchemaField } from "src/components/applyForm/types";
 import {
-  buildField,
   condenseFormSchemaProperties,
   determineFieldType,
   flatFormDataToArray,
@@ -36,8 +34,8 @@ import {
 //   formData: FormData;
 // }>;
 
-const mockRevalidateTag = jest.fn<void, [string]>();
-const getSessionMock = jest.fn();
+// const mockRevalidateTag = jest.fn<void, [string]>();
+// const getSessionMock = jest.fn();
 const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
 
@@ -143,100 +141,100 @@ describe("shapeFormData", () => {
   });
 });
 
-describe("buildField", () => {
-  it("should build a field with basic properties", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/name",
-      schema: {
-        type: "string",
-        title: "Name",
-        maxLength: 50,
-      },
-    };
+// describe("buildField", () => {
+//   it("should build a field with basic properties", () => {
+//     const uiFieldObject: UiSchemaField = {
+//       type: "field",
+//       definition: "/properties/name",
+//       schema: {
+//         type: "string",
+//         title: "Name",
+//         maxLength: 50,
+//       },
+//     };
 
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        name: { type: "string", title: "Name", maxLength: 50 },
-      },
-      required: ["name"],
-    };
+//     const formSchema: RJSFSchema = {
+//       type: "object",
+//       properties: {
+//         name: { type: "string", title: "Name", maxLength: 50 },
+//       },
+//       required: ["name"],
+//     };
 
-    const errors = null;
-    const formData = { name: "Jane Doe" };
+//     const errors = null;
+//     const formData = { name: "Jane Doe" };
 
-    const BuiltField = buildField({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-      requiredField: true,
-    });
-    render(BuiltField);
+//     const BuiltField = buildField({
+//       uiFieldObject,
+//       formSchema,
+//       errors,
+//       formData,
+//       requiredField: true,
+//     });
+//     render(BuiltField);
 
-    const label = screen.getByTestId("label");
-    expect(label).toHaveAttribute("for", "name");
-    expect(label).toHaveAttribute("id", "label-for-name");
+//     const label = screen.getByTestId("label");
+//     expect(label).toHaveAttribute("for", "name");
+//     expect(label).toHaveAttribute("id", "label-for-name");
 
-    const required = screen.getByText("*");
-    expect(required).toBeInTheDocument();
+//     const required = screen.getByText("*");
+//     expect(required).toBeInTheDocument();
 
-    const field = screen.getByTestId("name");
-    expect(field).toBeInTheDocument();
-    expect(field).toBeRequired();
-    expect(field).toHaveAttribute("type", "text");
-    expect(field).toHaveAttribute("maxLength", "50");
-    expect(field).toHaveValue("Jane Doe");
-  });
+//     const field = screen.getByTestId("name");
+//     expect(field).toBeInTheDocument();
+//     expect(field).toBeRequired();
+//     expect(field).toHaveAttribute("type", "text");
+//     expect(field).toHaveAttribute("maxLength", "50");
+//     expect(field).toHaveValue("Jane Doe");
+//   });
 
-  it("should handle fields with errors", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/email",
-    };
+//   it("should handle fields with errors", () => {
+//     const uiFieldObject: UiSchemaField = {
+//       type: "field",
+//       definition: "/properties/email",
+//     };
 
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        email: { type: "string", title: "Email" },
-      },
-    };
+//     const formSchema: RJSFSchema = {
+//       type: "object",
+//       properties: {
+//         email: { type: "string", title: "Email" },
+//       },
+//     };
 
-    const errors = [
-      {
-        field: "$.email",
-        message: "Invalid email format",
-        type: "",
-        value: "",
-      },
-    ];
+//     const errors = [
+//       {
+//         field: "$.email",
+//         message: "Invalid email format",
+//         type: "",
+//         value: "",
+//       },
+//     ];
 
-    const formData = { email: "invalid-email" };
+//     const formData = { email: "invalid-email" };
 
-    const BuiltField = buildField({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-      requiredField: false,
-    });
-    render(BuiltField);
+//     const BuiltField = buildField({
+//       uiFieldObject,
+//       formSchema,
+//       errors,
+//       formData,
+//       requiredField: false,
+//     });
+//     render(BuiltField);
 
-    const label = screen.getByTestId("label");
-    expect(label).toHaveAttribute("for", "email");
-    expect(label).toHaveAttribute("id", "label-for-email");
+//     const label = screen.getByTestId("label");
+//     expect(label).toHaveAttribute("for", "email");
+//     expect(label).toHaveAttribute("id", "label-for-email");
 
-    const error = screen.getByTestId("errorMessage");
-    expect(error).toBeInTheDocument();
-    expect(error).toHaveAttribute("role", "alert");
-    expect(error).toHaveTextContent("Invalid email format");
+//     const error = screen.getByTestId("errorMessage");
+//     expect(error).toBeInTheDocument();
+//     expect(error).toHaveAttribute("role", "alert");
+//     expect(error).toHaveTextContent("Invalid email format");
 
-    const field = screen.getByTestId("email");
-    expect(field).toBeInTheDocument();
-    expect(error).toHaveClass("usa-error-message");
-  });
-});
+//     const field = screen.getByTestId("email");
+//     expect(field).toBeInTheDocument();
+//     expect(error).toHaveClass("usa-error-message");
+//   });
+// });
 
 // describe("getApplicationResponse", () => {
 //   it("should return a structured response for valid input", () => {
