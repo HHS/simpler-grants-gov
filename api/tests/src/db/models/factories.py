@@ -890,6 +890,26 @@ class UserFactory(BaseFactory):
         model = user_models.User
 
     user_id = Generators.UuidObj
+    application_users = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.ApplicationUserFactory",
+        factory_related_name="user",
+        size=lambda: random.randint(1, 3),
+    )
+    organizations = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.OrganizationUserFactory",
+        factory_related_name="user",
+        size=lambda: random.randint(1, 3),
+    )
+    user_agencies = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.AgencyUserFactory",
+        factory_related_name="user",
+        size=lambda: random.randint(1, 3),
+    )
+    internal_user_roles = factory.RelatedFactoryList(
+        "tests.src.db.models.factories.InternalUserRoleFactory",
+        factory_related_name="user",
+        size=lambda: random.randint(1, 3),
+    )
 
 
 class LinkExternalUserFactory(BaseFactory):
@@ -2782,7 +2802,7 @@ class OrganizationUserRoleFactory(BaseFactory):
     organization_user = factory.SubFactory(OrganizationUserFactory)
     organization_user_id = factory.LazyAttribute(lambda o: o.organization_user.organization_user_id)
 
-    role = factory.SubFactory(RoleFactory, is_organization_owner=True)
+    role = factory.SubFactory(RoleFactory, is_org_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
 
 
