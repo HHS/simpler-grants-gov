@@ -1,7 +1,6 @@
 // based on https://github.com/ArturKot95/FormData2Json/blob/main/src/formDataToObject.ts
 
 import { RJSFSchema } from "@rjsf/utils";
-
 import { getByPointer, getFieldPath } from "./utils";
 
 // like, this is basically anything lol - DWS
@@ -18,30 +17,40 @@ type FormDataToJsonOptions = {
 };
 
 /*
-  - string representations of booleans are cast to booleans
-  - for number type fields, cast to number as long as a value is present
-  - for string type fields that represent a number, ensure they remain strings (or undefined)
-  - otherwise it may be an object or array, so try to cast to parse json
-    - note that this will cast a number string ("1") to a number, thus the necessity of the previous case
-  - if the json parse fails, just return the string (or undefined)
+  - Empty strings ("") are preserved only if the schema type is "string";
+    otherwise they become "undefined".
+  - "true"/"false" are cast to booleans.
+  - Numeric strings are cast to numbers *only* if the schema type is "number" or "integer".
+  - String fields always remain strings, even if the content looks numeric
+    (to avoid breaking things like IDs or codes).
+  - For schema types "object" or "array", values that look like JSON
+    (starting with {, [) are parsed via JSON.parse.
+  - For all other cases, the raw string is returned.
 */
-const parseValue = (value: unknown, type: string) => {
-  if (value === "false") return false;
-  if (value === "true") return true;
-  if (
-    (type === "integer" || type === "number") &&
-    value !== "" &&
-    !isNaN(Number(value))
-  )
-    return Number(value);
-  if (type === "string" && !isNaN(Number(value))) {
-    return value || undefined;
+const parseValue = (rawValue: unknown, type: string) => {
+  const text = String(rawValue);
+
+  if (text === "") return type === "string" ? "" : undefined;
+  if (text === "true") return true;
+  if (text === "false") return false;
+
+  if ((type === "number" || type === "integer") && !isNaN(Number(text))) {
+    return Number(text);
   }
-  try {
-    return JSON.parse(value as string) as unknown;
-  } catch (e) {
-    return value || undefined;
+
+  if (type === "string") {
+    return text;
   }
+
+  if ((type === "object" || type === "array") && /^[\[{]/.test(text.trim())) {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      return text;
+    }
+  }
+
+  return text;
 };
 
 const getFieldType = (
@@ -51,9 +60,7 @@ const getFieldType = (
 ): string => {
   const path = getFieldPath(currentKey);
   const fullPath = parentKey ? `${parentKey}/${path}` : path;
-  const formFieldDefinition = getByPointer(formSchema, fullPath) as {
-    type?: string;
-  };
+  const formFieldDefinition = getByPointer(formSchema, fullPath) as { type?: string };
   return formFieldDefinition?.type || "";
 };
 
@@ -73,44 +80,36 @@ export function formDataToObject(
     const fieldType = getFieldType(currentKey, formSchema, parentKey);
     const parsedValue = parseValue(value, fieldType);
 
-    let current = result;
+    let current: NestedObject = result;
 
-    const chunksLen = chunks.length;
-    for (let chunkIdx = 0; chunkIdx < chunksLen; chunkIdx++) {
-      const chunkName = chunks[chunkIdx];
-      const isArray = chunkName.endsWith("]");
+    const chunksLength = chunks.length;
+    for (let chunkIndex = 0; chunkIndex < chunksLength; chunkIndex++) {
+      const chunkName = chunks[chunkIndex];
+      const isArrayKey = chunkName.endsWith("]");
 
-      if (isArray) {
+      if (isArrayKey) {
         const indexStart = chunkName.indexOf("[");
         const indexEnd = chunkName.indexOf("]");
-
-        const arrayIndex = parseInt(
-          chunkName.substring(indexStart + 1, indexEnd),
-        );
+        const arrayIndex = parseInt(chunkName.substring(indexStart + 1, indexEnd));
 
         if (isNaN(arrayIndex)) {
-          throw new Error(
-            `wrong form data - cannot retrieve array index ${arrayIndex}`,
-          );
+          throw new Error(`Invalid form data - cannot retrieve array index: ${arrayIndex}`);
         }
 
-        const actualChunkName = chunkName.substring(0, indexStart);
-        current[actualChunkName] =
-          (current[actualChunkName] as unknown[]) ?? ([] as unknown[]);
+        const propertyName = chunkName.substring(0, indexStart);
+        current[propertyName] = (current[propertyName] as unknown[]) ?? ([] as unknown[]);
 
-        const currentChunk = current[actualChunkName] as unknown[];
-        if (chunkIdx === chunks.length - 1) {
-          currentChunk[arrayIndex] = parsedValue;
+        const currentArray = current[propertyName] as unknown[];
+        if (chunkIndex === chunksLength - 1) {
+          currentArray[arrayIndex] = parsedValue;
         } else {
-          // this is here to satisfy the TS, would love to find a way to remove this check
-          if (Array.isArray(current[actualChunkName])) {
-            current[actualChunkName][arrayIndex] =
-              currentChunk[arrayIndex] ?? {};
-            current = currentChunk[arrayIndex] as NestedObject;
+          if (Array.isArray(current[propertyName])) {
+            current[propertyName][arrayIndex] = currentArray[arrayIndex] ?? {};
+            current = currentArray[arrayIndex] as NestedObject;
           }
         }
       } else {
-        if (chunkIdx === chunks.length - 1) {
+        if (chunkIndex === chunksLength - 1) {
           current[chunkName] = parsedValue as NestedObject;
         } else {
           current[chunkName] = current[chunkName] ?? {};
