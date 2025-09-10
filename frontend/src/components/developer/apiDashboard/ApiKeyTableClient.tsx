@@ -52,7 +52,7 @@ const EditActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   };
 
   return (
-    <div className="display-flex flex-align-center">
+    <div className="flex-align-center">
       <ApiKeyModal
         mode="edit"
         apiKey={apiKey}
@@ -70,7 +70,7 @@ const DeleteActionDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
   };
 
   return (
-    <div className="display-flex flex-align-center">
+    <div className="flex-align-center">
       <ApiKeyModal
         mode="delete"
         apiKey={apiKey}

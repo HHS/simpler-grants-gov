@@ -33,7 +33,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
 
   return (
     <div className="grid-container">
-      <div className="display-flex flex-justify margin-bottom-4">
+      <div className="flex-justify margin-bottom-4">
         <h1 className="margin-y-0">{t("heading")}</h1>
         <CreateApiKeyButton />
       </div>
