@@ -83,6 +83,7 @@ function CheckboxWidget<
         label={label}
         labelDescription={description}
         defaultChecked={Boolean(value)}
+        value="true"
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}
