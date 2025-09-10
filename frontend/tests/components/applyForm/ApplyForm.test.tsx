@@ -53,7 +53,6 @@ jest.mock("src/services/auth/session", () => ({
 jest.mock("next-navigation-guard", () => ({
   useNavigationGuard: () => jest.fn(),
 }));
-// import { useNavigationGuard } from "next-navigation-guard";
 
 const formSchema: RJSFSchema = {
   title: "test schema",
