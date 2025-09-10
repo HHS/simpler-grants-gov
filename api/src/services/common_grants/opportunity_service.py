@@ -4,38 +4,34 @@ import logging
 from uuid import UUID
 
 from common_grants_sdk.schemas.pydantic import (
-    FilterInfo,
     OppFilters,
     OpportunitiesListResponse,
     OpportunitiesSearchResponse,
     OpportunityResponse,
     OppSortBy,
     OppSorting,
-    OppStatusOptions,
     PaginatedBodyParams,
     PaginatedResultsInfo,
     SortedResultsInfo,
 )
 from sqlalchemy.orm import Session, selectinload
 
-from src.constants.lookup_constants import OpportunityStatus
+import src.adapters.search as search
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.services.opportunities_v1.search_opportunities import search_opportunities
 
-from .transformation import transform_opportunity_to_common_grants
+from .transformation import (
+    build_filter_info,
+    transform_opportunity_to_cg,
+    transform_search_request_from_cg,
+    transform_search_result_to_cg,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class CommonGrantsOpportunityService:
     """Service for managing opportunities in CommonGrants Protocol format."""
-
-    # Mapping from CommonGrants SDK status options to database status enums
-    STATUS_MAPPING = {
-        OppStatusOptions.FORECASTED: OpportunityStatus.FORECASTED,
-        OppStatusOptions.OPEN: OpportunityStatus.POSTED,
-        OppStatusOptions.CLOSED: OpportunityStatus.CLOSED,
-        OppStatusOptions.CUSTOM: OpportunityStatus.ARCHIVED,
-    }
 
     def __init__(self, db_session: Session) -> None:
         """Initialize the service."""
@@ -61,7 +57,7 @@ class CommonGrantsOpportunityService:
             if not opportunity:
                 return None
 
-            opportunity_data = transform_opportunity_to_common_grants(opportunity)
+            opportunity_data = transform_opportunity_to_cg(opportunity)
 
             return OpportunityResponse(
                 status=200,
@@ -98,7 +94,7 @@ class CommonGrantsOpportunityService:
         )
 
         # Transform to CommonGrants format
-        opportunities_data = [transform_opportunity_to_common_grants(opp) for opp in opportunities]
+        opportunities_data = [transform_opportunity_to_cg(opp) for opp in opportunities]
 
         pagination_info = PaginatedResultsInfo(
             page=page,
@@ -114,14 +110,16 @@ class CommonGrantsOpportunityService:
             pagination_info=pagination_info,
         )
 
+    @staticmethod
     def search_opportunities(
-        self,
+        search_client: search.SearchClient,
         filters: OppFilters | None = None,
         sorting: OppSorting | None = None,
         pagination: PaginatedBodyParams | None = None,
-        search: str | None = None,
+        search_query: str | None = None,
     ) -> OpportunitiesSearchResponse:
         """Search for opportunities based on the provided filters."""
+
         # Use default values if not provided
         if filters is None:
             filters = OppFilters()
@@ -130,87 +128,45 @@ class CommonGrantsOpportunityService:
         if pagination is None:
             pagination = PaginatedBodyParams()
 
-        # Build search query
-        query = self.db_session.query(Opportunity)
-
-        # Apply search text
-        if search:
-            query = query.filter(Opportunity.opportunity_title.ilike(f"%{search}%"))
-
-        # Apply status filter
-        if filters.status and filters.status.value:
-            # Handle the first status value from the array
-            status_value = filters.status.value[0] if filters.status.value else None
-            db_status_enum = self.STATUS_MAPPING.get(status_value)
-
-            if db_status_enum:
-                query = query.join(CurrentOpportunitySummary).filter(
-                    CurrentOpportunitySummary.opportunity_status == db_status_enum
-                )
-
-        # Apply sorting
-        if sorting.sort_by == OppSortBy.LAST_MODIFIED_AT:
-            query = query.order_by(Opportunity.updated_at.desc())
-        elif sorting.sort_by == OppSortBy.TITLE:
-            query = query.order_by(Opportunity.opportunity_title.asc())
-        elif sorting.sort_by == OppSortBy.CLOSE_DATE:
-            query = query.order_by(
-                Opportunity.current_opportunity_summary.opportunity_summary.close_date.asc()
-            )
-
-        # Apply pagination
-        total_count = query.count()
-        opportunities = (
-            query.offset((pagination.page - 1) * pagination.page_size)
-            .limit(pagination.page_size)
-            .all()
+        # Convert search request to legacy format
+        legacy_search_params = transform_search_request_from_cg(
+            filters, sorting, pagination, search_query
         )
 
-        # Transform to CommonGrants format
-        items = [transform_opportunity_to_common_grants(opp) for opp in opportunities]
+        # Perform search
+        opportunities, aggregations, pagination_info = search_opportunities(
+            search_client, legacy_search_params
+        )
+
+        # Transform results to CommonGrants format
+        items = []
+        for opp_data in opportunities:
+            opportunity = transform_search_result_to_cg(opp_data)
+            if opportunity:
+                items.append(opportunity)
 
         # Build response
-        pagination_info = PaginatedResultsInfo(
+        pagination_info_cg = PaginatedResultsInfo(
             page=pagination.page,
             page_size=pagination.page_size,
-            totalItems=total_count,
-            totalPages=(total_count + pagination.page_size - 1) // pagination.page_size,
+            totalItems=pagination_info.total_records,
+            totalPages=pagination_info.total_pages,
         )
 
         sorted_info = SortedResultsInfo(
-            sort_by=sorting.sort_by.value,  # Convert enum to string
+            sort_by=sorting.sort_by.value,
             sort_order=sorting.sort_order,
             errors=[],
         )
 
-        # Build applied filters using the utility function pattern
-        applied_filters = {}
-        if filters:
-            if filters.status is not None:
-                applied_filters["status"] = filters.status.model_dump()
-            if filters.close_date_range is not None:
-                applied_filters["closeDateRange"] = filters.close_date_range.model_dump()
-            if filters.total_funding_available_range is not None:
-                applied_filters["totalFundingAvailableRange"] = (
-                    filters.total_funding_available_range.model_dump()
-                )
-            if filters.min_award_amount_range is not None:
-                applied_filters["minAwardAmountRange"] = filters.min_award_amount_range.model_dump()
-            if filters.max_award_amount_range is not None:
-                applied_filters["maxAwardAmountRange"] = filters.max_award_amount_range.model_dump()
-            if filters.custom_filters is not None:
-                applied_filters["customFilters"] = filters.custom_filters
-
-        filter_info = FilterInfo(
-            filters=applied_filters,
-            errors=[],
-        )
+        # Build applied filters
+        filter_info = build_filter_info(filters)
 
         return OpportunitiesSearchResponse(
             status=200,
-            message="Opportunities searched successfully",
+            message="Opportunities searched successfully using search client",
             items=items,
-            pagination_info=pagination_info,
+            pagination_info=pagination_info_cg,
             sort_info=sorted_info,
             filter_info=filter_info,
         )
