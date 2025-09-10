@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Iterable
 
 import xmltodict
-from defusedxml import ElementTree as DET
+import io
 from lxml import etree
 from lxml.etree import Element, QName, SubElement
 
@@ -209,16 +209,21 @@ def get_soap_operation_name(soap_xml: str | bytes) -> str:
     Get the SOAP operation name. Every valid SOAP request Body should
     have the global SOAP envelope namespace.
     """
+    operation_name = ""
+    is_body = False
     try:
-        if isinstance(soap_xml, bytes):
-            soap_xml = soap_xml.decode()
-        root = DET.fromstring(soap_xml)
-        body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
-        if body is not None and len(body) > 0:
-            return body[0].tag.split("}")[-1]
-        return ""
+        xml_bytes = soap_xml.encode("utf-8") if isinstance(soap_xml, str) else soap_xml
+        xml_file = io.BytesIO(xml_bytes)
+        for event, elem in etree.iterparse(xml_file, events=("start",)):
+            if is_body:
+                operation_name = elem.tag.split('}', 1)[1]
+                break
+            elif elem.tag.endswith("Body") and event == "start":
+                is_body = True
+            elem.clear()
     except Exception:
         return ""
+    return operation_name
 
 
 def get_soap_operation_dict(soap_xml: str, operation_name: str) -> dict:
