@@ -223,18 +223,12 @@ export const buildField = ({
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
       .reduce((acc, schema) => ({ ...acc, ...schema }), {});
-    value = definition
-      .map((def) => {
-        const defName = getNameFromDef({ definition: def, schema });
-        const result = get(formData, defName) as unknown;
-        return typeof result === "object" && result !== null
-          ? (result as Record<string, unknown>)
-          : {};
-      })
-      .reduce<Record<string, unknown>>(
-        (acc, value) => ({ ...acc, ...value }),
-        {},
-      );
+    value = definition.reduce<Record<string, unknown>>((acc, def) => {
+      const defName = getNameFromDef({ definition: def, schema });
+      acc[defName] = get(formData, defName) as unknown;
+      return acc;
+    }, {});
+
     // multifield needs to retain field location for errors.
     // this may not work with nested required fields
     rawErrors = definition
@@ -265,7 +259,7 @@ export const buildField = ({
     throw new Error("Invalid or missing field schema");
   }
 
-  // fields that have no definition won't have a name, but will havea schema
+  // fields that have no definition won't have a name, but will have a schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
@@ -330,6 +324,22 @@ export const buildField = ({
   }
 
   // IMPORTANT:
+  // Specific to the Budget Form Widgets
+  // Sections A–F need to read across multiple schema fragments
+  const compositeBudgetTypes = new Set<WidgetTypes>([
+    "Budget424aSectionA",
+    "Budget424aSectionB",
+    "Budget424aSectionC",
+    "Budget424aSectionD",
+    "Budget424aSectionE",
+    "Budget424aSectionF",
+  ]);
+
+  if (compositeBudgetTypes.has(type)) {
+    value = formData;
+  }
+
+  // IMPORTANT:
   // return a React element so hooks execute during render,
   // under the AttachmentsProvider context.
   return (
@@ -344,6 +354,9 @@ export const buildField = ({
       rawErrors={rawErrors}
       value={value}
       options={options}
+      {...(compositeBudgetTypes.has(type)
+        ? { formContext: { rootSchema: formSchema } }
+        : {})}
     />
   );
 };
@@ -464,8 +477,66 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
     if (isBasicallyAnObject(nestedValue)) {
       return isEmptyField(nestedValue);
     }
-    return !nestedValue;
+    return nestedValue === undefined || nestedValue === null;
   });
+};
+
+/** Returns true if a condensed schema node declares a string type. */
+const nodeIsStringTyped = (schemaNode: unknown): boolean => {
+  if (!schemaNode || typeof schemaNode !== "object") return false;
+  const typeField = (schemaNode as { type?: unknown }).type;
+  if (Array.isArray(typeField)) {
+    return typeField.includes("string");
+  }
+  return typeField === "string";
+};
+
+/** Recursively convert numbers → strings where the schema node is string-typed. */
+const coerceNumbersToStringsPerSchema = (
+  dataNode: unknown,
+  schemaNode: unknown,
+): unknown => {
+  // If this exact node is string-typed and value is a number, convert to string
+  if (nodeIsStringTyped(schemaNode) && typeof dataNode === "number") {
+    return String(dataNode);
+  }
+
+  // Arrays
+  if (Array.isArray(dataNode)) {
+    const itemSchema =
+      schemaNode &&
+      typeof schemaNode === "object" &&
+      (schemaNode as { items?: unknown }).items &&
+      !Array.isArray((schemaNode as { items?: unknown }).items)
+        ? (schemaNode as { items?: unknown }).items
+        : undefined;
+
+    return dataNode.map((child) =>
+      coerceNumbersToStringsPerSchema(child, itemSchema),
+    );
+  }
+
+  // Objects
+  if (dataNode && typeof dataNode === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [childKey, childValue] of Object.entries(
+      dataNode as Record<string, unknown>,
+    )) {
+      const childSchema =
+        schemaNode && typeof schemaNode === "object"
+          ? (schemaNode as Record<string, unknown>)[childKey]
+          : undefined;
+
+      result[childKey] = coerceNumbersToStringsPerSchema(
+        childValue,
+        childSchema,
+      );
+    }
+    return result;
+  }
+
+  // Primitives (string, boolean, null, undefined): leave as-is
+  return dataNode;
 };
 
 // if a nested field contains no defined items, remove it from the data
@@ -500,14 +571,20 @@ export const shapeFormData = <T extends object>(
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  const structuredFormData = formDataToObject(
-    formData,
-    condenseFormSchemaProperties(formSchema),
-    {
-      delimiter: "--",
-    },
-  );
-  return pruneEmptyNestedFields(structuredFormData) as T;
+  // Build the condensed schema once for both formDataToObject and coercion
+  const condensedSchema = condenseFormSchemaProperties(formSchema);
+
+  const structuredFormData = formDataToObject(formData, condensedSchema, {
+    delimiter: "--",
+  });
+
+  // NEW: convert numbers → strings wherever the schema declares a string type
+  const schemaAlignedData = coerceNumbersToStringsPerSchema(
+    structuredFormData,
+    condensedSchema,
+  ) as T;
+
+  return pruneEmptyNestedFields(schemaAlignedData) as T;
 };
 
 const removePropertyPaths = (path: unknown): string => {
