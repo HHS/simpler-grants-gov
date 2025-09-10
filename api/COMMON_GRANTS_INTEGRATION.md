@@ -20,11 +20,30 @@ The CommonGrants Protocol provides standardized access to grant opportunity data
 - **Dependency**: `common-grants-sdk = "^0.3.1"` - Protocol schemas and validation
 - **OpenAPI Generation**: `src/common_grants/scripts/generate_openapi.py` - Schema generation
 
+### Search Integration
+
+The search endpoint (`POST /common-grants/opportunities/search`) is implemented as a **wrapper** around the existing search infrastructure:
+
+- **Reuses**: Same OpenSearch client and index as legacy `/v1/opportunities/search`
+- **Transforms**: CommonGrants protocol requests to legacy search format
+- **Delegates**: Actual search operations to `src.services.opportunities_v1.search_opportunities`
+- **Transforms**: Legacy search results back to CommonGrants protocol format
+
+This approach ensures search functionality consistency while providing the standardized CommonGrants interface.
+
 ### Data Flow
 
+**List/Get Endpoints:**
 1. **Request** → Route handler validates input using APIFlask
-2. **Service** → Queries database and transforms models to Protocol format
+2. **Service** → Queries database directly and transforms models to Protocol format
 3. **Response** → Returns standardized CommonGrants Protocol response
+
+**Search Endpoint:**
+1. **Request** → Route handler validates input using APIFlask
+2. **Transformation** → Converts CommonGrants request to legacy search format
+3. **Search Client** → Uses OpenSearch client to query indexed data
+4. **Transformation** → Converts legacy search results back to CommonGrants format
+5. **Response** → Returns standardized CommonGrants Protocol response
 
 ## Configuration
 
@@ -123,9 +142,11 @@ Content-Type: application/json
 
 **Features**:
 - Status filtering (forecasted, posted, closed, archived)
-- Text search across opportunity titles
-- Sorting by title, lastModifiedAt, or closeDate
+- Text search across multiple fields (titles, descriptions, agency info, etc.)
+- Sorting by title, lastModifiedAt, createdAt, status, closeDate, award amounts, total funding
 - Pagination support
+- **Uses OpenSearch infrastructure** - same search engine as legacy `/v1/opportunities/search`
+- **Transforms requests/responses** between CommonGrants and legacy formats
 - Returns `OpportunitiesSearchResponse`
 
 ## OpenAPI Specification Generation & Validation
@@ -165,17 +186,21 @@ The `make check-spec` target uses the `cg check spec` command from the CommonGra
 ### Service Architecture
 
 `CommonGrantsOpportunityService` handles:
-- Database queries with filtering and eager loading
-- Data transformation using `transform_opportunity_to_common_grants()`
-- Pagination and sorting logic
+- **List/Get operations**: Direct database queries with filtering and eager loading
+- **Search operations**: Acts as a wrapper around the legacy search infrastructure
+- Data transformation using `transform_opportunity_to_cg()` and `transform_search_result_to_cg()`
+- Request transformation using `transform_search_request_from_cg()`
+- Pagination and sorting logic (database-based for list/get, search-based for search)
 - Error handling for missing data
 
 ### Route Implementation
 
 - Uses APIFlask decorators for validation and documentation
-- `@flask_db.with_db_session()` for database session injection
+- **List/Get endpoints**: `@flask_db.with_db_session()` for database session injection
+- **Search endpoint**: `@flask_opensearch.with_search_client()` for OpenSearch client injection
 - Standard HTTP status codes and error responses
 - Custom error schemas for validation failures
+- **Search endpoint**: Transforms CommonGrants requests to legacy format before calling search client
 
 ### Data Validation
 
@@ -213,7 +238,7 @@ make test
 make test-coverage
 
 # Run specific test file
-make test args="tests/src/api/common_grants/test_opportunity_routes.py"
+make test args="tests/src/api/common_grants/test_opportunities_routes.py"
 ```
 
 ### Code Quality
