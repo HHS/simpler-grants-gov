@@ -18,6 +18,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   try {
     apiKeys = await fetchApiKeys();
   } catch (e) {
+    console.error("Failed to fetch API keys:", e);
     return (
       <>
         <div className="grid-container">
