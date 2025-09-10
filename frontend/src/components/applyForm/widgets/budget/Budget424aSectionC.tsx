@@ -13,7 +13,7 @@ import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
-import { asMoney, isRecord } from "./budgetValueGuards";
+import { asMoney, getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
 interface NonFederalResources {
   applicant_amount?: MoneyString;
@@ -39,28 +39,27 @@ type NormalizedC = {
 function pickNonFederalResources(value: unknown): NonFederalResources {
   if (!isRecord(value)) return {};
   return {
-    applicant_amount: asMoney(value["applicant_amount"]),
-    state_amount: asMoney(value["state_amount"]),
-    other_amount: asMoney(value["other_amount"]),
-    total_amount: asMoney(value["total_amount"]),
+    applicant_amount: asMoney(value.applicant_amount),
+    state_amount: asMoney(value.state_amount),
+    other_amount: asMoney(value.other_amount),
+    total_amount: asMoney(value.total_amount),
   };
 }
 
 function pickActivityItem(value: unknown): ActivityItem {
   if (!isRecord(value)) return {};
   const activity: ActivityItem = {};
-  if (typeof value["activity_title"] === "string")
-    activity.activity_title = value["activity_title"];
-  if (typeof value["assistance_listing_number"] === "string") {
-    activity.assistance_listing_number = value["assistance_listing_number"];
+  if (typeof value.activity_title === "string") activity.activity_title = value.activity_title;
+  if (typeof value.assistance_listing_number === "string") {
+    activity.assistance_listing_number = value.assistance_listing_number;
   }
-  if (isRecord(value["budget_summary"])) {
-    const total = asMoney(value["budget_summary"]["total_amount"]);
+  if (isRecord(value.budget_summary)) {
+    const total = asMoney(value.budget_summary.total_amount);
     activity.budget_summary = { total_amount: total };
   }
-  if (isRecord(value["non_federal_resources"])) {
+  if (isRecord(value.non_federal_resources)) {
     activity.non_federal_resources = pickNonFederalResources(
-      value["non_federal_resources"],
+      value.non_federal_resources,
     );
   }
   return activity;
@@ -72,8 +71,8 @@ function normalizeSectionCValue(rawValue: unknown): NormalizedC {
   }
 
   if (isRecord(rawValue)) {
-    const fromArray = rawValue["activity_line_items"];
-    const totalsObj = rawValue["total_non_federal_resources"];
+    const fromArray = rawValue.activity_line_items;
+    const totalsObj = rawValue.total_non_federal_resources;
     if (Array.isArray(fromArray)) {
       return {
         items: fromArray.map(pickActivityItem),
@@ -86,7 +85,7 @@ function normalizeSectionCValue(rawValue: unknown): NormalizedC {
       items.push(pickActivityItem(rawValue[String(index)]));
     }
 
-    let totals: NonFederalResources | undefined = undefined;
+    let totals: NonFederalResources | undefined;
     if (isRecord(totalsObj)) {
       totals = pickNonFederalResources(totalsObj);
     } else {
@@ -141,14 +140,8 @@ function Budget424aSectionC<
   ];
 
   const titleCell = (rowIndex: number): JSX.Element => {
-    const title =
-      (get(activityItems, `[${rowIndex}].activity_title`) as
-        | string
-        | undefined) ?? "";
-    const cfda =
-      (get(activityItems, `[${rowIndex}].assistance_listing_number`) as
-        | string
-        | undefined) ?? "";
+  const title = getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
+  const cfda = getStringOrUndefined(activityItems, `[${rowIndex}].assistance_listing_number`) ?? "";
 
     return (
       <div className="display-flex flex-column">

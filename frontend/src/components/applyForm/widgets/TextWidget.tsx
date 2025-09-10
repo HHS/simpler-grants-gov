@@ -125,7 +125,7 @@ function TextWidget<
         aria-required={required}
         disabled={disabled}
         readOnly={readonly}
-        placeholder={placeholder ? placeholder : undefined}
+        placeholder={placeholder ?? undefined}
         list={examples ? examplesId<T>(id) : undefined}
         aria-describedby={describedby}
         onChange={updateOnInput ? _onChange : undefined}

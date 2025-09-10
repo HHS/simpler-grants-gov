@@ -43,7 +43,10 @@ const parseValue = (rawValue: unknown, type: string) => {
     return text;
   }
 
-  if ((type === "object" || type === "array") && /^[\[{]/.test(text.trim())) {
+if (
+  (type === "object" || type === "array") &&
+  /^(\{|\[)/.test(text.trim())
+) {
     try {
       return JSON.parse(text) as unknown;
     } catch {

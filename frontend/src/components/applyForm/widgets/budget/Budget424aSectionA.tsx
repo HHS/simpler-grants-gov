@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
-import React, { JSX, useEffect } from "react";
+import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import {
@@ -50,8 +50,11 @@ function Budget424aSectionA<
   const root: RootValue =
     (rawValue && typeof rawValue === "object" ? (rawValue as RootValue) : {}) ??
     {};
-  const items: ActivityItem[] = Array.isArray(root.activity_line_items)
-    ? root.activity_line_items!
+  function isActivityItemArray(value: unknown): value is ActivityItem[] {
+    return Array.isArray(value);
+  }
+  const items: ActivityItem[] = isActivityItemArray(root.activity_line_items)
+    ? root.activity_line_items
     : [];
   const totals: BudgetSummary | undefined = root.total_budget_summary;
 

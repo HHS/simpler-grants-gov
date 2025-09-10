@@ -1,23 +1,33 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get, set } from "lodash";
-
 import React, { JSX } from "react";
 
 import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import RadioWidget from "src/components/applyForm/widgets/RadioWidget";
 import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
-import CheckboxWidget from "../CheckboxWidget";
+import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
 import { getBudgetErrors } from "./budgetErrorLabels";
-import { isRecord } from "./budgetValueGuards";
+import { isRecord, getStringOrUndefined } from "./budgetValueGuards";
+
+type RootSchemaContext = FormContextType & { rootSchema?: RJSFSchema };
+
+function getRootSchemaFromContext(context: unknown): RJSFSchema | undefined {
+  if (context && typeof context === "object" && "rootSchema" in context) {
+    const candidate = (context as { rootSchema?: unknown }).rootSchema;
+    return candidate && typeof candidate === "object"
+      ? (candidate as RJSFSchema)
+      : undefined;
+  }
+  return undefined;
+}
 
 function Budget424aSectionF<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = FormContextType,
+  F extends FormContextType = FormContextType
 >({
   id,
   value: rawValue = {},
@@ -27,11 +37,9 @@ function Budget424aSectionF<
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const validationWarnings = (rawErrors as FormValidationWarning[]) || [];
   const rootValue = isRecord(rawValue) ? rawValue : {};
-
-  // Pull the full (processed) schema that utils passed through formContext
-  const rootSchema = (formContext?.rootSchema ?? undefined) as
-    | RJSFSchema
-    | undefined;
+  const rootSchema = getRootSchemaFromContext(
+    formContext as RootSchemaContext,
+  );
   const properties = rootSchema?.properties as
     | Record<
         string,
@@ -58,22 +66,21 @@ function Budget424aSectionF<
   const getFieldErrors = (fieldId: string) =>
     getBudgetErrors({ errors: validationWarnings, id: fieldId, section: "F" });
 
-  const directChargesValue = get(rootValue, "direct_charges_explanation") as
-    | string
-    | undefined;
-  const indirectChargesValue = get(
+  const directChargesValue = getStringOrUndefined(
+    rootValue,
+    "direct_charges_explanation",
+  );
+  const indirectChargesValue = getStringOrUndefined(
     rootValue,
     "indirect_charges_explanation",
-  ) as string | undefined;
-  const remarksValue = get(rootValue, "remarks") as string | undefined;
+  );
+  const remarksValue = getStringOrUndefined(rootValue, "remarks");
 
-  const confirmationValueRaw = get(rootValue, "confirmation") as
-    | boolean
-    | undefined;
-  const confirmationValue = confirmationValueRaw ?? false;
+  const confirmationValue =
+    (get(rootValue, "confirmation") as boolean | undefined) ?? false;
 
   const updateField = (path: string, next: unknown) => {
-    const updated = { ...(rootValue as Record<string, unknown>) };
+    const updated = { ...(rootValue) };
     set(updated, path, next);
     onChange?.(updated as T);
   };
@@ -127,9 +134,13 @@ function Budget424aSectionF<
             rawErrors={getFieldErrors("confirmation")}
             value={confirmationValue}
             onChange={(nextValue: unknown) => {
-              const nextConfirmationValue =
-                nextValue === true || nextValue === "true";
-              updateField("confirmation", nextConfirmationValue);
+              const next =
+                nextValue === true || nextValue === "true"
+                  ? true
+                  : nextValue === false || nextValue === "false"
+                  ? false
+                  : undefined;
+              updateField("confirmation", next);
             }}
           />
         )}

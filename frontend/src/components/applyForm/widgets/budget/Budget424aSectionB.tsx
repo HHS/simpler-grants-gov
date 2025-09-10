@@ -39,6 +39,11 @@ interface ActivityItem extends BaseActivityItem {
 
 type FieldKey = keyof BudgetCategories;
 
+const getAsStringOrUndefined = (source: unknown, path: string): string | undefined => {
+  const candidate = get(source as object, path);
+  return typeof candidate === "string" ? candidate : undefined;
+};
+
 function Budget424aSectionB<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -47,7 +52,7 @@ function Budget424aSectionB<
   id,
   value: rawValue = [],
   rawErrors,
-}: UswdsWidgetProps<T, S, F> & {}): JSX.Element {
+}: UswdsWidgetProps<T, S, F>): JSX.Element {
   const errors = (rawErrors as FormValidationWarning[]) || [];
   const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
 
@@ -211,14 +216,8 @@ function Budget424aSectionB<
           <tr className="bg-base-lighter">
             {/* columns 1-4 */}
             {COLUMNS.map((index) => {
-              const title = get(activityItems, `[${index}].activity_title`) as
-                | string
-                | undefined;
-
-              const cfda = get(
-                activityItems,
-                `[${index}].assistance_listing_number`,
-              ) as string | undefined;
+              const title = getAsStringOrUndefined(activityItems, `[${index}].activity_title`);
+              const cfda = getAsStringOrUndefined(activityItems, `[${index}].assistance_listing_number`);
 
               return (
                 <th
@@ -254,10 +253,7 @@ function Budget424aSectionB<
             </th>
 
             {COLUMNS.map((columnIndex) => {
-              const title = get(
-                activityItems,
-                `[${columnIndex}].activity_title`,
-              ) as string | undefined;
+              const title = getAsStringOrUndefined(activityItems, `[${columnIndex}].activity_title`);
 
               return (
                 <td
