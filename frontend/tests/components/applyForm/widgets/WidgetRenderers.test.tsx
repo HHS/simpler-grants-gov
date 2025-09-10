@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { fakeWidgetProps } from "src/utils/testing/fixtures";
 
 import {
   renderWidget,
@@ -13,7 +14,9 @@ jest.mock("src/components/applyForm/widgets/FieldsetWidget", () => ({
 }));
 
 jest.mock("src/components/applyForm/widgets/Widgets", () => ({
-  widgetComponents: { widgetName: (props) => mockWidget(props) },
+  widgetComponents: {
+    widgetName: (props: unknown) => mockWidget(props) as unknown,
+  },
 }));
 
 describe("wrapSection", () => {
@@ -36,9 +39,8 @@ describe("wrapSection", () => {
 
 describe("renderWidget", () => {
   it("renders the correct widget with correct props", () => {
-    const props = {};
-    render(renderWidget({ props, type }));
-    expect(mockWidget).toHaveBeenCalledWith({});
+    render(renderWidget({ props: fakeWidgetProps, type: "widgetName" }));
+    expect(mockWidget).toHaveBeenCalledWith(fakeWidgetProps);
   });
   it("errors if widget is not found", () => {});
 });

@@ -521,3 +521,23 @@ export const createMockApiKey = (overrides: Partial<ApiKey> = {}): ApiKey => ({
   ...baseApiKey,
   ...overrides,
 });
+
+export const fakeFieldSchema = {
+  maxLength: 15,
+  minLength: 0,
+  title: "Description for application",
+  type: "string",
+};
+
+export const fakeWidgetProps = {
+  id: "some-id",
+  key: "some-id",
+  disabled: false,
+  required: false,
+  minLength: fakeFieldSchema.minLength,
+  maxLength: fakeFieldSchema.maxLength,
+  schema: fakeFieldSchema,
+  rawErrors: [],
+  value: "hi",
+  options: {},
+};
