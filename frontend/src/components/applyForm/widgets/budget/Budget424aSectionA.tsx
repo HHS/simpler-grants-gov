@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
-// changes made to include USWDS and allow to functional as non-reactive form field
-import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
-import { get } from "lodash";
+"use client";
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
+
+import React, { JSX, useEffect } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import {
@@ -11,39 +11,69 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { getErrorsForSection } from "./budgetErrors";
+import {
+  activityTitleSchema,
+  assistanceListingNumberSchema,
+} from "./budgetSchemas";
+import { BaseActivityItem, MoneyString } from "./budgetTypes";
+import { CurrencyInput, HelperText } from "./budgetUiComponents";
 
-/** The `TextWidget` component uses the `BaseInputTemplate`.
- *
- * @param props - The `WidgetProps` for this component
- */
+interface BudgetSummary {
+  federal_estimated_unobligated_amount?: MoneyString;
+  non_federal_estimated_unobligated_amount?: MoneyString;
+  federal_new_or_revised_amount?: MoneyString;
+  non_federal_new_or_revised_amount?: MoneyString;
+  total_amount?: MoneyString;
+}
+
+interface ActivityItem extends BaseActivityItem {
+  budget_summary?: BudgetSummary;
+}
+
+type RootValue = {
+  activity_line_items?: ActivityItem[];
+  total_budget_summary?: BudgetSummary;
+};
+
 function Budget424aSectionA<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
->({ id, value = [], rawErrors }: UswdsWidgetProps<T, S, F>) {
-  const errors = rawErrors as FormValidationWarning[];
+>({
+  id,
+  value: rawValue = {},
+  rawErrors,
+}: UswdsWidgetProps<T, S, F>): JSX.Element {
+  const errors = (rawErrors as FormValidationWarning[]) || [];
+  const root: RootValue =
+    (rawValue && typeof rawValue === "object" ? (rawValue as RootValue) : {}) ??
+    {};
+  const items: ActivityItem[] = Array.isArray(root.activity_line_items)
+    ? root.activity_line_items!
+    : [];
+  const totals: BudgetSummary | undefined = root.total_budget_summary;
 
-  // TODO: use json pointer / ref for this
-  const activityTitleSchema = {
-    type: "string" as const,
-    minLength: 0,
-    maxLength: 120,
-  };
-  const assistanceListingNumberSchema = {
-    type: "string" as const,
-    minLength: 0,
-    maxLength: 15,
-  };
-  const amountSchema = {
-    type: "string" as const,
-    pattern: "^\\d*([.]\\d{2})?$",
-    maxLength: 14,
-  };
-  const federalEstimatedUnobligatedAmountSchema = amountSchema;
-  const nonFederalEstimatedUnobligatedAmountSchema = amountSchema;
-  const federalnewOrRevisedAmountSchema = amountSchema;
-  const nonFederalNewOrRevisedAmountSchema = amountSchema;
-  const totalAmountSchema = amountSchema;
+  const getErrorsA = getErrorsForSection("A");
+
+  // Get an activity item by index
+  const itemAt = (row: number): ActivityItem => items?.[row] ?? {};
+
+  // Getters for values displayed in inputs
+  const getItemVal = (
+    row: number,
+    path: keyof ActivityItem,
+  ): string | undefined =>
+    (itemAt(row)[path] as string | undefined) ?? undefined;
+
+  const getBudgetVal = (
+    row: number,
+    path: keyof BudgetSummary,
+  ): string | undefined =>
+    (itemAt(row).budget_summary?.[path] as string | undefined) ?? undefined;
+
+  const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
 
   return (
     <div key={id} id={id}>
@@ -66,6 +96,7 @@ function Budget424aSectionA<
           appropriate, the amounts shown in Columns E and F. The amount(s) in
           Column G should not equal the sum of amounts in Columns E and F.
         </p>
+
         <h4>Continuing grant applications</h4>
         <p>
           In Columns C and D, enter the estimated amounts of funds that will
@@ -77,9 +108,10 @@ function Budget424aSectionA<
           end of each funding period as required by the grantor agency.
         </p>
       </div>
+
       <Table
         bordered={false}
-        className="usa-table--borderless simpler-responsive-table width-full border-1px border-base-light"
+        className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light"
       >
         <thead className="text-bold">
           <tr className="bg-base-lighter">
@@ -149,13 +181,12 @@ function Budget424aSectionA<
             </td>
           </tr>
         </thead>
+
         <tbody>
-          {Array.from({ length: 4 }).map((_, row) => (
+          {COLUMNS.map((row) => (
             <tr key={row}>
-              <td
-                key={`activity_line_items_row_${row}_activity_title`}
-                className="border-transparent padding-05"
-              >
+              {/* Column A: activity title */}
+              <td className="border-transparent padding-05">
                 <div className="display-flex flex-align-end">
                   <span className="text-bold text-no-wrap margin-bottom-1">
                     {row + 1}.
@@ -164,135 +195,110 @@ function Budget424aSectionA<
                     <TextWidget
                       schema={activityTitleSchema}
                       id={`activity_line_items[${row}]--activity_title`}
-                      rawErrors={getErrors({
+                      rawErrors={getErrorsA({
                         errors,
                         id: `activity_line_items[${row}]--activity_title`,
                       })}
-                      formClassName="margin-left-2 margin-top-3"
+                      formClassName="margin-left-2 margin-top-auto"
                       inputClassName="minw-15"
-                      value={get(value, `[${row}]activity_title`)}
+                      value={getItemVal(row, "activity_title")}
                     />
                   </div>
                 </div>
               </td>
-              <td
-                key={`activity_line_items_row_${row}_assistance_listing_number`}
-                className="border-transparent padding-05"
-              >
+
+              {/* Column B: assistance listing */}
+              <td className="border-transparent padding-05">
                 <TextWidget
                   schema={assistanceListingNumberSchema}
                   id={`activity_line_items[${row}]--assistance_listing_number`}
-                  rawErrors={getErrors({
+                  rawErrors={getErrorsA({
                     errors,
                     id: `activity_line_items[${row}]--assistance_listing_number`,
                   })}
-                  formClassName="margin-top-3"
+                  formClassName="margin-top-auto"
                   inputClassName="minw-10"
-                  value={get(value, `[${row}]assistance_listing_number`)}
+                  value={getItemVal(row, "assistance_listing_number")}
                 />
               </td>
-              <td
-                key={`activity_line_items_row_${row}_federal_estimated_unobligated_amount`}
-                className="border-transparent padding-05"
-              >
-                <TextWidget
-                  schema={federalEstimatedUnobligatedAmountSchema}
+
+              {/* Column C: federal estimated unobligated */}
+              <td className="border-transparent padding-05">
+                <CurrencyInput
                   id={`activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`}
-                  rawErrors={getErrors({
+                  rawErrors={getErrorsA({
                     errors,
                     id: `activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`,
                   })}
-                  formClassName="margin-top-3 simpler-currency-input-wrapper"
-                  inputClassName="minw-10"
-                  value={get(
-                    value,
-                    `[${row}]budget_summary.federal_estimated_unobligated_amount`,
+                  value={getBudgetVal(
+                    row,
+                    "federal_estimated_unobligated_amount",
                   )}
                 />
               </td>
-              <td
-                key={`activity_line_items_row_${row}_non_federal_estimated_unobligated_amount`}
-                className="border-transparent padding-05"
-              >
-                <TextWidget
-                  schema={nonFederalEstimatedUnobligatedAmountSchema}
+
+              {/* Column D: non-federal estimated unobligated */}
+              <td className="border-transparent padding-05">
+                <CurrencyInput
                   id={`activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`}
-                  rawErrors={getErrors({
+                  rawErrors={getErrorsA({
                     errors,
                     id: `activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`,
                   })}
-                  formClassName="margin-top-3 simpler-currency-input-wrapper"
-                  inputClassName="minw-10"
-                  value={get(
-                    value,
-                    `[${row}]budget_summary.non_federal_estimated_unobligated_amount`,
+                  value={getBudgetVal(
+                    row,
+                    "non_federal_estimated_unobligated_amount",
                   )}
                 />
               </td>
-              <td
-                key={`activity_line_items_row_${row}_federal_new_or_revised_amount`}
-                className="border-transparent padding-05"
-              >
-                <TextWidget
-                  schema={federalnewOrRevisedAmountSchema}
+
+              {/* Column E: federal new/revised */}
+              <td className="border-transparent padding-05">
+                <CurrencyInput
                   id={`activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`}
-                  rawErrors={getErrors({
+                  rawErrors={getErrorsA({
                     errors,
                     id: `activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`,
                   })}
-                  inputClassName="minw-10"
-                  formClassName="margin-top-3 simpler-currency-input-wrapper"
-                  value={get(
-                    value,
-                    `[${row}]budget_summary.federal_new_or_revised_amount`,
-                  )}
+                  value={getBudgetVal(row, "federal_new_or_revised_amount")}
                 />
               </td>
-              <td
-                key={`activity_line_items_row_${row}_non_federal_new_or_revised_amount`}
-                className="border-transparent padding-05"
-              >
-                <TextWidget
-                  schema={nonFederalNewOrRevisedAmountSchema}
+
+              {/* Column F: non-federal new/revised */}
+              <td className="border-transparent padding-05">
+                <CurrencyInput
                   id={`activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`}
-                  rawErrors={getErrors({
+                  rawErrors={getErrorsA({
                     errors,
                     id: `activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`,
                   })}
-                  inputClassName="minw-10"
-                  formClassName="margin-top-3 simpler-currency-input-wrapper"
-                  value={get(
-                    value,
-                    `[${row}]budget_summary.non_federal_new_or_revised_amount`,
-                  )}
+                  value={getBudgetVal(row, "non_federal_new_or_revised_amount")}
                 />
               </td>
-              <td
-                key={`activity_line_items_row_${row}_total_amount`}
-                className="border-transparent padding-0"
-              >
+
+              {/* Column G: total */}
+              <td className="border-transparent padding-0">
                 <div className="display-flex flex-align-end">
                   <span className="margin-bottom-1 margin-right-1">=</span>
                   <div>
                     <div className="text-normal text-no-wrap text-italic font-sans-2xs">
                       Sum of row {row + 1}
                     </div>
-                    <TextWidget
-                      schema={totalAmountSchema}
+                    <CurrencyInput
                       id={`activity_line_items[${row}]--budget_summary--total_amount`}
-                      rawErrors={getErrors({
+                      rawErrors={getErrorsA({
                         errors,
                         id: `activity_line_items[${row}]--budget_summary--total_amount`,
                       })}
-                      inputClassName="minw-10 margin-top-0 border-2px"
-                      formClassName="margin-top-0 simpler-currency-input-wrapper"
-                      value={get(value, `[${row}]budget_summary.total_amount`)}
+                      value={getBudgetVal(row, "total_amount")}
                     />
                   </div>
                 </div>
               </td>
             </tr>
           ))}
+
+          {/* Totals row */}
           <tr>
             <td className="padding-05 text-bold" colSpan={2}>
               <div className="display-flex">
@@ -305,88 +311,73 @@ function Budget424aSectionA<
                 </div>
               </div>
             </td>
+
             <td className="padding-05">
-              <div className="text-italic font-sans-2xs text-no-wrap border-top-2px width-full padding-top-2 margin-top-2">
-                Sum of column C
-              </div>
-              <TextWidget
-                schema={amountSchema}
+              <HelperText hasHorizontalLine>Sum of column C</HelperText>
+              <CurrencyInput
                 id={
                   "total_budget_summary--federal_estimated_unobligated_amount"
                 }
-                rawErrors={getErrors({
+                rawErrors={getErrorsA({
                   errors,
                   id: "total_budget_summary--federal_estimated_unobligated_amount",
                 })}
-                formClassName="margin-top-0 simpler-currency-input-wrapper"
-                inputClassName="margin-top-0 border-2px"
-                value={get(value, "federal_estimated_unobligated_amount")}
+                value={totals?.federal_estimated_unobligated_amount}
+                bordered
               />
             </td>
+
             <td className="padding-05">
-              <div className="text-italic font-sans-2xs text-no-wrap border-top-2px width-full padding-top-2 margin-top-2">
-                Sum of column D
-              </div>
-              <TextWidget
-                schema={amountSchema}
+              <HelperText hasHorizontalLine>Sum of column D</HelperText>
+              <CurrencyInput
                 id={
-                  "total_budget_summary.non_federal_estimated_unobligated_amount"
+                  "total_budget_summary--non_federal_estimated_unobligated_amount"
                 }
-                rawErrors={getErrors({
+                rawErrors={getErrorsA({
                   errors,
-                  id: "total_budget_summary.non_federal_estimated_unobligated_amount",
+                  id: "total_budget_summary--non_federal_estimated_unobligated_amount",
                 })}
-                formClassName="margin-top-0 simpler-currency-input-wrapper"
-                inputClassName="margin-top-0 border-2px"
-                value={get(value, "non_federal_estimated_unobligated_amount")}
+                value={totals?.non_federal_estimated_unobligated_amount}
+                bordered
               />
             </td>
+
             <td className="padding-05">
-              <div className="text-italic font-sans-2xs text-no-wrap border-top-2px width-full padding-top-2 margin-top-2">
-                Sum of column E
-              </div>
-              <TextWidget
-                schema={amountSchema}
-                id={"total_budget_summary.federal_new_or_revised_amount"}
-                rawErrors={getErrors({
+              <HelperText hasHorizontalLine>Sum of column E</HelperText>
+              <CurrencyInput
+                id={"total_budget_summary--federal_new_or_revised_amount"}
+                rawErrors={getErrorsA({
                   errors,
-                  id: "total_budget_summary.federal_new_or_revised_amount",
+                  id: "total_budget_summary--federal_new_or_revised_amount",
                 })}
-                formClassName="margin-top-0 simpler-currency-input-wrapper"
-                inputClassName="margin-top-0 border-2px"
-                value={get(value, "federal_new_or_revised_amount")}
+                value={totals?.federal_new_or_revised_amount}
+                bordered
               />
             </td>
+
             <td className="padding-05">
-              <div className="text-italic font-sans-2xs text-no-wrap border-top-2px width-full padding-top-2 margin-top-2">
-                Sum of column F
-              </div>
-              <TextWidget
-                schema={amountSchema}
-                id={"total_budget_summary.non_federal_new_or_revised_amount"}
-                rawErrors={getErrors({
+              <HelperText hasHorizontalLine>Sum of column F</HelperText>
+              <CurrencyInput
+                id={"total_budget_summary--non_federal_new_or_revised_amount"}
+                rawErrors={getErrorsA({
                   errors,
-                  id: "total_budget_summary.non_federal_new_or_revised_amount",
+                  id: "total_budget_summary--non_federal_new_or_revised_amount",
                 })}
-                formClassName="margin-top-0 simpler-currency-input-wrapper"
-                inputClassName="margin-top-0 border-2px"
-                value={get(value, "non_federal_new_or_revised_amount")}
+                value={totals?.non_federal_new_or_revised_amount}
+                bordered
               />
             </td>
+
             <td className="padding-05">
-              <div className="text-italic font-sans-2xs text-no-wrap border-top-2px width-full padding-top-2 margin-top-2">
-                Sum of column G
-              </div>
-              <TextWidget
-                schema={amountSchema}
-                formClassName="margin-top-0 simpler-currency-input-wrapper"
-                inputClassName="margin-top-0 border-2px"
-                id={"total_budget_summary.total_amount"}
-                rawErrors={getErrors({
+              <HelperText hasHorizontalLine>Sum of column G</HelperText>
+              <CurrencyInput
+                id={"total_budget_summary--total_amount"}
+                rawErrors={getErrorsA({
                   errors,
-                  id: "total_budget_summary.total_amount",
+                  id: "total_budget_summary--total_amount",
                 })}
-                value={get(value, "total_amount")}
+                value={totals?.total_amount}
+                bordered
               />
             </td>
           </tr>
@@ -395,18 +386,5 @@ function Budget424aSectionA<
     </div>
   );
 }
-
-export const getErrors = ({
-  errors,
-  id,
-}: {
-  id: string;
-  errors: FormValidationWarning[];
-}) => {
-  if (!errors) return [];
-  return errors
-    .filter((error) => error.field === id)
-    .map((error) => error.message);
-};
 
 export default Budget424aSectionA;

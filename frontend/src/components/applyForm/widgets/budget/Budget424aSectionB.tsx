@@ -9,33 +9,35 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
-
-type MoneyString = string | undefined;
+import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { BaseActivityItem, MoneyString } from "./budgetTypes";
+import {
+  ColumnHelperText,
+  CurrencyInput,
+  HelperText,
+} from "./budgetUiComponents";
 
 interface BudgetCategories {
-  personnel_amount?: MoneyString; // a
-  fringe_benefits_amount?: MoneyString; // b
-  travel_amount?: MoneyString; // c
-  equipment_amount?: MoneyString; // d
-  supplies_amount?: MoneyString; // e
-  contractual_amount?: MoneyString; // f
-  construction_amount?: MoneyString; // g
-  other_amount?: MoneyString; // h
-  total_direct_charge_amount?: MoneyString; // i
-  total_indirect_charge_amount?: MoneyString; // j
-  total_amount?: MoneyString; // k
-  program_income_amount?: MoneyString; // line 7
+  personnel_amount?: MoneyString;
+  fringe_benefits_amount?: MoneyString;
+  travel_amount?: MoneyString;
+  equipment_amount?: MoneyString;
+  supplies_amount?: MoneyString;
+  contractual_amount?: MoneyString;
+  construction_amount?: MoneyString;
+  other_amount?: MoneyString;
+  total_direct_charge_amount?: MoneyString;
+  total_indirect_charge_amount?: MoneyString;
+  total_amount?: MoneyString;
+  program_income_amount?: MoneyString;
 }
-type FieldKey = keyof BudgetCategories;
 
-interface ActivityItem {
-  activity_title?: string;
-  assistance_listing_number?: string;
+interface ActivityItem extends BaseActivityItem {
   budget_categories?: BudgetCategories;
-  [k: string]: unknown;
+  budget_summary?: { total_amount?: MoneyString };
 }
-type ActivityItems = ActivityItem[];
+
+type FieldKey = keyof BudgetCategories;
 
 function Budget424aSectionB<
   T = unknown,
@@ -45,74 +47,58 @@ function Budget424aSectionB<
   id,
   value: rawValue = [],
   rawErrors,
-}: UswdsWidgetProps<T, S, F>): JSX.Element {
+}: UswdsWidgetProps<T, S, F> & {}): JSX.Element {
   const errors = (rawErrors as FormValidationWarning[]) || [];
+  const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
 
+  // Normalize incoming value:
+  // multiField passes an object with activity_line_items + total_budget_categories
   const activityItemsUnknown = Array.isArray(rawValue)
     ? (rawValue as unknown)
     : (get(rawValue as object, "activity_line_items") as unknown);
-  const activityItems: ActivityItems = Array.isArray(activityItemsUnknown)
-    ? (activityItemsUnknown as ActivityItems)
+
+  const activityItems: ActivityItem[] = Array.isArray(activityItemsUnknown)
+    ? (activityItemsUnknown as ActivityItem[])
     : [];
 
   const totalsUnknown = Array.isArray(rawValue)
     ? undefined
     : (get(rawValue as object, "total_budget_categories") as unknown);
+
   const totals: BudgetCategories | undefined =
     typeof totalsUnknown === "object" && totalsUnknown !== null
       ? (totalsUnknown as BudgetCategories)
       : undefined;
 
-  // Hardcode exactly 4 columns
-  const COLUMNS = [0, 1, 2, 3] as const;
-
-  // Mini schema for currency-like inputs
-  const amountSchema = {
-    type: "string" as const,
-    pattern: "^\\d*([.]\\d{2})?$",
-    maxLength: 14,
-  };
-
-  // Mini schema for plain text inputs
-  const activityTitleSchema = {
-    type: "string" as const,
-    minLength: 0,
-    maxLength: 120,
-  };
-
   // Section B rows (A-K)
-  const ROW_I_KEY: FieldKey = "total_direct_charge_amount"; // row i
-  const ROW_K_KEY: FieldKey = "total_amount"; // row k
+  // row i
+  const ROW_I_KEY: FieldKey = "total_direct_charge_amount";
+  // row k
+  const ROW_K_KEY: FieldKey = "total_amount";
 
-  interface HelperTextProps {
+  const ColHelper: React.FC<{
+    columnNumber: number;
     hasHorizontalLine?: boolean;
-  }
-
-  const HelperText: React.FC<React.PropsWithChildren<HelperTextProps>> = ({
-    hasHorizontalLine = true,
-    children,
-  }): JSX.Element => (
-    <div
-      className={`text-italic font-sans-2xs width-full margin-top-1 padding-top-1 ${hasHorizontalLine ? "border-top-2px" : ""}`}
-    >
-      {children}
-    </div>
+  }> = ({ columnNumber, hasHorizontalLine }) => (
+    <ColumnHelperText
+      columnNumber={columnNumber}
+      hasHorizontalLine={hasHorizontalLine}
+    />
   );
 
-  const ColHelper: React.FC<{ n: number }> = ({ n }): JSX.Element => (
-    <HelperText>Sum of column {n}</HelperText>
-  );
   const RowHelper: React.FC<{ letter: string }> = ({ letter }): JSX.Element => (
-    <HelperText>{`Sum of row ${letter}.`}</HelperText>
+    <HelperText>{`Sum of row ${letter}`}</HelperText>
   );
 
   // Column 5 helper (Category total)
   const TotalColHelper: React.FC<{ rowKey: FieldKey; letter: string }> = ({
     rowKey,
     letter,
-  }): JSX.Element => {
-    if (rowKey === ROW_I_KEY) return <ColHelper n={5} />;
-    if (rowKey === ROW_K_KEY) return <HelperText>Sum of i and j</HelperText>;
+  }) => {
+    if (rowKey === ROW_I_KEY)
+      return <ColHelper columnNumber={5} hasHorizontalLine />;
+    if (rowKey === ROW_K_KEY)
+      return <HelperText hasHorizontalLine>Sum of i and j</HelperText>;
     return <RowHelper letter={letter} />;
   };
 
@@ -166,53 +152,24 @@ function Budget424aSectionB<
   }): JSX.Element => {
     const idPath = `activity_line_items[${index}]--budget_categories--${fieldKey}`;
     return (
-      <TextWidget
-        schema={amountSchema}
+      <CurrencyInput
         id={idPath}
         rawErrors={getErrors({ errors, id: idPath })}
-        formClassName="margin-top-1 padding-top-05 simpler-currency-input-wrapper"
-        inputClassName="minw-10"
-        inputMode="decimal"
-        pattern="\\d*(\\.\\d{2})?"
-        maxLength={14}
-        value={get(activityItems, `[${index}].budget_categories.${fieldKey}`)}
+        value={activityItems?.[index]?.budget_categories?.[fieldKey]}
       />
     );
   };
 
+  // Category total (rightmost column)
   const totalInput = ({ fieldKey }: { fieldKey: FieldKey }): JSX.Element => {
     const idPath = `total_budget_categories--${fieldKey}`;
     return (
-      <TextWidget
-        schema={amountSchema}
+      <CurrencyInput
         id={idPath}
         rawErrors={getErrors({ errors, id: idPath })}
-        formClassName="margin-top-1 simpler-currency-input-wrapper"
-        inputClassName="minw-10 border-2px"
-        inputMode="decimal"
-        pattern="\\d*(\\.\\d{2})?"
-        maxLength={14}
-        value={totals ? totals[fieldKey] : undefined}
+        value={totals?.[fieldKey]}
+        bordered
       />
-    );
-  };
-
-  const colHeader = (index: number): JSX.Element => {
-    const title = get(activityItems, `[${index}].activity_title`);
-    const assistanceListingNumber = get(
-      activityItems,
-      `[${index}].assistance_listing_number`,
-    );
-    return (
-      <div className="text-center">
-        <div className="text-bold">{index + 1}</div>
-        {title ? <div className="font-sans-xs text-italic">{title}</div> : null}
-        {assistanceListingNumber ? (
-          <div className="font-sans-3xs text-base-dark text-italic">
-            CFDA: {assistanceListingNumber}
-          </div>
-        ) : null}
-      </div>
     );
   };
 
@@ -220,7 +177,7 @@ function Budget424aSectionB<
     <div key={id} id={id}>
       <Table
         bordered={false}
-        className="usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
+        className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
       >
         <thead>
           <tr className="bg-base-lighter">
@@ -253,19 +210,41 @@ function Budget424aSectionB<
 
           <tr className="bg-base-lighter">
             {/* columns 1-4 */}
-            {COLUMNS.map((i) => (
-              <th
-                key={`col-${i}`}
-                scope="col"
-                className="bg-base-lightest text-bold border-x-1px text-center border-base-light verticle-align-bottom"
-              >
-                {colHeader(i)}
-              </th>
-            ))}
+            {COLUMNS.map((index) => {
+              const title = get(activityItems, `[${index}].activity_title`) as
+                | string
+                | undefined;
+
+              const cfda = get(
+                activityItems,
+                `[${index}].assistance_listing_number`,
+              ) as string | undefined;
+
+              return (
+                <th
+                  key={`col-${index}`}
+                  className="bg-base-lightest text-center border-base-light border-x-1px"
+                  scope="col"
+                >
+                  <div className="text-center">
+                    <div className="text-bold">{index + 1}</div>
+                    <div className="font-sans-xs text-italic">
+                      {title?.trim() || "—"}
+                    </div>
+                    {cfda ? (
+                      <div className="font-sans-3xs text-base-dark text-italic">
+                        CFDA: {cfda}
+                      </div>
+                    ) : null}
+                  </div>
+                </th>
+              );
+            })}
           </tr>
         </thead>
 
         <tbody>
+          {/* 6. Object class categories */}
           <tr className="bg-base-lightest">
             <th
               scope="row"
@@ -273,37 +252,41 @@ function Budget424aSectionB<
             >
               6. Object class categories
             </th>
-            {COLUMNS.map((columnIndex) => (
-              <td
-                key={`occ-title-${columnIndex}`}
-                className="padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
-              >
-                <TextWidget
-                  schema={activityTitleSchema}
-                  id={`activity_line_items[${columnIndex}]--activity_title`}
-                  rawErrors={getErrors({
-                    errors,
-                    id: `activity_line_items[${columnIndex}]--activity_title`,
-                  })}
-                  formClassName="margin-top-1"
-                  inputClassName="minw-15"
-                  value={get(activityItems, `[${columnIndex}].activity_title`)}
-                />
-              </td>
-            ))}
-            <td colSpan={2} className="border-bottom-0 border-top-0"></td>
+
+            {COLUMNS.map((columnIndex) => {
+              const title = get(
+                activityItems,
+                `[${columnIndex}].activity_title`,
+              ) as string | undefined;
+
+              return (
+                <td
+                  key={`occ-title-${columnIndex}`}
+                  className="padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
+                >
+                  {/* display-only title with fallback dash */}
+                  <div className="minw-15 font-sans-sm text-italic">
+                    {title && title.trim() !== "" ? title : "—"}
+                  </div>
+                </td>
+              );
+            })}
+
+            <td colSpan={2} className="border-bottom-0 border-top-0" />
           </tr>
 
-          {rows.map((r) => (
-            <tr key={r.key} className="sf424a__row">
+          {rows.map((row) => (
+            <tr key={row.key} className="sf424a__row">
               <th
                 scope="row"
                 className="padding-05 text-normal border-bottom-0 border-top-0 sf424a__cell sf424a__cell--row-headers"
               >
                 <div className="display-flex flex-column">
-                  <span className="text-bold">{r.label}</span>
-                  {r.note ? (
-                    <span className="font-sans-3xs text-italic">{r.note}</span>
+                  <span className="text-bold">{row.label}</span>
+                  {row.note ? (
+                    <span className="font-sans-3xs text-italic">
+                      {row.note}
+                    </span>
                   ) : null}
                 </div>
               </th>
@@ -311,22 +294,31 @@ function Budget424aSectionB<
               {/* Four activity columns */}
               {COLUMNS.map((columnIndex) => {
                 const extraPad =
-                  r.key !== ROW_I_KEY && r.key !== ROW_K_KEY
+                  row.key !== ROW_I_KEY && row.key !== ROW_K_KEY
                     ? " padding-top-5"
                     : "";
+                const showLine = row.key === ROW_I_KEY || row.key === ROW_K_KEY;
+
                 return (
                   <td
-                    key={`cell-${r.key}-${columnIndex}`}
+                    key={`cell-${row.key}-${columnIndex}`}
                     className={`border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell ${extraPad}`}
                     height={"inherit"}
                   >
                     <div className="display-flex flex-column ">
-                      {r.key === ROW_I_KEY && <ColHelper n={columnIndex + 1} />}
-                      {r.key === ROW_K_KEY && (
-                        <HelperText>Sum of i and j</HelperText>
+                      {row.key === ROW_I_KEY && (
+                        <ColHelper
+                          columnNumber={columnIndex + 1}
+                          hasHorizontalLine={showLine}
+                        />
+                      )}
+                      {row.key === ROW_K_KEY && (
+                        <HelperText hasHorizontalLine={showLine}>
+                          Sum of i and j
+                        </HelperText>
                       )}
                       <div className="margin-top-auto">
-                        {cellInput({ fieldKey: r.key, index: columnIndex })}
+                        {cellInput({ fieldKey: row.key, index: columnIndex })}
                       </div>
                     </div>
                   </td>
@@ -339,15 +331,15 @@ function Budget424aSectionB<
 
               {/* TOTAL (Column 5) */}
               <td className="border-bottom-0 border-top-0 padding-05 margin-top-auto">
-                <TotalColHelper rowKey={r.key} letter={r.letter} />
-                {totalInput({ fieldKey: r.key })}
+                <TotalColHelper rowKey={row.key} letter={row.letter} />
+                {totalInput({ fieldKey: row.key })}
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
 
-      <Table className="usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto">
+      <Table className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto">
         <tbody>
           {/* Program income — total column only (Line 7) */}
           <tr className="bg-base-lightest">

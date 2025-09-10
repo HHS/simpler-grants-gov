@@ -9,9 +9,11 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
-
-type MoneyString = string | undefined;
+import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { getBudgetErrors } from "./budgetErrorLabels";
+import { BaseActivityItem, MoneyString } from "./budgetTypes";
+import { CurrencyInput, HelperText } from "./budgetUiComponents";
+import { asMoney, isRecord } from "./budgetValueGuards";
 
 interface FederalFundEstimates {
   first_year_amount?: MoneyString;
@@ -20,16 +22,80 @@ interface FederalFundEstimates {
   fourth_year_amount?: MoneyString;
 }
 
-interface ActivityItem {
-  activity_title?: string;
-  assistance_listing_number?: string;
+interface ActivityItem extends BaseActivityItem {
+  budget_summary?: { total_amount?: MoneyString };
   federal_fund_estimates?: FederalFundEstimates;
-  [k: string]: unknown;
 }
 
-type ActivityItems = ActivityItem[];
+type NormalizedE = {
+  items: ActivityItem[];
+  totals?: FederalFundEstimates;
+};
 
-type TotalFederalFundEstimates = FederalFundEstimates | undefined;
+function pickFederalFundEstimates(value: unknown): FederalFundEstimates {
+  if (!isRecord(value)) return {};
+  return {
+    first_year_amount: asMoney(value["first_year_amount"]),
+    second_year_amount: asMoney(value["second_year_amount"]),
+    third_year_amount: asMoney(value["third_year_amount"]),
+    fourth_year_amount: asMoney(value["fourth_year_amount"]),
+  };
+}
+function pickActivityItem(value: unknown): ActivityItem {
+  if (!isRecord(value)) return {};
+  const activity: ActivityItem = {};
+  if (typeof value["activity_title"] === "string") {
+    activity.activity_title = value["activity_title"];
+  }
+  if (typeof value["assistance_listing_number"] === "string") {
+    activity.assistance_listing_number = value["assistance_listing_number"];
+  }
+  if (isRecord(value["budget_summary"])) {
+    activity.budget_summary = {
+      total_amount: asMoney(value["budget_summary"]["total_amount"]),
+    };
+  }
+  if (isRecord(value["federal_fund_estimates"])) {
+    activity.federal_fund_estimates = pickFederalFundEstimates(
+      value["federal_fund_estimates"],
+    );
+  }
+  return activity;
+}
+function normalizeSectionEValue(rawValue: unknown): NormalizedE {
+  if (Array.isArray(rawValue)) {
+    return { items: rawValue.map(pickActivityItem) };
+  }
+  if (isRecord(rawValue)) {
+    const itemsProp = rawValue["activity_line_items"];
+    const totalsProp = rawValue["total_federal_fund_estimates"];
+    if (Array.isArray(itemsProp)) {
+      return {
+        items: itemsProp.map(pickActivityItem),
+        totals: pickFederalFundEstimates(totalsProp),
+      };
+    }
+
+    const items: ActivityItem[] = [];
+    for (const index of BUDGET_ACTIVITY_COLUMNS) {
+      items.push(pickActivityItem(rawValue[String(index)]));
+    }
+    let totals: FederalFundEstimates | undefined = undefined;
+    if (isRecord(totalsProp)) {
+      totals = pickFederalFundEstimates(totalsProp);
+    } else {
+      const rootTotals = pickFederalFundEstimates(rawValue);
+      const hasAny =
+        rootTotals.first_year_amount ||
+        rootTotals.second_year_amount ||
+        rootTotals.third_year_amount ||
+        rootTotals.fourth_year_amount;
+      totals = hasAny ? rootTotals : undefined;
+    }
+    return { items, totals };
+  }
+  return { items: [] };
+}
 
 function Budget424aSectionE<
   T = unknown,
@@ -41,26 +107,10 @@ function Budget424aSectionE<
   rawErrors,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const errors = (rawErrors as FormValidationWarning[]) || [];
+  const { items: activityItems, totals } = normalizeSectionEValue(rawValue);
 
-  const aiUnknown = get(rawValue as object, "activity_line_items") as unknown;
-  const activityItems: ActivityItems = Array.isArray(rawValue)
-    ? (rawValue as unknown as ActivityItems)
-    : Array.isArray(aiUnknown)
-      ? (aiUnknown as ActivityItems)
-      : [];
+  const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
-  const totalsUnknown = get(
-    rawValue as object,
-    "total_federal_fund_estimates",
-  ) as unknown;
-  const totals: TotalFederalFundEstimates = Array.isArray(rawValue)
-    ? undefined
-    : typeof totalsUnknown === "object" && totalsUnknown !== null
-      ? (totalsUnknown as FederalFundEstimates)
-      : undefined;
-
-  // 4 programs (rows 1-4) and 4 years (columns B-E)
-  const ROWS = [0, 1, 2, 3] as const;
   const YEARS = [
     { key: "first_year_amount", short: "First year", colLabel: "B" },
     { key: "second_year_amount", short: "Second year", colLabel: "C" },
@@ -69,63 +119,38 @@ function Budget424aSectionE<
   ] as const;
   type YearKey = (typeof YEARS)[number]["key"];
 
-  const amountSchema = {
-    type: "string" as const,
-    pattern: "^\\d*([.]\\d{2})?$",
-    maxLength: 14,
-  };
+  const resolveErrorsForSection = getBudgetErrors({ errors, id, section: "E" });
 
-  const titleSchema = {
-    type: "string" as const,
-    minLength: 0,
-    maxLength: 120,
-  };
+  const titleCell = (rowIndex: number): JSX.Element => {
+    const title =
+      (get(activityItems, `[${rowIndex}].activity_title`) as
+        | string
+        | undefined) ?? "";
+    const assistanceListingNumber =
+      (get(activityItems, `[${rowIndex}].assistance_listing_number`) as
+        | string
+        | undefined) ?? "";
 
-  const getErrors = ({
-    errors,
-    id,
-  }: {
-    id: string;
-    errors: FormValidationWarning[];
-  }): string[] =>
-    (errors || []).filter((e) => e.field === id).map((e) => e.message);
-
-  const HelperText: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <div className="text-italic font-sans-2xs border-top-2px width-full padding-top-2 margin-top-1">
-      {children}
-    </div>
-  );
-
-  // Grant program title cell (leftmost column)
-  const rowTitleInput = (rowIndex: number): JSX.Element => {
-    const idPath = `activity_line_items[${rowIndex}]--activity_title`;
     return (
-      <div className="display-flex flex-align-end">
-        <TextWidget
-          schema={titleSchema}
-          id={idPath}
-          rawErrors={getErrors({ errors, id: idPath })}
-          formClassName="margin-top-1"
-          inputClassName="minw-15"
-          value={get(activityItems, `[${rowIndex}].activity_title`)}
-        />
+      <div className="display-flex flex-column">
+        <div className="minw-15 font-sans-sm text-italic">
+          {title.trim() ? title : "—"}
+        </div>
+        {assistanceListingNumber.trim() ? (
+          <div className="font-sans-3xs text-base-dark text-italic">
+            CFDA: {assistanceListingNumber}
+          </div>
+        ) : null}
       </div>
     );
   };
 
-  // Per-program, per-year cell
   const cellInput = (rowIndex: number, yearKey: YearKey): JSX.Element => {
     const idPath = `activity_line_items[${rowIndex}]--federal_fund_estimates--${yearKey}`;
     return (
-      <TextWidget
-        schema={amountSchema}
+      <CurrencyInput
         id={idPath}
-        rawErrors={getErrors({ errors, id: idPath })}
-        formClassName="margin-top-auto padding-top-05 simpler-currency-input-wrapper"
-        inputClassName="minw-10"
-        inputMode="decimal"
-        pattern="\\d*(\\.\\d{2})?"
-        maxLength={14}
+        rawErrors={resolveErrorsForSection}
         value={get(
           activityItems,
           `[${rowIndex}].federal_fund_estimates.${yearKey}`,
@@ -134,28 +159,21 @@ function Budget424aSectionE<
     );
   };
 
-  // Bottom totals row (sums across programs for each year)
   const totalInput = (yearKey: YearKey, helper: string): JSX.Element => {
     const idPath = `total_federal_fund_estimates--${yearKey}`;
     return (
       <div className="display-flex flex-column">
-        <HelperText>{helper}</HelperText>
-        <TextWidget
-          schema={amountSchema}
+        <HelperText hasHorizontalLine>{helper}</HelperText>
+        <CurrencyInput
           id={idPath}
-          rawErrors={getErrors({ errors, id: idPath })}
-          formClassName="margin-top-1 padding-top-05 simpler-currency-input-wrapper"
-          inputClassName="minw-10 border-2px"
-          inputMode="decimal"
-          pattern="\\d*(\\.\\d{2})?"
-          maxLength={14}
+          rawErrors={resolveErrorsForSection}
           value={totals ? totals[yearKey] : undefined}
+          bordered
         />
       </div>
     );
   };
 
-  // Helper text mapping for totals row
   const totalHelpersByYear: Record<YearKey, string> = {
     first_year_amount: "Sum of column B",
     second_year_amount: "Sum of column C",
@@ -165,27 +183,22 @@ function Budget424aSectionE<
 
   return (
     <div key={id} id={id}>
-      <p>
-        Enter the estimated federal funds that will be required in the first,
-        second, third, and fourth funding years for each program.
-      </p>
-
       <Table
         bordered={false}
-        className="usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
+        className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
       >
         <thead>
           <tr>
             <th
               colSpan={2}
-              className="bg-base-lightest text-bold border-x-1px  border-bottom-0 border-base-light"
+              className="bg-base-lightest text-bold border-x-1px border-bottom-0 border-base-light"
             >
               &nbsp;
             </th>
             <th
               scope="col"
               colSpan={4}
-              className="bg-base-lightest text-bold text-center width-card border-base-light text-align-center"
+              className="bg-base-lightest text-bold text-center width-card border-base-light"
             >
               Future funding periods
             </th>
@@ -200,18 +213,18 @@ function Budget424aSectionE<
             >
               Grant Programs
             </th>
-            {YEARS.map((y) => (
+            {YEARS.map((year) => (
               <th
-                key={y.key}
+                key={year.key}
                 scope="col"
                 className="bg-base-lightest text-bold border-bottom-0 border-x-1px text-center border-base-light"
               >
-                {y.short}
+                {year.short}
               </th>
             ))}
           </tr>
           <tr className="bg-base-lighter">
-            <th className="bg-base-lightest  border-top-0 border-left-0 border-right-0 border-x-1px border-base-light">
+            <th className="bg-base-lightest border-top-0 border-left-0 border-right-0 border-x-1px border-base-light">
               &nbsp;
             </th>
             <th
@@ -220,45 +233,42 @@ function Budget424aSectionE<
             >
               A
             </th>
-            {YEARS.map((y) => (
+            {YEARS.map((year) => (
               <th
-                key={`col-${y.colLabel}`}
+                key={`col-${year.colLabel}`}
                 className="bg-base-lightest text-bold border-top-0 border-x-1px text-center border-base-light"
               >
-                {y.colLabel}
+                {year.colLabel}
               </th>
             ))}
           </tr>
         </thead>
 
         <tbody>
-          {/* Rows 1-4: one per grant program */}
           {ROWS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
               <td className="border-bottom-0 border-top-0 verticle-align-bottom">
                 {rowIndex + 16}.
               </td>
-              {/* Column A: grant program input */}
+
               <th
                 scope="row"
                 className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom"
               >
-                {rowTitleInput(rowIndex)}
+                {titleCell(rowIndex)}
               </th>
 
-              {/* Columns B-E: First..Fourth year amounts for this program */}
-              {YEARS.map((y) => (
+              {YEARS.map((year) => (
                 <td
-                  key={`${rowIndex}-${y.key}`}
+                  key={`${rowIndex}-${year.key}`}
                   className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom"
                 >
-                  {cellInput(rowIndex, y.key)}
+                  {cellInput(rowIndex, year.key)}
                 </td>
               ))}
             </tr>
           ))}
 
-          {/* Bottom totals row */}
           <tr className="bg-base-lightest sf424a__row">
             <th className="verticle-align-bottom">20.</th>
             <th
@@ -272,13 +282,12 @@ function Budget424aSectionE<
                 </span>
               </div>
             </th>
-
-            {YEARS.map((y) => (
+            {YEARS.map((year) => (
               <td
-                key={`total-${y.key}`}
+                key={`total-${year.key}`}
                 className="padding-05 border-bottom-0 border-top-0 sf424a__cell"
               >
-                {totalInput(y.key, totalHelpersByYear[y.key])}
+                {totalInput(year.key, totalHelpersByYear[year.key])}
               </td>
             ))}
           </tr>
