@@ -571,7 +571,7 @@ export const shapeFormData = <T extends object>(
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  // Build the condensed schema once for 
+  // Build the condensed schema once for
   // both formDataToObject and coercion
   const condensedSchema = condenseFormSchemaProperties(formSchema);
 
@@ -579,7 +579,7 @@ export const shapeFormData = <T extends object>(
     delimiter: "--",
   });
 
-  // Convert numbers to strings 
+  // Convert numbers to strings
   // wherever the schema declares a string type
   const schemaAlignedData = coerceNumbersToStringsPerSchema(
     structuredFormData,
