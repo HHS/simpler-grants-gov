@@ -95,7 +95,8 @@ def add_extra_data_to_current_request_logs(
     data: dict[str, str | int | float | bool | uuid.UUID | None]
 ) -> None:
     """Add data to every log record for the current request."""
-    assert flask.has_request_context(), "Must be in a request context"
+    if not flask.has_request_context():
+        return
 
     extra_log_data = getattr(flask.g, EXTRA_LOG_DATA_ATTR, {})
     extra_log_data.update(data)
