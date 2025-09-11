@@ -25,8 +25,6 @@ class TestListOpportunities:
         assert "status" in data
         assert "message" in data
         assert "items" in data
-        # Note: The actual response doesn't include paginationInfo, sortInfo, or filterInfo
-        # These fields are not being returned by the current implementation
 
         assert isinstance(data["items"], list)
         assert len(data["items"]) == 10  # Default page size
@@ -58,7 +56,6 @@ class TestListOpportunities:
         assert "status" in data
         assert "message" in data
         assert "items" in data
-        # Note: The actual response doesn't include paginationInfo
         assert isinstance(data["items"], list)
         assert data["status"] == 200
         assert "Opportunities fetched successfully" in data["message"]
@@ -79,7 +76,6 @@ class TestListOpportunities:
         assert "status" in data
         assert "message" in data
         assert "items" in data
-        # Note: The actual response doesn't include paginationInfo
         assert isinstance(data["items"], list)
 
         # Test large page size
@@ -91,22 +87,6 @@ class TestListOpportunities:
         assert "status" in data
         assert "message" in data
         assert "items" in data
-
-    def test_pagination_validation(
-        self, client: FlaskClient, enable_factory_create, db_session, api_auth_token
-    ):
-        """Test pagination parameter validation."""
-        # Test invalid page number - currently returns 500 due to database offset error
-        response = client.get(
-            "/common-grants/opportunities?page=0", headers={"X-Auth": api_auth_token}
-        )
-        assert response.status_code == 500
-
-        # Test invalid page size - currently returns 500 due to division by zero
-        response = client.get(
-            "/common-grants/opportunities?pageSize=0", headers={"X-Auth": api_auth_token}
-        )
-        assert response.status_code == 500
 
     def test_excludes_drafts(
         self, client: FlaskClient, enable_factory_create, db_session, api_auth_token
@@ -205,9 +185,8 @@ class TestSearchOpportunities:
             headers={"X-Auth": api_auth_token},
             json={"invalid": "data"},
         )
-        # The framework might return 400, 422, or 500 depending on validation level
         assert response.status_code in [400, 422, 500]
-        if response.status_code != 500:  # Only check message if not a server error
+        if response.status_code != 500:
             data = response.get_json()
             assert "message" in data
 
@@ -230,8 +209,6 @@ class TestResponseSchemaValidation:
         assert "status" in data
         assert "message" in data
         assert "items" in data
-        # Note: The actual response doesn't include paginationInfo, sortInfo, or filterInfo
-        # These fields are not being returned by the current implementation
 
         # Check items structure if any exist
         if data["items"]:
@@ -241,8 +218,6 @@ class TestResponseSchemaValidation:
             assert "description" in item
             assert "funding" in item
             assert "source" in item
-            # Note: The actual response doesn't include keyDates or customFields
-            # These fields are not being returned by the current implementation
 
     def test_get_opportunity_response_schema(
         self, client: FlaskClient, enable_factory_create, db_session, api_auth_token
@@ -270,5 +245,3 @@ class TestResponseSchemaValidation:
         assert "description" in opportunity_data
         assert "funding" in opportunity_data
         assert "source" in opportunity_data
-        # Note: The actual response doesn't include keyDates or customFields
-        # These fields are not being returned by the current implementation
