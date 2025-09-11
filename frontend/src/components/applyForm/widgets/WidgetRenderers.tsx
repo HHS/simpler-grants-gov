@@ -49,5 +49,5 @@ export const renderWidget = ({
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return Widget(props);
+  return <Widget {...props} />;
 };

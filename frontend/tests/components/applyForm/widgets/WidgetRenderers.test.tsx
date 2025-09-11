@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { omit } from "lodash";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import { fakeWidgetProps } from "src/utils/testing/fixtures";
 
@@ -41,7 +42,9 @@ describe("wrapSection", () => {
 describe("renderWidget", () => {
   it("renders the correct widget with correct props", () => {
     render(renderWidget({ props: fakeWidgetProps, type: "Text" }));
-    expect(mockWidget).toHaveBeenCalledWith(fakeWidgetProps);
+
+    // key prop is stripped out by React during render
+    expect(mockWidget).toHaveBeenCalledWith(omit(fakeWidgetProps, "key"));
   });
   it("errors if widget is not found", async () => {
     const error = await wrapForExpectedError(() => {
