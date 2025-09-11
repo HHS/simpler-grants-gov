@@ -65,10 +65,10 @@ class TestCurrencyTransformations:
         result = transform_currency_format("50000")
         assert result == "50000"
 
-    def test_transform_currency_string_with_symbols(self):
-        """Test currency transformation with currency symbols."""
-        result = transform_currency_format("$50,000.00")
-        assert result == "50000.00"
+    def test_transform_currency_string_negative(self):
+        """Test currency transformation with negative values."""
+        result = transform_currency_format("-50000.00")
+        assert result == "-50000.00"
 
     def test_transform_currency_single_decimal(self):
         """Test currency transformation with single decimal place."""
@@ -90,6 +90,9 @@ class TestCurrencyTransformations:
 
         with pytest.raises(ValueTransformationError):
             transform_currency_format("123.456")  # Too many decimal places
+
+        with pytest.raises(ValueTransformationError):
+            transform_currency_format("$50,000.00")  # Currency symbols not allowed
 
 
 class TestStringTransformations:

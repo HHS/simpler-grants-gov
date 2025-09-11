@@ -63,17 +63,12 @@ def transform_currency_format(value: Any) -> str:
             f"Currency value must be string (validated upstream), got {type(value)}"
         )
 
-    # Remove any non-numeric characters except decimal point
-    cleaned = re.sub(r"[^\d.]", "", value)
+    if not re.match(r"^-?\d+(\.\d{1,2})?$", value):
+        raise ValueTransformationError(
+            f"Invalid currency format: '{value}' - must be numeric with optional decimal (up to 2 places)"
+        )
 
-    if not cleaned:
-        raise ValueTransformationError(f"Invalid currency value: '{value}'")
-
-    # Validate format
-    if not re.match(r"^\d+(\.\d{1,2})?$", cleaned):
-        raise ValueTransformationError(f"Invalid currency format: '{value}'")
-
-    return cleaned
+    return value
 
 
 def transform_string_case(value: Any, case_type: str) -> str:

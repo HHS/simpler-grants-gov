@@ -86,10 +86,9 @@ class RecursiveXMLTransformer:
                             f"Using default value '{default_value}' for {'.'.join(current_path)}"
                         )
                     else:
-                        logger.warning(
-                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}, excluding field"
+                        raise ValueError(
+                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
                         )
-                        continue
 
                 # Apply the transformation
                 transformed_value = self._apply_transform_rule(
