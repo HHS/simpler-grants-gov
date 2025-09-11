@@ -1,3 +1,5 @@
+import { omit } from "lodash";
+
 import { JSX } from "react";
 
 import {
@@ -49,5 +51,8 @@ export const renderWidget = ({
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  return <Widget {...props} />;
+  // key prop can't be spread due to React internal rules
+  const key = props.key as string;
+  const spreadProps = omit(props, "key") as UswdsWidgetProps;
+  return <Widget key={key} {...spreadProps} />;
 };
