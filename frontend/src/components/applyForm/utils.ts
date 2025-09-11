@@ -6,8 +6,6 @@ import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
-import React, { JSX } from "react";
-
 import { formDataToObject } from "./formDataToJson";
 import {
   FormValidationWarning,
@@ -18,25 +16,9 @@ import {
   WidgetTypes,
 } from "./types";
 
-import AttachmentWidget from "./widgets/AttachmentUploadWidget";
-import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
-import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
-import Budget424aSectionC from "./widgets/budget/Budget424aSectionC";
-import Budget424aSectionD from "./widgets/budget/Budget424aSectionD";
-import Budget424aSectionE from "./widgets/budget/Budget424aSectionE";
-import Budget424aSectionF from "./widgets/budget/Budget424aSectionF";
-import CheckboxWidget from "./widgets/CheckboxWidget";
-import { FieldsetWidget } from "./widgets/FieldsetWidget";
-import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
-import MultiSelectWidget from "./widgets/MultiSelectWidget";
-import RadioWidget from "./widgets/RadioWidget";
-import SelectWidget from "./widgets/SelectWidget";
-import TextAreaWidget from "./widgets/TextAreaWidget";
-import TextWidget from "./widgets/TextWidget";
-
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
-// JSON Schema doesn't describe UI so types are inferred if a widget isn't supplied
+// json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -137,7 +119,7 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
-// Not used in multifield by default, but required to compute IDs and lookups
+// new, not used in multifield
 export const getFieldName = ({
   definition,
   schema,
@@ -149,7 +131,7 @@ export const getFieldName = ({
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--"); // friendlier for HTML attributes than slashes
+      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -158,26 +140,6 @@ export const getFieldName = ({
 export const getFieldPath = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
 
-const widgetComponents: Record<
-  WidgetTypes,
-  React.ComponentType<UswdsWidgetProps>
-> = {
-  Text: TextWidget,
-  TextArea: TextAreaWidget,
-  Radio: RadioWidget,
-  Select: SelectWidget,
-  MultiSelect: MultiSelectWidget,
-  Checkbox: CheckboxWidget,
-  Attachment: AttachmentWidget,
-  AttachmentArray: AttachmentArrayWidget,
-  Budget424aSectionA,
-  Budget424aSectionB,
-  Budget424aSectionC,
-  Budget424aSectionD,
-  Budget424aSectionE,
-  Budget424aSectionF,
-};
-
 export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
     return;
@@ -185,7 +147,8 @@ export const getByPointer = (target: object, path: string): unknown => {
   try {
     return getSchemaObjectFromPointer(target, path);
   } catch (e) {
-    // desired behavior: return undefined if path is not found
+    // this is not ideal, but it seems like the desired behavior is to return undefined if the
+    // path is not found on the target, and the library throws an error instead
     if ((e as Error).message.includes("Invalid reference token:")) {
       return undefined;
     }
@@ -194,10 +157,6 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-/**
- * External-style API: compute field type + props without rendering a React element.
- * We implement this on top of our shared logic so behavior is consistent.
- */
 export const getFieldConfig = ({
   errors,
   formSchema,
@@ -224,39 +183,23 @@ export const getFieldConfig = ({
       console.error("name misssing from multiField definition");
       throw new Error("Could not build field");
     }
-
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
-      .reduce((acc, s) => ({ ...acc, ...s }), {});
-
-    // Gather each subvalue
-    const collected = definition.map((def) => {
-      const defName = getNameFromDef({ definition: def, schema });
-      const val = get(formData, defName) as unknown;
-      return { defName, val };
-    });
-
-    // If all are plain objects, merge (external behavior). Else map by defName (legacy behavior).
-    const allObjects = collected.every(
-      ({ val }) => typeof val === "object" && val !== null && !Array.isArray(val),
-    );
-
-    if (allObjects) {
-      value = collected.reduce<Record<string, unknown>>(
-        (acc, { val }) => ({ ...acc, ...(val as Record<string, unknown>) }),
+      .reduce((acc, schema) => ({ ...acc, ...schema }), {});
+    value = definition
+      .map((def) => {
+        const defName = getNameFromDef({ definition: def, schema });
+        const result = get(formData, defName) as unknown;
+        return typeof result === "object" && result !== null
+          ? (result as Record<string, unknown>)
+          : {};
+      })
+      .reduce<Record<string, unknown>>(
+        (acc, value) => ({ ...acc, ...value }),
         {},
       );
-    } else {
-      value = collected.reduce<Record<string, unknown>>(
-        (acc, { defName, val }) => {
-          acc[defName] = val as unknown;
-          return acc;
-        },
-        {},
-      );
-    }
-
-    // MultiField needs to retain field location for errors
+    // multifield needs to retain field location for errors.
+    // this may not work with nested required fields
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -271,14 +214,13 @@ export const getFieldConfig = ({
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
     value = getByPointer(formData, path) as string | number | undefined;
-
-    const fsType =
+    const fieldType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "";
-    rawErrors = formatFieldWarnings(errors, name, fsType, requiredField);
+    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -292,11 +234,14 @@ export const getFieldConfig = ({
     throw new Error("Could not build field");
   }
 
+  // should filter and match warnings to field earlier in the process
   const type = determineFieldType({ uiFieldObject, fieldSchema });
+
+  // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
+  let options = {};
 
   // Provide enumOptions for Select, MultiSelect, and Radio
-  let options: WidgetOptions | Record<string, never> = {};
   if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
@@ -338,7 +283,6 @@ export const getFieldConfig = ({
         ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
         : ({ enumOptions } as WidgetOptions);
   }
-
   return {
     type,
     props: {
@@ -354,55 +298,6 @@ export const getFieldConfig = ({
       options,
     },
   };
-};
-
-/**
- * Our rendering path: uses getFieldConfig for consistency but returns a React element
- * so hooks run and context providers (e.g., attachments) work as expected.
- */
-export const buildField = ({
-  errors,
-  formSchema,
-  formData,
-  uiFieldObject,
-  requiredField,
-}: {
-  errors: FormValidationWarning[] | null;
-  formSchema: RJSFSchema;
-  formData: object;
-  uiFieldObject: UiSchemaField;
-  requiredField: boolean;
-}) => {
-  const { type, props } = getFieldConfig({
-    errors,
-    formSchema,
-    formData,
-    uiFieldObject,
-    requiredField,
-  });
-
-  const Widget = widgetComponents[type];
-  if (!Widget) {
-    // definition/schema not available here; leave helpful context
-    console.error(`Unknown widget type: ${type}`);
-    throw new Error(`Unknown widget type: ${type}`);
-  }
-
-  // Specific to the Budget Form Widgets — Sections A–F need to read across multiple schema fragments
-  const compositeBudgetTypes = new Set<WidgetTypes>([
-    "Budget424aSectionA",
-    "Budget424aSectionB",
-    "Budget424aSectionC",
-    "Budget424aSectionD",
-    "Budget424aSectionE",
-    "Budget424aSectionF",
-  ]);
-
-  const finalProps = compositeBudgetTypes.has(type)
-    ? { ...props, value: formData, formContext: { rootSchema: formSchema } }
-    : props;
-
-  return <Widget {...finalProps} />;
 };
 
 const getNestedWarningsForField = (
@@ -477,30 +372,6 @@ export function getFieldsForNav(
   return results;
 }
 
-export const wrapSection = ({
-  label,
-  fieldName,
-  tree,
-  description,
-}: {
-  label: string;
-  fieldName: string;
-  tree: JSX.Element | undefined;
-  description?: string;
-}) => {
-  const uniqueKey = `${fieldName}-fieldset`;
-  return (
-    <FieldsetWidget
-      key={uniqueKey}
-      fieldName={fieldName}
-      label={label}
-      description={description}
-    >
-      {tree}
-    </FieldsetWidget>
-  );
-};
-
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   if (typeof mightBeAnObject === "boolean") {
     return false;
@@ -521,67 +392,8 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
     if (isBasicallyAnObject(nestedValue)) {
       return isEmptyField(nestedValue);
     }
-    // STRICT: do not drop valid falsy primitives like false/0
-    return nestedValue === undefined || nestedValue === null;
+    return !nestedValue;
   });
-};
-
-// Returns true if a condensed schema node declares a string type
-const nodeIsStringTyped = (schemaNode: unknown): boolean => {
-  if (!schemaNode || typeof schemaNode !== "object") return false;
-  const typeField = (schemaNode as { type?: unknown }).type;
-  if (Array.isArray(typeField)) {
-    return typeField.includes("string");
-  }
-  return typeField === "string";
-};
-
-// Recursively convert numbers → strings where the schema node is string-typed
-const coerceNumbersToStringsPerSchema = (
-  dataNode: unknown,
-  schemaNode: unknown,
-): unknown => {
-  // If this exact node is string-typed and value is a number, convert to string
-  if (nodeIsStringTyped(schemaNode) && typeof dataNode === "number") {
-    return String(dataNode);
-  }
-
-  // Arrays
-  if (Array.isArray(dataNode)) {
-    const itemSchema =
-      schemaNode &&
-      typeof schemaNode === "object" &&
-      (schemaNode as { items?: unknown }).items &&
-      !Array.isArray((schemaNode as { items?: unknown }).items)
-        ? (schemaNode as { items?: unknown }).items
-        : undefined;
-
-    return dataNode.map((child) =>
-      coerceNumbersToStringsPerSchema(child, itemSchema),
-    );
-  }
-
-  // Objects
-  if (dataNode && typeof dataNode === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [childKey, childValue] of Object.entries(
-      dataNode as Record<string, unknown>,
-    )) {
-      const childSchema =
-        schemaNode && typeof schemaNode === "object"
-          ? (schemaNode as Record<string, unknown>)[childKey]
-          : undefined;
-
-      result[childKey] = coerceNumbersToStringsPerSchema(
-        childValue,
-        childSchema,
-      );
-    }
-    return result;
-  }
-
-  // Primitives (string, boolean, null, undefined): leave as-is
-  return dataNode;
 };
 
 // if a nested field contains no defined items, remove it from the data
@@ -616,20 +428,14 @@ export const shapeFormData = <T extends object>(
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  // Build the condensed schema once for both formDataToObject and coercion
-  const condensedSchema = condenseFormSchemaProperties(formSchema);
-
-  const structuredFormData = formDataToObject(formData, condensedSchema, {
-    delimiter: "--",
-  });
-
-  // Convert numbers to strings wherever the schema declares a string type
-  const schemaAlignedData = coerceNumbersToStringsPerSchema(
-    structuredFormData,
-    condensedSchema,
-  ) as T;
-
-  return pruneEmptyNestedFields(schemaAlignedData) as T;
+  const structuredFormData = formDataToObject(
+    formData,
+    condenseFormSchemaProperties(formSchema),
+    {
+      delimiter: "--",
+    },
+  );
+  return pruneEmptyNestedFields(structuredFormData) as T;
 };
 
 const removePropertyPaths = (path: unknown): string => {
@@ -721,15 +527,13 @@ export const flatFormDataToArray = (
   );
 };
 
-/**
-  dereferences all def links so that all necessary property definitions
-  can be found directly within the property without referencing $defs.
-  also resolves "allOf" references within "properties" or "$defs" fields.
-  not merging the entire schema because many schemas have top level
-  "allOf" blocks that often contain "if"/"then" statements or other things
-  that the mergeAllOf library can't handle out of the box, and we don't need
-  to condense in any case
- */
+// dereferences all def links so that all necessary property definitions
+// can be found directly within the property without referencing $defs.
+// also resolves "allOf" references within "properties" or "$defs" fields.
+// not merging the entire schema because many schemas have top level
+// "allOf" blocks that often contain "if"/"then" statements or other things
+// that the mergeAllOf library can't handle out of the box, and we don't need
+// to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
@@ -759,6 +563,7 @@ export const processFormSchema = async (
   ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
       { path: { nested: 'value' } }
 */
+
 export const condenseFormSchemaProperties = (schema: object): object => {
   return Object.entries(schema).reduce(
     (condensed: Record<string, unknown>, [key, value]: [string, unknown]) => {
