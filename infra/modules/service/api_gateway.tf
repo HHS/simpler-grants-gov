@@ -9,16 +9,17 @@ resource "aws_api_gateway_rest_api" "api" {
   body = jsonencode({
     "openapi" : "3.0.1",
     "paths" : {
-      "/health" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/health",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
+      # Temp disable as we work on fully testing this out
+      # "/health" : {
+      #   "get" : {
+      #     "x-amazon-apigateway-integration" : {
+      #       "type" : "http_proxy",
+      #       "httpMethod" : "GET",
+      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/health",
+      #       "passthroughBehavior" : "when_no_match"
+      #     }
+      #   }
+      # },
       "/{proxy+}" : {
         "x-amazon-apigateway-any-method" : {
           "parameters" : [
@@ -32,84 +33,88 @@ resource "aws_api_gateway_rest_api" "api" {
             }
           ],
           "security" : [
-            {
-              "api_key" : []
-            }
+            # Temp disable as we work on fully testing this out
+            # {
+            #   "api_key" : []
+            # }
           ],
           "x-amazon-apigateway-integration" : {
             "type" : "http_proxy",
             "httpMethod" : "ANY",
             "uri" : "https://${var.optional_extra_alb_domains[0]}/{proxy}",
             "requestParameters" : {
-              "integration.request.path.proxy" : "method.request.path.proxy"
+              "integration.request.path.proxy" : "method.request.path.proxy",
+              # Might not be needed, but adding for testing
+              "integration.request.header.Host" : "'${var.domain_name}'"
             },
             "passthroughBehavior" : "when_no_match",
             "timeoutInMillis" : 29000
           }
         }
       },
-      "/v1/users/login" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login",
-            "requestParameters" : {
-              "integration.request.header.Host" : "'${var.domain_name}'"
-            },
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/v1/users/login/callback" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/callback",
-            "requestParameters" : {
-              "integration.request.header.Host" : "'${var.domain_name}'"
-            },
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/docs" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/docs",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/static/{proxy+}" : {
-        "get" : {
-          "parameters" : [
-            {
-              "name" : "proxy",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          ],
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/static/{proxy}",
-            "requestParameters" : {
-              "integration.request.path.proxy" : "method.request.path.proxy"
-            },
-            "passthroughBehavior" : "when_no_match",
-            "cacheKeyParameters" : [
-              "method.request.path.proxy"
-            ]
-          }
-        }
-      }
+      # Temp disable as we work on fully testing this out
+      # "/v1/users/login" : {
+      #   "get" : {
+      #     "x-amazon-apigateway-integration" : {
+      #       "type" : "http_proxy",
+      #       "httpMethod" : "GET",
+      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login",
+      #       "requestParameters" : {
+      #         "integration.request.header.Host" : "'${var.domain_name}'"
+      #       },
+      #       "passthroughBehavior" : "when_no_match"
+      #     }
+      #   }
+      # },
+      # "/v1/users/login/callback" : {
+      #   "get" : {
+      #     "x-amazon-apigateway-integration" : {
+      #       "type" : "http_proxy",
+      #       "httpMethod" : "GET",
+      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/callback",
+      #       "requestParameters" : {
+      #         "integration.request.header.Host" : "'${var.domain_name}'"
+      #       },
+      #       "passthroughBehavior" : "when_no_match"
+      #     }
+      #   }
+      # },
+      # "/docs" : {
+      #   "get" : {
+      #     "x-amazon-apigateway-integration" : {
+      #       "type" : "http_proxy",
+      #       "httpMethod" : "GET",
+      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/docs",
+      #       "passthroughBehavior" : "when_no_match"
+      #     }
+      #   }
+      # },
+      # "/static/{proxy+}" : {
+      #   "get" : {
+      #     "parameters" : [
+      #       {
+      #         "name" : "proxy",
+      #         "in" : "path",
+      #         "required" : true,
+      #         "schema" : {
+      #           "type" : "string"
+      #         }
+      #       }
+      #     ],
+      #     "x-amazon-apigateway-integration" : {
+      #       "type" : "http_proxy",
+      #       "httpMethod" : "GET",
+      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/static/{proxy}",
+      #       "requestParameters" : {
+      #         "integration.request.path.proxy" : "method.request.path.proxy"
+      #       },
+      #       "passthroughBehavior" : "when_no_match",
+      #       "cacheKeyParameters" : [
+      #         "method.request.path.proxy"
+      #       ]
+      #     }
+      #   }
+      # }
     }
   })
   # checkov:skip=CKV_AWS_237: Create before destroy is defined in deployment below
