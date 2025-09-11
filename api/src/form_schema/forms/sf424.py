@@ -2,6 +2,7 @@ import uuid
 
 import src.form_schema.forms.shared_schema as shared_schema
 from src.db.models.competition_models import Form
+from src.services.xml_generation.constants import NO_VALUE
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -1066,11 +1067,21 @@ FORM_XML_TRANSFORM_RULES = {
         "form_name": "SF424_4_0",
         "namespaces": {"default": "http://apply.grants.gov/forms/SF424_4_0-V4.0", "prefix": ""},
         "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+            "include_null": "Include empty XML element: <Field></Field>",
+            "default_value": "Use configured default value when field is None",
+        },
     },
     # Core application information - direct field mappings
     "submission_type": {"xml_transform": {"target": "SubmissionType"}},
     "application_type": {"xml_transform": {"target": "ApplicationType"}},
-    "date_received": {"xml_transform": {"target": "DateReceived"}},
+    "date_received": {
+        "xml_transform": {
+            "target": "DateReceived",
+            "null_handling": "include_null",
+        }
+    },
     # Applicant information - direct field mappings
     "organization_name": {"xml_transform": {"target": "OrganizationName"}},
     "employer_taxpayer_identification_number": {
@@ -1108,21 +1119,70 @@ FORM_XML_TRANSFORM_RULES = {
     },
     "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
     "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
-    # Funding information - direct field mappings
-    "federal_estimated_funding": {"xml_transform": {"target": "FederalEstimatedFunding"}},
-    "applicant_estimated_funding": {"xml_transform": {"target": "ApplicantEstimatedFunding"}},
-    "state_estimated_funding": {"xml_transform": {"target": "StateEstimatedFunding"}},
-    "local_estimated_funding": {"xml_transform": {"target": "LocalEstimatedFunding"}},
-    "other_estimated_funding": {"xml_transform": {"target": "OtherEstimatedFunding"}},
-    "program_income_estimated_funding": {
-        "xml_transform": {"target": "ProgramIncomeEstimatedFunding"}
+    # Funding information - with currency formatting
+    "federal_estimated_funding": {
+        "xml_transform": {
+            "target": "FederalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
     },
-    "total_estimated_funding": {"xml_transform": {"target": "TotalEstimatedFunding"}},
-    # Review and certification - direct field mappings
-    "state_review": {"xml_transform": {"target": "StateReview"}},
+    "applicant_estimated_funding": {
+        "xml_transform": {
+            "target": "ApplicantEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "state_estimated_funding": {
+        "xml_transform": {
+            "target": "StateEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "local_estimated_funding": {
+        "xml_transform": {
+            "target": "LocalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "other_estimated_funding": {
+        "xml_transform": {
+            "target": "OtherEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "program_income_estimated_funding": {
+        "xml_transform": {
+            "target": "ProgramIncomeEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "total_estimated_funding": {
+        "xml_transform": {
+            "target": "TotalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    # Review and certification - with value transformations
+    "state_review": {
+        "xml_transform": {
+            "target": "StateReview",
+            "null_handling": "default_value",
+            "default_value": NO_VALUE,  # Use constant from value_transformers
+        }
+    },
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
-    "delinquent_federal_debt": {"xml_transform": {"target": "DelinquentFederalDebt"}},
-    "certification_agree": {"xml_transform": {"target": "CertificationAgree"}},
+    "delinquent_federal_debt": {
+        "xml_transform": {
+            "target": "DelinquentFederalDebt",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "certification_agree": {
+        "xml_transform": {
+            "target": "CertificationAgree",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
     # Authorized representative - direct field mappings
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}

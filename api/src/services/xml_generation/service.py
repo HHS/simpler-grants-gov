@@ -74,8 +74,7 @@ class XMLGenerationService:
 
         # Add data elements
         for field_name, value in data.items():
-            if value is not None:
-                self._add_element_to_parent(root, field_name, value)
+            self._add_element_to_parent(root, field_name, value)
 
         # Generate XML string
         if pretty_print:
@@ -92,6 +91,9 @@ class XMLGenerationService:
             for nested_field, nested_value in value.items():
                 if nested_value is not None:
                     self._add_element_to_parent(nested_element, nested_field, nested_value)
+        elif value is None:
+            # Create empty element for None values (when include_null is configured)
+            ET.SubElement(parent, field_name)
         else:
             # Simple value - create element with text content
             element = ET.SubElement(parent, field_name)

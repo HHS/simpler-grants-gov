@@ -3,6 +3,8 @@
 import logging
 from typing import Any
 
+from ..value_transformers import apply_value_transformation
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,7 +47,7 @@ class RecursiveXMLTransformer:
         Returns:
             Transformed data at this level
         """
-        result = {}
+        result: dict[str, Any] = {}
 
         # Iterate over rules at this level
         for key, rule_config in rules.items():
@@ -60,17 +62,50 @@ class RecursiveXMLTransformer:
 
                 # Get the source value from the input data
                 source_value = self._get_nested_value(source_data, current_path)
-                if source_value is not None:
-                    # Apply the transformation
-                    transformed_value = self._apply_transform_rule(
-                        source_value, transform_rule, rule_config, current_path
-                    )
-                    if transformed_value is not None:
+
+                # Handle None values based on configuration
+                if source_value is None:
+                    none_handling = transform_rule.get("null_handling", "exclude")
+
+                    if none_handling == "exclude":
+                        logger.debug(f"Excluding None value for {'.'.join(current_path)}")
+                        continue
+                    elif none_handling == "include_null":
+                        # Include field with null/empty value
                         target_field = transform_rule["target"]
-                        result[target_field] = transformed_value
+                        result[target_field] = None
                         logger.debug(
-                            f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                            f"Including None value for {'.'.join(current_path)} -> {target_field}"
                         )
+                        continue
+                    elif none_handling == "default_value":
+                        # Use configured default value - error if not provided
+                        if "default_value" not in transform_rule:
+                            raise ValueError(
+                                f"null_handling 'default_value' specified but no default_value provided for {'.'.join(current_path)}"
+                            )
+                        default_value = transform_rule["default_value"]
+                        source_value = default_value
+                        logger.debug(
+                            f"Using default value '{default_value}' for {'.'.join(current_path)}"
+                        )
+                    else:
+                        raise ValueError(
+                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
+                        )
+
+                # Apply the transformation
+                transformed_value = self._apply_transform_rule(
+                    source_value, transform_rule, rule_config, current_path
+                )
+
+                # Add to result if transformation succeeded and produced non-None value
+                if transformed_value is not None:
+                    target_field = transform_rule["target"]
+                    result[target_field] = transformed_value
+                    logger.debug(
+                        f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                    )
 
             # If this is a nested structure (dict without xml_transform), recurse
             elif isinstance(rule_config, dict) and "xml_transform" not in rule_config:
@@ -112,8 +147,19 @@ class RecursiveXMLTransformer:
 
             return nested_result if nested_result else None
         else:
-            # Simple transformation - just return the value
-            return source_value
+            # Simple transformation - apply value transformation if specified
+            transformed_value = source_value
+
+            # Check if there's a value transformation specified
+            if "value_transform" in transform_rule:
+                transformed_value = apply_value_transformation(
+                    source_value, transform_rule["value_transform"]
+                )
+                logger.debug(
+                    f"Applied value transformation at {'.'.join(path)}: {source_value} -> {transformed_value}"
+                )
+
+            return transformed_value
 
     def _get_nested_value(self, data: dict[str, Any], path: list[str]) -> Any:
         """Get a nested value from a dictionary using a path."""
