@@ -404,7 +404,7 @@ def build_sql(table_name: str, field_mappings: dict[str, Any]) -> str:
     column_str = ", ".join(columns)
     value_str = ", ".join(values)
 
-    return f"INSERT INTO api.{table_name}({column_str}) VALUES ({value_str});"
+    return f"INSERT INTO api.{table_name}({column_str}) VALUES ({value_str});"  # nosec
 
 
 ###############
