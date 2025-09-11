@@ -6,8 +6,6 @@ import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
-import React, { JSX } from "react";
-
 import { formDataToObject } from "./formDataToJson";
 import {
   FormValidationWarning,
@@ -17,21 +15,6 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
-import AttachmentWidget from "./widgets/AttachmentUploadWidget";
-import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
-import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
-import Budget424aSectionC from "./widgets/budget/Budget424aSectionC";
-import Budget424aSectionD from "./widgets/budget/Budget424aSectionD";
-import Budget424aSectionE from "./widgets/budget/Budget424aSectionE";
-import Budget424aSectionF from "./widgets/budget/Budget424aSectionF";
-import CheckboxWidget from "./widgets/CheckboxWidget";
-import { FieldsetWidget } from "./widgets/FieldsetWidget";
-import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
-import MultiSelectWidget from "./widgets/MultiSelectWidget";
-import RadioWidget from "./widgets/RadioWidget";
-import SelectWidget from "./widgets/SelectWidget";
-import TextAreaWidget from "./widgets/TextAreaWidget";
-import TextWidget from "./widgets/TextWidget";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
@@ -157,26 +140,6 @@ export const getFieldName = ({
 export const getFieldPath = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
 
-const widgetComponents: Record<
-  WidgetTypes,
-  React.ComponentType<UswdsWidgetProps>
-> = {
-  Text: TextWidget,
-  TextArea: TextAreaWidget,
-  Radio: RadioWidget,
-  Select: SelectWidget,
-  MultiSelect: MultiSelectWidget,
-  Checkbox: CheckboxWidget,
-  Attachment: AttachmentWidget,
-  AttachmentArray: AttachmentArrayWidget,
-  Budget424aSectionA,
-  Budget424aSectionB,
-  Budget424aSectionC,
-  Budget424aSectionD,
-  Budget424aSectionE,
-  Budget424aSectionF,
-};
-
 export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
     return;
@@ -194,7 +157,7 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-export const buildField = ({
+export const getFieldConfig = ({
   errors,
   formSchema,
   formData,
@@ -265,14 +228,13 @@ export const buildField = ({
     throw new Error("Invalid or missing field schema");
   }
 
-  // fields that have no definition won't have a name, but will havea schema
+  // fields that have no definition won't have a name, but will have a schema
   if ((!name || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
   // should filter and match warnings to field earlier in the process
-
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
@@ -321,31 +283,21 @@ export const buildField = ({
         ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
         : ({ enumOptions } as WidgetOptions);
   }
-
-  const Widget = widgetComponents[type];
-
-  if (!Widget) {
-    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
-    throw new Error(`Unknown widget type: ${type}`);
-  }
-
-  // IMPORTANT:
-  // return a React element so hooks execute during render,
-  // under the AttachmentsProvider context.
-  return (
-    <Widget
-      id={name}
-      key={name}
-      disabled={disabled}
-      required={requiredField}
-      minLength={fieldSchema?.minLength}
-      maxLength={fieldSchema?.maxLength}
-      schema={fieldSchema}
-      rawErrors={rawErrors}
-      value={value}
-      options={options}
-    />
-  );
+  return {
+    type,
+    props: {
+      id: name,
+      key: name,
+      disabled,
+      required: requiredField,
+      minLength: fieldSchema?.minLength,
+      maxLength: fieldSchema?.maxLength,
+      schema: fieldSchema,
+      rawErrors,
+      value,
+      options,
+    },
+  };
 };
 
 const getNestedWarningsForField = (
@@ -419,30 +371,6 @@ export function getFieldsForNav(
 
   return results;
 }
-
-export const wrapSection = ({
-  label,
-  fieldName,
-  tree,
-  description,
-}: {
-  label: string;
-  fieldName: string;
-  tree: JSX.Element | undefined;
-  description?: string;
-}) => {
-  const uniqueKey = `${fieldName}-fieldset`;
-  return (
-    <FieldsetWidget
-      key={uniqueKey}
-      fieldName={fieldName}
-      label={label}
-      description={description}
-    >
-      {tree}
-    </FieldsetWidget>
-  );
-};
 
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   if (typeof mightBeAnObject === "boolean") {
