@@ -29,7 +29,7 @@ function CheckboxWidget<
 }: UswdsWidgetProps<T, S, F>) {
   const hasError = rawErrors.length > 0 ? true : undefined;
 
-  const description = options?.description ?? schema.description
+  const description = options?.description ?? schema.description;
   const labelType = getLabelTypeFromOptions(
     (options?.["widget-label"] as string | undefined) ?? undefined,
   );

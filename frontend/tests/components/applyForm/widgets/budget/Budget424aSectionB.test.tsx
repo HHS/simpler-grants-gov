@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
+
 import React from "react";
+
 import Budget424aSectionB from "src/components/applyForm/widgets/budget/Budget424aSectionB";
 
 type MoneyString = string;
@@ -93,9 +95,7 @@ describe("Budget424aSectionB", () => {
     ).toHaveValue("96.00");
 
     expect(
-      screen.getByTestId(
-        "total_budget_categories--program_income_amount",
-      ),
+      screen.getByTestId("total_budget_categories--program_income_amount"),
     ).toHaveValue("4.00");
   });
 });

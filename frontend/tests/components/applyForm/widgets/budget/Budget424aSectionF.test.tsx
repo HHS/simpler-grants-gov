@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { RJSFSchema, FormContextType } from "@rjsf/utils";
+import { FormContextType, RJSFSchema } from "@rjsf/utils";
+import { fireEvent, render, screen } from "@testing-library/react";
+
 import React from "react";
 
 import Budget424aSectionF from "src/components/applyForm/widgets/budget/Budget424aSectionF";
@@ -68,9 +69,9 @@ describe("Budget424aSectionF", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("textbox", { name: "Direct charges" }),
-    ).toHaveValue("Direct notes");
+    expect(screen.getByRole("textbox", { name: "Direct charges" })).toHaveValue(
+      "Direct notes",
+    );
     expect(
       screen.getByRole("textbox", { name: "Indirect charges" }),
     ).toHaveValue("Indirect notes");
@@ -79,8 +80,7 @@ describe("Budget424aSectionF", () => {
     );
 
     const checkbox = screen.getByRole("checkbox", {
-      name:
-        /I confirm the information in this section is accurate to the best of my knowledge\./i,
+      name: /I confirm the information in this section is accurate to the best of my knowledge\./i,
     });
     expect(checkbox).toBeChecked();
   });
@@ -107,8 +107,7 @@ describe("Budget424aSectionF", () => {
     );
 
     const checkbox = screen.getByRole("checkbox", {
-      name:
-        /I confirm the information in this section is accurate to the best of my knowledge\./i,
+      name: /I confirm the information in this section is accurate to the best of my knowledge\./i,
     });
 
     fireEvent.click(checkbox);
@@ -136,11 +135,12 @@ describe("Budget424aSectionF", () => {
     expect(
       screen.getByRole("textbox", { name: "Indirect charges" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Remarks" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Remarks" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("checkbox", {
-        name:
-          /I confirm the information in this section is accurate to the best of my knowledge\./i,
+        name: /I confirm the information in this section is accurate to the best of my knowledge\./i,
       }),
     ).toBeInTheDocument();
   });

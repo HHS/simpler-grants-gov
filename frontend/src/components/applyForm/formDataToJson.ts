@@ -58,12 +58,11 @@ const parseValue = (rawValue: unknown, type: string) => {
     }
   }
 
-
   if (looksJsonish) {
     try {
       return JSON.parse(text) as unknown;
     } catch {
-      console.error("Not valid json")
+      console.error("Not valid json");
     }
   }
 

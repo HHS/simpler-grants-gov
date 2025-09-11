@@ -81,15 +81,11 @@ function normalizeSectionAValue(raw: unknown): NormalizedA {
   if (isRecord(raw)) {
     const items: ActivityItem[] = [];
     for (let i = 0; i < 4; i++) {
-      items.push(
-        pickActivityItemA((raw)[String(i)]),
-      );
+      items.push(pickActivityItemA(raw[String(i)]));
     }
 
     const totals =
-      pickBudgetSummary(
-        (raw).total_budget_summary,
-      ) || pickBudgetSummary(raw);
+      pickBudgetSummary(raw.total_budget_summary) || pickBudgetSummary(raw);
 
     const hasAnyTotal =
       totals.federal_estimated_unobligated_amount ||
