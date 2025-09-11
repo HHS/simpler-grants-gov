@@ -38,12 +38,6 @@ type NormalizedA = {
   totals?: BudgetSummary;
 };
 
-
-type RootValue = {
-  activity_line_items?: ActivityItem[];
-  total_budget_summary?: BudgetSummary;
-};
-
 function pickBudgetSummary(value: unknown): BudgetSummary {
   if (!isRecord(value)) return {};
   return {
@@ -53,9 +47,7 @@ function pickBudgetSummary(value: unknown): BudgetSummary {
     non_federal_estimated_unobligated_amount: asMoney(
       value.non_federal_estimated_unobligated_amount,
     ),
-    federal_new_or_revised_amount: asMoney(
-      value.federal_new_or_revised_amount,
-    ),
+    federal_new_or_revised_amount: asMoney(value.federal_new_or_revised_amount),
     non_federal_new_or_revised_amount: asMoney(
       value.non_federal_new_or_revised_amount,
     ),
@@ -89,14 +81,15 @@ function normalizeSectionAValue(raw: unknown): NormalizedA {
   if (isRecord(raw)) {
     const items: ActivityItem[] = [];
     for (let i = 0; i < 4; i++) {
-      items.push(pickActivityItemA((raw as Record<string, unknown>)[String(i)]));
+      items.push(
+        pickActivityItemA((raw)[String(i)]),
+      );
     }
 
     const totals =
       pickBudgetSummary(
-        (raw as Record<string, unknown>).total_budget_summary,
-      ) ||
-      pickBudgetSummary(raw);
+        (raw).total_budget_summary,
+      ) || pickBudgetSummary(raw);
 
     const hasAnyTotal =
       totals.federal_estimated_unobligated_amount ||
@@ -122,10 +115,16 @@ function Budget424aSectionA<
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const errors = (rawErrors as FormValidationWarning[]) || [];
   const { items, totals } = normalizeSectionAValue(rawValue);
-  const getErrorsA = getErrorsForSection("A")
+  const getErrorsA = getErrorsForSection("A");
   const itemAt = (row: number): ActivityItem => items[row] ?? {};
-  const getItemVal = (row: number, path: keyof ActivityItem): string | undefined => (itemAt(row)[path] as string | undefined);
-  const getBudgetVal = (row: number, path: keyof BudgetSummary): string | undefined => itemAt(row).budget_summary?.[path];
+  const getItemVal = (
+    row: number,
+    path: keyof ActivityItem,
+  ): string | undefined => itemAt(row)[path] as string | undefined;
+  const getBudgetVal = (
+    row: number,
+    path: keyof BudgetSummary,
+  ): string | undefined => itemAt(row).budget_summary?.[path];
 
   const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
 

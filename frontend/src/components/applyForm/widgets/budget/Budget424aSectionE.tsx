@@ -122,8 +122,13 @@ function Budget424aSectionE<
   const resolveErrorsForSection = getBudgetErrors({ errors, id, section: "E" });
 
   const titleCell = (rowIndex: number): JSX.Element => {
-  const title = getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
-  const assistanceListingNumber = getStringOrUndefined(activityItems, `[${rowIndex}].assistance_listing_number`) ?? "";
+    const title =
+      getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
+    const assistanceListingNumber =
+      getStringOrUndefined(
+        activityItems,
+        `[${rowIndex}].assistance_listing_number`,
+      ) ?? "";
 
     return (
       <div className="display-flex flex-column">

@@ -49,7 +49,8 @@ function pickNonFederalResources(value: unknown): NonFederalResources {
 function pickActivityItem(value: unknown): ActivityItem {
   if (!isRecord(value)) return {};
   const activity: ActivityItem = {};
-  if (typeof value.activity_title === "string") activity.activity_title = value.activity_title;
+  if (typeof value.activity_title === "string")
+    activity.activity_title = value.activity_title;
   if (typeof value.assistance_listing_number === "string") {
     activity.assistance_listing_number = value.assistance_listing_number;
   }
@@ -140,8 +141,13 @@ function Budget424aSectionC<
   ];
 
   const titleCell = (rowIndex: number): JSX.Element => {
-  const title = getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
-  const cfda = getStringOrUndefined(activityItems, `[${rowIndex}].assistance_listing_number`) ?? "";
+    const title =
+      getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
+    const cfda =
+      getStringOrUndefined(
+        activityItems,
+        `[${rowIndex}].assistance_listing_number`,
+      ) ?? "";
 
     return (
       <div className="display-flex flex-column">

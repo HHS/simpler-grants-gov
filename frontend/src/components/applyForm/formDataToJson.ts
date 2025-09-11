@@ -43,13 +43,14 @@ const parseValue = (rawValue: unknown, type: string) => {
     return Number(text);
   }
 
-  // Sring
+  // String
   if (type === "string") {
     return text;
   }
 
-  // Oject/Array
-  if ((type === "object" || type === "array") && (/^[{\[]/.test(text))) {
+  // Object/Array
+  const looksJsonish = text.startsWith("{") || text.startsWith("[");
+  if ((type === "object" || type === "array") && looksJsonish) {
     try {
       return JSON.parse(text) as unknown;
     } catch {
@@ -57,11 +58,12 @@ const parseValue = (rawValue: unknown, type: string) => {
     }
   }
 
-  if (/^[{\[]/.test(text)) {
+
+  if (looksJsonish) {
     try {
       return JSON.parse(text) as unknown;
     } catch {
-      console.error("Not valid JSON")
+      console.error("Not valid json")
     }
   }
 

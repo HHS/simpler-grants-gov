@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get, set } from "lodash";
+
 import React, { JSX } from "react";
 
 import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
 import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
+import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
 import { getBudgetErrors } from "./budgetErrorLabels";
-import { isRecord, getStringOrUndefined } from "./budgetValueGuards";
+import { getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
 type RootSchemaContext = FormContextType & { rootSchema?: RJSFSchema };
 
@@ -27,7 +28,7 @@ function getRootSchemaFromContext(context: unknown): RJSFSchema | undefined {
 function Budget424aSectionF<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = FormContextType
+  F extends FormContextType = FormContextType,
 >({
   id,
   value: rawValue = {},
@@ -37,9 +38,7 @@ function Budget424aSectionF<
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const validationWarnings = (rawErrors as FormValidationWarning[]) || [];
   const rootValue = isRecord(rawValue) ? rawValue : {};
-  const rootSchema = getRootSchemaFromContext(
-    formContext as RootSchemaContext,
-  );
+  const rootSchema = getRootSchemaFromContext(formContext as RootSchemaContext);
   const properties = rootSchema?.properties as
     | Record<
         string,
@@ -80,7 +79,7 @@ function Budget424aSectionF<
     (get(rootValue, "confirmation") as boolean | undefined) ?? false;
 
   const updateField = (path: string, next: unknown) => {
-    const updated = { ...(rootValue) };
+    const updated = { ...rootValue };
     set(updated, path, next);
     onChange?.(updated as T);
   };
@@ -138,8 +137,8 @@ function Budget424aSectionF<
                 nextValue === true || nextValue === "true"
                   ? true
                   : nextValue === false || nextValue === "false"
-                  ? false
-                  : undefined;
+                    ? false
+                    : undefined;
               updateField("confirmation", next);
             }}
           />
