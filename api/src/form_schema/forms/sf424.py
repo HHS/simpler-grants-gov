@@ -1170,7 +1170,6 @@ FORM_XML_TRANSFORM_RULES = {
             "default_value": NO_VALUE,  # Use constant from value_transformers
         }
     },
-    "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
     "delinquent_federal_debt": {
         "xml_transform": {
             "target": "DelinquentFederalDebt",
@@ -1194,6 +1193,107 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
+    # Conditional transformation examples
+    "revision_type": {
+        "xml_transform": {
+            "target": "RevisionType",
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "required_when",
+                "condition": {
+                    "type": "field_equals",
+                    "field": "application_type",
+                    "value": "Revision",
+                },
+                "value": {"type": "field_value", "field": "revision_type"},
+            },
+        }
+    },
+    "federal_award_identifier": {
+        "xml_transform": {
+            "target": "FederalAwardIdentifier",
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "required_when",
+                "condition": {
+                    "type": "or",
+                    "conditions": [
+                        {"type": "field_equals", "field": "application_type", "value": "Revision"},
+                        {
+                            "type": "field_equals",
+                            "field": "application_type",
+                            "value": "Continuation",
+                        },
+                    ],
+                },
+                "value": {"type": "field_value", "field": "federal_award_identifier"},
+            },
+        }
+    },
+    "debt_explanation": {
+        "xml_transform": {
+            "target": "DebtExplanation",
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "required_when",
+                "condition": {
+                    "type": "field_equals",
+                    "field": "delinquent_federal_debt",
+                    "value": True,
+                },
+                "value": {"type": "field_value", "field": "debt_explanation"},
+            },
+        }
+    },
+    "state_review_available_date": {
+        "xml_transform": {
+            "target": "StateReviewAvailableDate",
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "required_when",
+                "condition": {
+                    "type": "field_equals",
+                    "field": "state_review",
+                    "value": "a. This application was made available to the state under the Executive Order 12372 Process for review on",
+                },
+                "value": {"type": "field_value", "field": "state_review_available_date"},
+            },
+        }
+    },
+    # Computed field example - total estimated funding
+    "total_estimated_funding_computed": {
+        "xml_transform": {
+            "target": "TotalEstimatedFundingComputed",
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "computed_field",
+                "computation": {
+                    "type": "sum",
+                    "fields": [
+                        "federal_estimated_funding",
+                        "applicant_estimated_funding",
+                        "state_estimated_funding",
+                        "local_estimated_funding",
+                        "other_estimated_funding",
+                        "program_income_estimated_funding",
+                    ],
+                },
+            },
+        }
+    },
+    # One-to-many mapping example - applicant type codes
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "target": "ApplicantTypeCode",  # Not used for one-to-many
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+            },
+        }
+    },
 }
 
 
