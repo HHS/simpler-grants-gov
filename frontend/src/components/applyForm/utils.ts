@@ -17,6 +17,7 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
+
 import AttachmentWidget from "./widgets/AttachmentUploadWidget";
 import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
 import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
@@ -35,7 +36,7 @@ import TextWidget from "./widgets/TextWidget";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
-// json schema doesn't describe UI so types are infered if widget not supplied
+// JSON Schema doesn't describe UI so types are inferred if a widget isn't supplied
 export const determineFieldType = ({
   uiFieldObject,
   fieldSchema,
@@ -136,7 +137,7 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
-// Not used in multifield
+// Not used in multifield by default, but required to compute IDs and lookups
 export const getFieldName = ({
   definition,
   schema,
@@ -148,7 +149,7 @@ export const getFieldName = ({
     const definitionParts = definition.split("/");
     return definitionParts
       .filter((part) => part && part !== "properties")
-      .join("--"); // using hyphens since that will work better for html attributes than slashes and will have less conflict with other characters
+      .join("--"); // friendlier for HTML attributes than slashes
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
@@ -184,8 +185,7 @@ export const getByPointer = (target: object, path: string): unknown => {
   try {
     return getSchemaObjectFromPointer(target, path);
   } catch (e) {
-    // this is not ideal, but it seems like the desired behavior is to return undefined if the
-    // path is not found on the target, and the library throws an error instead
+    // desired behavior: return undefined if path is not found
     if ((e as Error).message.includes("Invalid reference token:")) {
       return undefined;
     }
@@ -194,7 +194,11 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-export const buildField = ({
+/**
+ * External-style API: compute field type + props without rendering a React element.
+ * We implement this on top of our shared logic so behavior is consistent.
+ */
+export const getFieldConfig = ({
   errors,
   formSchema,
   formData,
@@ -220,17 +224,39 @@ export const buildField = ({
       console.error("name misssing from multiField definition");
       throw new Error("Could not build field");
     }
+
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
-      .reduce((acc, schema) => ({ ...acc, ...schema }), {});
-    value = definition.reduce<Record<string, unknown>>((acc, def) => {
-      const defName = getNameFromDef({ definition: def, schema });
-      acc[defName] = get(formData, defName) as unknown;
-      return acc;
-    }, {});
+      .reduce((acc, s) => ({ ...acc, ...s }), {});
 
-    // multifield needs to retain field location for errors.
-    // this may not work with nested required fields
+    // Gather each subvalue
+    const collected = definition.map((def) => {
+      const defName = getNameFromDef({ definition: def, schema });
+      const val = get(formData, defName) as unknown;
+      return { defName, val };
+    });
+
+    // If all are plain objects, merge (external behavior). Else map by defName (legacy behavior).
+    const allObjects = collected.every(
+      ({ val }) => typeof val === "object" && val !== null && !Array.isArray(val),
+    );
+
+    if (allObjects) {
+      value = collected.reduce<Record<string, unknown>>(
+        (acc, { val }) => ({ ...acc, ...(val as Record<string, unknown>) }),
+        {},
+      );
+    } else {
+      value = collected.reduce<Record<string, unknown>>(
+        (acc, { defName, val }) => {
+          acc[defName] = val as unknown;
+          return acc;
+        },
+        {},
+      );
+    }
+
+    // MultiField needs to retain field location for errors
     rawErrors = definition
       .map((def) => {
         const defName = getNameFromDef({ definition: def, schema });
@@ -245,13 +271,14 @@ export const buildField = ({
     name = getFieldName({ definition, schema });
     const path = getFieldPath(name);
     value = getByPointer(formData, path) as string | number | undefined;
-    const fieldType =
+
+    const fsType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "";
-    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
+    rawErrors = formatFieldWarnings(errors, name, fsType, requiredField);
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -265,15 +292,11 @@ export const buildField = ({
     throw new Error("Could not build field");
   }
 
-  // should filter and match warnings to field earlier in the process
-
   const type = determineFieldType({ uiFieldObject, fieldSchema });
-
-  // TODO: move schema mutations to own function
   const disabled = fieldType === "null";
-  let options = {};
 
   // Provide enumOptions for Select, MultiSelect, and Radio
+  let options: WidgetOptions | Record<string, never> = {};
   if (type === "Select" || type === "MultiSelect" || type === "Radio") {
     let enums: string[] = [];
 
@@ -316,16 +339,56 @@ export const buildField = ({
         : ({ enumOptions } as WidgetOptions);
   }
 
-  const Widget = widgetComponents[type];
+  return {
+    type,
+    props: {
+      id: name,
+      key: name,
+      disabled,
+      required: requiredField,
+      minLength: fieldSchema?.minLength,
+      maxLength: fieldSchema?.maxLength,
+      schema: fieldSchema,
+      rawErrors,
+      value,
+      options,
+    },
+  };
+};
 
+/**
+ * Our rendering path: uses getFieldConfig for consistency but returns a React element
+ * so hooks run and context providers (e.g., attachments) work as expected.
+ */
+export const buildField = ({
+  errors,
+  formSchema,
+  formData,
+  uiFieldObject,
+  requiredField,
+}: {
+  errors: FormValidationWarning[] | null;
+  formSchema: RJSFSchema;
+  formData: object;
+  uiFieldObject: UiSchemaField;
+  requiredField: boolean;
+}) => {
+  const { type, props } = getFieldConfig({
+    errors,
+    formSchema,
+    formData,
+    uiFieldObject,
+    requiredField,
+  });
+
+  const Widget = widgetComponents[type];
   if (!Widget) {
-    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
+    // definition/schema not available here; leave helpful context
+    console.error(`Unknown widget type: ${type}`);
     throw new Error(`Unknown widget type: ${type}`);
   }
 
-  // IMPORTANT:
-  // Specific to the Budget Form Widgets
-  // Sections A–F need to read across multiple schema fragments
+  // Specific to the Budget Form Widgets — Sections A–F need to read across multiple schema fragments
   const compositeBudgetTypes = new Set<WidgetTypes>([
     "Budget424aSectionA",
     "Budget424aSectionB",
@@ -335,30 +398,11 @@ export const buildField = ({
     "Budget424aSectionF",
   ]);
 
-  if (compositeBudgetTypes.has(type)) {
-    value = formData;
-  }
+  const finalProps = compositeBudgetTypes.has(type)
+    ? { ...props, value: formData, formContext: { rootSchema: formSchema } }
+    : props;
 
-  // IMPORTANT:
-  // return a React element so hooks execute during render,
-  // under the AttachmentsProvider context.
-  return (
-    <Widget
-      id={name}
-      key={name}
-      disabled={disabled}
-      required={requiredField}
-      minLength={fieldSchema?.minLength}
-      maxLength={fieldSchema?.maxLength}
-      schema={fieldSchema}
-      rawErrors={rawErrors}
-      value={value}
-      options={options}
-      {...(compositeBudgetTypes.has(type)
-        ? { formContext: { rootSchema: formSchema } }
-        : {})}
-    />
-  );
+  return <Widget {...finalProps} />;
 };
 
 const getNestedWarningsForField = (
@@ -477,6 +521,7 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
     if (isBasicallyAnObject(nestedValue)) {
       return isEmptyField(nestedValue);
     }
+    // STRICT: do not drop valid falsy primitives like false/0
     return nestedValue === undefined || nestedValue === null;
   });
 };
@@ -571,16 +616,14 @@ export const shapeFormData = <T extends object>(
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  // Build the condensed schema once for
-  // both formDataToObject and coercion
+  // Build the condensed schema once for both formDataToObject and coercion
   const condensedSchema = condenseFormSchemaProperties(formSchema);
 
   const structuredFormData = formDataToObject(formData, condensedSchema, {
     delimiter: "--",
   });
 
-  // Convert numbers to strings
-  // wherever the schema declares a string type
+  // Convert numbers to strings wherever the schema declares a string type
   const schemaAlignedData = coerceNumbersToStringsPerSchema(
     structuredFormData,
     condensedSchema,
@@ -677,6 +720,7 @@ export const flatFormDataToArray = (
     [] as Array<Record<string, unknown>>,
   );
 };
+
 /**
   dereferences all def links so that all necessary property definitions
   can be found directly within the property without referencing $defs.
@@ -686,7 +730,6 @@ export const flatFormDataToArray = (
   that the mergeAllOf library can't handle out of the box, and we don't need
   to condense in any case
  */
-
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
@@ -716,7 +759,6 @@ export const processFormSchema = async (
   ex. { properties: { path: { properties: { nested: 'value' } } } } becomes
       { path: { nested: 'value' } }
 */
-
 export const condenseFormSchemaProperties = (schema: object): object => {
   return Object.entries(schema).reduce(
     (condensed: Record<string, unknown>, [key, value]: [string, unknown]) => {

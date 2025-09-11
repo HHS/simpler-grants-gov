@@ -1,14 +1,13 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { render, screen } from "@testing-library/react";
 import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
 import { UiSchemaField } from "src/components/applyForm/types";
 import {
-  buildField,
   condenseFormSchemaProperties,
   determineFieldType,
   flatFormDataToArray,
   formatFieldWarnings,
+  getFieldConfig,
   getFieldName,
   getFieldSchema,
   getRequiredProperties,
@@ -17,48 +16,8 @@ import {
   shapeFormData,
 } from "src/components/applyForm/utils";
 
-type FormActionArgs = [
-  {
-    applicationId: string;
-    formId: string;
-    formData: FormData;
-    saved: boolean;
-    error: boolean;
-  },
-  FormData,
-];
-
-type FormActionResult = Promise<{
-  applicationId: string;
-  formId: string;
-  saved: boolean;
-  error: boolean;
-  formData: FormData;
-}>;
-
-const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
-const mockRevalidateTag = jest.fn<void, [string]>();
-const getSessionMock = jest.fn();
 const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
-
-jest.mock("src/components/applyForm/actions", () => ({
-  handleFormAction: (...args: [...FormActionArgs]) =>
-    mockHandleFormAction(...args),
-}));
-
-jest.mock("next/cache", () => ({
-  revalidateTag: (tag: string) => mockRevalidateTag(tag),
-}));
-
-jest.mock("react", () => ({
-  ...jest.requireActual<typeof import("react")>("react"),
-  useCallback: (fn: unknown) => fn,
-}));
-
-jest.mock("src/services/auth/session", () => ({
-  getSession: (): unknown => getSessionMock(),
-}));
 
 jest.mock("@apidevtools/json-schema-ref-parser", () => ({
   dereference: () => mockDereference() as unknown,
@@ -139,8 +98,12 @@ describe("shapeFormData", () => {
   });
 });
 
-describe("buildField", () => {
-  it("should build a field with basic properties", () => {
+describe("getFieldConfig", () => {
+  // TODO: should add tests around
+  // * radio buttons
+  // * multifield
+
+  it("should build a config with basic properties", () => {
     const uiFieldObject: UiSchemaField = {
       type: "field",
       definition: "/properties/name",
@@ -162,28 +125,26 @@ describe("buildField", () => {
     const errors = null;
     const formData = { name: "Jane Doe" };
 
-    const BuiltField = buildField({
+    const { type, props } = getFieldConfig({
       uiFieldObject,
       formSchema,
       errors,
       formData,
       requiredField: true,
     });
-    render(BuiltField);
 
-    const label = screen.getByTestId("label");
-    expect(label).toHaveAttribute("for", "name");
-    expect(label).toHaveAttribute("id", "label-for-name");
-
-    const required = screen.getByText("*");
-    expect(required).toBeInTheDocument();
-
-    const field = screen.getByTestId("name");
-    expect(field).toBeInTheDocument();
-    expect(field).toBeRequired();
-    expect(field).toHaveAttribute("type", "text");
-    expect(field).toHaveAttribute("maxLength", "50");
-    expect(field).toHaveValue("Jane Doe");
+    expect(type).toEqual("Text");
+    expect(props).toEqual({
+      id: "name",
+      key: "name",
+      disabled: false,
+      required: true,
+      maxLength: 50,
+      schema: { type: "string", title: "Name", maxLength: 50 },
+      rawErrors: [],
+      value: "Jane Doe",
+      options: {},
+    });
   });
 
   it("should handle fields with errors", () => {
@@ -210,27 +171,81 @@ describe("buildField", () => {
 
     const formData = { email: "invalid-email" };
 
-    const BuiltField = buildField({
+    const { type, props } = getFieldConfig({
       uiFieldObject,
       formSchema,
       errors,
       formData,
       requiredField: false,
     });
-    render(BuiltField);
 
-    const label = screen.getByTestId("label");
-    expect(label).toHaveAttribute("for", "email");
-    expect(label).toHaveAttribute("id", "label-for-email");
+    expect(type).toEqual("Text");
+    expect(props).toEqual({
+      id: "email",
+      key: "email",
+      disabled: false,
+      required: false,
+      schema: { type: "string", title: "Email" },
+      rawErrors: ["Invalid email format"],
+      value: "invalid-email",
+      options: {},
+    });
+  });
 
-    const error = screen.getByTestId("errorMessage");
-    expect(error).toBeInTheDocument();
-    expect(error).toHaveAttribute("role", "alert");
-    expect(error).toHaveTextContent("Invalid email format");
+  it("should handle field types with options", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/pickOneOfTheOptions",
+    };
 
-    const field = screen.getByTestId("email");
-    expect(field).toBeInTheDocument();
-    expect(error).toHaveClass("usa-error-message");
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        pickOneOfTheOptions: {
+          type: "string",
+          title: "select field",
+          enum: ["first option", "second option"],
+        },
+      },
+    };
+
+    const errors = null;
+    const formData = {
+      pickOneOfTheOptions: "first option",
+    };
+
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: false,
+    });
+
+    expect(type).toEqual("Select");
+    expect(props).toEqual({
+      id: "pickOneOfTheOptions",
+      key: "pickOneOfTheOptions",
+      disabled: false,
+      required: false,
+      schema: {
+        type: "string",
+        title: "select field",
+        enum: ["first option", "second option"],
+      },
+      rawErrors: [],
+      value: "first option",
+      options: {
+        enumOptions: [
+          { label: "first option", value: "first option" },
+          {
+            label: "second option",
+            value: "second option",
+          },
+        ],
+        emptyValue: "- Select -",
+      },
+    });
   });
 });
 
