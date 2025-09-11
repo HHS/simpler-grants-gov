@@ -18,6 +18,8 @@ from common_grants_sdk.schemas.pydantic.requests.opportunity import OpportunityS
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+import src.adapters.search as search
+import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
@@ -122,8 +124,8 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     security=api_key_multi_auth_security_schemes,
     responses=[200],
 )
-@flask_db.with_db_session()
-def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict, int]:
+@flask_opensearch.with_search_client()
+def search_opportunities(search_client: search.SearchClient, json_data: dict) -> tuple[dict, int]:
     """Search for opportunities based on the provided filters."""
 
     # Validate input
@@ -134,13 +136,13 @@ def search_opportunities(db_session: db.Session, json_data: dict) -> tuple[dict,
     except Exception as e:
         return generate_422_error(e)
 
-    # Create service and get query result
-    service = CommonGrantsOpportunityService(db_session)
-    response_object = service.search_opportunities(
-        filters=search_request.filters,
-        sorting=search_request.sorting,
-        pagination=search_request.pagination,
-        search=search_request.search,
+    # Perform search
+    response_object = CommonGrantsOpportunityService.search_opportunities(
+        search_client,
+        search_request.filters,
+        search_request.sorting,
+        search_request.pagination,
+        search_request.search,
     )
 
     # Hydrate schema

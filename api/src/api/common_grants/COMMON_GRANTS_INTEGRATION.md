@@ -4,7 +4,7 @@ This document describes the integration of the CommonGrants Protocol into the `s
 
 ## Overview
 
-The CommonGrants Protocol provides standardized access to grant opportunity data. This integration adds three endpoints to the existing API:
+The CommonGrants Protocol provides standardized access to grant opportunity data. This integration adds three endpoints defined by the protocol to the existing API:
 
 - `GET /common-grants/opportunities/` - List opportunities with pagination
 - `GET /common-grants/opportunities/{oppId}` - Get specific opportunity by ID  
@@ -18,13 +18,31 @@ The CommonGrants Protocol provides standardized access to grant opportunity data
 - **Service**: `src/services/common_grants/opportunity_service.py` - Business logic
 - **Transformation**: `src/services/common_grants/transformation.py` - Data mapping
 - **Dependency**: `common-grants-sdk = "^0.3.1"` - Protocol schemas and validation
-- **OpenAPI Generation**: `src/common_grants/scripts/generate_openapi.py` - Schema generation
+
+### Search Integration
+
+The search endpoint (`POST /common-grants/opportunities/search`) is effectively a **wrapper** around the existing search infrastructure:
+
+- **Reuses**: OpenSearch client and index used by `/v1/opportunities/search`
+- **Transforms**: CommonGrants protocol requests to legacy search format
+- **Delegates**: Actual search operations to `src.services.opportunities_v1.search_opportunities`
+- **Transforms**: Legacy search results back to CommonGrants Protocol format
+
+This approach ensures search functionality consistency while providing the standardized CommonGrants interface.
 
 ### Data Flow
 
+**List/Get Endpoints:**
 1. **Request** → Route handler validates input using APIFlask
-2. **Service** → Queries database and transforms models to Protocol format
+2. **Service** → Queries database and transforms opportunity models to Protocol format
 3. **Response** → Returns standardized CommonGrants Protocol response
+
+**Search Endpoint:**
+1. **Request** → Route handler validates input using APIFlask
+2. **Transformation** → Converts CommonGrants request to legacy search format
+3. **Search Client** → Uses OpenSearch client to query indexed data
+4. **Transformation** → Converts legacy search results back to CommonGrants format
+5. **Response** → Returns standardized CommonGrants Protocol response
 
 ## Configuration
 
@@ -100,49 +118,28 @@ GET /common-grants/opportunities/{oppId}
 
 ```http
 POST /common-grants/opportunities/search
-Content-Type: application/json
-
-{
-  "filters": {
-    "status": {
-      "operator": "in",
-      "value": ["open"]
-    }
-  },
-  "sorting": {
-    "sortBy": "lastModifiedAt",
-    "sortOrder": "desc"
-  },
-  "pagination": {
-    "page": 1,
-    "pageSize": 10
-  },
-  "search": "research"
-}
 ```
 
 **Features**:
-- Status filtering (forecasted, posted, closed, archived)
-- Text search across opportunity titles
-- Sorting by title, lastModifiedAt, or closeDate
-- Pagination support
+- Status filtering
+- Text search across multiple fields
+- Sorting
+- Pagination
+- **Uses OpenSearch infrastructure** - same search engine used by `/v1/opportunities/search`
+- **Transforms requests/responses** between CommonGrants and legacy formats
 - Returns `OpportunitiesSearchResponse`
 
 ## OpenAPI Specification Generation & Validation
 
 The integration includes tools for generating and validating OpenAPI specifications for the CommonGrants Protocol endpoints.
 
-### Generation Script
-
-The script `src/common_grants/scripts/generate_openapi.py` creates an APIFlask app that includes only the CommonGrants routes and uses it for OpenAPI schema generation.
-
 ### Makefile Targets
 
 ```bash
-# Generate OpenAPI spec for CommonGrants endpoints only
+# Generate OpenAPI spec for CommonGrants routes only
 make openapi-spec-common-grants
 
-# Validate the OpenAPI spec using CommonGrants CLI
+# Validate the OpenAPI spec for CommonGrants routes
 make check-spec
 ```
 
@@ -165,17 +162,19 @@ The `make check-spec` target uses the `cg check spec` command from the CommonGra
 ### Service Architecture
 
 `CommonGrantsOpportunityService` handles:
-- Database queries with filtering and eager loading
-- Data transformation using `transform_opportunity_to_common_grants()`
+- **List/Get operations**: Database queries with filtering and eager loading
+- **Search operations**: Acts as a wrapper around the legacy search infrastructure
 - Pagination and sorting logic
-- Error handling for missing data
+- Error handling
 
 ### Route Implementation
 
-- Uses APIFlask decorators for validation and documentation
-- `@flask_db.with_db_session()` for database session injection
+- Uses APIFlask decorators for dependency injection:
+  - **List/Get endpoints**: `@flask_db.with_db_session()` for database session injection
+  - **Search endpoint**: `@flask_opensearch.with_search_client()` for OpenSearch client injection
 - Standard HTTP status codes and error responses
 - Custom error schemas for validation failures
+- Real-time data transformation to convert to and from Protocol format
 
 ### Data Validation
 
@@ -183,8 +182,6 @@ The `make check-spec` target uses the `cg check spec` command from the CommonGra
 - Required fields have appropriate fallbacks
 - Date objects formatted for SDK compatibility
 - UUID validation for opportunity IDs
-- Money objects created with USD currency
-- URL validation and protocol fixing
 
 ## Development
 
@@ -212,8 +209,10 @@ make test
 # Run tests with coverage
 make test-coverage
 
-# Run specific test file
-make test args="tests/src/api/common_grants/test_opportunity_routes.py"
+# Run isolated tests for Common Grants routes and services
+```bash
+make test args="tests/src/api/common_grants -v"
+make test args="tests/src/services/common_grants -v"
 ```
 
 ### Code Quality
@@ -231,7 +230,3 @@ make lint
 # Type checking
 make lint-mypy
 ```
-
-## Status
-
-The integration is fully implemented and enabled by default. All endpoints follow the CommonGrants Protocol specification and provide standardized access to opportunity data. OpenAPI specification generation is available for documentation and client generation purposes.
