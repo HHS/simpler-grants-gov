@@ -80,6 +80,8 @@ NOT_MAPPED_FIELDS = {
     # Review process flags added in prod to test agencies
     "ReviewProcessEnable",
     "ReviewProcessGoLive",
+    "EnableReviewProcess",
+    "ReviewProcessPeriod",
 }
 
 REQUIRED_FIELDS = {
