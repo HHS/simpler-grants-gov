@@ -365,6 +365,7 @@ export const messages = {
         "Correct the following errors before submitting your application.",
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
+      unsavedChangesWarning: "You have unsaved changes that will be lost.",
     },
   },
   Index: {
