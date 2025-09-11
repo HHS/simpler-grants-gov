@@ -29,28 +29,39 @@ type FormDataToJsonOptions = {
   - For all other cases, the raw string is returned.
 */
 const parseValue = (rawValue: unknown, type: string) => {
-  const text = String(rawValue);
+  const text = String(rawValue).trim();
 
+  // Empty
   if (text === "") return type === "string" ? "" : undefined;
+
+  // Booleans
   if (text === "true") return true;
   if (text === "false") return false;
 
+  // Numbers
   if ((type === "number" || type === "integer") && !isNaN(Number(text))) {
     return Number(text);
   }
 
+  // Sring
   if (type === "string") {
     return text;
   }
 
-if (
-  (type === "object" || type === "array") &&
-  /^(\{|\[)/.test(text.trim())
-) {
+  // Oject/Array
+  if ((type === "object" || type === "array") && (/^[{\[]/.test(text))) {
     try {
       return JSON.parse(text) as unknown;
     } catch {
       return text;
+    }
+  }
+
+  if (/^[{\[]/.test(text)) {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      console.error("Not valid JSON")
     }
   }
 

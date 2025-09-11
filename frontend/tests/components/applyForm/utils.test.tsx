@@ -94,7 +94,7 @@ describe("shapeFormData", () => {
       dob: "01/01/1900",
       address: {
         street: "test street",
-        zip: 1234,
+        zip: "1234",
         state: "XX",
         question: {
           rent: "yes",

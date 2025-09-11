@@ -19,6 +19,7 @@ import {
 } from "./budgetSchemas";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
+import { asMoney, isRecord } from "./budgetValueGuards";
 
 interface BudgetSummary {
   federal_estimated_unobligated_amount?: MoneyString;
@@ -32,10 +33,83 @@ interface ActivityItem extends BaseActivityItem {
   budget_summary?: BudgetSummary;
 }
 
+type NormalizedA = {
+  items: ActivityItem[];
+  totals?: BudgetSummary;
+};
+
+
 type RootValue = {
   activity_line_items?: ActivityItem[];
   total_budget_summary?: BudgetSummary;
 };
+
+function pickBudgetSummary(value: unknown): BudgetSummary {
+  if (!isRecord(value)) return {};
+  return {
+    federal_estimated_unobligated_amount: asMoney(
+      value.federal_estimated_unobligated_amount,
+    ),
+    non_federal_estimated_unobligated_amount: asMoney(
+      value.non_federal_estimated_unobligated_amount,
+    ),
+    federal_new_or_revised_amount: asMoney(
+      value.federal_new_or_revised_amount,
+    ),
+    non_federal_new_or_revised_amount: asMoney(
+      value.non_federal_new_or_revised_amount,
+    ),
+    total_amount: asMoney(value.total_amount),
+  };
+}
+
+function pickActivityItemA(value: unknown): ActivityItem {
+  if (!isRecord(value)) return {};
+  const out: ActivityItem = {};
+  if (typeof value.activity_title === "string") {
+    out.activity_title = value.activity_title;
+  }
+  if (typeof value.assistance_listing_number === "string") {
+    out.assistance_listing_number = value.assistance_listing_number;
+  }
+  if (isRecord(value.budget_summary)) {
+    out.budget_summary = pickBudgetSummary(value.budget_summary);
+  }
+  return out;
+}
+
+function normalizeSectionAValue(raw: unknown): NormalizedA {
+  if (isRecord(raw) && Array.isArray(raw.activity_line_items)) {
+    return {
+      items: raw.activity_line_items.map(pickActivityItemA),
+      totals: pickBudgetSummary(raw.total_budget_summary),
+    };
+  }
+
+  if (isRecord(raw)) {
+    const items: ActivityItem[] = [];
+    for (let i = 0; i < 4; i++) {
+      items.push(pickActivityItemA((raw as Record<string, unknown>)[String(i)]));
+    }
+
+    const totals =
+      pickBudgetSummary(
+        (raw as Record<string, unknown>).total_budget_summary,
+      ) ||
+      pickBudgetSummary(raw);
+
+    const hasAnyTotal =
+      totals.federal_estimated_unobligated_amount ||
+      totals.non_federal_estimated_unobligated_amount ||
+      totals.federal_new_or_revised_amount ||
+      totals.non_federal_new_or_revised_amount ||
+      totals.total_amount;
+
+    return { items, totals: hasAnyTotal ? totals : undefined };
+  }
+
+  return { items: [] };
+}
 
 function Budget424aSectionA<
   T = unknown,
@@ -47,34 +121,11 @@ function Budget424aSectionA<
   rawErrors,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const errors = (rawErrors as FormValidationWarning[]) || [];
-  const root: RootValue =
-    (rawValue && typeof rawValue === "object" ? (rawValue as RootValue) : {}) ??
-    {};
-  function isActivityItemArray(value: unknown): value is ActivityItem[] {
-    return Array.isArray(value);
-  }
-  const items: ActivityItem[] = isActivityItemArray(root.activity_line_items)
-    ? root.activity_line_items
-    : [];
-  const totals: BudgetSummary | undefined = root.total_budget_summary;
-
-  const getErrorsA = getErrorsForSection("A");
-
-  // Get an activity item by index
-  const itemAt = (row: number): ActivityItem => items?.[row] ?? {};
-
-  // Getters for values displayed in inputs
-  const getItemVal = (
-    row: number,
-    path: keyof ActivityItem,
-  ): string | undefined =>
-    (itemAt(row)[path] as string | undefined) ?? undefined;
-
-  const getBudgetVal = (
-    row: number,
-    path: keyof BudgetSummary,
-  ): string | undefined =>
-    (itemAt(row).budget_summary?.[path] as string | undefined) ?? undefined;
+  const { items, totals } = normalizeSectionAValue(rawValue);
+  const getErrorsA = getErrorsForSection("A")
+  const itemAt = (row: number): ActivityItem => items[row] ?? {};
+  const getItemVal = (row: number, path: keyof ActivityItem): string | undefined => (itemAt(row)[path] as string | undefined);
+  const getBudgetVal = (row: number, path: keyof BudgetSummary): string | undefined => itemAt(row).budget_summary?.[path];
 
   const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
 

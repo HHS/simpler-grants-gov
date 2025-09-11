@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ariaDescribedByIds,
   FormContextType,
   RJSFSchema,
   StrictRJSFSchema,
@@ -17,7 +16,7 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 function CheckboxWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never,
+  F extends FormContextType = never
 >({
   id,
   disabled,
@@ -33,14 +32,18 @@ function CheckboxWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const hasError = rawErrors.length > 0 ? true : undefined;
-  const description = (options?.description ?? schema.description);
+
+  const description = (options?.description ?? schema.description) as string | undefined;
   const labelType = getLabelTypeFromOptions(
-    (options?.["widget-label"] as string | undefined) ?? undefined,
+    (options?.["widget-label"] as string | undefined) ?? undefined
   );
 
   const baseTitle = (schema.title ??
     (options as Record<string, unknown> | undefined)?.label ??
     "") as string;
+
+  // Match radio pattern: input points to the label+desc block (and error) explicitly
+  const describedby = hasError ? `error-for-${id}` : `label-for-${id}`;
 
   const label = required ? (
     <DynamicFieldLabel
@@ -81,16 +84,14 @@ function CheckboxWidget<
         id={id}
         name={id}
         label={label}
-        labelDescription={description}
         defaultChecked={Boolean(value)}
-        value="true"
         required={required}
         disabled={disabled || readonly}
         autoFocus={autofocus}
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
-        aria-describedby={ariaDescribedByIds<T>(id)}
+        aria-describedby={describedby}
       />
     </FormGroup>
   );
