@@ -1,4 +1,3 @@
-// tests/components/applyForm/widgets/budget/Budget424aSectionF.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RJSFSchema, FormContextType } from "@rjsf/utils";
 import React from "react";
@@ -94,10 +93,8 @@ describe("Budget424aSectionF", () => {
       confirmation: false,
     };
 
-    // Strongly-typed mock for assertions
     const onChangeTyped = jest.fn<void, [RootValue]>();
 
-    // Adapter with the widget's expected function type
     const onChangeAdapter: (value: unknown) => void = (value) => {
       onChangeTyped(value as RootValue);
     };
