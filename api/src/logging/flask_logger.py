@@ -35,6 +35,42 @@ EXTRA_LOG_DATA_ATTR = "extra_log_data"
 _GLOBAL_LOG_CONTEXT: dict = {}
 
 
+def init_general_logging(app_logger: logging.Logger, app_name: str) -> None:
+    """Initialize logging that doesn't depend on a Flask app
+
+    If possible, use init_app instead which is called when we
+    create a flask app, this is only necessary for scripts that
+    aren't possible to run via Flask like our Alembic migrations
+    """
+
+    # Need to add filters to each of the handlers rather than to the logger itself, since
+    # messages are passed directly to the ancestor loggers’ handlers bypassing any filters
+    # set on the ancestors.
+    # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
+    for handler in app_logger.handlers:
+        handler.addFilter(_add_global_context_info_to_log_record)
+        handler.addFilter(_add_request_context_info_to_log_record)
+        handler.addFilter(_add_new_relic_context_to_log_record)
+        handler.addFilter(_add_error_info_to_log_record)
+
+    deploy_metadata = get_deploy_metadata_config()
+
+    # Add some metadata to all log messages globally
+    add_extra_data_to_global_logs(
+        {
+            "app.name": app_name,
+            "app_name": "api",
+            "run_mode": get_run_mode(),
+            "environment": os.environ.get("ENVIRONMENT"),
+            "deploy_github_ref": deploy_metadata.deploy_github_ref,
+            "deploy_github_sha": deploy_metadata.deploy_github_sha,
+            "deploy_whoami": deploy_metadata.deploy_whoami,
+        }
+    )
+
+    app_logger.info("initialized flask logger")
+
+
 def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     """Initialize the Flask app logger.
 
@@ -53,16 +89,6 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
         flask_logger.init_app(logger, app)
     """
 
-    # Need to add filters to each of the handlers rather than to the logger itself, since
-    # messages are passed directly to the ancestor loggers’ handlers bypassing any filters
-    # set on the ancestors.
-    # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
-    for handler in app_logger.handlers:
-        handler.addFilter(_add_global_context_info_to_log_record)
-        handler.addFilter(_add_request_context_info_to_log_record)
-        handler.addFilter(_add_new_relic_context_to_log_record)
-        handler.addFilter(_add_error_info_to_log_record)
-
     # Add request context data to every log record for the current request
     # such as request id, request method, request path, and the matching Flask request url rule
     app.before_request(
@@ -73,29 +99,15 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     app.before_request(_log_start_request)
     app.after_request(_log_end_request)
 
-    deploy_metadata = get_deploy_metadata_config()
-
-    # Add some metadata to all log messages globally
-    add_extra_data_to_global_logs(
-        {
-            "app.name": app.name,
-            "app_name": "api",
-            "run_mode": get_run_mode(),
-            "environment": os.environ.get("ENVIRONMENT"),
-            "deploy_github_ref": deploy_metadata.deploy_github_ref,
-            "deploy_github_sha": deploy_metadata.deploy_github_sha,
-            "deploy_whoami": deploy_metadata.deploy_whoami,
-        }
-    )
-
-    app_logger.info("initialized flask logger")
+    init_general_logging(app_logger, app.name)
 
 
 def add_extra_data_to_current_request_logs(
     data: dict[str, str | int | float | bool | uuid.UUID | None]
 ) -> None:
     """Add data to every log record for the current request."""
-    assert flask.has_request_context(), "Must be in a request context"
+    if not flask.has_request_context():
+        return
 
     extra_log_data = getattr(flask.g, EXTRA_LOG_DATA_ATTR, {})
     extra_log_data.update(data)

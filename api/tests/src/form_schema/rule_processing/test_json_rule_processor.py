@@ -8,6 +8,28 @@ from src.form_schema.rule_processing.json_rule_processor import process_rule_sch
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.form_schema.rule_processing.conftest import setup_context
 
+ARRAY_RULE_SCHEMA = {
+    "my_array_field": {
+        "gg_type": "array",
+        "nested_field": {
+            "gg_pre_population": {
+                "rule": "sum_monetary",
+                "fields": ["@THIS.x", "@THIS.y", "@THIS.z"],
+            }
+        },
+    },
+    "x": {"gg_pre_population": {"rule": "sum_monetary", "fields": ["my_array_field[*].x"]}},
+    "y": {"gg_pre_population": {"rule": "sum_monetary", "fields": ["my_array_field[*].y"]}},
+    "z": {"gg_pre_population": {"rule": "sum_monetary", "fields": ["my_array_field[*].z"]}},
+    "total_field": {
+        "gg_pre_population": {
+            "rule": "sum_monetary",
+            "fields": ["my_array_field[*].nested_field"],
+            "order": 2,
+        }
+    },
+}
+
 
 @freezegun.freeze_time("2023-02-20 12:00:00", tz_offset=0)
 def test_process_rule_schema_flat(enable_factory_create):
@@ -259,6 +281,62 @@ def test_process_rule_schema_nested(enable_factory_create):
     ]
 
 
+@pytest.mark.parametrize(
+    "json_data,expected_result",
+    [
+        # Empty input JSON
+        ({}, {"x": "0.00", "y": "0.00", "z": "0.00", "total_field": "0.00"}),
+        # Empty array field is basically same as empty JSON
+        (
+            {"my_array_field": []},
+            {"my_array_field": [], "x": "0.00", "y": "0.00", "z": "0.00", "total_field": "0.00"},
+        ),
+        # Several empty objects in array get a 0 total added
+        (
+            {"my_array_field": [{}, {}, {}]},
+            {
+                "my_array_field": [
+                    {"nested_field": "0.00"},
+                    {"nested_field": "0.00"},
+                    {"nested_field": "0.00"},
+                ],
+                "x": "0.00",
+                "y": "0.00",
+                "z": "0.00",
+                "total_field": "0.00",
+            },
+        ),
+        # Mostly populated JSON
+        (
+            {
+                "my_array_field": [
+                    {"x": "1.00", "y": "2.00", "z": "3.00"},
+                    {"x": "2.33"},
+                    {"y": "4.10", "z": "1.11"},
+                ]
+            },
+            {
+                "my_array_field": [
+                    {"x": "1.00", "y": "2.00", "z": "3.00", "nested_field": "6.00"},
+                    {"x": "2.33", "nested_field": "2.33"},
+                    {"y": "4.10", "z": "1.11", "nested_field": "5.21"},
+                ],
+                "x": "3.33",
+                "y": "6.10",
+                "z": "4.11",
+                "total_field": "13.54",
+            },
+        ),
+    ],
+)
+def test_process_rule_schema_with_arrays(enable_factory_create, json_data, expected_result):
+
+    context = setup_context(json_data, rule_schema=ARRAY_RULE_SCHEMA)
+
+    process_rule_schema_for_context(context)
+    assert context.json_data == expected_result
+
+
 def test_process_null_rule_schema(enable_factory_create):
     # Null rule schema means nothing will get processed
     context = setup_context({}, None)
@@ -267,6 +345,7 @@ def test_process_null_rule_schema(enable_factory_create):
     assert context.application_form.application_response == {}
     assert context.json_data == {}
     assert context.validation_issues == []
+    assert context.rules == []
 
 
 @pytest.mark.parametrize(
