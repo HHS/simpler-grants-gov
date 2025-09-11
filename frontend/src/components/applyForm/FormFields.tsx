@@ -24,7 +24,7 @@ export const FormFields = ({
   formData,
   schema,
   uiSchema,
-  formContext
+  formContext,
 }: {
   errors: FormValidationWarning[] | null;
   formData: object;
@@ -44,10 +44,19 @@ export const FormFields = ({
     const buildFormTree = (
       uiSchema:
         | UiSchema
-        | { children: UiSchema; label: string; name: string; description?: string },
+        | {
+            children: UiSchema;
+            label: string;
+            name: string;
+            description?: string;
+          },
       parent: { label: string; name: string; description?: string } | null,
     ) => {
-      if (!Array.isArray(uiSchema) && typeof uiSchema === "object" && "children" in uiSchema) {
+      if (
+        !Array.isArray(uiSchema) &&
+        typeof uiSchema === "object" &&
+        "children" in uiSchema
+      ) {
         buildFormTree(uiSchema.children, {
           label: uiSchema.label,
           name: uiSchema.name,
@@ -81,7 +90,10 @@ export const FormFields = ({
             });
 
             if (field) {
-              acc = [...acc, <React.Fragment key={node.name}>{field}</React.Fragment>];
+              acc = [
+                ...acc,
+                <React.Fragment key={node.name}>{field}</React.Fragment>,
+              ];
             }
           }
         });

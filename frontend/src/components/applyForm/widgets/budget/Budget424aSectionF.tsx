@@ -36,8 +36,9 @@ function Budget424aSectionF<
   formContext,
   onChange,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
-  const rootFormDataFromContext =
-      (formContext as { rootFormData?: unknown } | undefined)?.rootFormData;
+  const rootFormDataFromContext = (
+    formContext as { rootFormData?: unknown } | undefined
+  )?.rootFormData;
   const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const validationWarnings = (rawErrors as FormValidationWarning[]) || [];
   const rootValue = isRecord(rawValue) ? rawValue : {};
