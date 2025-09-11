@@ -80,6 +80,7 @@ function CheckboxWidget<
         id={id}
         name={id}
         label={label}
+        value="true"
         defaultChecked={Boolean(value)}
         required={required}
         disabled={disabled || readonly}

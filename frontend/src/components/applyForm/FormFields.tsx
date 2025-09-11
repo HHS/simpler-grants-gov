@@ -11,6 +11,11 @@ import {
 } from "./utils";
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
+type RootBudgetFormContext = {
+  rootSchema: RJSFSchema;
+  rootFormData: unknown;
+};
+
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
 */
@@ -19,15 +24,16 @@ export const FormFields = ({
   formData,
   schema,
   uiSchema,
+  formContext
 }: {
   errors: FormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
+  formContext: RootBudgetFormContext;
 }) => {
   try {
     let acc: JSX.Element[] = [];
-    // json schema describes arrays with dots, our html uses --
     const formattedErrors = errors?.map((error) => {
       error.field = error.field.replace("$.", "").replace(/\./g, "--");
       return error;
@@ -38,19 +44,10 @@ export const FormFields = ({
     const buildFormTree = (
       uiSchema:
         | UiSchema
-        | {
-            children: UiSchema;
-            label: string;
-            name: string;
-            description?: string;
-          },
+        | { children: UiSchema; label: string; name: string; description?: string },
       parent: { label: string; name: string; description?: string } | null,
     ) => {
-      if (
-        !Array.isArray(uiSchema) &&
-        typeof uiSchema === "object" &&
-        "children" in uiSchema
-      ) {
+      if (!Array.isArray(uiSchema) && typeof uiSchema === "object" && "children" in uiSchema) {
         buildFormTree(uiSchema.children, {
           label: uiSchema.label,
           name: uiSchema.name,
@@ -76,28 +73,27 @@ export const FormFields = ({
               formData,
               requiredField,
             });
+
             const field = renderWidget({
-              ...widgetConfig,
+              type: widgetConfig.type,
+              props: { ...widgetConfig.props, formContext },
               definition: node.definition,
             });
+
             if (field) {
-              acc = [
-                ...acc,
-                <React.Fragment key={node.name}>{field}</React.Fragment>,
-              ];
+              acc = [...acc, <React.Fragment key={node.name}>{field}</React.Fragment>];
             }
           }
         });
+
         if (parent) {
           const childAcc: JSX.Element[] = [];
           const keys: number[] = [];
           const row = uiSchema.map((node) => {
             if ("children" in node) {
               acc.forEach((item, key) => {
-                if (item) {
-                  if (item.key === `${node.name}-wrapper`) {
-                    keys.push(key);
-                  }
+                if (item && item.key === `${node.name}-wrapper`) {
+                  keys.push(key);
                 }
               });
               return null;
@@ -113,12 +109,15 @@ export const FormFields = ({
                 formData,
                 requiredField,
               });
+
               return renderWidget({
-                ...widgetConfig,
+                type: widgetConfig.type,
+                props: { ...widgetConfig.props, formContext },
                 definition: node.definition,
               });
             }
           });
+
           if (keys.length) {
             keys.forEach((key) => {
               childAcc.push(acc[key]);
@@ -149,7 +148,6 @@ export const FormFields = ({
     };
 
     buildFormTree(uiSchema, null);
-
     return acc;
   } catch (e) {
     console.error(e);

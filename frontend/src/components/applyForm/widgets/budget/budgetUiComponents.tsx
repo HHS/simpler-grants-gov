@@ -38,7 +38,7 @@ export const CurrencyInput: React.FC<{
   rawErrors,
   value,
   bordered = false,
-  formClassName = "margin-top-auto padding-top-05 simpler-currency-input-wrapper",
+  formClassName = "margin-top-0 padding-top-05 simpler-currency-input-wrapper",
   inputClassName = "minw-10",
 }) => (
   <TextWidget

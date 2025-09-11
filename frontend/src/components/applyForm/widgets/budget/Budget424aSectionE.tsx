@@ -103,9 +103,13 @@ function Budget424aSectionE<
   F extends FormContextType = never,
 >({
   id,
-  value: rawValue = [],
+  value,
   rawErrors,
+  formContext
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
+    const rootFormDataFromContext =
+      (formContext as { rootFormData?: unknown } | undefined)?.rootFormData;
+  const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const errors = (rawErrors as FormValidationWarning[]) || [];
   const { items: activityItems, totals } = normalizeSectionEValue(rawValue);
 

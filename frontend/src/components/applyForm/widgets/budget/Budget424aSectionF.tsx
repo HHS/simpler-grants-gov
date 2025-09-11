@@ -31,11 +31,14 @@ function Budget424aSectionF<
   F extends FormContextType = FormContextType,
 >({
   id,
-  value: rawValue = {},
+  value,
   rawErrors,
   formContext,
   onChange,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
+  const rootFormDataFromContext =
+      (formContext as { rootFormData?: unknown } | undefined)?.rootFormData;
+  const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const validationWarnings = (rawErrors as FormValidationWarning[]) || [];
   const rootValue = isRecord(rawValue) ? rawValue : {};
   const rootSchema = getRootSchemaFromContext(formContext as RootSchemaContext);

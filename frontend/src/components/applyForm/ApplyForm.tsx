@@ -59,6 +59,10 @@ const ApplyForm = ({
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
+  const formContextValue = useMemo(
+    () => ({ rootSchema: formSchema, rootFormData: formObject }),
+    [formSchema, formObject],
+  );
 
   if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
     return (
@@ -101,6 +105,7 @@ const ApplyForm = ({
               formData={formObject}
               schema={formSchema}
               uiSchema={uiSchema}
+              formContext={formContextValue}
             />
           </AttachmentsProvider>
         </FormGroup>

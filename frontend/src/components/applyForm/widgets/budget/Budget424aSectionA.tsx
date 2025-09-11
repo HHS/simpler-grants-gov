@@ -106,9 +106,14 @@ function Budget424aSectionA<
   F extends FormContextType = never,
 >({
   id,
-  value: rawValue = {},
+  value,
   rawErrors,
+  formContext
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
+  const rootFormDataFromContext =
+    (formContext as { rootFormData?: unknown } | undefined)?.rootFormData;
+
+  const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const errors = (rawErrors as FormValidationWarning[]) || [];
   const { items, totals } = normalizeSectionAValue(rawValue);
   const getErrorsA = getErrorsForSection("A");
@@ -123,6 +128,19 @@ function Budget424aSectionA<
   ): string | undefined => itemAt(row).budget_summary?.[path];
 
   const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
+
+  const CELL_TD_CLASS =
+    "border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell";
+
+  const Cell: React.FC<{
+    children: React.ReactNode;
+    className?: string;
+    height?: string | number;
+  }> = ({ children, className = "", height = "inherit" }) => (
+    <td className={`${CELL_TD_CLASS} ${className}`} height={height}>
+      <div className="display-flex flex-column">{children}</div>
+    </td>
+  );
 
   return (
     <div key={id} id={id}>
@@ -235,12 +253,9 @@ function Budget424aSectionA<
           {COLUMNS.map((row) => (
             <tr key={row}>
               {/* Column A: activity title */}
-              <td className="border-transparent padding-05">
+              <Cell>
                 <div className="display-flex flex-align-end">
-                  <span className="text-bold text-no-wrap margin-bottom-1">
-                    {row + 1}.
-                  </span>
-                  <div>
+                  <div className="margin-top-05 padding-top-0">
                     <TextWidget
                       schema={activityTitleSchema}
                       id={`activity_line_items[${row}]--activity_title`}
@@ -248,87 +263,109 @@ function Budget424aSectionA<
                         errors,
                         id: `activity_line_items[${row}]--activity_title`,
                       })}
-                      formClassName="margin-left-2 margin-top-auto"
-                      inputClassName="minw-15"
+                      formClassName="margin-left-2"
+                      inputClassName="minw-10"
                       value={getItemVal(row, "activity_title")}
                     />
                   </div>
                 </div>
-              </td>
+              </Cell>
 
               {/* Column B: assistance listing */}
-              <td className="border-transparent padding-05">
-                <TextWidget
-                  schema={assistanceListingNumberSchema}
-                  id={`activity_line_items[${row}]--assistance_listing_number`}
-                  rawErrors={getErrorsA({
-                    errors,
-                    id: `activity_line_items[${row}]--assistance_listing_number`,
-                  })}
-                  formClassName="margin-top-auto"
-                  inputClassName="minw-10"
-                  value={getItemVal(row, "assistance_listing_number")}
-                />
-              </td>
+              <Cell>
+                <div className="display-flex flex-align-end">
+                  <div className="margin-top-05 padding-top-0">
+                    <TextWidget
+                      schema={assistanceListingNumberSchema}
+                      id={`activity_line_items[${row}]--assistance_listing_number`}
+                      rawErrors={getErrorsA({
+                        errors,
+                        id: `activity_line_items[${row}]--assistance_listing_number`,
+                      })}
+                      inputClassName="minw-10"
+                      value={getItemVal(row, "assistance_listing_number")}
+                    />
+                  </div>
+                </div>
+              </Cell>
 
               {/* Column C: federal estimated unobligated */}
-              <td className="border-transparent padding-05">
-                <CurrencyInput
-                  id={`activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`}
-                  rawErrors={getErrorsA({
-                    errors,
-                    id: `activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`,
-                  })}
-                  value={getBudgetVal(
-                    row,
-                    "federal_estimated_unobligated_amount",
-                  )}
-                />
-              </td>
+              <Cell>
+                <div className="display-flex flex-align-end">
+                  <div className="margin-top-3 padding-top-0">
+                    <CurrencyInput
+                      id={`activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`}
+                      rawErrors={getErrorsA({
+                        errors,
+                        id: `activity_line_items[${row}]--budget_summary--federal_estimated_unobligated_amount`,
+                      })}
+                      value={getBudgetVal(
+                        row,
+                        "federal_estimated_unobligated_amount",
+                      )}
+                    />
+                  </div>
+                </div>
+              </Cell>
 
               {/* Column D: non-federal estimated unobligated */}
-              <td className="border-transparent padding-05">
-                <CurrencyInput
-                  id={`activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`}
-                  rawErrors={getErrorsA({
-                    errors,
-                    id: `activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`,
-                  })}
-                  value={getBudgetVal(
-                    row,
-                    "non_federal_estimated_unobligated_amount",
-                  )}
-                />
-              </td>
+              <Cell>
+                <div className="display-flex flex-align-end">
+                  <div className="margin-top-3 padding-top-0">
+                    <CurrencyInput
+                      id={`activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`}
+                      rawErrors={getErrorsA({
+                        errors,
+                        id: `activity_line_items[${row}]--budget_summary--non_federal_estimated_unobligated_amount`,
+                      })}
+                      value={getBudgetVal(
+                        row,
+                        "non_federal_estimated_unobligated_amount",
+                      )}
+                    />
+                  </div>
+                </div>
+              </Cell>
 
               {/* Column E: federal new/revised */}
-              <td className="border-transparent padding-05">
-                <CurrencyInput
-                  id={`activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`}
-                  rawErrors={getErrorsA({
-                    errors,
-                    id: `activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`,
-                  })}
-                  value={getBudgetVal(row, "federal_new_or_revised_amount")}
-                />
-              </td>
+              <Cell>
+                <div className="display-flex flex-align-end">
+                  <div className="margin-top-3 padding-top-0">
+                    <CurrencyInput
+                      id={`activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`}
+                      rawErrors={getErrorsA({
+                        errors,
+                        id: `activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`,
+                      })}
+                      value={getBudgetVal(row, "federal_new_or_revised_amount")}
+                    />
+                  </div>
+                </div>
+              </Cell>
 
               {/* Column F: non-federal new/revised */}
-              <td className="border-transparent padding-05">
-                <CurrencyInput
-                  id={`activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`}
-                  rawErrors={getErrorsA({
-                    errors,
-                    id: `activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`,
-                  })}
-                  value={getBudgetVal(row, "non_federal_new_or_revised_amount")}
-                />
-              </td>
+              <Cell>
+                <div className="display-flex flex-align-end">
+                  <div className="margin-top-3 padding-top-0">
+                    <CurrencyInput
+                      id={`activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`}
+                      rawErrors={getErrorsA({
+                        errors,
+                        id: `activity_line_items[${row}]--budget_summary--non_federal_new_or_revised_amount`,
+                      })}
+                      value={getBudgetVal(
+                        row,
+                        "non_federal_new_or_revised_amount",
+                      )}
+                    />
+                  </div>
+                </div>
+              </Cell>
 
               {/* Column G: total */}
-              <td className="border-transparent padding-0">
+              <Cell>
                 <div className="display-flex flex-align-end">
-                  <span className="margin-bottom-1 margin-right-1">=</span>
+                  <span className="margin-right-1">=</span>
                   <div>
                     <div className="text-normal text-no-wrap text-italic font-sans-2xs">
                       Sum of row {row + 1}
@@ -343,7 +380,7 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </td>
+              </Cell>
             </tr>
           ))}
 
