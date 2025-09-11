@@ -4,11 +4,9 @@ import logging
 import re
 from typing import Any, Callable
 
-logger = logging.getLogger(__name__)
+from .constants import CURRENCY_REGEX, NO_VALUE, YES_VALUE
 
-# Grants.gov YesNoDataType constants from GlobalLibrary-V2.0.xsd
-YES_VALUE = "Y: Yes"
-NO_VALUE = "N: No"
+logger = logging.getLogger(__name__)
 
 
 class ValueTransformationError(Exception):
@@ -63,9 +61,10 @@ def transform_currency_format(value: Any) -> str:
             f"Currency value must be string (validated upstream), got {type(value)}"
         )
 
-    if not re.match(r"^-?\d+(\.\d{1,2})?$", value):
+    # Use currency regex from SF-424A form schema
+    if not re.match(CURRENCY_REGEX, value):
         raise ValueTransformationError(
-            f"Invalid currency format: '{value}' - must be numeric with optional decimal (up to 2 places)"
+            f"Invalid currency format: '{value}' - must match pattern {CURRENCY_REGEX}"
         )
 
     return value

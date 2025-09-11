@@ -2,10 +2,10 @@
 
 import pytest
 
+from src.services.xml_generation.constants import NO_VALUE
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
-from src.services.xml_generation.value_transformers import NO_VALUE
 
 
 class TestNoneHandling:
@@ -190,4 +190,26 @@ class TestNoneHandling:
         source_data = {"test_field": None}
 
         with pytest.raises(ValueError, match="Unknown null_handling 'unknown_option'"):
+            transformer.transform(source_data)
+
+    def test_default_value_without_default_raises_error(self):
+        """Test that null_handling 'default_value' without default_value raises ValueError."""
+        transform_config = {
+            "test_field": {
+                "xml_transform": {
+                    "target": "TestField",
+                    "null_handling": "default_value",  # Missing default_value
+                }
+            }
+        }
+
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        # Source data with None value to trigger null_handling
+        source_data = {"test_field": None}
+
+        with pytest.raises(
+            ValueError,
+            match="null_handling 'default_value' specified but no default_value provided",
+        ):
             transformer.transform(source_data)

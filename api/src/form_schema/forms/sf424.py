@@ -2,7 +2,7 @@ import uuid
 
 import src.form_schema.forms.shared_schema as shared_schema
 from src.db.models.competition_models import Form
-from src.services.xml_generation.value_transformers import NO_VALUE
+from src.services.xml_generation.constants import NO_VALUE
 
 FORM_JSON_SCHEMA = {
     "type": "object",
