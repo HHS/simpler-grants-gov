@@ -136,7 +136,7 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
-// new, not used in multifield
+// Not used in multifield
 export const getFieldName = ({
   definition,
   schema,
@@ -481,7 +481,7 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
   });
 };
 
-/** Returns true if a condensed schema node declares a string type. */
+// Returns true if a condensed schema node declares a string type
 const nodeIsStringTyped = (schemaNode: unknown): boolean => {
   if (!schemaNode || typeof schemaNode !== "object") return false;
   const typeField = (schemaNode as { type?: unknown }).type;
@@ -491,7 +491,7 @@ const nodeIsStringTyped = (schemaNode: unknown): boolean => {
   return typeField === "string";
 };
 
-/** Recursively convert numbers → strings where the schema node is string-typed. */
+// Recursively convert numbers → strings where the schema node is string-typed
 const coerceNumbersToStringsPerSchema = (
   dataNode: unknown,
   schemaNode: unknown,
@@ -571,14 +571,16 @@ export const shapeFormData = <T extends object>(
   formData.delete("$ACTION_KEY");
   formData.delete("apply-form-button");
 
-  // Build the condensed schema once for both formDataToObject and coercion
+  // Build the condensed schema once for 
+  // both formDataToObject and coercion
   const condensedSchema = condenseFormSchemaProperties(formSchema);
 
   const structuredFormData = formDataToObject(formData, condensedSchema, {
     delimiter: "--",
   });
 
-  // NEW: convert numbers → strings wherever the schema declares a string type
+  // Convert numbers to strings 
+  // wherever the schema declares a string type
   const schemaAlignedData = coerceNumbersToStringsPerSchema(
     structuredFormData,
     condensedSchema,
@@ -675,14 +677,16 @@ export const flatFormDataToArray = (
     [] as Array<Record<string, unknown>>,
   );
 };
+/**
+  dereferences all def links so that all necessary property definitions
+  can be found directly within the property without referencing $defs.
+  also resolves "allOf" references within "properties" or "$defs" fields.
+  not merging the entire schema because many schemas have top level
+  "allOf" blocks that often contain "if"/"then" statements or other things
+  that the mergeAllOf library can't handle out of the box, and we don't need
+  to condense in any case
+ */
 
-// dereferences all def links so that all necessary property definitions
-// can be found directly within the property without referencing $defs.
-// also resolves "allOf" references within "properties" or "$defs" fields.
-// not merging the entire schema because many schemas have top level
-// "allOf" blocks that often contain "if"/"then" statements or other things
-// that the mergeAllOf library can't handle out of the box, and we don't need
-// to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
