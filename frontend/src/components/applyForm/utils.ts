@@ -485,7 +485,7 @@ export const getFieldConfig = ({
   }
 
   // fields that have no definition won't have a name, but will have a schema
-  if ((!name || !fieldSchema) && definition) {
+  if ((!fieldName || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
@@ -542,8 +542,8 @@ export const getFieldConfig = ({
   return {
     type,
     props: {
-      id: name,
-      key: name,
+      id: htmlFieldName,
+      key: htmlFieldName,
       disabled,
       required: requiredField,
       minLength: fieldSchema?.minLength,
