@@ -2,7 +2,7 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 
-import { getByPointer, getFieldPath } from "./utils";
+import { getByPointer, getFieldPathFromHtml } from "./utils";
 
 // like, this is basically anything lol - DWS
 type NestedObject = {
@@ -49,7 +49,7 @@ const getFieldType = (
   formSchema: RJSFSchema,
   parentKey?: string,
 ): string => {
-  const path = getFieldPath(currentKey);
+  const path = getFieldPathFromHtml(currentKey);
   const fullPath = parentKey ? `${parentKey}/${path}` : path;
   const formFieldDefinition = getByPointer(formSchema, fullPath) as {
     type?: string;

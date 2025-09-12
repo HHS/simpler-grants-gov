@@ -2,9 +2,10 @@
 // changes made to include USWDS and allow to functional as non-reactive form field
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
-import { ChangeEvent, FocusEvent, useCallback } from "react";
+import { ChangeEvent, FocusEvent, useCallback, useMemo } from "react";
 import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -33,7 +34,7 @@ function TextAreaWidget<
   onChange = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { description, title, maxLength, minLength } = schema;
+  const { description, title, maxLength, minLength, type } = schema;
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const handleBlur = useCallback(
@@ -60,7 +61,10 @@ function TextAreaWidget<
       ? `label-for-${id}`
       : undefined;
   const inputValue = value !== undefined ? String(value) : "";
-
+  const errors = useMemo(
+    () => FieldErrors({ type, fieldName: id, rawErrors }),
+    [type, id, rawErrors],
+  );
   return (
     <FormGroup error={error} key={`form-group__text-area--${id}`}>
       <DynamicFieldLabel
@@ -70,17 +74,7 @@ function TextAreaWidget<
         description={description as string}
         labelType={labelType}
       />
-
-      {error && (
-        <ErrorMessage>
-          {" "}
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0])
-                .map((value) => value)
-                .join(",")}
-        </ErrorMessage>
-      )}
+      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
       <Textarea
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}

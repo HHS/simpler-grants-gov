@@ -5,7 +5,7 @@ import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ErrorMessage,
   FileInput,
@@ -15,6 +15,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import {
   SchemaWithLabelOption,
   UploadedFile,
@@ -32,14 +33,24 @@ const MultipleAttachmentUploadWidget = ({
   schema,
   onChange,
 }: UswdsWidgetProps) => {
+  const { description, options, title, type } = schema as SchemaWithLabelOption;
+
   const attachments = useApplicationAttachments();
+
+  const error = rawErrors.length ? true : undefined;
+  const errors = useMemo(
+    () => FieldErrors({ type, fieldName: id, rawErrors }),
+    [type, id, rawErrors],
+  );
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();
-  const hasError = rawErrors.length > 0;
-  const describedBy = hasError ? `error-for-${id}` : `${id}-hint`;
-  const { description, title, options } = schema as SchemaWithLabelOption;
   const { uploadAttachment } = useAttachmentUpload();
   const { deleteState, deletePending, deleteAttachment } =
     useAttachmentDelete();
@@ -149,7 +160,10 @@ const MultipleAttachmentUploadWidget = ({
   };
 
   return (
-    <FormGroup key={`form-group__multi-file-upload--${id}`} error={hasError}>
+    <FormGroup
+      key={`form-group__multi-file-upload--${id}`}
+      error={errors !== "undefined"}
+    >
       <DynamicFieldLabel
         idFor={id}
         title={title}
@@ -158,10 +172,8 @@ const MultipleAttachmentUploadWidget = ({
         labelType={labelType}
       />
 
-      {hasError && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {String(rawErrors[0])}
-        </ErrorMessage>
+      {errors !== "undefined" && (
+        <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>
       )}
 
       <FileInput
@@ -176,7 +188,7 @@ const MultipleAttachmentUploadWidget = ({
             console.error(error),
           );
         }}
-        aria-describedby={describedBy}
+        aria-describedby={describedby}
       />
 
       <input

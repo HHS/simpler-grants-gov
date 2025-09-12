@@ -1,10 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-import { FormValidationWarning } from "./types";
-
-const removeLeadingFieldPathCruft = (fieldName: string): string =>
-  fieldName.replace(/^\$\./, "");
+import { FormattedFormValidationWarning } from "./types";
 
 export const ApplyFormMessage = ({
   error,
@@ -12,7 +9,7 @@ export const ApplyFormMessage = ({
   saved,
 }: {
   error: boolean;
-  validationWarnings: FormValidationWarning[] | null;
+  validationWarnings: FormattedFormValidationWarning[] | null;
   saved: boolean;
 }) => {
   const t = useTranslations("Application.applyForm");
@@ -47,9 +44,7 @@ export const ApplyFormMessage = ({
         <ul>
           {validationWarnings.map((warning, index) => (
             <li key={index}>
-              <a href={`#${removeLeadingFieldPathCruft(warning.field)}`}>
-                {warning.message}
-              </a>
+              <a href={`#${warning.htmlField}`}>{warning.formatted}</a>
             </li>
           ))}
         </ul>

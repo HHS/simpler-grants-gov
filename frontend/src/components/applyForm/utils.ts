@@ -8,6 +8,7 @@ import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import { formDataToObject } from "./formDataToJson";
 import {
+  FormattedFormValidationWarning,
   FormValidationWarning,
   SchemaField,
   UiSchema,
@@ -17,6 +18,232 @@ import {
 } from "./types";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
+
+const nestedWarningForField = ({
+  definition,
+  errors,
+  fieldName,
+  fieldSchema,
+  formSchema,
+  path,
+}: {
+  definition: string;
+  errors: FormValidationWarning[];
+  fieldName: string;
+  fieldSchema: SchemaField;
+  formSchema: RJSFSchema;
+  path: string;
+}): FormattedFormValidationWarning | null => {
+  const parent = definition.replace(/\/properties\/\w+$/, "");
+  const parentFieldDefinition = getFieldSchema({
+    definition: parent,
+    formSchema,
+    schema: undefined,
+  });
+
+  if (!parentFieldDefinition) return null;
+
+  const error = errors.find(({ field }) => {
+    if (
+      // field is within parent
+      path.includes(field) &&
+      path !== field &&
+      // field is in the parent required definition
+      "required" in parentFieldDefinition &&
+      parentFieldDefinition.required?.indexOf(fieldName) !== -1
+    )
+      return true;
+    return false;
+  });
+
+  if (error) {
+    const message = error.message.replace(/'\S+'/, fieldName);
+    const formatted = formatValidationWarning(fieldName, message, fieldSchema);
+    const formattedWithParent = parentFieldDefinition.title
+      ? `${parentFieldDefinition.title} ${formatted}`
+      : formatted;
+    const htmlField = getFieldNameForHtml({
+      definition,
+      schema: fieldSchema,
+    });
+    return {
+      ...error,
+      formatted: formattedWithParent,
+      htmlField,
+      definition,
+    };
+  }
+  return null;
+};
+
+const formatValidationWarning = (
+  fieldName: string,
+  message: string,
+  fieldSchema: SchemaField,
+) => {
+  // some schemas might not have a title
+  const title =
+    fieldSchema &&
+    typeof fieldSchema === "object" &&
+    fieldSchema !== null &&
+    "title" in fieldSchema
+      ? fieldSchema.title
+      : null;
+  if (title) {
+    const formatted = title.replace("?", "");
+    return message
+      .replace(fieldName, formatted)
+      .replace(/'/g, "")
+      .replace("is a required property", "is required");
+  }
+  return message;
+};
+
+const findValidationError = (
+  errors: FormValidationWarning[],
+  definition: string | undefined,
+  schema: SchemaField | undefined,
+  formSchema: RJSFSchema,
+): FormattedFormValidationWarning | null => {
+  const fieldSchema = getFieldSchema({
+    definition,
+    formSchema,
+    schema,
+  }) as SchemaField;
+  const path = definition ? jsonSchemaPointerToPath(definition) : "";
+  const fieldName = definition
+    ? definition.split("/")[definition.split("/").length - 1]
+    : "";
+  const directWarning = errors.find((error) => error.field === path);
+  if (directWarning) {
+    const formatted = formatValidationWarning(
+      fieldName,
+      directWarning.message,
+      fieldSchema,
+    );
+    const htmlField = getFieldNameForHtml({
+      definition,
+      schema: fieldSchema,
+    });
+
+    return { ...directWarning, formatted, htmlField, definition };
+  }
+  if (fieldSchema && definition) {
+    return nestedWarningForField({
+      path,
+      definition,
+      fieldName,
+      errors,
+      fieldSchema,
+      formSchema,
+    });
+  }
+  return null;
+};
+
+const formatValidationWarnings = (
+  uiSchema:
+    | UiSchema
+    | {
+        children: UiSchema;
+        label: string;
+        name: string;
+        description?: string;
+      },
+  parent: { label: string; name: string; description?: string } | null,
+  formValidationWarnings: FormValidationWarning[],
+  errors: FormattedFormValidationWarning[] = [],
+  formSchema: RJSFSchema,
+) => {
+  if (
+    !Array.isArray(uiSchema) &&
+    typeof uiSchema === "object" &&
+    "children" in uiSchema
+  ) {
+    formatValidationWarnings(
+      uiSchema.children,
+      {
+        label: uiSchema.label,
+        name: uiSchema.name,
+        description: uiSchema.description,
+      },
+      formValidationWarnings,
+      errors,
+      formSchema,
+    );
+  } else if (Array.isArray(uiSchema)) {
+    uiSchema.forEach((node) => {
+      if ("children" in node) {
+        formatValidationWarnings(
+          node.children,
+          {
+            label: node.label,
+            name: node.name,
+            description: node.description,
+          },
+          formValidationWarnings,
+          errors,
+          formSchema,
+        );
+      } else if (!parent && ("definition" in node || "schema" in node)) {
+        const error = findValidationError(
+          formValidationWarnings,
+          Array.isArray(node.definition) ? node.definition[0] : node.definition,
+          node.schema,
+          formSchema,
+        );
+        if (error) {
+          errors.push(error);
+        }
+      }
+    });
+    if (parent) {
+      uiSchema.forEach((node) => {
+        if ("children" in node) {
+          return formatValidationWarnings(
+            node.children,
+            {
+              label: node.label,
+              name: node.name,
+              description: node.description,
+            },
+            formValidationWarnings,
+            errors,
+            formSchema,
+          );
+        } else {
+          const error = findValidationError(
+            formValidationWarnings,
+            Array.isArray(node.definition)
+              ? node.definition[0]
+              : node.definition,
+            node.schema,
+            formSchema,
+          );
+          if (error) {
+            errors.push(error);
+          }
+        }
+      });
+    }
+  }
+};
+
+export const buildWarningTree = (
+  formUiSchema: UiSchema,
+  formValidationWarnings: FormValidationWarning[],
+  formSchema: RJSFSchema,
+) => {
+  const e: FormattedFormValidationWarning[] = [];
+  formatValidationWarnings(
+    formUiSchema,
+    null,
+    formValidationWarnings,
+    e,
+    formSchema,
+  );
+  return e;
+};
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -87,10 +314,10 @@ export const getFieldSchema = ({
   schema,
   formSchema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
   formSchema: RJSFSchema;
-}): RJSFSchema => {
+}): RJSFSchema | SchemaField => {
   if (definition && schema) {
     return {
       ...(getByPointer(formSchema, definition) as object),
@@ -106,7 +333,7 @@ export const getNameFromDef = ({
   definition,
   schema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
 }) => {
   return definition
@@ -120,7 +347,7 @@ export const getNameFromDef = ({
 };
 
 // new, not used in multifield
-export const getFieldName = ({
+export const getFieldNameForHtml = ({
   definition,
   schema,
 }: {
@@ -136,8 +363,8 @@ export const getFieldName = ({
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
 
-// transform a form data field name / id into a json pointer that can be used to reference the form schema
-export const getFieldPath = (fieldName: string) =>
+// transform a form data field name / id into a json path that can be used to reference the form schema
+export const getFieldPathFromHtml = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
 
 export const getByPointer = (target: object, path: string): unknown => {
@@ -157,6 +384,49 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
+// changes a json pointer /properties/field_name/properties/field_child to path $.field_name.field_child
+export const jsonSchemaPointerToPath = (jsonPointer: string) => {
+  const j = jsonPointerToPath(jsonPointer);
+  return j.replace(/\.properties/g, "");
+};
+
+// borrowed from https://github.com/javi11/jpo-jpa
+const jsonPointerToPath = (jsonPointer: string) => {
+  const specialChars = /[\s~!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+/;
+
+  const unescape = (str: string) => {
+    return str.replace(/~1/g, "/").replace(/~0/g, "~");
+  };
+
+  const parse = (jsonPointer: string) => {
+    if (jsonPointer.charAt(0) !== "/") {
+      throw new Error(`Invalid JSON pointer: ${jsonPointer}`);
+    }
+    return jsonPointer.substring(1).split("/").map(unescape);
+  };
+
+  if (jsonPointer === "") {
+    return "$";
+  }
+
+  if (jsonPointer === "/") {
+    return `$['']`;
+  }
+
+  const tokens = parse(jsonPointer);
+  let jsonPath = "$";
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    if (specialChars.test(tokens[i])) {
+      jsonPath += `['${tokens[i]}']`;
+    } else {
+      jsonPath += `.${tokens[i]}`;
+    }
+  }
+
+  return jsonPath;
+};
+
 export const getFieldConfig = ({
   errors,
   formSchema,
@@ -164,22 +434,22 @@ export const getFieldConfig = ({
   uiFieldObject,
   requiredField,
 }: {
-  errors: FormValidationWarning[] | null;
+  errors: FormattedFormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
   uiFieldObject: UiSchemaField;
   requiredField: boolean;
 }) => {
   const { definition, schema, type: fieldType } = uiFieldObject;
-
   let fieldSchema = {} as RJSFSchema;
-  let name = "";
+  let fieldName = "";
+  let htmlFieldName = "";
   let value = "" as string | number | object | undefined;
-  let rawErrors: string[] | FormValidationWarning[] = [];
+  let rawErrors: string[] | FormattedFormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
-    name = uiFieldObject.name ? uiFieldObject.name : "";
-    if (!name) {
+    fieldName = uiFieldObject.name ? uiFieldObject.name : "";
+    if (!fieldName) {
       console.error("name misssing from multiField definition");
       throw new Error("Could not build field");
     }
@@ -210,17 +480,29 @@ export const getFieldConfig = ({
       })
       .flat();
   } else if (typeof definition === "string") {
-    fieldSchema = getFieldSchema({ definition, schema, formSchema });
-    name = getFieldName({ definition, schema });
-    const path = getFieldPath(name);
-    value = getByPointer(formData, path) as string | number | undefined;
+    fieldSchema = getFieldSchema({
+      definition,
+      schema,
+      formSchema,
+    }) as RJSFSchema;
+    fieldName = getNameFromDef({ definition, schema });
+    htmlFieldName = getFieldNameForHtml({ definition, schema });
+    const formDataPath = getFieldPathFromHtml(htmlFieldName);
+    value = getByPointer(formData, formDataPath) as string | number | undefined;
+
     const fieldType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "";
-    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
+
+    rawErrors = getWarningsForField({
+      errors,
+      fieldName,
+      definition,
+      fieldType,
+    });
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -229,7 +511,7 @@ export const getFieldConfig = ({
   }
 
   // fields that have no definition won't have a name, but will have a schema
-  if ((!name || !fieldSchema) && definition) {
+  if ((!fieldName || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
@@ -286,8 +568,8 @@ export const getFieldConfig = ({
   return {
     type,
     props: {
-      id: name,
-      key: name,
+      id: htmlFieldName,
+      key: htmlFieldName,
       disabled,
       required: requiredField,
       minLength: fieldSchema?.minLength,
@@ -300,52 +582,39 @@ export const getFieldConfig = ({
   };
 };
 
-const getNestedWarningsForField = (
-  fieldName: string,
-  warnings: FormValidationWarning[],
-): FormValidationWarning[] => {
-  return warnings.filter(({ field, type }) => {
-    return type === "required" && fieldName.includes(field);
-  });
-};
-
-const getWarningsForField = (
-  fieldName: string,
-  isRequired: boolean,
-  warnings: FormValidationWarning[],
-): FormValidationWarning[] => {
-  const directWarnings = warnings?.filter(
-    (warning) => warning.field.indexOf(fieldName) !== -1,
-  );
-  const nestedRequiredWarnings = isRequired
-    ? getNestedWarningsForField(fieldName, warnings)
-    : [];
-  return [...directWarnings, ...nestedRequiredWarnings];
-};
-
-export const formatFieldWarnings = (
-  warnings: FormValidationWarning[] | null,
-  name: string,
-  fieldType: string,
-  required: boolean,
-): string[] => {
-  if (!warnings || warnings.length < 1) {
+export const getWarningsForField = ({
+  fieldName,
+  fieldType,
+  errors,
+  definition,
+}: {
+  fieldName: string;
+  definition: string;
+  fieldType: string;
+  errors: FormattedFormValidationWarning[] | null;
+}): string[] => {
+  if (!errors || errors.length < 1) {
     return [];
   }
   if (fieldType === "array") {
-    const warningMap = warnings.reduce(
-      (acc, item) => {
+    const warningMap = errors.reduce<Record<string, string>>(
+      (acc: Record<string, string>, item: FormattedFormValidationWarning) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         acc[item.field] = item.message;
         return acc;
       },
-      {} as Record<string, unknown>,
+      {},
     );
 
-    return flatFormDataToArray(name, warningMap) as unknown as [];
+    return flatFormDataToArray(fieldName, warningMap) as unknown as [];
   }
-  const warningsforField = getWarningsForField(name, required, warnings);
+
+  const warningsforField = errors.filter(
+    (error) => error.definition === definition,
+  );
+
   return warningsforField.map((warning) => {
-    return warning.message;
+    return warning.formatted;
   });
 };
 
@@ -443,7 +712,7 @@ const removePropertyPaths = (path: unknown): string => {
   return path.replace(/properties\//g, "").replace(/^\//, "");
 };
 
-const getKeyParentPath = (key: string, parentPath?: string) => {
+export const getKeyParentPath = (key: string, parentPath?: string) => {
   const keyParent = parentPath ? `${parentPath}/${key}` : key;
   return removePropertyPaths(keyParent);
 };
@@ -505,7 +774,7 @@ export const flatFormDataToArray = (
   field: string,
   data: Record<string, unknown>,
 ) => {
-  if (field in data) return [data[field]];
+  if (field in data) return [{ [field]: data[field] }];
   return Object.entries(data).reduce(
     (values: Array<Record<string, unknown>>, [key, value]) => {
       const fieldSplit = key.split(/\[\d+\]\./);
