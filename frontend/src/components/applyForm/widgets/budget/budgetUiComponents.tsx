@@ -5,6 +5,28 @@ import React from "react";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 import { amountSchema } from "./budgetSchemas";
 
+export const DATA_CELL_BASE_CLASS =
+  "border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell";
+
+export type DataCellProps = {
+  children: React.ReactNode;
+  className?: string;
+  height?: string | number;
+};
+
+export const DataCell: React.FC<DataCellProps> = ({
+  children,
+  className = "",
+  height = "inherit",
+}) => (
+  <td
+    className={`${DATA_CELL_BASE_CLASS}${className ? ` ${className}` : ""}`}
+    height={height}
+  >
+    <div className="display-flex flex-column">{children}</div>
+  </td>
+);
+
 export const HelperText: React.FC<
   React.PropsWithChildren<{ hasHorizontalLine?: boolean; className?: string }>
 > = ({ hasHorizontalLine = false, className, children }) => (

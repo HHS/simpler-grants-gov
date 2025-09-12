@@ -18,7 +18,7 @@ import {
   assistanceListingNumberSchema,
 } from "./budgetSchemas";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
-import { CurrencyInput, HelperText } from "./budgetUiComponents";
+import { CurrencyInput, DataCell, HelperText } from "./budgetUiComponents";
 import { asMoney, isRecord } from "./budgetValueGuards";
 
 interface BudgetSummary {
@@ -128,19 +128,6 @@ function Budget424aSectionA<
   ): string | undefined => itemAt(row).budget_summary?.[path];
 
   const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
-
-  const CELL_TD_CLASS =
-    "border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell";
-
-  const Cell: React.FC<{
-    children: React.ReactNode;
-    className?: string;
-    height?: string | number;
-  }> = ({ children, className = "", height = "inherit" }) => (
-    <td className={`${CELL_TD_CLASS} ${className}`} height={height}>
-      <div className="display-flex flex-column">{children}</div>
-    </td>
-  );
 
   return (
     <div key={id} id={id}>
@@ -253,7 +240,7 @@ function Budget424aSectionA<
           {COLUMNS.map((row) => (
             <tr key={row}>
               {/* Column A: activity title */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-05 padding-top-0">
                     <TextWidget
@@ -269,10 +256,10 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
 
               {/* Column B: assistance listing */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-05 padding-top-0">
                     <TextWidget
@@ -287,10 +274,10 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
 
               {/* Column C: federal estimated unobligated */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-3 padding-top-0">
                     <CurrencyInput
@@ -306,10 +293,10 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
 
               {/* Column D: non-federal estimated unobligated */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-3 padding-top-0">
                     <CurrencyInput
@@ -325,10 +312,10 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
 
               {/* Column E: federal new/revised */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-3 padding-top-0">
                     <CurrencyInput
@@ -341,10 +328,10 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
 
               {/* Column F: non-federal new/revised */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-3 padding-top-0">
                     <CurrencyInput
@@ -360,10 +347,10 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
 
               {/* Column G: total */}
-              <Cell>
+              <DataCell>
                 <div className="display-flex flex-align-end">
                   <span className="margin-right-1">=</span>
                   <div>
@@ -380,7 +367,7 @@ function Budget424aSectionA<
                     />
                   </div>
                 </div>
-              </Cell>
+              </DataCell>
             </tr>
           ))}
 
