@@ -86,9 +86,7 @@ def apply_conditional_transform(
     """Apply conditional transformation logic.
 
     Supports:
-    - if_then_else: Conditional field mapping
-    - computed_field: Calculate value from other fields
-    - required_when: Include field only when condition is met
+    - one_to_many: Map array field to multiple XML elements
 
     Args:
         transform_config: Conditional transformation configuration
@@ -103,36 +101,7 @@ def apply_conditional_transform(
     """
     transform_type = transform_config.get("type")
 
-    if transform_type == "if_then_else":
-        condition = transform_config.get("if")
-        then_config = transform_config.get("then")
-        else_config = transform_config.get("else")
-
-        if condition and evaluate_condition(condition, source_data):
-            if then_config:
-                return _apply_transform_action(then_config, source_data, field_path)
-        elif else_config:
-            return _apply_transform_action(else_config, source_data, field_path)
-        else:
-            return None
-
-    elif transform_type == "computed_field":
-        computation = transform_config.get("computation")
-        if computation:
-            return _apply_computation(computation, source_data, field_path)
-        return None
-
-    elif transform_type == "required_when":
-        condition = transform_config.get("condition")
-        value_config = transform_config.get("value")
-
-        if condition and evaluate_condition(condition, source_data):
-            if value_config:
-                return _apply_transform_action(value_config, source_data, field_path)
-        else:
-            return None
-
-    elif transform_type == "one_to_many":
+    if transform_type == "one_to_many":
         # Handle one-to-many field mappings (e.g., array to multiple XML elements)
         source_field = transform_config.get("source_field")
         target_pattern = transform_config.get("target_pattern")
@@ -161,94 +130,6 @@ def apply_conditional_transform(
         raise ConditionalTransformationError(
             f"Unknown conditional transform type: {transform_type}"
         )
-
-
-def _apply_transform_action(
-    action_config: dict[str, Any], source_data: dict[str, Any], field_path: list[str]
-) -> Any:
-    """Apply a transformation action (used in then/else clauses)."""
-    action_type = action_config.get("type", "field_value")
-
-    if action_type == "field_value":
-        # Get value from another field
-        source_field = action_config.get("field")
-        path_list = (
-            source_field.split(".") if isinstance(source_field, str) else (source_field or [])
-        )
-        return _get_nested_value(source_data, cast(list[str], path_list))
-
-    elif action_type == "static_value":
-        # Return a static value
-        return action_config.get("value")
-
-    elif action_type == "computed":
-        # Apply a computation
-        computation = action_config.get("computation")
-        if computation:
-            return _apply_computation(computation, source_data, field_path)
-        return None
-
-    else:
-        raise ConditionalTransformationError(f"Unknown transform action type: {action_type}")
-
-
-def _apply_computation(
-    computation: dict[str, Any], source_data: dict[str, Any], field_path: list[str]
-) -> Any:
-    """Apply a computation to calculate a value."""
-    computation_type = computation.get("type")
-
-    if computation_type == "sum":
-        # Sum multiple fields
-        fields = computation.get("fields", [])
-        total = 0.0
-        for field in fields:
-            path_list = field.split(".") if isinstance(field, str) else (field or [])
-            value = _get_nested_value(source_data, cast(list[str], path_list))
-            if value is not None:
-                try:
-                    # Handle both string and numeric values
-                    if isinstance(value, str):
-                        # Remove currency symbols and convert
-                        cleaned = value.replace("$", "").replace(",", "")
-                        total += float(cleaned)
-                    else:
-                        total += float(value)
-                except (ValueError, TypeError) as e:
-                    logger.warning(f"Could not convert {value} to number for sum computation: {e}")
-
-        # Format as currency string to match expected format
-        return f"{total:.2f}"
-
-    elif computation_type == "concat":
-        # Concatenate multiple field values
-        fields = computation.get("fields", [])
-        separator = computation.get("separator", " ")
-        values = []
-        for field in fields:
-            path_list = field.split(".") if isinstance(field, str) else (field or [])
-            value = _get_nested_value(source_data, cast(list[str], path_list))
-            if value is not None:
-                values.append(str(value))
-        return separator.join(values)
-
-    elif computation_type == "format_template":
-        # Format using a template string
-        template = computation.get("template", "")
-        fields = computation.get("fields", {})
-        format_values = {}
-        for key, field_path_str in fields.items():
-            path_list = (
-                field_path_str.split(".")
-                if isinstance(field_path_str, str)
-                else (field_path_str or [])
-            )
-            value = _get_nested_value(source_data, cast(list[str], path_list))
-            format_values[key] = value if value is not None else ""
-        return template.format(**format_values)
-
-    else:
-        raise ConditionalTransformationError(f"Unknown computation type: {computation_type}")
 
 
 def _get_nested_value(data: dict[str, Any], path: list[str]) -> Any:
