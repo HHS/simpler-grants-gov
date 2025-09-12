@@ -5,7 +5,7 @@ export const FieldErrors = ({
   fieldName,
   rawErrors,
 }: {
-  type: JSONSchema7TypeName | JSONSchema7TypeName[] | undefined;
+  type: JSONSchema7TypeName | JSONSchema7TypeName[] | string | undefined;
   fieldName: string;
   rawErrors: string[] | Record<string, string>[] | undefined;
 }): React.ReactNode | string | null => {

@@ -5,7 +5,7 @@ import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ErrorMessage,
   FileInput,
@@ -33,20 +33,24 @@ const MultipleAttachmentUploadWidget = ({
   schema,
   onChange,
 }: UswdsWidgetProps) => {
-  const attachments = useApplicationAttachments();
-  const { type } = schema;
+  const { description, options, title, type } = schema as SchemaWithLabelOption;
 
-  const errors = FieldErrors({
-    type,
-    fieldName: id,
-    rawErrors,
-  });
+  const attachments = useApplicationAttachments();
+
+  const error = rawErrors.length ? true : undefined;
+  const errors = useMemo(
+    () => FieldErrors({ type, fieldName: id, rawErrors }),
+    [type, id, rawErrors],
+  );
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
 
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();
-  const describedBy = errors ? `error-for-${id}` : `${id}-hint`;
-  const { description, title, options } = schema as SchemaWithLabelOption;
   const { uploadAttachment } = useAttachmentUpload();
   const { deleteState, deletePending, deleteAttachment } =
     useAttachmentDelete();
@@ -184,7 +188,7 @@ const MultipleAttachmentUploadWidget = ({
             console.error(error),
           );
         }}
-        aria-describedby={describedBy}
+        aria-describedby={describedby}
       />
 
       <input
