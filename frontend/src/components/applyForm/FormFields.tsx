@@ -30,7 +30,7 @@ export const FormFields = ({
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
-  formContext: RootBudgetFormContext;
+  formContext?: RootBudgetFormContext;
 }) => {
   try {
     let acc: JSX.Element[] = [];
