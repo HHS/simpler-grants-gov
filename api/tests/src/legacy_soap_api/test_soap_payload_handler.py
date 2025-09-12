@@ -8,6 +8,7 @@ from src.legacy_soap_api.soap_payload_handler import (
     build_xml_from_dict,
     get_envelope_dict,
     get_soap_envelope_from_payload,
+    get_soap_operation_name,
 )
 from tests.util.minifiers import minify_xml
 
@@ -223,3 +224,96 @@ class TestBuildXMLFromDict(unittest.TestCase):
         """
             ).encode()
         )
+
+
+class TestGetSoapOperationName(unittest.TestCase):
+    def test_get_soap_operation_name_ignores_header_and_attachment(self):
+        header = (
+            b"\r\n------=_Part_41_486913496.1757620327503\r\nContent-Type: application/xop+xml; c"
+            b'harset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: 8bit\r\nContent-ID: <test>\r\n\r\n'
+        )
+        envelope = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+            f"\n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>"
+            "</app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n"
+            "             <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>"
+            '<inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>'
+            f"</gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        attachment = (
+            b"\r\n------=_Part_41_486913496.1757620327503\r\nConte"
+            b'nt-Type: text/plain; charset=us-ascii; name=test.txt\r\nContent-Transfer-Encoding: 7bit\r\nContent-ID: <budget>\r\nContent-Disposition: attachment; name="test.txt"; filename="test.txt"\r\n\r\nhello\nhello\nhello\nh'
+            b"ello\nworld\n\n\r\n------=_Part_41_486913496.1757620327503--\r\n"
+        )
+        result = get_soap_operation_name(header + envelope + attachment)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_when_just_xml(self):
+        envelope = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+            f"\n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>"
+            "</app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n"
+            "             <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>"
+            '<inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>'
+            f"</gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        result = get_soap_operation_name(envelope)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_when_passed_a_string_instead_of_bytes(self):
+        envelope = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+            f"\n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>"
+            "</app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n"
+            "             <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>"
+            '<inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>'
+            f"</gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n"
+            "</soapenv:Envelope>"
+        )
+        result = get_soap_operation_name(envelope)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_checks_for_older_soap_envelope_tag(self):
+        envelope = (
+            '<soap:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+            f"\n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>"
+            "</app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n"
+            "             <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>"
+            '<inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>'
+            f"</gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        result = get_soap_operation_name(envelope)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_returns_empty_string_when_xml_does_not_have_correct_structure(
+        self,
+    ):
+        envelope = (
+            b'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+            b"\n   <soapenv:Header/>\n  "
+        )
+        result = get_soap_operation_name(envelope)
+        assert result == ""
+
+    def test_get_soap_operation_name_returns_empty_string_when_passed_empty_string(self):
+        result = get_soap_operation_name("")
+        assert result == ""
+
+    def test_get_soap_operation_name_handles_when_soap_pattern_is_divided_between_two_chunks_of_1000(
+        self,
+    ):
+        header = b"a" * 997
+        envelope = (
+            '<soap:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+            f"\n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>"
+            "</app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n"
+            "             <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>"
+            '<inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>'
+            f"</gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        result = get_soap_operation_name(header + envelope)
+        assert result == MOCK_SOAP_OPERATION_NAME
