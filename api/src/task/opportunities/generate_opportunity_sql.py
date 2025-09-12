@@ -71,6 +71,7 @@ class GenerateOpportunitySqlTaskConfig(PydanticBaseEnvConfig):
 class OppSqlRequest:
     opportunity_id: str
     environment: str
+    forms: list[str] = dataclasses.field(default_factory=list)
     # This is just so we can avoid printing in tests
     print_output: bool = True
 
@@ -195,6 +196,9 @@ class GenerateOpportunitySqlProcessor:
         data_to_insert["opportunity_summary_id"] = self.opp_data_container.opportunity_summary_id
         data_to_insert["opportunity_id"] = self.opp_data_container.opportunity_id
         data_to_insert["legacy_opportunity_id"] = self.opp_data_container.legacy_opportunity_id
+        data_to_insert["agency_contact_description"] = "Bob Smith"
+        data_to_insert["agency_email_address"] = "fake_mail@fake.com"
+        data_to_insert["agency_email_address_description"] = "fake contact info"
 
         self.add_section_to_sql("Opportunity Summary")
         self.sql_statements.append(build_sql("opportunity_summary", data_to_insert))
@@ -295,6 +299,7 @@ class GenerateOpportunitySqlProcessor:
             data_to_insert["is_simpler_grants_enabled"] = False
             # This isn't returned, but putting in SQL to be easily found
             data_to_insert["grace_period"] = 0
+            data_to_insert["contact_info"] = "Bob Smith"
 
             # Figure out the assistance listing ID by iterating over
             # what we inserted and finding the matching assistance listing number
@@ -326,6 +331,7 @@ class GenerateOpportunitySqlProcessor:
             ### Competition Forms
             competition_forms = competition.get("competition_forms", [])
 
+            form_ids = set()
             for competition_form in competition_forms:
                 form = competition_form.get("form", {})
                 competition_form_data = {
@@ -335,8 +341,22 @@ class GenerateOpportunitySqlProcessor:
                     "is_required": competition_form.get("is_required"),
                 }
 
+                form_ids.add(str(form.get("form_id")))
                 self.add_section_to_sql(f"Competition Form: {form.get('short_form_name')}")
                 self.sql_statements.append(build_sql("competition_form", competition_form_data))
+
+            for form in self.request.forms:
+                if form not in form_ids:
+                    competition_form_data = {
+                        "competition_form_id": str(uuid.uuid4()),
+                        "competition_id": competition_id,
+                        "form_id": form,
+                        "is_required": False,
+                    }
+                    self.add_section_to_sql(
+                        f"Competition Form - Manually Added ID {form} - NOTE - defaulted to non-required"
+                    )
+                    self.sql_statements.append(build_sql("competition_form", competition_form_data))
 
             ### Competition Open To Applicants
             self.add_section_to_sql("Competition Open To Applicant")
@@ -496,12 +516,18 @@ def map_lookup_value(value: StrEnum | None) -> int | None:
     "--environment", required=True, type=click.Choice(["local", "dev", "staging", "prod"])
 )
 @click.option("--opportunity-id", required=True, type=str)
-def generate_opportunity_sql(environment: str, opportunity_id: str) -> None:
+@click.option(
+    "--forms",
+    default=[],
+    multiple=True,
+    help="List of forms to add, will be added as non-required. If form already exists, does nothing.",
+)
+def generate_opportunity_sql(environment: str, opportunity_id: str, forms: list[str]) -> None:
     # This script is only meant for running locally at this time
     error_if_not_local()
 
     GenerateOpportunitySqlProcessor(
-        OppSqlRequest(environment=environment, opportunity_id=opportunity_id)
+        OppSqlRequest(environment=environment, opportunity_id=opportunity_id, forms=forms)
     ).run()
 
     logger.info("Completed SQL generation")
