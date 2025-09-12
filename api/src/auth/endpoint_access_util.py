@@ -63,6 +63,7 @@ def can_access(
     allowed_privileges: set[Privilege],
     resource: Organization | Application | Agency | None,
 ) -> bool:
+    # import pdb; pdb.set_trace()
     roles = get_roles_for_resource(user, resource)
 
     for role in roles:
