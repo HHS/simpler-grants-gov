@@ -20,24 +20,21 @@ import {
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
 const nestedWarningForField = ({
-  path,
   definition,
+  errors,
   fieldName,
   fieldSchema,
-  errors,
   formSchema,
+  path,
 }: {
-  fieldName: string;
-  definition: `/properties/${string}`;
-  path: string;
-  fieldSchema: SchemaField;
+  definition: string;
   errors: FormValidationWarning[];
+  fieldName: string;
+  fieldSchema: SchemaField;
   formSchema: RJSFSchema;
+  path: string;
 }): FormattedFormValidationWarning | null => {
-  const parent = definition.replace(
-    /\/properties\/\w+$/,
-    "",
-  ) as `/properties/${string}`;
+  const parent = definition.replace(/\/properties\/\w+$/, "");
   const parentFieldDefinition = getFieldSchema({
     definition: parent,
     formSchema,
@@ -104,7 +101,7 @@ const formatValidationWarning = (
 
 const findValidationError = (
   errors: FormValidationWarning[],
-  definition: `/properties/${string}` | undefined,
+  definition: string | undefined,
   schema: SchemaField | undefined,
   formSchema: RJSFSchema,
 ): FormattedFormValidationWarning | null => {
@@ -113,7 +110,7 @@ const findValidationError = (
     formSchema,
     schema,
   }) as SchemaField;
-  const path = definition ? jsonPointerToPath(definition) : "";
+  const path = definition ? jsonSchemaPointerToPath(definition) : "";
   const fieldName = definition
     ? definition.split("/")[definition.split("/").length - 1]
     : "";
@@ -317,7 +314,7 @@ export const getFieldSchema = ({
   schema,
   formSchema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
   formSchema: RJSFSchema;
 }): RJSFSchema | SchemaField => {
@@ -336,7 +333,7 @@ export const getNameFromDef = ({
   definition,
   schema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
 }) => {
   return definition
@@ -387,18 +384,47 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-// changes a json path $.field_name.field_child to pointer /properties/field_name/properties/field_child
-export const jsonPathToPointer = (
-  jsonPath: string,
-): `/properties/${string}` => {
-  return jsonPath
-    .replace("$", "")
-    .replace(/\./g, "/properties/") as `/properties/${string}`;
+// changes a json pointer /properties/field_name/properties/field_child to path $.field_name.field_child
+export const jsonSchemaPointerToPath = (jsonPointer: string) => {
+  const j = jsonPointerToPath(jsonPointer);
+  return j.replace(/\.properties/g, "");
 };
 
-// changes a json pointer /properties/field_name/properties/field_child to path $.field_name.field_child
-export const jsonPointerToPath = (jsonPointer: string) => {
-  return `$${jsonPointer.replace(/\/properties\//g, ".")}`;
+// borrowed from https://github.com/javi11/jpo-jpa
+const jsonPointerToPath = (jsonPointer: string) => {
+  const specialChars = /[\s~!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+/;
+
+  const unescape = (str: string) => {
+    return str.replace(/~1/g, "/").replace(/~0/g, "~");
+  };
+
+  const parse = (jsonPointer: string) => {
+    if (jsonPointer.charAt(0) !== "/") {
+      throw new Error(`Invalid JSON pointer: ${jsonPointer}`);
+    }
+    return jsonPointer.substring(1).split("/").map(unescape);
+  };
+
+  if (jsonPointer === "") {
+    return "$";
+  }
+
+  if (jsonPointer === "/") {
+    return `$['']`;
+  }
+
+  const tokens = parse(jsonPointer);
+  let jsonPath = "$";
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    if (specialChars.test(tokens[i])) {
+      jsonPath += `['${tokens[i]}']`;
+    } else {
+      jsonPath += `.${tokens[i]}`;
+    }
+  }
+
+  return jsonPath;
 };
 
 export const getFieldConfig = ({
