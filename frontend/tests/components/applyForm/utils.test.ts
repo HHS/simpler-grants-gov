@@ -10,7 +10,6 @@ import {
   condenseFormSchemaProperties,
   determineFieldType,
   flatFormDataToArray,
-  formatFieldWarnings,
   getFieldConfig,
   getFieldNameForHtml,
   getFieldPathFromHtml,
@@ -26,7 +25,6 @@ import {
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
-  wrapSection,
 } from "src/components/applyForm/utils";
 
 const mockDereference = jest.fn();
@@ -705,16 +703,6 @@ describe("getNameFromDef", () => {
     expect(getNameFromDef({ definition: undefined, schema: {} })).toBe(
       "untitled",
     );
-  });
-});
-
-describe("wrapSection", () => {
-  it("returns a FieldsetWidget element", () => {
-    const tree = <div>Test</div>;
-    const el = wrapSection({ label: "Label", fieldName: "field", tree });
-    expect(el.props.label).toBe("Label");
-    expect(el.props.fieldName).toBe("field");
-    expect(el.props.children).toBe(tree);
   });
 });
 
