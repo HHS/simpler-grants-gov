@@ -20,8 +20,7 @@ import {
   getRequiredProperties,
   getWarningsForField,
   isFieldRequired,
-  jsonPathToPointer,
-  jsonPointerToPath,
+  jsonSchemaPointerToPath,
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
@@ -672,17 +671,9 @@ describe("getFieldPathFromHtml", () => {
   });
 });
 
-describe("jsonPathToPointer", () => {
-  it("converts JSON path to pointer", () => {
-    expect(jsonPathToPointer("$.foo.bar")).toBe(
-      "/properties/foo/properties/bar",
-    );
-  });
-});
-
 describe("jsonPointerToPath", () => {
   it("converts pointer to JSON path", () => {
-    expect(jsonPointerToPath("/properties/foo/properties/bar")).toBe(
+    expect(jsonSchemaPointerToPath("/properties/foo/properties/bar")).toBe(
       "$.foo.bar",
     );
   });

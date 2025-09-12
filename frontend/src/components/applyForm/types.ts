@@ -6,7 +6,6 @@ import {
   StrictRJSFSchema,
   UIOptionsType,
 } from "@rjsf/utils";
-import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
 
@@ -34,12 +33,6 @@ export interface FormData {
 export interface SetFormDataFunction {
   (data: FormData): void;
 }
-
-export type FieldErrors = ErrorObject<
-  string,
-  Record<string, unknown>,
-  unknown
->[];
 
 export type FormValidationWarning = {
   field: string;
