@@ -87,7 +87,6 @@ module "prod_config" {
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
-    SYNC_SUPPRESSED_EMAILS       = "false"
 
     # PDF Generation - Production overrides
     FRONTEND_URL             = "https://simpler.grants.gov"
