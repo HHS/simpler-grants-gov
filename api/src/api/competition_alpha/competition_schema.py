@@ -56,30 +56,35 @@ class CompetitionAlphaSchema(Schema):
     )
 
     competition_title = fields.String(
+        allow_none=True,
         metadata={
             "description": "The title of the competition",
             "example": "Proposal for Advanced Research",
-        }
+        },
     )
     opening_date = fields.Date(
+        allow_none=True,
         metadata={
             "description": "The opening date of the competition, the first day applications are accepted"
-        }
+        },
     )
     closing_date = fields.Date(
+        allow_none=True,
         metadata={
             "description": "The closing date of the competition, the last day applications are accepted"
-        }
+        },
     )
     contact_info = fields.String(
+        allow_none=True,
         metadata={
             "description": "Contact info getting assistance with the competition",
             "example": "Bob Smith\nFakeMail@fake.com",
-        }
+        },
     )
 
     opportunity_assistance_listing = fields.Nested(
         OpportunityAssistanceListingV1Schema(),
+        allow_none=True,
         metadata={"description": "Assistance listing information for this competition"},
     )
 
