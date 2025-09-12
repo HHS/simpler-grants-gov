@@ -7,7 +7,8 @@ import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useMemo } from "react";
+import { useNavigationGuard } from "next-navigation-guard";
+import { useActionState, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -55,6 +56,15 @@ const ApplyForm = ({
     saved: false,
   });
 
+  const [formChanged, setFormChanged] = useState<boolean>(false);
+
+  useNavigationGuard({
+    enabled: formChanged,
+    confirm: () =>
+      // eslint-disable-next-line no-alert
+      window.confirm(t("unsavedChangesWarning")),
+  });
+
   const { formData, error, saved } = formState;
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
@@ -76,6 +86,9 @@ const ApplyForm = ({
     <form
       className="flex-1 margin-top-2 simpler-apply-form"
       action={formAction}
+      onChange={() => {
+        setFormChanged(true);
+      }}
       // turns off html5 validation so all error displays are consistent
       noValidate
     >
@@ -87,6 +100,7 @@ const ApplyForm = ({
           name="apply-form-button"
           className="margin-top-0"
           value="save"
+          onClick={() => setFormChanged(false)}
         >
           {pending ? "Saving..." : "Save"}
         </Button>
