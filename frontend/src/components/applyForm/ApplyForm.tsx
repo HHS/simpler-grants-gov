@@ -8,7 +8,13 @@ import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { useActionState, useMemo, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -35,6 +41,8 @@ const ApplyForm = ({
   validationWarnings: FormValidationWarning[] | null;
   attachments: Attachment[];
 }) => {
+  const [pdfLoadingTimeoutComplete, setPdfLoadingTimeoutComplete] =
+    useState(false);
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const required = t.rich("required", {
@@ -64,6 +72,23 @@ const ApplyForm = ({
       // eslint-disable-next-line no-alert
       window.confirm(t("unsavedChangesWarning")),
   });
+
+  const pdfLoadingComplete = useCallback(() => {
+    if (!pdfLoadingTimeoutComplete) {
+      setTimeout(() => {
+        setPdfLoadingTimeoutComplete(true);
+      }, 10000);
+      return false;
+    }
+    return true;
+  }, [pdfLoadingTimeoutComplete]);
+
+  useEffect(() => {
+    if (!window) {
+      return;
+    }
+    window.docraptorJavaScriptFinished = pdfLoadingComplete;
+  }, [pdfLoadingComplete]);
 
   const { formData, error, saved } = formState;
 
