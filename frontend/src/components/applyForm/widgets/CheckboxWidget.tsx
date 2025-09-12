@@ -41,7 +41,7 @@ function CheckboxWidget<
   // Match radio pattern: input points to the label+desc block (and error) explicitly
   const describedby = hasError ? `error-for-${id}` : `label-for-${id}`;
 
-  const label = required ? (
+  const label = (required || Boolean(description)) ? (
     <DynamicFieldLabel
       idFor={id}
       title={baseTitle}
