@@ -19,7 +19,7 @@ module "aws_vpc" {
   # Public subnets
   public_subnets                                               = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
   public_subnet_tags                                           = { subnet_type = "public" }
-  public_subnet_assign_ipv6_address_on_creation                = true
+  public_subnet_assign_ipv6_address_on_creation                = false
   public_subnet_enable_dns64                                   = true
   public_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
   public_subnet_ipv6_prefixes                                  = [1, 2, 3]
@@ -27,7 +27,7 @@ module "aws_vpc" {
   # Private subnets
   private_subnets                                               = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
   private_subnet_tags                                           = { subnet_type = "private" }
-  private_subnet_assign_ipv6_address_on_creation                = true
+  private_subnet_assign_ipv6_address_on_creation                = false
   private_subnet_enable_dns64                                   = true
   private_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
   private_subnet_ipv6_prefixes                                  = [4, 5, 6]
@@ -39,7 +39,7 @@ module "aws_vpc" {
   database_subnet_tags                                           = { subnet_type = "database" }
   create_database_subnet_group                                   = var.has_database
   database_subnet_group_name                                     = var.database_subnet_group_name
-  database_subnet_assign_ipv6_address_on_creation                = true
+  database_subnet_assign_ipv6_address_on_creation                = false
   database_subnet_enable_dns64                                   = true
   database_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
   database_subnet_ipv6_prefixes                                  = [7, 8, 9]
