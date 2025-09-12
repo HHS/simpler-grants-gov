@@ -387,6 +387,7 @@ FORM_UI_SCHEMA = [
                     "/properties/direct_charges_explanation",
                     "/properties/indirect_charges_explanation",
                     "/properties/remarks",
+                    "/properties/confirmation",
                 ],
             }
         ],

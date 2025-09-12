@@ -143,6 +143,10 @@ export interface UswdsWidgetProps<
   onChange?: (value: unknown) => void;
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
+  formContext?: {
+    rootSchema?: RJSFSchema;
+    rootFormData?: unknown;
+  };
 }
 
 export interface SchemaWithLabelOption {

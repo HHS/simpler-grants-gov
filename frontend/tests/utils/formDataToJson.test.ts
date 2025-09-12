@@ -91,7 +91,7 @@ describe("formDataToObject", () => {
       user: {
         age: "30",
         name: "Alice",
-        emptyString: undefined,
+        emptyString: "",
         emptyNumber: undefined,
         skills: ["JavaScript", "TypeScript", { surprise: "more stuff" }],
         deeper: {
@@ -99,7 +99,7 @@ describe("formDataToObject", () => {
         },
       },
       nonUser: false,
-      empty: undefined,
+      empty: "",
       numeral: 100,
     };
 

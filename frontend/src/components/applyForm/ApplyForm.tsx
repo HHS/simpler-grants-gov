@@ -8,7 +8,7 @@ import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { useActionState, useMemo, useState } from "react";
+import React, { ReactNode, useActionState, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
@@ -35,9 +35,17 @@ const ApplyForm = ({
   validationWarnings: FormValidationWarning[] | null;
   attachments: Attachment[];
 }) => {
+  type RichRenderer = (chunks: ReactNode) => ReactNode;
+  type Translator = ((
+    key: string,
+    values?: Record<string, unknown>,
+  ) => string) & {
+    rich: (key: string, values: Record<string, RichRenderer>) => ReactNode;
+  };
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
-  const required = t.rich("required", {
+  const translate = t as unknown as Translator;
+  const required = translate.rich("required", {
     abr: (content) => (
       <abbr
         title="required"
@@ -62,13 +70,17 @@ const ApplyForm = ({
     enabled: formChanged,
     confirm: () =>
       // eslint-disable-next-line no-alert
-      window.confirm(t("unsavedChangesWarning")),
+      window.confirm(translate("unsavedChangesWarning")),
   });
 
   const { formData, error, saved } = formState;
 
   const formObject = !isEmpty(formData) ? formData : savedFormData;
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
+  const formContextValue = useMemo(
+    () => ({ rootSchema: formSchema, rootFormData: formObject }),
+    [formSchema, formObject],
+  );
 
   if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
     return (
@@ -110,14 +122,16 @@ const ApplyForm = ({
           />
           <AttachmentsProvider value={attachments ?? []}>
             <FormFields
+              key={saved ? "after-save" : "before-save"}
               errors={saved ? validationWarnings : null}
               formData={formObject}
               schema={formSchema}
               uiSchema={uiSchema}
+              formContext={formContextValue}
             />
           </AttachmentsProvider>
         </FormGroup>
-        <ApplyFormNav title={t("navTitle")} fields={navFields} />
+        <ApplyFormNav title={translate("navTitle")} fields={navFields} />
       </div>
     </form>
   );
