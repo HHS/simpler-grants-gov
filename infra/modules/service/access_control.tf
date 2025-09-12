@@ -131,6 +131,11 @@ data "aws_iam_policy_document" "email_access" {
     actions   = ["ses:SendEmail"]
     resources = ["arn:aws:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:configuration-set/${var.ses_configuration_set}"]
   }
+  statement {
+    sid       = "ListSuppressedDestinations"
+    actions   = ["ses:ListSuppressedDestinations"]
+    resources = ["*"]
+  }
 }
 
 
