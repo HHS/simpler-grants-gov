@@ -151,14 +151,12 @@ export interface UswdsWidgetProps<
   onFocus?: (id: string, value: unknown) => void;
 }
 
-export interface SchemaWithLabelOption {
-  title?: string;
-  description?: string;
+export type SchemaWithLabelOption = UswdsWidgetProps & {
   options?: {
     "widget-label"?: string;
     [key: string]: unknown;
   };
-}
+};
 
 export type UploadedFile = {
   id: string;
