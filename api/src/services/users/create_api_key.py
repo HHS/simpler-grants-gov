@@ -116,13 +116,8 @@ def _import_api_key_to_aws_gateway(api_key: UserApiKey) -> None:
             )
 
     except Exception as e:
-        logger.exception(
-            "Error importing API key to AWS API Gateway",
-            extra={
-                "api_key_id": api_key.api_key_id,
-                "key_name": api_key.key_name,
-            },
-        )
+        # Re-raise as a domain-specific exception without additional logging
+        # since the AWS adapter already logs the underlying error
         raise ApiGatewayIntegrationError(
             f"Failed to import API key to AWS API Gateway: {str(e)}"
         ) from e

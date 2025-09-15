@@ -50,12 +50,16 @@ def import_api_key(
     """
     Import an API key into AWS API Gateway using CSV format.
 
+    This function uses AWS API Gateway's CSV import functionality to import an API key
+    and associate it with a usage plan in a single operation, eliminating the need for
+    separate usage plan association calls.
+
     Args:
-        api_key: The API key value to import
-        name: Name for the API key
+        api_key: The API key value to import (must be 20-128 characters)
+        name: Name for the API key (cannot exceed 1024 characters)
         description: Optional description for the API key
         enabled: Whether the API key should be enabled (default: True)
-        usage_plan_id: Optional usage plan ID to associate the key with
+        usage_plan_id: Optional usage plan ID to associate the key with during import
         api_gateway_client: Optional pre-configured API Gateway client
 
     Returns:
@@ -69,8 +73,9 @@ def import_api_key(
         api_gateway_client = get_boto_api_gateway_client()
 
     # Format the API key data as CSV for import
-    # AWS API Gateway expects CSV format: name,key,description,enabled
-    csv_data = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'}"
+    # AWS API Gateway expects CSV format: name,key,description,enabled,usageplanIds
+    usage_plan_ids_str = f'"{usage_plan_id}"' if usage_plan_id else ""
+    csv_data = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'},{usage_plan_ids_str}"
 
     try:
         response = api_gateway_client.import_api_keys(
@@ -109,33 +114,10 @@ def import_api_key(
     api_key_response = ApiKeyImportResponse.model_validate(key_details)
 
     if usage_plan_id:
-        try:
-            api_gateway_client.create_usage_plan_key(
-                usagePlanId=usage_plan_id, keyId=api_key_response.id, keyType="API_KEY"
-            )
-            logger.info(
-                "Associated API key with usage plan",
-                extra={"api_key_id": api_key_response.id, "usage_plan_id": usage_plan_id},
-            )
-        except ClientError:
-            logger.exception(
-                "Error associating API key with usage plan",
-                extra={
-                    "api_key_id": api_key_response.id,
-                    "usage_plan_id": usage_plan_id,
-                },
-            )
-            raise
-        except Exception as e:
-            logger.exception(
-                "Unexpected error associating API key with usage plan",
-                extra={
-                    "error": str(e),
-                    "api_key_id": api_key_response.id,
-                    "usage_plan_id": usage_plan_id,
-                },
-            )
-            raise
+        logger.info(
+            "API key imported with usage plan association",
+            extra={"api_key_id": api_key_response.id, "usage_plan_id": usage_plan_id},
+        )
 
     return api_key_response
 

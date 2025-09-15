@@ -123,7 +123,7 @@ class TestImportApiKeyFunction:
 
         # Verify the boto3 calls were made correctly
         mock_boto_client.import_api_keys.assert_called_once_with(
-            body=b"Test API Key,test-key-12345,Test description,true",
+            body=b"Test API Key,test-key-12345,Test description,true,",
             format="csv",
             failOnWarnings=True,
         )
@@ -140,7 +140,7 @@ class TestImportApiKeyFunction:
     @patch("src.adapters.aws.api_gateway_adapter.is_local_aws")
     @patch("src.adapters.aws.api_gateway_adapter.get_boto_api_gateway_client")
     def test_real_aws_import_with_usage_plan(self, mock_get_client, mock_is_local):
-        """Test API key import with usage plan association."""
+        """Test API key import with usage plan association via CSV format."""
         mock_is_local.return_value = False
 
         mock_boto_client = Mock()
@@ -158,11 +158,6 @@ class TestImportApiKeyFunction:
             "tags": {},
         }
 
-        mock_boto_client.create_usage_plan_key.return_value = {
-            "id": "api-key-123",
-            "type": "API_KEY",
-        }
-
         response = import_api_key(
             api_key="test-key-12345",
             name="Test API Key",
@@ -171,10 +166,15 @@ class TestImportApiKeyFunction:
             usage_plan_id="test-plan-123",
         )
 
-        # Verify usage plan association was called
-        mock_boto_client.create_usage_plan_key.assert_called_once_with(
-            usagePlanId="test-plan-123", keyId="api-key-123", keyType="API_KEY"
+        # Verify the CSV format includes the usage plan ID
+        mock_boto_client.import_api_keys.assert_called_once_with(
+            body=b'Test API Key,test-key-12345,Test description,true,"test-plan-123"',
+            format="csv",
+            failOnWarnings=True,
         )
+
+        # Verify no separate usage plan association call is made
+        mock_boto_client.create_usage_plan_key.assert_not_called()
 
         assert response.id == "api-key-123"
 

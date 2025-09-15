@@ -276,7 +276,12 @@ def test_create_api_key_aws_gateway_error_handling(
         "Failed to import API key to AWS API Gateway, rolling back database transaction"
         in caplog.text
     )
-    assert "AWS API Gateway unavailable" in caplog.text
+    # Check that the error details are in the log records (structured logging)
+    error_records = [record for record in caplog.records if record.levelname == "ERROR"]
+    assert len(error_records) > 0
+    error_record = error_records[0]
+    assert hasattr(error_record, "error")
+    assert "AWS API Gateway unavailable" in str(error_record.error)
 
 
 @patch("src.services.users.create_api_key.import_api_key")
