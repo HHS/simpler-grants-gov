@@ -54,18 +54,7 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
     db_session.add(api_key)
 
     # Import the API key to AWS API Gateway
-    try:
-        _import_api_key_to_aws_gateway(api_key)
-    except Exception as e:
-        logger.error(
-            "Failed to import API key to AWS API Gateway",
-            extra={
-                "api_key_id": api_key.api_key_id,
-                "key_name": key_name,
-                "error": str(e),
-            },
-        )
-        raise
+    _import_api_key_to_aws_gateway(api_key)
 
     logger.info(
         "Created new API key",
