@@ -65,14 +65,9 @@ class RecursiveXMLTransformer:
                 transform_rule = rule_config["xml_transform"]
                 current_path = path + [key]
 
-                # Check if this is a conditional transformation that doesn't need source value
+                # Get the source value from the input data
                 transform_type = transform_rule.get("type", "simple")
-                if transform_type == "conditional":
-                    # For conditional transformations, always attempt to process
-                    source_value = self._get_nested_value(source_data, current_path)
-                else:
-                    # Get the source value from the input data
-                    source_value = self._get_nested_value(source_data, current_path)
+                source_value = self._get_nested_value(source_data, current_path)
 
                 # Handle None values based on configuration
                 if source_value is None and transform_type != "conditional":
@@ -113,21 +108,19 @@ class RecursiveXMLTransformer:
                 # Add to result if transformation succeeded and produced non-None value
                 if transformed_value is not None:
                     # Handle one-to-many mappings that return dictionaries
-                    if isinstance(transformed_value, dict) and transform_type == "conditional":
-                        conditional_config = transform_rule.get("conditional_transform", {})
-                        if conditional_config.get("type") == "one_to_many":
-                            # Add all key-value pairs from one-to-many result
-                            result.update(transformed_value)
-                            logger.debug(
-                                f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
-                            )
-                        else:
-                            target_field = transform_rule["target"]
-                            result[target_field] = transformed_value
-                            logger.debug(
-                                f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
-                            )
+                    if (
+                        isinstance(transformed_value, dict)
+                        and transform_type == "conditional"
+                        and transform_rule.get("conditional_transform", {}).get("type")
+                        == "one_to_many"
+                    ):
+                        # Add all key-value pairs from one-to-many result
+                        result.update(transformed_value)
+                        logger.debug(
+                            f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
+                        )
                     else:
+                        # Standard field assignment for all other cases
                         target_field = transform_rule["target"]
                         result[target_field] = transformed_value
                         logger.debug(
