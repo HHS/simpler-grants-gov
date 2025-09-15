@@ -253,32 +253,77 @@ def test_create_api_key_uses_key_generator(
 def test_create_api_key_aws_gateway_error_handling(
     mock_import_api_key, enable_factory_create, db_session: db.Session, caplog
 ):
-    """Test that API key creation succeeds even when AWS API Gateway import fails."""
+    """Test that API key creation fails when AWS API Gateway import fails."""
     # Configure the mock to raise an exception
     mock_import_api_key.side_effect = Exception("AWS API Gateway unavailable")
 
     user = UserFactory.create()
     json_data = {"key_name": "Test API Key"}
 
-    # This should still succeed despite the AWS error
-    api_key = create_api_key(
-        db_session=db_session,
-        user_id=user.user_id,
-        json_data=json_data,
-    )
-
-    # Verify the API key was still created
-    assert api_key.api_key_id is not None
-    assert api_key.user_id == user.user_id
-    assert api_key.key_name == "Test API Key"
-    assert api_key.is_active is True
+    # This should now fail due to the AWS error
+    with pytest.raises(Exception, match="AWS API Gateway unavailable"):
+        create_api_key(
+            db_session=db_session,
+            user_id=user.user_id,
+            json_data=json_data,
+        )
 
     # Verify that the AWS import was attempted
     mock_import_api_key.assert_called_once()
 
-    # Verify the error was logged
-    assert "Failed to import API key to AWS API Gateway" in caplog.text
+    # Verify the error was logged with rollback message
+    assert (
+        "Failed to import API key to AWS API Gateway, rolling back database transaction"
+        in caplog.text
+    )
     assert "AWS API Gateway unavailable" in caplog.text
+
+
+@patch("src.services.users.create_api_key.import_api_key")
+def test_create_api_key_database_rollback_on_gateway_failure(
+    mock_import_api_key, enable_factory_create, db_session: db.Session
+):
+    """Test that database rollback occurs when AWS API Gateway import fails, leaving no orphaned records."""
+    from sqlalchemy import select
+
+    from src.db.models.user_models import UserApiKey
+
+    # Configure the mock to raise an exception
+    mock_import_api_key.side_effect = Exception("AWS API Gateway unavailable")
+
+    user = UserFactory.create()
+    json_data = {"key_name": "Test API Key"}
+
+    # Count existing API keys before the failed creation attempt
+    initial_count = db_session.execute(
+        select(UserApiKey).where(UserApiKey.user_id == user.user_id)
+    ).all()
+    initial_count = len(initial_count)
+
+    # This should fail due to the AWS error
+    with pytest.raises(Exception, match="AWS API Gateway unavailable"):
+        create_api_key(
+            db_session=db_session,
+            user_id=user.user_id,
+            json_data=json_data,
+        )
+
+    # Verify that no new API key was persisted to the database after rollback
+    final_count = db_session.execute(
+        select(UserApiKey).where(UserApiKey.user_id == user.user_id)
+    ).all()
+    final_count = len(final_count)
+
+    assert final_count == initial_count, "No new API key should be persisted after rollback"
+
+    # Also verify no API key exists with the expected name
+    api_key_with_name = db_session.execute(
+        select(UserApiKey).where(
+            UserApiKey.user_id == user.user_id, UserApiKey.key_name == "Test API Key"
+        )
+    ).scalar_one_or_none()
+
+    assert api_key_with_name is None, "No API key with the test name should exist after rollback"
 
 
 @patch("src.services.users.create_api_key.import_api_key")
