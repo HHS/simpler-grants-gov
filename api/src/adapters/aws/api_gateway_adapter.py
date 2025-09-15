@@ -68,38 +68,14 @@ def import_api_key(
     if api_gateway_client is None:
         api_gateway_client = get_boto_api_gateway_client()
 
-    try:
-        # Format the API key data as CSV for import
-        # AWS API Gateway expects CSV format: name,key,description,enabled
-        csv_data = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'}"
+    # Format the API key data as CSV for import
+    # AWS API Gateway expects CSV format: name,key,description,enabled
+    csv_data = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'}"
 
+    try:
         response = api_gateway_client.import_api_keys(
             body=csv_data.encode("utf-8"), format="csv", failOnWarnings=True
         )
-
-        if response.get("warnings"):
-            logger.warning("API Gateway import warnings", extra={"warnings": response["warnings"]})
-
-        imported_key_ids = response.get("ids", [])
-        if not imported_key_ids:
-            raise Exception("No API key IDs returned from import operation")
-
-        key_id = imported_key_ids[0]
-        key_details = api_gateway_client.get_api_key(apiKey=key_id, includeValue=False)
-
-        api_key_response = ApiKeyImportResponse.model_validate(key_details)
-
-        if usage_plan_id:
-            api_gateway_client.create_usage_plan_key(
-                usagePlanId=usage_plan_id, keyId=api_key_response.id, keyType="API_KEY"
-            )
-            logger.info(
-                "Associated API key with usage plan",
-                extra={"api_key_id": api_key_response.id, "usage_plan_id": usage_plan_id},
-            )
-
-        return api_key_response
-
     except ClientError as e:
         logger.exception(
             "Error importing API key to AWS API Gateway",
@@ -112,6 +88,68 @@ def import_api_key(
     except Exception as e:
         logger.exception("Unexpected error importing API key", extra={"error": str(e)})
         raise
+
+    if response.get("warnings"):
+        logger.warning("API Gateway import warnings", extra={"warnings": response["warnings"]})
+
+    imported_key_ids = response.get("ids", [])
+    if not imported_key_ids:
+        raise Exception("No API key IDs returned from import operation")
+
+    key_id = imported_key_ids[0]
+
+    try:
+        key_details = api_gateway_client.get_api_key(apiKey=key_id, includeValue=False)
+    except ClientError as e:
+        logger.exception(
+            "Error retrieving API key details from AWS API Gateway",
+            extra={
+                "error_code": e.response["Error"]["Code"],
+                "error_message": e.response["Error"]["Message"],
+                "key_id": key_id,
+            },
+        )
+        raise
+    except Exception as e:
+        logger.exception(
+            "Unexpected error retrieving API key details", extra={"error": str(e), "key_id": key_id}
+        )
+        raise
+
+    api_key_response = ApiKeyImportResponse.model_validate(key_details)
+
+    if usage_plan_id:
+        try:
+            api_gateway_client.create_usage_plan_key(
+                usagePlanId=usage_plan_id, keyId=api_key_response.id, keyType="API_KEY"
+            )
+            logger.info(
+                "Associated API key with usage plan",
+                extra={"api_key_id": api_key_response.id, "usage_plan_id": usage_plan_id},
+            )
+        except ClientError as e:
+            logger.exception(
+                "Error associating API key with usage plan",
+                extra={
+                    "error_code": e.response["Error"]["Code"],
+                    "error_message": e.response["Error"]["Message"],
+                    "api_key_id": api_key_response.id,
+                    "usage_plan_id": usage_plan_id,
+                },
+            )
+            raise
+        except Exception as e:
+            logger.exception(
+                "Unexpected error associating API key with usage plan",
+                extra={
+                    "error": str(e),
+                    "api_key_id": api_key_response.id,
+                    "usage_plan_id": usage_plan_id,
+                },
+            )
+            raise
+
+    return api_key_response
 
 
 _mock_import_responses: list[tuple[dict, ApiKeyImportResponse]] = []
