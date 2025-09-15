@@ -129,7 +129,7 @@ const ApplyForm = ({
       // turns off html5 validation so all error displays are consistent
       noValidate
     >
-      <div className="display-flex flex-justify">
+      <div className="display-flex flex-justify position-sticky top-0 bg-white z-100">
         <div>{required}</div>
         <Button
           data-testid="apply-form-save"
