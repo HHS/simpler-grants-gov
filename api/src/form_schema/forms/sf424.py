@@ -2,7 +2,7 @@ import uuid
 
 import src.form_schema.forms.shared_schema as shared_schema
 from src.db.models.competition_models import Form
-from src.services.xml_generation.value_transformers import NO_VALUE
+from src.services.xml_generation.constants import NO_VALUE
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -1170,6 +1170,7 @@ FORM_XML_TRANSFORM_RULES = {
             "default_value": NO_VALUE,  # Use constant from value_transformers
         }
     },
+    "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
     "delinquent_federal_debt": {
         "xml_transform": {
             "target": "DelinquentFederalDebt",

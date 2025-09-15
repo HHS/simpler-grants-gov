@@ -121,11 +121,22 @@ class RecursiveXMLTransformer:
                         )
                     else:
                         # Standard field assignment for all other cases
-                        target_field = transform_rule["target"]
-                        result[target_field] = transformed_value
-                        logger.debug(
-                            f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                        raise ValueError(
+                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
                         )
+
+                # Apply the transformation
+                transformed_value = self._apply_transform_rule(
+                    source_value, transform_rule, rule_config, current_path
+                )
+
+                # Add to result if transformation succeeded and produced non-None value
+                if transformed_value is not None:
+                    target_field = transform_rule["target"]
+                    result[target_field] = transformed_value
+                    logger.debug(
+                        f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                    )
 
             # If this is a nested structure (dict without xml_transform), recurse
             elif isinstance(rule_config, dict) and "xml_transform" not in rule_config:

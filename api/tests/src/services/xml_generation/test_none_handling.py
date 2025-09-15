@@ -1,8 +1,11 @@
 """Tests for None value handling in XML generation."""
 
+import pytest
+
+from src.services.xml_generation.constants import NO_VALUE
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
-from src.services.xml_generation.value_transformers import NO_VALUE
+from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
 
 
 class TestNoneHandling:
@@ -169,3 +172,43 @@ class TestNoneHandling:
             "<State>" not in xml_data
         )  # More specific - looking for the State element, not substring
         assert "</Applicant>" in xml_data
+    def test_unknown_null_handling_raises_error(self):
+        """Test that unknown null_handling configuration raises ValueError."""
+        transform_config = {
+            "test_field": {
+                "xml_transform": {
+                    "target": "TestField",
+                    "null_handling": "unknown_option",  # Invalid option
+                }
+            }
+        }
+
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        # Source data with None value to trigger null_handling
+        source_data = {"test_field": None}
+
+        with pytest.raises(ValueError, match="Unknown null_handling 'unknown_option'"):
+            transformer.transform(source_data)
+
+    def test_default_value_without_default_raises_error(self):
+        """Test that null_handling 'default_value' without default_value raises ValueError."""
+        transform_config = {
+            "test_field": {
+                "xml_transform": {
+                    "target": "TestField",
+                    "null_handling": "default_value",  # Missing default_value
+                }
+            }
+        }
+
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        # Source data with None value to trigger null_handling
+        source_data = {"test_field": None}
+
+        with pytest.raises(
+            ValueError,
+            match="null_handling 'default_value' specified but no default_value provided",
+        ):
+            transformer.transform(source_data)

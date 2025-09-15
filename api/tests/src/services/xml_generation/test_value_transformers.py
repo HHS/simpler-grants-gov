@@ -2,9 +2,8 @@
 
 import pytest
 
+from src.services.xml_generation.constants import NO_VALUE, YES_VALUE
 from src.services.xml_generation.value_transformers import (
-    NO_VALUE,
-    YES_VALUE,
     ValueTransformationError,
     apply_value_transformation,
     transform_boolean_to_yes_no,
@@ -65,15 +64,21 @@ class TestCurrencyTransformations:
         result = transform_currency_format("50000")
         assert result == "50000"
 
+<<<<<<< HEAD
     def test_transform_currency_string_with_symbols(self):
         """Test currency transformation with currency symbols."""
         result = transform_currency_format("$50,000.00")
         assert result == "50000.00"
 
-    def test_transform_currency_single_decimal(self):
-        """Test currency transformation with single decimal place."""
-        result = transform_currency_format("50000.5")
-        assert result == "50000.5"
+    def test_transform_currency_string_decimal_only(self):
+        """Test currency transformation with decimal starting with dot."""
+        result = transform_currency_format(".50")
+        assert result == ".50"
+
+    def test_transform_currency_empty_string(self):
+        """Test currency transformation with empty string."""
+        result = transform_currency_format("")
+        assert result == ""
 
     def test_transform_currency_non_string_error(self):
         """Test error handling for non-string input."""
@@ -91,6 +96,16 @@ class TestCurrencyTransformations:
         with pytest.raises(ValueTransformationError):
             transform_currency_format("123.456")  # Too many decimal places
 
+<<<<<<< HEAD
+=======
+        with pytest.raises(ValueTransformationError):
+            transform_currency_format("123.5")  # Single decimal place not allowed
+
+        with pytest.raises(ValueTransformationError):
+            transform_currency_format("-50000.00")  # Negative values not allowed
+
+        with pytest.raises(ValueTransformationError):
+            transform_currency_format("$50,000.00")  # Currency symbols not allowed
 
 class TestStringTransformations:
     """Test string case transformations."""
