@@ -57,12 +57,8 @@ def create_api_key(db_session: db.Session, user_id: UUID, json_data: dict) -> Us
     try:
         _import_api_key_to_aws_gateway(api_key)
     except Exception as e:
-        # Remove the API key from the database since AWS API Gateway integration failed
-        # This ensures consistency - if the key can't be created in API Gateway,
-        # it shouldn't exist in our database either
-        db_session.rollback()
         logger.error(
-            "Failed to import API key to AWS API Gateway, rolling back database transaction",
+            "Failed to import API key to AWS API Gateway",
             extra={
                 "api_key_id": api_key.api_key_id,
                 "key_name": key_name,
