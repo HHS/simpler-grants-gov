@@ -202,6 +202,12 @@ def read_file(path: str | Path, mode: str = "r", encoding: str | None = None) ->
         return input_file.read()
 
 
+def write_to_file(path: str | Path, content: str, encoding: str | None = None) -> str:
+    """Simple function for replacing contents of a file"""
+    with open_stream(path, "w", encoding) as file_to_write_to:
+        return file_to_write_to.write(content)
+
+
 def convert_public_s3_to_cdn_url(file_path: str, cdn_url: str, s3_config: S3Config) -> str:
     """
     Convert an S3 URL to a CDN URL

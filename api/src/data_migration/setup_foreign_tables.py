@@ -9,6 +9,7 @@ import src.db.models.foreign
 import src.db.models.foreign.dialect
 from src.constants.schema import Schemas
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.task.ecs_background_task import ecs_background_task
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class ForeignTableConfig(PydanticBaseEnvConfig):
     "setup-foreign-tables", help="Setup the foreign tables for connecting to the Oracle database"
 )
 @flask_db.with_db_session()
+@ecs_background_task(task_name="setup-foreign-tables")
 def setup_foreign_tables(db_session: db.Session) -> None:
     logger.info("Beginning setup of foreign Oracle tables")
 
