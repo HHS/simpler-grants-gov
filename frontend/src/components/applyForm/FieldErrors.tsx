@@ -12,8 +12,7 @@ export const FieldErrors = ({
   rawErrors: string[] | Record<string, string>[] | undefined;
 }): React.ReactNode | string | null => {
   const safeType = Array.isArray(type) && type.length > 0 ? type[0] : type;
-  if (!Array.isArray(rawErrors) || !rawErrors.length || !rawErrors)
-    return null;
+  if (!Array.isArray(rawErrors) || !rawErrors.length || !rawErrors) return null;
   let errors = rawErrors;
   if (safeType === "array") {
     errors = rawErrors

@@ -152,15 +152,14 @@ const formatValidationWarnings = (
       },
   parent: { label: string; name: string; description?: string } | null,
   formValidationWarnings: FormValidationWarning[],
-  errors: FormattedFormValidationWarning[] = [],
   formSchema: RJSFSchema,
-) => {
+): FormattedFormValidationWarning[] => {
   if (
     !Array.isArray(uiSchema) &&
     typeof uiSchema === "object" &&
     "children" in uiSchema
   ) {
-    formatValidationWarnings(
+    return formatValidationWarnings(
       uiSchema.children,
       {
         label: uiSchema.label,
@@ -168,39 +167,13 @@ const formatValidationWarnings = (
         description: uiSchema.description,
       },
       formValidationWarnings,
-      errors,
       formSchema,
     );
   } else if (Array.isArray(uiSchema)) {
-    uiSchema.forEach((node) => {
-      if ("children" in node) {
-        formatValidationWarnings(
-          node.children,
-          {
-            label: node.label,
-            name: node.name,
-            description: node.description,
-          },
-          formValidationWarnings,
-          errors,
-          formSchema,
-        );
-      } else if (!parent && ("definition" in node || "schema" in node)) {
-        const error = findValidationError(
-          formValidationWarnings,
-          Array.isArray(node.definition) ? node.definition[0] : node.definition,
-          node.schema,
-          formSchema,
-        );
-        if (error) {
-          errors.push(error);
-        }
-      }
-    });
-    if (parent) {
-      uiSchema.forEach((node) => {
+    const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
+      (errors, node) => {
         if ("children" in node) {
-          return formatValidationWarnings(
+          const nodeError = formatValidationWarnings(
             node.children,
             {
               label: node.label,
@@ -208,10 +181,10 @@ const formatValidationWarnings = (
               description: node.description,
             },
             formValidationWarnings,
-            errors,
             formSchema,
           );
-        } else {
+          return errors.concat(nodeError);
+        } else if (!parent && ("definition" in node || "schema" in node)) {
           const error = findValidationError(
             formValidationWarnings,
             Array.isArray(node.definition)
@@ -221,12 +194,50 @@ const formatValidationWarnings = (
             formSchema,
           );
           if (error) {
-            errors.push(error);
+            return errors.concat([error]);
           }
         }
-      });
+        return errors;
+      },
+      [],
+    );
+    if (parent) {
+      const parentErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
+        (errors, node) => {
+          if ("children" in node) {
+            const nodeError = formatValidationWarnings(
+              node.children,
+              {
+                label: node.label,
+                name: node.name,
+                description: node.description,
+              },
+              formValidationWarnings,
+              formSchema,
+            );
+            return errors.concat(nodeError);
+          } else {
+            const error = findValidationError(
+              formValidationWarnings,
+              Array.isArray(node.definition)
+                ? node.definition[0]
+                : node.definition,
+              node.schema,
+              formSchema,
+            );
+            if (error) {
+              return errors.concat([error]);
+            }
+            return errors;
+          }
+        },
+        [],
+      );
+      return childErrors.concat(parentErrors);
     }
+    return childErrors;
   }
+  return [];
 };
 
 export const buildWarningTree = (
@@ -235,11 +246,10 @@ export const buildWarningTree = (
   formSchema: RJSFSchema,
 ) => {
   const e: FormattedFormValidationWarning[] = [];
-  formatValidationWarnings(
+  return formatValidationWarnings(
     formUiSchema,
     null,
     formValidationWarnings,
-    e,
     formSchema,
   );
   return e;
