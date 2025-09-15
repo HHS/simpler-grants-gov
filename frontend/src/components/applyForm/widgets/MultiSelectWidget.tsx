@@ -131,10 +131,13 @@ export default function MultiSelect<
   const getLabelForValue = (value: string) =>
     allOptions.find((option) => String(option.value) === value)?.label ?? value;
 
+  // ComboBox widget changes the id which breaks handling of idFor and anchor links
+  const idFor = `${id}__combobox`;
+
   return (
     <FormGroup error={error} key={`form-group__uswds-combomulti--${id}`}>
       <DynamicFieldLabel
-        idFor={id}
+        idFor={idFor}
         title={title}
         required={required}
         description={description as string}
@@ -152,7 +155,7 @@ export default function MultiSelect<
           value={v}
         />
       ))}
-
+      <span id={id}></span>
       <ComboBox
         ref={comboRef}
         id={`${id}__combobox`}

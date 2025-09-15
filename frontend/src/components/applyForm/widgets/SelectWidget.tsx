@@ -117,11 +117,14 @@ function SelectWidget<
       : undefined;
 
   const Widget = useCombo ? ComboBox : Select;
+  // ComboBox widget changes the id which breaks handling of idFor and anchor links
+  const idFor = useCombo ? `${id}__combobox` : id;
+  const IdSpan = useCombo ? <span id={id}></span> : undefined;
 
   return (
     <FormGroup error={error} key={`form-group__select-input--${id}`}>
       <DynamicFieldLabel
-        idFor={id}
+        idFor={idFor}
         title={title}
         required={required}
         description={description as string}
@@ -130,6 +133,7 @@ function SelectWidget<
       {error && (
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
+      {IdSpan}
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
         key={selectValue}
