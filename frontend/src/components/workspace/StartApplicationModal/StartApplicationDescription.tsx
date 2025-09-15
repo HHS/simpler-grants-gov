@@ -1,3 +1,4 @@
+import { ExternalRoutes } from "src/constants/routes";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { Organization } from "src/types/UserTypes";
 
@@ -95,7 +96,8 @@ export const StartApplicationDescription = ({
   // organization
   return (
     <div>
-      <p>{t("organizationIntro")}</p>
+      <p>{t("pilotIntro")}</p>
+      <p>{t("organizationApply")}</p>
       <ul>
         <li>{t("poc")}</li>
         <li>
@@ -113,7 +115,7 @@ export const StartApplicationDescription = ({
         </li>
       </ul>
       <p>
-        {t.rich("goToGrants", {
+        {t.rich("support", {
           link: (chunk) => (
             <a
               target="_blank"
@@ -123,6 +125,12 @@ export const StartApplicationDescription = ({
               {chunk}
             </a>
           ),
+          email: (chunk) => (
+            <a href={`mailto:${ExternalRoutes.EMAIL_SIMPLERGRANTSGOV}}`}>
+              {chunk}
+            </a>
+          ),
+          telephone: (chunk) => <a href="tel:18005814726">{chunk}</a>,
         })}
       </p>
     </div>
