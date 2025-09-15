@@ -76,14 +76,8 @@ def import_api_key(
         response = api_gateway_client.import_api_keys(
             body=csv_data.encode("utf-8"), format="csv", failOnWarnings=True
         )
-    except ClientError as e:
-        logger.exception(
-            "Error importing API key to AWS API Gateway",
-            extra={
-                "error_code": e.response["Error"]["Code"],
-                "error_message": e.response["Error"]["Message"],
-            },
-        )
+    except ClientError:
+        logger.exception("Error importing API key to AWS API Gateway")
         raise
     except Exception as e:
         logger.exception("Unexpected error importing API key", extra={"error": str(e)})
@@ -100,14 +94,10 @@ def import_api_key(
 
     try:
         key_details = api_gateway_client.get_api_key(apiKey=key_id, includeValue=False)
-    except ClientError as e:
+    except ClientError:
         logger.exception(
             "Error retrieving API key details from AWS API Gateway",
-            extra={
-                "error_code": e.response["Error"]["Code"],
-                "error_message": e.response["Error"]["Message"],
-                "key_id": key_id,
-            },
+            extra={"key_id": key_id},
         )
         raise
     except Exception as e:
@@ -127,12 +117,10 @@ def import_api_key(
                 "Associated API key with usage plan",
                 extra={"api_key_id": api_key_response.id, "usage_plan_id": usage_plan_id},
             )
-        except ClientError as e:
+        except ClientError:
             logger.exception(
                 "Error associating API key with usage plan",
                 extra={
-                    "error_code": e.response["Error"]["Code"],
-                    "error_message": e.response["Error"]["Message"],
                     "api_key_id": api_key_response.id,
                     "usage_plan_id": usage_plan_id,
                 },
