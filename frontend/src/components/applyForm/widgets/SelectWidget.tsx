@@ -16,7 +16,6 @@ import {
 import {
   ComboBox,
   ComboBoxOption,
-  ErrorMessage,
   FormGroup,
   Select,
 } from "@trussworks/react-uswds";
@@ -116,10 +115,6 @@ function SelectWidget<
     : title
       ? `label-for-${id}`
       : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
 
   const Widget = useCombo ? ComboBox : Select;
 
@@ -132,7 +127,9 @@ function SelectWidget<
         description={description as string}
         labelType={labelType}
       />
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+      )}
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
         key={selectValue}

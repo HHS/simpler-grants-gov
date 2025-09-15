@@ -10,7 +10,7 @@ import {
 } from "@rjsf/utils";
 
 import React, { FocusEvent, useCallback, useMemo } from "react";
-import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
+import { FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
@@ -117,10 +117,6 @@ function RadioWidget<
     : title
       ? `label-for-${id}`
       : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) => {
@@ -153,7 +149,9 @@ function RadioWidget<
         description={description as string}
         labelType={labelType}
       />
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+      )}
       {enumOptions.map((option, index) => {
         // Normalize the current value so it can match "true"/"false" string options
         const currentForCompare = normalizeForCompare(option.value, value);

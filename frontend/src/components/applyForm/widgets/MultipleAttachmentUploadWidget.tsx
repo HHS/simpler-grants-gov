@@ -5,9 +5,8 @@ import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  ErrorMessage,
   FileInput,
   FileInputRef,
   FormGroup,
@@ -38,10 +37,7 @@ const MultipleAttachmentUploadWidget = ({
   const attachments = useApplicationAttachments();
 
   const error = rawErrors.length ? true : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
+
   const describedby = error
     ? `error-for-${id}`
     : title
@@ -160,10 +156,7 @@ const MultipleAttachmentUploadWidget = ({
   };
 
   return (
-    <FormGroup
-      key={`form-group__multi-file-upload--${id}`}
-      error={errors !== "undefined"}
-    >
+    <FormGroup key={`form-group__multi-file-upload--${id}`} error={error}>
       <DynamicFieldLabel
         idFor={id}
         title={title}
@@ -172,8 +165,8 @@ const MultipleAttachmentUploadWidget = ({
         labelType={labelType}
       />
 
-      {errors !== "undefined" && (
-        <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
       )}
 
       <FileInput

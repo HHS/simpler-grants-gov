@@ -5,10 +5,9 @@ import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
-  ErrorMessage,
   FileInput,
   FileInputRef,
   ModalRef,
@@ -114,17 +113,15 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     : schema.title
       ? `label-for-${id}`
       : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type: schema.type, fieldName: id, rawErrors }),
-    [schema, id, rawErrors],
-  );
 
   const isPreviouslyUploaded = fileName === "(Previously uploaded file)";
 
   return (
     <React.Fragment key={`${id}-key`}>
       <input type="hidden" name={id} value={attachmentId ?? ""} />
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={schema.type} fieldName={id} rawErrors={rawErrors} />
+      )}
       {!showFile && (
         <FileInput
           id={id}

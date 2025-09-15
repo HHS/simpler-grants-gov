@@ -5,8 +5,8 @@ import {
   StrictRJSFSchema,
 } from "@rjsf/utils";
 
-import { ChangeEvent, FocusEvent, useCallback, useMemo } from "react";
-import { Checkbox, ErrorMessage, FormGroup } from "@trussworks/react-uswds";
+import { ChangeEvent, FocusEvent, useCallback } from "react";
+import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
@@ -37,10 +37,6 @@ function CheckboxWidget<
 }: UswdsWidgetProps<T, S, F>) {
   const { title, type } = schema;
   const error = rawErrors.length ? true : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
 
   const handleBlur = useCallback(
     (event: FocusEvent<HTMLInputElement>) => onBlur(id, event.target.checked),
@@ -69,7 +65,9 @@ function CheckboxWidget<
 
   return (
     <FormGroup error={error} key={`form-group__checkbox--${id}`}>
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+      )}
       <Checkbox
         id={id}
         label={label}

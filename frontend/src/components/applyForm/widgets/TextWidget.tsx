@@ -7,8 +7,8 @@ import {
   StrictRJSFSchema,
 } from "@rjsf/utils";
 
-import { ChangeEvent, FocusEvent, useCallback, useMemo } from "react";
-import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
+import { ChangeEvent, FocusEvent, useCallback } from "react";
+import { FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
@@ -88,10 +88,6 @@ function TextWidget<
     [onFocus, id],
   );
   const error = rawErrors.length ? true : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
 
   const describedby = error
     ? `error-for-${id}`
@@ -112,7 +108,9 @@ function TextWidget<
         description={description as string}
         labelType={labelType}
       />
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+      )}
       <TextInput
         data-testid={id}
         className={inputClassName}

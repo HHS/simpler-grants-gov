@@ -2,8 +2,8 @@
 // changes made to include USWDS and allow to functional as non-reactive form field
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
-import { ChangeEvent, FocusEvent, useCallback, useMemo } from "react";
-import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
+import { ChangeEvent, FocusEvent, useCallback } from "react";
+import { FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
@@ -61,10 +61,7 @@ function TextAreaWidget<
       ? `label-for-${id}`
       : undefined;
   const inputValue = value !== undefined ? String(value) : "";
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
+
   return (
     <FormGroup error={error} key={`form-group__text-area--${id}`}>
       <DynamicFieldLabel
@@ -74,7 +71,9 @@ function TextAreaWidget<
         description={description as string}
         labelType={labelType}
       />
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+      )}
       <Textarea
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}

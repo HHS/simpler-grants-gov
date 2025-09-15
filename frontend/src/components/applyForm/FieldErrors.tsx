@@ -1,5 +1,7 @@
 import { JSONSchema7TypeName } from "json-schema";
 
+import { ErrorMessage } from "@trussworks/react-uswds";
+
 export const FieldErrors = ({
   type,
   fieldName,
@@ -26,12 +28,18 @@ export const FieldErrors = ({
   }
   if (errors.length > 1) {
     return (
-      <ul>
-        {errors.map((error, idx) => (
-          <li key={idx}>{String(error)}</li>
-        ))}
-      </ul>
+      <ErrorMessage id={`error-for-${fieldName}`}>
+        <ul>
+          {errors.map((error, idx) => (
+            <li key={idx}>{String(error)}</li>
+          ))}
+        </ul>
+      </ErrorMessage>
     );
   }
-  return String(errors[0]);
+  return (
+    <ErrorMessage id={`error-for-${fieldName}`}>
+      {String(errors[0])}
+    </ErrorMessage>
+  );
 };

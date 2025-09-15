@@ -10,7 +10,6 @@ import {
 import React, { useCallback, useMemo, useRef } from "react";
 import {
   ComboBox,
-  ErrorMessage,
   FormGroup,
   type ComboBoxOption,
   type ComboBoxRef,
@@ -93,10 +92,6 @@ export default function MultiSelect<
     : title
       ? `label-for-${id}`
       : undefined;
-  const errors = useMemo(
-    () => FieldErrors({ type, fieldName: id, rawErrors }),
-    [type, id, rawErrors],
-  );
 
   const syncUpstream = (next: string[]) => {
     setSelected(next);
@@ -145,7 +140,9 @@ export default function MultiSelect<
         description={description as string}
         labelType={labelType}
       />
-      {error && <ErrorMessage id={`error-for-${id}`}>{errors}</ErrorMessage>}
+      {error && (
+        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+      )}
       {/* Hidden inputs so your form posts an array */}
       {selected.map((v, i) => (
         <input
