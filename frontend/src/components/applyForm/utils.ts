@@ -150,7 +150,7 @@ const findValidationError = (
   return null;
 };
 
-export const formatValidationWarnings = (
+export const buildWarningTree = (
   uiSchema:
     | Array<UiSchemaSection | UiSchemaField>
     | UiSchemaSection
@@ -168,7 +168,7 @@ export const formatValidationWarnings = (
     typeof uiSchema === "object" &&
     "children" in uiSchema
   ) {
-    return formatValidationWarnings(
+    return buildWarningTree(
       uiSchema.children,
       uiSchema,
       formValidationWarnings,
@@ -178,7 +178,7 @@ export const formatValidationWarnings = (
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
         if ("children" in node) {
-          const nodeError = formatValidationWarnings(
+          const nodeError = buildWarningTree(
             node.children,
             uiSchema,
             formValidationWarnings,
@@ -206,7 +206,7 @@ export const formatValidationWarnings = (
       const parentErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
         (errors, node) => {
           if ("children" in node) {
-            const nodeError = formatValidationWarnings(
+            const nodeError = buildWarningTree(
               node.children,
               uiSchema,
               formValidationWarnings,
@@ -235,19 +235,6 @@ export const formatValidationWarnings = (
     return childErrors;
   }
   return [];
-};
-
-export const buildWarningTree = (
-  formUiSchema: UiSchema,
-  formValidationWarnings: FormValidationWarning[],
-  formSchema: RJSFSchema,
-) => {
-  return formatValidationWarnings(
-    formUiSchema,
-    null,
-    formValidationWarnings,
-    formSchema,
-  );
 };
 
 // json schema doesn't describe UI so types are infered if widget not supplied
@@ -760,33 +747,6 @@ export const isFieldRequired = (
     .some((clean) => requiredFields.includes(clean));
 };
 
-// arrays from the html look like field_[row]_item or are simply the field name
-export const flatFormDataToArray = (
-  field: string,
-  data: Record<string, unknown>,
-) => {
-  if (field in data) return [{ [field]: data[field] }];
-  return Object.entries(data).reduce(
-    (values: Array<Record<string, unknown>>, [key, value]) => {
-      const fieldSplit = key.split(/\[\d+\]\./);
-      const fieldName = fieldSplit[0];
-      const itemName = fieldSplit[1];
-
-      if (fieldName === field && value) {
-        const match = key.match(/[0-9]+/);
-        const arrayNumber = match ? Number(match[0]) : -1;
-        if (!values[arrayNumber]) {
-          values[arrayNumber] = {};
-        }
-        values[arrayNumber][itemName] = value;
-      }
-
-      return values;
-    },
-    [] as Array<Record<string, unknown>>,
-  );
-};
-
 // dereferences all def links so that all necessary property definitions
 // can be found directly within the property without referencing $defs.
 // also resolves "allOf" references within "properties" or "$defs" fields.
@@ -843,19 +803,3 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     {},
   );
 };
-
-// This is only needed when extracting an application response from the application endpoint's
-// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
-// the application detail contains an empty array for the form response if no
-// forms have been saved or an application_response with a form_id
-// export const getApplicationResponse = (
-//   forms: [] | ApplicationFormDetail[],
-//   formId: string,
-// ): ApplicationResponseDetail | object => {
-//   if (forms.length > 0) {
-//     const form = forms.find((form) => form?.form_id === formId);
-//     return form?.application_response || {};
-//   } else {
-//     return {};
-//   }
-// };

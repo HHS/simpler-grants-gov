@@ -59,7 +59,7 @@ async function FormPage({ params }: formPageProps) {
   } = data;
 
   const warnings = formValidationWarnings
-    ? buildWarningTree(formUiSchema, formValidationWarnings, formSchema)
+    ? buildWarningTree(formUiSchema, null, formValidationWarnings, formSchema)
     : [];
 
   return (
