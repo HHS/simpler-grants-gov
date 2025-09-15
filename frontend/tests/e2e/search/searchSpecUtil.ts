@@ -27,7 +27,9 @@ export function getSearchInput(page: Page) {
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
-  await searchInput.fill(term);
+  // this needs to be `pressSequentially` rather than `fill` because `fill` was not
+  // reliably triggering onChange handlers in webkit
+  await searchInput.pressSequentially(term);
   await expect(searchInput).toHaveValue(term);
   await submitButton.click();
 }
@@ -72,12 +74,6 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
-}
-
-export async function refreshPageWithCurrentURL(page: Page) {
-  const currentURL = page.url();
-  await page.goto(currentURL); // go to new url in same tab
-  return page;
 }
 
 export async function selectSortBy(
