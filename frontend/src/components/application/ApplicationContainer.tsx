@@ -122,7 +122,7 @@ const ApplicationContainer = ({
         applicationId={applicationId}
         forms={forms}
         errors={validationErrors}
-        opportunityInstructionsDownloadPath={instructionsDownloadPath}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
       <AttachmentsCard
         applicationId={applicationId}

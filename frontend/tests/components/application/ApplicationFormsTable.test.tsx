@@ -35,7 +35,7 @@ describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <ApplicationFormsTable
-        opportunityInstructionsDownloadPath="http://path-to-instructions.com"
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
@@ -47,7 +47,7 @@ describe("CompetitionFormsTable", () => {
   it("Renders without errors", () => {
     render(
       <ApplicationFormsTable
-        opportunityInstructionsDownloadPath="http://path-to-instructions.com"
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
@@ -67,7 +67,7 @@ describe("CompetitionFormsTable", () => {
   it("matches snapshot", () => {
     const { container } = render(
       <ApplicationFormsTable
-        opportunityInstructionsDownloadPath="http://path-to-instructions.com"
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}

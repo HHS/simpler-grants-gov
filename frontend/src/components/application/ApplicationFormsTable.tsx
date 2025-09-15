@@ -45,13 +45,13 @@ export const ApplicationFormsTable = ({
   applicationForms,
   applicationId,
   forms,
-  opportunityInstructionsDownloadPath,
+  competitionInstructionsDownloadPath,
   errors = null,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
-  opportunityInstructionsDownloadPath: string;
+  competitionInstructionsDownloadPath: string;
   errors?: FormValidationWarning[] | null;
 }) => {
   const requiredForms = selectApplicationFormsByRequired({
@@ -81,8 +81,8 @@ export const ApplicationFormsTable = ({
           <p>
             {t.rich("conditionalFormsDescription", {
               instructionsLink: (chunks) => {
-                return opportunityInstructionsDownloadPath ? (
-                  <a href={opportunityInstructionsDownloadPath}>{chunks}</a>
+                return competitionInstructionsDownloadPath ? (
+                  <a href={competitionInstructionsDownloadPath}>{chunks}</a>
                 ) : (
                   <span>{chunks}</span>
                 );
