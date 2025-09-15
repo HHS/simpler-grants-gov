@@ -74,8 +74,11 @@ def import_api_key(
 
     # Format the API key data as CSV for import
     # AWS API Gateway expects CSV format: name,key,description,enabled,usageplanIds
+    # Header row is optional but improves readability and maintainability
     usage_plan_ids_str = f'"{usage_plan_id}"' if usage_plan_id else ""
-    csv_data = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'},{usage_plan_ids_str}"
+    header = "name,key,description,enabled,usageplanIds"
+    data_row = f"{name},{api_key},{description or ''},{'true' if enabled else 'false'},{usage_plan_ids_str}"
+    csv_data = f"{header}\n{data_row}"
 
     try:
         response = api_gateway_client.import_api_keys(

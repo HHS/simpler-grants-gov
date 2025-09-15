@@ -21,9 +21,9 @@ class TestApiGatewayConfig:
 
         assert config.default_usage_plan_id is None
 
-    @patch.dict("os.environ", {"API_GATEWAY_DEFAULT_USAGE_PLAN_ID": "test-plan-123"})
-    def test_config_from_environment(self):
+    def test_config_from_environment(self, monkeypatch):
         """Test that configuration can be loaded from environment variables."""
+        monkeypatch.setenv("API_GATEWAY_DEFAULT_USAGE_PLAN_ID", "test-plan-123")
         config = ApiGatewayConfig()
 
         assert config.default_usage_plan_id == "test-plan-123"
@@ -122,8 +122,9 @@ class TestImportApiKeyFunction:
         )
 
         # Verify the boto3 calls were made correctly
+        expected_csv = "name,key,description,enabled,usageplanIds\nTest API Key,test-key-12345,Test description,true,"
         mock_boto_client.import_api_keys.assert_called_once_with(
-            body=b"Test API Key,test-key-12345,Test description,true,",
+            body=expected_csv.encode("utf-8"),
             format="csv",
             failOnWarnings=True,
         )
@@ -167,8 +168,9 @@ class TestImportApiKeyFunction:
         )
 
         # Verify the CSV format includes the usage plan ID
+        expected_csv = 'name,key,description,enabled,usageplanIds\nTest API Key,test-key-12345,Test description,true,"test-plan-123"'
         mock_boto_client.import_api_keys.assert_called_once_with(
-            body=b'Test API Key,test-key-12345,Test description,true,"test-plan-123"',
+            body=expected_csv.encode("utf-8"),
             format="csv",
             failOnWarnings=True,
         )
