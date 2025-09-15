@@ -311,7 +311,7 @@ export const messages = {
       attachmentUnavailable: "Unavailable",
       conditionalForms: "Conditionally-Required Forms",
       conditionalFormsDescription:
-        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
+        "These forms may be required based on your situation. Review the <instructionsLink>opportunity instructions</instructionsLink> and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
       downloadInstructions: "Download instructions",
       form: "Form",
       instructions: "Instructions",
