@@ -172,6 +172,7 @@ class TestNoneHandling:
             "<State>" not in xml_data
         )  # More specific - looking for the State element, not substring
         assert "</Applicant>" in xml_data
+
     def test_unknown_null_handling_raises_error(self):
         """Test that unknown null_handling configuration raises ValueError."""
         transform_config = {

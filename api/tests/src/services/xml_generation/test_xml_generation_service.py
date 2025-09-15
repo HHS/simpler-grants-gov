@@ -5,7 +5,6 @@ from pydantic import ValidationError
 from src.services.xml_generation.constants import NO_VALUE, YES_VALUE
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
-from src.services.xml_generation.value_transformers import NO_VALUE, YES_VALUE
 
 
 class TestXMLGenerationService:
