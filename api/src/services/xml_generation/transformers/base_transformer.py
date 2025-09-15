@@ -85,17 +85,20 @@ class RecursiveXMLTransformer:
                         )
                         continue
                     elif none_handling == "default_value":
-                        # Use configured default value
-                        default_value = transform_rule.get("default_value", "")
+                        # Use configured default value - error if not provided
+                        if "default_value" not in transform_rule:
+                            raise ValueError(
+                                f"null_handling 'default_value' specified but no default_value provided for {'.'.join(current_path)}"
+                            )
+                        default_value = transform_rule["default_value"]
                         source_value = default_value
                         logger.debug(
                             f"Using default value '{default_value}' for {'.'.join(current_path)}"
                         )
                     else:
-                        logger.warning(
-                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}, excluding field"
+                        raise ValueError(
+                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
                         )
-                        continue
 
                 # Apply the transformation (conditional transformations can handle None source values)
                 if transform_type == "conditional" or source_value is not None:
