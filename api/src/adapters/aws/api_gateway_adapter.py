@@ -87,8 +87,8 @@ def import_api_key(
     except ClientError:
         logger.exception("Error importing API key to AWS API Gateway")
         raise
-    except Exception as e:
-        logger.exception("Unexpected error importing API key", extra={"error": str(e)})
+    except Exception:
+        logger.exception("Unexpected error importing API key")
         raise
 
     if response.get("warnings"):
