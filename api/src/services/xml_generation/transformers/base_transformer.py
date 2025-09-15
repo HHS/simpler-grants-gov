@@ -3,6 +3,7 @@
 import logging
 from typing import Any
 
+from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ class RecursiveXMLTransformer:
 
     def __init__(self, transform_config: dict[str, Any]):
         self.transform_config = transform_config
+        self.root_source_data: dict[str, Any] = {}
 
     def transform(self, source_data: dict[str, Any]) -> dict[str, Any]:
         """Transform source data using recursive rule processing.
@@ -25,6 +27,9 @@ class RecursiveXMLTransformer:
         """
         if not source_data:
             return {}
+
+        # Store root data for conditional transformations
+        self.root_source_data = source_data
 
         # Start recursive transformation from root
         result = self._process_transform_rules(source_data, self.transform_config, [])
@@ -61,10 +66,11 @@ class RecursiveXMLTransformer:
                 current_path = path + [key]
 
                 # Get the source value from the input data
+                transform_type = transform_rule.get("type", "simple")
                 source_value = self._get_nested_value(source_data, current_path)
 
                 # Handle None values based on configuration
-                if source_value is None:
+                if source_value is None and transform_type != "conditional":
                     none_handling = transform_rule.get("null_handling", "exclude")
 
                     if none_handling == "exclude":
@@ -94,18 +100,35 @@ class RecursiveXMLTransformer:
                             f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
                         )
 
-                # Apply the transformation
-                transformed_value = self._apply_transform_rule(
-                    source_value, transform_rule, rule_config, current_path
-                )
+                # Apply the transformation (conditional transformations can handle None source values)
+                if transform_type == "conditional" or source_value is not None:
+                    transformed_value = self._apply_transform_rule(
+                        source_value, transform_rule, rule_config, current_path
+                    )
+                else:
+                    transformed_value = None
 
                 # Add to result if transformation succeeded and produced non-None value
                 if transformed_value is not None:
-                    target_field = transform_rule["target"]
-                    result[target_field] = transformed_value
-                    logger.debug(
-                        f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
-                    )
+                    # Handle one-to-many mappings that return dictionaries
+                    if (
+                        isinstance(transformed_value, dict)
+                        and transform_type == "conditional"
+                        and transform_rule.get("conditional_transform", {}).get("type")
+                        == "one_to_many"
+                    ):
+                        # Add all key-value pairs from one-to-many result
+                        result.update(transformed_value)
+                        logger.debug(
+                            f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
+                        )
+                    else:
+                        # Standard field assignment for all other cases
+                        target_field = transform_rule["target"]
+                        result[target_field] = transformed_value
+                        logger.debug(
+                            f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                        )
 
             # If this is a nested structure (dict without xml_transform), recurse
             elif isinstance(rule_config, dict) and "xml_transform" not in rule_config:
@@ -127,7 +150,19 @@ class RecursiveXMLTransformer:
         """Apply a specific transformation rule to a source value."""
         transform_type = transform_rule.get("type", "simple")
 
-        if transform_type == "nested_object":
+        if transform_type == "conditional":
+            # Handle conditional transformations
+            conditional_config = transform_rule.get("conditional_transform")
+            if conditional_config:
+                # Use the stored root source data for condition evaluation
+                return apply_conditional_transform(conditional_config, self.root_source_data, path)
+            else:
+                logger.warning(
+                    f"Conditional transform specified but no conditional_transform config at {'.'.join(path)}"
+                )
+                return None
+
+        elif transform_type == "nested_object":
             # For nested objects, we need to process the child rules
             if not isinstance(source_value, dict):
                 return None

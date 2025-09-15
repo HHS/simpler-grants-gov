@@ -1194,6 +1194,19 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
+    # One-to-many mapping example - applicant type codes
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "target": "ApplicantTypeCode",  # Not used for one-to-many
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+            },
+        }
+    },
 }
 
 
