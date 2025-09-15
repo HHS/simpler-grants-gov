@@ -1,7 +1,7 @@
 import uuid
 
 from src.db.models.competition_models import Form
-from src.services.xml_generation.constants import CURRENCY_REGEX
+from src.services.xml_generation.constants import CURRENCY_REGEX_WITH_NEGATIVES
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -132,7 +132,7 @@ FORM_JSON_SCHEMA = {
             # * Any number of digits
             # * An optional decimal point
             # * Then exactly 2 digits - if there was a decimal
-            "pattern": CURRENCY_REGEX,
+            "pattern": CURRENCY_REGEX_WITH_NEGATIVES,
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
         },
