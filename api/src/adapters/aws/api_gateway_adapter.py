@@ -62,11 +62,11 @@ def import_api_key(
         ApiKeyImportResponse with the imported key details
     """
 
-    if api_gateway_client is None:
-        api_gateway_client = get_boto_api_gateway_client()
-
     if is_local_aws():
         return _handle_mock_import_response(api_key, name, description, enabled, usage_plan_id)
+
+    if api_gateway_client is None:
+        api_gateway_client = get_boto_api_gateway_client()
 
     try:
         # Format the API key data as CSV for import
