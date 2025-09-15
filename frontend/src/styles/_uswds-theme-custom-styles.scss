@@ -701,6 +701,9 @@ dl {
       scroll-margin-top: 6rem;
     }
   }
+  aside {
+    max-height: calc(100vh - 2rem);
+  }
 }
 
 .simpler-application-forms-table {
