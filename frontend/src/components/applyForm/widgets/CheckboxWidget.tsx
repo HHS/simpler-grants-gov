@@ -35,7 +35,7 @@ function CheckboxWidget<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, type } = schema;
+  const { title } = schema;
   const error = rawErrors.length ? true : undefined;
 
   const handleBlur = useCallback(
@@ -66,7 +66,7 @@ function CheckboxWidget<
   return (
     <FormGroup error={error} key={`form-group__checkbox--${id}`}>
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <Checkbox
         id={id}

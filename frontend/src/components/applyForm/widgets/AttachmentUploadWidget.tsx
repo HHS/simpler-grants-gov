@@ -27,6 +27,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     rawErrors = [],
     disabled,
   } = props;
+  const { contentMediaType, title } = schema;
 
   const attachments = useApplicationAttachments();
   const fileInputRef = useRef<FileInputRef | null>(null);
@@ -110,7 +111,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const error = rawErrors.length ? true : undefined;
   const describedby = error
     ? `error-for-${id}`
-    : schema.title
+    : title
       ? `label-for-${id}`
       : undefined;
 
@@ -120,7 +121,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     <React.Fragment key={`${id}-key`}>
       <input type="hidden" name={id} value={attachmentId ?? ""} />
       {error && (
-        <FieldErrors type={schema.type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       {!showFile && (
         <FileInput
@@ -132,7 +133,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
           onChange={(e) => {
             handleChange(e).catch((error) => console.error(error));
           }}
-          accept={schema.contentMediaType}
+          accept={contentMediaType}
           aria-describedby={describedby}
           aria-invalid={error}
         />

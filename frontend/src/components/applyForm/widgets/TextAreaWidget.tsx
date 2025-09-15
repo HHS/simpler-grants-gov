@@ -34,7 +34,7 @@ function TextAreaWidget<
   onChange = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { description, title, maxLength, minLength, type } = schema;
+  const { description, title, maxLength, minLength } = schema;
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const handleBlur = useCallback(
@@ -72,7 +72,7 @@ function TextAreaWidget<
         labelType={labelType}
       />
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <Textarea
         minLength={(minLength as number) ?? undefined}

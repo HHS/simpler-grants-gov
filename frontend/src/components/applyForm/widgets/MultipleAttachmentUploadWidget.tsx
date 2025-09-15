@@ -32,7 +32,7 @@ const MultipleAttachmentUploadWidget = ({
   schema,
   onChange,
 }: UswdsWidgetProps) => {
-  const { description, options, title, type } = schema as SchemaWithLabelOption;
+  const { description, options, title } = schema as SchemaWithLabelOption;
 
   const attachments = useApplicationAttachments();
 
@@ -164,9 +164,8 @@ const MultipleAttachmentUploadWidget = ({
         description={description as string}
         labelType={labelType}
       />
-
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
 
       <FileInput

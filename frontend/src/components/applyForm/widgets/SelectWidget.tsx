@@ -61,7 +61,7 @@ function SelectWidget<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, description, type } = schema;
+  const { title, description } = schema;
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
@@ -128,7 +128,7 @@ function SelectWidget<
         labelType={labelType}
       />
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580

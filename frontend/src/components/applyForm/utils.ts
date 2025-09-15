@@ -13,6 +13,7 @@ import {
   SchemaField,
   UiSchema,
   UiSchemaField,
+  UiSchemaSection,
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
@@ -89,14 +90,21 @@ const formatValidationWarning = (
     "title" in fieldSchema
       ? fieldSchema.title
       : null;
-  if (title) {
-    const formatted = title.replace("?", "");
-    return message
-      .replace(fieldName, formatted)
-      .replace(/'/g, "")
-      .replace("is a required property", "is required");
-  }
-  return message;
+
+  return validationWarningOverrides(message, fieldName, title);
+};
+
+const validationWarningOverrides = (
+  message: string,
+  fieldName: string,
+  title?: string | null | undefined,
+) => {
+  const formattedTitle = title ? title.replace("?", "") : "Field";
+  return message
+    .replace(fieldName, formattedTitle)
+    .replace(/'/g, "")
+    .replace("[] should be non-empty", `${formattedTitle} is required`)
+    .replace("is a required property", "is required");
 };
 
 const findValidationError = (
@@ -115,6 +123,7 @@ const findValidationError = (
     ? definition.split("/")[definition.split("/").length - 1]
     : "";
   const directWarning = errors.find((error) => error.field === path);
+
   if (directWarning) {
     const formatted = formatValidationWarning(
       fieldName,
@@ -141,16 +150,16 @@ const findValidationError = (
   return null;
 };
 
-const formatValidationWarnings = (
+export const formatValidationWarnings = (
   uiSchema:
-    | UiSchema
-    | {
-        children: UiSchema;
-        label: string;
-        name: string;
-        description?: string;
-      },
-  parent: { label: string; name: string; description?: string } | null,
+    | Array<UiSchemaSection | UiSchemaField>
+    | UiSchemaSection
+    | UiSchemaField,
+  parent:
+    | Array<UiSchemaSection | UiSchemaField>
+    | UiSchemaSection
+    | UiSchemaField
+    | null,
   formValidationWarnings: FormValidationWarning[],
   formSchema: RJSFSchema,
 ): FormattedFormValidationWarning[] => {
@@ -161,11 +170,7 @@ const formatValidationWarnings = (
   ) {
     return formatValidationWarnings(
       uiSchema.children,
-      {
-        label: uiSchema.label,
-        name: uiSchema.name,
-        description: uiSchema.description,
-      },
+      uiSchema,
       formValidationWarnings,
       formSchema,
     );
@@ -175,11 +180,7 @@ const formatValidationWarnings = (
         if ("children" in node) {
           const nodeError = formatValidationWarnings(
             node.children,
-            {
-              label: node.label,
-              name: node.name,
-              description: node.description,
-            },
+            uiSchema,
             formValidationWarnings,
             formSchema,
           );
@@ -207,11 +208,7 @@ const formatValidationWarnings = (
           if ("children" in node) {
             const nodeError = formatValidationWarnings(
               node.children,
-              {
-                label: node.label,
-                name: node.name,
-                description: node.description,
-              },
+              uiSchema,
               formValidationWarnings,
               formSchema,
             );
@@ -245,14 +242,12 @@ export const buildWarningTree = (
   formValidationWarnings: FormValidationWarning[],
   formSchema: RJSFSchema,
 ) => {
-  const e: FormattedFormValidationWarning[] = [];
   return formatValidationWarnings(
     formUiSchema,
     null,
     formValidationWarnings,
     formSchema,
   );
-  return e;
 };
 
 // json schema doesn't describe UI so types are infered if widget not supplied
@@ -593,8 +588,6 @@ export const getFieldConfig = ({
 };
 
 export const getWarningsForField = ({
-  fieldName,
-  fieldType,
   errors,
   definition,
 }: {
@@ -605,18 +598,6 @@ export const getWarningsForField = ({
 }): string[] => {
   if (!errors || errors.length < 1) {
     return [];
-  }
-  if (fieldType === "array") {
-    const warningMap = errors.reduce<Record<string, string>>(
-      (acc: Record<string, string>, item: FormattedFormValidationWarning) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        acc[item.field] = item.message;
-        return acc;
-      },
-      {},
-    );
-
-    return flatFormDataToArray(fieldName, warningMap) as unknown as [];
   }
 
   const warningsforField = errors.filter(

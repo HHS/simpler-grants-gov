@@ -45,7 +45,7 @@ export default function MultiSelect<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, description, maxItems, minItems, type } = schema;
+  const { title, description, maxItems, minItems } = schema;
 
   const { enumOptions: opts, enumDisabled } = (options ?? {}) as {
     enumOptions?: ComboBoxOption[];
@@ -141,7 +141,7 @@ export default function MultiSelect<
         labelType={labelType}
       />
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       {/* Hidden inputs so your form posts an array */}
       {selected.map((v, i) => (

@@ -109,7 +109,7 @@ function TextWidget<
         labelType={labelType}
       />
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <TextInput
         data-testid={id}

@@ -85,7 +85,7 @@ function RadioWidget<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, enum: enumFromSchema, description, type } = schema;
+  const { title, enum: enumFromSchema, description } = schema;
 
   // Extract and safely type the options we use
   const { enumDisabled, enumOptions: uiEnumOptions } =
@@ -150,7 +150,7 @@ function RadioWidget<
         labelType={labelType}
       />
       {error && (
-        <FieldErrors type={type} fieldName={id} rawErrors={rawErrors} />
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       {enumOptions.map((option, index) => {
         // Normalize the current value so it can match "true"/"false" string options
