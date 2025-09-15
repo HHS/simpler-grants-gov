@@ -77,7 +77,6 @@ class XSDValidator:
         if env_url:
             logger.info(f"Using XSD URL from environment variable {env_var_name}: {env_url}")
             return env_url
-
         url = xsd_urls[form_name]
         if url.startswith("PLACEHOLDER_"):
             raise XSDValidationError(
@@ -85,7 +84,6 @@ class XSDValidator:
                 f"Please update the URL in get_xsd_url() method or set environment variable {env_var_name}. "
                 f"See comments in xsd_validator.py for guidance on finding correct Grants.gov XSD URLs."
             )
-
         return url
 
     def download_xsd(self, form_name: str) -> Path:
@@ -187,7 +185,6 @@ class XSDValidator:
                 xsd_path = Path(xsd_url_or_path)
                 if not xsd_path.exists():
                     raise XSDValidationError(f"XSD file not found: {xsd_path}")
-
                 logger.info(f"Loading XSD from local path: {xsd_path}")
                 schema = xmlschema.XMLSchema(str(xsd_path))
 

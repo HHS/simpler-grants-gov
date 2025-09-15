@@ -330,6 +330,16 @@ help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 ##################################################
+# XML Validation Tests
+##################################################
+
+xml-validation: ## Run all XML validation tests against XSD schemas
+	$(PY_RUN_CMD) python run_xml_validation.py $(args)
+
+xml-validation-sf424: ## Run SF-424 specific XML validation tests
+	$(PY_RUN_CMD) python run_xml_validation.py --form SF424_4_0 $(args)
+
+##################################################
 # Load testing
 ##################################################
 
