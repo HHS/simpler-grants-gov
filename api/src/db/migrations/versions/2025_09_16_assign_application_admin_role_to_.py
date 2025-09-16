@@ -29,7 +29,7 @@ def upgrade():
         INSERT INTO api.application_user_role (application_user_id, role_id, created_at, updated_at)
         SELECT
             au.application_user_id,
-            :role_id::uuid,
+            :role_id,
             NOW(),
             NOW()
         FROM api.application_user au
@@ -38,10 +38,10 @@ def upgrade():
             SELECT 1
             FROM api.application_user_role aur
             WHERE aur.application_user_id = au.application_user_id
-            AND aur.role_id = :role_id::uuid
+            AND aur.role_id = :role_id
         );
         """
-        ).bindparams(role_id=str(APPLICATION_OWNER_ID))
+        ).params(role_id=APPLICATION_OWNER_ID)
     )
 
     # ### end Alembic commands ###
@@ -55,14 +55,14 @@ def downgrade():
         text(
             """
         DELETE FROM api.application_user_role
-        WHERE role_id = :role_id::uuid
+        WHERE role_id = :role_id
         AND application_user_id IN (
             SELECT application_user_id
             FROM api.application_user
             WHERE is_application_owner = true
         );
         """
-        ).bindparams(role_id=APPLICATION_OWNER_ID)
+        ).params(role_id=APPLICATION_OWNER_ID)
     )
 
     # ### end Alembic commands ###
