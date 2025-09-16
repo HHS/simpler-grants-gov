@@ -42,9 +42,9 @@ export type FormValidationWarning = {
 };
 
 export type FormattedFormValidationWarning = FormValidationWarning & {
-  htmlField: string;
-  formatted: string;
-  definition: string | undefined;
+  htmlField?: string;
+  formatted?: string;
+  definition?: string | undefined;
 };
 
 export type WidgetTypes =

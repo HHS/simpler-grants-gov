@@ -89,7 +89,7 @@ async function FormPage({ params }: formPageProps) {
         <h1>{formName}</h1>
         <ApplyForm
           applicationId={applicationId}
-          validationWarnings={warnings}
+          validationWarnings={warnings || null}
           savedFormData={applicationResponse}
           formSchema={formSchema}
           uiSchema={formUiSchema}

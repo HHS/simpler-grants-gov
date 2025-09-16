@@ -592,7 +592,7 @@ export const getWarningsForField = ({
   );
 
   return warningsforField.map((warning) => {
-    return warning.formatted;
+    return warning.formatted || warning.message;
   });
 };
 

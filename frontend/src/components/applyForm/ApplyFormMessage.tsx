@@ -12,7 +12,7 @@ export const ApplyFormMessage = ({
   error: boolean;
   validationWarnings: FormattedFormValidationWarning[] | null;
   saved: boolean;
-  isBudgetForm: boolean;
+  isBudgetForm?: boolean;
 }) => {
   const t = useTranslations("Application.applyForm");
   const errorMessage = t.rich("errorMessage", {
@@ -48,7 +48,7 @@ export const ApplyFormMessage = ({
             const link = isBudgetForm ? (
               <a href={`#${warning.field}`}>{warning.message}</a>
             ) : (
-              <a href={`#${warning.htmlField}`}>{warning.formatted}</a>
+              <a href={`#${warning.htmlField || ""}`}>{warning.formatted}</a>
             );
             return <li key={index}>{link}</li>;
           })}
