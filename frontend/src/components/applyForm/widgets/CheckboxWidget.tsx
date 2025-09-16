@@ -8,6 +8,7 @@ import {
 import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 
 /** The `CheckBoxWidget` is a widget for rendering boolean properties.
@@ -64,6 +65,9 @@ function CheckboxWidget<
 
   return (
     <FormGroup error={error} key={`form-group__checkbox--${id}`}>
+      {error && (
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
+      )}
       <Checkbox
         id={id}
         label={label}

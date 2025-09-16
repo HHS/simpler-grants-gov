@@ -15,7 +15,7 @@ import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormFields } from "./FormFields";
-import { FormValidationWarning, UiSchema } from "./types";
+import { FormattedFormValidationWarning, UiSchema } from "./types";
 import { getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
@@ -32,7 +32,7 @@ const ApplyForm = ({
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
-  validationWarnings: FormValidationWarning[] | null;
+  validationWarnings: FormattedFormValidationWarning[] | null;
   attachments: Attachment[];
 }) => {
   const { pending } = useFormStatus();
@@ -65,9 +65,9 @@ const ApplyForm = ({
       window.confirm(t("unsavedChangesWarning")),
   });
 
-  const { formData, error, saved } = formState;
+  const { error, saved } = formState;
 
-  const formObject = !isEmpty(formData) ? formData : savedFormData;
+  const formObject = savedFormData || new FormData();
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
 
   if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
