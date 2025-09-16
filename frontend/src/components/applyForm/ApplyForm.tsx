@@ -15,7 +15,11 @@ import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";
 import { FormFields } from "./FormFields";
-import { FormattedFormValidationWarning, UiSchema } from "./types";
+import {
+  FormattedFormValidationWarning,
+  FormValidationWarning,
+  UiSchema,
+} from "./types";
 import { getFieldsForNav } from "./utils";
 
 const ApplyForm = ({
@@ -26,14 +30,19 @@ const ApplyForm = ({
   validationWarnings,
   uiSchema,
   attachments,
+  isBudgetForm = false,
 }: {
   applicationId: string;
   formId: string;
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
-  validationWarnings: FormattedFormValidationWarning[] | null;
+  validationWarnings:
+    | FormattedFormValidationWarning[]
+    | FormValidationWarning[]
+    | null;
   attachments: Attachment[];
+  isBudgetForm?: boolean;
 }) => {
   type RichRenderer = (chunks: ReactNode) => ReactNode;
   type Translator = ((
@@ -119,6 +128,7 @@ const ApplyForm = ({
             saved={saved}
             error={error}
             validationWarnings={validationWarnings}
+            isBudgetForm={isBudgetForm}
           />
           <AttachmentsProvider value={attachments ?? []}>
             <FormFields

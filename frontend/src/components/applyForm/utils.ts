@@ -592,7 +592,7 @@ export const getWarningsForField = ({
   );
 
   return warningsforField.map((warning) => {
-    return warning.formatted;
+    return warning.formatted || warning.message;
   });
 };
 
@@ -802,4 +802,8 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     },
     {},
   );
+};
+
+export const pointerToFieldName = (pointer: string): string => {
+  return pointer.replace("$.", "").replace(/\./g, "--");
 };
