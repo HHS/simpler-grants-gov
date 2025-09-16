@@ -4,7 +4,7 @@ import base64
 import hashlib
 import mimetypes
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -38,7 +38,7 @@ class AttachmentFile(BaseModel):
 
     @classmethod
     def from_file_path(
-        cls, file_path: Union[str, Path], file_location: Optional[str] = None
+        cls, file_path: str | Path, file_location: str | None = None
     ) -> "AttachmentFile":
         """Create AttachmentFile from a file path.
 
@@ -75,7 +75,7 @@ class AttachmentFile(BaseModel):
         )
 
     @staticmethod
-    def compute_base64_sha1(file_path: Union[str, Path]) -> str:
+    def compute_base64_sha1(file_path: str | Path) -> str:
         """Compute base64-encoded SHA-1 hash of a file.
 
         Args:
@@ -111,7 +111,7 @@ class AttachmentFile(BaseModel):
 class AttachmentGroup(BaseModel):
     """Model for a group of attachment files (0-100 files)."""
 
-    attached_files: List[AttachmentFile] = Field(
+    attached_files: list[AttachmentFile] = Field(
         default_factory=list, max_length=100, description="List of attached files (maximum 100)"
     )
 
@@ -129,7 +129,7 @@ class AttachmentGroup(BaseModel):
         self.attached_files.append(attachment_file)
 
     def add_file_from_path(
-        self, file_path: Union[str, Path], file_location: Optional[str] = None
+        self, file_path: str | Path, file_location: str | None = None
     ) -> None:
         """Add a file from a file path.
 
@@ -144,18 +144,18 @@ class AttachmentGroup(BaseModel):
 class AttachmentData(BaseModel):
     """Model for all attachment data in an SF-424 form."""
 
-    areas_affected: Optional[AttachmentFile] = Field(None, description="Geographic areas affected")
-    additional_project_title: Optional[AttachmentGroup] = Field(
+    areas_affected: AttachmentFile | None = Field(None, description="Geographic areas affected")
+    additional_project_title: AttachmentGroup | None = Field(
         None, description="Additional project title attachments"
     )
-    additional_congressional_districts: Optional[AttachmentFile] = Field(
+    additional_congressional_districts: AttachmentFile | None = Field(
         None, description="Additional congressional districts"
     )
-    debt_explanation: Optional[AttachmentFile] = Field(
+    debt_explanation: AttachmentFile | None = Field(
         None, description="Debt explanation document"
     )
 
-    def to_xml_dict(self) -> Dict[str, Any]:
+    def to_xml_dict(self) -> dict[str, Any]:
         """Convert attachment data to XML-ready dictionary format.
 
         Returns:
@@ -186,7 +186,7 @@ class AttachmentData(BaseModel):
 
         return result
 
-    def _attachment_to_dict(self, attachment: AttachmentFile) -> Dict[str, Any]:
+    def _attachment_to_dict(self, attachment: AttachmentFile) -> dict[str, Any]:
         """Convert a single attachment to dictionary format.
 
         Args:

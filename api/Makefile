@@ -376,3 +376,16 @@ start-mock-soap-services: ## start applicants soap api
 #   make setup-soap-proxy cert_dir="~/certs/dir/"
 setup-soap-proxy:
 	./bin/setup-soap.sh $(cert_dir)
+
+####################
+# XML Generation CLI
+####################
+
+generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}')
+	docker compose run --rm grants-api poetry run python tool/xml_cli.py --json '$(json)'
+
+generate-xml-file: ## Generate XML from JSON file (usage: make generate-xml-file file=input.json)
+	docker compose run --rm grants-api poetry run python tool/xml_cli.py --file $(file)
+
+generate-xml-example: ## Show example JSON for SF-424
+	docker compose run --rm grants-api poetry run python tool/xml_cli.py --example
