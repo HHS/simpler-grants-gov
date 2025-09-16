@@ -1,0 +1,30 @@
+name: "Lint - Deliverable Metrics"
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  issues: read
+  pull-requests: read
+
+defaults:
+  run:
+    working-directory: ./.github/linters
+
+jobs:
+  lint-deliverable-metrics:
+    name: Lint Deliverable Metrics
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run deliverable metrics linter
+        run: |
+          ./scripts/lint-deliverable-metrics.sh \
+            --org "HHS" \
+            --project "13" \
+            --issue-type "Deliverable" \
+            --dry-run 
