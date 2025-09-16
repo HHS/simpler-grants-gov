@@ -180,7 +180,7 @@ resource "aws_iam_policy" "runtime_logs" {
 }
 
 resource "aws_iam_policy" "api_gateway_access" {
-  count = var.enable_api_gateway ? 1 : 0
+  count  = var.enable_api_gateway ? 1 : 0
   name   = "${var.service_name}-api-gateway-access-role-policy"
   policy = data.aws_iam_policy_document.api_gateway_access[0].json
 }
