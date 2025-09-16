@@ -212,6 +212,13 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="application_users")
 
+    application_user_roles: Mapped[list["ApplicationUserRole"]] = relationship(
+        "ApplicationUserRole",
+        back_populates="application_user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
 
 class OrganizationUser(ApiSchemaTable, TimestampMixin):
     __tablename__ = "organization_user"
