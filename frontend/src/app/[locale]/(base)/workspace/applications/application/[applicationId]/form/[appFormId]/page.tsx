@@ -8,6 +8,10 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
+import {
+  buildWarningTree,
+  pointerToFieldName,
+} from "src/components/applyForm/utils";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +61,17 @@ async function FormPage({ params }: formPageProps) {
     formValidationWarnings,
   } = data;
 
+  const isBudgetForm = formName.includes("SF-424A");
+
+  const warnings = isBudgetForm
+    ? formValidationWarnings?.map((warning) => ({
+        ...warning,
+        field: pointerToFieldName(warning.field),
+      }))
+    : formValidationWarnings
+      ? buildWarningTree(formUiSchema, null, formValidationWarnings, formSchema)
+      : [];
+
   return (
     <>
       <GridContainer>
@@ -76,12 +91,13 @@ async function FormPage({ params }: formPageProps) {
         <h1>{formName}</h1>
         <ApplyForm
           applicationId={applicationId}
-          validationWarnings={formValidationWarnings}
+          validationWarnings={warnings || null}
           savedFormData={applicationResponse}
           formSchema={formSchema}
           uiSchema={formUiSchema}
           formId={formId}
           attachments={applicationAttachments}
+          isBudgetForm={isBudgetForm}
         />
       </GridContainer>
     </>

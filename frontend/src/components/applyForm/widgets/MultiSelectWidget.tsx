@@ -10,12 +10,12 @@ import {
 import React, { useCallback, useMemo, useRef } from "react";
 import {
   ComboBox,
-  ErrorMessage,
   FormGroup,
   type ComboBoxOption,
   type ComboBoxRef,
 } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { Pill } from "src/components/Pill";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
@@ -131,24 +131,21 @@ export default function MultiSelect<
   const getLabelForValue = (value: string) =>
     allOptions.find((option) => String(option.value) === value)?.label ?? value;
 
+  // ComboBox widget changes the id which breaks handling of idFor and anchor links
+  const idFor = `${id}__combobox`;
+
   return (
     <FormGroup error={error} key={`form-group__uswds-combomulti--${id}`}>
       <DynamicFieldLabel
-        idFor={id}
+        idFor={idFor}
         title={title}
         required={required}
         description={description as string}
         labelType={labelType}
       />
-
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0]).join(",")}
-        </ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
-
       {/* Hidden inputs so your form posts an array */}
       {selected.map((v, i) => (
         <input
@@ -158,7 +155,8 @@ export default function MultiSelect<
           value={v}
         />
       ))}
-
+      {/* ComboBox widget changes the id which breaks handling of idFor and anchor links */}
+      <span id={id}></span>
       <ComboBox
         ref={comboRef}
         id={`${id}__combobox`}
