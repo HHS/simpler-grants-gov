@@ -92,7 +92,7 @@ class XMLGenerationService:
             root.set(f"{{{default_namespace}}}FormVersion", "4.0")
 
             # Add data elements using lxml with namespace context
-            self._add_lxml_elements_to_parent(root, data, nsmap)
+            self._add_lxml_elements_to_parent(root, data, nsmap, transform_config)
 
             # Generate XML string with lxml
             if pretty_print:
@@ -122,28 +122,42 @@ class XMLGenerationService:
 
         return xml_string
 
-    def _add_lxml_elements_to_parent(self, parent: Any, data: dict, nsmap: dict) -> None:
+    def _extract_namespace_fields(self, transform_config: dict) -> dict[str, str]:
+        """Extract namespace configuration from transform rules.
+        
+        Args:
+            transform_config: The transformation configuration dictionary
+            
+        Returns:
+            Dictionary mapping field names to their namespace prefixes
+        """
+        namespace_fields = {}
+        
+        def extract_from_rules(rules: dict, path: str = ""):
+            """Recursively extract namespace information from rules."""
+            for key, value in rules.items():
+                if key.startswith("_"):  # Skip metadata keys
+                    continue
+                    
+                if isinstance(value, dict):
+                    # Check if this field has XML transform with namespace
+                    if "xml_transform" in value:
+                        xml_transform = value["xml_transform"]
+                        if "namespace" in xml_transform and "target" in xml_transform:
+                            target_name = xml_transform["target"]
+                            namespace = xml_transform["namespace"]
+                            namespace_fields[target_name] = namespace
+                    
+                    # Recursively check nested fields
+                    extract_from_rules(value, f"{path}.{key}" if path else key)
+        
+        extract_from_rules(transform_config)
+        return namespace_fields
+
+    def _add_lxml_elements_to_parent(self, parent: Any, data: dict, nsmap: dict, transform_config: dict) -> None:
         """Add elements to a parent using lxml, handling both simple values and nested dictionaries."""
-        # Define which fields should use GlobalLibrary namespace
-        # IMPORTANT: Address fields inside Applicant AND name fields inside AuthorizedRepresentative use globLib namespace
-        # Root-level elements use SF-424 namespace even if their type is globLib
-        globlib_fields = {
-            # Address fields (inside Applicant) - these use globLib namespace
-            "Street1",
-            "Street2",
-            "City",
-            "County",
-            "State",
-            "Province",
-            "ZipPostalCode",
-            "Country",
-            # Human name fields (inside AuthorizedRepresentative) - these use globLib namespace
-            "PrefixName",
-            "FirstName",
-            "MiddleName",
-            "LastName",
-            "SuffixName",
-        }
+        # Extract namespace configuration from transform rules
+        namespace_fields = self._extract_namespace_fields(transform_config)
 
         # Define XSD element order for SF-424 root elements (complete sequence from XSD)
         sf424_element_order = [
@@ -239,7 +253,7 @@ class XMLGenerationService:
                     # Special handling for Applicant address to ensure correct XSD sequence
                     if element_name == "Applicant":
                         self._add_address_elements_in_order(
-                            nested_element, value, nsmap, globlib_fields
+                            nested_element, value, nsmap, namespace_fields
                         )
                     else:
                         for nested_field, nested_value in value.items():
@@ -249,7 +263,7 @@ class XMLGenerationService:
                                     nested_field,
                                     nested_value,
                                     nsmap,
-                                    globlib_fields,
+                                    namespace_fields,
                                 )
                 else:
                     # Simple value - create element with SF424_4_0 namespace prefix
@@ -257,7 +271,7 @@ class XMLGenerationService:
                     element.text = str(value)
 
     def _add_address_elements_in_order(
-        self, parent: Any, address_data: dict, nsmap: dict, globlib_fields: set
+        self, parent: Any, address_data: dict, nsmap: dict, namespace_fields: dict
     ) -> None:
         """Add address elements in the correct XSD sequence order."""
         # XSD sequence: Street1, Street2, City, County, State/Province, ZipPostalCode, Country
@@ -279,11 +293,11 @@ class XMLGenerationService:
             if field_value is not None:
                 # Use the XML field name for the element
                 self._add_lxml_element_to_parent(
-                    parent, xml_field, field_value, nsmap, globlib_fields
+                    parent, xml_field, field_value, nsmap, namespace_fields
                 )
 
     def _add_lxml_element_to_parent(
-        self, parent: Any, field_name: str, value: Any, nsmap: dict, globlib_fields: set
+        self, parent: Any, field_name: str, value: Any, nsmap: dict, namespace_fields: dict
     ) -> None:
         """Add a single element to a parent using lxml with proper namespace handling."""
         if isinstance(value, dict):
@@ -292,22 +306,24 @@ class XMLGenerationService:
             for nested_field, nested_value in value.items():
                 if nested_value is not None:
                     self._add_lxml_element_to_parent(
-                        nested_element, nested_field, nested_value, nsmap, globlib_fields
+                        nested_element, nested_field, nested_value, nsmap, namespace_fields
                     )
         elif value is None:
             # Create empty element for None values
-            if field_name in globlib_fields:
-                # Use GlobalLibrary namespace
-                element_name = f"{{{nsmap['globLib']}}}{field_name}"
+            if field_name in namespace_fields:
+                # Use configured namespace
+                namespace_prefix = namespace_fields[field_name]
+                element_name = f"{{{nsmap[namespace_prefix]}}}{field_name}"
                 lxml_etree.SubElement(parent, element_name)
             else:
                 # Use default namespace
                 lxml_etree.SubElement(parent, field_name)
         else:
             # Simple value - create element with text content
-            if field_name in globlib_fields:
-                # Use GlobalLibrary namespace
-                element_name = f"{{{nsmap['globLib']}}}{field_name}"
+            if field_name in namespace_fields:
+                # Use configured namespace
+                namespace_prefix = namespace_fields[field_name]
+                element_name = f"{{{nsmap[namespace_prefix]}}}{field_name}"
                 element = lxml_etree.SubElement(parent, element_name)
             else:
                 # Use default namespace

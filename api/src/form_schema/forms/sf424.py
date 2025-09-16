@@ -1100,16 +1100,16 @@ FORM_XML_TRANSFORM_RULES = {
             "null_handling": "exclude",
         }
     },
-    # Address information - nested structure
+    # Address information - nested structure with GlobalLibrary namespace
     "applicant_address": {
         "xml_transform": {"target": "Applicant", "type": "nested_object"},
-        "street1": {"xml_transform": {"target": "Street1"}},
-        "street2": {"xml_transform": {"target": "Street2"}},
-        "city": {"xml_transform": {"target": "City"}},
-        "county": {"xml_transform": {"target": "County"}},
-        "state": {"xml_transform": {"target": "State"}},
-        "country": {"xml_transform": {"target": "Country"}},
-        "zip_postal_code": {"xml_transform": {"target": "ZipPostalCode"}},
+        "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
+        "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
+        "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},
+        "county": {"xml_transform": {"target": "County", "namespace": "globLib"}},
+        "state": {"xml_transform": {"target": "State", "namespace": "globLib"}},
+        "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
+        "zip_postal_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
     },
     # Contact information - direct field mappings with defaults for required fields
     "phone_number": {
@@ -1247,6 +1247,7 @@ FORM_XML_TRANSFORM_RULES = {
         "first_name": {
             "xml_transform": {
                 "target": "FirstName",
+                "namespace": "globLib",
                 "null_handling": "default_value",
                 "default_value": "John",
             }
@@ -1254,6 +1255,7 @@ FORM_XML_TRANSFORM_RULES = {
         "last_name": {
             "xml_transform": {
                 "target": "LastName",
+                "namespace": "globLib",
                 "null_handling": "default_value",
                 "default_value": "Doe",
             }
