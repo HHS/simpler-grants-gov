@@ -119,7 +119,7 @@ fetch_data() {
 
   # Extract the nodes from the response
   if ! raw_data=$(echo "$raw_response" | jq -r '.data.organization.projectV2.items.nodes[]' 2>&1); then
-    err "Failed to extract nodes from response: $raw_data"
+    err "Failed to extract nodes from response"
   fi
 
   if [[ -z "$raw_data" ]]; then
@@ -243,26 +243,56 @@ lint_deliverables() {
 
     log "Processing: $title ($url)"
     
-    # Extract the acceptance criteria section and ensure it contains checkboxes
-    local ac_section=$(echo "$body" | sed -n "/$ACCEPTANCE_CRITERIA_HEADER/,/^###/{ /^###/d; p; }")
-    if [[ -z "$ac_section" ]] || ! echo "$ac_section" | grep -q "\[[ x]\]"; then
-      warn "  ❌ Acceptance criteria missing!"
-      ac_failed_issues+=("$title|$url")
-    else
-      ((ac_valid_count++))
-    fi
+    # Validate the acceptance criteria section
+    validate_acceptance_criteria "$body" "$title" "$url"
 
-    # Extract the metrics section and ensure it contains checkboxes
-    local metrics_section=$(echo "$body" | sed -n "/$METRICS_HEADER/,/^###/{ /^###/d; p; }")
-    if [[ -z "$metrics_section" ]] || ! echo "$metrics_section" | grep -q "\[[ x]\]"; then
-      warn "  ❌ Metrics missing!"
-      metrics_failed_issues+=("$title|$url")
-    else
-      ((metrics_valid_count++))
-    fi
+    # Validate the metrics section
+    validate_metrics "$body" "$title" "$url"
 
   done
 }
+
+validate_acceptance_criteria() {
+  local body="$1"
+  local title="$2"
+  local url="$3"
+
+  # Extract the acceptance criteria section and ensure it contains checkboxes
+  local ac_section=$(echo "$body" | sed -n "/$ACCEPTANCE_CRITERIA_HEADER/,/^###/{ /^###/d; p; }")
+  if [[ -z "$ac_section" ]] || ! echo "$ac_section" | grep -q "\[[ x]\]"; then
+    warn "  ❌ Acceptance criteria missing!"
+    ac_failed_issues+=("$title|$url")
+  else
+    ac_valid_count=$((ac_valid_count + 1))
+  fi
+}
+
+validate_metrics() {
+  local body="$1"
+  local title="$2"
+  local url="$3"
+
+  # Extract the metrics section and ensure it contains checkboxes
+  local metrics_section=$(echo "$body" | sed -n "/$METRICS_HEADER/,/^###/{ /^###/d; p; }")
+  if [[ -z "$metrics_section" ]] || ! echo "$metrics_section" | grep -q "\[[ x]\]"; then
+    warn "  ❌ Metrics missing!"
+    metrics_failed_issues+=("$title|$url")
+  else
+    metrics_valid_count=$((metrics_valid_count + 1))
+  fi
+}
+
+validate_summary() {
+  local body="$1"
+  local title="$2"
+  local url="$3"
+
+}
+
+
+# #######################################################
+# Main
+# #######################################################
 
 # Parse command line arguments
 read -r dry_run org project issue_type <<< "$(parse_args "$@")"
