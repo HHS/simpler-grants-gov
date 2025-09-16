@@ -101,6 +101,36 @@ rules currently implemented:
 * `current_date` - The current date in the US EST timezone
 * `signature` - The name of the creator of the application - NOTE - currently defaults to a random application user's email due to not having names in our system yet.
 
+## Null Population
+Several of our rules like `public_competition_id` and `competition_title` can be
+null due to them being nullable in their corresponding DB tables. We don't generally
+configure our JSON schema to allow null values, instead preferring a value to be excluded
+if there is no value (eg. We want `{}` over `{"my_field": null}`). However, if the rule
+returns null, we have to do something. For that reason, all pre/post population rules
+can take in an optional `null_population` rule with the following values:
+* `exclude_value` (the default if no rule configured) - This will not add the value to the JSON schema AND remove any existing values.
+* `set_as_null` - This will set the value as null, behaving the same as any other population
+
+The default assumes we don't want null values in our JSON schema.
+
+### Caveats of Null Population when using `exclude_value`
+If a field is an array of values, (eg. `[1, 2, 3]`) we will not update those values. This is because
+removing values from the array could have consequences on our logic. If we remove records from an array
+list, then our indexing logic would be made incredibly complex. As we are unlikely to pre/post populate
+fields directly into an array, it has been deemed better to not support the case for now.
+
+NOTE: If you had data like `{"my_array": [{"x": 4}, {"x": 5}]}` and ran a rule on `my_array[*].x` to set a value to null,
+that would work as we can change the values in the objects within an array uneventfully. We just don't
+want to be adding or removing items themselves from the array. This would result in `{"my_array": [{}, {}]}`
+
+---
+Due to how our pre-population rules are setup, we'll still create the path to a value,
+even if we don't create the value itself. For example, if you had data of `{}` and
+a rule to pre-populate `x.y.z` with a null value, the result would be: `{"x": {"y": {}}}`.
+We may be able to work around this issue in the future.
+
+TODO - can I fix this?
+
 ## Monetary Summation
 We support the ability to sum monetary amounts together. This rule requires that you
 specify which fields to sum together like so:

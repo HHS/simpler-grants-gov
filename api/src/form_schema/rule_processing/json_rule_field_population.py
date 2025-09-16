@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 INDIVIDUAL_UEI = "00000000INDV"
 ZERO_DECIMAL = Decimal("0.00")  # For formatting and defining 0 for decimal/monetary
-
+EXCLUDE_VALUE = "exclude_value"
 
 def get_opportunity_number(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
     """Get the opportunity number"""
@@ -179,6 +179,7 @@ def handle_field_population(
 ) -> None:
 
     rule_code: str | None = json_rule.rule.get("rule", None)
+    remove_null_fields = json_rule.rule.get("null_population", EXCLUDE_VALUE) == EXCLUDE_VALUE
     log_extra = context.get_log_context() | json_rule.get_log_context()
 
     # If the rule code isn't configured right, log a warning to alert us, but
@@ -193,7 +194,7 @@ def handle_field_population(
     rule_func = mapper[rule_code]
     try:
         value = rule_func(context, json_rule)
-        context.json_data = populate_nested_value(context.json_data, json_rule.path, value)
+        context.json_data = populate_nested_value(context.json_data, json_rule.path, value, remove_null_fields=remove_null_fields)
     except ValueError:
         # If a value error occurred, something unexpected happened with the data/config
         # we don't want to fail, so instead we'll proceed on. This will only be blocking
