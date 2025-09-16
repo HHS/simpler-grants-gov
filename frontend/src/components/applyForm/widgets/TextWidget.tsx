@@ -34,6 +34,7 @@ function TextWidget<
   options = {},
   rawErrors = [],
   updateOnInput = false,
+  placeholder,
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
@@ -124,6 +125,7 @@ function TextWidget<
         aria-required={required}
         disabled={disabled}
         readOnly={readonly}
+        placeholder={placeholder ?? undefined}
         list={examples ? examplesId<T>(id) : undefined}
         aria-describedby={describedby}
         onChange={updateOnInput ? _onChange : undefined}

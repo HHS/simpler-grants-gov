@@ -20,6 +20,7 @@ import {
   getWarningsForField,
   isFieldRequired,
   jsonSchemaPointerToPath,
+  pointerToFieldName,
   processFormSchema,
   pruneEmptyNestedFields,
   shapeFormData,
@@ -62,7 +63,7 @@ describe("shapeFormData", () => {
       dob: "01/01/1900",
       address: {
         street: "test street",
-        zip: 1234,
+        zip: "1234",
         state: "XX",
         question: {
           rent: "yes",
@@ -824,4 +825,12 @@ it("handles nested uiSchema sections", () => {
 
   expect(errors.length).toBeGreaterThan(0);
   expect(errors[0].message).toBe("bar is required");
+});
+
+describe("pointerToFieldName", () => {
+  it("changes a pointer to a field name", () => {
+    expect(pointerToFieldName("$.somethig[0].another.this_one")).toEqual(
+      "somethig[0]--another--this_one",
+    );
+  });
 });

@@ -9,9 +9,11 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import TextWidget from "src/components/applyForm/widgets/TextWidget";
-
-type MoneyString = string | undefined;
+import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { getBudgetErrors } from "./budgetErrorLabels";
+import { BaseActivityItem, MoneyString } from "./budgetTypes";
+import { CurrencyInput, HelperText } from "./budgetUiComponents";
+import { asMoney, getStringOrUndefined, isRecord } from "./budgetValueGuards";
 
 interface NonFederalResources {
   applicant_amount?: MoneyString;
@@ -19,14 +21,100 @@ interface NonFederalResources {
   other_amount?: MoneyString;
   total_amount?: MoneyString;
 }
+
 type AmountKey = keyof NonFederalResources;
 
-interface ActivityItem {
-  activity_title?: string;
+interface ActivityItem extends BaseActivityItem {
+  budget_summary?: {
+    total_amount?: MoneyString;
+  };
   non_federal_resources?: NonFederalResources;
-  [k: string]: unknown;
 }
-type ActivityItems = ActivityItem[];
+
+type NormalizedC = {
+  items: ActivityItem[];
+  totals?: NonFederalResources;
+};
+
+function pickNonFederalResources(value: unknown): NonFederalResources {
+  if (!isRecord(value)) return {};
+  return {
+    applicant_amount: asMoney(value.applicant_amount),
+    state_amount: asMoney(value.state_amount),
+    other_amount: asMoney(value.other_amount),
+    total_amount: asMoney(value.total_amount),
+  };
+}
+
+function pickActivityItem(value: unknown): ActivityItem {
+  if (!isRecord(value)) return {};
+  const activity: ActivityItem = {};
+  if (typeof value.activity_title === "string")
+    activity.activity_title = value.activity_title;
+  if (typeof value.assistance_listing_number === "string") {
+    activity.assistance_listing_number = value.assistance_listing_number;
+  }
+  if (isRecord(value.budget_summary)) {
+    const total = asMoney(value.budget_summary.total_amount);
+    activity.budget_summary = { total_amount: total };
+  }
+  if (isRecord(value.non_federal_resources)) {
+    activity.non_federal_resources = pickNonFederalResources(
+      value.non_federal_resources,
+    );
+  }
+  return activity;
+}
+
+function normalizeSectionCValue(rawValue: unknown): NormalizedC {
+  if (Array.isArray(rawValue)) {
+    return { items: rawValue.map(pickActivityItem) };
+  }
+
+  if (isRecord(rawValue)) {
+    const fromArray = rawValue.activity_line_items;
+    const totalsObj = rawValue.total_non_federal_resources;
+    if (Array.isArray(fromArray)) {
+      return {
+        items: fromArray.map(pickActivityItem),
+        totals: pickNonFederalResources(totalsObj),
+      };
+    }
+
+    const items: ActivityItem[] = [];
+    for (const index of BUDGET_ACTIVITY_COLUMNS) {
+      items.push(pickActivityItem(rawValue[String(index)]));
+    }
+
+    let totals: NonFederalResources | undefined;
+    if (isRecord(totalsObj)) {
+      totals = pickNonFederalResources(totalsObj);
+    } else {
+      const rootTotals = pickNonFederalResources(rawValue);
+      const hasAny =
+        rootTotals.applicant_amount ||
+        rootTotals.state_amount ||
+        rootTotals.other_amount ||
+        rootTotals.total_amount;
+      totals = hasAny ? rootTotals : undefined;
+    }
+
+    return { items, totals };
+  }
+
+  return { items: [] };
+}
+
+function getHeaderCellClass(index: number, totalCount: number): string {
+  const base =
+    "bg-base-lightest text-bold border-bottom-0 border-x-1px text-center border-base-light";
+
+  // last item: remove border-base-light entirely
+  if (index === totalCount - 1) {
+    return "bg-base-lightest text-bold border-bottom-0 border-x-0 text-center";
+  }
+  return base;
+}
 
 function Budget424aSectionC<
   T = unknown,
@@ -34,78 +122,49 @@ function Budget424aSectionC<
   F extends FormContextType = never,
 >({
   id,
-  value: rawValue = [],
+  value,
   rawErrors,
+  formContext,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
+  const rootFormDataFromContext = (
+    formContext as { rootFormData?: unknown } | undefined
+  )?.rootFormData;
+  const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const errors = (rawErrors as FormValidationWarning[]) || [];
 
-  const activityItemUnknown = Array.isArray(rawValue)
-    ? (rawValue as unknown)
-    : (get(rawValue as object, "activity_line_items") as unknown);
-  const activityItems: ActivityItems = Array.isArray(activityItemUnknown)
-    ? (activityItemUnknown as ActivityItems)
-    : [];
+  const { items: activityItems, totals } = normalizeSectionCValue(rawValue);
 
-  const totalsUnknown = Array.isArray(rawValue)
-    ? undefined
-    : (get(rawValue as object, "total_non_federal_resources") as unknown);
-  const totals: NonFederalResources | undefined =
-    typeof totalsUnknown === "object" && totalsUnknown !== null
-      ? (totalsUnknown as NonFederalResources)
-      : undefined;
+  const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
-  // Exactly 4 activities (rows 1-4), then a 5th total row
-  const ROWS = [0, 1, 2, 3] as const;
+  const getErrors = getBudgetErrors({ errors, id, section: "C" });
 
-  // currency-like inputs
-  const amountSchema = {
-    type: "string" as const,
-    pattern: "^\\d*([.]\\d{2})?$",
-    maxLength: 14,
-  };
+  // column labels for the money fields
+  const fields: { key: AmountKey; label: string }[] = [
+    { key: "applicant_amount", label: "Applicant" },
+    { key: "state_amount", label: "State" },
+    { key: "other_amount", label: "Other sources" },
+  ];
 
-  // simple title constraints
-  const titleSchema = {
-    type: "string" as const,
-    minLength: 0,
-    maxLength: 120,
-  };
+  const titleCell = (rowIndex: number): JSX.Element => {
+    const title =
+      getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
+    const cfda =
+      getStringOrUndefined(
+        activityItems,
+        `[${rowIndex}].assistance_listing_number`,
+      ) ?? "";
 
-  const getErrors = ({
-    errors,
-    id,
-  }: {
-    id: string;
-    errors: FormValidationWarning[];
-  }): string[] =>
-    (errors || []).filter((e) => e.field === id).map((e) => e.message);
-
-  const HelperText: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <div className="text-italic font-sans-2xs border-top-2px width-full padding-top-2 margin-top-1">
-      {children}
-    </div>
-  );
-
-  // per-activity inputs (row 1-4)
-  // starting at 8
-  const rowNumbering = (rowIndex: number): JSX.Element => (
-    <span className="text-bold text-no-wrap margin-right-1">
-      {rowIndex + 8}.
-    </span>
-  );
-
-  const titleInput = (rowIndex: number): JSX.Element => {
-    const idPath = `activity_line_items[${rowIndex}]--activity_title`;
     return (
-      <div className="display-flex flex-align-end">
-        <TextWidget
-          schema={titleSchema}
-          id={idPath}
-          rawErrors={getErrors({ errors, id: idPath })}
-          formClassName="margin-top-1"
-          inputClassName="minw-15"
-          value={get(activityItems, `[${rowIndex}].activity_title`)}
-        />
+      <div className="display-flex flex-column">
+        {/* Display text only (no input). Fallback to dash. */}
+        <div className="minw-15 font-sans-sm text-italic">
+          {title.trim() ? title : "—"}
+        </div>
+        {cfda.trim() ? (
+          <div className="font-sans-3xs text-base-dark text-italic">
+            CFDA: {cfda}
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -113,15 +172,9 @@ function Budget424aSectionC<
   const cellInput = (rowIndex: number, fieldKey: AmountKey): JSX.Element => {
     const idPath = `activity_line_items[${rowIndex}]--non_federal_resources--${fieldKey}`;
     return (
-      <TextWidget
-        schema={amountSchema}
+      <CurrencyInput
         id={idPath}
-        rawErrors={getErrors({ errors, id: idPath })}
-        formClassName="margin-top-auto padding-top-05 simpler-currency-input-wrapper"
-        inputClassName="minw-10"
-        inputMode="decimal"
-        pattern="\\d*(\\.\\d{2})?"
-        maxLength={14}
+        rawErrors={getErrors}
         value={get(
           activityItems,
           `[${rowIndex}].non_federal_resources.${fieldKey}`,
@@ -130,21 +183,40 @@ function Budget424aSectionC<
     );
   };
 
-  // total row inputs (row 5)
+  const rowTotalInput = (rowIndex: number): JSX.Element => {
+    const idPath = `activity_line_items[${rowIndex}]--non_federal_resources--total_amount`;
+    return (
+      <div className="display-flex flex-column">
+        <HelperText>Sum of row {rowIndex + 8}</HelperText>
+        <CurrencyInput
+          id={idPath}
+          rawErrors={getErrors}
+          value={get(
+            activityItems,
+            `[${rowIndex}].non_federal_resources.total_amount`,
+          )}
+        />
+      </div>
+    );
+  };
+
   const totalInput = (fieldKey: AmountKey): JSX.Element => {
     const idPath = `total_non_federal_resources--${fieldKey}`;
     return (
-      <TextWidget
-        schema={amountSchema}
-        id={idPath}
-        rawErrors={getErrors({ errors, id: idPath })}
-        formClassName="margin-top-1 simpler-currency-input-wrapper"
-        inputClassName="minw-10 border-2px"
-        inputMode="decimal"
-        pattern="\\d*(\\.\\d{2})?"
-        maxLength={14}
-        value={totals ? totals[fieldKey] : undefined}
-      />
+      <div className="display-flex flex-column">
+        {/* Helper only for subtotal row */}
+        <HelperText hasHorizontalLine>
+          {fieldKey === "total_amount"
+            ? "Sum of row 12"
+            : `Sum of column ${fieldKey === "applicant_amount" ? "B" : fieldKey === "state_amount" ? "C" : "D"}`}
+        </HelperText>
+        <CurrencyInput
+          id={idPath}
+          rawErrors={getErrors}
+          value={totals ? totals[fieldKey] : undefined}
+          bordered
+        />
+      </div>
     );
   };
 
@@ -152,7 +224,7 @@ function Budget424aSectionC<
     <div key={id} id={id}>
       <Table
         bordered={false}
-        className="usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
+        className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
       >
         <thead>
           <tr className="bg-base-lighter">
@@ -168,24 +240,15 @@ function Budget424aSectionC<
             >
               Grant program
             </th>
-            <th
-              scope="col"
-              className="bg-base-lightest text-bold border-bottom-0 border-x-1px text-center border-base-light"
-            >
-              Applicant
-            </th>
-            <th
-              scope="col"
-              className="bg-base-lightest text-bold border-bottom-0 border-x-1px text-center border-base-light"
-            >
-              State
-            </th>
-            <th
-              scope="col"
-              className="bg-base-lightest text-bold border-bottom-0 border-right-0 border-x-1px text-center border-base-light"
-            >
-              Other sources
-            </th>
+            {fields.map((field, index) => (
+              <th
+                key={field.key}
+                scope="col"
+                className={getHeaderCellClass(index, fields.length)}
+              >
+                {field.label}
+              </th>
+            ))}
             <th
               className="bg-base-lightest text-bold border-left-0 border-right-0 border-x-1px border-base-light"
               rowSpan={2}
@@ -222,42 +285,38 @@ function Budget424aSectionC<
         </thead>
 
         <tbody>
-          {/* Rows 1-4: one per activity */}
+          {/* Rows 1-4: one per activity → numbered 8–11 per SF-424A */}
           {ROWS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
               <th
                 scope="row"
                 className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom"
               >
-                {rowNumbering(rowIndex)}
+                <span className="text-bold text-no-wrap margin-right-1">
+                  {rowIndex + 8}.
+                </span>
               </th>
 
-              {/* Column A: activity title */}
+              {/* Column A: grant program (display only) + carriers */}
               <th
                 scope="row"
                 className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom"
               >
-                {titleInput(rowIndex)}
+                {titleCell(rowIndex)}
               </th>
 
               {/* Columns B-D: Applicant, State, Other */}
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column">
-                  {cellInput(rowIndex, "applicant_amount")}
-                </div>
+                {cellInput(rowIndex, "applicant_amount")}
               </td>
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column">
-                  {cellInput(rowIndex, "state_amount")}
-                </div>
+                {cellInput(rowIndex, "state_amount")}
               </td>
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column">
-                  {cellInput(rowIndex, "other_amount")}
-                </div>
+                {cellInput(rowIndex, "other_amount")}
               </td>
 
-              {/* visual equals column */}
+              {/* Visual equals column */}
               <td
                 className="border-bottom-0 border-top-0 verticle-align-bottom"
                 aria-hidden="true"
@@ -265,17 +324,14 @@ function Budget424aSectionC<
                 =
               </td>
 
-              {/* Column E: Total — with helper */}
+              {/* Column E: Total for the row */}
               <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell verticle-align-bottom">
-                <div className="display-flex flex-column">
-                  <HelperText>Sum of row {rowIndex + 8}</HelperText>
-                  {cellInput(rowIndex, "total_amount")}
-                </div>
+                {rowTotalInput(rowIndex)}
               </td>
             </tr>
           ))}
 
-          {/* Row 5 (12): TOTAL */}
+          {/* Row 5 (12): TOTALS */}
           <tr className="bg-base-lightest sf424a__row">
             <th
               scope="row"
@@ -295,15 +351,12 @@ function Budget424aSectionC<
               </div>
             </th>
             <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell">
-              <HelperText>Sum of column B</HelperText>
               {totalInput("applicant_amount")}
             </td>
             <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell">
-              <HelperText>Sum of column C</HelperText>
               {totalInput("state_amount")}
             </td>
             <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell">
-              <HelperText>Sum of column D</HelperText>
               {totalInput("other_amount")}
             </td>
             <td
@@ -313,7 +366,6 @@ function Budget424aSectionC<
               &nbsp;
             </td>
             <td className="padding-05 border-bottom-0 border-top-0 sf424a__cell">
-              <HelperText>Sum of row 12</HelperText>
               {totalInput("total_amount")}
             </td>
           </tr>

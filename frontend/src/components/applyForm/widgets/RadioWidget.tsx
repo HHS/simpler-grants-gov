@@ -45,12 +45,6 @@ function normalizeForCompare(optionValue: unknown, current: unknown): unknown {
   return current;
 }
 
-/**
- * parseFromInputValue
- *
- * Convert an HTML input value (always a string) to either a boolean (for
- * boolean radio groups) or the original enum value if we can find it.
- */
 function coerceFromString<S extends StrictRJSFSchema>(
   raw: string,
   enumOptions: ReadonlyArray<EnumOptionsType<S>>,
@@ -58,15 +52,13 @@ function coerceFromString<S extends StrictRJSFSchema>(
   const usesBoolStrings = enumOptions.some(
     (option) => option.value === "true" || option.value === "false",
   );
-  if (usesBoolStrings) {
-    return raw === "true";
-  }
+  if (usesBoolStrings) return raw === "true";
   // For non-boolean radios, return the actual enum value (could be number/string)
   const hit = enumOptions.find((option) => String(option.value) === raw);
   return hit ? hit.value : raw;
 }
 
-function RadioWidget<
+export default function RadioWidget<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
@@ -90,8 +82,6 @@ function RadioWidget<
   // Extract and safely type the options we use
   const { enumDisabled, enumOptions: uiEnumOptions } =
     (options as LocalOptions<S>) ?? {};
-
-  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   /**
    * Determine our list of options:
@@ -117,6 +107,8 @@ function RadioWidget<
     : title
       ? `label-for-${id}`
       : undefined;
+
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLInputElement>) => {
@@ -153,10 +145,7 @@ function RadioWidget<
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       {enumOptions.map((option, index) => {
-        // Normalize the current value so it can match "true"/"false" string options
         const currentForCompare = normalizeForCompare(option.value, value);
-
-        // Works for booleans, strings, and numbers
         const checked = enumOptionsIsSelected<S>(
           option.value,
           currentForCompare,
@@ -184,16 +173,13 @@ function RadioWidget<
             aria-describedby={describedby}
             checked={updateOnInput ? checked : undefined}
             defaultChecked={updateOnInput ? undefined : checked}
-            value={updateOnInput ? String(option.value) : undefined}
             defaultValue={updateOnInput ? undefined : String(option.value)}
-            onChange={updateOnInput ? handleChange : undefined}
-            onBlur={updateOnInput ? handleBlur : undefined}
-            onFocus={updateOnInput ? handleFocus : undefined}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
           />
         );
       })}
     </FormGroup>
   );
 }
-
-export default RadioWidget;

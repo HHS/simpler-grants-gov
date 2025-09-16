@@ -42,9 +42,9 @@ export type FormValidationWarning = {
 };
 
 export type FormattedFormValidationWarning = FormValidationWarning & {
-  htmlField: string;
-  formatted: string;
-  definition: string | undefined;
+  htmlField?: string;
+  formatted?: string;
+  definition?: string | undefined;
 };
 
 export type WidgetTypes =
@@ -142,6 +142,10 @@ export interface UswdsWidgetProps<
   onChange?: (value: unknown) => void;
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
+  formContext?: {
+    rootSchema?: RJSFSchema;
+    rootFormData?: unknown;
+  };
 }
 
 export type SchemaWithLabelOption = UswdsWidgetProps & {
