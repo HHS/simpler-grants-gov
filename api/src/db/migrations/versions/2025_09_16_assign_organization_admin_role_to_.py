@@ -29,7 +29,7 @@ def upgrade():
         INSERT INTO api.organization_user_role (organization_user_id, role_id, created_at, updated_at)
         SELECT
             ou.organization_user_id,
-            :role_id::uuid,
+            :role_id,
             NOW(),
             NOW()
         FROM api.organization_user ou
@@ -38,10 +38,10 @@ def upgrade():
             SELECT 1
             FROM api.organization_user_role our
             WHERE our.organization_user_id = ou.organization_user_id
-            AND our.role_id = :role_id::uuid
+            AND our.role_id = :role_id
         );
         """
-        ).bindparams(role_id=ORG_ADMIN_ID)
+        ).params(role_id=ORG_ADMIN_ID)
     )
 
     # ### end Alembic commands ###
@@ -55,14 +55,14 @@ def downgrade():
         text(
             """
         DELETE FROM api.organization_user_role
-        WHERE role_id = :role_id::uuid
+        WHERE role_id = :role_id
         AND organization_user_id IN (
             SELECT organization_user_id
             FROM api.organization_user
             WHERE is_organization_owner = true
         );
         """
-        ).bindparams(role_id=ORG_ADMIN_ID)
+        ).params(role_id=ORG_ADMIN_ID)
     )
 
     # ### end Alembic commands ###
