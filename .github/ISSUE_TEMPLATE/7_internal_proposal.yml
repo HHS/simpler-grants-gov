@@ -3,19 +3,6 @@ description: Submit a proposal for co-planning that will be voted on by the comm
 type: Task
 labels: ["Coplanning Proposal"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## Community Co-Planning Proposal
-        
-        Use this template to submit proposals that require community input and voting. These proposals will go through a structured review process involving community discussion and formal voting.
-        
-        **Process Overview:**
-        1. Proposal submission (this issue)
-        2. Community discussion period
-        3. Refinement based on feedback
-        4. Community voting
-        5. Implementation planning (if approved)
 
   - type: textarea
     id: proposal_title
