@@ -16,11 +16,11 @@ import {
 import {
   ComboBox,
   ComboBoxOption,
-  ErrorMessage,
   FormGroup,
   Select,
 } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -117,27 +117,23 @@ function SelectWidget<
       : undefined;
 
   const Widget = useCombo ? ComboBox : Select;
+  // ComboBox widget changes the id which breaks handling of idFor and anchor links
+  const idFor = useCombo ? `${id}__combobox` : id;
+  const IdSpan = useCombo ? <span id={id}></span> : undefined;
 
   return (
     <FormGroup error={error} key={`form-group__select-input--${id}`}>
       <DynamicFieldLabel
-        idFor={id}
+        idFor={idFor}
         title={title}
         required={required}
         description={description as string}
         labelType={labelType}
       />
-
       {error && (
-        <ErrorMessage>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0])
-                .map((value) => value)
-                .join(",")}
-        </ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
-
+      {IdSpan}
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
         key={selectValue}

@@ -3,7 +3,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import React, { JSX } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
-import { FormValidationWarning, UiSchema } from "./types";
+import { FormattedFormValidationWarning, UiSchema } from "./types";
 import {
   getFieldConfig,
   getRequiredProperties,
@@ -26,7 +26,7 @@ export const FormFields = ({
   uiSchema,
   formContext,
 }: {
-  errors: FormValidationWarning[] | null;
+  errors: FormattedFormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
@@ -34,10 +34,6 @@ export const FormFields = ({
 }) => {
   try {
     let acc: JSX.Element[] = [];
-    const formattedErrors = errors?.map((error) => {
-      error.field = error.field.replace("$.", "").replace(/\./g, "--");
-      return error;
-    });
 
     const requiredFieldPaths = getRequiredProperties(schema);
 
@@ -78,7 +74,7 @@ export const FormFields = ({
             const widgetConfig = getFieldConfig({
               uiFieldObject: node,
               formSchema: schema,
-              errors: formattedErrors ?? null,
+              errors: errors ?? null,
               formData,
               requiredField,
             });
@@ -117,7 +113,7 @@ export const FormFields = ({
               const widgetConfig = getFieldConfig({
                 uiFieldObject: node,
                 formSchema: schema,
-                errors: formattedErrors ?? null,
+                errors: errors ?? null,
                 formData,
                 requiredField,
               });

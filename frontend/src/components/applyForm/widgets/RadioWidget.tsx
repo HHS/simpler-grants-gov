@@ -10,8 +10,9 @@ import {
 } from "@rjsf/utils";
 
 import React, { FocusEvent, useCallback, useMemo } from "react";
-import { ErrorMessage, FormGroup, Radio } from "@trussworks/react-uswds";
+import { FormGroup, Radio } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -140,15 +141,9 @@ export default function RadioWidget<
         description={description as string}
         labelType={labelType}
       />
-
       {error && (
-        <ErrorMessage>
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0] as Record<string, string>).join(",")}
-        </ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
-
       {enumOptions.map((option, index) => {
         const currentForCompare = normalizeForCompare(option.value, value);
         const checked = enumOptionsIsSelected<S>(

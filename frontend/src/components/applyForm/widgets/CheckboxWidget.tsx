@@ -5,6 +5,7 @@ import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import React, { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -27,7 +28,7 @@ function CheckboxWidget<
   onBlur = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const hasError = rawErrors.length > 0 ? true : undefined;
+  const error = rawErrors.length > 0 ? true : undefined;
 
   const description = options?.description ?? schema.description;
   const labelType = getLabelTypeFromOptions(
@@ -39,7 +40,7 @@ function CheckboxWidget<
     "") as string;
 
   // Match radio pattern: input points to the label+desc block (and error) explicitly
-  const describedby = hasError ? `error-for-${id}` : `label-for-${id}`;
+  const describedby = error ? `error-for-${id}` : `label-for-${id}`;
 
   const label =
     required || Boolean(description) ? (
@@ -76,7 +77,10 @@ function CheckboxWidget<
   );
 
   return (
-    <FormGroup error={hasError} key={`form-group__checkbox--${id}`}>
+    <FormGroup error={error} key={`form-group__checkbox--${id}`}>
+      {error && (
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
+      )}
       <Checkbox
         id={id}
         name={id}

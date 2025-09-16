@@ -6,7 +6,6 @@ import {
   StrictRJSFSchema,
   UIOptionsType,
 } from "@rjsf/utils";
-import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
 
@@ -35,17 +34,17 @@ export interface SetFormDataFunction {
   (data: FormData): void;
 }
 
-export type FieldErrors = ErrorObject<
-  string,
-  Record<string, unknown>,
-  unknown
->[];
-
 export type FormValidationWarning = {
   field: string;
   message: string;
   type: string;
   value: string;
+};
+
+export type FormattedFormValidationWarning = FormValidationWarning & {
+  htmlField: string;
+  formatted: string;
+  definition: string | undefined;
 };
 
 export type WidgetTypes =
@@ -149,14 +148,12 @@ export interface UswdsWidgetProps<
   };
 }
 
-export interface SchemaWithLabelOption {
-  title?: string;
-  description?: string;
+export type SchemaWithLabelOption = UswdsWidgetProps & {
   options?: {
     "widget-label"?: string;
     [key: string]: unknown;
   };
-}
+};
 
 export type UploadedFile = {
   id: string;

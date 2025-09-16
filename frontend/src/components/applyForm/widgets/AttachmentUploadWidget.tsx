@@ -8,18 +8,17 @@ import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
-  ErrorMessage,
   FileInput,
   FileInputRef,
   ModalRef,
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
-    error,
     id,
     value,
     onChange,
@@ -28,6 +27,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     rawErrors = [],
     disabled,
   } = props;
+  const { contentMediaType, title } = schema;
 
   const attachments = useApplicationAttachments();
   const fileInputRef = useRef<FileInputRef | null>(null);
@@ -108,20 +108,21 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     fileInputRef.current?.clearFiles();
   };
 
-  const hasError = rawErrors.length > 0;
-  const describedBy = hasError ? `${id}-error` : undefined;
+  const error = rawErrors.length ? true : undefined;
+  const describedby = error
+    ? `error-for-${id}`
+    : title
+      ? `label-for-${id}`
+      : undefined;
+
   const isPreviouslyUploaded = fileName === "(Previously uploaded file)";
 
   return (
     <React.Fragment key={`${id}-key`}>
       <input type="hidden" name={id} value={attachmentId ?? ""} />
-
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {String(rawErrors[0])}
-        </ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
-
       {!showFile && (
         <FileInput
           id={id}
@@ -132,9 +133,9 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
           onChange={(e) => {
             handleChange(e).catch((error) => console.error(error));
           }}
-          accept={schema.contentMediaType}
-          aria-describedby={describedBy}
-          aria-invalid={hasError}
+          accept={contentMediaType}
+          aria-describedby={describedby}
+          aria-invalid={error}
         />
       )}
 
