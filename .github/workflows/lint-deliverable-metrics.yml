@@ -21,10 +21,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Detect missing acceptance criteria and metrics
+      - name: Lint Project 13
         run: |
-          ./scripts/lint-deliverable-metrics.sh \
+          ./scripts/lint-issue-body.sh \
             --org "HHS" \
             --project "13" \
+            --issue-type "Deliverable" \
+            --dry-run 
+
+      - name: Lint Project 17
+        run: |
+          ./scripts/lint-issue-body.sh \
+            --org "HHS" \
+            --project "17" \
             --issue-type "Deliverable" \
             --dry-run 
