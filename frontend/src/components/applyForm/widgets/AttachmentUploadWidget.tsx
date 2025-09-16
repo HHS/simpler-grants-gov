@@ -10,12 +10,15 @@ import {
   Button,
   FileInput,
   FileInputRef,
+  FormGroup,
   ModalRef,
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const {
@@ -26,8 +29,11 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     schema,
     rawErrors = [],
     disabled,
+    options,
   } = props;
-  const { contentMediaType, title } = schema;
+  const { contentMediaType, title, description } = schema;
+
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const attachments = useApplicationAttachments();
   const fileInputRef = useRef<FileInputRef | null>(null);
@@ -118,7 +124,14 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const isPreviouslyUploaded = fileName === "(Previously uploaded file)";
 
   return (
-    <React.Fragment key={`${id}-key`}>
+    <FormGroup key={`form-group__multi-file-upload--${id}`} error={error}>
+      <DynamicFieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description as string}
+        labelType={labelType}
+      />
       <input type="hidden" name={id} value={attachmentId ?? ""} />
       {error && (
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
@@ -160,7 +173,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
         modalRef={deleteModalRef}
         pendingDeleteName={deletePendingName ?? ""}
       />
-    </React.Fragment>
+    </FormGroup>
   );
 };
 
