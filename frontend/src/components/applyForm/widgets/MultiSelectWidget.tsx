@@ -155,6 +155,7 @@ export default function MultiSelect<
           value={v}
         />
       ))}
+      {/* ComboBox widget changes the id which breaks handling of idFor and anchor links */}
       <span id={id}></span>
       <ComboBox
         ref={comboRef}
