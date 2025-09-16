@@ -26,6 +26,7 @@ const ApplyForm = ({
   validationWarnings,
   uiSchema,
   attachments,
+  isBudgetForm = false,
 }: {
   applicationId: string;
   formId: string;
@@ -34,6 +35,7 @@ const ApplyForm = ({
   uiSchema: UiSchema;
   validationWarnings: FormattedFormValidationWarning[] | null;
   attachments: Attachment[];
+  isBudgetForm: boolean;
 }) => {
   type RichRenderer = (chunks: ReactNode) => ReactNode;
   type Translator = ((
@@ -119,6 +121,7 @@ const ApplyForm = ({
             saved={saved}
             error={error}
             validationWarnings={validationWarnings}
+            isBudgetForm={isBudgetForm}
           />
           <AttachmentsProvider value={attachments ?? []}>
             <FormFields

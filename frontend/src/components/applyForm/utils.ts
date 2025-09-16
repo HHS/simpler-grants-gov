@@ -803,3 +803,7 @@ export const condenseFormSchemaProperties = (schema: object): object => {
     {},
   );
 };
+
+export const pointerToFieldName = (pointer: string): string => {
+  return pointer.replace("$.", "").replace(/\./g, "--");
+};
