@@ -41,8 +41,7 @@ def upgrade():
             AND aur.role_id = :role_id::uuid
         );
         """
-        ),
-        {"role_id": str(APPLICATION_OWNER_ID)},
+        ).bindparams(role_id=str(APPLICATION_OWNER_ID))
     )
 
     # ### end Alembic commands ###
@@ -63,8 +62,7 @@ def downgrade():
             WHERE is_application_owner = true
         );
         """
-        ),
-        {"role_id": str(APPLICATION_OWNER_ID)},
+        ).bindparams(role_id=APPLICATION_OWNER_ID)
     )
 
     # ### end Alembic commands ###
