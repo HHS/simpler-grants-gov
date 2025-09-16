@@ -240,6 +240,13 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User, back_populates="organizations", uselist=False)
 
+    organization_user_roles: Mapped[list["OrganizationUserRole"]] = relationship(
+        "OrganizationUserRole",
+        back_populates="organization_user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
 
 class SuppressedEmail(ApiSchemaTable, TimestampMixin):
     __tablename__ = "suppressed_email"
