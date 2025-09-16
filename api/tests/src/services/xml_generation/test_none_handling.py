@@ -8,6 +8,7 @@ from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
 
 
+@pytest.mark.xml_validation
 class TestNoneHandling:
     """Test cases for configurable None value handling."""
 

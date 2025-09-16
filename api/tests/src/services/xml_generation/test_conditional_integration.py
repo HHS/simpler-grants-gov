@@ -1,9 +1,12 @@
 """Integration tests for conditional transformations (simplified for one-to-many only)."""
 
+import pytest
+
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
 
+@pytest.mark.xml_validation
 class TestConditionalIntegration:
     """Test end-to-end conditional transformation integration."""
 

@@ -1,8 +1,11 @@
 """Tests for recursive XML transformer."""
 
+import pytest
+
 from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
 
 
+@pytest.mark.xml_validation
 class TestRecursiveXMLTransformer:
     """Test cases for RecursiveXMLTransformer."""
 

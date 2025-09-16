@@ -166,6 +166,8 @@ filterwarnings = [
 
 markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests",
+  "xml_validation: mark a test as an XML generation/validation test, to be run isolated from other tests",
+  "sf424: mark a test as SF-424 form specific",
 ]
 
 [tool.coverage.run]
