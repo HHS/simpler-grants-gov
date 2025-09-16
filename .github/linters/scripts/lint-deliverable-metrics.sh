@@ -12,13 +12,13 @@ set -euo pipefail
 # Define constants
 # #######################################################
 
-ACCEPTANCE_CRITERIA_HEADER="### Acceptance criteria"
-METRICS_HEADER="### Metrics"
+HEADER_ACCEPTANCE_CRITERIA="### Acceptance criteria"
+HEADER_METRICS="### Metrics"
+HEADER_SUMMARY="### Summary"
 DEFAULT_ORG="HHS"
 DEFAULT_PROJECT="13"
 DEFAULT_ISSUE_TYPE="Deliverable"
 ALLOWED_ISSUE_TYPES=("Deliverable" "Proposal")
-
 
 # #######################################################
 # Initialize variables for tracking results
@@ -30,6 +30,9 @@ ac_failed_issues=()
 metrics_valid_count=0
 metrics_invalid_count=0
 metrics_failed_issues=()
+summary_valid_count=0
+summary_invalid_count=0
+summary_failed_issues=()
 
 # #######################################################
 # Define helper functions
@@ -90,7 +93,7 @@ parse_args() {
 # #######################################################
 
 fetch_data() {
-  log "Fetching items..."
+  log "Fetching items"
 
   query_file="queries/getProjectIssuesWithBody.graphql"
   if [[ ! -f "$query_file" ]]; then
@@ -131,10 +134,8 @@ fetch_data() {
     err "Failed to count items: $total_items"
   fi
 
-  # Filter issues by type and extract relevant data
-  log "Filtering items by type '$issue_type'"
-
   # Filter issues by type, excluding "Done" status
+  log "Filtering items by type '$issue_type'"
   if ! filtered_data=$(echo "$raw_data" | jq -s --arg issue_type "$issue_type" '
     map(select(
       .content.issueType.name == $issue_type and
@@ -156,71 +157,23 @@ fetch_data() {
   if ! issue_count=$(echo "$filtered_data" | jq 'length' 2>&1); then
     err "Failed to count filtered items: $issue_count"
   fi
-  log "Found $issue_count items of type '$issue_type'"
 
-  if [[ "$issue_count" -eq 0 ]]; then
-    log "No items of type '$issue_type' found"
-    exit 0
-  fi
+  log "Found $issue_count items of type '$issue_type'"
 
   # Return the filtered data
   echo "$filtered_data"
 }
 
 # #######################################################
-# Display results
+# Lint issues
 # #######################################################
 
-display_results() {
-  local issue_count="$1"
-  local ac_valid_count="$2"
-  local metrics_valid_count="$3"
-  local ac_invalid_count="$4"
-  local metrics_invalid_count="$5"
-
-  echo ""
-  echo "===== RESULTS ====="
-  echo ""
-
-  echo "Total issues processed: $issue_count"
-  echo "✅ Total issues with valid acceptance criteria: $ac_valid_count"
-  echo "✅ Total issues with valid metrics: $metrics_valid_count"
-  echo ""
-
-  if [[ "$ac_invalid_count" -gt 0 ]]; then
-    echo "===== ISSUES WITH INVALID ACCEPTANCE CRITERIA ====="
-    echo "❌ Total issues with invalid acceptance criteria: $ac_invalid_count"
-    if [[ ${#ac_failed_issues[@]} -gt 0 ]]; then
-      printf '%s\n' "${ac_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
-        echo "- $title ($url)"
-      done
-    fi
-  fi
-
-  echo ""
-
-  if [[ "$metrics_invalid_count" -gt 0 ]]; then
-    echo "===== ISSUES WITH INVALID METRICS ====="
-    echo "❌ Total issues with invalid metrics: $metrics_invalid_count"
-    if [[ ${#metrics_failed_issues[@]} -gt 0 ]]; then
-      printf '%s\n' "${metrics_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
-        echo "- $title ($url)"
-      done
-    fi
-  fi
-
-  echo ""
-}
-
-# #######################################################
-# Lint deliverables
-# #######################################################
-
-lint_deliverables() {
-  local filtered_data="$1"
-  local issue_count="$2"
+lint_issue_body() {
+  local issue_type="$1"
+  local filtered_data="$2"
+  local issue_count="$3"
   
-  log "Linting items for acceptance criteria and metrics..."
+  log "Linting items"
 
   # Process each issue directly
   for ((i=0; i<issue_count; i++)); do
@@ -242,14 +195,21 @@ lint_deliverables() {
     fi
 
     log "Processing: $title ($url)"
-    
-    # Validate the acceptance criteria section
-    validate_acceptance_criteria "$body" "$title" "$url"
 
-    # Validate the metrics section
-    validate_metrics "$body" "$title" "$url"
+    # Validate body contents
+    case "$issue_type" in 
+      Deliverable)
+        validate_acceptance_criteria "$body" "$title" "$url"
+        validate_metrics "$body" "$title" "$url"
+        ;;
+      Proposal)
+        validate_summary "$body" "$title" "$url"
+        ;;
+    esac 
 
   done
+
+  log "Done linting items"
 }
 
 validate_acceptance_criteria() {
@@ -258,7 +218,7 @@ validate_acceptance_criteria() {
   local url="$3"
 
   # Extract the acceptance criteria section and ensure it contains checkboxes
-  local ac_section=$(echo "$body" | sed -n "/$ACCEPTANCE_CRITERIA_HEADER/,/^###/{ /^###/d; p; }")
+  local ac_section=$(echo "$body" | sed -n "/$HEADER_ACCEPTANCE_CRITERIA/,/^###/{ /^###/d; p; }")
   if [[ -z "$ac_section" ]] || ! echo "$ac_section" | grep -q "\[[ x]\]"; then
     warn "  ❌ Acceptance criteria missing!"
     ac_failed_issues+=("$title|$url")
@@ -273,7 +233,7 @@ validate_metrics() {
   local url="$3"
 
   # Extract the metrics section and ensure it contains checkboxes
-  local metrics_section=$(echo "$body" | sed -n "/$METRICS_HEADER/,/^###/{ /^###/d; p; }")
+  local metrics_section=$(echo "$body" | sed -n "/$HEADER_METRICS/,/^###/{ /^###/d; p; }")
   if [[ -z "$metrics_section" ]] || ! echo "$metrics_section" | grep -q "\[[ x]\]"; then
     warn "  ❌ Metrics missing!"
     metrics_failed_issues+=("$title|$url")
@@ -287,8 +247,84 @@ validate_summary() {
   local title="$2"
   local url="$3"
 
+  # Extract the summary section and ensure it contains something
+  local summary_section=$(echo "$body" | sed -n "/$HEADER_SUMMARY/,/^###/{ /^###/d; p; }")
+  if [[ -z "$summary_section" ]]; then
+    warn "  ❌ Summary missing!"
+    summary_failed_issues+=("$title|$url")
+  else
+    summary_valid_count=$((summary_valid_count + 1))
+  fi
 }
 
+# #######################################################
+# Display results
+# #######################################################
+
+display_results() {
+  local issue_type="$1"
+  local issue_count="$2"
+  local ac_valid_count="$3"
+  local ac_invalid_count="$4"
+  local metrics_valid_count="$5"
+  local metrics_invalid_count="$6"
+  local summary_valid_count="$7"
+  local summary_invalid_count="$8"
+
+  echo ""
+  echo "===== RESULTS ====="
+  echo ""
+  echo "Total issues processed: $issue_count"
+
+  case "$issue_type" in 
+    Deliverable)
+      echo "✅ Total issues with valid acceptance criteria: $ac_valid_count"
+      echo "✅ Total issues with valid metrics: $metrics_valid_count"
+      echo ""
+      ;;
+    Proposal)
+      echo "✅ Total issues with valid summary: $summary_valid_count"
+      echo ""
+      ;;
+  esac 
+
+  case "$issue_type" in 
+    Deliverable)
+      if [[ "$ac_invalid_count" -gt 0 ]]; then
+        echo "===== ISSUES WITH INVALID ACCEPTANCE CRITERIA ====="
+        echo "❌ Total issues with invalid acceptance criteria: $ac_invalid_count"
+        if [[ ${#ac_failed_issues[@]} -gt 0 ]]; then
+          printf '%s\n' "${ac_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
+            echo "- $title ($url)"
+          done
+        fi
+      fi
+      echo ""
+      if [[ "$metrics_invalid_count" -gt 0 ]]; then
+        echo "===== ISSUES WITH INVALID METRICS ====="
+        echo "❌ Total issues with invalid metrics: $metrics_invalid_count"
+        if [[ ${#metrics_failed_issues[@]} -gt 0 ]]; then
+          printf '%s\n' "${metrics_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
+            echo "- $title ($url)"
+          done
+        fi
+      fi
+      echo ""
+      ;;
+    Proposal)
+      if [[ "$summary_invalid_count" -gt 0 ]]; then
+        echo "===== ISSUES WITH INVALID SUMMARY ====="
+        echo "❌ Total issues with invalid summary: $summary_invalid_count"
+        if [[ ${#summary_failed_issues[@]} -gt 0 ]]; then
+          printf '%s\n' "${summary_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
+            echo "- $title ($url)"
+          done
+        fi
+      fi
+      echo ""
+      ;;
+  esac
+}
 
 # #######################################################
 # Main
@@ -306,15 +342,17 @@ log "Dry run: $dry_run"
 # Fetch data
 filtered_data=$(fetch_data)
 issue_count=$(echo "$filtered_data" | jq 'length' 2>&1)
+issue_count=${issue_count:-0}
 
 # Lint issues
-lint_deliverables "$filtered_data" "$issue_count"
+if [[ "$issue_count" -gt 0 ]]; then
+   lint_issue_body "$issue_type" "$filtered_data" "$issue_count"
+fi
 
 # Calculate issues without valid content
 ac_invalid_count=$((issue_count - ac_valid_count))
 metrics_invalid_count=$((issue_count - metrics_valid_count))
-
-log "Linting complete"
+summary_invalid_count=$((issue_count - summary_valid_count))
 
 # Display results
-display_results "$issue_count" "$ac_valid_count" "$metrics_valid_count" "$ac_invalid_count" "$metrics_invalid_count"
+display_results "$issue_type" "$issue_count" "$ac_valid_count" "$ac_invalid_count" "$metrics_valid_count" "$metrics_invalid_count" "$summary_valid_count" "$summary_invalid_count"
