@@ -5,15 +5,6 @@ labels: ["Coplanning Proposal"]
 body:
 
   - type: textarea
-    id: proposal_title
-    attributes:
-      label: Proposal Title
-      description: A clear, concise title for this proposal
-      placeholder: ex. "Implement new user authentication system"
-    validations:
-      required: true
-
-  - type: textarea
     id: problem_statement
     attributes:
       label: Problem Statement
