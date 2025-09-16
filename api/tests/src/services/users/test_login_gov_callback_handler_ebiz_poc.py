@@ -1,3 +1,4 @@
+from src.constants.static_role_values import ORG_ADMIN
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
 from tests.src.db.models.factories import (
     LinkExternalUserFactory,
@@ -5,7 +6,6 @@ from tests.src.db.models.factories import (
     SamGovEntityFactory,
     UserFactory,
 )
-from src.constants.static_role_values import ORG_ADMIN
 
 
 def test_ebiz_poc_organization_during_login_creates_organization(enable_factory_create, db_session):
