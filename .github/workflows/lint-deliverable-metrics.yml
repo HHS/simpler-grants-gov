@@ -1,4 +1,4 @@
-name: "Lint - Deliverable Metrics"
+name: "Lint - Deliverable Acceptance Criteria and Metrics"
 
 on:
   workflow_dispatch: {}
@@ -12,8 +12,8 @@ defaults:
     working-directory: ./.github/linters
 
 jobs:
-  lint-deliverable-metrics:
-    name: Lint Deliverable Metrics
+  run-deliverable-linter:
+    name: Run Deliverable Linter
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run deliverable metrics linter
+      - name: Detect missing acceptance criteria and metrics
         run: |
           ./scripts/lint-deliverable-metrics.sh \
             --org "HHS" \
