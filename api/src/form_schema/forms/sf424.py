@@ -452,7 +452,7 @@ FORM_JSON_SCHEMA = {
         "debt_explanation": {
             "allOf": [{"$ref": "#/$defs/attachment_field"}],
             "title": "Debt Explanation",
-            "description": "Debt Explanation is required.",
+            "description": "",
         },
         "certification_agree": {
             "type": "boolean",
