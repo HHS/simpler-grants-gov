@@ -1,3 +1,4 @@
+from src.constants.static_role_values import ORG_ADMIN
 from src.services.users.organization_from_ebiz_poc import (
     find_sam_gov_entities_for_ebiz_poc,
     handle_ebiz_poc_organization_during_login,
@@ -61,6 +62,7 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     db_session, enable_factory_create
 ):
     """Test that we create organization when user is an ebiz POC with no existing organization"""
+
     # Create SAM.gov entity without an organization
     sam_gov_entity = SamGovEntityFactory.create(
         ebiz_poc_email="creates@example.com",
@@ -79,11 +81,14 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     assert org_user.organization.sam_gov_entity == sam_gov_entity
     assert org_user.is_organization_owner is True
 
+    # Verify the user has the Organization Admin role
+    assert len(org_user.organization_user_roles) == 1
+    assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
+
 
 def test_handle_ebiz_poc_organization_during_login_existing_organization(
     db_session, enable_factory_create
 ):
-    """Test that we link user to existing organization when they are an ebiz POC"""
     # Create organization first
     organization = OrganizationFactory.create(no_sam_gov_entity=True)
 
@@ -112,6 +117,10 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization(
     assert org_user.user == user
     assert org_user.organization == organization
     assert org_user.is_organization_owner is True
+
+    # Verify the user has the Organization Admin role
+    assert len(org_user.organization_user_roles) == 1
+    assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
 
 def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
