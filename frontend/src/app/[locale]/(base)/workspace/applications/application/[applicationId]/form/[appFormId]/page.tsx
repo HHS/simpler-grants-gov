@@ -61,7 +61,9 @@ async function FormPage({ params }: formPageProps) {
     formValidationWarnings,
   } = data;
 
-  const warnings = formName.includes("SF-424A")
+  const isBudgetForm = formName.includes("SF-424A");
+
+  const warnings = isBudgetForm
     ? formValidationWarnings?.map((warning) => ({
         ...warning,
         field: pointerToFieldName(warning.field),
@@ -95,7 +97,7 @@ async function FormPage({ params }: formPageProps) {
           uiSchema={formUiSchema}
           formId={formId}
           attachments={applicationAttachments}
-          isBudgetForm={formName.includes("SF-424A")}
+          isBudgetForm={isBudgetForm}
         />
       </GridContainer>
     </>
