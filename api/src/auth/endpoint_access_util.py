@@ -27,7 +27,6 @@ def get_roles_for_org(user: User, organization: Organization) -> list[Role]:
 
 def get_roles_for_app(user: User, application: Application) -> list[Role]:
     roles = []
-
     # If the app has an org, add any org roles for the user
     if application.organization is not None:
         roles.extend(get_roles_for_org(user, application.organization))
@@ -63,7 +62,6 @@ def can_access(
     allowed_privileges: set[Privilege],
     resource: Organization | Application | Agency | None,
 ) -> bool:
-    # import pdb; pdb.set_trace()
     roles = get_roles_for_resource(user, resource)
 
     for role in roles:

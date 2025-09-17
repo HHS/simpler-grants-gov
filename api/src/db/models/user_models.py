@@ -341,18 +341,6 @@ class LinkRoleRoleType(ApiSchemaTable, TimestampMixin):
         index=True,
     )
 
-
-# from tests.lib.db_testing import cascade_delete_from_db_table
-# from src.db.models.user_models import User
-# from src.db.models.entity_models import SamGovEntity
-# from src.db.models.agency_models import Agency
-# cascade_delete_from_db_table(dbs, User)
-# cascade_delete_from_db_table(dbs, Agency)
-# cascade_delete_from_db_table(dbs,Agency)
-# cascade_delete_from_db_table(dbs,SamGovEntity)
-# our = f.OrganizationUserRoleFactory.create()
-
-
 class LinkRolePrivilege(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_role_privilege"
 
