@@ -1,6 +1,5 @@
 import logging
 import re
-from os import remove
 from typing import Any
 
 import jsonpath_ng
@@ -157,7 +156,12 @@ def get_nested_value(data: dict, path: list[str]) -> Any:
 
 
 def _populate_nested_value_for_array(
-    json_data: dict, curr_node: str, sub_path: list[str], raw_index: str, value: Any, remove_null_fields: bool = True
+    json_data: dict,
+    curr_node: str,
+    sub_path: list[str],
+    raw_index: str,
+    value: Any,
+    remove_null_fields: bool = True,
 ) -> dict:
     """Handle the case where we need to populate a nested value
     for an array field.
@@ -195,7 +199,9 @@ def _populate_nested_value_for_array(
         if len(sub_path) == 0:
             array_value[index] = value
         else:
-            result = _populate_nested_value(array_value[index], sub_path, value, remove_null_fields=remove_null_fields)
+            result = _populate_nested_value(
+                array_value[index], sub_path, value, remove_null_fields=remove_null_fields
+            )
             array_value[index] = result
     return json_data
 
@@ -220,7 +226,9 @@ def _get_index_from_str(text: str) -> str | None:
     return match.group(1)
 
 
-def _populate_nested_value(json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True) -> dict:
+def _populate_nested_value(
+    json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True
+) -> dict:
     """Populate a value in a series of nested dictionaries
 
     For example, if your path is ["path", "to", "field"]
@@ -254,7 +262,7 @@ def _populate_nested_value(json_data: dict, path: list[str], value: Any, remove_
             sub_path=sub_path,
             raw_index=raw_index,
             value=value,
-            remove_null_fields=remove_null_fields
+            remove_null_fields=remove_null_fields,
         )
 
     # If we're at the end of the path, populate
@@ -288,13 +296,17 @@ def _populate_nested_value(json_data: dict, path: list[str], value: Any, remove_
             f"Unable to populate nested value, value in path is not a dictionary: {curr_node}"
         )
 
-    result = _populate_nested_value(json_data[curr_node], sub_path, value, remove_null_fields=remove_null_fields)
+    result = _populate_nested_value(
+        json_data[curr_node], sub_path, value, remove_null_fields=remove_null_fields
+    )
     json_data[curr_node] = result
     return json_data
 
 
 # TODO - adjust the function params, assuming logic as I implement
-def populate_nested_value(json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True) -> dict:
+def populate_nested_value(
+    json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True
+) -> dict:
     """Handle populating a nested value, just a wrapper around _populate_nested_value
     to add a convenient error log message for debugging
     """

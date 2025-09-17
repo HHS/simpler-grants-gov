@@ -3,11 +3,25 @@
 To help simplify setup when we need many factories repeatedly
 with only a few alterations.
 """
+
 from src.db.models.competition_models import ApplicationForm
-from tests.src.db.models.factories import AgencyFactory, OpportunityFactory, OpportunityAssistanceListingFactory, CompetitionFactory, OrganizationFactory, ApplicationFactory, ApplicationFormFactory, \
-    FormFactory, CompetitionFormFactory, ApplicationAttachmentFactory, ApplicationUserFactory, LinkExternalUserFactory
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    ApplicationAttachmentFactory,
+    ApplicationFactory,
+    ApplicationFormFactory,
+    ApplicationUserFactory,
+    CompetitionFactory,
+    CompetitionFormFactory,
+    FormFactory,
+    LinkExternalUserFactory,
+    OpportunityAssistanceListingFactory,
+    OpportunityFactory,
+    OrganizationFactory,
+)
 
 DEFAULT_VALUE = object()
+
 
 def setup_application_for_form_validation(
     json_data: dict,

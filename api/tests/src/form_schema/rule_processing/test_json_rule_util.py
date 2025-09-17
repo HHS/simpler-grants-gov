@@ -112,33 +112,56 @@ COMPLEX_ARRAY_DATA = {
 def test_populate_nested_value(existing_json, path, value, expected_json):
     assert populate_nested_value(existing_json, path, value) == expected_json
 
-@pytest.mark.parametrize("existing_json,path,expected_json", [
-    ({"my_field": {"x": 4}}, ["my_field", "x"], {"my_field": {}}),
-    ({}, ["my_field", "x"], {}),
-    ({}, ["x", "y", "z"], {}),
-    ({}, ["my_field"], {}),
-    ({"my_field": [{"a": 1, "x": 10}, {"x": 4}]}, ["my_field[*]", "x"], {"my_field": [{"a": 1}, {}]}),
-    ({"my_field": [{"a": 1, "x": 10}, {"x": 4}]}, ["my_field[0]", "x"], {"my_field": [{"a": 1}, {"x": 4}]}),
-    # Deleting values in an array is not supported at this time
-    # so these cases will just be changed to None unlike the above cases
-    # See the README.md in the rule_processing folder for further details
-    ({"my_field": [1, 2, 3]}, ["my_field[*]"], {"my_field": [None, None, None]}),
-    ({"my_field": [1, 2, 3]}, ["my_field[1]"], {"my_field": [1, None, 3]}),
-])
+
+@pytest.mark.parametrize(
+    "existing_json,path,expected_json",
+    [
+        ({"my_field": {"x": 4}}, ["my_field", "x"], {"my_field": {}}),
+        ({}, ["my_field", "x"], {}),
+        ({}, ["x", "y", "z"], {}),
+        ({}, ["my_field"], {}),
+        (
+            {"my_field": [{"a": 1, "x": 10}, {"x": 4}]},
+            ["my_field[*]", "x"],
+            {"my_field": [{"a": 1}, {}]},
+        ),
+        (
+            {"my_field": [{"a": 1, "x": 10}, {"x": 4}]},
+            ["my_field[0]", "x"],
+            {"my_field": [{"a": 1}, {"x": 4}]},
+        ),
+        # Deleting values in an array is not supported at this time
+        # so these cases will just be changed to None unlike the above cases
+        # See the README.md in the rule_processing folder for further details
+        ({"my_field": [1, 2, 3]}, ["my_field[*]"], {"my_field": [None, None, None]}),
+        ({"my_field": [1, 2, 3]}, ["my_field[1]"], {"my_field": [1, None, 3]}),
+    ],
+)
 def test_populate_nested_value_null_exclude_value(existing_json, path, expected_json):
     assert populate_nested_value(existing_json, path, None) == expected_json
 
-@pytest.mark.parametrize("existing_json,path,expected_json", [
-    ({"my_field": {"x": 4}}, ["my_field", "x"], {"my_field": {"x": None}}),
-    ({}, ["my_field", "x"], {"my_field": {"x": None}}),
-    ({}, ["x", "y", "z"], {"x": {"y": {"z": None}}}),
-    ({}, ["my_field"], {"my_field": None}),
-    ({"my_field": [{"a": 1, "x": 10}, {"x": 4}]}, ["my_field[*]", "x"], {"my_field": [{"a": 1, "x": None}, {"x": None}]}),
-    ({"my_field": [1, 2, 3]}, ["my_field[*]"], {"my_field": [None, None, None]}),
-    ({"my_field": [1, 2, 3]}, ["my_field[1]"], {"my_field": [1, None, 3]}),
-])
+
+@pytest.mark.parametrize(
+    "existing_json,path,expected_json",
+    [
+        ({"my_field": {"x": 4}}, ["my_field", "x"], {"my_field": {"x": None}}),
+        ({}, ["my_field", "x"], {"my_field": {"x": None}}),
+        ({}, ["x", "y", "z"], {"x": {"y": {"z": None}}}),
+        ({}, ["my_field"], {"my_field": None}),
+        (
+            {"my_field": [{"a": 1, "x": 10}, {"x": 4}]},
+            ["my_field[*]", "x"],
+            {"my_field": [{"a": 1, "x": None}, {"x": None}]},
+        ),
+        ({"my_field": [1, 2, 3]}, ["my_field[*]"], {"my_field": [None, None, None]}),
+        ({"my_field": [1, 2, 3]}, ["my_field[1]"], {"my_field": [1, None, 3]}),
+    ],
+)
 def test_populate_nested_value_null_set_as_null(existing_json, path, expected_json):
-    assert populate_nested_value(existing_json, path, None, remove_null_fields=False) == expected_json
+    assert (
+        populate_nested_value(existing_json, path, None, remove_null_fields=False) == expected_json
+    )
+
 
 def test_populate_nested_value_non_dict_in_path():
     with pytest.raises(

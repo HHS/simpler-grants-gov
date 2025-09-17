@@ -13,6 +13,7 @@ ZERO_DECIMAL = Decimal("0.00")  # For formatting and defining 0 for decimal/mone
 EXCLUDE_VALUE = "exclude_value"
 UNKNOWN_VALUE = "unknown"
 
+
 def get_opportunity_number(context: JsonRuleContext, json_rule: JsonRule) -> str:
     """Get the opportunity number"""
     opportunity_number = context.opportunity.opportunity_number
@@ -20,7 +21,10 @@ def get_opportunity_number(context: JsonRuleContext, json_rule: JsonRule) -> str
         # The data model lets opportunity number be null, but in prod
         # there are no null opportunity numbers, this is just a safety net
         # so we always populate something
-        logger.error("Opportunity with null opportunity_number run through pre-population", extra=context.get_log_context())
+        logger.error(
+            "Opportunity with null opportunity_number run through pre-population",
+            extra=context.get_log_context(),
+        )
         return UNKNOWN_VALUE
 
     return opportunity_number
@@ -33,7 +37,10 @@ def get_opportunity_title(context: JsonRuleContext, json_rule: JsonRule) -> str:
         # The data model lets opportunity title be null, but in prod
         # there are no null opportunity titles, this is just a safety net
         # so we always populate something
-        logger.error("Opportunity with null opportunity_title run through pre-population", extra=context.get_log_context())
+        logger.error(
+            "Opportunity with null opportunity_title run through pre-population",
+            extra=context.get_log_context(),
+        )
         return UNKNOWN_VALUE
 
     return opportunity_title
@@ -41,7 +48,6 @@ def get_opportunity_title(context: JsonRuleContext, json_rule: JsonRule) -> str:
 
 def get_agency_name(context: JsonRuleContext, json_rule: JsonRule) -> str:
     """Get the agency's name, falling back to agency code if no agency name"""
-    agency_name = context.opportunity.agency_name
     if context.opportunity.agency_name is not None:
         return context.opportunity.agency_name
 
@@ -51,7 +57,10 @@ def get_agency_name(context: JsonRuleContext, json_rule: JsonRule) -> str:
     # There are a handful of very old opportunities in prod without an agency
     # attached to them, so this is technically possible, but we shouldn't expect
     # it on anything new with an active competition
-    logger.error("Opportunity with null agency_code run through pre-population", extra=context.get_log_context())
+    logger.error(
+        "Opportunity with null agency_code run through pre-population",
+        extra=context.get_log_context(),
+    )
     return UNKNOWN_VALUE
 
 
@@ -221,7 +230,9 @@ def handle_field_population(
     rule_func = mapper[rule_code]
     try:
         value = rule_func(context, json_rule)
-        context.json_data = populate_nested_value(context.json_data, json_rule.path, value, remove_null_fields=remove_null_fields)
+        context.json_data = populate_nested_value(
+            context.json_data, json_rule.path, value, remove_null_fields=remove_null_fields
+        )
     except ValueError:
         # If a value error occurred, something unexpected happened with the data/config
         # we don't want to fail, so instead we'll proceed on. This will only be blocking
