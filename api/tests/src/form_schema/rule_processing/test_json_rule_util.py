@@ -4,7 +4,6 @@ from src.form_schema.rule_processing.json_rule_util import (
     _get_index_from_str,
     build_path_str,
     get_field_values,
-    get_nested_value,
     make_relative_path_absolute,
     populate_nested_value,
 )
@@ -134,46 +133,6 @@ def test_populate_nested_value_value_is_not_array():
         ValueError, match="Unable to populate nested value, value in path is not a list"
     ):
         populate_nested_value({"my_field": 10}, ["my_field[*]"], "hello")
-
-
-@pytest.mark.parametrize(
-    "json_data,path,expected_value",
-    [
-        ({"my_field": 5}, ["my_field"], 5),
-        ({"nested": {"path": {"to": {"value": 10}}}}, ["nested", "path", "to", "value"], 10),
-        # Path doesn't fully exist
-        ({}, ["whatever", "path"], None),
-        ({"whatever": {}}, ["whatever", "path"], None),
-        # Can fetch a whole chunk
-        (
-            {"nested": {"path": {"to": {"value": "hello"}}}},
-            ["nested"],
-            {"path": {"to": {"value": "hello"}}},
-        ),
-        (
-            {"nested": {"path": ["hello", "there", "this is a text"]}},
-            ["nested", "path"],
-            ["hello", "there", "this is a text"],
-        ),
-        # Passing in an empty path returns itself
-        ({"example": 5, "nested": {"field": 100}}, [], {"example": 5, "nested": {"field": 100}}),
-    ],
-)
-def test_get_nested_value(json_data, path, expected_value):
-    assert get_nested_value(json_data, path) == expected_value
-
-
-@pytest.mark.parametrize(
-    "path,expected_value",
-    [
-        (["array_field[0]", "x"], 1),
-        (["array_field[*]", "x"], [1, 3]),
-        (["array_field[*]", "nested_array[*]", "a"], [10, 15, 5]),
-        (["array_field[*]", "nested_array[*]", "b"], [4, 6]),
-    ],
-)
-def test_get_nested_value_of_arrays(path, expected_value):
-    assert get_nested_value(COMPLEX_ARRAY_DATA, path) == expected_value
 
 
 @pytest.mark.parametrize(
