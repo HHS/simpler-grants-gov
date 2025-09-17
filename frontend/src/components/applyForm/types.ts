@@ -6,7 +6,6 @@ import {
   StrictRJSFSchema,
   UIOptionsType,
 } from "@rjsf/utils";
-import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
 
@@ -35,17 +34,17 @@ export interface SetFormDataFunction {
   (data: FormData): void;
 }
 
-export type FieldErrors = ErrorObject<
-  string,
-  Record<string, unknown>,
-  unknown
->[];
-
 export type FormValidationWarning = {
   field: string;
   message: string;
   type: string;
   value: string;
+};
+
+export type FormattedFormValidationWarning = FormValidationWarning & {
+  htmlField?: string;
+  formatted?: string;
+  definition?: string | undefined;
 };
 
 export type WidgetTypes =
@@ -64,18 +63,22 @@ export type WidgetTypes =
   | "Budget424aSectionE"
   | "Budget424aSectionF";
 
+export type DefinitionPath =
+  | `/properties/${string}`
+  | [`/properties/${string}`];
+
 export type UiSchemaField = {
   type: "field" | "multiField" | "null";
   widget?: WidgetTypes;
   name?: string;
 } & (
   | {
-      definition: `/properties/${string}` | [`/properties/${string}`];
+      definition: DefinitionPath;
       schema?: undefined;
     }
   | { schema: SchemaField; definition?: undefined }
   | {
-      definition: `/properties/${string}` | [`/properties/${string}`];
+      definition: DefinitionPath;
       schema: SchemaField;
     }
 );
@@ -139,16 +142,18 @@ export interface UswdsWidgetProps<
   onChange?: (value: unknown) => void;
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
+  formContext?: {
+    rootSchema?: RJSFSchema;
+    rootFormData?: unknown;
+  };
 }
 
-export interface SchemaWithLabelOption {
-  title?: string;
-  description?: string;
+export type SchemaWithLabelOption = UswdsWidgetProps & {
   options?: {
     "widget-label"?: string;
     [key: string]: unknown;
   };
-}
+};
 
 export type UploadedFile = {
   id: string;

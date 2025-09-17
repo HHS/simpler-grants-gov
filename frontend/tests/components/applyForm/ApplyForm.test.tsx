@@ -46,6 +46,14 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("next-navigation-guard", () => ({
+  useNavigationGuard: () => jest.fn(),
+}));
+
 const formSchema: RJSFSchema = {
   title: "test schema",
   properties: {
@@ -307,9 +315,12 @@ describe("ApplyForm", () => {
         validationWarnings={[
           {
             field: "$.name",
-            message: "this is an error",
+            message: "'this' is an error",
+            formatted: "this is an error",
+            htmlField: "name",
             value: "",
             type: "",
+            definition: "/properties/name",
           },
         ]}
         attachments={[]}
@@ -347,9 +358,12 @@ describe("ApplyForm", () => {
         validationWarnings={[
           {
             field: "$.name",
-            message: "this is an error",
+            message: "'this' is an error",
             value: "",
+            htmlField: "name",
             type: "",
+            formatted: "this is an error",
+            definition: "/properties/name",
           },
         ]}
         attachments={[]}

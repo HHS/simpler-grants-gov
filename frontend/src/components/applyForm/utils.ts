@@ -6,34 +6,236 @@ import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
-import React, { JSX } from "react";
-
 import { formDataToObject } from "./formDataToJson";
 import {
+  FormattedFormValidationWarning,
   FormValidationWarning,
   SchemaField,
   UiSchema,
   UiSchemaField,
+  UiSchemaSection,
   UswdsWidgetProps,
   WidgetTypes,
 } from "./types";
-import AttachmentWidget from "./widgets/AttachmentUploadWidget";
-import Budget424aSectionA from "./widgets/budget/Budget424aSectionA";
-import Budget424aSectionB from "./widgets/budget/Budget424aSectionB";
-import Budget424aSectionC from "./widgets/budget/Budget424aSectionC";
-import Budget424aSectionD from "./widgets/budget/Budget424aSectionD";
-import Budget424aSectionE from "./widgets/budget/Budget424aSectionE";
-import Budget424aSectionF from "./widgets/budget/Budget424aSectionF";
-import CheckboxWidget from "./widgets/CheckboxWidget";
-import { FieldsetWidget } from "./widgets/FieldsetWidget";
-import AttachmentArrayWidget from "./widgets/MultipleAttachmentUploadWidget";
-import MultiSelectWidget from "./widgets/MultiSelectWidget";
-import RadioWidget from "./widgets/RadioWidget";
-import SelectWidget from "./widgets/SelectWidget";
-import TextAreaWidget from "./widgets/TextAreaWidget";
-import TextWidget from "./widgets/TextWidget";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
+
+const nestedWarningForField = ({
+  definition,
+  errors,
+  fieldName,
+  fieldSchema,
+  formSchema,
+  path,
+}: {
+  definition: string;
+  errors: FormValidationWarning[];
+  fieldName: string;
+  fieldSchema: SchemaField;
+  formSchema: RJSFSchema;
+  path: string;
+}): FormattedFormValidationWarning | null => {
+  const parent = definition.replace(/\/properties\/\w+$/, "");
+  const parentFieldDefinition = getFieldSchema({
+    definition: parent,
+    formSchema,
+    schema: undefined,
+  });
+
+  if (!parentFieldDefinition) return null;
+
+  const error = errors.find(({ field }) => {
+    if (
+      // field is within parent
+      path.includes(field) &&
+      path !== field &&
+      // field is in the parent required definition
+      "required" in parentFieldDefinition &&
+      parentFieldDefinition.required?.indexOf(fieldName) !== -1
+    )
+      return true;
+    return false;
+  });
+
+  if (error) {
+    const message = error.message.replace(/'\S+'/, fieldName);
+    const formatted = formatValidationWarning(fieldName, message, fieldSchema);
+    const formattedWithParent = parentFieldDefinition.title
+      ? `${parentFieldDefinition.title} ${formatted}`
+      : formatted;
+    const htmlField = getFieldNameForHtml({
+      definition,
+      schema: fieldSchema,
+    });
+    return {
+      ...error,
+      formatted: formattedWithParent,
+      htmlField,
+      definition,
+    };
+  }
+  return null;
+};
+
+const formatValidationWarning = (
+  fieldName: string,
+  message: string,
+  fieldSchema: SchemaField,
+) => {
+  // some schemas might not have a title
+  const title =
+    fieldSchema &&
+    typeof fieldSchema === "object" &&
+    fieldSchema !== null &&
+    "title" in fieldSchema
+      ? fieldSchema.title
+      : null;
+
+  return validationWarningOverrides(message, fieldName, title);
+};
+
+const validationWarningOverrides = (
+  message: string,
+  fieldName: string,
+  title?: string | null | undefined,
+) => {
+  const formattedTitle = title ? title.replace("?", "") : "Field";
+  return message
+    .replace(fieldName, formattedTitle)
+    .replace(/'/g, "")
+    .replace("[] should be non-empty", `${formattedTitle} is required`)
+    .replace("is a required property", "is required");
+};
+
+const findValidationError = (
+  errors: FormValidationWarning[],
+  definition: string | undefined,
+  schema: SchemaField | undefined,
+  formSchema: RJSFSchema,
+): FormattedFormValidationWarning | null => {
+  const fieldSchema = getFieldSchema({
+    definition,
+    formSchema,
+    schema,
+  }) as SchemaField;
+  const path = definition ? jsonSchemaPointerToPath(definition) : "";
+  const fieldName = definition
+    ? definition.split("/")[definition.split("/").length - 1]
+    : "";
+  const directWarning = errors.find((error) => error.field === path);
+
+  if (directWarning) {
+    const formatted = formatValidationWarning(
+      fieldName,
+      directWarning.message,
+      fieldSchema,
+    );
+    const htmlField = getFieldNameForHtml({
+      definition,
+      schema: fieldSchema,
+    });
+
+    return { ...directWarning, formatted, htmlField, definition };
+  }
+  if (fieldSchema && definition) {
+    return nestedWarningForField({
+      path,
+      definition,
+      fieldName,
+      errors,
+      fieldSchema,
+      formSchema,
+    });
+  }
+  return null;
+};
+
+export const buildWarningTree = (
+  uiSchema:
+    | Array<UiSchemaSection | UiSchemaField>
+    | UiSchemaSection
+    | UiSchemaField,
+  parent:
+    | Array<UiSchemaSection | UiSchemaField>
+    | UiSchemaSection
+    | UiSchemaField
+    | null,
+  formValidationWarnings: FormValidationWarning[],
+  formSchema: RJSFSchema,
+): FormattedFormValidationWarning[] => {
+  if (
+    !Array.isArray(uiSchema) &&
+    typeof uiSchema === "object" &&
+    "children" in uiSchema
+  ) {
+    return buildWarningTree(
+      uiSchema.children,
+      uiSchema,
+      formValidationWarnings,
+      formSchema,
+    );
+  } else if (Array.isArray(uiSchema)) {
+    const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
+      (errors, node) => {
+        if ("children" in node) {
+          const nodeError = buildWarningTree(
+            node.children,
+            uiSchema,
+            formValidationWarnings,
+            formSchema,
+          );
+          return errors.concat(nodeError);
+        } else if (!parent && ("definition" in node || "schema" in node)) {
+          const error = findValidationError(
+            formValidationWarnings,
+            Array.isArray(node.definition)
+              ? node.definition[0]
+              : node.definition,
+            node.schema,
+            formSchema,
+          );
+          if (error) {
+            return errors.concat([error]);
+          }
+        }
+        return errors;
+      },
+      [],
+    );
+    if (parent) {
+      const parentErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
+        (errors, node) => {
+          if ("children" in node) {
+            const nodeError = buildWarningTree(
+              node.children,
+              uiSchema,
+              formValidationWarnings,
+              formSchema,
+            );
+            return errors.concat(nodeError);
+          } else {
+            const error = findValidationError(
+              formValidationWarnings,
+              Array.isArray(node.definition)
+                ? node.definition[0]
+                : node.definition,
+              node.schema,
+              formSchema,
+            );
+            if (error) {
+              return errors.concat([error]);
+            }
+            return errors;
+          }
+        },
+        [],
+      );
+      return childErrors.concat(parentErrors);
+    }
+    return childErrors;
+  }
+  return [];
+};
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -104,10 +306,10 @@ export const getFieldSchema = ({
   schema,
   formSchema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
   formSchema: RJSFSchema;
-}): RJSFSchema => {
+}): RJSFSchema | SchemaField => {
   if (definition && schema) {
     return {
       ...(getByPointer(formSchema, definition) as object),
@@ -123,7 +325,7 @@ export const getNameFromDef = ({
   definition,
   schema,
 }: {
-  definition: `/properties/${string}` | undefined;
+  definition: string | undefined;
   schema: SchemaField | undefined;
 }) => {
   return definition
@@ -137,7 +339,7 @@ export const getNameFromDef = ({
 };
 
 // new, not used in multifield
-export const getFieldName = ({
+export const getFieldNameForHtml = ({
   definition,
   schema,
 }: {
@@ -153,29 +355,9 @@ export const getFieldName = ({
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
 
-// transform a form data field name / id into a json pointer that can be used to reference the form schema
-export const getFieldPath = (fieldName: string) =>
+// transform a form data field name / id into a json path that can be used to reference the form schema
+export const getFieldPathFromHtml = (fieldName: string) =>
   `/${fieldName.replace(/--/g, "/")}`;
-
-const widgetComponents: Record<
-  WidgetTypes,
-  React.ComponentType<UswdsWidgetProps>
-> = {
-  Text: TextWidget,
-  TextArea: TextAreaWidget,
-  Radio: RadioWidget,
-  Select: SelectWidget,
-  MultiSelect: MultiSelectWidget,
-  Checkbox: CheckboxWidget,
-  Attachment: AttachmentWidget,
-  AttachmentArray: AttachmentArrayWidget,
-  Budget424aSectionA,
-  Budget424aSectionB,
-  Budget424aSectionC,
-  Budget424aSectionD,
-  Budget424aSectionE,
-  Budget424aSectionF,
-};
 
 export const getByPointer = (target: object, path: string): unknown => {
   if (!Object.keys(target).length) {
@@ -194,29 +376,72 @@ export const getByPointer = (target: object, path: string): unknown => {
   }
 };
 
-export const buildField = ({
+// changes a json pointer /properties/field_name/properties/field_child to path $.field_name.field_child
+export const jsonSchemaPointerToPath = (jsonPointer: string) => {
+  const j = jsonPointerToPath(jsonPointer);
+  return j.replace(/\.properties/g, "");
+};
+
+// borrowed from https://github.com/javi11/jpo-jpa
+const jsonPointerToPath = (jsonPointer: string) => {
+  const specialChars = /[\s~!@#$%^&*()+\-=[\]{};':"\\|,.<>/?]+/;
+
+  const unescape = (str: string) => {
+    return str.replace(/~1/g, "/").replace(/~0/g, "~");
+  };
+
+  const parse = (jsonPointer: string) => {
+    if (jsonPointer.charAt(0) !== "/") {
+      throw new Error(`Invalid JSON pointer: ${jsonPointer}`);
+    }
+    return jsonPointer.substring(1).split("/").map(unescape);
+  };
+
+  if (jsonPointer === "") {
+    return "$";
+  }
+
+  if (jsonPointer === "/") {
+    return `$['']`;
+  }
+
+  const tokens = parse(jsonPointer);
+  let jsonPath = "$";
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    if (specialChars.test(tokens[i])) {
+      jsonPath += `['${tokens[i]}']`;
+    } else {
+      jsonPath += `.${tokens[i]}`;
+    }
+  }
+
+  return jsonPath;
+};
+
+export const getFieldConfig = ({
   errors,
   formSchema,
   formData,
   uiFieldObject,
   requiredField,
 }: {
-  errors: FormValidationWarning[] | null;
+  errors: FormattedFormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
   uiFieldObject: UiSchemaField;
   requiredField: boolean;
 }) => {
   const { definition, schema, type: fieldType } = uiFieldObject;
-
   let fieldSchema = {} as RJSFSchema;
-  let name = "";
+  let fieldName = "";
+  let htmlFieldName = "";
   let value = "" as string | number | object | undefined;
-  let rawErrors: string[] | FormValidationWarning[] = [];
+  let rawErrors: string[] | FormattedFormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
-    name = uiFieldObject.name ? uiFieldObject.name : "";
-    if (!name) {
+    fieldName = uiFieldObject.name ? uiFieldObject.name : "";
+    if (!fieldName) {
       console.error("name misssing from multiField definition");
       throw new Error("Could not build field");
     }
@@ -247,17 +472,29 @@ export const buildField = ({
       })
       .flat();
   } else if (typeof definition === "string") {
-    fieldSchema = getFieldSchema({ definition, schema, formSchema });
-    name = getFieldName({ definition, schema });
-    const path = getFieldPath(name);
-    value = getByPointer(formData, path) as string | number | undefined;
+    fieldSchema = getFieldSchema({
+      definition,
+      schema,
+      formSchema,
+    }) as RJSFSchema;
+    fieldName = getNameFromDef({ definition, schema });
+    htmlFieldName = getFieldNameForHtml({ definition, schema });
+    const formDataPath = getFieldPathFromHtml(htmlFieldName);
+    value = getByPointer(formData, formDataPath) as string | number | undefined;
+
     const fieldType =
       typeof fieldSchema?.type === "string"
         ? fieldSchema.type
         : Array.isArray(fieldSchema?.type)
           ? (fieldSchema.type[0] ?? "")
           : "";
-    rawErrors = formatFieldWarnings(errors, name, fieldType, requiredField);
+
+    rawErrors = getWarningsForField({
+      errors,
+      fieldName,
+      definition,
+      fieldType,
+    });
   }
 
   if (!fieldSchema || typeof fieldSchema !== "object") {
@@ -265,14 +502,13 @@ export const buildField = ({
     throw new Error("Invalid or missing field schema");
   }
 
-  // fields that have no definition won't have a name, but will havea schema
-  if ((!name || !fieldSchema) && definition) {
+  // fields that have no definition won't have a name, but will have a schema
+  if ((!fieldName || !fieldSchema) && definition) {
     console.error("no field name or schema for: ", definition);
     throw new Error("Could not build field");
   }
 
   // should filter and match warnings to field earlier in the process
-
   const type = determineFieldType({ uiFieldObject, fieldSchema });
 
   // TODO: move schema mutations to own function
@@ -321,79 +557,42 @@ export const buildField = ({
         ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
         : ({ enumOptions } as WidgetOptions);
   }
-
-  const Widget = widgetComponents[type];
-
-  if (!Widget) {
-    console.error(`Unknown widget type: ${type}`, { definition, fieldSchema });
-    throw new Error(`Unknown widget type: ${type}`);
-  }
-
-  // IMPORTANT:
-  // return a React element so hooks execute during render,
-  // under the AttachmentsProvider context.
-  return (
-    <Widget
-      id={name}
-      key={name}
-      disabled={disabled}
-      required={requiredField}
-      minLength={fieldSchema?.minLength}
-      maxLength={fieldSchema?.maxLength}
-      schema={fieldSchema}
-      rawErrors={rawErrors}
-      value={value}
-      options={options}
-    />
-  );
+  return {
+    type,
+    props: {
+      id: htmlFieldName,
+      key: htmlFieldName,
+      disabled,
+      required: requiredField,
+      minLength: fieldSchema?.minLength,
+      maxLength: fieldSchema?.maxLength,
+      schema: fieldSchema,
+      rawErrors,
+      value,
+      options,
+    },
+  };
 };
 
-const getNestedWarningsForField = (
-  fieldName: string,
-  warnings: FormValidationWarning[],
-): FormValidationWarning[] => {
-  return warnings.filter(({ field, type }) => {
-    return type === "required" && fieldName.includes(field);
-  });
-};
-
-const getWarningsForField = (
-  fieldName: string,
-  isRequired: boolean,
-  warnings: FormValidationWarning[],
-): FormValidationWarning[] => {
-  const directWarnings = warnings?.filter(
-    (warning) => warning.field.indexOf(fieldName) !== -1,
-  );
-  const nestedRequiredWarnings = isRequired
-    ? getNestedWarningsForField(fieldName, warnings)
-    : [];
-  return [...directWarnings, ...nestedRequiredWarnings];
-};
-
-export const formatFieldWarnings = (
-  warnings: FormValidationWarning[] | null,
-  name: string,
-  fieldType: string,
-  required: boolean,
-): string[] => {
-  if (!warnings || warnings.length < 1) {
+export const getWarningsForField = ({
+  errors,
+  definition,
+}: {
+  fieldName: string;
+  definition: string;
+  fieldType: string;
+  errors: FormattedFormValidationWarning[] | null;
+}): string[] => {
+  if (!errors || errors.length < 1) {
     return [];
   }
-  if (fieldType === "array") {
-    const warningMap = warnings.reduce(
-      (acc, item) => {
-        acc[item.field] = item.message;
-        return acc;
-      },
-      {} as Record<string, unknown>,
-    );
 
-    return flatFormDataToArray(name, warningMap) as unknown as [];
-  }
-  const warningsforField = getWarningsForField(name, required, warnings);
+  const warningsforField = errors.filter(
+    (error) => error.definition === definition,
+  );
+
   return warningsforField.map((warning) => {
-    return warning.message;
+    return warning.formatted || warning.message;
   });
 };
 
@@ -419,30 +618,6 @@ export function getFieldsForNav(
 
   return results;
 }
-
-export const wrapSection = ({
-  label,
-  fieldName,
-  tree,
-  description,
-}: {
-  label: string;
-  fieldName: string;
-  tree: JSX.Element | undefined;
-  description?: string;
-}) => {
-  const uniqueKey = `${fieldName}-fieldset`;
-  return (
-    <FieldsetWidget
-      key={uniqueKey}
-      fieldName={fieldName}
-      label={label}
-      description={description}
-    >
-      {tree}
-    </FieldsetWidget>
-  );
-};
 
 const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   if (typeof mightBeAnObject === "boolean") {
@@ -515,7 +690,7 @@ const removePropertyPaths = (path: unknown): string => {
   return path.replace(/properties\//g, "").replace(/^\//, "");
 };
 
-const getKeyParentPath = (key: string, parentPath?: string) => {
+export const getKeyParentPath = (key: string, parentPath?: string) => {
   const keyParent = parentPath ? `${parentPath}/${key}` : key;
   return removePropertyPaths(keyParent);
 };
@@ -570,33 +745,6 @@ export const isFieldRequired = (
   return defs
     .map((def) => removePropertyPaths(def))
     .some((clean) => requiredFields.includes(clean));
-};
-
-// arrays from the html look like field_[row]_item or are simply the field name
-export const flatFormDataToArray = (
-  field: string,
-  data: Record<string, unknown>,
-) => {
-  if (field in data) return [data[field]];
-  return Object.entries(data).reduce(
-    (values: Array<Record<string, unknown>>, [key, value]) => {
-      const fieldSplit = key.split(/\[\d+\]\./);
-      const fieldName = fieldSplit[0];
-      const itemName = fieldSplit[1];
-
-      if (fieldName === field && value) {
-        const match = key.match(/[0-9]+/);
-        const arrayNumber = match ? Number(match[0]) : -1;
-        if (!values[arrayNumber]) {
-          values[arrayNumber] = {};
-        }
-        values[arrayNumber][itemName] = value;
-      }
-
-      return values;
-    },
-    [] as Array<Record<string, unknown>>,
-  );
 };
 
 // dereferences all def links so that all necessary property definitions
@@ -656,18 +804,6 @@ export const condenseFormSchemaProperties = (schema: object): object => {
   );
 };
 
-// This is only needed when extracting an application response from the application endpoint's
-// payload. When hitting the applicationForm endpoint this is not necessary. Should we get rid of it?
-// the application detail contains an empty array for the form response if no
-// forms have been saved or an application_response with a form_id
-// export const getApplicationResponse = (
-//   forms: [] | ApplicationFormDetail[],
-//   formId: string,
-// ): ApplicationResponseDetail | object => {
-//   if (forms.length > 0) {
-//     const form = forms.find((form) => form?.form_id === formId);
-//     return form?.application_response || {};
-//   } else {
-//     return {};
-//   }
-// };
+export const pointerToFieldName = (pointer: string): string => {
+  return pointer.replace("$.", "").replace(/\./g, "--");
+};

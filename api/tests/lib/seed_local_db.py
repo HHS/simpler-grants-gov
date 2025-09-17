@@ -20,6 +20,7 @@ from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.form_schema.forms.sflll import SFLLL_v2_0
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
+from tests.lib.seed_e2e import _build_users_and_tokens
 from tests.lib.seed_orgs_and_users import _build_organizations_and_users
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class SeedConfig:
     seed_opportunities: bool
     seed_forms: bool
     seed_users: bool
+    seed_e2e: bool
 
 
 def _build_opportunities(
@@ -223,6 +225,7 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_opportunities="ALL" in steps or "opps" in steps,
         seed_forms="ALL" in steps or "forms" in steps,
         seed_users="ALL" in steps or "users" in steps,
+        seed_e2e="ALL" in steps or "e2e" in steps,
     )
 
     with src.logging.init("seed_local_db"):
@@ -251,4 +254,6 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         _build_competitions(forms_map)
     if seed_config.seed_users:
         _build_organizations_and_users(db_session)
+    if seed_config.seed_e2e:
+        _build_users_and_tokens(db_session)
     db_session.commit()

@@ -77,8 +77,11 @@ NOT_MAPPED_FIELDS = {
     "SAMValidation",
     # This was added in Jan 2025 in Grants.gov, we aren't using it yet
     "AllowSubmitWithExpSAM",
-    # Review process enable flag added in prod to test agencies
+    # Review process flags added in prod to test agencies
     "ReviewProcessEnable",
+    "ReviewProcessGoLive",
+    "EnableReviewProcess",
+    "ReviewProcessPeriod",
 }
 
 REQUIRED_FIELDS = {
