@@ -1041,6 +1041,10 @@ export const messages = {
             content:
               "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
           },
+          {
+            title: "Co-planning",
+            content: "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+          }
         ],
       },
       timeline: {
