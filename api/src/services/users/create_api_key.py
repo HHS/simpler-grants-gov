@@ -82,23 +82,14 @@ def _import_api_key_to_aws_gateway(api_key: UserApiKey) -> None:
             usage_plan_id=config.default_usage_plan_id,
         )
 
-        if config.default_usage_plan_id:
-            logger.info(
-                "Successfully imported API key to AWS API Gateway and associated with usage plan",
-                extra={
-                    "api_key_id": api_key.api_key_id,
-                    "gateway_key_id": gateway_response.id,
-                    "usage_plan_id": config.default_usage_plan_id,
-                },
-            )
-        else:
-            logger.info(
-                "Successfully imported API key to AWS API Gateway (no usage plan configured)",
-                extra={
-                    "api_key_id": api_key.api_key_id,
-                    "gateway_key_id": gateway_response.id,
-                },
-            )
+        logger.info(
+            "Successfully imported API key to AWS API Gateway and associated with usage plan",
+            extra={
+                "api_key_id": api_key.api_key_id,
+                "gateway_key_id": gateway_response.id,
+                "usage_plan_id": config.default_usage_plan_id,
+            },
+        )
 
     except Exception as e:
         # Re-raise as a domain-specific exception without additional logging

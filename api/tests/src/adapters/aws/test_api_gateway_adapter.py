@@ -15,11 +15,16 @@ from src.adapters.aws.api_gateway_adapter import (
 class TestApiGatewayConfig:
     """Test the configuration class for API Gateway."""
 
-    def test_config_defaults(self):
-        """Test that configuration has reasonable defaults."""
-        config = ApiGatewayConfig()
+    def test_config_defaults(self, monkeypatch):
+        """Test that configuration requires default_usage_plan_id to be set."""
+        from pydantic import ValidationError
 
-        assert config.default_usage_plan_id is None
+        # Clear any existing environment variable
+        monkeypatch.delenv("API_GATEWAY_DEFAULT_USAGE_PLAN_ID", raising=False)
+
+        # Should raise a ValidationError when required field is missing
+        with pytest.raises(ValidationError):
+            ApiGatewayConfig()
 
     def test_config_from_environment(self, monkeypatch):
         """Test that configuration can be loaded from environment variables."""

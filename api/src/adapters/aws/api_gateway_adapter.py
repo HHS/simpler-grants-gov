@@ -26,9 +26,7 @@ class ApiGatewayConfig(PydanticBaseEnvConfig):
     """Configuration for AWS API Gateway integration"""
 
     # Usage plan ID for newly created API keys (typically the public usage plan)
-    default_usage_plan_id: str | None = Field(
-        default=None, alias="API_GATEWAY_DEFAULT_USAGE_PLAN_ID"
-    )
+    default_usage_plan_id: str = Field(alias="API_GATEWAY_DEFAULT_USAGE_PLAN_ID")
 
 
 def get_boto_api_gateway_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
