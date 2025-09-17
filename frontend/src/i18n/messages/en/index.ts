@@ -1041,7 +1041,7 @@ export const messages = {
             content:
               "We continuously release features, refining the product with each cycle based on public input. Send us your feedback and suggestions.",
             link: "mailto:simpler@grants.gov",
-            linkText: "Contact us at simpler@grants.gov.",
+            linkText: "Contact us at simpler@grants.gov",
           },
           {
             title: "Co-planning",
