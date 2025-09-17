@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-import jsonpath_ng
+from src.form_schema.rule_processing.json_rule_util import get_nested_value
 
 from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
@@ -86,7 +86,7 @@ class RecursiveXMLTransformer:
 
         # Get the source value from the input data
         transform_type = transform_rule.get("type", "simple")
-        source_value = self._get_nested_value(source_data, current_path)
+        source_value = get_nested_value(source_data, current_path)
 
         # Handle None values based on configuration
         processed_source_value = self._handle_none_values(
@@ -135,7 +135,7 @@ class RecursiveXMLTransformer:
     ) -> None:
         """Process a nested structure rule (dict without xml_transform)."""
         # Get source data at this path level
-        nested_source = self._get_nested_value(source_data, path + [key])
+        nested_source = get_nested_value(source_data, path + [key])
         if isinstance(nested_source, dict):
             # Recursively process nested rules
             nested_result = self._process_transform_rules(source_data, rule_config, path + [key])
@@ -263,34 +263,3 @@ class RecursiveXMLTransformer:
                 )
 
             return transformed_value
-
-    def _get_nested_value(self, data: dict[str, Any], path: list[str]) -> Any:
-        """Get a nested value from a dictionary using a path.
-
-        Uses jsonpath_ng for enhanced array handling capability when available.
-        Falls back to simple dictionary traversal for basic paths.
-        """
-        if not path:
-            return data
-
-        # Convert path to JSONPath expression
-        # For simple paths like ['field1', 'field2'], create '$.field1.field2'
-        jsonpath_expr = "$." + ".".join(path)
-
-        expr = jsonpath_ng.parse(jsonpath_expr)
-        matches = expr.find(data)
-
-        # Return first match if found, None otherwise
-        if matches:
-            return matches[0].value
-        else:
-            return None
-
-        # Simple dictionary traversal fallback (original implementation)
-        current = data
-        for part in path:
-            if isinstance(current, dict) and part in current:
-                current = current[part]
-            else:
-                return None
-        return current
