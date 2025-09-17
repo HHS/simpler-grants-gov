@@ -14,6 +14,10 @@ XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 CHUNK_SIZE = 1000
 NUMBER_OF_CHUNKS = 5
+SKIP_PROXY_OPERATION_IDS = {
+    "getapplicationziprequest": "GrantsGovTrackingNumber",
+    "getapplicationrequest": "GrantsGovTrackingNumber",
+}
 
 
 class SOAPPayload:
@@ -226,6 +230,28 @@ def extract_soap_xml(soap_bytes: bytes) -> bytes:
         total_bytes_read += len(chunk)
         count -= 1
     return b""
+
+
+def get_simpler_grants_gov_tracking_number(
+    operation_name: str, soap_xml: str | bytes
+) -> str | None:
+    if operation_name.lower() not in ["getapplicationziprequest", "getapplicationrequest"]:
+        return None
+    xml_bytes = extract_soap_xml(
+        soap_xml.encode("utf-8") if isinstance(soap_xml, str) else soap_xml
+    )
+    if not xml_bytes:
+        return None
+    xml_file = io.BytesIO(xml_bytes)
+    value = None
+    try:
+        for event, elem in etree.iterparse(xml_file, events=("end",)):
+            if elem.tag.endswith("GrantsGovTrackingNumber") and event == "end":
+                value = elem.text
+                elem.clear()
+    except etree.XMLSyntaxError:
+        return ""
+    return value if value and value.startswith("GRANT8") else None
 
 
 def get_soap_operation_name(soap_xml: str | bytes) -> str:
