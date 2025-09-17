@@ -1042,13 +1042,14 @@ export const messages = {
               "We continuously release features, refining the product with each cycle based on public input. Send us your feedback and suggestions.",
             link: "mailto:simpler@grants.gov",
             linkText: "Contact us at simpler@grants.gov.",
-            },
+          },
           {
             title: "Co-planning",
-            content: "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+            content:
+              "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
             link: "https://simplergrants.fider.io",
             linkText: "Vote on our proposals board",
-          }
+          },
         ],
       },
       timeline: {

@@ -1,9 +1,9 @@
 import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
+
 import IconInfo from "src/components/homepage/IconInfoSection";
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 type RoadmapProcessSectionContentProps = {
   content: string;
@@ -45,7 +45,7 @@ export default function RoadmapProcess() {
         link: t(`contentItems.${3}.link`),
         linkText: t(`contentItems.${3}.linkText`),
       },
-    ]
+    ],
   ];
 
   return (
