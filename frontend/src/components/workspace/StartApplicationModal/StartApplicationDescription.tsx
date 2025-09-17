@@ -126,7 +126,7 @@ export const StartApplicationDescription = ({
             </a>
           ),
           email: (chunk) => (
-            <a href={`mailto:${ExternalRoutes.EMAIL_SIMPLERGRANTSGOV}}`}>
+            <a href={`mailto:${ExternalRoutes.EMAIL_SIMPLERGRANTSGOV}`}>
               {chunk}
             </a>
           ),
