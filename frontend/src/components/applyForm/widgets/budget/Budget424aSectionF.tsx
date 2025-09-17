@@ -1,10 +1,13 @@
+'use client';
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get, set } from "lodash";
 
-import React, { JSX } from "react";
+import React, { JSX, useEffect } from "react";
 
 import {
+  FormattedFormValidationWarning,
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
@@ -12,6 +15,7 @@ import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
 import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { getStringOrUndefined, isRecord } from "./budgetValueGuards";
+import TextWidget from "../TextWidget";
 
 type RootSchemaContext = FormContextType & { rootSchema?: RJSFSchema };
 
@@ -23,6 +27,35 @@ function getRootSchemaFromContext(context: unknown): RJSFSchema | undefined {
       : undefined;
   }
   return undefined;
+}
+
+type WarningsFromContext =
+  | FormValidationWarning[]
+  | FormattedFormValidationWarning[]
+  | [];
+
+function coerceFormValidationWarnings(
+  input: WarningsFromContext,
+): FormValidationWarning[] {
+  return input
+    .map((item): FormValidationWarning | null => {
+      const candidate = item as Partial<FormValidationWarning> & Partial<FormattedFormValidationWarning>;
+      const fieldId =
+        typeof candidate.field === "string"
+          ? candidate.field
+          : typeof candidate.htmlField === "string"
+            ? candidate.htmlField
+            : null;
+      const messageText =
+        typeof candidate.message === "string"
+          ? candidate.message
+          : typeof candidate.formatted === "string"
+            ? candidate.formatted
+            : null;
+      if (!fieldId || !messageText) return null;
+      return { field: fieldId, message: messageText, type: "custom", value: '' };
+    })
+    .filter((v): v is FormValidationWarning => v !== null);
 }
 
 function Budget424aSectionF<
@@ -40,7 +73,6 @@ function Budget424aSectionF<
     formContext as { rootFormData?: unknown } | undefined
   )?.rootFormData;
   const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
-  const validationWarnings = (rawErrors as FormValidationWarning[]) || [];
   const rootValue = isRecord(rawValue) ? rawValue : {};
   const rootSchema = getRootSchemaFromContext(formContext as RootSchemaContext);
   const properties = rootSchema?.properties as
@@ -66,8 +98,27 @@ function Budget424aSectionF<
   const remarksSchema = properties?.remarks as RJSFSchema | undefined;
   const confirmationSchema = properties?.confirmation as RJSFSchema | undefined;
 
-  const getFieldErrors = (fieldId: string) =>
-    getBudgetErrors({ errors: validationWarnings, id: fieldId, section: "F" });
+  // function getErrorMessagesForField(fieldId: string): string[] {
+  //   return getBudgetErrors({ errors: validationWarnings, id: fieldId, section: "F" });
+  // }
+
+  function getWarningsFromContext(context: unknown): FormValidationWarning[] {
+    if (!context || typeof context !== "object") return [];
+    const support = (context as { widgetSupport?: { validationWarnings?: unknown } }).widgetSupport;
+    const raw = Array.isArray(support?.validationWarnings)
+      ? (support!.validationWarnings as WarningsFromContext)
+      : [];
+    return coerceFormValidationWarnings(raw);
+  }
+
+  const warningsFromProps = Array.isArray(rawErrors) ? (rawErrors as FormValidationWarning[]) : [];
+  const warningsFromContext = getWarningsFromContext(formContext);
+  const validationWarnings: FormValidationWarning[] =
+    warningsFromProps.length > 0 ? warningsFromProps : warningsFromContext;
+
+  function getErrorMessagesForField(fieldId: string): string[] {
+    return getBudgetErrors({ errors: validationWarnings, id: fieldId, section: "F" });
+  }
 
   const directChargesValue = getStringOrUndefined(
     rootValue,
@@ -78,9 +129,7 @@ function Budget424aSectionF<
     "indirect_charges_explanation",
   );
   const remarksValue = getStringOrUndefined(rootValue, "remarks");
-
-  const confirmationValue =
-    (get(rootValue, "confirmation") as boolean | undefined) ?? false;
+  const confirmationValue = get(rootValue, "confirmation") as boolean | undefined;
 
   const updateField = (path: string, next: unknown) => {
     const updated = { ...rootValue };
@@ -92,10 +141,10 @@ function Budget424aSectionF<
     <div key={id} id={id} className="grid-row grid-gap">
       <div className="grid-col-12 margin-bottom-2">
         {directChargesSchema && (
-          <TextAreaWidget
+          <TextWidget
             schema={directChargesSchema}
             id="direct_charges_explanation"
-            rawErrors={getFieldErrors("direct_charges_explanation")}
+            rawErrors={getErrorMessagesForField("direct_charges_explanation")}
             formClassName="margin-top-1"
             inputClassName="width-full minw-30"
             value={directChargesValue}
@@ -105,10 +154,10 @@ function Budget424aSectionF<
 
       <div className="grid-col-12 margin-bottom-2">
         {indirectChargesSchema && (
-          <TextAreaWidget
+          <TextWidget
             schema={indirectChargesSchema}
             id="indirect_charges_explanation"
-            rawErrors={getFieldErrors("indirect_charges_explanation")}
+            rawErrors={getErrorMessagesForField("indirect_charges_explanation")}
             formClassName="margin-top-1"
             inputClassName="width-full minw-30"
             value={indirectChargesValue}
@@ -121,7 +170,7 @@ function Budget424aSectionF<
           <TextAreaWidget
             schema={remarksSchema}
             id="remarks"
-            rawErrors={getFieldErrors("remarks")}
+            rawErrors={getErrorMessagesForField("remarks")}
             formClassName="margin-top-1"
             inputClassName="width-full minw-30"
             value={remarksValue}
@@ -134,7 +183,7 @@ function Budget424aSectionF<
           <CheckboxWidget
             id="confirmation"
             schema={confirmationSchema}
-            rawErrors={getFieldErrors("confirmation")}
+            rawErrors={getErrorMessagesForField("confirmation")}
             value={confirmationValue}
             onChange={(nextValue: unknown) => {
               const next =

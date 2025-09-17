@@ -2,7 +2,7 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
 
-import React, { JSX } from "react";
+import React, { JSX, useEffect } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import {
@@ -136,7 +136,9 @@ function Budget424aSectionC<
 
   const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
-  const getErrors = getBudgetErrors({ errors, id, section: "C" });
+  function getErrorMessagesForField(fieldId: string): string[] {
+    return getBudgetErrors({ errors, id: fieldId, section: "C" });
+  }
 
   // column labels for the money fields
   const fields: { key: AmountKey; label: string }[] = [
@@ -153,6 +155,10 @@ function Budget424aSectionC<
         activityItems,
         `[${rowIndex}].assistance_listing_number`,
       ) ?? "";
+
+      useEffect(() => {
+        console.log("Section C: ", errors, rawErrors)
+      }), [errors, rawErrors]
 
     return (
       <div className="display-flex flex-column">
@@ -174,7 +180,7 @@ function Budget424aSectionC<
     return (
       <CurrencyInput
         id={idPath}
-        rawErrors={getErrors}
+        rawErrors={getErrorMessagesForField(idPath)}
         value={get(
           activityItems,
           `[${rowIndex}].non_federal_resources.${fieldKey}`,
@@ -190,7 +196,6 @@ function Budget424aSectionC<
         <HelperText>Sum of row {rowIndex + 8}</HelperText>
         <CurrencyInput
           id={idPath}
-          rawErrors={getErrors}
           value={get(
             activityItems,
             `[${rowIndex}].non_federal_resources.total_amount`,
@@ -212,7 +217,6 @@ function Budget424aSectionC<
         </HelperText>
         <CurrencyInput
           id={idPath}
-          rawErrors={getErrors}
           value={totals ? totals[fieldKey] : undefined}
           bordered
         />

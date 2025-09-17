@@ -2,7 +2,7 @@
 
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
-import React, { ChangeEvent, FocusEvent, useCallback } from "react";
+import React, { ChangeEvent, FocusEvent, useCallback, useEffect } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
@@ -54,6 +54,11 @@ function CheckboxWidget<
     ) : (
       baseTitle
     );
+
+    useEffect(() => {
+      console.log('error: ', error)
+      console.log('rawErrors: ', rawErrors)
+    }, [error, rawErrors])
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
