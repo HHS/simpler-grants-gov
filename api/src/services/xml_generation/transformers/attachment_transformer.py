@@ -99,7 +99,12 @@ class AttachmentTransformer:
         """
         group_elem = lxml_etree.SubElement(parent, element_name)
 
-        if "AttachedFile" in attachment_data:
+        # Handle direct list of attachments
+        if isinstance(attachment_data, list):
+            for file_data in attachment_data:
+                file_elem = lxml_etree.SubElement(group_elem, "AttachedFile")
+                self._populate_attachment_content(file_elem, file_data, nsmap)
+        elif isinstance(attachment_data, dict) and "AttachedFile" in attachment_data:
             attached_files = attachment_data["AttachedFile"]
             if isinstance(attached_files, list):
                 for file_data in attached_files:
@@ -123,6 +128,9 @@ class AttachmentTransformer:
             attachment_data: Attachment data dictionary
             nsmap: Namespace map
         """
+        if not isinstance(attachment_data, dict):
+            return
+            
         # Add FileName
         if "FileName" in attachment_data:
             filename_elem = lxml_etree.SubElement(attachment_elem, "FileName")

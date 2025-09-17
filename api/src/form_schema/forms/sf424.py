@@ -1079,7 +1079,7 @@ FORM_XML_TRANSFORM_RULES = {
     "date_received": {
         "xml_transform": {
             "target": "DateReceived",
-            "null_handling": "exclude",
+            "null_handling": "include_null",
         }
     },
     # Applicant information - direct field mappings with defaults for required fields
@@ -1226,7 +1226,8 @@ FORM_XML_TRANSFORM_RULES = {
     "state_review": {
         "xml_transform": {
             "target": "StateReview",
-            "null_handling": "exclude",
+            "null_handling": "default_value",
+            "default_value": "N: No",
         }
     },
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},

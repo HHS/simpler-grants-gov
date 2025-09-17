@@ -124,21 +124,21 @@ class XMLGenerationService:
 
     def _extract_namespace_fields(self, transform_config: dict) -> dict[str, str]:
         """Extract namespace configuration from transform rules.
-        
+
         Args:
             transform_config: The transformation configuration dictionary
-            
+
         Returns:
             Dictionary mapping field names to their namespace prefixes
         """
         namespace_fields = {}
-        
-        def extract_from_rules(rules: dict, path: str = ""):
+
+        def extract_from_rules(rules: dict, path: str = "") -> None:
             """Recursively extract namespace information from rules."""
             for key, value in rules.items():
                 if key.startswith("_"):  # Skip metadata keys
                     continue
-                    
+
                 if isinstance(value, dict):
                     # Check if this field has XML transform with namespace
                     if "xml_transform" in value:
@@ -147,14 +147,16 @@ class XMLGenerationService:
                             target_name = xml_transform["target"]
                             namespace = xml_transform["namespace"]
                             namespace_fields[target_name] = namespace
-                    
+
                     # Recursively check nested fields
                     extract_from_rules(value, f"{path}.{key}" if path else key)
-        
+
         extract_from_rules(transform_config)
         return namespace_fields
 
-    def _add_lxml_elements_to_parent(self, parent: Any, data: dict, nsmap: dict, transform_config: dict) -> None:
+    def _add_lxml_elements_to_parent(
+        self, parent: Any, data: dict, nsmap: dict, transform_config: dict
+    ) -> None:
         """Add elements to a parent using lxml, handling both simple values and nested dictionaries."""
         # Extract namespace configuration from transform rules
         namespace_fields = self._extract_namespace_fields(transform_config)
@@ -234,8 +236,14 @@ class XMLGenerationService:
         # Generate elements in XSD order with SF424_4_0 namespace prefix
         sf424_namespace = nsmap.get("SF424_4_0", "")
         for element_name in sf424_element_order:
-            if element_name in data and data[element_name] is not None:
+            if element_name in data:
                 value = data[element_name]
+                
+                # Handle special include_null marker
+                if value == "INCLUDE_NULL_MARKER":
+                    value = None  # Convert marker to None for XML generation
+                elif value is None:
+                    continue  # Skip None values that aren't marked for inclusion
 
                 # Special handling for attachment fields
                 if element_name in attachment_fields:
@@ -268,7 +276,9 @@ class XMLGenerationService:
                 else:
                     # Simple value - create element with SF424_4_0 namespace prefix
                     element = lxml_etree.SubElement(parent, f"{{{sf424_namespace}}}{element_name}")
-                    element.text = str(value)
+                    if value is not None:
+                        element.text = str(value)
+                    # If value is None, leave element empty (for include_null behavior)
 
     def _add_address_elements_in_order(
         self, parent: Any, address_data: dict, nsmap: dict, namespace_fields: dict
@@ -470,10 +480,14 @@ class XMLGenerationService:
             # Create nested element for dictionary values
             nested_element = ET.SubElement(parent, field_name)
             for nested_field, nested_value in value.items():
-                if nested_value is not None:
+                # Handle include_null marker in nested values
+                should_include = nested_value is not None or nested_value == "INCLUDE_NULL_MARKER"
+                if should_include:
+                    if nested_value == "INCLUDE_NULL_MARKER":
+                        nested_value = None
                     self._add_element_to_parent(nested_element, nested_field, nested_value)
-        elif value is None:
-            # Create empty element for None values (when include_null is configured)
+        elif value == "INCLUDE_NULL_MARKER" or value is None:
+            # Create empty element for None values or include_null markers
             ET.SubElement(parent, field_name)
         else:
             # Simple value - create element with text content
