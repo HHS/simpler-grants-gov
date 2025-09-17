@@ -21,7 +21,7 @@ const ApplyFormNav = ({
   return (
     fields.length > 0 && (
       <aside
-        className="usa-in-page-nav maxw-card order-1 margin-left-0 desktop:margin-right-5"
+        className="usa-in-page-nav maxw-card order-1 margin-left-0 desktop:margin-right-5 overflow-auto"
         aria-label={title}
         data-testid="InPageNavigation"
       >
