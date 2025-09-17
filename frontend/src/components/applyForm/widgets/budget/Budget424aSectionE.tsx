@@ -41,6 +41,7 @@ function pickFederalFundEstimates(value: unknown): FederalFundEstimates {
     fourth_year_amount: asMoney(value.fourth_year_amount),
   };
 }
+
 function pickActivityItem(value: unknown): ActivityItem {
   if (!isRecord(value)) return {};
   const activity: ActivityItem = {};
@@ -62,6 +63,7 @@ function pickActivityItem(value: unknown): ActivityItem {
   }
   return activity;
 }
+
 function normalizeSectionEValue(rawValue: unknown): NormalizedE {
   if (Array.isArray(rawValue)) {
     return { items: rawValue.map(pickActivityItem) };
@@ -114,6 +116,10 @@ function Budget424aSectionE<
   const errors = (rawErrors as FormValidationWarning[]) || [];
   const { items: activityItems, totals } = normalizeSectionEValue(rawValue);
 
+  function getErrorMessagesForField(fieldId: string): string[] {
+    return getBudgetErrors({ errors, id: fieldId, section: "C" });
+  }
+
   const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
   const YEARS = [
@@ -122,9 +128,8 @@ function Budget424aSectionE<
     { key: "third_year_amount", short: "Third year", colLabel: "D" },
     { key: "fourth_year_amount", short: "Fourth year", colLabel: "E" },
   ] as const;
-  type YearKey = (typeof YEARS)[number]["key"];
 
-  const resolveErrorsForSection = getBudgetErrors({ errors, id, section: "E" });
+  type YearKey = (typeof YEARS)[number]["key"];
 
   const titleCell = (rowIndex: number): JSX.Element => {
     const title =
@@ -154,7 +159,7 @@ function Budget424aSectionE<
     return (
       <CurrencyInput
         id={idPath}
-        rawErrors={resolveErrorsForSection}
+        rawErrors={getErrorMessagesForField(idPath)}
         value={get(
           activityItems,
           `[${rowIndex}].federal_fund_estimates.${yearKey}`,
@@ -170,7 +175,7 @@ function Budget424aSectionE<
         <HelperText hasHorizontalLine>{helper}</HelperText>
         <CurrencyInput
           id={idPath}
-          rawErrors={resolveErrorsForSection}
+          rawErrors={getErrorMessagesForField(idPath)}
           value={totals ? totals[yearKey] : undefined}
           bordered
         />
