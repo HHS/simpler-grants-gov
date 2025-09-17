@@ -152,3 +152,9 @@ export const openMobileNav = async (page: Page) => {
   await menuOpener.click();
   return menuOpener;
 };
+
+export async function refreshPageWithCurrentURL(page: Page) {
+  const currentURL = page.url();
+  await page.goto(currentURL); // go to new url in same tab
+  return page;
+}

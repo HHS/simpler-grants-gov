@@ -7,6 +7,7 @@ module "training_config" {
   network_name                    = "training"
   domain_name                     = "api.training.simpler.grants.gov"
   s3_cdn_domain_name              = "files.training.simpler.grants.gov"
+  secondary_domain_names          = ["alb.training.simpler.grants.gov"]
   mtls_domain_name                = "soap.training.simpler.grants.gov"
   enable_https                    = true
   database_engine_version         = "15.10"

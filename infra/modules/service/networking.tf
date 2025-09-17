@@ -57,6 +57,32 @@ resource "aws_security_group_rule" "https_ingress" {
   type        = "ingress"
 }
 
+resource "aws_security_group_rule" "http_ingress_ipv6" {
+  # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
+  # checkov:skip=CKV_AWS_260:Disallow ingress from 0.0.0.0:0 to port 80 when implementing HTTPS support in issue #163
+
+  security_group_id = aws_security_group.alb.id
+
+  description      = "Allow HTTP traffic from public internet"
+  from_port        = 80
+  to_port          = 80
+  protocol         = "tcp"
+  ipv6_cidr_blocks = ["::/0"]
+  type             = "ingress"
+}
+
+resource "aws_security_group_rule" "https_ingress_ipv6" {
+  count             = var.certificate_arn != null ? 1 : 0
+  security_group_id = aws_security_group.alb.id
+
+  description      = "Allow HTTPS traffic from public internet"
+  from_port        = 443
+  to_port          = 443
+  protocol         = "tcp"
+  ipv6_cidr_blocks = ["::/0"]
+  type             = "ingress"
+}
+
 # Security group to allow access to Fargate tasks
 resource "aws_security_group" "app" {
   # TODO(https://github.com/HHS/simpler-grants-gov/issues/5415) Restrict outbound traffic
