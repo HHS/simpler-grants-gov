@@ -128,9 +128,7 @@ class AttachmentGroup(BaseModel):
             raise ValueError("Cannot add more than 100 files to an attachment group")
         self.attached_files.append(attachment_file)
 
-    def add_file_from_path(
-        self, file_path: str | Path, file_location: str | None = None
-    ) -> None:
+    def add_file_from_path(self, file_path: str | Path, file_location: str | None = None) -> None:
         """Add a file from a file path.
 
         Args:
@@ -151,9 +149,7 @@ class AttachmentData(BaseModel):
     additional_congressional_districts: AttachmentFile | None = Field(
         None, description="Additional congressional districts"
     )
-    debt_explanation: AttachmentFile | None = Field(
-        None, description="Debt explanation document"
-    )
+    debt_explanation: AttachmentFile | None = Field(None, description="Debt explanation document")
 
     def to_xml_dict(self) -> dict[str, Any]:
         """Convert attachment data to XML-ready dictionary format.

@@ -124,21 +124,21 @@ class XMLGenerationService:
 
     def _extract_namespace_fields(self, transform_config: dict) -> dict[str, str]:
         """Extract namespace configuration from transform rules.
-        
+
         Args:
             transform_config: The transformation configuration dictionary
-            
+
         Returns:
             Dictionary mapping field names to their namespace prefixes
         """
         namespace_fields = {}
-        
-        def extract_from_rules(rules: dict, path: str = ""):
+
+        def extract_from_rules(rules: dict, path: str = "") -> None:
             """Recursively extract namespace information from rules."""
             for key, value in rules.items():
                 if key.startswith("_"):  # Skip metadata keys
                     continue
-                    
+
                 if isinstance(value, dict):
                     # Check if this field has XML transform with namespace
                     if "xml_transform" in value:
@@ -147,14 +147,16 @@ class XMLGenerationService:
                             target_name = xml_transform["target"]
                             namespace = xml_transform["namespace"]
                             namespace_fields[target_name] = namespace
-                    
+
                     # Recursively check nested fields
                     extract_from_rules(value, f"{path}.{key}" if path else key)
-        
+
         extract_from_rules(transform_config)
         return namespace_fields
 
-    def _add_lxml_elements_to_parent(self, parent: Any, data: dict, nsmap: dict, transform_config: dict) -> None:
+    def _add_lxml_elements_to_parent(
+        self, parent: Any, data: dict, nsmap: dict, transform_config: dict
+    ) -> None:
         """Add elements to a parent using lxml, handling both simple values and nested dictionaries."""
         # Extract namespace configuration from transform rules
         namespace_fields = self._extract_namespace_fields(transform_config)
