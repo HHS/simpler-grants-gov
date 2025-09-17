@@ -40,7 +40,7 @@ variable "instance_count" {
 variable "max_capacity" {
   description = "Maximum capacity of the Aurora Serverless v2 cluster"
   type        = number
-  default     = 1.0
+  default     = 2.0
 }
 
 variable "min_capacity" {
@@ -112,5 +112,5 @@ variable "vpc_id" {
 variable "engine_version" {
   type        = string
   description = "Postgres database engine version"
-  default     = "15.10"
+  default     = "17.5"
 }

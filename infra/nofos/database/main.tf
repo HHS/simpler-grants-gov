@@ -97,7 +97,7 @@ module "database" {
   min_capacity                   = local.database_config.min_capacity
   enable_http_endpoint           = local.database_config.enable_http_endpoint
   vpc_id                         = data.aws_vpc.network.id
-  engine_version                 = local.database_config.database_engine_version
+  engine_version                 = local.database_config.engine_version
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
   database_subnet_group_name     = var.environment_name
