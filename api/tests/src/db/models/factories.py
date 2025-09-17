@@ -890,26 +890,6 @@ class UserFactory(BaseFactory):
         model = user_models.User
 
     user_id = Generators.UuidObj
-    # application_users = factory.RelatedFactoryList(
-    #     "tests.src.db.models.factories.ApplicationUserFactory",
-    #     factory_related_name="user",
-    #     size=lambda: random.randint(1, 3),
-    # )
-    # organizations = factory.RelatedFactoryList(
-    #     "tests.src.db.models.factories.OrganizationUserFactory",
-    #     factory_related_name="user",
-    #     size=lambda: random.randint(1, 3),
-    # )
-    # user_agencies = factory.RelatedFactoryList(
-    #     "tests.src.db.models.factories.AgencyUserFactory",
-    #     factory_related_name="user",
-    #     size=lambda: random.randint(1, 3),
-    # )
-    # internal_user_roles = factory.RelatedFactoryList(
-    #     "tests.src.db.models.factories.InternalUserRoleFactory",
-    #     factory_related_name="user",
-    #     size=lambda: random.randint(1, 3),
-    # )
 
 
 class LinkExternalUserFactory(BaseFactory):
