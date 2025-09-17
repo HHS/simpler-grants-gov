@@ -3,6 +3,8 @@
 import logging
 from typing import Any
 
+import jsonpath_ng
+
 from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
 
@@ -60,89 +62,155 @@ class RecursiveXMLTransformer:
             if key.startswith("_"):
                 continue
 
-            # If this is an XML transformation rule, process it
+            # Process XML transformation rules
             if isinstance(rule_config, dict) and "xml_transform" in rule_config:
-                transform_rule = rule_config["xml_transform"]
-                current_path = path + [key]
+                self._process_xml_transform_rule(source_data, key, rule_config, path, result)
 
-                # Get the source value from the input data
-                transform_type = transform_rule.get("type", "simple")
-                source_value = self._get_nested_value(source_data, current_path)
-
-                # Handle None values based on configuration
-                if source_value is None and transform_type != "conditional":
-                    none_handling = transform_rule.get("null_handling", "exclude")
-
-                    if none_handling == "exclude":
-                        logger.debug(f"Excluding None value for {'.'.join(current_path)}")
-                        continue
-                    elif none_handling == "include_null":
-                        # Include field with null/empty value
-                        target_field = transform_rule["target"]
-                        result[target_field] = None
-                        logger.debug(
-                            f"Including None value for {'.'.join(current_path)} -> {target_field}"
-                        )
-                        continue
-                    elif none_handling == "default_value":
-                        # Use configured default value - error if not provided
-                        if "default_value" not in transform_rule:
-                            raise ValueError(
-                                f"null_handling 'default_value' specified but no default_value provided for {'.'.join(current_path)}"
-                            )
-                        default_value = transform_rule["default_value"]
-                        source_value = default_value
-                        logger.debug(
-                            f"Using default value '{default_value}' for {'.'.join(current_path)}"
-                        )
-                    else:
-                        raise ValueError(
-                            f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
-                        )
-
-                # Apply the transformation (conditional transformations can handle None source values)
-                if transform_type == "conditional" or source_value is not None:
-                    transformed_value = self._apply_transform_rule(
-                        source_value, transform_rule, rule_config, current_path
-                    )
-                else:
-                    transformed_value = None
-
-                # Add to result if transformation succeeded and produced non-None value
-                if transformed_value is not None:
-                    # Handle one-to-many mappings that return dictionaries
-                    if (
-                        isinstance(transformed_value, dict)
-                        and transform_type == "conditional"
-                        and transform_rule.get("conditional_transform", {}).get("type")
-                        == "one_to_many"
-                    ):
-                        # Add all key-value pairs from one-to-many result
-                        result.update(transformed_value)
-                        logger.debug(
-                            f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
-                        )
-                    else:
-                        # Standard field assignment for all other cases
-                        target_field = transform_rule["target"]
-                        result[target_field] = transformed_value
-                        logger.debug(
-                            f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
-                        )
-
-            # If this is a nested structure (dict without xml_transform), recurse
+            # Process nested structure rules (dict without xml_transform)
             elif isinstance(rule_config, dict) and "xml_transform" not in rule_config:
-                # Get source data at this path level
-                nested_source = self._get_nested_value(source_data, path + [key])
-                if isinstance(nested_source, dict):
-                    # Recursively process nested rules
-                    nested_result = self._process_transform_rules(
-                        source_data, rule_config, path + [key]
-                    )
-                    if nested_result:
-                        result.update(nested_result)
+                self._process_nested_structure_rule(source_data, key, rule_config, path, result)
 
         return result
+
+    def _process_xml_transform_rule(
+        self,
+        source_data: dict[str, Any],
+        key: str,
+        rule_config: dict[str, Any],
+        path: list[str],
+        result: dict[str, Any],
+    ) -> None:
+        """Process a single XML transformation rule."""
+        transform_rule = rule_config["xml_transform"]
+        current_path = path + [key]
+
+        # Get the source value from the input data
+        transform_type = transform_rule.get("type", "simple")
+        source_value = self._get_nested_value(source_data, current_path)
+
+        # Handle None values based on configuration
+        processed_source_value = self._handle_none_values(
+            source_value, transform_rule, transform_type, current_path
+        )
+
+        # If None handling returned None, skip this rule
+        if (
+            processed_source_value is None
+            and source_value is None
+            and transform_type != "conditional"
+        ):
+            return
+
+        # Handle special marker for null inclusion
+        if processed_source_value == "INCLUDE_NULL_MARKER":
+            target_field = transform_rule["target"]
+            result[target_field] = None
+            logger.debug(f"Including None value for {'.'.join(current_path)} -> {target_field}")
+            return
+
+        # Use processed value if it was changed by None handling
+        if processed_source_value is not None:
+            source_value = processed_source_value
+
+        # Apply the transformation (conditional transformations can handle None source values)
+        if transform_type == "conditional" or source_value is not None:
+            transformed_value = self._apply_transform_rule(
+                source_value, transform_rule, rule_config, current_path
+            )
+        else:
+            transformed_value = None
+
+        # Add transformed value to result
+        self._add_transformed_value_to_result(
+            transformed_value, transform_rule, transform_type, current_path, source_value, result
+        )
+
+    def _process_nested_structure_rule(
+        self,
+        source_data: dict[str, Any],
+        key: str,
+        rule_config: dict[str, Any],
+        path: list[str],
+        result: dict[str, Any],
+    ) -> None:
+        """Process a nested structure rule (dict without xml_transform)."""
+        # Get source data at this path level
+        nested_source = self._get_nested_value(source_data, path + [key])
+        if isinstance(nested_source, dict):
+            # Recursively process nested rules
+            nested_result = self._process_transform_rules(source_data, rule_config, path + [key])
+            if nested_result:
+                result.update(nested_result)
+
+    def _handle_none_values(
+        self,
+        source_value: Any,
+        transform_rule: dict[str, Any],
+        transform_type: str,
+        current_path: list[str],
+    ) -> Any:
+        """Handle None values based on configuration.
+
+        Returns:
+            - The original source_value if not None
+            - A default value if None handling specifies one
+            - None if the value should be excluded or included as null
+        """
+        if source_value is None and transform_type != "conditional":
+            none_handling = transform_rule.get("null_handling", "exclude")
+
+            if none_handling == "exclude":
+                logger.debug(f"Excluding None value for {'.'.join(current_path)}")
+                return None
+            elif none_handling == "include_null":
+                # Signal that we should include this field with null value
+                return "INCLUDE_NULL_MARKER"
+            elif none_handling == "default_value":
+                # Use configured default value - error if not provided
+                if "default_value" not in transform_rule:
+                    raise ValueError(
+                        f"null_handling 'default_value' specified but no default_value provided for {'.'.join(current_path)}"
+                    )
+                default_value = transform_rule["default_value"]
+                logger.debug(f"Using default value '{default_value}' for {'.'.join(current_path)}")
+                return default_value
+            else:
+                raise ValueError(
+                    f"Unknown null_handling '{none_handling}' for {'.'.join(current_path)}"
+                )
+
+        return source_value
+
+    def _add_transformed_value_to_result(
+        self,
+        transformed_value: Any,
+        transform_rule: dict[str, Any],
+        transform_type: str,
+        current_path: list[str],
+        source_value: Any,
+        result: dict[str, Any],
+    ) -> None:
+        """Add transformed value to result dictionary."""
+        # Add to result if transformation succeeded and produced non-None value
+        if transformed_value is not None:
+            # Handle one-to-many mappings that return dictionaries
+            if (
+                isinstance(transformed_value, dict)
+                and transform_type == "conditional"
+                and transform_rule.get("conditional_transform", {}).get("type") == "one_to_many"
+            ):
+                # Add all key-value pairs from one-to-many result
+                result.update(transformed_value)
+                logger.debug(
+                    f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
+                )
+            else:
+                # Standard field assignment for all other cases
+                target_field = transform_rule["target"]
+                result[target_field] = transformed_value
+                logger.debug(
+                    f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
+                )
 
     def _apply_transform_rule(
         self, source_value: Any, transform_rule: dict, full_rule_config: dict, path: list[str]
@@ -197,7 +265,28 @@ class RecursiveXMLTransformer:
             return transformed_value
 
     def _get_nested_value(self, data: dict[str, Any], path: list[str]) -> Any:
-        """Get a nested value from a dictionary using a path."""
+        """Get a nested value from a dictionary using a path.
+
+        Uses jsonpath_ng for enhanced array handling capability when available.
+        Falls back to simple dictionary traversal for basic paths.
+        """
+        if not path:
+            return data
+
+        # Convert path to JSONPath expression
+        # For simple paths like ['field1', 'field2'], create '$.field1.field2'
+        jsonpath_expr = "$." + ".".join(path)
+
+        expr = jsonpath_ng.parse(jsonpath_expr)
+        matches = expr.find(data)
+
+        # Return first match if found, None otherwise
+        if matches:
+            return matches[0].value
+        else:
+            return None
+
+        # Simple dictionary traversal fallback (original implementation)
         current = data
         for part in path:
             if isinstance(current, dict) and part in current:
