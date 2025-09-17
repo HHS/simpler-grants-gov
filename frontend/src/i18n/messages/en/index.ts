@@ -1441,5 +1441,9 @@ export const messages = {
       email: "Email",
     },
     save: "Save",
+    validationErrors: {
+      firstName: "First name is required",
+      lastName: "Last name is required",
+    },
   },
 };
