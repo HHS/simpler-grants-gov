@@ -269,8 +269,11 @@ def _populate_nested_value(
     # the value in the json_data and return, we're
     # done with recursion down this path.
     if len(path) == 1:
-        # TODO - document / add extra variable
+        # If a value is None and we want to remove null fields
+        # then we want to skip populating the field will null
         if value is None and remove_null_fields:
+            # If the field already exists, remove it rather
+            # than leave some lingering value
             if json_data.get(curr_node, None) is not None:
                 del json_data[curr_node]
 
@@ -303,7 +306,6 @@ def _populate_nested_value(
     return json_data
 
 
-# TODO - adjust the function params, assuming logic as I implement
 def populate_nested_value(
     json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True
 ) -> dict:
