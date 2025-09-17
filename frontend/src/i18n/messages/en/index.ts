@@ -1032,18 +1032,22 @@ export const messages = {
               "We're building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
           },
           {
-            title: "Iterative",
-            content:
-              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
-          },
-          {
             title: "Agile",
             content:
               "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
           },
           {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input.",
+            link: "mailto:simpler@grants.gov",
+            linkText: "Send feedback and suggestions to simpler@grants.gov.",
+            },
+          {
             title: "Co-planning",
             content: "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+            link: "https://simplergrants.fider.io",
+            linkText: "Vote on our proposals board",
           }
         ],
       },

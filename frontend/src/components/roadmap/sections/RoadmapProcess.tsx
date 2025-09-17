@@ -35,13 +35,15 @@ export default function RoadmapProcess() {
         title: t(`contentItems.${2}.title`),
         content: t(`contentItems.${2}.content`),
         iconName: "construction",
+        link: t(`contentItems.${2}.link`),
+        linkText: t(`contentItems.${2}.linkText`),
       },
       {
         title: t(`contentItems.${3}.title`),
         content: t(`contentItems.${3}.content`),
         iconName: "star_half",
-        link: "https://simplergrants.fider.io",
-        linkText: "Vote on our proposals board",
+        link: t(`contentItems.${3}.link`),
+        linkText: t(`contentItems.${3}.linkText`),
       },
     ]
   ];
