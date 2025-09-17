@@ -15,7 +15,6 @@ import { LayoutProps } from "src/types/generalTypes";
 
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import Head from "next/head";
 
 const typedNewRelic = newrelic as NewRelicWithCorrectTypes;
 
@@ -55,13 +54,13 @@ export default async function RootLayoutWrapper({
   // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
     <html lang={locale} suppressHydrationWarning>
-      <Head>
+      <head>
         <GoogleAnalytics gaId={environment.GOOGLE_TAG_MANAGER_ID} />
         <meta
           name="google-site-verification"
           content="jFShzxCTiLzv8gvEW4ft7fCaQkluH229-B-tJKteYJY"
         />
-      </Head>
+      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}

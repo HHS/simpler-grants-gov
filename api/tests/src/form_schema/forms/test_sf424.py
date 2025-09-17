@@ -244,14 +244,16 @@ def test_sf424_v_4_0_applicant_type_length(sf424_v4_0, valid_json_v4_0, value, e
     assert validation_issues[0].message == expected_error
 
 
-@pytest.mark.parametrize("value", ["-123.45", "123.4", "$123.45", "123..45", "12.345"])
+@pytest.mark.parametrize("value", ["123.4", "$123.45", "123..45", "12.345"])
 def test_sf424_v4_0_monetary_amount_format(sf424_v4_0, valid_json_v4_0, value):
     data = valid_json_v4_0
     data["federal_estimated_funding"] = value
 
     validation_issues = validate_json_schema_for_form(data, sf424_v4_0)
     assert len(validation_issues) == 1
-    assert validation_issues[0].message == f"'{value}' does not match '^\\\\d*([.]\\\\d{{2}})?$'"
+    assert (
+        validation_issues[0].message == f"'{value}' does not match '^(-)?\\\\d*([.]\\\\d{{2}})?$'"
+    )
 
 
 @pytest.mark.parametrize(

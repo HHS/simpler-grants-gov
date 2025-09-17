@@ -46,6 +46,14 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
 }));
 
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("next-navigation-guard", () => ({
+  useNavigationGuard: () => jest.fn(),
+}));
+
 const formSchema: RJSFSchema = {
   title: "test schema",
   properties: {

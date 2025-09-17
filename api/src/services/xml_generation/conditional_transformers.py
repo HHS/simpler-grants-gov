@@ -7,6 +7,8 @@ including if/then/else rules, field dependencies, and computed fields.
 import logging
 from typing import Any, cast
 
+from src.util.dict_util import get_nested_value
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,21 +45,21 @@ def evaluate_condition(condition: dict[str, Any], source_data: dict[str, Any]) -
         field_path = condition.get("field")
         expected_value = condition.get("value")
         path_list = field_path.split(".") if isinstance(field_path, str) else (field_path or [])
-        actual_value = _get_nested_value(source_data, cast(list[str], path_list))
+        actual_value = get_nested_value(source_data, cast(list[str], path_list))
         return actual_value == expected_value
 
     elif condition_type == "field_in":
         field_path = condition.get("field")
         allowed_values = condition.get("values", [])
         path_list = field_path.split(".") if isinstance(field_path, str) else (field_path or [])
-        actual_value = _get_nested_value(source_data, cast(list[str], path_list))
+        actual_value = get_nested_value(source_data, cast(list[str], path_list))
         return actual_value in allowed_values
 
     elif condition_type == "field_contains":
         field_path = condition.get("field")
         search_value = condition.get("value")
         path_list = field_path.split(".") if isinstance(field_path, str) else (field_path or [])
-        actual_value = _get_nested_value(source_data, cast(list[str], path_list))
+        actual_value = get_nested_value(source_data, cast(list[str], path_list))
         if isinstance(actual_value, list):
             return search_value in actual_value
         return False
@@ -111,7 +113,7 @@ def apply_conditional_transform(
             source_path = (
                 source_field.split(".") if isinstance(source_field, str) else (source_field or [])
             )
-            source_values = _get_nested_value(source_data, cast(list[str], source_path))
+            source_values = get_nested_value(source_data, cast(list[str], source_path))
 
             if isinstance(source_values, list):
                 result = {}
@@ -130,14 +132,3 @@ def apply_conditional_transform(
         raise ConditionalTransformationError(
             f"Unknown conditional transform type: {transform_type}"
         )
-
-
-def _get_nested_value(data: dict[str, Any], path: list[str]) -> Any:
-    """Get a nested value from a dictionary using a path."""
-    current = data
-    for part in path:
-        if isinstance(current, dict) and part in current:
-            current = current[part]
-        else:
-            return None
-    return current

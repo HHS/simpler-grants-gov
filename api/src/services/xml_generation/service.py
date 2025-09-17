@@ -57,7 +57,7 @@ class XMLGenerationService:
             return XMLGenerationResponse(success=True, xml_data=xml_string)
 
         except Exception as e:
-            logger.error(f"XML generation failed: {e}")
+            logger.exception("XML generation failed")
             return XMLGenerationResponse(success=False, error_message=str(e))
 
     def _generate_xml_string(

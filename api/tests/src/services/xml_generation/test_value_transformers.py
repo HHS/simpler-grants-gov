@@ -96,9 +96,6 @@ class TestCurrencyTransformations:
             transform_currency_format("123.5")  # Single decimal place not allowed
 
         with pytest.raises(ValueTransformationError):
-            transform_currency_format("-50000.00")  # Negative values not allowed
-
-        with pytest.raises(ValueTransformationError):
             transform_currency_format("$50,000.00")  # Currency symbols not allowed
 
 

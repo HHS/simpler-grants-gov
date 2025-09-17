@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { waitForAnyURLChange } from "tests/e2e/playwrightUtils";
+import {
+  refreshPageWithCurrentURL,
+  waitForAnyURLChange,
+} from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
@@ -11,7 +14,6 @@ import {
   getLastSearchResultTitle,
   getNumberOfOpportunitySearchResults,
   getSearchInput,
-  refreshPageWithCurrentURL,
   selectSortBy,
   toggleCheckboxes,
   toggleFilterDrawer,
@@ -46,9 +48,6 @@ test.describe("Search page tests", () => {
     const isMobile = !!project.name.match(/[Mm]obile/);
     const agencyCheckboxes: { [key: string]: string } = {};
     await page.goto("/search");
-    //     if (project.name.match(/[Mm]obile/)) {
-    //   await toggleFilterDrawer(page);
-    // }
 
     await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page);
@@ -60,7 +59,6 @@ test.describe("Search page tests", () => {
 
     if (!isMobile) {
       await toggleFilterDrawer(page);
-      // await toggleFilterDrawer(page);
     }
     await waitForFilterOptions(page, "agency");
 

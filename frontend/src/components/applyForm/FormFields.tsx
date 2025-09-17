@@ -5,11 +5,11 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { FormValidationWarning, UiSchema } from "./types";
 import {
-  buildField,
+  getFieldConfig,
   getRequiredProperties,
   isFieldRequired,
-  wrapSection,
 } from "./utils";
+import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
@@ -69,12 +69,16 @@ export const FormFields = ({
               (node.definition || node.schema.title || "") as string,
               requiredFieldPaths,
             );
-            const field = buildField({
+            const widgetConfig = getFieldConfig({
               uiFieldObject: node,
               formSchema: schema,
               errors: formattedErrors ?? null,
               formData,
               requiredField,
+            });
+            const field = renderWidget({
+              ...widgetConfig,
+              definition: node.definition,
             });
             if (field) {
               acc = [
@@ -102,12 +106,16 @@ export const FormFields = ({
                 (node.definition || node.schema.title || "") as string,
                 requiredFieldPaths,
               );
-              return buildField({
+              const widgetConfig = getFieldConfig({
                 uiFieldObject: node,
                 formSchema: schema,
                 errors: formattedErrors ?? null,
                 formData,
                 requiredField,
+              });
+              return renderWidget({
+                ...widgetConfig,
+                definition: node.definition,
               });
             }
           });
