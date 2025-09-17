@@ -3,7 +3,8 @@ import typing
 
 from src.api.response import ValidationErrorDetail
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
-from src.form_schema.rule_processing.json_rule_util import build_path_str, get_nested_value
+from src.form_schema.rule_processing.json_rule_util import build_path_str
+from src.util.dict_util import get_nested_value
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)

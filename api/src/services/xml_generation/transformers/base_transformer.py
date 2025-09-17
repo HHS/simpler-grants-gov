@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from src.form_schema.rule_processing.json_rule_util import get_nested_value
+from src.util.dict_util import get_nested_value
 
 from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
