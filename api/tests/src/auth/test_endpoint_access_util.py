@@ -39,73 +39,6 @@ APP_PRIVILEGES = [
     Privilege.SUBMIT_APPLICATION,
 ]
 
-
-@pytest.fixture
-def app(enable_factory_create):
-    return ApplicationFactory.create()
-
-
-@pytest.fixture
-def org_a(enable_factory_create):
-    return OrganizationFactory()
-
-
-@pytest.fixture
-def org_b(enable_factory_create):
-    return OrganizationFactory()
-
-
-@pytest.fixture
-def app_owned_by_org_a(org_a):
-    return ApplicationFactory(organization=org_a)
-
-
-@pytest.fixture
-def app_owned_by_org_b(org_b):
-    return ApplicationFactory(organization=org_b)
-
-
-@pytest.fixture
-def org_role_privileges():
-    return RoleFactory(privileges=ORG_PRIVILEGES)
-
-
-@pytest.fixture
-def app_role_privileges():
-    return RoleFactory(privileges=APP_PRIVILEGES)
-
-
-@pytest.fixture
-def user_a_org_a(org_a, org_role_privileges):
-    return OrganizationUserRoleFactory(
-        organization_user=OrganizationUserFactory(organization=org_a), role=org_role_privileges
-    )
-
-
-@pytest.fixture
-def user_b_org_b(app_owned_by_org_b, org_role_privileges):
-    return OrganizationUserRoleFactory(
-        organization_user=OrganizationUserFactory(organization=app_owned_by_org_b.organization),
-        role=org_role_privileges,
-    )
-
-
-@pytest.fixture
-def user_a_app_a(app_owned_by_org_a, app_role_privileges):
-    return ApplicationUserRoleFactory(
-        application_user=ApplicationUserFactory(application=app_owned_by_org_a),
-        role=app_role_privileges,
-    )
-
-
-@pytest.fixture
-def user_b_app_b(app_owned_by_org_b, app_role_privileges):
-    return ApplicationUserRoleFactory(
-        application_user=ApplicationUserFactory(application=app_owned_by_org_b),
-        role=app_role_privileges,
-    )
-
-
 # test for multiple users with diff priv/role
 # create fixture for
 # 2 orgs 2 apps multiple users
@@ -114,6 +47,59 @@ def user_b_app_b(app_owned_by_org_b, app_role_privileges):
 
 
 class TestEndpointAccessUtil(BaseTestClass):
+    @pytest.fixture(scope="class")
+    def app(self,enable_factory_create):
+        return ApplicationFactory.create()
+    @pytest.fixture(scope="class")
+    def org_a(self,enable_factory_create):
+        return OrganizationFactory()
+
+    @pytest.fixture(scope="class")
+    def org_b(self,enable_factory_create):
+        return OrganizationFactory()
+
+    @pytest.fixture(scope="class")
+    def app_owned_by_org_a(self,org_a):
+        return ApplicationFactory(organization=org_a)
+
+    @pytest.fixture(scope="class")
+    def app_owned_by_org_b(self,org_b):
+        return ApplicationFactory(organization=org_b)
+
+    @pytest.fixture(scope="class")
+    def org_role_privileges(self):
+        return RoleFactory(privileges=ORG_PRIVILEGES)
+
+    @pytest.fixture(scope="class")
+    def app_role_privileges(self):
+        return RoleFactory(privileges=APP_PRIVILEGES)
+
+    @pytest.fixture(scope="class")
+    def user_a_org_a(self,org_a, org_role_privileges):
+        return OrganizationUserRoleFactory(
+            organization_user=OrganizationUserFactory(organization=org_a), role=org_role_privileges
+        )
+
+    @pytest.fixture(scope="class")
+    def user_b_org_b(self,app_owned_by_org_b, org_role_privileges):
+        return OrganizationUserRoleFactory(
+            organization_user=OrganizationUserFactory(organization=app_owned_by_org_b.organization),
+            role=org_role_privileges,
+        )
+
+    @pytest.fixture(scope="class")
+    def user_a_app_a(self,app_owned_by_org_a, app_role_privileges):
+        return ApplicationUserRoleFactory(
+            application_user=ApplicationUserFactory(application=app_owned_by_org_a),
+            role=app_role_privileges,
+        )
+
+    @pytest.fixture(scope="class")
+    def user_b_app_b(self,app_owned_by_org_b, app_role_privileges):
+        return ApplicationUserRoleFactory(
+            application_user=ApplicationUserFactory(application=app_owned_by_org_b),
+            role=app_role_privileges,
+        )
 
     # Organization
     def test_get_roles_for_org_no_role(self, user, org_a):
