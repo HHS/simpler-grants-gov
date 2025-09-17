@@ -18,7 +18,7 @@ def setup_application_for_form_validation(
     opportunity_number: str | None = DEFAULT_VALUE,
     opportunity_title: str | None = DEFAULT_VALUE,
     has_agency: bool = True,
-    agency_name: str | None = None,
+    agency_name: str | None = DEFAULT_VALUE,
     agency_code: str | None = None,
     user_email: str | None = None,
     attachment_ids: list[str] | None = None,
@@ -93,4 +93,3 @@ def setup_application_for_form_validation(
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
 
     return application_form
-

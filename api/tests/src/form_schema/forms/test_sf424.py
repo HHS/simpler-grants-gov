@@ -4,8 +4,7 @@ from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.applications.application_validation import validate_application_form, ApplicationAction
 from tests.lib.data_factories import setup_application_for_form_validation
-from tests.src.db.models.factories import ApplicationFormFactory, CompetitionFactory, CompetitionFormFactory, ApplicationFactory
-
+import freezegun
 
 @pytest.fixture()
 def sf424_v4_0():
@@ -420,7 +419,7 @@ def test_sf424_v4_0_pre_population_with_all_null_values(enable_factory_create, v
         opportunity_number=None,
         opportunity_title=None,
         has_agency=False,
-        agency_code="NO-AGENCY-THIS-CONNECTS-TO",
+        agency_code=None,
         has_organization=False,
         has_assistance_listing_number=False,
         public_competition_id=None,
@@ -433,14 +432,29 @@ def test_sf424_v4_0_pre_population_with_all_null_values(enable_factory_create, v
     # Verify prepopulation rules ran
     app_json = application_form.application_response
     assert app_json["sam_uei"] == "00000000INDV"
-    assert app_json["agency_name"] == "NO-AGENCY-THIS-CONNECTS-TO"
-    assert "assistance_listing_number" not in app_json
+    assert app_json["agency_name"] == "unknown"
+    assert app_json["funding_opportunity_number"] == "unknown"
+    assert app_json["funding_opportunity_title"] == "unknown"
     assert "assistance_listing_program_title" not in app_json
-    assert "funding_opportunity_number" not in app_json
-    assert "funding_opportunity_title" not in app_json
     assert "competition_identification_number" not in app_json
     assert "competition_identification_title" not in app_json
     # Post-populated fields not present
     assert "date_received" not in app_json
     assert "date_signed" not in app_json
     assert "aor_signature" not in app_json
+
+@freezegun.freeze_time("2023-02-20 12:00:00", tz_offset=0)
+def test_sf424_post_population(enable_factory_create, valid_json_v4_0):
+    application_form = setup_application_for_form_validation(
+        valid_json_v4_0,
+        json_schema=SF424_v4_0.form_json_schema,
+        rule_schema=SF424_v4_0.form_rule_schema,
+        user_email="mynewmail@example.com",
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.SUBMIT)
+    assert len(issues) == 0
+    app_json = application_form.application_response
+    assert app_json["date_received"] == "2023-02-20"
+    assert app_json["date_signed"] == "2023-02-20"
+    assert app_json["aor_signature"] == "mynewmail@example.com"
