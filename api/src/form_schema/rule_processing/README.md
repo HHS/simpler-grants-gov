@@ -123,14 +123,6 @@ NOTE: If you had data like `{"my_array": [{"x": 4}, {"x": 5}]}` and ran a rule o
 that would work as we can change the values in the objects within an array uneventfully. We just don't
 want to be adding or removing items themselves from the array. This would result in `{"my_array": [{}, {}]}`
 
----
-Due to how our pre-population rules are setup, we'll still create the path to a value,
-even if we don't create the value itself. For example, if you had data of `{}` and
-a rule to pre-populate `x.y.z` with a null value, the result would be: `{"x": {"y": {}}}`.
-We may be able to work around this issue in the future.
-
-TODO - can I fix this?
-
 ## Monetary Summation
 We support the ability to sum monetary amounts together. This rule requires that you
 specify which fields to sum together like so:
