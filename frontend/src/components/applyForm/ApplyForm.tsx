@@ -22,24 +22,27 @@ import {
 } from "./types";
 import { getFieldsForNav } from "./utils";
 
- type Translator = ((
-   key: string,
-   values?: Record<string, unknown>,
- ) => string) & {
-   rich: (key: string, values: Record<string, (chunks: ReactNode) => ReactNode>) => ReactNode;
- };
+type Translator = ((
+  key: string,
+  values?: Record<string, unknown>,
+) => string) & {
+  rich: (
+    key: string,
+    values: Record<string, (chunks: ReactNode) => ReactNode>,
+  ) => ReactNode;
+};
 
- interface WidgetSupport {
-   validationWarnings:
-     | FormattedFormValidationWarning[]
-     | FormValidationWarning[];
-  }
+interface WidgetSupport {
+  validationWarnings:
+    | FormattedFormValidationWarning[]
+    | FormValidationWarning[];
+}
 
- interface ApplyFormFormContext {
-   rootSchema: RJSFSchema;
-   rootFormData: unknown;
-   widgetSupport: WidgetSupport;
- }
+interface ApplyFormFormContext {
+  rootSchema: RJSFSchema;
+  rootFormData: unknown;
+  widgetSupport: WidgetSupport;
+}
 
 const ApplyForm = ({
   applicationId,
@@ -63,7 +66,6 @@ const ApplyForm = ({
   attachments: Attachment[];
   isBudgetForm?: boolean;
 }) => {
-  
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;

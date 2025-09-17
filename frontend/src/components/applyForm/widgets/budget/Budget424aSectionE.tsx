@@ -2,7 +2,7 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
 
-import React, { JSX, useEffect } from "react";
+import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import {
@@ -131,8 +131,6 @@ function Budget424aSectionE<
 
   type YearKey = (typeof YEARS)[number]["key"];
 
-  const resolveErrorsForSection = getBudgetErrors({ errors, id, section: "E" });
-
   const titleCell = (rowIndex: number): JSX.Element => {
     const title =
       getStringOrUndefined(activityItems, `[${rowIndex}].activity_title`) ?? "";
@@ -191,10 +189,6 @@ function Budget424aSectionE<
     third_year_amount: "Sum of column D",
     fourth_year_amount: "Sum of column E",
   };
-
-        useEffect(() => {
-          console.log("Section E: ", errors, rawErrors)
-        }), [errors, rawErrors]
 
   return (
     <div key={id} id={id}>

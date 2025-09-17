@@ -1,10 +1,8 @@
-'use client';
-
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get, set } from "lodash";
 
-import React, { JSX, useEffect } from "react";
+import React, { JSX } from "react";
 
 import {
   FormattedFormValidationWarning,
@@ -13,9 +11,9 @@ import {
 } from "src/components/applyForm/types";
 import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
 import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
+import TextWidget from "src/components/applyForm/widgets/TextWidget";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { getStringOrUndefined, isRecord } from "./budgetValueGuards";
-import TextWidget from "../TextWidget";
 
 type RootSchemaContext = FormContextType & { rootSchema?: RJSFSchema };
 
@@ -39,7 +37,8 @@ function coerceFormValidationWarnings(
 ): FormValidationWarning[] {
   return input
     .map((item): FormValidationWarning | null => {
-      const candidate = item as Partial<FormValidationWarning> & Partial<FormattedFormValidationWarning>;
+      const candidate = item as Partial<FormValidationWarning> &
+        Partial<FormattedFormValidationWarning>;
       const fieldId =
         typeof candidate.field === "string"
           ? candidate.field
@@ -53,7 +52,12 @@ function coerceFormValidationWarnings(
             ? candidate.formatted
             : null;
       if (!fieldId || !messageText) return null;
-      return { field: fieldId, message: messageText, type: "custom", value: '' };
+      return {
+        field: fieldId,
+        message: messageText,
+        type: "custom",
+        value: "",
+      };
     })
     .filter((v): v is FormValidationWarning => v !== null);
 }
@@ -98,26 +102,29 @@ function Budget424aSectionF<
   const remarksSchema = properties?.remarks as RJSFSchema | undefined;
   const confirmationSchema = properties?.confirmation as RJSFSchema | undefined;
 
-  // function getErrorMessagesForField(fieldId: string): string[] {
-  //   return getBudgetErrors({ errors: validationWarnings, id: fieldId, section: "F" });
-  // }
-
   function getWarningsFromContext(context: unknown): FormValidationWarning[] {
     if (!context || typeof context !== "object") return [];
-    const support = (context as { widgetSupport?: { validationWarnings?: unknown } }).widgetSupport;
-    const raw = Array.isArray(support?.validationWarnings)
-      ? (support!.validationWarnings as WarningsFromContext)
-      : [];
-    return coerceFormValidationWarnings(raw);
+    const support = (
+      context as { widgetSupport?: { validationWarnings?: unknown } }
+    ).widgetSupport;
+    const rawCandidate = support?.validationWarnings;
+    if (!Array.isArray(rawCandidate)) return [];
+    return coerceFormValidationWarnings(rawCandidate as WarningsFromContext);
   }
 
-  const warningsFromProps = Array.isArray(rawErrors) ? (rawErrors as FormValidationWarning[]) : [];
+  const warningsFromProps = Array.isArray(rawErrors)
+    ? (rawErrors as FormValidationWarning[])
+    : [];
   const warningsFromContext = getWarningsFromContext(formContext);
   const validationWarnings: FormValidationWarning[] =
     warningsFromProps.length > 0 ? warningsFromProps : warningsFromContext;
 
   function getErrorMessagesForField(fieldId: string): string[] {
-    return getBudgetErrors({ errors: validationWarnings, id: fieldId, section: "F" });
+    return getBudgetErrors({
+      errors: validationWarnings,
+      id: fieldId,
+      section: "F",
+    });
   }
 
   const directChargesValue = getStringOrUndefined(
@@ -129,7 +136,9 @@ function Budget424aSectionF<
     "indirect_charges_explanation",
   );
   const remarksValue = getStringOrUndefined(rootValue, "remarks");
-  const confirmationValue = get(rootValue, "confirmation") as boolean | undefined;
+  const confirmationValue = get(rootValue, "confirmation") as
+    | boolean
+    | undefined;
 
   const updateField = (path: string, next: unknown) => {
     const updated = { ...rootValue };

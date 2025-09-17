@@ -2,7 +2,7 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
 
-import React, { JSX, useEffect } from "react";
+import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
 import {
@@ -155,10 +155,6 @@ function Budget424aSectionC<
         activityItems,
         `[${rowIndex}].assistance_listing_number`,
       ) ?? "";
-
-      useEffect(() => {
-        console.log("Section C: ", errors, rawErrors)
-      }), [errors, rawErrors]
 
     return (
       <div className="display-flex flex-column">
