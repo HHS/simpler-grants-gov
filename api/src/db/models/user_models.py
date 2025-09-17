@@ -341,6 +341,7 @@ class LinkRoleRoleType(ApiSchemaTable, TimestampMixin):
         index=True,
     )
 
+
 class LinkRolePrivilege(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_role_privilege"
 
