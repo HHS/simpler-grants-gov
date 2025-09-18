@@ -31,6 +31,7 @@ class SyncSuppressedEmailsTask(Task):
             select(func.count()).select_from(SuppressedEmail)
         ).scalar_one()
         logger.info("Existing count of suppressed emails: %s", total_suppressed_emails)
+        self.increment(Metrics.TOTAL_SUPPRESSED_DESTINATION_COUNT, total_suppressed_emails)
 
         stmt = select(SuppressedEmail).order_by(SuppressedEmail.last_update_time.desc()).limit(1)
 
@@ -42,7 +43,6 @@ class SyncSuppressedEmailsTask(Task):
 
         resp = self.sesv2_client.list_suppressed_destinations(start_time=start_time)
         suppressed_emails = resp.suppressed_destination_summaries
-        self.increment(Metrics.TOTAL_SUPPRESSED_DESTINATION_COUNT, len(suppressed_emails))
 
         emails = [d.email_address for d in suppressed_emails]
         if not emails:
