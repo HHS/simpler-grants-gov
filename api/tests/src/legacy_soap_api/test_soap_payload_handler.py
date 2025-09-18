@@ -8,6 +8,7 @@ from src.legacy_soap_api.soap_payload_handler import (
     build_xml_from_dict,
     get_envelope_dict,
     get_soap_envelope_from_payload,
+    get_soap_operation_name,
 )
 from tests.util.minifiers import minify_xml
 
@@ -33,6 +34,51 @@ Content-ID:
 <root.message@cxf.apache.org>
 {MOCK_SOAP_ENVELOPE}
 --uuid:cb40f637-4aa7-4771-abca-3130a73794dc--"""
+
+MOCK_SOAP_REQUEST_HEADER = b"""
+    \r\n------=_Part_41_486913496.1757620327503\r\nContent-Type: application/xop+xml; c
+    harset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: 8bit\r\nContent-ID: <test>\r\n\r\n
+"""
+MOCK_SOAP_REQUEST_ENVELOPE = f"""
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">
+    \n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>
+    </app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n
+                 <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>
+    <inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>
+    </gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n   </soapenv:Body>\n
+    </soapenv:Envelope>
+""".encode(
+    "utf-8"
+)
+MOCK_SOAP_REQUEST_ALT_ENVELOPE = f"""
+    <soap:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">
+    \n   <soapenv:Header/>\n   <soapenv:Body>\n      <app:{MOCK_SOAP_OPERATION_NAME}>\n         <app:OperationName2>
+    </app:OperationName2>\n<!--Zero or more repetitions:-->\n          <gran:Attachment>\n
+                 <gran:FileContentId>Dummy.pdf</gran:FileContentId>\n\t        <gran:FileDataHandler>
+    <inc:Include href="cid:0000" xmlns:inc="http://www.w3.org/2004/08/xop/include"/>
+    </gran:FileDataHandler>\n         </gran:Attachment>\n\n       </app:{MOCK_SOAP_OPERATION_NAME}>\n
+    </soapenv:Body>\n</soapenv:Envelope>
+""".encode(
+    "utf-8"
+)
+MOCK_SOAP_REQUEST_NO_TAG_ENVELOPE = """
+    '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">'
+    "\n   <soapenv:Header/>\n   <soapenv:Body>\n      "
+"""
+MOCK_SOAP_REQUEST_INCOMPLETE_ENVELOPE = f"""
+    <soap:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://schemas.xmlsoap.org/services/ApplicantWebServices-V2.0">
+    "\n   <soapenv:Header/>\n
+    <soapenv:Body>\n
+    <app:{MOCK_SOAP_OPERATION_NAME}>\n
+"""
+MOCK_SOAP_REQUEST_ATTACHMENT = b"""
+    \r\n------=_Part_41_486913496.1757620327503\r\nConte
+    nt-Type: text/plain; charset=us-ascii; name=test.txt\r\nContent-Transfer-Encoding:
+    7bit\r\nContent-ID: <budget>\r\nContent-Disposition: attachment; name="test.txt"; filename="test.txt"\r\n\r\nhello\nhello\nhello\nh
+    ello\nworld\n\n\r\n------=_Part_41_486913496.1757620327503--\r\n
+"""
+ALMOST_ONE_CHUNK = "a" * 997
+FIVE_CHUNKS = "a" * 5000
 
 
 def test_invalid_soap_string():
@@ -223,3 +269,59 @@ class TestBuildXMLFromDict(unittest.TestCase):
         """
             ).encode()
         )
+
+
+class TestGetSoapOperationName(unittest.TestCase):
+    def test_get_soap_operation_name_ignores_header_and_attachment(self):
+        result = get_soap_operation_name(
+            (
+                MOCK_SOAP_REQUEST_HEADER.decode()
+                + MOCK_SOAP_REQUEST_ENVELOPE.decode()
+                + MOCK_SOAP_REQUEST_ATTACHMENT.decode()
+            ).encode("utf-8")
+        )
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_when_just_xml(self):
+        result = get_soap_operation_name(MOCK_SOAP_REQUEST_ENVELOPE)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_when_passed_a_string_instead_of_bytes(self):
+        result = get_soap_operation_name(MOCK_SOAP_REQUEST_ENVELOPE.decode())
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_checks_for_older_soap_envelope_tag(self):
+        result = get_soap_operation_name(MOCK_SOAP_REQUEST_ALT_ENVELOPE)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_returns_first_tag_after_body_even_if_invalid_xml(
+        self,
+    ):
+        result = get_soap_operation_name(MOCK_SOAP_REQUEST_INCOMPLETE_ENVELOPE)
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_returns_empty_string_when_xml_does_not_have_operation_tag(
+        self,
+    ):
+        result = get_soap_operation_name(MOCK_SOAP_REQUEST_NO_TAG_ENVELOPE)
+        assert result == ""
+
+    def test_get_soap_operation_name_returns_empty_string_when_passed_empty_string(self):
+        result = get_soap_operation_name("")
+        assert result == ""
+
+    def test_get_soap_operation_name_handles_when_soap_pattern_is_divided_between_two_chunks_of_1000(
+        self,
+    ):
+        result = get_soap_operation_name(
+            (ALMOST_ONE_CHUNK + MOCK_SOAP_REQUEST_ENVELOPE.decode()).encode("utf-8")
+        )
+        assert result == MOCK_SOAP_OPERATION_NAME
+
+    def test_get_soap_operation_name_stops_checking_after_five_chunks(
+        self,
+    ):
+        result = get_soap_operation_name(
+            (FIVE_CHUNKS + MOCK_SOAP_REQUEST_ENVELOPE.decode()).encode("utf-8")
+        )
+        assert result == ""

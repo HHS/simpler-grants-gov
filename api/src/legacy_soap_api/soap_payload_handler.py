@@ -1,10 +1,10 @@
+import io
 import re
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable
 
 import xmltodict
-from defusedxml import ElementTree as DET
 from lxml import etree
 from lxml.etree import Element, QName, SubElement
 
@@ -12,6 +12,8 @@ ENVELOPE_REGEX = r"<([a-zA-Z0-9]+):Envelope.*?>(.*?)</([a-zA-Z0-9]+):Envelope>"
 XML_DICT_KEY_NAMESPACE_DELIMITER = ":"
 XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
+CHUNK_SIZE = 1000
+NUMBER_OF_CHUNKS = 5
 
 
 class SOAPPayload:
@@ -203,22 +205,55 @@ def get_soap_envelope_from_payload(soap_message: str) -> SOAPEnvelopeData:
     return envelope_data
 
 
+def extract_soap_xml(soap_bytes: bytes) -> bytes:
+    soap_patterns = [b"<soap:Envelope", b"<soapenv:Envelope"]
+    max_tag_size = len(soap_patterns[1])
+    bytes_stream = io.BytesIO(soap_bytes)
+    buffer = b""
+    total_bytes_read = 0
+    count = NUMBER_OF_CHUNKS
+    while count > 0:
+        chunk = bytes_stream.read(CHUNK_SIZE)
+        if not chunk:
+            break
+        current_data = buffer + chunk
+        for pattern in soap_patterns:
+            match_index = current_data.find(pattern)
+            if match_index != -1:
+                start_position = (total_bytes_read - len(buffer)) + match_index
+                return soap_bytes[start_position:]
+        buffer = current_data[-max_tag_size:]
+        total_bytes_read += len(chunk)
+        count -= 1
+    return b""
+
+
 def get_soap_operation_name(soap_xml: str | bytes) -> str:
     """Get operation name
 
     Get the SOAP operation name. Every valid SOAP request Body should
     have the global SOAP envelope namespace.
     """
+    xml_bytes = extract_soap_xml(
+        soap_xml.encode("utf-8") if isinstance(soap_xml, str) else soap_xml
+    )
+    if not xml_bytes:
+        return ""
+    xml_file = io.BytesIO(xml_bytes)
+    operation_name = ""
     try:
-        if isinstance(soap_xml, bytes):
-            soap_xml = soap_xml.decode()
-        root = DET.fromstring(soap_xml)
-        body = root.find(".//{http://schemas.xmlsoap.org/soap/envelope/}Body")
-        if body is not None and len(body) > 0:
-            return body[0].tag.split("}")[-1]
+        in_body = False
+        for event, elem in etree.iterparse(xml_file, events=("start", "end")):
+            if in_body:
+                operation_name = elem.tag.split("}", 1)[1]
+                elem.clear()
+                return operation_name
+            elif elem.tag.endswith("Body") and event == "start":
+                in_body = True
+                continue
+    except etree.XMLSyntaxError:
         return ""
-    except Exception:
-        return ""
+    return operation_name
 
 
 def get_soap_operation_dict(soap_xml: str, operation_name: str) -> dict:
