@@ -124,43 +124,6 @@ def test_assign_application_owner_role_new_role(db_session, enable_factory_creat
     assert role_assignment.role_id == APPLICATION_OWNER.role_id
 
 
-def test_assign_application_owner_role_existing_role(db_session, enable_factory_create):
-    """Test that assigning Application Owner role to a user who already has it does nothing"""
-    application_user = ApplicationUserFactory.create(is_application_owner=True)
-
-    # Create existing role assignment
-    existing_role = ApplicationUserRole(
-        application_user=application_user, role_id=APPLICATION_OWNER.role_id
-    )
-    db_session.add(existing_role)
-    db_session.commit()
-
-    # Count existing roles
-    initial_count = (
-        db_session.query(ApplicationUserRole)
-        .filter_by(
-            application_user_id=application_user.application_user_id,
-            role_id=APPLICATION_OWNER.role_id,
-        )
-        .count()
-    )
-    assert initial_count == 1
-
-    # Try to assign the role again
-    _assign_application_owner_role(db_session, application_user)
-
-    # Verify no duplicate role was created
-    final_count = (
-        db_session.query(ApplicationUserRole)
-        .filter_by(
-            application_user_id=application_user.application_user_id,
-            role_id=APPLICATION_OWNER.role_id,
-        )
-        .count()
-    )
-    assert final_count == 1
-
-
 def test_create_application_assigns_owner_role(db_session, enable_factory_create):
     """Test that creating an application assigns the Application Owner role"""
     user = UserFactory.create()

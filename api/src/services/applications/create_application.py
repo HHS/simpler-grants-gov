@@ -30,15 +30,8 @@ logger = logging.getLogger(__name__)
 def _assign_application_owner_role(
     db_session: db.Session, application_user: ApplicationUser
 ) -> None:
-    """Assign the Application Owner role to an application user if they don't already have it."""
+    """Assign the Application Owner role to an application user."""
 
-    # Check if the user already has the Application Owner role
-    for role_assignment in application_user.application_user_roles:
-        if role_assignment.role_id == APPLICATION_OWNER.role_id:
-            # User already has the role, nothing to do
-            return
-
-    # User doesn't have the role, assign it
     app_user_role = ApplicationUserRole(
         application_user=application_user, role_id=APPLICATION_OWNER.role_id
     )
