@@ -1,7 +1,5 @@
 """Tests for configurable XML namespaces feature."""
 
-import pytest
-
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
