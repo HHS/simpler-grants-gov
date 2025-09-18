@@ -30,8 +30,8 @@ class TestNoneHandling:
         # Verify None field is excluded
         assert "OrganizationName" not in xml_data
         # Verify non-None fields are included
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
 
     def test_none_handling_include_null(self):
         """Test include_null behavior - include empty XML elements."""
@@ -56,8 +56,8 @@ class TestNoneHandling:
             or "<DateReceived />" in xml_data
         )
         # Verify non-None fields are included normally
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
 
     def test_none_handling_default_value(self):
         """Test default_value behavior - use configured default when None."""
@@ -78,8 +78,8 @@ class TestNoneHandling:
         # Verify None field gets default value
         assert f"<StateReview>{NO_VALUE}</StateReview>" in xml_data
         # Verify non-None fields are included normally
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
 
     def test_none_handling_mixed_behaviors(self):
         """Test multiple None handling behaviors in same request."""
@@ -108,8 +108,8 @@ class TestNoneHandling:
         )  # empty element
         assert f"<StateReview>{NO_VALUE}</StateReview>" in xml_data  # default value
         # Verify non-None fields are included normally
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
 
     def test_none_handling_with_value_transforms(self):
         """Test None handling works with value transformations."""
@@ -132,8 +132,8 @@ class TestNoneHandling:
         assert "FederalEstimatedFunding" not in xml_data
         assert "DelinquentFederalDebt" not in xml_data
         # Verify non-None fields are included
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
 
     def test_none_handling_invalid_configuration(self):
         """Test that invalid null_handling values fall back to exclude."""
