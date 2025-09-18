@@ -2,8 +2,9 @@ import logging
 import typing
 
 from src.api.response import ValidationErrorDetail
-from src.form_schema.rule_processing.json_rule_context import JsonRuleContext
-from src.form_schema.rule_processing.json_rule_util import build_path_str, get_nested_value
+from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
+from src.form_schema.rule_processing.json_rule_util import build_path_str
+from src.util.dict_util import get_nested_value
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ def _validate_attachment_value(
         )
 
 
-def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) -> None:
+def validate_attachments(context: JsonRuleContext, json_rule: JsonRule) -> None:
     """Validate that the attachment ID field corresponds
     to an actual attachment ID on the application
 
@@ -58,7 +59,7 @@ def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) 
     ]
 
     # Fetch the value
-    value = get_nested_value(context.json_data, path)
+    value = get_nested_value(context.json_data, json_rule.path)
 
     # If there is no value currently for an attachment field
     # then we don't do any check, if the field is required, JSON schema
@@ -74,7 +75,7 @@ def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) 
                 context=context,
                 application_attachment_ids=application_attachment_ids,
                 value=v,
-                path=path,
+                path=json_rule.path,
                 index=index,
             )
     else:
@@ -83,7 +84,7 @@ def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) 
             context=context,
             application_attachment_ids=application_attachment_ids,
             value=value,
-            path=path,
+            path=json_rule.path,
             index=None,
         )
 
@@ -91,13 +92,13 @@ def validate_attachments(context: JsonRuleContext, rule: dict, path: list[str]) 
 VALIDATION_RULES = {"attachment": validate_attachments}
 
 
-def handle_validation(context: JsonRuleContext, rule: dict, path: list[str]) -> None:
+def handle_validation(context: JsonRuleContext, json_rule: JsonRule) -> None:
     if not context.config.do_field_validation:
         return
 
-    rule_code: str | None = rule.get("rule", None)
+    rule_code: str | None = json_rule.rule.get("rule", None)
 
-    log_extra = context.get_log_context() | {"validation_rule": rule_code, "path": ".".join(path)}
+    log_extra = context.get_log_context() | json_rule.get_log_context()
 
     if rule_code is None:
         logger.warning("Rule code is null for configuration", extra=log_extra)
@@ -109,4 +110,4 @@ def handle_validation(context: JsonRuleContext, rule: dict, path: list[str]) -> 
     # Run the validation rule, if there are any issues
     # they'll be added to the context
     rule_func = VALIDATION_RULES[rule_code]
-    rule_func(context, rule, path)
+    rule_func(context, json_rule)

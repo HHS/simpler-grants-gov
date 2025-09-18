@@ -26,6 +26,10 @@ class CreateOrgsFromSamEntityTask(Task):
             sam_gov_entities = self.db_session.execute(
                 select(SamGovEntity, LinkExternalUser)
                 .join(LinkExternalUser, SamGovEntity.ebiz_poc_email == LinkExternalUser.email)
+                # There can be blank email fields in the Sam.gov data
+                # just in case a user ever ends up with a blank email
+                # we want to avoid them becoming the org owner of 500 random orgs
+                .where(SamGovEntity.ebiz_poc_email != "")
                 .options(selectinload(SamGovEntity.organization))
                 .options(selectinload(LinkExternalUser.user).selectinload(User.organizations))
             )

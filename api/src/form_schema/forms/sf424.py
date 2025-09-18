@@ -2,6 +2,7 @@ import uuid
 
 import src.form_schema.forms.shared_schema as shared_schema
 from src.db.models.competition_models import Form
+from src.services.xml_generation.constants import NO_VALUE
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -204,7 +205,7 @@ FORM_JSON_SCHEMA = {
         },
         "applicant": {
             "allOf": [{"$ref": "#/$defs/address"}],
-            "title": "applicant",
+            "title": "Applicant",
             "description": "Enter information about the applicant.",
         },
         "department_name": {
@@ -452,7 +453,7 @@ FORM_JSON_SCHEMA = {
         "debt_explanation": {
             "allOf": [{"$ref": "#/$defs/attachment_field"}],
             "title": "Debt Explanation",
-            "description": "Debt Explanation is required.",
+            "description": "",
         },
         "certification_agree": {
             "type": "boolean",
@@ -461,7 +462,7 @@ FORM_JSON_SCHEMA = {
         },
         "authorized_representative": {
             "allOf": [{"$ref": "#/$defs/person_name"}],
-            "title": "Authorized Representative Header",
+            "title": "Authorized Representative",
             "description": "",
         },
         "authorized_representative_phone_number": {
@@ -569,7 +570,7 @@ FORM_JSON_SCHEMA = {
         },
         "person_name": {
             "type": "object",
-            "title": "Name and Contact Information Header",
+            "title": "Name and Contact Information",
             "description": "",
             "required": [
                 "first_name",
@@ -1055,6 +1056,158 @@ FORM_RULE_SCHEMA = {
     "additional_project_title": {"gg_validation": {"rule": "attachment"}},
     "additional_congressional_districts": {"gg_validation": {"rule": "attachment"}},
     "debt_explanation": {"gg_validation": {"rule": "attachment"}},
+}
+
+
+# XML Transformation Rules for SF-424 4.0
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting Simpler SF-424 JSON to Grants.gov XML format",
+        "version": "1.0",
+        "form_name": "SF424_4_0",
+        "namespaces": {"default": "http://apply.grants.gov/forms/SF424_4_0-V4.0", "prefix": ""},
+        "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+            "include_null": "Include empty XML element: <Field></Field>",
+            "default_value": "Use configured default value when field is None",
+        },
+    },
+    # Core application information - direct field mappings
+    "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+    "application_type": {"xml_transform": {"target": "ApplicationType"}},
+    "date_received": {
+        "xml_transform": {
+            "target": "DateReceived",
+            "null_handling": "include_null",
+        }
+    },
+    # Applicant information - direct field mappings
+    "organization_name": {"xml_transform": {"target": "OrganizationName"}},
+    "employer_taxpayer_identification_number": {
+        "xml_transform": {"target": "EmployerTaxpayerIdentificationNumber"}
+    },
+    "sam_uei": {"xml_transform": {"target": "SAMUEI"}},
+    # Address information - nested structure
+    "applicant_address": {
+        "xml_transform": {"target": "Applicant", "type": "nested_object"},
+        "address_line_1": {"xml_transform": {"target": "Street1"}},
+        "address_line_2": {"xml_transform": {"target": "Street2"}},
+        "city": {"xml_transform": {"target": "City"}},
+        "county": {"xml_transform": {"target": "County"}},
+        "state_code": {"xml_transform": {"target": "State"}},
+        "country_code": {"xml_transform": {"target": "Country"}},
+        "zip_code": {"xml_transform": {"target": "ZipPostalCode"}},
+    },
+    # Contact information - direct field mappings
+    "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
+    "fax_number": {"xml_transform": {"target": "Fax"}},
+    "email": {"xml_transform": {"target": "Email"}},
+    # Opportunity information - direct field mappings
+    "agency_name": {"xml_transform": {"target": "AgencyName"}},
+    "assistance_listing_number": {"xml_transform": {"target": "CFDANumber"}},
+    "assistance_listing_program_title": {"xml_transform": {"target": "CFDAProgramTitle"}},
+    "funding_opportunity_number": {"xml_transform": {"target": "FundingOpportunityNumber"}},
+    "funding_opportunity_title": {"xml_transform": {"target": "FundingOpportunityTitle"}},
+    # Project information - direct field mappings
+    "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "congressional_district_applicant": {
+        "xml_transform": {"target": "CongressionalDistrictApplicant"}
+    },
+    "congressional_district_program_project": {
+        "xml_transform": {"target": "CongressionalDistrictProgramProject"}
+    },
+    "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
+    "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
+    # Funding information - with currency formatting
+    "federal_estimated_funding": {
+        "xml_transform": {
+            "target": "FederalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "applicant_estimated_funding": {
+        "xml_transform": {
+            "target": "ApplicantEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "state_estimated_funding": {
+        "xml_transform": {
+            "target": "StateEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "local_estimated_funding": {
+        "xml_transform": {
+            "target": "LocalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "other_estimated_funding": {
+        "xml_transform": {
+            "target": "OtherEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "program_income_estimated_funding": {
+        "xml_transform": {
+            "target": "ProgramIncomeEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "total_estimated_funding": {
+        "xml_transform": {
+            "target": "TotalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    # Review and certification - with value transformations
+    "state_review": {
+        "xml_transform": {
+            "target": "StateReview",
+            "null_handling": "default_value",
+            "default_value": NO_VALUE,  # Use constant from value_transformers
+        }
+    },
+    "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
+    "delinquent_federal_debt": {
+        "xml_transform": {
+            "target": "DelinquentFederalDebt",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "certification_agree": {
+        "xml_transform": {
+            "target": "CertificationAgree",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    # Authorized representative - direct field mappings
+    "authorized_representative_title": {
+        "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
+    },
+    "authorized_representative_phone_number": {
+        "xml_transform": {"target": "AuthorizedRepresentativePhoneNumber"}
+    },
+    "authorized_representative_email": {
+        "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
+    },
+    "date_signed": {"xml_transform": {"target": "DateSigned"}},
+    # One-to-many mapping example - applicant type codes
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "target": "ApplicantTypeCode",  # Not used for one-to-many
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+            },
+        }
+    },
 }
 
 

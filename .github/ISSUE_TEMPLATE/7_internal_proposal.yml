@@ -1,0 +1,44 @@
+name: Internal - Proposal
+description: Submit a proposal for co-planning that will be voted on by the community
+type: Task
+labels: ["Coplanning Proposal"]
+body:
+
+  - type: textarea
+    id: problem_statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this proposal solve? What is the current state and why is change needed?
+      placeholder: Describe the current situation, pain points, and why this proposal is necessary...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution in detail. What exactly are you proposing?
+      placeholder: Provide a detailed description of what you're proposing to build, change, or implement...
+    validations:
+      required: true
+
+  - type: textarea
+    id: success_criteria
+    attributes:
+      label: Success Criteria
+      description: How will we know this proposal has been successfully implemented? What are the measurable outcomes?
+      placeholder: |
+        - Criterion 1: [measurable outcome]
+        - Criterion 2: [measurable outcome]
+        - Criterion 3: [measurable outcome]
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any additional information, links, research, or context that supports this proposal
+      placeholder: Include links to relevant documentation, research, similar implementations, etc.
+    validations:
+      required: false

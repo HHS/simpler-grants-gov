@@ -50,10 +50,13 @@ def build_sam_extract_row(
     return "|".join(raw_data) + "!end"
 
 
-def build_sam_extract_row_deactivated_or_expired(uei: str, extract_code: str = "1"):
+def build_sam_extract_row_deactivated_or_expired(
+    uei: str, extract_code: str = "1", eft_indicator: str = ""
+):
     return build_sam_extract_row(
         uei=uei,
         extract_code=extract_code,
+        entity_eft_indicator=eft_indicator,
         # All of the below won't be set for deactivated/expired rows
         legal_business_name="",
         registration_expiration_date="",
@@ -62,7 +65,6 @@ def build_sam_extract_row_deactivated_or_expired(uei: str, extract_code: str = "
         ebiz_last_name="",
         debt_subject_to_offset="",
         exclusion_status_flag="",
-        entity_eft_indicator="",
         initial_registration_date="",
         last_update_date="",
     )
@@ -103,7 +105,7 @@ class TestProcessSamExtracts:
             extract_code="A",
             legal_business_name="Sara's Sweets",
             registration_expiration_date="20250101",
-            ebiz_poc_email="sara@example.com",
+            ebiz_poc_email="SARA@example.com",  # will be lowercased when processed
             ebiz_first_name="Sara",
             ebiz_last_name="Smith",
             debt_subject_to_offset="Y",
@@ -162,7 +164,11 @@ class TestProcessSamExtracts:
             extract_code="4",
         )
 
-        rows = [row1, row2, row3, row4, row5, row6, row7, row8]
+        row9 = build_sam_extract_row_deactivated_or_expired(
+            uei="III999", extract_code="1", eft_indicator="1234"
+        )
+
+        rows = [row1, row2, row3, row4, row5, row6, row7, row8, row9]
 
         s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1234.zip"
         make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
@@ -264,8 +270,9 @@ class TestProcessSamExtracts:
         assert len(entity6.import_records) == 0
 
         metrics = task.metrics
-        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 8
+        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 9
         assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 4
+        assert metrics[task.Metrics.DEACTIVATED_SKIPPED_COUNT] == 1
         assert metrics[task.Metrics.DEACTIVATED_ROWS_COUNT] == 1
         assert metrics[task.Metrics.EXPIRED_ROWS_COUNT] == 1
         assert metrics[task.Metrics.ROWS_SKIPPED_COUNT] == 0

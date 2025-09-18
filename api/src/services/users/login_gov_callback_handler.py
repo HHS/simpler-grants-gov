@@ -152,7 +152,9 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
         external_user = _create_login_gov_user(login_gov_user.user_id, db_session)
 
     # Update fields on the external user table
-    external_user.email = login_gov_user.email
+    # Store the email as lowercase, this should be how it's returned already
+    # but just to make email comparisons easier elsewhere we doubly make sure.
+    external_user.email = login_gov_user.email.lower()
 
     # Flush the records to the DB so any auto-generated IDs and similar are populated
     # prior to us trying to work with the user further.

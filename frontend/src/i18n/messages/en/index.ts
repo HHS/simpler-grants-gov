@@ -121,7 +121,7 @@ export const messages = {
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
       requiredText: "All fields are required.",
-      saveButtonText: "Save",
+      saveButtonText: "Create Application",
       title: "Start a new application",
       ineligibleTitle:
         "It looks like you're not eligible to start a new application through this site",
@@ -144,6 +144,9 @@ export const messages = {
       description: {
         organizationIntro:
           "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
+        pilotIntro:
+          "Welcome to our new, simpler application process. In partnership with the Bureau of Reclamation, we ensure your application is processed by the agency normally.",
+        organizationApply: "To apply as part of an organization you must:",
         applyingForOrg:
           "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
         poc: "Be the EBiz POC (Electronic Business Point of Contact) for your organization",
@@ -152,6 +155,8 @@ export const messages = {
           "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
         goToGrants:
           "If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        support:
+          "For product support, contact us at <telephone>1-800-581-4726</telephone> or <email>simpler@grants.gov</email>. You can also apply through <link>Grants.gov</link> if you prefer.",
         pilotGoToGrants:
           "This opportunity is part of a pilot program. If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
         organizationIndividualIntro:
@@ -365,6 +370,7 @@ export const messages = {
         "Correct the following errors before submitting your application.",
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
+      unsavedChangesWarning: "You have unsaved changes that will be lost.",
     },
   },
   Index: {
@@ -516,14 +522,104 @@ export const messages = {
     pageTitle: "Developer Portal | Simpler.Grants.gov",
     pageDescription:
       "Tools and resources for developers working on Simpler.Grants.gov",
-    description:
-      "Welcome to the Simpler.Grants.gov Developer Portal. Here you'll find tools and resources to help you contribute to and work with our platform.",
+    infoTitle: "API tools & management",
+    canDoHeader: "What's available for developers",
+    canDoSubHeader: "What you can do with an API key now",
+    canDoParagraph:
+      "You can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials to create, view, rotate, and revoke API keys.",
+    cantDoHeader: "Current limitations",
+    cantDoParagraph:
+      "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren't available yet.</p>",
+    apiDashboardLink: "Manage API Keys",
+    iconSections: [
+      {
+        description:
+          "Make your first API request in minutes. Learn the basics of the Simpler.Grants.gov API.",
+        http: "https://github.com/HHS/simpler-grants-gov/tree/main/documentation",
+        iconName: "code",
+        link: "Get started",
+        title: "Developer quickstart",
+      },
+      {
+        description: "Learn more about integrating our API into your project.",
+        http: "https://api.simpler.grants.gov/docs#/Opportunity%20v1/post_v1_opportunities_search",
+        iconName: "local_library",
+        link: "Read the docs",
+        title: "API reference",
+      },
+    ],
+  },
+  ApiDashboard: {
+    pageTitle: "API Dashboard | Simpler.Grants.gov",
+    metaDescription: "Manage your API keys for Simpler.Grants.gov",
+    heading: "API Dashboard",
+    errorLoadingKeys: "Failed to load API keys",
+    table: {
+      headers: {
+        apiKey: "API Key",
+        dates: "Dates",
+        editName: "Edit Name",
+        deleteKey: "Delete Key",
+      },
+      dateLabels: {
+        created: "Created:",
+        lastUsed: "Last used:",
+        never: "Never",
+      },
+      deleteButton: "Delete Key",
+      deleteButtonTitle: "Delete this API key",
+      emptyState:
+        "You don't have any API keys yet. Create your first API key to get started.",
+    },
+    modal: {
+      apiKeyNameLabel: "Name <required>(required)</required>",
+      placeholder: "e.g., Production API Key",
+      createTitle: "Create New API Key",
+      createDescription:
+        "Create a new key for use with the Simpler.Grants.gov API",
+      editDescription: "Change the name of your Simpler.Grants.gov API key",
+      createSuccessHeading: "API Key Created Successfully",
+      editSuccessHeading: "API Key Renamed Successfully",
+      createSuccessMessage:
+        'Your API key "{keyName}" has been created successfully.',
+      editSuccessMessage:
+        'Your API key has been renamed from "{originalName}" to "{keyName}".',
+      close: "Close",
+      createErrorMessage:
+        "There was an error creating your API key. Please try again.",
+      editErrorMessage:
+        "There was an error renaming your API key. Please try again.",
+      nameRequiredError: "API key name is required",
+      nameChangedError: "Please enter a different name",
+      editTitle: "Rename API Key",
+      createButtonText: "Create API Key",
+      editNameButtonText: "Edit Name",
+      creating: "Creating...",
+      saving: "Saving...",
+      saveChanges: "Save Changes",
+      cancel: "Cancel",
+      deleteTitle: "Delete API Key",
+      deleteDescription:
+        'To confirm deletion, type "delete" in the field below:',
+      deleteConfirmationLabel:
+        'Type "delete" to confirm <required>(required)</required>',
+      deleteConfirmationPlaceholder: "delete",
+      deleteConfirmationError: 'Please type "delete" to confirm deletion',
+      deleteSuccessHeading: "API Key Deleted Successfully",
+      deleteSuccessMessage:
+        'Your API key "{keyName}" has been deleted successfully.',
+      deleteErrorMessage:
+        "There was an error deleting your API key. Please try again.",
+      deleteButtonText: "Delete Key",
+      deleting: "Deleting...",
+    },
   },
   Header: {
     navLinks: {
       about: "About",
       community: "Community",
       developer: "Developer Portal",
+      developers: "Developers",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",
@@ -936,14 +1032,23 @@ export const messages = {
               "We're building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
           },
           {
-            title: "Iterative",
-            content:
-              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
-          },
-          {
             title: "Agile",
             content:
               "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Send us your feedback and suggestions.",
+            link: "mailto:simpler@grants.gov",
+            linkText: "Contact us at simpler@grants.gov",
+          },
+          {
+            title: "Co-planning",
+            content:
+              "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+            link: "https://simplergrants.fider.io",
+            linkText: "Vote on our proposals board",
           },
         ],
       },

@@ -66,6 +66,7 @@ class ProcessSamExtractsTask(Task):
 
         ROWS_PROCESSED_COUNT = "rows_processed_count"
         ROWS_SKIPPED_COUNT = "rows_skipped_count"
+        DEACTIVATED_SKIPPED_COUNT = "deactivated_skipped_count"
         DEACTIVATED_ROWS_COUNT = "deactivated_rows_count"
         EXPIRED_ROWS_COUNT = "expired_rows_count"
         ROWS_CONVERTED_COUNT = "rows_converted_count"
@@ -237,6 +238,19 @@ class ProcessSamExtractsTask(Task):
             # These records are separated by the "EFT Indicator" and we will
             # assume that every UEI has one null/empty EFT indicator record that we'll use.
             if len(eft_indicator) > 0:
+                # If the extract_code is to deactivate a record, AND has an eft indicator
+                # then it's saying to deactivate that particular EFT indicator record on a UEI
+                # Since we don't consume any non-empty EFT indicator records, we have nothing
+                # to deactivate and shouldn't expect it to be present.
+                # If the entire UEI was deactivated, we'd receive the empty EFT indicator record itself
+                if extract_code == "1":
+                    logger.info(
+                        "EFT Indicator is not empty, but record is marked for deactivation, skipping entirely",
+                        extra=log_extra,
+                    )
+                    self.increment(self.Metrics.DEACTIVATED_SKIPPED_COUNT)
+                    continue
+
                 logger.info(
                     "EFT Indicator is not empty, skipping assuming to be a duplicate",
                     extra=log_extra,
@@ -512,7 +526,9 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
         tokens, ExtractIndex.REGISTRATION_EXPIRATION_DATE, can_be_blank=False
     )
     # NOTE: Email can be null in rare cases
-    ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL)
+    # We lowercase the email so it can later be joined with our user table
+    # to setup organizations. Sam.gov stores emails with whatever case the user entered.
+    ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL).lower()
     ebiz_first_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_FIRST_NAME)
     ebiz_last_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_LAST_NAME)
     debt_subject_to_offset = get_token_value(tokens, ExtractIndex.DEBT_SUBJECT_TO_OFFSET)
