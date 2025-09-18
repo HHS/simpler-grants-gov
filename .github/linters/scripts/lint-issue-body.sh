@@ -293,50 +293,29 @@ display_results() {
     Deliverable)
       echo "✅ Total issues with valid acceptance criteria: $ac_valid_count"
       echo "✅ Total issues with valid metrics: $metrics_valid_count"
-      echo ""
       ;;
     Proposal)
       echo "✅ Total issues with valid summary: $summary_valid_count"
-      echo ""
       ;;
   esac 
 
   case "$issue_type" in 
     Deliverable)
       if [[ "$ac_invalid_count" -gt 0 ]]; then
-        echo "===== ISSUES WITH INVALID ACCEPTANCE CRITERIA ====="
         echo "❌ Total issues with invalid acceptance criteria: $ac_invalid_count"
-        if [[ ${#ac_failed_issues[@]} -gt 0 ]]; then
-          printf '%s\n' "${ac_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
-            echo "- $title ($url)"
-          done
-        fi
       fi
-      echo ""
       if [[ "$metrics_invalid_count" -gt 0 ]]; then
-        echo "===== ISSUES WITH INVALID METRICS ====="
         echo "❌ Total issues with invalid metrics: $metrics_invalid_count"
-        if [[ ${#metrics_failed_issues[@]} -gt 0 ]]; then
-          printf '%s\n' "${metrics_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
-            echo "- $title ($url)"
-          done
-        fi
       fi
-      echo ""
       ;;
     Proposal)
       if [[ "$summary_invalid_count" -gt 0 ]]; then
-        echo "===== ISSUES WITH INVALID SUMMARY ====="
         echo "❌ Total issues with invalid summary: $summary_invalid_count"
-        if [[ ${#summary_failed_issues[@]} -gt 0 ]]; then
-          printf '%s\n' "${summary_failed_issues[@]}" | sort | while IFS='|' read -r title url; do
-            echo "- $title ($url)"
-          done
-        fi
       fi
-      echo ""
       ;;
   esac
+
+  echo ""
 }
 
 # #######################################################
