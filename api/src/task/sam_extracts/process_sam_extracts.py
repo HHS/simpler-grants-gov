@@ -526,7 +526,9 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
         tokens, ExtractIndex.REGISTRATION_EXPIRATION_DATE, can_be_blank=False
     )
     # NOTE: Email can be null in rare cases
-    ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL)
+    # We lowercase the email so it can later be joined with our user table
+    # to setup organizations. Sam.gov stores emails with whatever case the user entered.
+    ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL).lower()
     ebiz_first_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_FIRST_NAME)
     ebiz_last_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_LAST_NAME)
     debt_subject_to_offset = get_token_value(tokens, ExtractIndex.DEBT_SUBJECT_TO_OFFSET)

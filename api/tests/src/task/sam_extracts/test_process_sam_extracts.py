@@ -105,7 +105,7 @@ class TestProcessSamExtracts:
             extract_code="A",
             legal_business_name="Sara's Sweets",
             registration_expiration_date="20250101",
-            ebiz_poc_email="sara@example.com",
+            ebiz_poc_email="SARA@example.com",  # will be lowercased when processed
             ebiz_first_name="Sara",
             ebiz_last_name="Smith",
             debt_subject_to_offset="Y",

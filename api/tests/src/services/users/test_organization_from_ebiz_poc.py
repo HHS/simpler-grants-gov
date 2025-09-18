@@ -57,6 +57,16 @@ def test_handle_ebiz_poc_organization_during_login_not_ebiz_poc(db_session, enab
     assert result is None
 
 
+def test_handle_ebiz_poc_organization_during_login_blank_email(db_session, enable_factory_create):
+    """Test that we return None when user email is blank"""
+    SamGovEntityFactory.create(ebiz_poc_email="")
+    external_user = LinkExternalUserFactory.create(email="")
+
+    result = handle_ebiz_poc_organization_during_login(db_session, external_user.user)
+
+    assert result is None
+
+
 def test_handle_ebiz_poc_organization_during_login_creates_organization(
     db_session, enable_factory_create
 ):
