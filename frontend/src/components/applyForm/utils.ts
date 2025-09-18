@@ -186,16 +186,28 @@ export const buildWarningTree = (
           );
           return errors.concat(nodeError);
         } else if (!parent && ("definition" in node || "schema" in node)) {
-          const error = findValidationError(
-            formValidationWarnings,
-            Array.isArray(node.definition)
-              ? node.definition[0]
-              : node.definition,
-            node.schema,
-            formSchema,
-          );
-          if (error) {
-            return errors.concat([error]);
+          if (Array.isArray(node.definition)) {
+            node.definition.forEach((def) => {
+              const error = findValidationError(
+                formValidationWarnings,
+                def,
+                node.schema,
+                formSchema,
+              );
+              if (error) {
+                return errors.concat([error]);
+              }
+            });
+          } else {
+            const error = findValidationError(
+              formValidationWarnings,
+              node.definition,
+              node.schema,
+              formSchema,
+            );
+            if (error) {
+              return errors.concat([error]);
+            }
           }
         }
         return errors;
@@ -214,17 +226,29 @@ export const buildWarningTree = (
             );
             return errors.concat(nodeError);
           } else {
+          if (Array.isArray(node.definition)) {
+            node.definition.forEach((def) => {
+              const error = findValidationError(
+                formValidationWarnings,
+                def,
+                node.schema,
+                formSchema,
+              );
+              if (error) {
+                return errors.concat([error]);
+              }
+            });
+          } else {
             const error = findValidationError(
               formValidationWarnings,
-              Array.isArray(node.definition)
-                ? node.definition[0]
-                : node.definition,
+              node.definition,
               node.schema,
               formSchema,
             );
             if (error) {
               return errors.concat([error]);
             }
+          }
             return errors;
           }
         },
