@@ -1070,6 +1070,7 @@ FORM_XML_TRANSFORM_RULES = {
             "default": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
         },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
         "null_handling_options": {
             "exclude": "Default - exclude field entirely from XML (recommended)",
@@ -1216,6 +1217,7 @@ FORM_XML_TRANSFORM_RULES = {
     "authorized_representative_email": {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
+    "aor_signature": {"xml_transform": {"target": "AORSignature"}},
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
     # One-to-many mapping example - applicant type codes
     "applicant_type_code_mapping": {
