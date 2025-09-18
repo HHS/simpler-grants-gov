@@ -403,24 +403,27 @@ class XMLGenerationService:
                 )
             else:
                 for nested_field, nested_value in value.items():
-                    if nested_value is not None:
+                    if nested_value is not None or nested_value == "INCLUDE_NULL_MARKER":
                         self._add_lxml_element_to_parent(
                             nested_element, nested_field, nested_value, nsmap, namespace_fields, xsd_url
                         )
-        elif value is None:
-            # Create empty element for None values (when include_null is configured)
-            if field_name in namespace_fields:
-                namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
-                lxml_etree.SubElement(parent, element_name)
-            else:
-                default_namespace = nsmap.get("SF424_4_0", "")
-                if default_namespace:
-                    element_name = f"{{{default_namespace}}}{field_name}"
+        elif value == "INCLUDE_NULL_MARKER" or value is None:
+            # Create empty element for INCLUDE_NULL_MARKER values or handle None values
+            if value == "INCLUDE_NULL_MARKER":
+                # This is a None value that should be included as empty element
+                if field_name in namespace_fields:
+                    namespace_prefix = namespace_fields[field_name]
+                    namespace_uri = nsmap.get(namespace_prefix, "")
+                    element_name = f"{{{namespace_uri}}}{field_name}"
                     lxml_etree.SubElement(parent, element_name)
                 else:
-                    lxml_etree.SubElement(parent, field_name)
+                    default_namespace = nsmap.get("SF424_4_0", "")
+                    if default_namespace:
+                        element_name = f"{{{default_namespace}}}{field_name}"
+                        lxml_etree.SubElement(parent, element_name)
+                    else:
+                        lxml_etree.SubElement(parent, field_name)
+            # If value is None (not INCLUDE_NULL_MARKER), skip it - it should be excluded
         else:
             # Simple value - create element with text content
             if field_name in namespace_fields:
