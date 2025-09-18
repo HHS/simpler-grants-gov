@@ -1,17 +1,11 @@
 "use server";
 
+import { getSession } from "src/services/auth/session";
+import { updateUserDetails } from "src/services/fetch/fetchers/userFetcher";
+import { UserProfileResponse } from "src/types/userTypes";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
-
-export type UserProfileValidationErrors = {
-  firstName?: string[];
-  lastName?: string[];
-};
-
-type UserProfileResponse = {
-  validationErrors: UserProfileValidationErrors;
-};
 
 const validateUserProfileAction = async (formData: FormData) => {
   const t = await getTranslations("UserProfile.validationErrors");
@@ -29,7 +23,6 @@ const validateUserProfileAction = async (formData: FormData) => {
   if (!validatedFields.success) {
     return validatedFields.error.flatten().fieldErrors;
   }
-  return {};
 };
 
 export const userProfileAction = async (
@@ -38,7 +31,38 @@ export const userProfileAction = async (
 ): Promise<UserProfileResponse> => {
   console.log("Received form data to save to user profile", formData);
   const validationErrors = await validateUserProfileAction(formData);
-  return {
-    validationErrors,
+  if (validationErrors) {
+    return {
+      validationErrors,
+    };
+  }
+
+  const session = await getSession();
+
+  if (!session) {
+    return {
+      errorMessage: "Not logged in",
+    };
+  }
+
+  const rawFormData = {
+    first_name: formData.get("first_name") as string,
+    middle_name: formData.get("middle_name") as string,
+    last_name: formData.get("last_name") as string,
   };
+
+  let userDetailsResponse;
+  try {
+    userDetailsResponse = await updateUserDetails(session.token, rawFormData);
+    return { data: userDetailsResponse };
+  } catch (e) {
+    // General try failure catch error
+    const error = e as Error;
+    console.error(
+      `Error updating user details - ${error.message} ${error.cause?.toString() || ""}`,
+    );
+    return {
+      errorMessage: error.message,
+    };
+  }
 };
