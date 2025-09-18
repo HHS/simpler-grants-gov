@@ -45,6 +45,7 @@ class SESV2Client(BaseSESV2Client):
         next_token = None
 
         try:
+            logger.info("Retrieving suppressed destinations")
             iterations = 0
             while True:
                 iterations += 1

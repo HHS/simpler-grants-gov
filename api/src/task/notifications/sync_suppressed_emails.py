@@ -1,6 +1,7 @@
+import logging
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client, get_sesv2_client
@@ -8,6 +9,8 @@ from src.db.models.user_models import LinkExternalUser, SuppressedEmail
 from src.task.notifications import constants
 from src.task.notifications.constants import Metrics
 from src.task.task import Task
+
+logger = logging.getLogger(__name__)
 
 
 class SyncSuppressedEmailsTask(Task):
@@ -24,6 +27,11 @@ class SyncSuppressedEmailsTask(Task):
 
     def process_suppressed_emails(self) -> None:
         # Get the most recent suppression timestamp from DB
+        total_suppressed_emails = self.db_session.execute(
+            select(func.count()).select_from(SuppressedEmail)
+        ).scalar_one()
+        logger.info("Existing count of suppressed emails: %s", total_suppressed_emails)
+
         stmt = select(SuppressedEmail).order_by(SuppressedEmail.last_update_time.desc()).limit(1)
 
         last_record = self.db_session.execute(stmt).scalars().first()
@@ -33,8 +41,12 @@ class SyncSuppressedEmailsTask(Task):
             start_time = last_record.last_update_time + timedelta(microseconds=1)
 
         resp = self.sesv2_client.list_suppressed_destinations(start_time=start_time)
-        emails = [d.email_address for d in resp.suppressed_destination_summaries]
+        suppressed_emails = resp.suppressed_destination_summaries
+        self.increment(Metrics.TOTAL_SUPPRESSED_DESTINATION_COUNT, len(suppressed_emails))
+
+        emails = [d.email_address for d in suppressed_emails]
         if not emails:
+            logger.info("No suppressed destinations returned")
             return
 
         # Fetch relevant users
@@ -55,6 +67,7 @@ class SyncSuppressedEmailsTask(Task):
             .scalars()
             .all()
         )
+        logger.info("Updating %d existing suppressed emails", len(existing_suppressions))
 
         suppression_map = {s.email: s for s in existing_suppressions}
 
