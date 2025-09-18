@@ -121,6 +121,8 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization(
     assert org_user.organization == organization
     assert org_user.is_organization_owner is True
 
+    db_session.flush()
+
     # Verify the user has the Organization Admin role
     assert len(org_user.organization_user_roles) == 1
     assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
