@@ -231,14 +231,14 @@ start-mock-oauth2:
 # Testing
 ##################################################
 
-test: ## Run all tests except for audit logging tests
-	$(PY_RUN_CMD) pytest -m "not audit" $(args)
+test: ## Run all tests except for audit logging and XML validation tests
+	$(PY_RUN_CMD) pytest -m "not audit and not xml_validation" $(args)
 
 test-audit: ## Run audit logging tests
 	$(PY_RUN_CMD) pytest -m "audit" $(args)
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit and not xml_validation" $(args)
 	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
 	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
 	$(PY_RUN_CMD) coverage report
@@ -330,6 +330,20 @@ help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 ##################################################
+# XML Validation Tests
+##################################################
+
+test-xml-validation: ## Run XML validation tests (separate from main test suite). Use 'form=sf424' for SF-424 specific tests
+	@if [ "$(form)" = "sf424" ]; then \
+		$(PY_RUN_CMD) pytest -m "xml_validation and sf424" $(args); \
+	else \
+		$(PY_RUN_CMD) pytest -m "xml_validation" $(args); \
+	fi
+
+test-xml-validation-xsd: ## Run XML validation tests against specific XSD. Use 'xsd=URL_OR_PATH' and optionally 'form=FORM_NAME'
+	$(PY_RUN_CMD) python run_xml_validation.py --xsd-url "$(xsd)" $(if $(form),--form $(form)) $(args)
+
+##################################################
 # Load testing
 ##################################################
 
@@ -362,3 +376,17 @@ start-mock-soap-services: ## start applicants soap api
 #   make setup-soap-proxy cert_dir="~/certs/dir/"
 setup-soap-proxy:
 	./bin/setup-soap.sh $(cert_dir)
+
+####################
+# XML Generation CLI
+####################
+
+generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}')
+	$(PY_RUN_CMD) python tool/xml_cli.py --json '$(json)'
+
+generate-xml-file: ## Generate XML from JSON file (usage: make generate-xml-file file=input.json)
+	$(PY_RUN_CMD) python tool/xml_cli.py --file $(file)
+
+generate-xml-example: ## Show example JSON for SF-424
+	$(PY_RUN_CMD) python tool/xml_cli.py --example
+
