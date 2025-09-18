@@ -22,6 +22,28 @@ import {
 } from "./types";
 import { getFieldsForNav } from "./utils";
 
+type Translator = ((
+  key: string,
+  values?: Record<string, unknown>,
+) => string) & {
+  rich: (
+    key: string,
+    values: Record<string, (chunks: ReactNode) => ReactNode>,
+  ) => ReactNode;
+};
+
+interface WidgetSupport {
+  validationWarnings:
+    | FormattedFormValidationWarning[]
+    | FormValidationWarning[];
+}
+
+interface ApplyFormFormContext {
+  rootSchema: RJSFSchema;
+  rootFormData: unknown;
+  widgetSupport: WidgetSupport;
+}
+
 const ApplyForm = ({
   applicationId,
   formId,
@@ -44,13 +66,6 @@ const ApplyForm = ({
   attachments: Attachment[];
   isBudgetForm?: boolean;
 }) => {
-  type RichRenderer = (chunks: ReactNode) => ReactNode;
-  type Translator = ((
-    key: string,
-    values?: Record<string, unknown>,
-  ) => string) & {
-    rich: (key: string, values: Record<string, RichRenderer>) => ReactNode;
-  };
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
@@ -86,9 +101,13 @@ const ApplyForm = ({
 
   const formObject = savedFormData || new FormData();
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
-  const formContextValue = useMemo(
-    () => ({ rootSchema: formSchema, rootFormData: formObject }),
-    [formSchema, formObject],
+  const formContextValue = useMemo<ApplyFormFormContext>(
+    () => ({
+      rootSchema: formSchema,
+      rootFormData: formObject,
+      widgetSupport: { validationWarnings: validationWarnings ?? [] },
+    }),
+    [formSchema, formObject, validationWarnings],
   );
 
   if (!formSchema || !formSchema.properties || isEmpty(formSchema.properties)) {
