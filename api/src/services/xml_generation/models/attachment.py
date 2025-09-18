@@ -84,7 +84,7 @@ class AttachmentFile(BaseModel):
         Returns:
             Base64-encoded SHA-1 hash string
         """
-        sha1_hash = hashlib.sha1()
+        sha1_hash = hashlib.sha1(usedforsecurity=False)
 
         with open(file_path, "rb") as f:
             # Read file in chunks to handle large files efficiently
@@ -104,7 +104,7 @@ class AttachmentFile(BaseModel):
         Returns:
             Base64-encoded SHA-1 hash string
         """
-        sha1_hash = hashlib.sha1(content)
+        sha1_hash = hashlib.sha1(content, usedforsecurity=False)
         return base64.b64encode(sha1_hash.digest()).decode("utf-8")
 
 

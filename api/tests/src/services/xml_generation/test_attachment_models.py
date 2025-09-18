@@ -81,7 +81,7 @@ class TestAttachmentFile:
         computed_hash = AttachmentFile.compute_base64_sha1_from_content(test_content)
 
         # Verify manually
-        expected_sha1 = hashlib.sha1(test_content)
+        expected_sha1 = hashlib.sha1(test_content)  # nosec B324
         expected_base64 = base64.b64encode(expected_sha1.digest()).decode("utf-8")
 
         assert computed_hash == expected_base64

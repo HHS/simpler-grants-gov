@@ -5,8 +5,8 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Any
-from urllib.request import urlopen
 
+import requests
 import xmlschema
 from lxml import etree
 
@@ -79,11 +79,8 @@ class XSDValidator:
             return env_url
         url = xsd_urls[form_name]
         if url.startswith("PLACEHOLDER_"):
-            raise XSDValidationError(
-                f"XSD URL for {form_name} is not configured. "
-                f"Please update the URL in get_xsd_url() method or set environment variable {env_var_name}. "
-                f"See comments in xsd_validator.py for guidance on finding correct Grants.gov XSD URLs."
-            )
+            error_msg = ("XSD URL for {form_name} is not configured. ").format(form_name=form_name)
+            raise XSDValidationError(error_msg)
         return url
 
     def download_xsd(self, form_name: str) -> Path:
@@ -108,8 +105,9 @@ class XSDValidator:
 
         try:
             logger.info(f"Downloading XSD from: {xsd_url}")
-            with urlopen(xsd_url) as response:
-                xsd_content = response.read()
+            response = requests.get(xsd_url, timeout=30)
+            response.raise_for_status()
+            xsd_content = response.content
 
             with open(xsd_path, "wb") as f:
                 f.write(xsd_content)
@@ -171,8 +169,9 @@ class XSDValidator:
                     logger.debug(f"Using cached XSD file: {xsd_path}")
                 else:
                     logger.info(f"Downloading XSD from: {xsd_url_or_path}")
-                    with urlopen(xsd_url_or_path) as response:
-                        xsd_content = response.read()
+                    response = requests.get(xsd_url_or_path, timeout=30)
+                    response.raise_for_status()
+                    xsd_content = response.content
 
                     with open(xsd_path, "wb") as f:
                         f.write(xsd_content)
