@@ -51,11 +51,6 @@ def _assign_application_owner_role(
         },
     )
 
-    # Flush to ensure the ApplicationUser gets its primary key (application_user_id)
-    # before the ApplicationUserRole is created. This prevents foreign key constraint
-    # violations when the role references the application_user_id.
-    db_session.flush()
-
 
 def _validate_organization_membership(
     db_session: db.Session, organization: Organization, user: User
