@@ -172,12 +172,11 @@ class ValidationTestRunner:
 
         logger.info(f"Results saved to: {output_path}")
 
-    def print_summary(self, summary: dict[str, Any], verbose: bool = False) -> None:
+    def print_summary(self, summary: dict[str, Any]) -> None:
         """Print a summary of test results.
 
         Args:
             summary: Test results summary
-            verbose: Show detailed error messages
         """
         print("\n" + "=" * 60)
         print("XML VALIDATION TEST SUMMARY")
@@ -193,27 +192,5 @@ class ValidationTestRunner:
                 print(f"  {error_type}: {len(test_names)} tests")
                 for test_name in test_names:
                     print(f"    - {test_name}")
-
-        # Show detailed errors for failed tests
-        if verbose and summary["failed_tests"] > 0:
-            print("\nDETAILED VALIDATION ERRORS:")
-            print("=" * 60)
-            for result in summary["results"]:
-                if not result["success"]:
-                    print(f"\n{result['test_name']}:")
-                    if result.get("validation_result"):
-                        validation_result = result["validation_result"]
-                        if hasattr(validation_result, "errors") and validation_result.errors:
-                            for i, error in enumerate(
-                                validation_result.errors[:3]
-                            ):  # Show first 3 errors
-                                print(f"  {i + 1}. {error}")
-                        elif isinstance(validation_result, dict) and "errors" in validation_result:
-                            for i, error in enumerate(
-                                validation_result["errors"][:3]
-                            ):  # Show first 3 errors
-                                print(f"  {i + 1}. {error}")
-                    if result.get("error_message"):
-                        print(f"  Error: {result['error_message']}")
 
         print("=" * 60)

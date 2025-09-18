@@ -67,6 +67,10 @@ Examples:
         help="Output file to save results (JSON format)",
     )
     parser.add_argument(
+        "--cache-dir",
+        help="Directory to cache XSD files (default: system temp directory)",
+    )
+    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -101,13 +105,13 @@ Examples:
                 test_case["xsd_url"] = args.xsd_url
 
         # Initialize test runner
-        runner = ValidationTestRunner()
+        runner = ValidationTestRunner(cache_dir=args.cache_dir)
 
         # Run tests
         summary = runner.run_test_suite(test_cases)
 
         # Print summary
-        runner.print_summary(summary, verbose=args.verbose)
+        runner.print_summary(summary)
 
         # Save results if requested
         if args.output:

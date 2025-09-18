@@ -37,6 +37,8 @@ xlrd = "^2.0.1"
 pypdf = "^6.0.0"
 python-docx = "^1.1.2"
 beautifulsoup4 = "^4.13.3"
+xmlschema = "^3.4.0"
+lxml = "^5.3.0"
 striprtf = "^0.0.29"
 python-pptx = "^1.0.2"
 openpyxl = "^3.1.5"
@@ -167,6 +169,8 @@ filterwarnings = [
 
 markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests",
+  "xml_validation: mark a test as an XML generation/validation test, to be run isolated from other tests",
+  "sf424: mark a test as SF-424 form specific",
 ]
 
 [tool.coverage.run]
