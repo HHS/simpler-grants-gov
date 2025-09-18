@@ -37,14 +37,14 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         id="edit-user-first-name"
         name="firstName"
         type="text"
-        defaultValue={userDetails.first_name}
+        value={state.first_name || userDetails.first_name}
       />
       <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
       <TextInput
         id="edit-user-middle-name"
         name="middleName"
         type="text"
-        defaultValue={userDetails.middle_name}
+        value={state.middle_name || userDetails.middle_name}
       />
       <Label htmlFor="lastName">
         <span>{t("inputs.lastName")}</span>
@@ -58,7 +58,7 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         id="edit-user-last-name"
         name="lastName"
         type="text"
-        defaultValue={userDetails.last_name}
+        value={state.last_name || userDetails.last_name}
       />
       <Label htmlFor="email">{t("inputs.email")}</Label>
       <TextInput
