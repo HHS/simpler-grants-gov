@@ -248,6 +248,20 @@ test-coverage-report: ## Open HTML test coverage report
 	open .coverage_report/index.html
 
 ##################################################
+# XML Validation Tests
+##################################################
+
+test-xml-validation: ## Run XML validation tests (separate from main test suite). Use 'form=sf424' for SF-424 specific tests
+	@if [ "$(form)" = "sf424" ]; then \
+		$(PY_RUN_CMD) pytest -m "xml_validation and sf424" $(args); \
+	else \
+		$(PY_RUN_CMD) pytest -m "xml_validation" $(args); \
+	fi
+
+test-xml-validation-xsd: ## Run XML validation tests against specific XSD. Use 'xsd=URL_OR_PATH' and optionally 'form=FORM_NAME'
+	$(PY_RUN_CMD) python run_xml_validation.py --xsd-url "$(xsd)" $(if $(form),--form $(form)) $(args)
+
+##################################################
 # Formatting and linting
 ##################################################
 

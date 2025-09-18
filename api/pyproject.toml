@@ -42,6 +42,8 @@ python-pptx = "^1.0.2"
 openpyxl = "^3.1.5"
 defusedxml = "^0.7.1"
 xmltodict = "^0.15.0"
+lxml = "^5.0.0"
+xmlschema = "^3.0.0"
 docraptor = "^3.0.0"
 jsonpath-ng = "^1.7.0"
 

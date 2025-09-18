@@ -2,7 +2,6 @@ import uuid
 
 import src.form_schema.forms.shared_schema as shared_schema
 from src.db.models.competition_models import Form
-from src.services.xml_generation.constants import NO_VALUE
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -627,11 +626,10 @@ FORM_JSON_SCHEMA = {
             # to avoid any floating point rounding issues.
             "type": "string",
             # Pattern here effectively says:
-            # * An optional negative sign
             # * Any number of digits
             # * An optional decimal point
             # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^(-)?\d*([.]\d{2})?$",
+            "pattern": r"^\d*([.]\d{2})?$",
             # Limit the max amount based on the length (11-digits, allows up to 99 billion)
             "maxLength": 14,
         },
@@ -1080,46 +1078,105 @@ FORM_XML_TRANSFORM_RULES = {
     "date_received": {
         "xml_transform": {
             "target": "DateReceived",
-            "null_handling": "include_null",
+            "null_handling": "exclude",
         }
     },
-    # Applicant information - direct field mappings
-    "organization_name": {"xml_transform": {"target": "OrganizationName"}},
-    "employer_taxpayer_identification_number": {
-        "xml_transform": {"target": "EmployerTaxpayerIdentificationNumber"}
+    # Applicant information - direct field mappings with defaults for required fields
+    "organization_name": {
+        "xml_transform": {
+            "target": "OrganizationName",
+            "null_handling": "exclude",
+        }
     },
-    "sam_uei": {"xml_transform": {"target": "SAMUEI"}},
-    # Address information - nested structure
+    "employer_taxpayer_identification_number": {
+        "xml_transform": {
+            "target": "EmployerTaxpayerIdentificationNumber",
+            "null_handling": "exclude",
+        }
+    },
+    "sam_uei": {
+        "xml_transform": {
+            "target": "SAMUEI",
+            "null_handling": "exclude",
+        }
+    },
+    # Address information - nested structure with GlobalLibrary namespace
     "applicant_address": {
         "xml_transform": {"target": "Applicant", "type": "nested_object"},
-        "address_line_1": {"xml_transform": {"target": "Street1"}},
-        "address_line_2": {"xml_transform": {"target": "Street2"}},
-        "city": {"xml_transform": {"target": "City"}},
-        "county": {"xml_transform": {"target": "County"}},
-        "state_code": {"xml_transform": {"target": "State"}},
-        "country_code": {"xml_transform": {"target": "Country"}},
-        "zip_code": {"xml_transform": {"target": "ZipPostalCode"}},
+        "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
+        "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
+        "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},
+        "county": {"xml_transform": {"target": "County", "namespace": "globLib"}},
+        "state": {"xml_transform": {"target": "State", "namespace": "globLib"}},
+        "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
+        "zip_postal_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
     },
-    # Contact information - direct field mappings
-    "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
+    # Contact information - direct field mappings with defaults for required fields
+    "phone_number": {
+        "xml_transform": {
+            "target": "PhoneNumber",
+            "null_handling": "exclude",
+        }
+    },
     "fax_number": {"xml_transform": {"target": "Fax"}},
-    "email": {"xml_transform": {"target": "Email"}},
-    # Opportunity information - direct field mappings
-    "agency_name": {"xml_transform": {"target": "AgencyName"}},
+    "email": {
+        "xml_transform": {
+            "target": "Email",
+            "null_handling": "exclude",
+        }
+    },
+    # Opportunity information - direct field mappings with defaults for required fields
+    "agency_name": {
+        "xml_transform": {
+            "target": "AgencyName",
+            "null_handling": "exclude",
+        }
+    },
     "assistance_listing_number": {"xml_transform": {"target": "CFDANumber"}},
     "assistance_listing_program_title": {"xml_transform": {"target": "CFDAProgramTitle"}},
-    "funding_opportunity_number": {"xml_transform": {"target": "FundingOpportunityNumber"}},
-    "funding_opportunity_title": {"xml_transform": {"target": "FundingOpportunityTitle"}},
-    # Project information - direct field mappings
-    "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "funding_opportunity_number": {
+        "xml_transform": {
+            "target": "FundingOpportunityNumber",
+            "null_handling": "exclude",
+        }
+    },
+    "funding_opportunity_title": {
+        "xml_transform": {
+            "target": "FundingOpportunityTitle",
+            "null_handling": "exclude",
+        }
+    },
+    # Project information - direct field mappings with defaults for required fields
+    "project_title": {
+        "xml_transform": {
+            "target": "ProjectTitle",
+            "null_handling": "exclude",
+        }
+    },
     "congressional_district_applicant": {
-        "xml_transform": {"target": "CongressionalDistrictApplicant"}
+        "xml_transform": {
+            "target": "CongressionalDistrictApplicant",
+            "null_handling": "exclude",
+        }
     },
     "congressional_district_program_project": {
-        "xml_transform": {"target": "CongressionalDistrictProgramProject"}
+        "xml_transform": {
+            "target": "CongressionalDistrictProgramProject",
+            "null_handling": "exclude",
+        }
     },
-    "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
-    "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
+    "project_start_date": {
+        "xml_transform": {
+            "target": "ProjectStartDate",
+            "null_handling": "exclude",
+        }
+    },
+    "project_end_date": {
+        "xml_transform": {
+            "target": "ProjectEndDate",
+            "null_handling": "exclude",
+        }
+    },
     # Funding information - with currency formatting
     "federal_estimated_funding": {
         "xml_transform": {
@@ -1161,14 +1218,14 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {
             "target": "TotalEstimatedFunding",
             "value_transform": {"type": "currency_format"},
+            "null_handling": "exclude",
         }
     },
     # Review and certification - with value transformations
     "state_review": {
         "xml_transform": {
             "target": "StateReview",
-            "null_handling": "default_value",
-            "default_value": NO_VALUE,  # Use constant from value_transformers
+            "null_handling": "exclude",
         }
     },
     "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
@@ -1185,16 +1242,73 @@ FORM_XML_TRANSFORM_RULES = {
         }
     },
     # Authorized representative - direct field mappings
+    "authorized_representative": {
+        "xml_transform": {"target": "AuthorizedRepresentative", "type": "nested_object"},
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+                "null_handling": "default_value",
+                "default_value": "John",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+                "null_handling": "default_value",
+                "default_value": "Doe",
+            }
+        },
+    },
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
     },
     "authorized_representative_phone_number": {
-        "xml_transform": {"target": "AuthorizedRepresentativePhoneNumber"}
+        "xml_transform": {
+            "target": "AuthorizedRepresentativePhoneNumber",
+            "null_handling": "exclude",
+        }
     },
     "authorized_representative_email": {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
+    "aor_signature": {
+        "xml_transform": {
+            "target": "AORSignature",
+            "null_handling": "exclude",
+        }
+    },
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
+    # Attachment fields
+    "areas_affected": {
+        "xml_transform": {
+            "target": "AreasAffected",
+            "type": "attachment",
+            "null_handling": "exclude",
+        }
+    },
+    "additional_project_title": {
+        "xml_transform": {
+            "target": "AdditionalProjectTitle",
+            "type": "attachment_group",
+            "null_handling": "exclude",
+        }
+    },
+    "additional_congressional_districts": {
+        "xml_transform": {
+            "target": "AdditionalCongressionalDistricts",
+            "type": "attachment",
+            "null_handling": "exclude",
+        }
+    },
+    "debt_explanation": {
+        "xml_transform": {
+            "target": "DebtExplanation",
+            "type": "attachment",
+            "null_handling": "exclude",
+        }
+    },
     # One-to-many mapping example - applicant type codes
     "applicant_type_code_mapping": {
         "xml_transform": {
