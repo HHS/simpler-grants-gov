@@ -1066,7 +1066,10 @@ FORM_XML_TRANSFORM_RULES = {
         "description": "XML transformation rules for converting Simpler SF-424 JSON to Grants.gov XML format",
         "version": "1.0",
         "form_name": "SF424_4_0",
-        "namespaces": {"default": "http://apply.grants.gov/forms/SF424_4_0-V4.0", "prefix": ""},
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
         "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
         "null_handling_options": {
             "exclude": "Default - exclude field entirely from XML (recommended)",
@@ -1089,16 +1092,16 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {"target": "EmployerTaxpayerIdentificationNumber"}
     },
     "sam_uei": {"xml_transform": {"target": "SAMUEI"}},
-    # Address information - nested structure
+    # Address information - nested structure with GlobalLibrary namespace
     "applicant_address": {
         "xml_transform": {"target": "Applicant", "type": "nested_object"},
-        "address_line_1": {"xml_transform": {"target": "Street1"}},
-        "address_line_2": {"xml_transform": {"target": "Street2"}},
-        "city": {"xml_transform": {"target": "City"}},
-        "county": {"xml_transform": {"target": "County"}},
-        "state_code": {"xml_transform": {"target": "State"}},
-        "country_code": {"xml_transform": {"target": "Country"}},
-        "zip_code": {"xml_transform": {"target": "ZipPostalCode"}},
+        "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
+        "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
+        "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},
+        "county": {"xml_transform": {"target": "County", "namespace": "globLib"}},
+        "state": {"xml_transform": {"target": "State", "namespace": "globLib"}},
+        "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
+        "zip_postal_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
     },
     # Contact information - direct field mappings
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
@@ -1184,7 +1187,26 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
-    # Authorized representative - direct field mappings
+    # Authorized representative - nested structure with GlobalLibrary namespace for names
+    "authorized_representative": {
+        "xml_transform": {"target": "AuthorizedRepresentative", "type": "nested_object"},
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+                "null_handling": "default_value",
+                "default_value": "John",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+                "null_handling": "default_value",
+                "default_value": "Doe",
+            }
+        },
+    },
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
     },

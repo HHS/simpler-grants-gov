@@ -1,6 +1,6 @@
 """Attachment transformer for XML generation."""
 
-from typing import Any, Dict
+from typing import Any
 
 from lxml import etree as lxml_etree
 
@@ -21,7 +21,7 @@ class AttachmentTransformer:
         self.attachment_namespace = attachment_namespace
 
     def add_attachment_elements(
-        self, parent: lxml_etree._Element, data: Dict[str, Any], nsmap: Dict[str, str]
+        self, parent: lxml_etree._Element, data: dict[str, Any], nsmap: dict[str, str]
     ) -> None:
         """Add attachment elements to the parent XML element.
 
@@ -68,8 +68,8 @@ class AttachmentTransformer:
         self,
         parent: lxml_etree._Element,
         element_name: str,
-        attachment_data: Dict[str, Any],
-        nsmap: Dict[str, str],
+        attachment_data: dict[str, Any],
+        nsmap: dict[str, str],
     ) -> None:
         """Add a single attachment element.
 
@@ -86,8 +86,8 @@ class AttachmentTransformer:
         self,
         parent: lxml_etree._Element,
         element_name: str,
-        attachment_data: Dict[str, Any],
-        nsmap: Dict[str, str],
+        attachment_data: dict[str, Any] | list[Any],
+        nsmap: dict[str, str],
     ) -> None:
         """Add a multiple attachment element (AttachmentGroup).
 
@@ -118,8 +118,8 @@ class AttachmentTransformer:
     def _populate_attachment_content(
         self,
         attachment_elem: lxml_etree._Element,
-        attachment_data: Dict[str, Any],
-        nsmap: Dict[str, str],
+        attachment_data: Any,
+        nsmap: dict[str, str],
     ) -> None:
         """Populate the content of an attachment element.
 
@@ -130,7 +130,7 @@ class AttachmentTransformer:
         """
         if not isinstance(attachment_data, dict):
             return
-            
+
         # Add FileName
         if "FileName" in attachment_data:
             filename_elem = lxml_etree.SubElement(attachment_elem, "FileName")
@@ -165,7 +165,7 @@ class AttachmentTransformer:
                 hashvalue_elem.set("hashAlgorithm", "SHA-1")  # Default
                 hashvalue_elem.text = hash_data
 
-    def _attachment_file_to_dict(self, attachment_file: AttachmentFile) -> Dict[str, Any]:
+    def _attachment_file_to_dict(self, attachment_file: AttachmentFile) -> dict[str, Any]:
         """Convert AttachmentFile to dictionary format.
 
         Args:
@@ -184,7 +184,7 @@ class AttachmentTransformer:
             },
         }
 
-    def process_attachment_data(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_attachment_data(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """Process raw attachment data into XML-ready format.
 
         Args:
@@ -227,7 +227,7 @@ class AttachmentTransformer:
 
         return result
 
-    def _process_single_attachment(self, attachment_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _process_single_attachment(self, attachment_info: dict[str, Any]) -> dict[str, Any]:
         """Process a single attachment info dictionary.
 
         Args:
@@ -256,7 +256,7 @@ class AttachmentTransformer:
         # Process direct attachment data
         return self._create_attachment_from_data(attachment_info)
 
-    def _create_placeholder_attachment(self, attachment_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_placeholder_attachment(self, attachment_info: dict[str, Any]) -> dict[str, Any]:
         """Create a placeholder attachment structure.
 
         Args:
@@ -279,7 +279,7 @@ class AttachmentTransformer:
             },
         }
 
-    def _create_attachment_from_data(self, attachment_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_attachment_from_data(self, attachment_info: dict[str, Any]) -> dict[str, Any]:
         """Create attachment data from provided information.
 
         Args:
