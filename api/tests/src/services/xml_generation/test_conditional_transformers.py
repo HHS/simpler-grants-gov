@@ -9,7 +9,6 @@ from src.services.xml_generation.conditional_transformers import (
 )
 
 
-@pytest.mark.xml_validation
 class TestEvaluateCondition:
     """Test basic condition evaluation logic (kept for potential future use)."""
 
@@ -38,7 +37,6 @@ class TestEvaluateCondition:
             evaluate_condition(condition, source_data)
 
 
-@pytest.mark.xml_validation
 class TestApplyConditionalTransform:
     """Test conditional transformation logic (one-to-many only)."""
 

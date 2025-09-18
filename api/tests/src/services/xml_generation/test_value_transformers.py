@@ -13,7 +13,6 @@ from src.services.xml_generation.value_transformers import (
 )
 
 
-@pytest.mark.xml_validation
 class TestBooleanTransformations:
     """Test boolean to Yes/No transformations."""
 
@@ -52,7 +51,6 @@ class TestBooleanTransformations:
             transform_boolean_to_yes_no(42)
 
 
-@pytest.mark.xml_validation
 class TestCurrencyTransformations:
     """Test currency format transformations."""
 
@@ -99,7 +97,6 @@ class TestCurrencyTransformations:
             transform_currency_format("$50,000.00")  # Currency symbols not allowed
 
 
-@pytest.mark.xml_validation
 class TestStringTransformations:
     """Test string case transformations."""
 
@@ -129,7 +126,6 @@ class TestStringTransformations:
             transform_string_case(123, "upper")
 
 
-@pytest.mark.xml_validation
 class TestStringTruncation:
     """Test string truncation transformations."""
 
@@ -159,7 +155,6 @@ class TestStringTruncation:
             transform_truncate_string(123, 5)
 
 
-@pytest.mark.xml_validation
 class TestApplyValueTransformation:
     """Test the main value transformation function."""
 

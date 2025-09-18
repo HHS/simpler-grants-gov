@@ -21,7 +21,6 @@ export const AttachmentsCardForm = ({
         id="application-attachment-upload"
         name="application-attachment-upload"
         errorText={errorText}
-        accept=".pdf,.xlsx"
         onChange={(e) => {
           const files = e.currentTarget.files;
           e.preventDefault();

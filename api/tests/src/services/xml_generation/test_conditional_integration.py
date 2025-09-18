@@ -1,12 +1,9 @@
 """Integration tests for conditional transformations (simplified for one-to-many only)."""
 
-import pytest
-
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
 
-@pytest.mark.xml_validation
 class TestConditionalIntegration:
     """Test end-to-end conditional transformation integration."""
 
@@ -32,9 +29,9 @@ class TestConditionalIntegration:
         assert "ApplicantTypeCode1" in response.xml_data
         assert "ApplicantTypeCode2" in response.xml_data
         assert "ApplicantTypeCode3" in response.xml_data
-        assert "<SF424_4_0:ApplicantTypeCode1>A</SF424_4_0:ApplicantTypeCode1>" in response.xml_data
-        assert "<SF424_4_0:ApplicantTypeCode2>B</SF424_4_0:ApplicantTypeCode2>" in response.xml_data
-        assert "<SF424_4_0:ApplicantTypeCode3>C</SF424_4_0:ApplicantTypeCode3>" in response.xml_data
+        assert "<ApplicantTypeCode1>A</ApplicantTypeCode1>" in response.xml_data
+        assert "<ApplicantTypeCode2>B</ApplicantTypeCode2>" in response.xml_data
+        assert "<ApplicantTypeCode3>C</ApplicantTypeCode3>" in response.xml_data
 
     def test_one_to_many_single_applicant_type_code_integration(self):
         """Test one-to-many transformation with single applicant type code."""
@@ -56,7 +53,7 @@ class TestConditionalIntegration:
 
         # Verify only the first type code is mapped
         assert "ApplicantTypeCode1" in response.xml_data
-        assert "<SF424_4_0:ApplicantTypeCode1>A</SF424_4_0:ApplicantTypeCode1>" in response.xml_data
+        assert "<ApplicantTypeCode1>A</ApplicantTypeCode1>" in response.xml_data
         assert "ApplicantTypeCode2" not in response.xml_data
 
     def test_one_to_many_no_applicant_type_codes_integration(self):

@@ -1,11 +1,8 @@
 """Tests for XML generation configuration."""
 
-import pytest
-
 from src.services.xml_generation.config import load_xml_transform_config
 
 
-@pytest.mark.xml_validation
 class TestXMLTransformConfig:
     """Test cases for XML transform config loading."""
 
