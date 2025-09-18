@@ -369,3 +369,6 @@ summary_invalid_count=$((issue_count - summary_valid_count))
 
 # Display results
 display_results "$issue_type" "$issue_count" "$ac_valid_count" "$ac_invalid_count" "$metrics_valid_count" "$metrics_invalid_count" "$summary_valid_count" "$summary_invalid_count"
+
+# Exit with nonzero status if any validation failed
+exit $(( ac_invalid_count || metrics_invalid_count || summary_invalid_count ))
