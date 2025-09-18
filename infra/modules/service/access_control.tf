@@ -141,17 +141,14 @@ data "aws_iam_policy_document" "email_access" {
 data "aws_iam_policy_document" "api_gateway_access" {
   count = var.enable_api_gateway ? 1 : 0
 
-  # Will be locked down once base functionality is confirmed to work
-
   # Only allows running the GET /apikeys request
   statement {
     sid     = "AllowGetApiKeys"
     actions = ["apigateway:GET"]
     resources = [
+      # Must be wildcarded for this to work. Someone using a dev key in prod would not work
+      # because the dev key's usage plan doesn't allow it to access other env's gateways
       "arn:aws:apigateway:${data.aws_region.current.name}::/apikeys/*", # GetApiKey
-      # Not sure if we need this?
-      # Gives permissions for the API gateway and all sub resources
-      # "${aws_api_gateway_rest_api.api[0].arn}/*"
     ]
   }
 
@@ -160,10 +157,9 @@ data "aws_iam_policy_document" "api_gateway_access" {
     sid     = "AllowImportApiKeys"
     actions = ["apigateway:POST"]
     resources = [
+      # Must be wildcarded for this to work. Someone using a dev key in prod would not work
+      # because the dev key's usage plan doesn't allow it to access other env's gateways
       "arn:aws:apigateway:${data.aws_region.current.name}::/apikeys", # ImportApiKeys
-      # Not sure if we need this?
-      # Gives permissions for the API gateway and all sub resources
-      # "${aws_api_gateway_rest_api.api[0].arn}/*"
     ]
   }
 }
