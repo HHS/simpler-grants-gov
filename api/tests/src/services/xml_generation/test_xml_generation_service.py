@@ -213,8 +213,13 @@ class TestXMLGenerationService:
         # Verify both contain the same content
         assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in pretty_xml
         assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in condensed_xml
-        assert "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in pretty_xml
-        assert "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in condensed_xml
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in pretty_xml
+        )
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>"
+            in condensed_xml
+        )
 
         # Verify formatting differences
         # Pretty-print should have indentation/newlines, condensed should not
@@ -245,15 +250,23 @@ class TestXMLGenerationService:
         xml_data = response.xml_data
 
         # Verify value transformations were applied
-        assert "<SF424_4_0:FederalEstimatedFunding>50000.00</SF424_4_0:FederalEstimatedFunding>" in xml_data
-        assert f"<SF424_4_0:DelinquentFederalDebt>{YES_VALUE}</SF424_4_0:DelinquentFederalDebt>" in xml_data
+        assert (
+            "<SF424_4_0:FederalEstimatedFunding>50000.00</SF424_4_0:FederalEstimatedFunding>"
+            in xml_data
+        )
+        assert (
+            f"<SF424_4_0:DelinquentFederalDebt>{YES_VALUE}</SF424_4_0:DelinquentFederalDebt>"
+            in xml_data
+        )
         assert (
             f"<SF424_4_0:CertificationAgree>{NO_VALUE}</SF424_4_0:CertificationAgree>" in xml_data
         )
 
         # Verify non-transformed fields remain unchanged
         assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
-        assert "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        )
 
     def test_generate_xml_with_none_values_excluded(self):
         """Test that None values are excluded from XML output (default behavior)."""
@@ -281,8 +294,13 @@ class TestXMLGenerationService:
 
         # Verify non-None fields are included
         assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
-        assert "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
-        assert f"<SF424_4_0:DelinquentFederalDebt>{YES_VALUE}</SF424_4_0:DelinquentFederalDebt>" in xml_data
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        )
+        assert (
+            f"<SF424_4_0:DelinquentFederalDebt>{YES_VALUE}</SF424_4_0:DelinquentFederalDebt>"
+            in xml_data
+        )
 
     def test_generate_xml_with_configurable_none_handling(self):
         """Test configurable None handling behaviors."""
