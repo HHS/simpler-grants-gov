@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
@@ -69,10 +70,35 @@ def can_access(
         if len(privilege_overlap) > 0:
             logger.info(
                 "Access granted",
-                extra={"user_id": user.user_id, "role_id": role.role_id, "resource": resource},
+                extra={
+                    "user_id": user.user_id,
+                    "role_id": role.role_id,
+                    **get_log_info_for_resource(resource),
+                },
             )
             return True
 
-    logger.warning("Access denied", extra={"user_id": user.user_id, "resource": resource})
+    logger.info(
+        "Access denied", extra={"user_id": user.user_id, **get_log_info_for_resource(resource)}
+    )
 
     return False
+
+
+def get_log_info_for_resource(resource: Organization | Application | Agency | None) -> dict:
+    log_info: dict[str, Any] = {}
+    if resource is None:
+        return log_info
+
+    if isinstance(resource, Organization):
+        log_info["resource_type"] = "organization"
+        log_info["organization_id"] = resource.organization_id
+    elif isinstance(resource, Application):
+        log_info["resource_type"] = "application"
+        log_info["application_id"] = resource.application_id
+    elif isinstance(resource, Agency):
+        log_info["resource_type"] = "agency"
+        log_info["agency_id"] = resource.agency_id
+        log_info["agency_code"] = resource.agency_code
+
+    return log_info

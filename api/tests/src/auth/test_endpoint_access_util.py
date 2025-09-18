@@ -132,6 +132,29 @@ class TestEndpointAccessUtil(BaseTestClass):
             role=agency_role_privileges,
         )
 
+    @pytest.fixture(scope="class")
+    def user_c_limited_app_a_priv(self, app_owned_by_org_a):
+        return ApplicationUserRoleFactory(
+            application_user=ApplicationUserFactory(application=app_owned_by_org_a),
+            role=RoleFactory(privileges=[Privilege.VIEW_APPLICATION, Privilege.SUBMIT_APPLICATION]),
+        )
+
+    @pytest.fixture(scope="class")
+    def user_d_limited_org_b_priv(self, org_b):
+        return OrganizationUserRoleFactory(
+            organization_user=OrganizationUserFactory(organization=org_b),
+            role=RoleFactory(
+                privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS]
+            ),
+        )
+
+    @pytest.fixture(scope="class")
+    def user_e_limited_agency_b_priv(self, agency_b):
+        return AgencyUserRoleFactory(
+            agency_user=AgencyUserFactory(agency=agency_b),
+            role=RoleFactory(privileges=[Privilege.GET_SUBMITTED_APPLICATIONS]),
+        )
+
     # Organization
     def test_get_roles_for_org_no_role(self, user, org_a):
         """User has no organization role; should return an empty list"""
@@ -172,6 +195,20 @@ class TestEndpointAccessUtil(BaseTestClass):
     def test_user_a_app_a_accessing_org_a(self, user_a_app_a, org_a, privilege):
         """User with App role trying to access organization-level privileges"""
         assert not can_access(user_a_app_a.application_user.user, privilege, org_a)
+
+    @pytest.mark.parametrize(
+        "privilege,expected",
+        [
+            ({Privilege.VIEW_ORG_MEMBERSHIP}, True),
+            ({Privilege.MANAGE_ORG_ADMIN_MEMBERS}, False),
+        ],
+    )
+    def test_user_c_org_a_limited_priv(self, user_d_limited_org_b_priv, org_b, privilege, expected):
+        """User with limited Org privileges"""
+        assert (
+            can_access(user_d_limited_org_b_priv.organization_user.user, privilege, org_b)
+            == expected
+        )
 
     # Application
     def test_get_roles_for_app_no_role(self, user, app):
@@ -223,6 +260,24 @@ class TestEndpointAccessUtil(BaseTestClass):
         )
         assert can_access(app_user_role.application_user.user, privilege, app)
 
+    @pytest.mark.parametrize(
+        "privilege,expected",
+        [
+            ({Privilege.SUBMIT_APPLICATION}, True),
+            ({Privilege.START_APPLICATION}, False),
+        ],
+    )
+    def test_user_c_limited_app_a_priv(
+        self, user_c_limited_app_a_priv, app_owned_by_org_a, privilege, expected
+    ):
+        """User with limited Org privileges"""
+        assert (
+            can_access(
+                user_c_limited_app_a_priv.application_user.user, privilege, app_owned_by_org_a
+            )
+            == expected
+        )
+
     # Internal
     def test_get_internal_role(self, internal_role_privileges, app):
         """User has internal role; should be returned"""
@@ -241,7 +296,7 @@ class TestEndpointAccessUtil(BaseTestClass):
             role=internal_role_privileges,
         )
 
-        can_access(internal_user_role.user, {INTERNAL_PRIVILEGES[0]}, app)
+        assert can_access(internal_user_role.user, {INTERNAL_PRIVILEGES[0]}, app)
 
     # Agency
     def test_get_roles_for_agency_no_role(self, user, agency_a):
@@ -276,3 +331,19 @@ class TestEndpointAccessUtil(BaseTestClass):
     def test_user_a_agency_a_accessing_agency_b(self, user_b_agency_b, agency_a, privilege):
         """User with Agency role accessing a different agency"""
         assert not can_access(user_b_agency_b.agency_user.user, privilege, agency_a)
+
+    @pytest.mark.parametrize(
+        "privilege,expected",
+        [
+            ({Privilege.GET_SUBMITTED_APPLICATIONS}, True),
+            ({Privilege.MANAGE_AGENCY_MEMBERS}, False),
+        ],
+    )
+    def test_user_e_limited_agency_b_priv(
+        self, user_e_limited_agency_b_priv, agency_b, privilege, expected
+    ):
+        """User with limited Agency privileges"""
+        assert (
+            can_access(user_e_limited_agency_b_priv.agency_user.user, privilege, agency_b)
+            == expected
+        )
