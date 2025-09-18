@@ -1,11 +1,13 @@
 import { getSession } from "src/services/auth/session";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
 
-export default async function UserProfile() {
+export async function UserProfile() {
   const t = await getTranslations("UserProfile");
 
   const session = await getSession();
@@ -16,11 +18,14 @@ export default async function UserProfile() {
   }
 
   // fetch name info from user endpoint
-  // gate on feature flag
   return (
-    <GridContainer>
+    <GridContainer className="padding-top-2 tablet:padding-y-6">
       <h1>{t("title")}</h1>
       <UserProfileForm email={session.email} />
     </GridContainer>
   );
 }
+
+export default withFeatureFlag<object, never>(UserProfile, "userAdminOff", () =>
+  redirect("/maintenance"),
+);
