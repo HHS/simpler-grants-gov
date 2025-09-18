@@ -3,7 +3,7 @@
  */
 
 import { getUserOrganizations } from "src/app/api/user/organizations/handler";
-import { Organization } from "src/types/UserTypes";
+import { Organization } from "src/types/userTypes";
 import { fakeOrganization } from "src/utils/testing/fixtures";
 
 const mockFetchOrganizations = jest.fn();
