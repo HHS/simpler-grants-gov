@@ -55,6 +55,9 @@ class User(ApiSchemaTable, TimestampMixin):
     api_keys: Mapped[list["UserApiKey"]] = relationship(
         "UserApiKey", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
+    profile: Mapped["UserProfile"] = relationship(
+        "UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
 
     @property
     def email(self) -> str | None:
@@ -380,3 +383,16 @@ class AgencyUserRole(ApiSchemaTable, TimestampMixin):
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
     role: Mapped[Role] = relationship(Role)
+
+
+class UserProfile(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_profile"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(User.user_id), primary_key=True, index=True
+    )
+    user: Mapped[User] = relationship(User, back_populates="profile", uselist=False)
+
+    first_name: Mapped[str]
+    middle_name: Mapped[str | None]
+    last_name: Mapped[str]

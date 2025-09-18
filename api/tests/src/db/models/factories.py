@@ -891,6 +891,25 @@ class UserFactory(BaseFactory):
 
     user_id = Generators.UuidObj
 
+    class Params:
+        with_profile = factory.Trait(
+            profile=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.UserProfileFactory",
+                factory_related_name="user",
+                size=1,
+            )
+        )
+
+
+class UserProfileFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserProfile
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+
 
 class LinkExternalUserFactory(BaseFactory):
     class Meta:
