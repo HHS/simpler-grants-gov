@@ -362,13 +362,13 @@ if [[ "$issue_count" -gt 0 ]]; then
    lint_issue_body "$issue_type" "$filtered_data" "$issue_count"
 fi
 
-# Calculate issues without valid content
-ac_invalid_count=$((issue_count - ac_valid_count))
-metrics_invalid_count=$((issue_count - metrics_valid_count))
-summary_invalid_count=$((issue_count - summary_valid_count))
+# Calculate number of failures
+ac_invalid_count=${#ac_failed_issues[@]}
+metrics_invalid_count=${#metrics_failed_issues[@]}
+summary_invalid_count=${#summary_failed_issues[@]}
 
 # Display results
 display_results "$issue_type" "$issue_count" "$ac_valid_count" "$ac_invalid_count" "$metrics_valid_count" "$metrics_invalid_count" "$summary_valid_count" "$summary_invalid_count"
 
-# Exit with nonzero status if any validation failed
+# Exit with nonzero status if there were any failures
 exit $(( ac_invalid_count || metrics_invalid_count || summary_invalid_count ))
