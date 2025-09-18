@@ -397,6 +397,60 @@ describe("pruneEmptyNestedFields", () => {
       },
     });
   });
+  it("removes empty nested objects from within arrays", () => {
+    expect(
+      pruneEmptyNestedFields({
+        thing: [
+          {
+            stuff: {
+              more: undefined,
+            },
+            here: "it is",
+          },
+        ],
+      }),
+    ).toEqual({
+      thing: [{ here: "it is" }],
+    });
+  });
+  it("removes empty array values from arrays", () => {
+    expect(
+      pruneEmptyNestedFields({
+        thing: [
+          {
+            stuff: {
+              more: undefined,
+            },
+            here: undefined,
+          },
+        ],
+      }),
+    ).toEqual({
+      thing: [],
+    });
+  });
+  it("removes empty array values from nested arrays", () => {
+    expect(
+      pruneEmptyNestedFields({
+        thing: [
+          {
+            stuff: [
+              {
+                more: undefined,
+              },
+            ],
+            here: undefined,
+          },
+        ],
+      }),
+    ).toEqual({
+      thing: [
+        {
+          stuff: [],
+        },
+      ],
+    });
+  });
 });
 
 describe("getFieldNameForHtml", () => {
