@@ -152,7 +152,6 @@ function Search({ searchParams, params }: SearchPageProps) {
   );
 }
 
-// Exports page behind both feature flags
 export default withFeatureFlag<SearchPageProps, never>(
   Search,
   "searchOff",

@@ -21,8 +21,7 @@ export function UserProfileForm({ email }: { email: string }) {
   const [state, formAction] = useActionState(userProfileAction, {
     validationErrors: {},
   });
-  // fetch name info from user endpoint
-  // gate on feature flag
+
   return (
     <form action={formAction}>
       <Label htmlFor="firstName">
