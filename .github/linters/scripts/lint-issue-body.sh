@@ -141,6 +141,7 @@ fetch_data() {
       .content.issueType.name == $issue_type and
       .content.body != null and
       .content.body != "" and
+      .status.name != null and
       .status.name != "Done"
     )) |
     map({
@@ -217,9 +218,13 @@ validate_acceptance_criteria() {
   local title="$2"
   local url="$3"
 
+  # Convert body and header to lowercase for case-insensitive matching
+  local body_lc=$(echo "$body" | tr '[:upper:]' '[:lower:]')
+  local header=$(echo "$HEADER_ACCEPTANCE_CRITERIA" | tr '[:upper:]' '[:lower:]')
+
   # Extract the acceptance criteria section and ensure it contains checkboxes
-  local ac_section=$(echo "$body" | sed -n "/$HEADER_ACCEPTANCE_CRITERIA/,/^###/{ /^###/d; p; }")
-  if [[ -z "$ac_section" ]] || ! echo "$ac_section" | grep -q "\[[ x]\]"; then
+  local section=$(echo "$body_lc" | sed -n "/$header/,/^###/{ /^###/d; p; }")
+  if [[ -z "$section" ]] || ! echo "$section" | grep -q "\[[ x]\]"; then
     warn "  ❌ Acceptance criteria missing!"
     ac_failed_issues+=("$title|$url")
   else
@@ -232,9 +237,13 @@ validate_metrics() {
   local title="$2"
   local url="$3"
 
+  # Convert body and header to lowercase for case-insensitive matching
+  local body_lc=$(echo "$body" | tr '[:upper:]' '[:lower:]')
+  local header=$(echo "$HEADER_METRICS" | tr '[:upper:]' '[:lower:]')
+
   # Extract the metrics section and ensure it contains checkboxes
-  local metrics_section=$(echo "$body" | sed -n "/$HEADER_METRICS/,/^###/{ /^###/d; p; }")
-  if [[ -z "$metrics_section" ]] || ! echo "$metrics_section" | grep -q "\[[ x]\]"; then
+  local section=$(echo "$body_lc" | sed -n "/$header/,/^###/{ /^###/d; p; }")
+  if [[ -z "$section" ]] || ! echo "$section" | grep -q "\[[ x]\]"; then
     warn "  ❌ Metrics missing!"
     metrics_failed_issues+=("$title|$url")
   else
@@ -247,9 +256,13 @@ validate_summary() {
   local title="$2"
   local url="$3"
 
+  # Convert body and header to lowercase for case-insensitive matching
+  local body_lc=$(echo "$body" | tr '[:upper:]' '[:lower:]')
+  local header=$(echo "$HEADER_SUMMARY" | tr '[:upper:]' '[:lower:]')
+
   # Extract the summary section and ensure it contains something
-  local summary_section=$(echo "$body" | sed -n "/$HEADER_SUMMARY/,/^###/{ /^###/d; p; }")
-  if [[ -z "$summary_section" ]]; then
+  local section=$(echo "$body_lc" | sed -n "/$header/,/^###/{ /^###/d; p; }")
+  if [[ -z "$section" ]]; then
     warn "  ❌ Summary missing!"
     summary_failed_issues+=("$title|$url")
   else
