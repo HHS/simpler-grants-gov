@@ -90,6 +90,8 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
 def test_handle_ebiz_poc_organization_during_login_existing_organization(
     db_session, enable_factory_create
 ):
+    """Test that we link user to existing organization when they are an ebiz POC"""
+
     # Create organization first
     organization = OrganizationFactory.create(no_sam_gov_entity=True)
 
