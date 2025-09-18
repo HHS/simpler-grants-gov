@@ -43,6 +43,7 @@ class SESV2Client(BaseSESV2Client):
 
         all_summaries: list[SuppressedDestination] = []
         next_token = None
+        r = {"SuppressedDestinationSummaries": [], "NextToken": None}
 
         try:
             logger.info("Retrieving suppressed destinations")
@@ -75,7 +76,7 @@ class SESV2Client(BaseSESV2Client):
             logger.exception("Error calling list_suppressed_destinations")
             raise
 
-        return SESV2Response(suppressed_destination_summaries=all_summaries)
+        return SESV2Response(SuppressedDestinationSummaries=all_summaries)
 
 
 class MockSESV2Client(BaseSESV2Client):
