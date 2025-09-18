@@ -110,8 +110,3 @@ def _assign_organization_admin_role(
     )
     db_session.add(org_user_role)
     logger.info("Assigned Organization Admin role to organization user", extra=log_extra)
-
-    # Flush to ensure the OrganizationUser gets its primary key (organization_user_id)
-    # before the OrganizationUserRole is created. This prevents foreign key constraint
-    # violations when the role references the organization_user_id.
-    db_session.flush()

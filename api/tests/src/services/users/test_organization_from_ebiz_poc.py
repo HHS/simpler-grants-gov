@@ -81,7 +81,8 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     assert org_user.organization.sam_gov_entity == sam_gov_entity
     assert org_user.is_organization_owner is True
 
-    # Verify the user has the Organization Admin role
+    db_session.flush()
+
     assert len(org_user.organization_user_roles) == 1
     assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
