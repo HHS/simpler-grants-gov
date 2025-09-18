@@ -207,6 +207,9 @@ class Privilege(StrEnum):
     VIEW_APPLICATION = "view_application"
     MODIFY_APPLICATION = "modify_application"
     SUBMIT_APPLICATION = "submit_application"
+    UPDATE_FORM = "update_form"
+    MANAGE_AGENCY_MEMBERS = "manage_agency_members"
+    GET_SUBMITTED_APPLICATIONS = "get_submitted_applications"
 
 
 class RoleType(StrEnum):
