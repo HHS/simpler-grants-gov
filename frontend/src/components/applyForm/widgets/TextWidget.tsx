@@ -8,8 +8,9 @@ import {
 } from "@rjsf/utils";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
+import { FormGroup, TextInput } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -33,6 +34,7 @@ function TextWidget<
   options = {},
   rawErrors = [],
   updateOnInput = false,
+  placeholder,
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
@@ -87,6 +89,7 @@ function TextWidget<
     [onFocus, id],
   );
   const error = rawErrors.length ? true : undefined;
+
   const describedby = error
     ? `error-for-${id}`
     : title
@@ -107,9 +110,7 @@ function TextWidget<
         labelType={labelType}
       />
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>
-          {String(rawErrors[0])}
-        </ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <TextInput
         data-testid={id}
@@ -124,6 +125,7 @@ function TextWidget<
         aria-required={required}
         disabled={disabled}
         readOnly={readonly}
+        placeholder={placeholder ?? undefined}
         list={examples ? examplesId<T>(id) : undefined}
         aria-describedby={describedby}
         onChange={updateOnInput ? _onChange : undefined}

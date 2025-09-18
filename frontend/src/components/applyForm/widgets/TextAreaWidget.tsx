@@ -3,8 +3,9 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
+import { FormGroup, Textarea } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
@@ -70,16 +71,8 @@ function TextAreaWidget<
         description={description as string}
         labelType={labelType}
       />
-
       {error && (
-        <ErrorMessage>
-          {" "}
-          {typeof rawErrors[0] === "string"
-            ? rawErrors[0]
-            : Object.values(rawErrors[0])
-                .map((value) => value)
-                .join(",")}
-        </ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <Textarea
         minLength={(minLength as number) ?? undefined}

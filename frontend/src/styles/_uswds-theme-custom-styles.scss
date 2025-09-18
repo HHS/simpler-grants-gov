@@ -672,12 +672,11 @@ dl {
 .simpler-currency-input-wrapper {
   position: relative;
   display: inline-block;
-
-  &:before {
+  &::after {
     content: "$";
     position: absolute;
     left: 10px;
-    top: 50%;
+    bottom: -0.5rem;
     transform: translateY(-50%);
   }
 
@@ -701,6 +700,9 @@ dl {
       scroll-margin-top: 6rem;
     }
   }
+  aside {
+    max-height: calc(100vh - 2rem);
+  }
 }
 
 .simpler-application-forms-table {
@@ -714,6 +716,19 @@ dl {
 }
 
 // SF 424 A Budget Form
+
+.sf424__table {
+  .usa-error-message {
+    display: none !important;
+  }
+
+  .usa-form-group {
+    border-left: 0;
+    margin-left: 0;
+    padding: 0;
+  }
+}
+
 .sf424a__row {
   height: fit-content;
   .sf424a__cell {

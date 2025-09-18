@@ -3870,21 +3870,29 @@ components:
             - object
             $ref: '#/components/schemas/CompetitionInstructionAlpha'
         competition_title:
-          type: string
+          type:
+          - string
+          - 'null'
           description: The title of the competition
           example: Proposal for Advanced Research
         opening_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: The opening date of the competition, the first day applications
             are accepted
         closing_date:
-          type: string
+          type:
+          - string
+          - 'null'
           format: date
           description: The closing date of the competition, the last day applications
             are accepted
         contact_info:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Contact info getting assistance with the competition
           example: 'Bob Smith
 
@@ -3893,7 +3901,10 @@ components:
           description: Assistance listing information for this competition
           type:
           - object
-          $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+          - type: 'null'
         open_to_applicants:
           type: array
           description: List of applicant types who are eligible for this competition

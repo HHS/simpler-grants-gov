@@ -121,7 +121,7 @@ export const messages = {
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
       requiredText: "All fields are required.",
-      saveButtonText: "Save",
+      saveButtonText: "Create Application",
       title: "Start a new application",
       ineligibleTitle:
         "It looks like you're not eligible to start a new application through this site",
@@ -144,6 +144,9 @@ export const messages = {
       description: {
         organizationIntro:
           "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
+        pilotIntro:
+          "Welcome to our new, simpler application process. In partnership with the Bureau of Reclamation, we ensure your application is processed by the agency normally.",
+        organizationApply: "To apply as part of an organization you must:",
         applyingForOrg:
           "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
         poc: "Be the EBiz POC (Electronic Business Point of Contact) for your organization",
@@ -152,6 +155,8 @@ export const messages = {
           "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
         goToGrants:
           "If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        support:
+          "For product support, contact us at <telephone>1-800-581-4726</telephone> or <email>simpler@grants.gov</email>. You can also apply through <link>Grants.gov</link> if you prefer.",
         pilotGoToGrants:
           "This opportunity is part of a pilot program. If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
         organizationIndividualIntro:
@@ -1027,14 +1032,23 @@ export const messages = {
               "We're building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
           },
           {
-            title: "Iterative",
-            content:
-              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
-          },
-          {
             title: "Agile",
             content:
               "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Send us your feedback and suggestions.",
+            link: "mailto:simpler@grants.gov",
+            linkText: "Contact us at simpler@grants.gov",
+          },
+          {
+            title: "Co-planning",
+            content:
+              "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+            link: "https://simplergrants.fider.io",
+            linkText: "Vote on our proposals board",
           },
         ],
       },

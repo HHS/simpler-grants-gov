@@ -205,7 +205,7 @@ FORM_JSON_SCHEMA = {
         },
         "applicant": {
             "allOf": [{"$ref": "#/$defs/address"}],
-            "title": "applicant",
+            "title": "Applicant",
             "description": "Enter information about the applicant.",
         },
         "department_name": {
@@ -453,7 +453,7 @@ FORM_JSON_SCHEMA = {
         "debt_explanation": {
             "allOf": [{"$ref": "#/$defs/attachment_field"}],
             "title": "Debt Explanation",
-            "description": "Debt Explanation is required.",
+            "description": "",
         },
         "certification_agree": {
             "type": "boolean",
@@ -462,7 +462,7 @@ FORM_JSON_SCHEMA = {
         },
         "authorized_representative": {
             "allOf": [{"$ref": "#/$defs/person_name"}],
-            "title": "Authorized Representative Header",
+            "title": "Authorized Representative",
             "description": "",
         },
         "authorized_representative_phone_number": {
@@ -570,7 +570,7 @@ FORM_JSON_SCHEMA = {
         },
         "person_name": {
             "type": "object",
-            "title": "Name and Contact Information Header",
+            "title": "Name and Contact Information",
             "description": "",
             "required": [
                 "first_name",
