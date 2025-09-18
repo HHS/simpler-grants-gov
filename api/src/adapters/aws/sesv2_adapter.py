@@ -43,7 +43,6 @@ class SESV2Client(BaseSESV2Client):
 
         all_summaries: list[SuppressedDestination] = []
         next_token = None
-        r = {"SuppressedDestinationSummaries": [], "NextToken": None}
 
         try:
             logger.info("Retrieving suppressed destinations")

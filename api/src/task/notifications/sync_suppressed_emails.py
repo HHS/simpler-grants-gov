@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client, get_sesv2_client
