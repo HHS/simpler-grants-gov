@@ -1,9 +1,10 @@
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { GridContainer } from "@trussworks/react-uswds";
+import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
 
@@ -16,12 +17,21 @@ export async function UserProfile() {
     console.error("no user session, or user has no email address");
     return;
   }
+  let userDetails;
+  try {
+    userDetails = await getUserDetails(session.token, session.user_id);
+  } catch (e) {
+    console.error("Unable to fetch user details", e);
+  }
 
-  // fetch name info from user endpoint
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
       <h1>{t("title")}</h1>
-      <UserProfileForm email={session.email} />
+      {userDetails ? (
+        <UserProfileForm userDetails={userDetails} />
+      ) : (
+        <ErrorMessage>{t("fetchError")}</ErrorMessage>
+      )}
     </GridContainer>
   );
 }

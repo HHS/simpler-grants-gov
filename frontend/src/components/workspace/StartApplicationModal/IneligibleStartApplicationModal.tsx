@@ -1,5 +1,5 @@
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
-import { Organization } from "src/types/UserTypes";
+import { Organization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { RefObject } from "react";
