@@ -54,7 +54,7 @@ class SESV2Client(BaseSESV2Client):
                     request_params["NextToken"] = next_token
 
                 response = self.client.list_suppressed_destinations(**request_params)
-                logger.info("Raw count of suppressed emails returned: %d", len(response.get["SuppressedDestinationSummaries"], []))
+                logger.info("Raw count of suppressed emails returned: %d", len(response.get("SuppressedDestinationSummaries", [])))
                 response = self.client.list_suppressed_destinations(**request_params)
 
                 response_object = SESV2Response.model_validate(response)
