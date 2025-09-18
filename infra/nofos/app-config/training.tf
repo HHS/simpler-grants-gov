@@ -11,7 +11,7 @@ module "training_config" {
   instance_desired_instance_count = 1
   instance_scaling_min_capacity   = 1
   instance_scaling_max_capacity   = 1
-  database_engine_version         = "15.10"
+  database_engine_version         = "17.5"
 
   database_min_capacity   = 1
   database_max_capacity   = 1

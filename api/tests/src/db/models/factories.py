@@ -1058,10 +1058,14 @@ class RoleFactory(BaseFactory):
             role_types=[RoleType.APPLICATION],
         )
 
-        # Have yet to be defined
-        is_agency_role = factory.Trait(privileges=[], role_types=[RoleType.AGENCY])
+        is_agency_role = factory.Trait(
+            privileges=[Privilege.MANAGE_AGENCY_MEMBERS, Privilege.GET_SUBMITTED_APPLICATIONS],
+            role_types=[RoleType.AGENCY],
+        )
 
-        is_internal_role = factory.Trait(privileges=[], role_types=[RoleType.INTERNAL])
+        is_internal_role = factory.Trait(
+            privileges=[Privilege.UPDATE_FORM], role_types=[RoleType.INTERNAL]
+        )
 
 
 class LinkRoleRoleTypeFactory(BaseFactory):
@@ -2801,7 +2805,7 @@ class OrganizationUserRoleFactory(BaseFactory):
     organization_user = factory.SubFactory(OrganizationUserFactory)
     organization_user_id = factory.LazyAttribute(lambda o: o.organization_user.organization_user_id)
 
-    role = factory.SubFactory(RoleFactory, is_organization_owner=True)
+    role = factory.SubFactory(RoleFactory, is_org_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
 
 

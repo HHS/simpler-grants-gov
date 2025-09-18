@@ -189,7 +189,7 @@ variable "service_override_extra_environment_variables" {
 variable "database_engine_version" {
   type        = string
   description = "Postgres database engine version"
-  default     = "15.10"
+  default     = "17.5"
 }
 
 variable "secondary_domain_names" {
