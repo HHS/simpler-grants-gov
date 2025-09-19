@@ -280,7 +280,7 @@ get_comment_body() {
 This issue failed an automated lint process that checks the content of required sections.
 
 **Next steps:**
-Please review the [linter expectations documentation](https://github.com/HHS/simpler-grants-gov/blob/main/.github/linters/README.md) and update this issue accordingly.
+Please review the [linter expectations documentation](https://github.com/HHS/simpler-grants-gov/blob/main/.github/linters/documentation/ISSUE_BODY_LINTER.md) and update this issue accordingly.
 
 ---
 *This comment was automatically generated.*"
