@@ -1,176 +1,211 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
-import { get } from "lodash";
+import { get, set } from "lodash";
 
-import React from "react";
+import React, { JSX } from "react";
 
 import {
+  FormattedFormValidationWarning,
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
+import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
+import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
+import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import { getBudgetErrors } from "./budgetErrorLabels";
+import { getStringOrUndefined, isRecord } from "./budgetValueGuards";
+
+type RootSchemaContext = FormContextType & { rootSchema?: RJSFSchema };
+
+function getRootSchemaFromContext(context: unknown): RJSFSchema | undefined {
+  if (context && typeof context === "object" && "rootSchema" in context) {
+    const candidate = (context as { rootSchema?: unknown }).rootSchema;
+    return candidate && typeof candidate === "object"
+      ? (candidate as RJSFSchema)
+      : undefined;
+  }
+  return undefined;
+}
+
+type WarningsFromContext =
+  | FormValidationWarning[]
+  | FormattedFormValidationWarning[]
+  | [];
+
+function coerceFormValidationWarnings(
+  input: WarningsFromContext,
+): FormValidationWarning[] {
+  return input
+    .map((item): FormValidationWarning | null => {
+      const candidate = item as Partial<FormValidationWarning> &
+        Partial<FormattedFormValidationWarning>;
+      const fieldId =
+        typeof candidate.field === "string"
+          ? candidate.field
+          : typeof candidate.htmlField === "string"
+            ? candidate.htmlField
+            : null;
+      const messageText =
+        typeof candidate.message === "string"
+          ? candidate.message
+          : typeof candidate.formatted === "string"
+            ? candidate.formatted
+            : null;
+      if (!fieldId || !messageText) return null;
+      return {
+        field: fieldId,
+        message: messageText,
+        type: "custom",
+        value: "",
+      };
+    })
+    .filter((v): v is FormValidationWarning => v !== null);
+}
 
 function Budget424aSectionF<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = never,
+  F extends FormContextType = FormContextType,
 >({
   id,
-  value: rawValue = {},
+  value,
   rawErrors,
-  options,
-}: UswdsWidgetProps<T, S, F> & { options?: Record<string, unknown> }) {
-  const errors = (rawErrors as FormValidationWarning[]) || [];
-  const root = rawValue;
-
-  const uiHelpers = (options as Record<string, string>) || {};
-  const directChargesHelp =
-    uiHelpers.direct_charges_explanation ??
-    "Explain amounts for individual direct object class cost categories that may appear to be out of the ordinary or to explain the details as required by the Federal grantor agency.";
-  const indirectChargesHelp =
-    uiHelpers.indirect_charges_explanation ??
-    "Enter the type of indirect rate (provisional, predetermined, final or fixed) that will be in effect during the funding period, the estimated amount of the base to which the rate is applied, and the total of indirect expense.";
-  const remarksHelp =
-    uiHelpers.remarks ??
-    "Provide any other explanations or comments deemed necessary.";
-
-  const getErrors = (fieldId: string) =>
-    (errors || []).filter((e) => e.field === fieldId).map((e) => e.message);
-
-  const FieldBlock: React.FC<
-    React.PropsWithChildren<{
-      label: string;
-      helper?: string;
-      htmlFor?: string;
-    }>
-  > = ({ label, helper, htmlFor, children }) => (
-    <div className="margin-bottom-4">
-      <label
-        className="text-bold display-block margin-bottom-05"
-        htmlFor={htmlFor}
+  formContext,
+  onChange,
+}: UswdsWidgetProps<T, S, F>): JSX.Element {
+  const rootFormDataFromContext = (
+    formContext as { rootFormData?: unknown } | undefined
+  )?.rootFormData;
+  const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
+  const rootValue = isRecord(rawValue) ? rawValue : {};
+  const rootSchema = getRootSchemaFromContext(formContext as RootSchemaContext);
+  const properties = rootSchema?.properties as
+    | Record<
+        string,
+        {
+          type?: unknown;
+          title?: string;
+          description?: string;
+          minLength?: number;
+          maxLength?: number;
+          enum?: unknown[];
+        }
       >
-        {label}
-      </label>
-      {helper ? (
-        <div className="font-sans-2xs text-italic margin-bottom-1">
-          {helper}
-        </div>
-      ) : null}
-      {children}
-    </div>
+    | undefined;
+
+  const directChargesSchema = properties?.direct_charges_explanation as
+    | RJSFSchema
+    | undefined;
+  const indirectChargesSchema = properties?.indirect_charges_explanation as
+    | RJSFSchema
+    | undefined;
+  const remarksSchema = properties?.remarks as RJSFSchema | undefined;
+  const confirmationSchema = properties?.confirmation as RJSFSchema | undefined;
+
+  function getWarningsFromContext(context: unknown): FormValidationWarning[] {
+    if (!context || typeof context !== "object") return [];
+    const support = (
+      context as { widgetSupport?: { validationWarnings?: unknown } }
+    ).widgetSupport;
+    const rawCandidate = support?.validationWarnings;
+    if (!Array.isArray(rawCandidate)) return [];
+    return coerceFormValidationWarnings(rawCandidate as WarningsFromContext);
+  }
+
+  const warningsFromProps = Array.isArray(rawErrors)
+    ? (rawErrors as FormValidationWarning[])
+    : [];
+  const warningsFromContext = getWarningsFromContext(formContext);
+  const validationWarnings: FormValidationWarning[] =
+    warningsFromProps.length > 0 ? warningsFromProps : warningsFromContext;
+
+  function getErrorMessagesForField(fieldId: string): string[] {
+    return getBudgetErrors({
+      errors: validationWarnings,
+      id: fieldId,
+      section: "F",
+    });
+  }
+
+  const directChargesValue = getStringOrUndefined(
+    rootValue,
+    "direct_charges_explanation",
   );
+  const indirectChargesValue = getStringOrUndefined(
+    rootValue,
+    "indirect_charges_explanation",
+  );
+  const remarksValue = getStringOrUndefined(rootValue, "remarks");
+  const confirmationValue = get(rootValue, "confirmation") as
+    | boolean
+    | undefined;
 
-  const textareaFor = (fieldKey: string, rows = 4) => {
-    const idPath = fieldKey;
-    const errMsgs = getErrors(idPath);
-    const describedById = errMsgs.length ? `${idPath}-error` : undefined;
-
-    return (
-      <div className="display-flex flex-column">
-        <textarea
-          id={idPath}
-          name={idPath}
-          className="usa-textarea minw-30"
-          rows={rows}
-          aria-invalid={errMsgs.length ? true : undefined}
-          aria-describedby={describedById}
-          defaultValue={get(root, fieldKey) ?? ""}
-        />
-        {errMsgs.length ? (
-          <div id={describedById} className="usa-error-message margin-top-1">
-            {errMsgs.join(" ")}
-          </div>
-        ) : null}
-      </div>
-    );
-  };
-
-  // Yes/No radio group for confirmation (maps to boolean)
-  const confirmationRadios = () => {
-    const idBase = "confirmation";
-    const errMsgs = getErrors(idBase);
-    const describedById = errMsgs.length ? `${idBase}-error` : `${idBase}-hint`;
-
-    const currentVal = get(root, "confirmation");
-    const checkedYes = currentVal === true;
-    const checkedNo = currentVal === false;
-
-    return (
-      <fieldset className="usa-fieldset">
-        <legend className="usa-sr-only">Confirmation</legend>
-        <div className="usa-radio">
-          <input
-            className="usa-radio__input"
-            id={`${idBase}-yes`}
-            type="radio"
-            name={idBase}
-            value="yes"
-            aria-describedby={describedById}
-            defaultChecked={checkedYes}
-          />
-          <label className="usa-radio__label" htmlFor={`${idBase}-yes`}>
-            Yes
-          </label>
-        </div>
-        <div className="usa-radio">
-          <input
-            className="usa-radio__input"
-            id={`${idBase}-no`}
-            type="radio"
-            name={idBase}
-            value="no"
-            aria-describedby={describedById}
-            defaultChecked={checkedNo}
-          />
-          <label className="usa-radio__label" htmlFor={`${idBase}-no`}>
-            No
-          </label>
-        </div>
-
-        {errMsgs.length ? (
-          <div
-            id={`${idBase}-error`}
-            className="usa-error-message margin-top-1"
-          >
-            {errMsgs.join(" ")}
-          </div>
-        ) : null}
-      </fieldset>
-    );
+  const updateField = (path: string, next: unknown) => {
+    const updated = { ...rootValue };
+    set(updated, path, next);
+    onChange?.(updated as T);
   };
 
   return (
-    <div key={id} id={id}>
-      <p className="margin-bottom-3">
-        Provide additional budget information as needed.
-      </p>
+    <div key={id} id={id} className="grid-row grid-gap">
+      <div className="grid-col-12 margin-bottom-2">
+        {directChargesSchema && (
+          <TextWidget
+            schema={directChargesSchema}
+            id="direct_charges_explanation"
+            rawErrors={getErrorMessagesForField("direct_charges_explanation")}
+            formClassName="margin-top-1"
+            inputClassName="width-full minw-30"
+            value={directChargesValue}
+          />
+        )}
+      </div>
 
-      <FieldBlock
-        label="21. Direct charges"
-        helper={directChargesHelp}
-        htmlFor="direct_charges_explanation"
-      >
-        {textareaFor("direct_charges_explanation", 4)}
-      </FieldBlock>
+      <div className="grid-col-12 margin-bottom-2">
+        {indirectChargesSchema && (
+          <TextWidget
+            schema={indirectChargesSchema}
+            id="indirect_charges_explanation"
+            rawErrors={getErrorMessagesForField("indirect_charges_explanation")}
+            formClassName="margin-top-1"
+            inputClassName="width-full minw-30"
+            value={indirectChargesValue}
+          />
+        )}
+      </div>
 
-      <FieldBlock
-        label="22. Indirect charges"
-        helper={indirectChargesHelp}
-        htmlFor="indirect_charges_explanation"
-      >
-        {textareaFor("indirect_charges_explanation", 4)}
-      </FieldBlock>
+      <div className="grid-col-12">
+        {remarksSchema && (
+          <TextAreaWidget
+            schema={remarksSchema}
+            id="remarks"
+            rawErrors={getErrorMessagesForField("remarks")}
+            formClassName="margin-top-1"
+            inputClassName="width-full minw-30"
+            value={remarksValue}
+          />
+        )}
+      </div>
 
-      <FieldBlock label="23. Remarks" helper={remarksHelp} htmlFor="remarks">
-        {textareaFor("remarks", 6)}
-      </FieldBlock>
-
-      <FieldBlock
-        label="Confirmation"
-        helper="Is this form complete?"
-        htmlFor="confirmation"
-      >
-        {confirmationRadios()}
-      </FieldBlock>
+      <div className="grid-col-12 margin-top-3">
+        {confirmationSchema && (
+          <CheckboxWidget
+            id="confirmation"
+            schema={confirmationSchema}
+            rawErrors={getErrorMessagesForField("confirmation")}
+            value={confirmationValue}
+            onChange={(nextValue: unknown) => {
+              const next =
+                nextValue === true || nextValue === "true"
+                  ? true
+                  : nextValue === false || nextValue === "false"
+                    ? false
+                    : undefined;
+              updateField("confirmation", next);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

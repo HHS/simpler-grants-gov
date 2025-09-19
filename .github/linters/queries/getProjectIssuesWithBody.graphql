@@ -1,0 +1,37 @@
+# Get project issues with their body content, issue type, and status
+# Used by: lint-deliverable-metrics.sh
+
+query ($endCursor: String, $login: String!, $project: Int!, $batch: Int!) {
+  organization(login: $login) {
+    projectV2(number: $project) {
+      projectId: id
+      items(first: $batch, after: $endCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          ... on ProjectV2Item {
+            itemId: id
+            content {
+              ... on Issue {
+                title
+                url
+                body
+                issueType {
+                  name
+                }
+              }
+            }
+            # Get status field to filter for "Done" items
+            status: fieldValueByName(name: "Status") {
+              ... on ProjectV2ItemFieldSingleSelectValue {
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

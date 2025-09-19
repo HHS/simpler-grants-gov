@@ -148,4 +148,21 @@ describe("formDataToObject", () => {
     // @ts-ignore
     expect(result.something.somethingElse).toEqual(undefined);
   });
+  it("handles array paths", () => {
+    const formData = new FormData();
+
+    formData.append("something[0]--whatever", "a value");
+
+    const formSchema = {
+      something: {
+        items: { type: "object", properties: { whatever: { type: "string" } } },
+      },
+    };
+
+    const result = formDataToObject(formData, formSchema, { delimiter: "--" });
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    expect(result.something[0]).toEqual({ whatever: "a value" });
+  });
 });

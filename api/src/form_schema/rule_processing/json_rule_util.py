@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Any
 
-import jsonpath_ng
+from src.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 
@@ -94,69 +94,13 @@ def get_field_values(data: dict, fields: list[str], path: list[str]) -> list:
     return values
 
 
-def get_nested_value(data: dict, path: list[str]) -> Any:
-    """Fetch a value from a dictionary based on the nested path
-
-    For example, if you have the following dict:
-        {
-            "path": {
-                "to": {
-                    "some_field": 10
-                },
-                "another_field": "hello"
-            },
-            "array_field": [
-              {
-                "x": 1,
-                "y": "hello"
-              },
-              {
-                "x": 3,
-                "y": "there",
-                "z": "words"
-              }
-            ]
-        }
-
-        Passing in the following paths would give the following values:
-        ["path", "to", "some_field"] -> 10
-        ["path", "another_field"] -> "hello"
-        [] -> Returns the whole dict back
-        ["something", "that", "isn't", "a", "path"] -> None
-
-        Array Cases
-        ["array_field[*]", "x"] -> [2, 3]
-        ["array_field[0]", "x"] -> 2
-        ["array_field[*]", "y"] -> ["hello", "there"]
-        ["array_field[0]", "y"] -> "hello"
-        ["array_field[*]", "z"] -> [None, "there"]
-        ["array_field[0]", "z"] -> None
-        ["array_field[*]"] -> [{"x": 2, "y": "hello"}, {"x": 3, "y": "there", "z": "words"}] # Note this is the same as just ["array_field"] with more steps
-    """
-    # If no path, just return the data
-    if len(path) == 0:
-        return data
-
-    # Use jsonpath_ng to parse the path and
-    # find the data
-    full_path = ".".join(path)
-    expr = jsonpath_ng.parse(full_path)
-    result = expr.find(data)
-
-    # No results, return None, not an empty list
-    if len(result) == 0:
-        return None
-    # One result and the path didn't specify an array (anywhere, not just at end)
-    # then we want to return a single item
-    if len(result) == 1 and "[*]" not in full_path:
-        return result[0].value
-
-    # Otherwise return the list of results
-    return [r.value for r in result]
-
-
 def _populate_nested_value_for_array(
-    json_data: dict, curr_node: str, sub_path: list[str], raw_index: str, value: Any
+    json_data: dict,
+    curr_node: str,
+    sub_path: list[str],
+    raw_index: str,
+    value: Any,
+    remove_null_fields: bool = True,
 ) -> dict:
     """Handle the case where we need to populate a nested value
     for an array field.
@@ -194,7 +138,9 @@ def _populate_nested_value_for_array(
         if len(sub_path) == 0:
             array_value[index] = value
         else:
-            result = _populate_nested_value(array_value[index], sub_path, value)
+            result = _populate_nested_value(
+                array_value[index], sub_path, value, remove_null_fields=remove_null_fields
+            )
             array_value[index] = result
     return json_data
 
@@ -219,7 +165,9 @@ def _get_index_from_str(text: str) -> str | None:
     return match.group(1)
 
 
-def _populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
+def _populate_nested_value(
+    json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True
+) -> dict:
     """Populate a value in a series of nested dictionaries
 
     For example, if your path is ["path", "to", "field"]
@@ -253,13 +201,30 @@ def _populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict
             sub_path=sub_path,
             raw_index=raw_index,
             value=value,
+            remove_null_fields=remove_null_fields,
         )
 
     # If we're at the end of the path, populate
     # the value in the json_data and return, we're
     # done with recursion down this path.
     if len(path) == 1:
+        # If a value is None and we want to remove null fields
+        # then we want to skip populating the field will null
+        if value is None and remove_null_fields:
+            # If the field already exists, remove it rather
+            # than leave some lingering value
+            if json_data.get(curr_node, None) is not None:
+                del json_data[curr_node]
+
+            return json_data
+
         json_data[curr_node] = value
+        return json_data
+
+    # If the value is None, and we want to remove null fields
+    # Don't create a nested object if the value is just going to be removed
+    # This prevents us from creating a path to an object and then doing nothing with it
+    if value is None and remove_null_fields and json_data.get(curr_node, None) is None:
         return json_data
 
     # If the value doesn't exist, make it a dictionary
@@ -273,17 +238,21 @@ def _populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict
             f"Unable to populate nested value, value in path is not a dictionary: {curr_node}"
         )
 
-    result = _populate_nested_value(json_data[curr_node], sub_path, value)
+    result = _populate_nested_value(
+        json_data[curr_node], sub_path, value, remove_null_fields=remove_null_fields
+    )
     json_data[curr_node] = result
     return json_data
 
 
-def populate_nested_value(json_data: dict, path: list[str], value: Any) -> dict:
+def populate_nested_value(
+    json_data: dict, path: list[str], value: Any, remove_null_fields: bool = True
+) -> dict:
     """Handle populating a nested value, just a wrapper around _populate_nested_value
     to add a convenient error log message for debugging
     """
     try:
-        return _populate_nested_value(json_data, path, value)
+        return _populate_nested_value(json_data, path, value, remove_null_fields)
     except Exception:
         logger.exception("Failed to populate nested value", extra={"path": build_path_str(path)})
         raise

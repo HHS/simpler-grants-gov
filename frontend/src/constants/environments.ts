@@ -17,6 +17,7 @@ const {
   FEATURE_SAVED_OPPORTUNITIES_ON,
   FEATURE_SAVED_SEARCHES_ON,
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  FEATURE_USER_ADMIN_OFF,
   AUTH_LOGIN_URL,
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
@@ -32,6 +33,7 @@ export const envFeatureFlags = {
   savedOpportunitiesOn: FEATURE_SAVED_OPPORTUNITIES_ON,
   savedSearchesOn: FEATURE_SAVED_SEARCHES_ON,
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  userAdminOff: FEATURE_USER_ADMIN_OFF,
 };
 
 const legacyHost = (): string => {
