@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client, get_sesv2_client
@@ -27,11 +27,6 @@ class SyncSuppressedEmailsTask(Task):
 
     def process_suppressed_emails(self) -> None:
         # Get the most recent suppression timestamp from DB
-        total_suppressed_emails = self.db_session.execute(
-            select(func.count()).select_from(SuppressedEmail)
-        ).scalar_one()
-        logger.info("Existing count of suppressed emails: %s", total_suppressed_emails)
-
         stmt = select(SuppressedEmail).order_by(SuppressedEmail.last_update_time.desc()).limit(1)
 
         last_record = self.db_session.execute(stmt).scalars().first()
@@ -42,11 +37,10 @@ class SyncSuppressedEmailsTask(Task):
 
         resp = self.sesv2_client.list_suppressed_destinations(start_time=start_time)
         suppressed_emails = resp.suppressed_destination_summaries
-        self.increment(Metrics.TOTAL_SUPPRESSED_DESTINATION_COUNT, len(suppressed_emails))
 
         emails = [d.email_address for d in suppressed_emails]
         if not emails:
-            logger.info("No suppressed destinations returned")
+            logger.info("No suppressed email destinations returned")
             return
 
         # Fetch relevant users
