@@ -33,15 +33,15 @@ def _fetch_user(db_session: db.Session, user_id: UUID) -> LinkExternalUser | Non
 def get_user(db_session: db.Session, user_id: UUID) -> UserWithProfile | None:
     external_user = _fetch_user(db_session, user_id)
 
-    if external_user:
-        profile = external_user.user.profile
-        return UserWithProfile(
-            user_id=external_user.user_id,
-            email=external_user.email,
-            external_user_type=external_user.external_user_type,
-            first_name=profile.first_name if profile else None,
-            middle_name=profile.middle_name if profile else None,
-            last_name=profile.last_name if profile else None,
-        )
+    if not external_user:
+        return None
 
-    return None
+    profile = external_user.user.profile
+    return UserWithProfile(
+        user_id=external_user.user_id,
+        email=external_user.email,
+        external_user_type=external_user.external_user_type,
+        first_name=profile.first_name if profile else None,
+        middle_name=profile.middle_name if profile else None,
+        last_name=profile.last_name if profile else None,
+    )
