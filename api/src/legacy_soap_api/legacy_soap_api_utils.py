@@ -17,11 +17,11 @@ BASE_SOAP_API_RESPONSE_HEADERS = {
 HIDDEN_VALUE = "hidden"
 
 
-def format_local_soap_response(response_data: bytes) -> bytes:
+def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
     # This is a format string for formatting local responses from the mock
     # soap server since it does not support manipulating the response.
     # The grants.gov SOAP API currently includes this data.
-    response_id = str(uuid.uuid4())
+    response_id = boundary_id if boundary_id else str(uuid.uuid4())
     return (
         f"""
 --uuid:{response_id}
@@ -35,6 +35,35 @@ Content-ID: <root.message@cxf.apache.org>{response_data.decode()}
         .strip()
         .encode("utf-8")
     )
+
+
+def get_soap_proxy_grant_application_not_found_response(
+    grants_gov_tracking_number: str, headers: dict, is_get_application_zip: bool = True
+) -> SOAPResponse:
+    data = (
+        '\n\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>"
+        f"Failed to get application{' zip' if is_get_application_zip else ''}."
+        f"(Grant Application not found for tracking number:{grants_gov_tracking_number})"
+        "</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
+    boundary_id = str(uuid.uuid4())
+    response_data = format_local_soap_response(data, boundary_id=boundary_id)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            'type="application/xop+xml";'
+            f'boundary="uuid:{boundary_id}";'
+            'start="<root.message@cxf.apache.org>";'
+            'start-info="text/xml"'
+        ),
+    }
+    if cookie := headers.get("Cookie"):
+        response_headers["Set-Cookie"] = f"{cookie}; Path=/grantsws-agency; Secure; HttpOnly"
+    return get_soap_response(response_data, 500, headers=response_headers)
 
 
 def get_soap_response(

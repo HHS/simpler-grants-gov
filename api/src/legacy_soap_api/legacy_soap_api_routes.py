@@ -12,9 +12,13 @@ from src.legacy_soap_api.legacy_soap_api_schemas import SimplerSoapAPI, SOAPRequ
 from src.legacy_soap_api.legacy_soap_api_utils import (
     get_invalid_path_response,
     get_soap_error_response,
+    get_soap_proxy_grant_application_not_found_response,
 )
 from src.legacy_soap_api.simpler_soap_api import get_simpler_soap_response
-from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
+from src.legacy_soap_api.soap_payload_handler import (
+    get_simpler_grants_gov_tracking_number,
+    get_soap_operation_name,
+)
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
@@ -60,7 +64,15 @@ def simpler_soap_api_route(
             auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
             operation_name=operation_name,
         )
-        soap_proxy_response = get_proxy_response(soap_request)
+        if tracking_number := get_simpler_grants_gov_tracking_number(
+            soap_request.operation_name, soap_request.data
+        ):
+            is_get_application_zip = operation_name == "GetApplicationZipRequest"
+            soap_proxy_response = get_soap_proxy_grant_application_not_found_response(
+                tracking_number, soap_request.headers, is_get_application_zip=is_get_application_zip
+            )
+        else:
+            soap_proxy_response = get_proxy_response(soap_request)
     except Exception:
         logger.exception(
             msg="Error getting soap proxy response",
