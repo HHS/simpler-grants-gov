@@ -3256,6 +3256,24 @@ components:
           - login_gov
           type:
           - string
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: The first name of the user
+          example: John
+        middle_name:
+          type:
+          - string
+          - 'null'
+          description: The middle name of the user
+          example: Hoover
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: The last name of the user
+          example: Smith
     UserGetResponse:
       type: object
       properties:
