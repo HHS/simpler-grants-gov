@@ -949,7 +949,7 @@ FORM_UI_SCHEMA = [
                 "definition": "/properties/program_income_estimated_funding",
             },
             {
-                "type": "field",
+                "type": "null",
                 "definition": "/properties/total_estimated_funding",
             },
         ],
@@ -1047,6 +1047,19 @@ FORM_RULE_SCHEMA = {
     "funding_opportunity_title": {"gg_pre_population": {"rule": "opportunity_title"}},
     "competition_identification_number": {"gg_pre_population": {"rule": "public_competition_id"}},
     "competition_identification_title": {"gg_pre_population": {"rule": "competition_title"}},
+    "total_estimated_funding": {
+        "gg_pre_population": {
+            "rule": "sum_monetary",
+            "fields": [
+                "federal_estimated_funding",
+                "applicant_estimated_funding",
+                "state_estimated_funding",
+                "local_estimated_funding",
+                "other_estimated_funding",
+                "program_income_estimated_funding",
+            ],
+        }
+    },
     ##### POST-POPULATION RULES
     "date_received": {"gg_post_population": {"rule": "current_date"}},
     "date_signed": {"gg_post_population": {"rule": "current_date"}},
