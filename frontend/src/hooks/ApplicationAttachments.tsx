@@ -4,7 +4,14 @@ import type { Attachment } from "src/types/attachmentTypes";
 
 import { createContext, PropsWithChildren, useContext } from "react";
 
-const AttachmentsContext = createContext<Attachment[] | null>(null);
+export interface AttachmentsContext {
+  attachments: Attachment[] | null;
+  setAttachmentsChanged: (value: boolean) => void;
+}
+
+const AttachmentsContext = createContext<AttachmentsContext>(
+  {} as AttachmentsContext,
+);
 
 export const useApplicationAttachments = () => {
   const ctx = useContext(AttachmentsContext);
@@ -19,10 +26,9 @@ export const useApplicationAttachments = () => {
 export function AttachmentsProvider({
   value,
   children,
-}: PropsWithChildren<{ value?: Attachment[] }>) {
-  const safe = Array.isArray(value) ? value : [];
+}: PropsWithChildren<{ value: AttachmentsContext }>) {
   return (
-    <AttachmentsContext.Provider value={safe}>
+    <AttachmentsContext.Provider value={value}>
       {children}
     </AttachmentsContext.Provider>
   );
