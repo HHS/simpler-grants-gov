@@ -21,7 +21,7 @@ DEFAULT_ISSUE_TYPE="Deliverable"
 ALLOWED_ISSUE_TYPES=("Deliverable" "Proposal")
 
 # #######################################################
-# Initialize variables for tracking results
+# Initialize variables 
 # #######################################################
 
 ac_valid_count=0
@@ -159,7 +159,7 @@ fetch_data() {
     err "Failed to count filtered items: $issue_count"
   fi
 
-  log "Found $issue_count items of type '$issue_type'"
+  log "Found $issue_count item(s) of type '$issue_type'"
 
   # Return the filtered data
   echo "$filtered_data"
@@ -226,7 +226,7 @@ validate_acceptance_criteria() {
   local section=$(echo "$body_lc" | sed -n "/$header/,/^###/{ /^###/d; p; }")
   if [[ -z "$section" ]] || ! echo "$section" | grep -q "\[[ x]\]"; then
     warn "  ❌ Acceptance criteria missing!"
-    ac_failed_issues+=("$title|$url")
+    ac_failed_issues+=("$url")
   else
     ac_valid_count=$((ac_valid_count + 1))
   fi
@@ -245,7 +245,7 @@ validate_metrics() {
   local section=$(echo "$body_lc" | sed -n "/$header/,/^###/{ /^###/d; p; }")
   if [[ -z "$section" ]] || ! echo "$section" | grep -q "\[[ x]\]"; then
     warn "  ❌ Metrics missing!"
-    metrics_failed_issues+=("$title|$url")
+    metrics_failed_issues+=("$url")
   else
     metrics_valid_count=$((metrics_valid_count + 1))
   fi
@@ -264,10 +264,83 @@ validate_summary() {
   local section=$(echo "$body_lc" | sed -n "/$header/,/^###/{ /^###/d; p; }")
   if [[ -z "$section" ]]; then
     warn "  ❌ Summary missing!"
-    summary_failed_issues+=("$title|$url")
+    summary_failed_issues+=("$url")
   else
     summary_valid_count=$((summary_valid_count + 1))
   fi
+}
+
+# #######################################################
+# Post comments to failed issues
+# #######################################################
+
+get_comment_body() {
+  local comment_template="## ⚠️ Automated Lint Check Failed
+
+This issue failed an automated lint process that checks the content of required sections.
+
+**Next steps:**
+Please review the [linter expectations documentation](https://github.com/HHS/simpler-grants-gov/blob/main/.github/linters/README.md) and update this issue accordingly.
+
+---
+*This comment was automatically generated.*"
+
+    echo "$comment_template"
+}
+
+extract_issue_id_from_url() {
+  local issue_url="$1"
+  
+  # Extract issue number from URL (format: https://github.com/org/repo/issues/123)
+  local issue_id=$(echo "$issue_url" | sed -n 's/.*\/issues\/\([0-9]*\).*/\1/p')
+
+  echo "$issue_id"
+}  
+  
+comment_on_failed_issues() {
+  local dry_run="$1"
+  local issue_type="$2"
+
+  log "Preparing to post comments to items that failed linting"
+
+  # Aggregate failed issues
+  local failed_issues=()
+  case "$issue_type" in 
+    Deliverable)
+      failed_issues+=(${ac_failed_issues[@]+"${ac_failed_issues[@]}"})
+      failed_issues+=(${metrics_failed_issues[@]+"${metrics_failed_issues[@]}"})
+      failed_issues=($(printf '%s\n' ${failed_issues[@]+"${failed_issues[@]}"} | sort -u))
+      ;;
+    Proposal)
+      failed_issues=(${summary_failed_issues[@]+"${summary_failed_issues[@]}"})
+      ;;
+  esac 
+
+  # No-op if there are zero lint failures
+  local failed_count=${#failed_issues[@]}
+  log "Found $failed_count unique item(s) that require comments"
+  if [[ "$failed_count" == 0 ]]; then
+    return 0
+  fi
+
+  # No-op if dry-run mode enabled
+  if [[ "$dry_run" == "true" ]]; then
+    warn "Dry-run mode enabled, comments will NOT be posted"
+    return 0
+  fi
+
+  # Define body of comment
+  local comment_body="$(get_comment_body)"
+
+  # Post comment to each issue
+  for url in "${failed_issues[@]}"; do
+    local issue_id=$(extract_issue_id_from_url "$url")
+    if ! gh issue comment "$issue_id" --body "$comment_body" > /dev/null 2>&1; then
+      warn "  ❌ Failed to post comment to issue #$issue_id"
+    fi
+  done
+
+  log "Done posting comments"
 }
 
 # #######################################################
@@ -345,6 +418,9 @@ fi
 ac_invalid_count=${#ac_failed_issues[@]}
 metrics_invalid_count=${#metrics_failed_issues[@]}
 summary_invalid_count=${#summary_failed_issues[@]}
+
+# Comment on failed issues
+comment_on_failed_issues "$dry_run" "$issue_type"
 
 # Display results
 display_results "$issue_type" "$issue_count" "$ac_valid_count" "$ac_invalid_count" "$metrics_valid_count" "$metrics_invalid_count" "$summary_valid_count" "$summary_invalid_count"
