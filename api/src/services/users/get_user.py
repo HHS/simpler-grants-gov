@@ -1,15 +1,20 @@
+import logging
 from uuid import UUID
 
-from pydantic import BaseModel
+from black.cache import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
+from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import LinkExternalUser, User
 
+logger = logging.getLogger(__name__)
 
-class UserWithProfile(BaseModel):
+
+@dataclass
+class UserWithProfile:
     user_id: UUID
     email: str
     external_user_type: ExternalUserType
@@ -34,7 +39,7 @@ def get_user(db_session: db.Session, user_id: UUID) -> UserWithProfile | None:
     external_user = _fetch_user(db_session, user_id)
 
     if not external_user:
-        return None
+        raise_flask_error(404, f"User ID: {user_id}  not found")
 
     profile = external_user.user.profile
     return UserWithProfile(
