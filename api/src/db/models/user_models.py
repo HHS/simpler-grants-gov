@@ -428,10 +428,8 @@ class AgencyUserRole(ApiSchemaTable, TimestampMixin):
 
 class UserProfile(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_profile"
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey(User.user_id), primary_key=True, index=True
-    )
+    user_profile_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), unique=True)
     user: Mapped[User] = relationship(User, back_populates="profile", uselist=False)
 
     first_name: Mapped[str]

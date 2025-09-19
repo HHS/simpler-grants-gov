@@ -26,13 +26,11 @@ jobs:
           ./scripts/lint-issue-body.sh \
             --org "HHS" \
             --project "13" \
-            --issue-type "Deliverable" \
-            --dry-run 
+            --issue-type "Deliverable" 
 
       - name: Lint Project 17
         run: |
           ./scripts/lint-issue-body.sh \
             --org "HHS" \
             --project "17" \
-            --issue-type "Deliverable" \
-            --dry-run 
+            --issue-type "Deliverable" 
