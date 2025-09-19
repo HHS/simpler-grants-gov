@@ -27,15 +27,24 @@ export function getBudgetErrors({
         typeof e.message === "string" &&
         /does not contain|minContains|items matching/i.test(e.message),
     );
+    // the system will send up an empty array for activity line items if nothing is filled out
+    // we need to interpret this into an error for the required activity title field on the first line
+    // item only. The alternative to this custom handling would be to send up an empty object in the line
+    // items array. As this would build budget form specific logic into the form data pruning function,
+    // better to handle here for now - DWS
+    const hasEmptyArrayError = (errors ?? []).some(
+      (e) => e.field === "activity_line_items" && e.type === "minItems",
+    );
 
-    if (hasContainsError) {
-      if (
-        id === "activity_line_items[0]--activity_title" ||
-        id === "activity_line_items[0]--assistance_listing_number" ||
-        id === "activity_line_items[0]--budget_summary--total_amount"
-      ) {
-        return ["This field is required."];
-      }
+    const hasRequiredError =
+      (hasContainsError &&
+        (id === "activity_line_items[0]--activity_title" ||
+          id === "activity_line_items[0]--assistance_listing_number" ||
+          id === "activity_line_items[0]--budget_summary--total_amount")) ||
+      (id === "activity_line_items[0]--activity_title" && hasEmptyArrayError);
+
+    if (hasRequiredError) {
+      return ["This field is required."];
     }
   }
 
