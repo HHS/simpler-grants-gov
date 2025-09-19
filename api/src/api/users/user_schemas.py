@@ -38,6 +38,27 @@ class UserSchema(Schema):
             "example": ExternalUserType.LOGIN_GOV,
         },
     )
+    first_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The first name of the user",
+            "example": "John",
+        },
+    )
+    middle_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The middle name of the user",
+            "example": "Hoover",
+        },
+    )
+    last_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The last name of the user",
+            "example": "Smith",
+        },
+    )
 
 
 class UserLoginGovCallbackSchema(Schema):
