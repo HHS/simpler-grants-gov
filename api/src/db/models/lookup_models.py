@@ -193,6 +193,9 @@ PRIVILEGE_CONFIG = LookupConfig(
         LookupStr(Privilege.VIEW_APPLICATION, 6),
         LookupStr(Privilege.MODIFY_APPLICATION, 7),
         LookupStr(Privilege.SUBMIT_APPLICATION, 8),
+        LookupStr(Privilege.UPDATE_FORM, 9),
+        LookupStr(Privilege.MANAGE_AGENCY_MEMBERS, 10),
+        LookupStr(Privilege.GET_SUBMITTED_APPLICATIONS, 11),
     ]
 )
 

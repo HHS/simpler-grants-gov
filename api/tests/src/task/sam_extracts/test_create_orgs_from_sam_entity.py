@@ -56,10 +56,12 @@ def test_run_task_multiple_different_email_addresses(enable_factory_create, db_s
     user_a = LinkExternalUserFactory.create(email="entity_a@mail.com")
     user_b = LinkExternalUserFactory.create(email="entity_b@mail.com")
     user_c = LinkExternalUserFactory.create(email="entity_c@mail.com")
+    user_blank_email = LinkExternalUserFactory(email="")
 
     entity_a = SamGovEntityFactory.create(ebiz_poc_email=user_a.email)
     entity_b = SamGovEntityFactory.create(ebiz_poc_email=user_b.email)
     entity_c = SamGovEntityFactory.create(ebiz_poc_email=user_c.email)
+    entity_blank_email = SamGovEntityFactory(ebiz_poc_email="")
 
     task = CreateOrgsFromSamEntityTask(db_session)
     task.run()
@@ -78,6 +80,10 @@ def test_run_task_multiple_different_email_addresses(enable_factory_create, db_s
     assert len(entity_c.organization.organization_users) == 1
     assert entity_c.organization.organization_users[0].user_id == user_c.user_id
     assert entity_c.organization.organization_users[0].is_organization_owner is True
+
+    # Blank emails aren't picked up in the join logic
+    assert entity_blank_email.organization is None
+    assert len(user_blank_email.user.organizations) == 0
 
     metrics = task.metrics
     assert metrics[task.Metrics.RECORDS_PROCESSED] == 3
