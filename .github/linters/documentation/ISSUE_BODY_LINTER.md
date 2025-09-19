@@ -48,7 +48,7 @@ Proposal issues must contain one required section:
 - For the Summary section, it simply checks that content exists after the header
 - Issues that fail validation will receive an automated comment with a link to this documentation
 
-## Fixing Failed Issues
+## How to Fix Linter Errors
 
 If your issue fails the linter check:
 
