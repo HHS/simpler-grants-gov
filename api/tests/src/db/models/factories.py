@@ -905,6 +905,7 @@ class UserProfileFactory(BaseFactory):
     class Meta:
         model = user_models.UserProfile
 
+    user_profile_id = Generators.UuidObj
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)
     first_name = factory.Faker("first_name")
