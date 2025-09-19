@@ -20,7 +20,6 @@ class Metrics(StrEnum):
     USERS_NOTIFIED = "users_notified"
     FAILED_TO_SEND = "failed_to_send"
     NOTIFICATIONS_RESET = "notifications_reset"
-    TOTAL_SUPPRESSED_DESTINATION_COUNT = "total_suppressed_destination"
     SUPPRESSED_DESTINATION_COUNT = "suppressed_destination_count"
 
 
