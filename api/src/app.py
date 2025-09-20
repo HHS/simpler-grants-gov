@@ -55,7 +55,7 @@ class EndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
-    enable_common_grants_endpoints: bool = Field(True, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
+    enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
 
