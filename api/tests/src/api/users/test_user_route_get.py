@@ -36,6 +36,5 @@ def test_get_user_with_profile_200(enable_factory_create, client, db_session, ap
     db_session.commit()
 
     resp = client.get(f"/v1/users/{external_user.user_id}", headers={"X-SGG-Token": token})
-
     assert resp.status_code == 200
     assert resp.get_json()["data"]["user_id"] == str(external_user.user_id)
