@@ -3237,6 +3237,27 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunityFacetV1'
+    UserProfile:
+      type: object
+      properties:
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: The first name of the user
+          example: John
+        middle_name:
+          type:
+          - string
+          - 'null'
+          description: The middle name of the user
+          example: Hoover
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: The last name of the user
+          example: Smith
     User:
       type: object
       properties:
@@ -3256,24 +3277,10 @@ components:
           - login_gov
           type:
           - string
-        first_name:
+        profile:
           type:
-          - string
-          - 'null'
-          description: The first name of the user
-          example: John
-        middle_name:
-          type:
-          - string
-          - 'null'
-          description: The middle name of the user
-          example: Hoover
-        last_name:
-          type:
-          - string
-          - 'null'
-          description: The last name of the user
-          example: Smith
+          - object
+          $ref: '#/components/schemas/UserProfile'
     UserGetResponse:
       type: object
       properties:
