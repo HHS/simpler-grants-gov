@@ -3280,7 +3280,10 @@ components:
         profile:
           type:
           - object
-          $ref: '#/components/schemas/UserProfile'
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserProfile'
+          - type: 'null'
     UserGetResponse:
       type: object
       properties:
