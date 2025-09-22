@@ -1,7 +1,7 @@
 """Assign application owner role to existing application owners
 
 Revision ID: bfd8ad9cf5d6
-Revises: 61578095938e
+Revises: e4ac8da61902
 Create Date: 2025-09-16 16:51:37.082923
 
 """
@@ -13,7 +13,7 @@ from src.constants.static_role_values import APPLICATION_OWNER_ID
 
 # revision identifiers, used by Alembic.
 revision = "bfd8ad9cf5d6"
-down_revision = "61578095938e"
+down_revision = "e4ac8da61902"
 branch_labels = None
 depends_on = None
 
