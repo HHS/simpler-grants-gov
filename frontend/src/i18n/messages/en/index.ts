@@ -370,7 +370,8 @@ export const messages = {
         "Correct the following errors before submitting your application.",
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
-      unsavedChangesWarning: "You have unsaved changes that will be lost.",
+      unsavedChangesWarning:
+        "You have unsaved changes or attachments that will be lost if you select OK.",
     },
   },
   Index: {
@@ -1032,14 +1033,23 @@ export const messages = {
               "We're building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
           },
           {
-            title: "Iterative",
-            content:
-              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
-          },
-          {
             title: "Agile",
             content:
               "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Send us your feedback and suggestions.",
+            link: "mailto:simpler@grants.gov",
+            linkText: "Contact us at simpler@grants.gov",
+          },
+          {
+            title: "Co-planning",
+            content:
+              "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+            link: "https://simplergrants.fider.io",
+            linkText: "Vote on our proposals board",
           },
         ],
       },

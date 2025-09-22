@@ -14,28 +14,32 @@ from tests.src.form_schema.rule_processing.conftest import setup_context
     "rule,setup_params,expected_value",
     [
         ({"rule": "opportunity_number"}, {"opportunity_number": "ABC-XYZ"}, "ABC-XYZ"),
+        # Opportunity number always gets a value, this should not ever happen
+        ({"rule": "opportunity_number"}, {"opportunity_number": None}, "unknown"),
         (
             {"rule": "opportunity_title"},
             {"opportunity_title": "My opportunity title"},
             "My opportunity title",
         ),
+        # Opportunity title always gets a value, this should not ever happen
+        (
+            {"rule": "opportunity_title"},
+            {"opportunity_title": None},
+            "unknown",
+        ),
         ({"rule": "agency_name"}, {"agency_name": "My Research Agency"}, "My Research Agency"),
         # Agency name falls back to agency code if no agency
         ({"rule": "agency_name"}, {"has_agency": False, "agency_code": "XYZ-ABC"}, "XYZ-ABC"),
+        # No agency name / code, falls back to unknown
+        ({"rule": "agency_name"}, {"has_agency": False, "agency_code": None}, "unknown"),
         # No organization get a generic INDV UEI
         ({"rule": "uei"}, {"has_organization": False}, "00000000INDV"),
         # Having an organization gets the UEI
         ({"rule": "uei"}, {"has_organization": True, "uei": "123456789"}, "123456789"),
-        ({"rule": "assistance_listing_number"}, {"has_assistance_listing_number": False}, None),
         (
             {"rule": "assistance_listing_number"},
             {"has_assistance_listing_number": True, "assistance_listing_number": "00.123"},
             "00.123",
-        ),
-        (
-            {"rule": "assistance_listing_program_title"},
-            {"has_assistance_listing_number": False},
-            None,
         ),
         (
             {"rule": "assistance_listing_program_title"},
@@ -45,9 +49,7 @@ from tests.src.form_schema.rule_processing.conftest import setup_context
             },
             "My program title",
         ),
-        ({"rule": "public_competition_id"}, {"public_competition_id": None}, None),
         ({"rule": "public_competition_id"}, {"public_competition_id": "ABC123456"}, "ABC123456"),
-        ({"rule": "competition_title"}, {"competition_title": None}, None),
         (
             {"rule": "competition_title"},
             {"competition_title": "Research Competition"},
@@ -65,6 +67,30 @@ def test_handle_field_population_pre_population(
         PRE_POPULATION_MAPPER,
     )
     assert context.json_data == {"my_field": expected_value}
+
+
+@pytest.mark.parametrize(
+    "rule,setup_params",
+    [
+        ({"rule": "assistance_listing_number"}, {"has_assistance_listing_number": False}),
+        ({"rule": "assistance_listing_program_title"}, {"has_assistance_listing_number": False}),
+        ({"rule": "public_competition_id"}, {"public_competition_id": None}),
+        ({"rule": "competition_title"}, {"competition_title": None}),
+    ],
+)
+def test_handle_field_population_pre_population_with_null_value(
+    rule, setup_params, enable_factory_create
+):
+    context = setup_context(
+        {"my_field": "this-will-be-removed"}, {"my_field": rule}, **setup_params
+    )
+    handle_field_population(
+        context,
+        JsonRule(handler="gg_pre_population", rule=rule, path=["my_field"]),
+        PRE_POPULATION_MAPPER,
+    )
+    # Because the value is null, we don't populate it, and actually remove the field by default
+    assert context.json_data == {}
 
 
 @pytest.mark.parametrize(

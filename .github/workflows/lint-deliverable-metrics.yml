@@ -1,0 +1,36 @@
+name: "Lint - Deliverable Acceptance Criteria and Metrics"
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  issues: read
+  pull-requests: read
+
+defaults:
+  run:
+    working-directory: ./.github/linters
+
+jobs:
+  run-deliverable-linter:
+    name: Run Deliverable Linter
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint Project 13
+        run: |
+          ./scripts/lint-issue-body.sh \
+            --org "HHS" \
+            --project "13" \
+            --issue-type "Deliverable" 
+
+      - name: Lint Project 17
+        run: |
+          ./scripts/lint-issue-body.sh \
+            --org "HHS" \
+            --project "17" \
+            --issue-type "Deliverable" 

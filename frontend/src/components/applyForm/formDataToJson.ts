@@ -49,12 +49,22 @@ const getFieldType = (
   formSchema: RJSFSchema,
   parentKey?: string,
 ): string => {
-  const path = getFieldPathFromHtml(currentKey);
+  // this assumes that all elements of an array will have the same type
+  // needed to handle activity line items in the budget form
+  const keyWithArrayNotationStripped = currentKey.replace(
+    /\[\d+\]/g,
+    "--items",
+  );
+  const path = getFieldPathFromHtml(keyWithArrayNotationStripped);
   const fullPath = parentKey ? `${parentKey}/${path}` : path;
   const formFieldDefinition = getByPointer(formSchema, fullPath) as {
     type?: string;
   };
-  return formFieldDefinition?.type || "";
+  if (!formFieldDefinition?.type) {
+    console.error("Undefined field type shaping form data", currentKey);
+    return "string"; // I mean, like, we may as well take our best guess and cross our fingers
+  }
+  return formFieldDefinition?.type;
 };
 
 export function formDataToObject(

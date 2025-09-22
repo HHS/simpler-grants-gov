@@ -7,8 +7,9 @@ from src.form_schema.rule_processing.json_rule_field_population import (
     PRE_POPULATION_MAPPER,
     handle_field_population,
 )
-from src.form_schema.rule_processing.json_rule_util import build_path_str, get_nested_value
+from src.form_schema.rule_processing.json_rule_util import build_path_str
 from src.form_schema.rule_processing.json_rule_validator import handle_validation
+from src.util.dict_util import get_nested_value
 
 logger = logging.getLogger(__name__)
 

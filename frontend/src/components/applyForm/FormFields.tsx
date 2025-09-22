@@ -11,6 +11,11 @@ import {
 } from "./utils";
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
+type RootBudgetFormContext = {
+  rootSchema: RJSFSchema;
+  rootFormData: unknown;
+};
+
 /*
   Runs through the UI Schema to produce a rendered array of field widgets and sections
 */
@@ -19,11 +24,13 @@ export const FormFields = ({
   formData,
   schema,
   uiSchema,
+  formContext,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
+  formContext?: RootBudgetFormContext;
 }) => {
   try {
     let acc: JSX.Element[] = [];
@@ -71,10 +78,13 @@ export const FormFields = ({
               formData,
               requiredField,
             });
+
             const field = renderWidget({
-              ...widgetConfig,
+              type: widgetConfig.type,
+              props: { ...widgetConfig.props, formContext },
               definition: node.definition,
             });
+
             if (field) {
               acc = [
                 ...acc,
@@ -83,16 +93,15 @@ export const FormFields = ({
             }
           }
         });
+
         if (parent) {
           const childAcc: JSX.Element[] = [];
           const keys: number[] = [];
           const row = uiSchema.map((node) => {
             if ("children" in node) {
               acc.forEach((item, key) => {
-                if (item) {
-                  if (item.key === `${node.name}-wrapper`) {
-                    keys.push(key);
-                  }
+                if (item && item.key === `${node.name}-wrapper`) {
+                  keys.push(key);
                 }
               });
               return null;
@@ -108,12 +117,15 @@ export const FormFields = ({
                 formData,
                 requiredField,
               });
+
               return renderWidget({
-                ...widgetConfig,
+                type: widgetConfig.type,
+                props: { ...widgetConfig.props, formContext },
                 definition: node.definition,
               });
             }
           });
+
           if (keys.length) {
             keys.forEach((key) => {
               childAcc.push(acc[key]);
@@ -144,7 +156,6 @@ export const FormFields = ({
     };
 
     buildFormTree(uiSchema, null);
-
     return acc;
   } catch (e) {
     console.error(e);

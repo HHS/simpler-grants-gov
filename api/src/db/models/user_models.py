@@ -52,8 +52,21 @@ class User(ApiSchemaTable, TimestampMixin):
         "OrganizationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
+    user_agencies: Mapped[list["AgencyUser"]] = relationship(
+        "AgencyUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
+    )
+
+    internal_user_roles: Mapped[list["InternalUserRole"]] = relationship(
+        back_populates="user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     api_keys: Mapped[list["UserApiKey"]] = relationship(
         "UserApiKey", back_populates="user", uselist=True, cascade="all, delete-orphan"
+    )
+    profile: Mapped["UserProfile"] = relationship(
+        "UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     @property
@@ -61,6 +74,10 @@ class User(ApiSchemaTable, TimestampMixin):
         if self.linked_login_gov_external_user is not None:
             return self.linked_login_gov_external_user.email
         return None
+
+    @property
+    def internal_roles(self) -> list["Role"]:
+        return [iur.role for iur in self.internal_user_roles]
 
 
 class LinkExternalUser(ApiSchemaTable, TimestampMixin):
@@ -211,6 +228,15 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
 
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="application_users")
+    application_user_roles: Mapped[list["ApplicationUserRole"]] = relationship(
+        back_populates="application_user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def roles(self) -> list["Role"]:
+        return [aur.role for aur in self.application_user_roles]
 
     application_user_roles: Mapped[list["ApplicationUserRole"]] = relationship(
         "ApplicationUserRole",
@@ -243,9 +269,18 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
     organization: Mapped[Organization] = relationship(
         Organization, back_populates="organization_users", uselist=False
     )
+    organization_user_roles: Mapped[list["OrganizationUserRole"]] = relationship(
+        back_populates="organization_user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User, back_populates="organizations", uselist=False)
+
+    @property
+    def roles(self) -> list["Role"]:
+        return [our.role for our in self.organization_user_roles]
 
 
 class SuppressedEmail(ApiSchemaTable, TimestampMixin):
@@ -375,6 +410,15 @@ class AgencyUser(ApiSchemaTable, TimestampMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User)
+    agency_user_roles: Mapped[list["AgencyUserRole"]] = relationship(
+        back_populates="agency_user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def roles(self) -> list["Role"]:
+        return [aur.role for aur in self.agency_user_roles]
 
 
 class AgencyUserRole(ApiSchemaTable, TimestampMixin):
@@ -387,3 +431,14 @@ class AgencyUserRole(ApiSchemaTable, TimestampMixin):
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
     role: Mapped[Role] = relationship(Role)
+
+
+class UserProfile(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "user_profile"
+    user_profile_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(User.user_id), unique=True)
+    user: Mapped[User] = relationship(User, back_populates="profile", uselist=False)
+
+    first_name: Mapped[str]
+    middle_name: Mapped[str | None]
+    last_name: Mapped[str]

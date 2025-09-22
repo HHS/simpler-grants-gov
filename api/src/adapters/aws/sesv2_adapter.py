@@ -41,10 +41,11 @@ class SESV2Client(BaseSESV2Client):
         if start_time:
             request_params["StartDate"] = start_time
 
-        all_summaries = []
+        all_summaries: list[SuppressedDestination] = []
         next_token = None
 
         try:
+            logger.info("Retrieving suppressed destinations")
             iterations = 0
             while True:
                 iterations += 1
@@ -53,6 +54,11 @@ class SESV2Client(BaseSESV2Client):
                     request_params["NextToken"] = next_token
 
                 response = self.client.list_suppressed_destinations(**request_params)
+                logger.info(
+                    "Raw count of suppressed emails returned: %d",
+                    len(response.get("SuppressedDestinationSummaries", [])),
+                )
+
                 response_object = SESV2Response.model_validate(response)
                 all_summaries.extend(response_object.suppressed_destination_summaries)
 
@@ -69,7 +75,7 @@ class SESV2Client(BaseSESV2Client):
             logger.exception("Error calling list_suppressed_destinations")
             raise
 
-        return SESV2Response(suppressed_destination_summaries=all_summaries)
+        return SESV2Response(SuppressedDestinationSummaries=all_summaries)
 
 
 class MockSESV2Client(BaseSESV2Client):
