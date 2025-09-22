@@ -8,13 +8,7 @@ import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import React, {
-  ReactNode,
-  useActionState,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { ReactNode, useActionState, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
 import { handleFormAction } from "./actions";
