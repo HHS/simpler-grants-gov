@@ -238,13 +238,6 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
     def roles(self) -> list["Role"]:
         return [aur.role for aur in self.application_user_roles]
 
-    application_user_roles: Mapped[list["ApplicationUserRole"]] = relationship(
-        "ApplicationUserRole",
-        back_populates="application_user",
-        uselist=True,
-        cascade="all, delete-orphan",
-    )
-
 
 class OrganizationUser(ApiSchemaTable, TimestampMixin):
     __tablename__ = "organization_user"
