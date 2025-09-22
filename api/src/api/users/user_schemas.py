@@ -342,3 +342,26 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
         fields.Nested(UserApiKeySchema),
         metadata={"description": "List of API keys for the user"},
     )
+
+class UserUpdateProfileRequestSchema(Schema):
+    first_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The updated first name of the user",
+            "example": "Jane",
+        },
+    )
+    middle_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The updated middle name of the user",
+            "example": "H",
+        },
+    )
+    last_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The updated last name of the user",
+            "example": "Doe",
+        },
+    )
