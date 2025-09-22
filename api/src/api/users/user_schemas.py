@@ -18,26 +18,7 @@ class UserTokenHeaderSchema(Schema):
     )
 
 
-class UserSchema(Schema):
-    user_id = fields.String(
-        metadata={
-            "description": "The internal ID of a user",
-            "example": "861a0148-cf2c-432b-b0b3-690016299ab1",
-        }
-    )
-    email = fields.String(
-        metadata={
-            "description": "The email address returned from Oauth2 provider",
-            "example": "user@example.com",
-        }
-    )
-    external_user_type = fields.Enum(
-        ExternalUserType,
-        metadata={
-            "description": "The Oauth2 provider through which a user was authenticated",
-            "example": ExternalUserType.LOGIN_GOV,
-        },
-    )
+class UserProfile(Schema):
     first_name = fields.String(
         allow_none=True,
         metadata={
@@ -59,6 +40,29 @@ class UserSchema(Schema):
             "example": "Smith",
         },
     )
+
+
+class UserSchema(Schema):
+    user_id = fields.String(
+        metadata={
+            "description": "The internal ID of a user",
+            "example": "861a0148-cf2c-432b-b0b3-690016299ab1",
+        }
+    )
+    email = fields.String(
+        metadata={
+            "description": "The email address returned from Oauth2 provider",
+            "example": "user@example.com",
+        }
+    )
+    external_user_type = fields.Enum(
+        ExternalUserType,
+        metadata={
+            "description": "The Oauth2 provider through which a user was authenticated",
+            "example": ExternalUserType.LOGIN_GOV,
+        },
+    )
+    profile = fields.Nested(UserProfile)
 
 
 class UserLoginGovCallbackSchema(Schema):
