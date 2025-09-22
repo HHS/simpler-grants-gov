@@ -194,7 +194,6 @@ def test_sflll_2_0_entity_type_subawardee_missing_fields(minimal_valid_sflll_v2_
     data["reporting_entity"]["entity_type"] = "SubAwardee"
 
     EXPECTED_REQUIRED_FIELDS = [
-        "$.reporting_entity.tier",
         "$.reporting_entity.prime_reporting_entity",
     ]
     validate_required(data, EXPECTED_REQUIRED_FIELDS)

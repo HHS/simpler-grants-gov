@@ -34,7 +34,7 @@ const MultipleAttachmentUploadWidget = ({
 }: UswdsWidgetProps) => {
   const { description, options, title } = schema as SchemaWithLabelOption;
 
-  const attachments = useApplicationAttachments();
+  const { attachments, setAttachmentsChanged } = useApplicationAttachments();
 
   const error = rawErrors.length ? true : undefined;
 
@@ -111,8 +111,15 @@ const MultipleAttachmentUploadWidget = ({
       setFileToDeleteIndex(null);
       setDeletePendingName(null);
       deleteModalRef.current?.toggleModal();
+      setAttachmentsChanged(true);
     }
-  }, [deleteState, fileToDeleteIndex, uploadedFiles, onChange]);
+  }, [
+    deleteState,
+    fileToDeleteIndex,
+    uploadedFiles,
+    onChange,
+    setAttachmentsChanged,
+  ]);
 
   const handleFileChange = async (files: FileList | null): Promise<void> => {
     if (!files || !applicationId) return;

@@ -89,9 +89,10 @@ const ApplyForm = ({
   });
 
   const [formChanged, setFormChanged] = useState<boolean>(false);
+  const [attachmentsChanged, setAttachmentsChanged] = useState<boolean>(false);
 
   useNavigationGuard({
-    enabled: formChanged,
+    enabled: formChanged || attachmentsChanged,
     confirm: () =>
       // eslint-disable-next-line no-alert
       window.confirm(translate("unsavedChangesWarning")),
@@ -136,7 +137,10 @@ const ApplyForm = ({
           name="apply-form-button"
           className="margin-top-0"
           value="save"
-          onClick={() => setFormChanged(false)}
+          onClick={() => {
+            setFormChanged(false);
+            setAttachmentsChanged(false);
+          }}
         >
           {pending ? "Saving..." : "Save"}
         </Button>
@@ -149,7 +153,9 @@ const ApplyForm = ({
             validationWarnings={validationWarnings}
             isBudgetForm={isBudgetForm}
           />
-          <AttachmentsProvider value={attachments ?? []}>
+          <AttachmentsProvider
+            value={{ attachments: attachments ?? [], setAttachmentsChanged }}
+          >
             <FormFields
               key={saved ? "after-save" : "before-save"}
               errors={saved ? validationWarnings : null}
