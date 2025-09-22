@@ -138,7 +138,7 @@ fi
 
 # Update the deliverable field
 # Note: We need to pass the value as a raw field to prevent the gh CLI from parsing
-#       the option ID as a number if there are no alphanumeric characters e.g. 360523
+#       the option ID as a number if there are no alphabetic characters e.g. 360523
 log "Updating deliverable field to match parent: '$parent_deliverable_option_name'"
 gh api graphql \
   --field projectId="$child_project_id" \
