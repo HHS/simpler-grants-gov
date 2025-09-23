@@ -78,6 +78,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
       setAttachmentId(null);
       onChange?.(undefined);
       deleteModalRef.current?.toggleModal();
+      setAttachmentsChanged(true);
     }
   }, [deleteState, onChange]);
 
@@ -95,10 +96,6 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     );
 
     setShowFile(!!newAttachmentId);
-
-    if (newAttachmentId) {
-      setAttachmentsChanged(true);
-    }
   }, [value, attachments, setAttachmentsChanged]);
 
   const handleChange = async (
@@ -113,7 +110,6 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
       setFileName(file.name);
       setShowFile(true);
       onChange?.(uploadedId);
-      setAttachmentsChanged(true);
     }
 
     fileInputRef.current?.clearFiles();
