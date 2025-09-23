@@ -25,7 +25,7 @@ class UserTokenHeaderSchema(Schema):
 
 class UserProfile(Schema):
     first_name = fields.String(
-        allow_none=True,
+        allow_none=False,
         metadata={
             "description": "The first name of the user",
             "example": "John",
@@ -39,7 +39,7 @@ class UserProfile(Schema):
         },
     )
     last_name = fields.String(
-        allow_none=True,
+        allow_none=False,
         metadata={
             "description": "The last name of the user",
             "example": "Smith",
@@ -382,28 +382,9 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
         metadata={"description": "List of API keys for the user"},
     )
 
-class UserUpdateProfileRequestSchema(Schema):
-    first_name = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The updated first name of the user",
-            "example": "Jane",
-        },
-    )
-    middle_name = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The updated middle name of the user",
-            "example": "H",
-        },
-    )
-    last_name = fields.String(
-        allow_none=True,
-        metadata={
-            "description": "The updated last name of the user",
-            "example": "Doe",
-        },
-    )
+
+class UserUpdateProfileRequestSchema(UserProfile):
+    pass
 
 
 class UserUpdateProfileResponseSchema(AbstractResponseSchema):
