@@ -1,16 +1,10 @@
-import pytest
+from uuid import uuid4
 
 from src.db.models.user_models import UserProfile
-from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import UserFactory, UserProfileFactory
+from tests.src.db.models.factories import UserProfileFactory
 
 
-@pytest.fixture(autouse=True)
-def clear_data(db_session):
-    cascade_delete_from_db_table(db_session, UserProfile)
-
-
-def test_user_update_profile_new(client, db_session, user_auth_token, user, enable_factory_create):
+def test_user_update_profile_new(client, db_session, user_auth_token, user):
     response = client.put(
         f"/v1/users/{user.user_id}/profile",
         headers={"X-SGG-Token": user_auth_token},
@@ -27,7 +21,6 @@ def test_user_update_profile_new(client, db_session, user_auth_token, user, enab
 
 def test_user_update_profile_update(client, db_session, user_auth_token, user):
     user_profile = UserProfileFactory.create(user=user, first_name="Everett", last_name="Child")
-    db_session.commit()
 
     data = {
         "first_name": "Everett",
@@ -50,11 +43,10 @@ def test_user_update_profile_update(client, db_session, user_auth_token, user):
     assert res.middle_name == data["middle_name"]
 
 
-def test_user_update_profile_unauthorized(
-    client, db_session, user_auth_token, user, enable_factory_create
-):
+def test_user_update_profile_unauthorized(client, db_session, user_auth_token, user):
+    user_id = uuid4()
     response = client.put(
-        f"/v1/users/{UserFactory.create().user_id}/profile",
+        f"/v1/users/{user_id}/profile",
         headers={"X-SGG-Token": user_auth_token},
         json={"first_name": "Henry"},
     )
@@ -63,5 +55,5 @@ def test_user_update_profile_unauthorized(
     assert response.json["message"] == "Forbidden"
 
     # Verify no record created
-    res = db_session.query(UserProfile).first()
+    res = db_session.query(UserProfile).filter(UserProfile.user_id == user_id).first()
     assert not res
