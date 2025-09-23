@@ -578,6 +578,39 @@ def user_list_api_keys(
 
     return response.ApiResponse(message="Success", data=api_keys)
 
+
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_profile_update(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update the authenticated user's profile data'"""
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("PUT /v1/users/:user_id/profile")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        updated_user_profile = update_user_profile(db_session, user_id, json_data)
+
+    logger.info(
+        "Updated profile for user",
+        extra={
+            "user_profile_id": updated_user_profile.user_profile_id,
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=updated_user_profile)
+
 @user_blueprint.post("/<uuid:user_id>/privileges")
 @user_blueprint.input(, location="json")
 @user_blueprint.output()
@@ -587,5 +620,4 @@ def user_list_api_keys(
 def user_get_privileges_roles(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     """Get the roles and privileges for the authenticated user"""
     logger.info("GET /v1/users/:user_id/privileges-roles")
-
     return response.ApiResponse(message="Success", data={})
