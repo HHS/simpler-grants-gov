@@ -34,8 +34,10 @@ from src.api.users.user_schemas import (
     UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
+    UserUpdateProfileRequestSchema,
+    UserUpdateProfileResponseSchema,
     UserUpdateSavedSearchRequestSchema,
-    UserUpdateSavedSearchResponseSchema, UserUpdateProfileRequestSchema,
+    UserUpdateSavedSearchResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
@@ -60,6 +62,7 @@ from src.services.users.login_gov_callback_handler import (
 )
 from src.services.users.rename_api_key import rename_api_key
 from src.services.users.update_saved_searches import update_saved_search
+from src.services.users.update_user_profile import update_user_profile
 
 logger = logging.getLogger(__name__)
 
@@ -555,9 +558,9 @@ def user_rename_api_key(
     return response.ApiResponse(message="Success", data=api_key)
 
 
-@user_blueprint.post("/<uuid:user_id>/profile")
-@user_blueprint.input(UserUpdateProfileRequestSchema, location="json")
-@user_blueprint.output(UserUpdateProfileResponseSchema)
+@user_blueprint.post("/<uuid:user_id>/api-keys/list")
+@user_blueprint.input(UserApiKeyListRequestSchema, location="json")
+@user_blueprint.output(UserApiKeyListResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
@@ -579,8 +582,20 @@ def user_list_api_keys(
     return response.ApiResponse(message="Success", data=api_keys)
 
 
-def user_profile_update(db_session: db.Session, user_id: UUID, json_data: dict) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"user_id": user_id,})
+@user_blueprint.put("/<uuid:user_id>/profile")
+@user_blueprint.input(UserUpdateProfileRequestSchema, location="json")
+@user_blueprint.output(UserUpdateProfileResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_profile_update(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
     logger.info("PUT /v1/users/:user_id/profile")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
@@ -600,9 +615,4 @@ def user_profile_update(db_session: db.Session, user_id: UUID, json_data: dict) 
         },
     )
 
-    return response.ApiResponse(message="Success")
-
-
-
-
-
+    return response.ApiResponse(message="Success", data=updated_user_profile)

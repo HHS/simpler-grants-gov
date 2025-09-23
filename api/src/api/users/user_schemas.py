@@ -365,3 +365,7 @@ class UserUpdateProfileRequestSchema(Schema):
             "example": "Doe",
         },
     )
+
+
+class UserUpdateProfileResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(UserProfile, metadata={"description": "The updated user profile"})
