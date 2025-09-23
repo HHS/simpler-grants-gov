@@ -46,31 +46,31 @@ class TestCommonGrantsOpportunityService:
         """Test listing opportunities with default pagination."""
         response = service.list_opportunities()
 
-        assert response.status == 200
-        assert response.message == "Opportunities fetched successfully"
-        assert len(response.items) <= 10
-        assert response.pagination_info.page == 1
-        assert response.pagination_info.page_size == 10
-        assert response.pagination_info.total_items >= 0
+        assert response["status"] == 200
+        assert response["message"] == "Opportunities fetched successfully"
+        assert len(response["items"]) <= 10
+        assert response["paginationInfo"]["page"] == 1
+        assert response["paginationInfo"]["pageSize"] == 10
+        assert response["paginationInfo"]["totalItems"] >= 0
 
     def test_list_opportunities_custom_pagination(self, service):
         """Test listing opportunities with custom pagination."""
         response = service.list_opportunities(page=2, page_size=5)
 
-        assert response.status == 200
-        assert response.message == "Opportunities fetched successfully"
-        assert len(response.items) <= 5
-        assert response.pagination_info.page == 2
-        assert response.pagination_info.page_size == 5
+        assert response["status"] == 200
+        assert response["message"] == "Opportunities fetched successfully"
+        assert len(response["items"]) <= 5
+        assert response["paginationInfo"]["page"] == 2
+        assert response["paginationInfo"]["pageSize"] == 5
 
     def test_list_opportunities_empty_page(self, service):
         """Test listing opportunities with a page that has no results."""
         response = service.list_opportunities(page=999, page_size=10)
 
-        assert response.status == 200
-        assert response.message == "Opportunities fetched successfully"
-        assert len(response.items) == 0
-        assert response.pagination_info.page == 999
+        assert response["status"] == 200
+        assert response["message"] == "Opportunities fetched successfully"
+        assert len(response["items"]) == 0
+        assert response["paginationInfo"]["page"] == 999
 
     def test_search_opportunities_default(self, mock_search_client):
         """Test searching opportunities with default parameters."""
@@ -83,13 +83,13 @@ class TestCommonGrantsOpportunityService:
 
             response = CommonGrantsOpportunityService.search_opportunities(mock_search_client)
 
-            assert response.status == 200
-            assert response.message == "Opportunities searched successfully using search client"
-            assert isinstance(response.items, list)
-            assert response.pagination_info.page == 1
-            assert response.pagination_info.page_size == 10
-            assert response.sort_info.sort_by == "lastModifiedAt"
-            assert response.sort_info.sort_order == "desc"
+            assert response["status"] == 200
+            assert response["message"] == "Opportunities searched successfully using search client"
+            assert isinstance(response["items"], list)
+            assert response["paginationInfo"]["page"] == 1
+            assert response["paginationInfo"]["pageSize"] == 10
+            assert response["sortInfo"]["sortBy"] == "lastModifiedAt"
+            assert response["sortInfo"]["sortOrder"] == "desc"
 
     def test_search_opportunities_with_custom_pagination(self, mock_search_client):
         """Test searching opportunities with custom pagination."""
@@ -105,10 +105,10 @@ class TestCommonGrantsOpportunityService:
                 mock_search_client, pagination=pagination
             )
 
-            assert response.status == 200
-            assert response.message == "Opportunities searched successfully using search client"
-            assert response.pagination_info.page == 2
-            assert response.pagination_info.page_size == 5
+            assert response["status"] == 200
+            assert response["message"] == "Opportunities searched successfully using search client"
+            assert response["paginationInfo"]["page"] == 2
+            assert response["paginationInfo"]["pageSize"] == 5
 
     def test_search_opportunities_with_sorting(self, mock_search_client):
         """Test searching opportunities with custom sorting."""
@@ -125,10 +125,10 @@ class TestCommonGrantsOpportunityService:
                 mock_search_client, sorting=sorting
             )
 
-            assert response.status == 200
-            assert response.message == "Opportunities searched successfully using search client"
-            assert response.sort_info.sort_by == "title"
-            assert response.sort_info.sort_order == "asc"
+            assert response["status"] == 200
+            assert response["message"] == "Opportunities searched successfully using search client"
+            assert response["sortInfo"]["sortBy"] == "title"
+            assert response["sortInfo"]["sortOrder"] == "asc"
 
     def test_search_opportunities_with_status_filter(self, mock_search_client):
         """Test searching opportunities with status filter."""
@@ -150,8 +150,8 @@ class TestCommonGrantsOpportunityService:
                 mock_search_client, filters=filters
             )
 
-            assert response.status == 200
-            assert response.message == "Opportunities searched successfully using search client"
+            assert response["status"] == 200
+            assert response["message"] == "Opportunities searched successfully using search client"
             # Note: We can't easily verify the filter was applied without checking the actual data
 
     def test_search_opportunities_with_text_search(self, mock_search_client):
@@ -165,8 +165,8 @@ class TestCommonGrantsOpportunityService:
                 mock_search_client, search_query="test"
             )
 
-            assert response.status == 200
-            assert response.message == "Opportunities searched successfully using search client"
+            assert response["status"] == 200
+            assert response["message"] == "Opportunities searched successfully using search client"
             # Note: We can't easily verify the text search was applied without checking the actual data
 
     def test_search_opportunities_with_all_parameters(self, mock_search_client):
@@ -197,22 +197,22 @@ class TestCommonGrantsOpportunityService:
                 search_query="test",
             )
 
-            assert response.status == 200
-            assert response.message == "Opportunities searched successfully using search client"
-            assert response.pagination_info.page == 2
-            assert response.pagination_info.page_size == 5
-            assert response.sort_info.sort_by == "title"
-            assert response.sort_info.sort_order == "asc"
-            # Verify filter_info is included in response
-            assert hasattr(response, "filter_info")
+            assert response["status"] == 200
+            assert response["message"] == "Opportunities searched successfully using search client"
+            assert response["paginationInfo"]["page"] == 2
+            assert response["paginationInfo"]["pageSize"] == 5
+            assert response["sortInfo"]["sortBy"] == "title"
+            assert response["sortInfo"]["sortOrder"] == "asc"
+            # Verify filterInfo is included in response
+            assert "filterInfo" in response
 
     def test_list_opportunities_total_pages_calculation(self, service):
         """Test that total pages calculation is correct."""
         response = service.list_opportunities(page=1, page_size=3)
 
-        assert response.status == 200
-        assert response.pagination_info.page == 1
-        assert response.pagination_info.page_size == 3
+        assert response["status"] == 200
+        assert response["paginationInfo"]["page"] == 1
+        assert response["paginationInfo"]["pageSize"] == 3
         # Verify totalPages is calculated correctly
-        expected_total_pages = (response.pagination_info.total_items + 3 - 1) // 3
-        assert response.pagination_info.total_pages == expected_total_pages
+        expected_total_pages = (response["paginationInfo"]["totalItems"] + 3 - 1) // 3
+        assert response["paginationInfo"]["totalPages"] == expected_total_pages

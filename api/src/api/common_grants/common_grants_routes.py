@@ -83,11 +83,7 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
         page=int(query_data.get("page", 1)), page_size=int(query_data.get("pageSize", 10))
     )
 
-    # Hydrate response model
-    response_json = response_object.model_dump(by_alias=True, mode="json")
-    response_schema = OpportunitiesListResponseSchema()
-    validated_response = response_schema.load(response_json)
-    return validated_response, 200
+    return response_object, 200
 
 
 @common_grants_blueprint.get("/opportunities/<oppId>")
@@ -113,12 +109,7 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     if not response_object:
         return generate_404_error("oppId")
 
-    # Hydrate response model
-    response_json = response_object.model_dump(by_alias=True, mode="json")
-    response_schema = OpportunityResponseSchema()
-    validated_response = response_schema.load(response_json)
-    return validated_response, 200
-
+    return response_object, 200
 
 @common_grants_blueprint.post("/opportunities/search")
 @common_grants_blueprint.input(OpportunitySearchRequestSchema)
@@ -153,8 +144,4 @@ def search_opportunities(search_client: search.SearchClient, json_data: dict) ->
         search_request.search,
     )
 
-    # Hydrate schema
-    response_json = response_object.model_dump(by_alias=True, mode="json")
-    response_schema = OpportunitiesSearchResponseSchema()
-    validated_response = response_schema.load(response_json)
-    return validated_response, 200
+    return response_object, 200
