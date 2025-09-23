@@ -172,11 +172,7 @@ module "service" {
     module.app_config.enable_identity_provider ? [{
       # name      = "COGNITO_CLIENT_SECRET"
       # valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : [],
-    [{
-      name      = "X-API-KEY",
-      valueFrom = aws_ssm_parameter.frontend_api_access_token.arn
-    }]
+    }] : []
   )
 
   extra_policies = merge(
