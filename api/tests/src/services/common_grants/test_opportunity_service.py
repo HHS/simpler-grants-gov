@@ -24,26 +24,36 @@ class TestCommonGrantsOpportunityService:
     @pytest.fixture
     def service(self, db_session):
         """Create a CommonGrantsOpportunityService instance for testing."""
-        return CommonGrantsOpportunityService(db_session)
+        return CommonGrantsOpportunityService()
 
     @pytest.fixture
     def mock_search_client(self):
         """Create a mock search client for testing."""
-        return Mock()
+        mock_client = Mock()
+        # Mock the search response structure
+        mock_response = Mock()
+        mock_response.total_records = 0
+        mock_response.total_pages = 0
+        mock_response.records = []  # Empty list of records
+        mock_client.search.return_value = mock_response
+        return mock_client
 
     def test_service_initialization(self, service):
         """Test that the service initializes correctly."""
-        assert service.db_session is not None
+        assert service is not None
 
-    def test_get_opportunity_invalid_uuid(self, service):
+    def test_get_opportunity_invalid_uuid(self, service, db_session):
         """Test getting an opportunity with an invalid UUID."""
-        result = service.get_opportunity("invalid-uuid")
+        result = CommonGrantsOpportunityService.get_opportunity(db_session, "invalid-uuid")
         assert result is None
 
-    def test_get_opportunity_nonexistent_id(self, service):
+    def test_get_opportunity_nonexistent_id(self, service, db_session):
         """Test getting an opportunity with a valid UUID that doesn't exist."""
-        result = service.get_opportunity(str(uuid4()))
-        assert result is None
+        # The service raises an HTTPError when opportunity is not found
+        from apiflask.exceptions import HTTPError
+
+        with pytest.raises(HTTPError):
+            CommonGrantsOpportunityService.get_opportunity(db_session, str(uuid4()))
 
     def test_get_opportunity_success(self, service, db_session):
         """Test getting an opportunity successfully."""
@@ -52,9 +62,9 @@ class TestCommonGrantsOpportunityService:
         # In a real test environment, you'd create an opportunity record first
         pass
 
-    def test_list_opportunities_default_pagination(self, service):
+    def test_list_opportunities_default_pagination(self, service, mock_search_client):
         """Test listing opportunities with default pagination."""
-        response = service.list_opportunities()
+        response = CommonGrantsOpportunityService.list_opportunities(mock_search_client)
 
         assert response["status"] == 200
         assert response["message"] == "Opportunities fetched successfully"
@@ -63,9 +73,11 @@ class TestCommonGrantsOpportunityService:
         assert response["paginationInfo"]["pageSize"] == 10
         assert response["paginationInfo"]["totalItems"] >= 0
 
-    def test_list_opportunities_custom_pagination(self, service):
+    def test_list_opportunities_custom_pagination(self, service, mock_search_client):
         """Test listing opportunities with custom pagination."""
-        response = service.list_opportunities(page=2, page_size=5)
+        response = CommonGrantsOpportunityService.list_opportunities(
+            mock_search_client, page=2, page_size=5
+        )
 
         assert response["status"] == 200
         assert response["message"] == "Opportunities fetched successfully"
@@ -73,9 +85,11 @@ class TestCommonGrantsOpportunityService:
         assert response["paginationInfo"]["page"] == 2
         assert response["paginationInfo"]["pageSize"] == 5
 
-    def test_list_opportunities_empty_page(self, service):
+    def test_list_opportunities_empty_page(self, service, mock_search_client):
         """Test listing opportunities with a page that has no results."""
-        response = service.list_opportunities(page=999, page_size=10)
+        response = CommonGrantsOpportunityService.list_opportunities(
+            mock_search_client, page=999, page_size=10
+        )
 
         assert response["status"] == 200
         assert response["message"] == "Opportunities fetched successfully"
@@ -206,9 +220,11 @@ class TestCommonGrantsOpportunityService:
             # Verify filterInfo is included in response
             assert "filterInfo" in response
 
-    def test_list_opportunities_total_pages_calculation(self, service):
+    def test_list_opportunities_total_pages_calculation(self, service, mock_search_client):
         """Test that total pages calculation is correct."""
-        response = service.list_opportunities(page=1, page_size=3)
+        response = CommonGrantsOpportunityService.list_opportunities(
+            mock_search_client, page=1, page_size=3
+        )
 
         assert response["status"] == 200
         assert response["paginationInfo"]["page"] == 1

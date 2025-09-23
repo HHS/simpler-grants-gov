@@ -21,10 +21,10 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedResultsInfo,
     SortedResultsInfo,
 )
-from sqlalchemy.orm import Session, selectinload
 
+import src.adapters.db as db
 import src.adapters.search as search
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.services.opportunities_v1.get_opportunity import get_opportunity
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 
 from .transformation import (
@@ -40,27 +40,19 @@ logger = logging.getLogger(__name__)
 class CommonGrantsOpportunityService:
     """Service for managing opportunities in CommonGrants Protocol format."""
 
-    def __init__(self, db_session: Session) -> None:
+    def __init__(self) -> None:
         """Initialize the service."""
-        self.db_session = db_session
+        return
 
-    def get_opportunity(self, opportunity_id: str) -> OpportunityResponseSchema | None:
+    @staticmethod
+    def get_opportunity(
+        db_session: db.Session, opportunity_id: str
+    ) -> OpportunityResponseSchema | None:
         """Get a specific opportunity by ID."""
         try:
-            # Get response data
+            # Get response data from v1 service
             opportunity_uuid = UUID(opportunity_id)
-            opportunity_data = (
-                self.db_session.query(Opportunity)
-                .filter(
-                    Opportunity.opportunity_id == opportunity_uuid, Opportunity.is_draft.is_(False)
-                )
-                .options(
-                    selectinload(Opportunity.current_opportunity_summary).selectinload(
-                        CurrentOpportunitySummary.opportunity_summary
-                    )
-                )
-                .first()
-            )
+            opportunity_data = get_opportunity(db_session, opportunity_uuid)
 
             # Handle not-found condition
             if not opportunity_data:
@@ -84,43 +76,42 @@ class CommonGrantsOpportunityService:
         except ValueError:
             return None
 
+    @staticmethod
     def list_opportunities(
-        self,
+        search_client: search.SearchClient,
         page: int = 1,
         page_size: int = 10,
     ) -> OpportunitiesListResponseSchema:
         """Get a paginated list of opportunities."""
-        # Get total count (excluding drafts)
-        total_count = (
-            self.db_session.query(Opportunity).filter(Opportunity.is_draft.is_(False)).count()
-        )
+
+        # Set empty search params
+        filters = OppFilters()
+        pagination = PaginatedBodyParams(page=page, page_size=page_size)
+        sorting = OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT)
+
+        # Convert search request to v1 format
+        v1_search_params = transform_search_request_from_cg(filters, sorting, pagination, "")
 
         # Get response data
-        opportunity_data = (
-            self.db_session.query(Opportunity)
-            .filter(Opportunity.is_draft.is_(False))
-            .options(
-                selectinload(Opportunity.current_opportunity_summary).selectinload(
-                    CurrentOpportunitySummary.opportunity_summary
-                )
-            )
-            .order_by(Opportunity.updated_at.desc())
-            .offset((page - 1) * page_size)
-            .limit(page_size)
-            .all()
+        opportunity_data, aggregations, pagination_data = search_opportunities(
+            search_client, v1_search_params
         )
 
         # Transform response data to CG format
-        opportunity_data_cg = [transform_opportunity_to_cg(opp) for opp in opportunity_data]
+        opportunity_data_cg = []
+        for item in opportunity_data:
+            opportunity = transform_search_result_to_cg(item)
+            if opportunity:
+                opportunity_data_cg.append(opportunity)
         opportunity_response = OpportunitiesListResponse(
             status=200,
             message="Opportunities fetched successfully",
             items=opportunity_data_cg,
             pagination_info=PaginatedResultsInfo(
-                page=page,
-                page_size=page_size,
-                totalItems=total_count,
-                totalPages=(total_count + page_size - 1) // page_size,
+                page=pagination_data.page_offset,
+                page_size=pagination_data.page_size,
+                totalItems=pagination_data.total_records,
+                totalPages=pagination_data.total_pages,
             ),
         )
 
@@ -141,7 +132,7 @@ class CommonGrantsOpportunityService:
     ) -> OpportunitiesSearchResponseSchema:
         """Search for opportunities based on the provided filters."""
 
-        # Set default values
+        # Set search params
         filters = filters or OppFilters()
         sorting = sorting or OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT)
         pagination = pagination or PaginatedBodyParams()
