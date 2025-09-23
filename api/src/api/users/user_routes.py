@@ -171,7 +171,7 @@ def user_token_refresh(db_session: db.Session) -> response.ApiResponse:
 
 @user_blueprint.get("/<uuid:user_id>")
 @user_blueprint.output(UserGetResponseSchema)
-@user_blueprint.doc(responses=[200, 401])
+@user_blueprint.doc(responses=[200, 401, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
