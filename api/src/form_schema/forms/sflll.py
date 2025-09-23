@@ -72,13 +72,13 @@ FORM_JSON_SCHEMA = {
             "required": ["entity_type", "applicant_reporting_entity"],
             # Conditionally required
             "allOf": [
-                # If entity_type is SubAwardee, then tier and prime_reporting_entity become required
+                # If entity_type is SubAwardee, then prime_reporting_entity is required
                 {
                     "if": {
                         "properties": {"entity_type": {"const": "SubAwardee"}},
                         "required": ["entity_type"],
                     },
-                    "then": {"required": ["tier", "prime_reporting_entity"]},
+                    "then": {"required": ["prime_reporting_entity"]},
                 }
             ],
             "properties": {

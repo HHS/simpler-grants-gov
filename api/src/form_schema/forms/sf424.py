@@ -36,6 +36,7 @@ FORM_JSON_SCHEMA = {
         "delinquent_federal_debt",
         "certification_agree",
         "authorized_representative",
+        "authorized_representative_title",
         "authorized_representative_phone_number",
         "authorized_representative_email",
     ],
@@ -226,6 +227,13 @@ FORM_JSON_SCHEMA = {
             "allOf": [{"$ref": "#/$defs/person_name"}],
             "title": "Contact Person",
             "description": "Enter information about the contact person.",
+        },
+        "contact_person_title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Enter the position title.",
+            "minLength": 1,
+            "maxLength": 45,
         },
         "organization_affiliation": {
             "type": "string",
@@ -465,6 +473,13 @@ FORM_JSON_SCHEMA = {
             "title": "Authorized Representative",
             "description": "",
         },
+        "authorized_representative_title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Enter the position title.",
+            "minLength": 1,
+            "maxLength": 45,
+        },
         "authorized_representative_phone_number": {
             "allOf": [{"$ref": "#/$defs/phone_number_field"}],
             "title": "AOR Telephone Number",
@@ -611,14 +626,6 @@ FORM_JSON_SCHEMA = {
                     "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
                     "minLength": 1,
                     "maxLength": 10,
-                },
-                "title": {
-                    # This isn't in this part of the model of the SF424, but is in the global lib
-                    "type": "string",
-                    "title": "Title",
-                    "description": "Enter the position title.",
-                    "minLength": 1,
-                    "maxLength": 45,
                 },
             },
         },
@@ -780,7 +787,7 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/contact_person/properties/middle_name"},
             {"type": "field", "definition": "/properties/contact_person/properties/last_name"},
             {"type": "field", "definition": "/properties/contact_person/properties/suffix"},
-            {"type": "field", "definition": "/properties/contact_person/properties/title"},
+            {"type": "field", "definition": "/properties/contact_person_title"},
             {
                 "type": "field",
                 "definition": "/properties/organization_affiliation",
@@ -1024,7 +1031,7 @@ FORM_UI_SCHEMA = [
             },
             {
                 "type": "field",
-                "definition": "/properties/authorized_representative/properties/title",
+                "definition": "/properties/authorized_representative_title",
             },
             {"type": "field", "definition": "/properties/authorized_representative_phone_number"},
             {"type": "field", "definition": "/properties/authorized_representative_fax"},
