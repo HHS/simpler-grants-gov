@@ -3,6 +3,13 @@
 import logging
 from uuid import UUID
 
+from common_grants_sdk.schemas.marshmallow import (
+    OpportunitiesListResponse as OpportunitiesListResponseSchema,
+)
+from common_grants_sdk.schemas.marshmallow import (
+    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+)
+from common_grants_sdk.schemas.marshmallow import OpportunityResponse as OpportunityResponseSchema
 from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunitiesListResponse,
@@ -13,11 +20,6 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     PaginatedResultsInfo,
     SortedResultsInfo,
-)
-from common_grants_sdk.schemas.marshmallow import (
-    OpportunitiesListResponse as OpportunitiesListResponseSchema,
-    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
-    OpportunityResponse as OpportunityResponseSchema,
 )
 from sqlalchemy.orm import Session, selectinload
 
@@ -47,7 +49,7 @@ class CommonGrantsOpportunityService:
         try:
             # Get response data
             opportunity_uuid = UUID(opportunity_id)
-            opportunity = (
+            opportunity_data = (
                 self.db_session.query(Opportunity)
                 .filter(
                     Opportunity.opportunity_id == opportunity_uuid, Opportunity.is_draft.is_(False)
@@ -61,15 +63,15 @@ class CommonGrantsOpportunityService:
             )
 
             # Handle not-found condition
-            if not opportunity:
+            if not opportunity_data:
                 return None
 
             # Transform response data to CG format
-            opportunity_data = transform_opportunity_to_cg(opportunity)
+            opportunity_data_cg = transform_opportunity_to_cg(opportunity_data)
             opportunity_response = OpportunityResponse(
                 status=200,
                 message="Success",
-                data=opportunity_data,
+                data=opportunity_data_cg,
             )
 
             # Transform response data from pydantic to marshmallow
@@ -94,7 +96,7 @@ class CommonGrantsOpportunityService:
         )
 
         # Get response data
-        opportunities = (
+        opportunity_data = (
             self.db_session.query(Opportunity)
             .filter(Opportunity.is_draft.is_(False))
             .options(
@@ -109,17 +111,17 @@ class CommonGrantsOpportunityService:
         )
 
         # Transform response data to CG format
-        opportunity_data = [transform_opportunity_to_cg(opp) for opp in opportunities]
+        opportunity_data_cg = [transform_opportunity_to_cg(opp) for opp in opportunity_data]
         opportunity_response = OpportunitiesListResponse(
             status=200,
             message="Opportunities fetched successfully",
-            items=opportunity_data,
+            items=opportunity_data_cg,
             pagination_info=PaginatedResultsInfo(
                 page=page,
                 page_size=page_size,
                 totalItems=total_count,
                 totalPages=(total_count + page_size - 1) // page_size,
-            )
+            ),
         )
 
         # Transform response data from pydantic to marshmallow
@@ -145,30 +147,30 @@ class CommonGrantsOpportunityService:
         pagination = pagination or PaginatedBodyParams()
 
         # Convert search request to v1 format
-        legacy_search_params = transform_search_request_from_cg(
+        v1_search_params = transform_search_request_from_cg(
             filters, sorting, pagination, search_query
         )
 
         # Get response data
-        opportunities, aggregations, pagination_info = search_opportunities(
-            search_client, legacy_search_params
+        opportunity_data, aggregations, pagination_data = search_opportunities(
+            search_client, v1_search_params
         )
 
         # Transform response data to CG format
-        items = []
-        for opp_data in opportunities:
-            opportunity = transform_search_result_to_cg(opp_data)
+        opportunity_data_cg = []
+        for item in opportunity_data:
+            opportunity = transform_search_result_to_cg(item)
             if opportunity:
-                items.append(opportunity)
+                opportunity_data_cg.append(opportunity)
         opportunity_response = OpportunitiesSearchResponse(
             status=200,
             message="Opportunities searched successfully using search client",
-            items=items,
+            items=opportunity_data_cg,
             pagination_info=PaginatedResultsInfo(
                 page=pagination.page,
                 page_size=pagination.page_size,
-                totalItems=pagination_info.total_records,
-                totalPages=pagination_info.total_pages,
+                totalItems=pagination_data.total_records,
+                totalPages=pagination_data.total_pages,
             ),
             sort_info=SortedResultsInfo(
                 sort_by=sorting.sort_by.value,

@@ -1,6 +1,7 @@
 """Tests for the CommonGrants Protocol routes."""
 
 import uuid
+from datetime import datetime
 
 from flask.testing import FlaskClient
 
@@ -44,8 +45,6 @@ def validate_opportunity_structure(opportunity):
     assert "value" in status
 
     # Validate date formats (ISO 8601)
-    from datetime import datetime
-
     try:
         datetime.fromisoformat(opportunity["createdAt"].replace("Z", "+00:00"))
         datetime.fromisoformat(opportunity["lastModifiedAt"].replace("Z", "+00:00"))

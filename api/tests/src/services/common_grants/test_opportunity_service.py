@@ -4,6 +4,16 @@ from unittest.mock import Mock, patch
 from uuid import uuid4
 
 import pytest
+from common_grants_sdk.schemas.pydantic import (
+    ArrayOperator,
+    OppFilters,
+    OppSortBy,
+    OppSorting,
+    OppStatusOptions,
+    PaginatedBodyParams,
+    SortOrder,
+    StringArrayFilter,
+)
 
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 
@@ -93,7 +103,6 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_custom_pagination(self, mock_search_client):
         """Test searching opportunities with custom pagination."""
-        from common_grants_sdk.schemas.pydantic import PaginatedBodyParams
 
         with patch(
             "src.services.common_grants.opportunity_service.search_opportunities"
@@ -112,8 +121,6 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_sorting(self, mock_search_client):
         """Test searching opportunities with custom sorting."""
-        from common_grants_sdk.schemas.pydantic import OppSorting
-        from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, SortOrder
 
         with patch(
             "src.services.common_grants.opportunity_service.search_opportunities"
@@ -132,9 +139,6 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_status_filter(self, mock_search_client):
         """Test searching opportunities with status filter."""
-        from common_grants_sdk.schemas.pydantic import OppFilters
-        from common_grants_sdk.schemas.pydantic.filters import ArrayOperator, StringArrayFilter
-        from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
 
         with patch(
             "src.services.common_grants.opportunity_service.search_opportunities"
@@ -171,10 +175,6 @@ class TestCommonGrantsOpportunityService:
 
     def test_search_opportunities_with_all_parameters(self, mock_search_client):
         """Test searching opportunities with all parameters specified."""
-        from common_grants_sdk.schemas.pydantic import OppFilters, OppSorting, PaginatedBodyParams
-        from common_grants_sdk.schemas.pydantic.filters import ArrayOperator, StringArrayFilter
-        from common_grants_sdk.schemas.pydantic.models import OppStatusOptions
-        from common_grants_sdk.schemas.pydantic.sorting import OppSortBy, SortOrder
 
         with patch(
             "src.services.common_grants.opportunity_service.search_opportunities"

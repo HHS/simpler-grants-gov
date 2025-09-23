@@ -111,6 +111,7 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 
     return response_object, 200
 
+
 @common_grants_blueprint.post("/opportunities/search")
 @common_grants_blueprint.input(OpportunitySearchRequestSchema)
 @common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
