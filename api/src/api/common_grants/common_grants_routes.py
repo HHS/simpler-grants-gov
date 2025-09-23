@@ -22,7 +22,9 @@ import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
+from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +74,8 @@ def generate_404_error(
 @flask_db.with_db_session()
 def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, int]:
     """Get a paginated list of opportunities."""
+    add_extra_data_to_current_request_logs(query_data)
+    logger.info("GET /common-grants/opportunities/")
 
     # Create service and get query result
     service = CommonGrantsOpportunityService(db_session)
@@ -98,6 +102,8 @@ def list_opportunities(db_session: db.Session, query_data: dict) -> tuple[dict, 
 @flask_db.with_db_session()
 def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
     """Get a specific opportunity by ID."""
+    add_extra_data_to_current_request_logs({"oppId": oppId})
+    logger.info("GET /common-grants/opportunities/{oppId}")
 
     # Create service and get query result
     service = CommonGrantsOpportunityService(db_session)
@@ -127,6 +133,8 @@ def get_opportunity(db_session: db.Session, oppId: str) -> tuple[dict, int]:
 @flask_opensearch.with_search_client()
 def search_opportunities(search_client: search.SearchClient, json_data: dict) -> tuple[dict, int]:
     """Search for opportunities based on the provided filters."""
+    add_extra_data_to_current_request_logs(json_data)
+    logger.info("POST /common-grants/opportunities/search")
 
     # Validate input
     request_schema = OpportunitySearchRequestSchema()
