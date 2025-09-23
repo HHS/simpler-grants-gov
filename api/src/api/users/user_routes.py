@@ -577,3 +577,15 @@ def user_list_api_keys(
         api_keys = get_user_api_keys(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=api_keys)
+
+@user_blueprint.post("/<uuid:user_id>/privileges")
+@user_blueprint.input(, location="json")
+@user_blueprint.output()
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_privileges_roles(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+    """Get the roles and privileges for the authenticated user"""
+    logger.info("GET /v1/users/:user_id/privileges-roles")
+
+    return response.ApiResponse(message="Success", data={})
