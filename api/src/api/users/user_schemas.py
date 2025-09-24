@@ -2,6 +2,7 @@ from typing import Any
 
 from marshmallow import pre_dump
 
+from src.api.agencies_v1.agency_schema import AgencyV1Schema
 from src.api.application_alpha.application_schemas import SamGovEntitySchema
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySearchRequestV1Schema,
@@ -9,8 +10,14 @@ from src.api.opportunities_v1.opportunity_schemas import (
 )
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.constants.lookup_constants import ApplicationStatus, ExternalUserType
-from src.db.models.user_models import LinkExternalUser
+from src.constants.lookup_constants import ApplicationStatus, ExternalUserType, Privilege
+from src.db.models.user_models import (
+    AgencyUserRole,
+    ApplicationUserRole,
+    InternalUserRole,
+    LinkExternalUser,
+    OrganizationUserRole,
+)
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -389,3 +396,103 @@ class UserUpdateProfileRequestSchema(UserProfile):
 
 class UserUpdateProfileResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserProfile, metadata={"description": "The updated user profile"})
+
+
+class UserRolesAndPrivileges(Schema):
+    """Schema for user role and privileges within a resource."""
+
+    role_id = fields.UUID()
+    role_name = fields.String(metadata={"description": "The name of the role"})
+    privileges = fields.List(
+        fields.Enum(Privilege, metadata={"description": "Privileges for the role"})
+    )
+
+    @pre_dump
+    def flatten_linked_user(
+        self,
+        resource_role: (
+            ApplicationUserRole | OrganizationUserRole | InternalUserRole | AgencyUserRole
+        ),
+        **kwargs: Any
+    ) -> dict:
+        role = resource_role.role
+        return {
+            "role_id": resource_role.role_id,
+            "role_name": role.role_name,
+            "privileges": role.privileges,
+        }
+
+
+class UserOrganization(Schema):
+    """Schema representing a user's association with an organization and their roles."""
+
+    organization = fields.Nested(
+        UserOrganizationSchema, metadata={"description": "Organization details"}
+    )
+    organization_user_roles = fields.List(
+        fields.Nested(
+            UserRolesAndPrivileges,
+            metadata={"description": "Roles the user has for this organization"},
+        )
+    )
+
+
+class UserApplication(Schema):
+    """Schema representing a user's association with an application and their roles."""
+
+    application = fields.Nested(
+        UserApplicationListItemSchema, metadata={"description": "Application details"}
+    )
+    application_user_roles = fields.List(
+        fields.Nested(
+            UserRolesAndPrivileges,
+            metadata={"description": "Roles the user has for this application"},
+        )
+    )
+
+
+class UserAgency(Schema):
+    """Schema representing a user's association with an agency and their roles."""
+
+    agency = fields.Nested(AgencyV1Schema, metadata={"description": "Agency details"})
+    agency_user_roles = fields.List(
+        fields.Nested(
+            UserRolesAndPrivileges, metadata={"description": "Roles the user has for this agency"}
+        )
+    )
+
+
+class GetRolesAndPrivilegesResponseSchema(Schema):
+    """Schema for the full response containing user roles and privileges."""
+
+    user_id = fields.UUID()
+    organizations = fields.List(
+        fields.Nested(
+            UserOrganization,
+            metadata={"description": "List of organizations and the user's roles in each"},
+        ),
+    )
+
+    application_users = fields.List(
+        fields.Nested(
+            UserApplication,
+            metadata={"description": "List of applications and the user's roles in each"},
+        ),
+    )
+
+    user_agencies = fields.List(
+        fields.Nested(
+            UserAgency, metadata={"description": "List of agencies and the user's roles in each"}
+        ),
+    )
+
+    internal_user_roles = fields.List(
+        fields.Nested(
+            UserRolesAndPrivileges,
+            metadata={"description": "List of roles and the user's roles & privileges in each"},
+        ),
+    )
+
+
+class UserGetRolesAndPrivilegesResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(GetRolesAndPrivilegesResponseSchema)
