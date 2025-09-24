@@ -24,6 +24,7 @@ tags:
 - name: Opportunity v1
 - name: Extract v1
 - name: Agency v1
+- name: Organization v1
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
@@ -916,6 +917,44 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserSaveSearchRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}:
+    get:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Get organization information by ID
       security:
       - ApiJwtAuth: []
   /alpha/applications/{application_id}:
@@ -4188,6 +4227,54 @@ components:
           type:
           - object
           $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SamGovEntityResponse:
+      type: object
+      properties:
+        uei:
+          type: string
+          description: Unique Entity Identifier
+          example: 000123456789
+        legal_business_name:
+          type: string
+          description: Legal business name from SAM.gov
+          example: Example Inc.
+        expiration_date:
+          type: string
+          format: date
+          description: SAM.gov registration expiration date
+          example: '2025-08-11'
+    OrganizationData:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        sam_gov_entity:
+          description: SAM.gov entity information
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntityResponse'
+          - type: 'null'
+    OrganizationGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationData'
         status_code:
           type: integer
           description: The HTTP status code
