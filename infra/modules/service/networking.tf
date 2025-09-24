@@ -128,4 +128,12 @@ resource "aws_security_group" "app" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    description = "All TCP traffic outbound"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
