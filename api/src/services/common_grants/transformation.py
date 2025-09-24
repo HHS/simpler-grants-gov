@@ -1,7 +1,8 @@
 """Transformation utilities for converting native models to CommonGrants Protocol format."""
 
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timezone
+from urllib.parse import urlparse
 
 from common_grants_sdk.schemas.pydantic import (
     FilterInfo,
@@ -25,24 +26,30 @@ from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 logger = logging.getLogger(__name__)
 
 
-def transform_status_to_cg(status_value: str) -> OppStatusOptions:
+def transform_status_to_cg(status: OpportunityStatus) -> OppStatusOptions:
     """
     Transform opportunity status value to CommonGrants status.
 
     Args:
-        status_value: The status string value
+        status: The OpportunityStatus enum value
 
     Returns:
         OppStatusOptions: The CommonGrants status enum value
     """
 
     STATUS_TO_CG_MAP = {
-        OpportunityStatus.FORECASTED.value: OppStatusOptions.FORECASTED,
-        OpportunityStatus.POSTED.value: OppStatusOptions.OPEN,
-        OpportunityStatus.CLOSED.value: OppStatusOptions.CLOSED,
-        OpportunityStatus.ARCHIVED.value: OppStatusOptions.CUSTOM,
+        OpportunityStatus.FORECASTED: OppStatusOptions.FORECASTED,
+        OpportunityStatus.POSTED: OppStatusOptions.OPEN,
+        OpportunityStatus.CLOSED: OppStatusOptions.CLOSED,
+        OpportunityStatus.ARCHIVED: OppStatusOptions.CUSTOM,
     }
-    return STATUS_TO_CG_MAP.get(status_value, OppStatusOptions.CUSTOM)
+
+    new_status = STATUS_TO_CG_MAP.get(status, None)
+    if not new_status:
+        logger.error(f"Status transformation failed: unexpected OpportunityStatus value: {status}")
+        new_status = OppStatusOptions.FORECASTED
+
+    return new_status
 
 
 def transform_status_from_cg(status: OppStatusOptions) -> str:
@@ -63,7 +70,14 @@ def transform_status_from_cg(status: OppStatusOptions) -> str:
         OppStatusOptions.CUSTOM: OpportunityStatus.ARCHIVED,
     }
 
-    return STATUS_FROM_CG_MAP.get(status, OppStatusOptions.CUSTOM)
+    new_status = STATUS_FROM_CG_MAP.get(status, None)
+    if not new_status:
+        logger.error(
+            f"Status transformation failed: unexpected OpportunityStatusOptions value: {status}"
+        )
+        new_status = OpportunityStatus.FORECASTED
+
+    return new_status
 
 
 def transform_sorting_from_cg(sortBy: OppSortBy) -> str:
@@ -129,28 +143,27 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
     return date_value
 
 
-def validate_url(url: str | None) -> str | None:
+def validate_url(value: str | None) -> str | None:
     """
-    Validate and fix a URL string.
+    Validate a URL string.
 
     Args:
-        url: The URL string to validate and fix
+        value: The string to validate
 
     Returns:
-        A valid URL string or None if the URL cannot be fixed
+        A valid URL string or None
     """
-    if not url:
-        return None
+    # Parse the string
+    parsed = urlparse(value)
 
-    # If the URL already has a protocol, return it as is
-    if url.startswith(("http://", "https://")):
-        return url
+    # Check for scheme and netloc (i.e. it's a complete url)
+    if parsed.scheme and parsed.netloc:
+        return value
 
-    # If it's a domain without protocol, add https://
-    if "." in url and not url.startswith(("http://", "https://", "ftp://", "file://")):
-        return f"https://{url}"
+    # Check for netloc only (i.e. it's a domain name)
+    if not parsed.scheme and parsed.netloc:
+        return f"https://{value}"
 
-    # If it's not a valid URL format, return None
     return None
 
 
@@ -159,88 +172,44 @@ def transform_opportunity_to_cg(opportunity: Opportunity) -> OpportunityBase:
     Transform a native Opportunity model to CommonGrants Protocol format.
 
     Args:
-        opportunity: The native Opportunity model from the database
+        opportunity: A v1 Opportunity model instance
 
     Returns:
-        OpportunityBase: The opportunity in CommonGrants Protocol format
+        OpportunityBase: A CommonGrants Protocol model instance
     """
-    # Transform status
-    status_value = (
-        opportunity.opportunity_status.value
-        if opportunity.opportunity_status
-        else OpportunityStatus.POSTED
-    )
-    opp_status = transform_status_to_cg(status_value)
-
     # Extract opportunity summary
     summary = _get_opportunity_summary(opportunity)
 
-    # Create timeline
-    timeline = OppTimeline(
-        postDate=(
-            SingleDateEvent(
-                name="Opportunity Posted",
-                date=_transform_date_to_cg(opportunity.created_at),
-                description="Date when the opportunity was first posted",
-            )
-            if opportunity.created_at
-            else None
+    # Convert model to dict
+    opp_data = {
+        "opportunity_id": opportunity.opportunity_id,
+        "opportunity_title": opportunity.opportunity_title or "Untitled Opportunity",
+        "opportunity_status": opportunity.opportunity_status,
+        "created_at": opportunity.created_at,
+        "updated_at": opportunity.updated_at,
+        "summary": (
+            {
+                "summary_description": summary.summary_description if summary else None,
+                "post_date": summary.post_date if summary else None,
+                "close_date": summary.close_date if summary else None,
+                "estimated_total_program_funding": (
+                    summary.estimated_total_program_funding if summary else None
+                ),
+                "award_ceiling": summary.award_ceiling if summary else None,
+                "award_floor": summary.award_floor if summary else None,
+                "additional_info_url": summary.additional_info_url if summary else None,
+            }
+            if summary
+            else {}
         ),
-        closeDate=(
-            SingleDateEvent(
-                name="Application Deadline",
-                date=_transform_date_to_cg(summary.close_date),
-                description="Deadline for submitting applications",
-            )
-            if summary and summary.close_date
-            else None
-        ),
-    )
+    }
 
-    # Create funding objects
-    total_amount_money = None
-    if summary and summary.estimated_total_program_funding is not None:
-        total_amount_money = Money(
-            amount=str(summary.estimated_total_program_funding),
-            currency="USD",
-        )
+    # Transform
+    result = transform_search_result_to_cg(opp_data)
+    if result is None:
+        raise ValueError("Failed to transform opportunity to CommonGrants format")
 
-    max_award_money = None
-    if summary and summary.award_ceiling is not None:
-        max_award_money = Money(
-            amount=str(summary.award_ceiling),
-            currency="USD",
-        )
-
-    min_award_money = None
-    if summary and summary.award_floor is not None:
-        min_award_money = Money(
-            amount=str(summary.award_floor),
-            currency="USD",
-        )
-
-    funding = OppFunding(
-        totalAmountAvailable=total_amount_money,
-        maxAwardAmount=max_award_money,
-        minAwardAmount=min_award_money,
-    )
-
-    return OpportunityBase(
-        id=opportunity.opportunity_id,
-        title=opportunity.opportunity_title or "Untitled Opportunity",
-        description=(
-            summary.summary_description
-            if summary and summary.summary_description
-            else "No description available"
-        ),
-        status=OppStatus(value=opp_status),
-        keyDates=timeline,
-        funding=funding,
-        source=validate_url(summary.additional_info_url if summary else None),
-        custom_fields={},
-        createdAt=opportunity.created_at,
-        lastModifiedAt=opportunity.updated_at,
-    )
+    return result
 
 
 def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
@@ -258,9 +227,9 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         opportunity_id = opp_data.get("opportunity_id")
         title = opp_data.get("opportunity_title", "Untitled Opportunity")
         summary = opp_data.get("summary", {})
-        description = summary.get("summary_description", "No description available")
+        description = summary.get("summary_description") or "No description available"
 
-        # Map status
+        # Transform status
         status_value = opp_data.get("opportunity_status", OpportunityStatus.POSTED)
         opp_status = transform_status_to_cg(status_value)
 
@@ -269,50 +238,52 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             postDate=(
                 SingleDateEvent(
                     name="Opportunity Posted",
-                    date=_transform_date_to_cg(opp_data.get("created_at")),
+                    date=_transform_date_to_cg(
+                        summary.get("post_date") if isinstance(summary, dict) else summary.post_date
+                    ),
                     description="Date when the opportunity was first posted",
                 )
-                if opp_data.get("created_at")
+                if summary
+                and (summary.get("post_date") if isinstance(summary, dict) else summary.post_date)
                 else None
             ),
             closeDate=(
                 SingleDateEvent(
                     name="Application Deadline",
-                    date=_transform_date_to_cg(summary.get("close_date")),
+                    # TODO: close_date is not the correct value, deadlines are stored in competitions
+                    date=_transform_date_to_cg(
+                        summary.get("close_date")
+                        if isinstance(summary, dict)
+                        else summary.close_date
+                    ),
                     description="Deadline for submitting applications",
                 )
-                if summary.get("close_date")
+                if summary
+                and (summary.get("close_date") if isinstance(summary, dict) else summary.close_date)
                 else None
             ),
         )
 
-        # Create funding objects
+        # Create money objects
         total_amount_money = None
+        max_award_money = None
+        min_award_money = None
+
         if summary.get("estimated_total_program_funding") is not None:
             total_amount_money = Money(
                 amount=str(summary["estimated_total_program_funding"]),
                 currency="USD",
             )
-
-        max_award_money = None
         if summary.get("award_ceiling") is not None:
             max_award_money = Money(
                 amount=str(summary["award_ceiling"]),
                 currency="USD",
             )
-
-        min_award_money = None
         if summary.get("award_floor") is not None:
             min_award_money = Money(
                 amount=str(summary["award_floor"]),
                 currency="USD",
             )
-
-        funding = OppFunding(
-            totalAmountAvailable=total_amount_money,
-            maxAwardAmount=max_award_money,
-            minAwardAmount=min_award_money,
-        )
 
         return OpportunityBase(
             id=opportunity_id,
@@ -320,14 +291,18 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             description=description,
             status=OppStatus(value=opp_status),
             keyDates=timeline,
-            funding=funding,
+            funding=OppFunding(
+                totalAmountAvailable=total_amount_money,
+                maxAwardAmount=max_award_money,
+                minAwardAmount=min_award_money,
+            ),
             source=validate_url(summary.get("additional_info_url")),
             custom_fields={},
-            createdAt=opp_data.get("created_at"),
-            lastModifiedAt=opp_data.get("updated_at"),
+            createdAt=opp_data.get("created_at") or datetime.now(timezone.utc),
+            lastModifiedAt=opp_data.get("updated_at") or datetime.now(timezone.utc),
         )
     except Exception as e:
-        logger.error(f"Failed to transform search result to CommonGrants format: {e}")
+        logger.exception(f"Failed to transform search result to CommonGrants format: {e}")
         return None
 
 
