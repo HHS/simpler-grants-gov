@@ -23,6 +23,7 @@ from src.api.users.user_schemas import (
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
+    UserGetRolesAndPrivilegesResponseSchema,
     UserOrganizationsResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
@@ -34,6 +35,8 @@ from src.api.users.user_schemas import (
     UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
+    UserUpdateProfileRequestSchema,
+    UserUpdateProfileResponseSchema,
     UserUpdateSavedSearchRequestSchema,
     UserUpdateSavedSearchResponseSchema,
 )
@@ -48,6 +51,7 @@ from src.services.users.create_saved_search import create_saved_search
 from src.services.users.delete_api_key import delete_api_key
 from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
+from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
@@ -60,6 +64,7 @@ from src.services.users.login_gov_callback_handler import (
 )
 from src.services.users.rename_api_key import rename_api_key
 from src.services.users.update_saved_searches import update_saved_search
+from src.services.users.update_user_profile import update_user_profile
 
 logger = logging.getLogger(__name__)
 
@@ -579,6 +584,9 @@ def user_list_api_keys(
     return response.ApiResponse(message="Success", data=api_keys)
 
 
+@user_blueprint.put("/<uuid:user_id>/profile")
+@user_blueprint.input(UserUpdateProfileRequestSchema, location="json")
+@user_blueprint.output(UserUpdateProfileResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
@@ -611,13 +619,29 @@ def user_profile_update(
 
     return response.ApiResponse(message="Success", data=updated_user_profile)
 
-@user_blueprint.post("/<uuid:user_id>/privileges")
-@user_blueprint.input(, location="json")
-@user_blueprint.output()
+
+@user_blueprint.get("/<uuid:user_id>/privileges")
+@user_blueprint.output(UserGetRolesAndPrivilegesResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def user_get_privileges_roles(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     """Get the roles and privileges for the authenticated user"""
     logger.info("GET /v1/users/:user_id/privileges-roles")
-    return response.ApiResponse(message="Success", data={})
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("PUT /v1/users/:user_id/privileges")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        roles_and_privileges = get_roles_and_privileges(db_session, user_id)
+
+    return response.ApiResponse(message="Success", data=roles_and_privileges)
