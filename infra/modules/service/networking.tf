@@ -42,13 +42,13 @@ resource "aws_security_group_rule" "alb_app_local_health_check" {
     aws_security_group.app
   ]
 
-  description = "Allow HTTP traffic from public internet"
-  from_port   = 0
-  to_port     = 0
-  protocol    = "-1"
-  security_group_id = aws_security_group.alb.id
+  description              = "Allow HTTP traffic from public internet"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  security_group_id        = aws_security_group.alb.id
   source_security_group_id = aws_security_group.app.id
-  type        = "egress"
+  type                     = "egress"
 }
 
 resource "aws_security_group_rule" "https_ingress" {
