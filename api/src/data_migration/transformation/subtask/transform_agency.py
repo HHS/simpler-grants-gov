@@ -418,9 +418,25 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
 
         tgroup_field_name = tgroup.get_field_name()
 
+        # First check if this is a known unmapped field
         if tgroup_field_name in NOT_MAPPED_FIELDS:
             logger.info(
                 "Skipping processing of field %s for %s",
+                tgroup_field_name,
+                tgroup_agency.agency_code,
+            )
+            continue
+
+        # Check if the field has a mapping
+        has_mapping = (
+            tgroup_field_name == "AgencyDownload"
+            or tgroup_field_name in AGENCY_FIELD_MAP
+            or tgroup_field_name in AGENCY_CONTACT_INFO_FIELD_MAP
+        )
+
+        if not has_mapping:
+            logger.warning(
+                "Skipping unmapped field %s for %s - consider adding to NOT_MAPPED_FIELDS if intentional",
                 tgroup_field_name,
                 tgroup_agency.agency_code,
             )
@@ -453,9 +469,6 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
         elif tgroup_field_name in AGENCY_CONTACT_INFO_FIELD_MAP:
             field_name = AGENCY_CONTACT_INFO_FIELD_MAP[tgroup_field_name]
             updates.agency_contact_info_updates[field_name] = value
-
-        else:
-            raise ValueError("Unknown tgroups agency field %s" % tgroup_field_name)
 
         # We effectively need to merge the created_at/updated_at timestamps to the earliest/latest respectively
         created_at, updated_at = transform_util.get_create_update_timestamps(
