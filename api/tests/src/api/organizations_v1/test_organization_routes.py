@@ -4,11 +4,8 @@ from datetime import date
 import pytest
 
 from src.constants.lookup_constants import Privilege
-from tests.src.db.models.factories import (
-    OrganizationFactory,
-    SamGovEntityFactory,
-)
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
+from tests.src.db.models.factories import OrganizationFactory, SamGovEntityFactory
 
 
 class TestOrganizationGet:
