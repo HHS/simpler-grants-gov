@@ -104,7 +104,7 @@ class RecursiveXMLTransformer:
         # Handle special marker for null inclusion
         if processed_source_value == "INCLUDE_NULL_MARKER":
             target_field = transform_rule["target"]
-            result[target_field] = None
+            result[target_field] = "INCLUDE_NULL_MARKER"
             logger.debug(f"Including None value for {'.'.join(current_path)} -> {target_field}")
             return
 
