@@ -1,10 +1,11 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { redirectLogoutPaths } from "src/constants/redirectLogout";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import {
   IconListContent,
@@ -124,6 +125,7 @@ export const UserControl = () => {
 
   const { user, logoutLocalUser } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   const logout = useCallback(async (): Promise<void> => {
     // this isn't using the clientFetch hook because we don't really need all that added functionality here
@@ -131,9 +133,18 @@ export const UserControl = () => {
       method: "POST",
     });
 
+    const redirectToLogout = redirectLogoutPaths.some((pathRegexp) =>
+      pathRegexp.test(pathname),
+    );
+
     logoutLocalUser();
-    router.refresh();
-  }, [logoutLocalUser, router]);
+
+    if (redirectToLogout) {
+      redirect("/");
+    } else {
+      router.refresh();
+    }
+  }, [logoutLocalUser, router, pathname]);
 
   return (
     <>
