@@ -8,8 +8,8 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
 
-async function UserProfile() {
-  const t = await getTranslations("UserProfile");
+async function UserAccount() {
+  const t = await getTranslations("UserAccount");
 
   const session = await getSession();
   if (!session?.email) {
@@ -36,6 +36,6 @@ async function UserProfile() {
   );
 }
 
-export default withFeatureFlag<object, never>(UserProfile, "userAdminOff", () =>
+export default withFeatureFlag<object, never>(UserAccount, "userAdminOff", () =>
   redirect("/maintenance"),
 );

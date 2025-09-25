@@ -1,6 +1,6 @@
 "use client";
 
-import { userProfileAction } from "src/app/[locale]/(base)/user/actions";
+import { userProfileAction } from "src/app/[locale]/(base)/user/account/actions";
 import { UserDetail, UserProfileValidationErrors } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -14,7 +14,7 @@ const UserProfileValidationError =
   ConditionalFormActionError<UserProfileValidationErrors>;
 
 export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
-  const t = useTranslations("UserProfile");
+  const t = useTranslations("UserAccount");
 
   const [state, formAction, isPending] = useActionState(userProfileAction, {
     validationErrors: {},

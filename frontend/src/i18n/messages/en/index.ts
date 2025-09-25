@@ -1431,9 +1431,9 @@ export const messages = {
     technicalSupportMessage:
       "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
   },
-  UserProfile: {
-    pageTitle: "User Profile | Simpler.Grants.gov",
-    title: "User Profile",
+  UserAccount: {
+    pageTitle: "User Account | Simpler.Grants.gov",
+    title: "User Account",
     inputs: {
       firstName: "First name",
       middleName: "Middle name",
