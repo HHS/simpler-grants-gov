@@ -20,23 +20,17 @@ export const InformationCard = ({
   applicationSubmitted,
   opportunityName,
   submissionLoading,
+  instructionsDownloadPath,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
   applicationSubmitHandler: () => void;
   applicationSubmitted: boolean;
   opportunityName: string | null;
   submissionLoading: boolean;
+  instructionsDownloadPath: string;
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
-
-  // TODO: check this after mvp
-  // instructions were to use the first available path
-  // this may change
-  const instructionsDownloadPath = applicationDetails.competition
-    .competition_instructions.length
-    ? applicationDetails.competition.competition_instructions[0].download_path
-    : undefined;
 
   const ApplicantDetails = () => {
     if (hasOrganization) {
@@ -138,7 +132,7 @@ export const InformationCard = ({
   }) => {
     return (
       <>
-        {/* 
+        {/*
           TODO: Edit functionality in future task
         */}
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>

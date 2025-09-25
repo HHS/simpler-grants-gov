@@ -43,6 +43,14 @@ const ApplicationContainer = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
 
+  // TODO: check this after mvp
+  // instructions were to use the first available path
+  // this may change
+  const instructionsDownloadPath = applicationDetails.competition
+    .competition_instructions.length
+    ? applicationDetails.competition.competition_instructions[0].download_path
+    : "";
+
   const handleSubmit = useCallback(() => {
     if (!token) {
       return;
@@ -106,6 +114,7 @@ const ApplicationContainer = ({
         applicationSubmitted={applicationStatus === "submitted" || success}
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
+        instructionsDownloadPath={instructionsDownloadPath}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
@@ -113,6 +122,7 @@ const ApplicationContainer = ({
         applicationId={applicationId}
         forms={forms}
         errors={validationErrors}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
       <AttachmentsCard
         applicationId={applicationId}
