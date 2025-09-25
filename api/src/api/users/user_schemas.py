@@ -76,7 +76,7 @@ class UserSchema(Schema):
     profile = fields.Nested(UserProfile, allow_none=True)
 
     @pre_dump
-    def flatten_linked_user(self, external_user: LinkExternalUser, **kwargs: Any) -> dict:
+    def flatten_linked_role(self, external_user: LinkExternalUser, **kwargs: Any) -> dict:
         return {
             "user_id": str(external_user.user_id),
             "email": external_user.email,
@@ -400,7 +400,7 @@ class UserUpdateProfileResponseSchema(AbstractResponseSchema):
 class UserRolesAndPrivileges(Schema):
     """Schema for user role and privileges within a resource."""
 
-    role_id = fields.UUID()
+    role_id = fields.String(metadata={"description": "The internal ID of a role"})
     role_name = fields.String(metadata={"description": "The name of the role"})
     privileges = fields.List(
         fields.Enum(Privilege, metadata={"description": "Privileges for the role"})
