@@ -3,17 +3,12 @@ from datetime import date
 
 import pytest
 
-from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege
 from tests.src.db.models.factories import (
-    LinkExternalUserFactory,
     OrganizationFactory,
-    OrganizationUserFactory,
-    OrganizationUserRoleFactory,
-    RoleFactory,
     SamGovEntityFactory,
-    UserFactory,
 )
+from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 
 
 class TestOrganizationGet:
@@ -23,10 +18,6 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test getting organization with SAM.gov entity data"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
         # Create SAM.gov entity
         sam_gov_entity = SamGovEntityFactory.create(
             uei="TEST123456789",
@@ -34,21 +25,13 @@ class TestOrganizationGet:
             expiration_date=date(2025, 12, 31),
         )
 
-        # Create organization with SAM.gov entity
-        organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
-
-        # Create role with VIEW_ORG_MEMBERSHIP privilege
-        role = RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP], is_org_role=True)
-
-        # Create organization-user relationship with role
-        org_user = OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=True
+        # Create user in organization with required privileges
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            sam_gov_entity=sam_gov_entity,
+            is_organization_owner=True,
         )
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Make request
         resp = client.get(
@@ -69,25 +52,13 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test getting organization without SAM.gov entity data"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create organization without SAM.gov entity
-        organization = OrganizationFactory.create(sam_gov_entity=None)
-
-        # Create role with VIEW_ORG_MEMBERSHIP privilege
-        role = RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP], is_org_role=True)
-
-        # Create organization-user relationship with role
-        org_user = OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=False
+        # Create user in organization with required privileges - no SAM.gov entity
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            is_organization_owner=False,
+            without_sam_gov_entity=True,
         )
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Make request
         resp = client.get(
@@ -104,23 +75,11 @@ class TestOrganizationGet:
 
     def test_get_organization_403_no_privilege(self, enable_factory_create, client, db_session):
         """Test that user without VIEW_ORG_MEMBERSHIP privilege gets 403"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create organization
-        organization = OrganizationFactory.create()
-
-        # Create role WITHOUT VIEW_ORG_MEMBERSHIP privilege
-        role = RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION], is_org_role=True)
-
-        # Create organization-user relationship with role that lacks the required privilege
-        org_user = OrganizationUserFactory.create(user=user, organization=organization)
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
+        # Create user in organization with wrong privilege (not VIEW_ORG_MEMBERSHIP)
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+        )
 
         # Make request
         resp = client.get(
@@ -134,16 +93,11 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test that user who is not a member of the organization gets 403"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
+        # Create user that is NOT a member of any organization
+        user, token = create_user_not_in_org(db_session)
 
         # Create organization (user is NOT a member)
         organization = OrganizationFactory.create()
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Make request
         resp = client.get(
@@ -157,24 +111,14 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test that user cannot access a different organization"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
+        # Create user in one organization with proper privileges
+        user, user_organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+        )
 
-        # Create two organizations
-        user_organization = OrganizationFactory.create()
+        # Create a different organization that user is NOT a member of
         other_organization = OrganizationFactory.create()
-
-        # Create role with VIEW_ORG_MEMBERSHIP privilege
-        role = RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP], is_org_role=True)
-
-        # User is a member of user_organization but NOT other_organization
-        org_user = OrganizationUserFactory.create(user=user, organization=user_organization)
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Try to access other_organization
         resp = client.get(
@@ -188,13 +132,8 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test that non-existent organization returns 404"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
+        # Create user (doesn't need to be in any organization for this test)
+        user, token = create_user_not_in_org(db_session)
 
         # Try to access non-existent organization
         non_existent_id = str(uuid.uuid4())
@@ -226,13 +165,8 @@ class TestOrganizationGet:
 
     def test_get_organization_400_malformed_uuid(self, enable_factory_create, client, db_session):
         """Test that malformed UUID parameter returns 400"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
+        # Create user (doesn't need to be in any organization for this test)
+        user, token = create_user_not_in_org(db_session)
 
         # Try to access organization with malformed UUID
         resp = client.get(
@@ -246,30 +180,15 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test that user with multiple privileges including VIEW_ORG_MEMBERSHIP can access"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create organization
-        organization = OrganizationFactory.create()
-
-        # Create role with multiple privileges including VIEW_ORG_MEMBERSHIP
-        role = RoleFactory.create(
+        # Create user in organization with multiple privileges including VIEW_ORG_MEMBERSHIP
+        user, organization, token = create_user_in_org(
             privileges=[
                 Privilege.VIEW_ORG_MEMBERSHIP,
                 Privilege.MANAGE_ORG_MEMBERS,
                 Privilege.VIEW_APPLICATION,
             ],
-            is_org_role=True,
+            db_session=db_session,
         )
-
-        # Create organization-user relationship with role
-        org_user = OrganizationUserFactory.create(user=user, organization=organization)
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Make request
         resp = client.get(
@@ -284,25 +203,12 @@ class TestOrganizationGet:
 
     def test_get_organization_owner_can_access(self, enable_factory_create, client, db_session):
         """Test that organization owner with proper privilege can access"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create organization
-        organization = OrganizationFactory.create()
-
-        # Create role with VIEW_ORG_MEMBERSHIP privilege
-        role = RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP], is_org_role=True)
-
-        # Create organization-user relationship as owner
-        org_user = OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=True
+        # Create user in organization as owner with required privileges
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            is_organization_owner=True,
         )
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Make request
         resp = client.get(
@@ -319,25 +225,12 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session
     ):
         """Test that non-owner with VIEW_ORG_MEMBERSHIP privilege can access"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create organization
-        organization = OrganizationFactory.create()
-
-        # Create role with VIEW_ORG_MEMBERSHIP privilege
-        role = RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP], is_org_role=True)
-
-        # Create organization-user relationship as non-owner
-        org_user = OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=False
+        # Create user in organization as non-owner with required privileges
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            is_organization_owner=False,
         )
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
 
         # Make request
         resp = client.get(
@@ -364,23 +257,11 @@ class TestOrganizationGet:
         self, enable_factory_create, client, db_session, privilege_set, expected_status
     ):
         """Test various privilege combinations to ensure only VIEW_ORG_MEMBERSHIP grants access"""
-        # Create user with external login
-        user = UserFactory.create()
-        LinkExternalUserFactory.create(user=user)
-
-        # Create organization
-        organization = OrganizationFactory.create()
-
-        # Create role with specified privileges
-        role = RoleFactory.create(privileges=privilege_set, is_org_role=True)
-
-        # Create organization-user relationship
-        org_user = OrganizationUserFactory.create(user=user, organization=organization)
-        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
+        # Create user in organization with specified privileges
+        user, organization, token = create_user_in_org(
+            privileges=privilege_set,
+            db_session=db_session,
+        )
 
         # Make request
         resp = client.get(
