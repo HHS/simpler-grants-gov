@@ -5,7 +5,12 @@ import { UserDetail, UserProfileValidationErrors } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
-import { Button, Label, TextInput } from "@trussworks/react-uswds";
+import {
+  Button,
+  ErrorMessage,
+  Label,
+  TextInput,
+} from "@trussworks/react-uswds";
 
 import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
 import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
@@ -22,6 +27,7 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
 
   return (
     <form action={formAction}>
+      {state.errorMessage && <ErrorMessage>{state.errorMessage}</ErrorMessage>}
       <Label htmlFor="firstName">
         <span>{t("inputs.firstName")}</span>
         <RequiredFieldIndicator> *</RequiredFieldIndicator>

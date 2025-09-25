@@ -12,7 +12,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("UserProfile.pageTitle"),
+    title: t("UserAccount.pageTitle"),
     description: t("Index.metaDescription"),
   };
   return meta;

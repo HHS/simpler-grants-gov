@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionalFormActionError matches snapshot 1`] = `
+<div>
+  <span
+    class="usa-error-message maxw-mobile-lg"
+    data-testid="errorMessage"
+    role="alert"
+  >
+    special error
+  </span>
+</div>
+`;

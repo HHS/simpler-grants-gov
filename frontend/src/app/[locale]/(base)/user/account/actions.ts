@@ -8,7 +8,7 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 const validateUserProfileAction = async (formData: FormData) => {
-  const t = await getTranslations("UserProfile.validationErrors");
+  const t = await getTranslations("UserAccount.validationErrors");
   const schema = z.object({
     firstName: z.string().min(1, { message: t("firstName") }),
     lastName: z.string().min(1, { message: t("lastName") }),
@@ -26,21 +26,21 @@ const validateUserProfileAction = async (formData: FormData) => {
 };
 
 export const userProfileAction = async (
-  _prevState: UserProfileResponse,
+  _prevState: unknown,
   formData: FormData,
 ): Promise<UserProfileResponse> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    return {
+      errorMessage: "Not logged in",
+    };
+  }
+
   const validationErrors = await validateUserProfileAction(formData);
   if (validationErrors) {
     return {
       validationErrors,
-    };
-  }
-
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      errorMessage: "Not logged in",
     };
   }
 
