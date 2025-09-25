@@ -76,7 +76,7 @@ class UserSchema(Schema):
     profile = fields.Nested(UserProfile, allow_none=True)
 
     @pre_dump
-    def flatten_linked_role(self, external_user: LinkExternalUser, **kwargs: Any) -> dict:
+    def flatten_linked_user(self, external_user: LinkExternalUser, **kwargs: Any) -> dict:
         return {
             "user_id": str(external_user.user_id),
             "email": external_user.email,
@@ -407,7 +407,7 @@ class UserRolesAndPrivileges(Schema):
     )
 
     @pre_dump
-    def flatten_linked_user(
+    def flatten_linked_role(
         self,
         resource_role: (
             ApplicationUserRole | OrganizationUserRole | InternalUserRole | AgencyUserRole
