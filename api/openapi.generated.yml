@@ -621,7 +621,7 @@ paths:
           description: Forbidden
       tags:
       - User v1 - Internal Only
-      summary: User Profile Update
+      summary: Update the authenticated user's profile data'
       requestBody:
         content:
           application/json:
@@ -682,6 +682,44 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserApiKeyCreateRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/privileges:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGetRolesAndPrivilegesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Get the roles and privileges for the authenticated user
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/applications:
@@ -3729,6 +3767,146 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    GetUserRolesAndPrivilegesOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+    UserRolesAndPrivileges:
+      type: object
+      properties:
+        role_id:
+          type: string
+          description: The internal ID of a role
+        role_name:
+          type: string
+          description: The name of the role
+        privileges:
+          type: array
+          items:
+            description: Privileges for the role
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    UserOrganization:
+      type: object
+      properties:
+        organization:
+          description: Organization details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesOrganization'
+        organization_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this organization
+            type:
+            - object
+            $ref: '#/components/schemas/UserRolesAndPrivileges'
+    GetUserRolesAndPrivilegesApplication:
+      type: object
+      properties:
+        application_id:
+          type: string
+          description: The internal ID of the application
+    UserApplication:
+      type: object
+      properties:
+        application:
+          description: Application details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesApplication'
+        application_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this application
+            type:
+            - object
+            $ref: '#/components/schemas/UserRolesAndPrivileges'
+    GetUserRolesAndPrivilegesAgency:
+      type: object
+      properties:
+        agency_id:
+          type: string
+          description: The internal ID of the agency
+    UserAgency:
+      type: object
+      properties:
+        agency:
+          description: Agency details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesAgency'
+        agency_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this agency
+            type:
+            - object
+            $ref: '#/components/schemas/UserRolesAndPrivileges'
+    GetRolesAndPrivilegesResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organizations:
+          type: array
+          items:
+            description: List of organizations and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
+        application_users:
+          type: array
+          items:
+            description: List of applications and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserApplication'
+        user_agencies:
+          type: array
+          items:
+            description: List of agencies and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserAgency'
+        internal_user_roles:
+          type: array
+          items:
+            description: List of roles and the user's roles & privileges in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserRolesAndPrivileges'
+    UserGetRolesAndPrivilegesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/GetRolesAndPrivilegesResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserApplicationListRequest:
       type: object
       properties: {}
@@ -3748,7 +3926,7 @@ components:
           format: date
           description: The expiration date of the SAM.gov registration
           example: '2025-12-31'
-    UserOrganization:
+    UserOrganization1:
       type: object
       properties:
         organization_id:
@@ -3824,7 +4002,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/UserOrganization'
+          - $ref: '#/components/schemas/UserOrganization1'
           - type: 'null'
         competition:
           description: Competition information
@@ -3862,7 +4040,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/UserOrganization'
+            $ref: '#/components/schemas/UserOrganization1'
         status_code:
           type: integer
           description: The HTTP status code
