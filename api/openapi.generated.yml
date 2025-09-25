@@ -3771,22 +3771,22 @@ components:
     UserApplicationListRequest:
       type: object
       properties: {}
-    SamGovEntity:
+    SamGovEntityResponse:
       type: object
       properties:
         uei:
           type: string
-          description: Unique Entity Identifier from SAM.gov
-          example: ABCDEFGHIJK1
+          description: Unique Entity Identifier
+          example: 000123456789
         legal_business_name:
           type: string
-          description: Legal business name as registered in SAM.gov
-          example: Example Research Corporation
+          description: Legal business name from SAM.gov
+          example: Example Inc.
         expiration_date:
           type: string
           format: date
-          description: The expiration date of the SAM.gov registration
-          example: '2025-12-31'
+          description: SAM.gov registration expiration date
+          example: '2025-08-11'
     UserOrganization:
       type: object
       properties:
@@ -3804,7 +3804,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
+          - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
     UserApplicationCompetition:
       type: object
@@ -4231,22 +4231,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    SamGovEntityResponse:
-      type: object
-      properties:
-        uei:
-          type: string
-          description: Unique Entity Identifier
-          example: 000123456789
-        legal_business_name:
-          type: string
-          description: Legal business name from SAM.gov
-          example: Example Inc.
-        expiration_date:
-          type: string
-          format: date
-          description: SAM.gov registration expiration date
-          example: '2025-08-11'
     OrganizationData:
       type: object
       properties:
@@ -4413,7 +4397,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
+          - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
     ApplicationGetResponseData:
       type: object
