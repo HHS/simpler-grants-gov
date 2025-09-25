@@ -2,11 +2,11 @@ from typing import Any
 
 from marshmallow import pre_dump
 
-from src.api.application_alpha.application_schemas import SamGovEntitySchema
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySearchRequestV1Schema,
     SavedOpportunityResponseV1Schema,
 )
+from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ApplicationStatus, ExternalUserType
@@ -224,7 +224,7 @@ class UserOrganizationSchema(Schema):
         }
     )
     sam_gov_entity = fields.Nested(
-        SamGovEntitySchema,
+        SamGovEntityResponseSchema,
         allow_none=True,
         metadata={"description": "SAM.gov entity information for the organization"},
     )
