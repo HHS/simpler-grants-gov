@@ -26,6 +26,7 @@ describe("getNextRoutes", () => {
       "/(base)/saved-search-queries",
       "/(base)/search",
       "/(base)/unauthenticated",
+      "/(base)/user",
       "/(base)/vision",
       "/(base)/workspace/applications/application/[applicationId]/form/[appFormId]",
       "/(base)/workspace/applications/application/[applicationId]/form/[appFormId]/success",

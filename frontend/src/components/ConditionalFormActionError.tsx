@@ -1,5 +1,3 @@
-import { OptionalStringDict } from "src/types/generalTypes";
-
 import { ErrorMessage } from "@trussworks/react-uswds";
 
 export function ConditionalFormActionError<

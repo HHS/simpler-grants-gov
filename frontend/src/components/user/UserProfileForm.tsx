@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  userProfileAction,
-  UserProfileValidationErrors,
-} from "src/app/[locale]/(base)/user/actions";
-import { UserDetail } from "src/types/userTypes";
+import { userProfileAction } from "src/app/[locale]/(base)/user/actions";
+import { UserDetail, UserProfileValidationErrors } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
@@ -19,7 +16,7 @@ const UserProfileValidationError =
 export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
   const t = useTranslations("UserProfile");
 
-  const [state, formAction] = useActionState(userProfileAction, {
+  const [state, formAction, isPending] = useActionState(userProfileAction, {
     validationErrors: {},
   });
 
@@ -37,14 +34,14 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         id="edit-user-first-name"
         name="firstName"
         type="text"
-        value={state.first_name || userDetails.first_name}
+        defaultValue={state.data?.first_name || userDetails.first_name}
       />
       <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
       <TextInput
         id="edit-user-middle-name"
         name="middleName"
         type="text"
-        value={state.middle_name || userDetails.middle_name}
+        defaultValue={state.data?.middle_name || userDetails.middle_name}
       />
       <Label htmlFor="lastName">
         <span>{t("inputs.lastName")}</span>
@@ -58,7 +55,7 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         id="edit-user-last-name"
         name="lastName"
         type="text"
-        value={state.last_name || userDetails.last_name}
+        defaultValue={state.data?.last_name || userDetails.last_name}
       />
       <Label htmlFor="email">{t("inputs.email")}</Label>
       <TextInput
@@ -68,8 +65,8 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         defaultValue={userDetails.email}
         disabled
       />
-      <Button type="submit" className="margin-top-4">
-        {t("save")}
+      <Button type="submit" disabled={isPending} className="margin-top-4">
+        {t(isPending ? "pending" : "save")}
       </Button>
     </form>
   );

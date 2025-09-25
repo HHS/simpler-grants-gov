@@ -29,7 +29,6 @@ export const userProfileAction = async (
   _prevState: UserProfileResponse,
   formData: FormData,
 ): Promise<UserProfileResponse> => {
-  console.log("Received form data to save to user profile", formData);
   const validationErrors = await validateUserProfileAction(formData);
   if (validationErrors) {
     return {
@@ -46,9 +45,9 @@ export const userProfileAction = async (
   }
 
   const rawFormData = {
-    first_name: formData.get("first_name") as string,
-    middle_name: formData.get("middle_name") as string,
-    last_name: formData.get("last_name") as string,
+    first_name: formData.get("firstName") as string,
+    middle_name: formData.get("middleName") as string,
+    last_name: formData.get("lastName") as string,
   };
 
   let userDetailsResponse;

@@ -1446,5 +1446,6 @@ export const messages = {
       lastName: "Last name is required",
     },
     fetchError: "Error fetching user data. Please try refreshing the page.",
+    pending: "Saving...",
   },
 };

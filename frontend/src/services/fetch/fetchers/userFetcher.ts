@@ -1,7 +1,7 @@
 "server only";
 
 import {
-  fetchUserWithMethod,
+  // fetchUserWithMethod,
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import { DynamicUserDetails, UserDetail } from "src/types/userTypes";
@@ -35,7 +35,7 @@ export const updateUserDetails = async (
   _token: string,
   updates: DynamicUserDetails,
 ): Promise<UserDetail> => {
-  return Promise.resolve({ ...fakeUser, ...updates });
+  return Promise.resolve({ ...fakeUser, ...updates } as UserDetail);
   // uncomment this once the API changes to add support for names are implemented
 
   // const ssgToken = {

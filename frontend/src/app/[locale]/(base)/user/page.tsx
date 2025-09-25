@@ -8,7 +8,7 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
 
-export async function UserProfile() {
+async function UserProfile() {
   const t = await getTranslations("UserProfile");
 
   const session = await getSession();
