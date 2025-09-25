@@ -11,7 +11,7 @@ from tests.src.db.models.factories import (
 )
 
 
-def test_get_roles_ans_privileges(enable_factory_create, client, user, db_session, user_auth_token):
+def test_get_roles_and_privileges(enable_factory_create, client, user, db_session, user_auth_token):
     user_apps = ApplicationUserFactory.create_batch(2, user=user)
     for user_app in user_apps:
         ApplicationUserRoleFactory.create(application_user=user_app)
@@ -27,8 +27,7 @@ def test_get_roles_ans_privileges(enable_factory_create, client, user, db_sessio
         agency_user=AgencyUserFactory.create(user=user),
     )
     InternalUserRoleFactory.create(user=user)
-
-    resp = client.get(
+    resp = client.post(
         f"/v1/users/{user.user_id}/privileges", headers={"X-SGG-Token": user_auth_token}
     )
     data = resp.get_json()["data"]

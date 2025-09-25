@@ -620,20 +620,20 @@ def user_profile_update(
     return response.ApiResponse(message="Success", data=updated_user_profile)
 
 
-@user_blueprint.get("/<uuid:user_id>/privileges")
+@user_blueprint.post("/<uuid:user_id>/privileges")
 @user_blueprint.output(UserGetRolesAndPrivilegesResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     """Get the roles and privileges for the authenticated user"""
-    logger.info("GET /v1/users/:user_id/privileges-roles")
+    logger.info("POST /v1/users/:user_id/privileges")
     add_extra_data_to_current_request_logs(
         {
             "user_id": user_id,
         }
     )
-    logger.info("PUT /v1/users/:user_id/privileges")
+    logger.info("POST /v1/users/:user_id/privileges")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
