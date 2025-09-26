@@ -90,8 +90,8 @@ describe("userProfileForm", () => {
 
     render(<UserProfileForm userDetails={fakeUser} />);
 
-    const alert = screen.getByRole("alert");
+    const alert = screen.getByRole("heading");
     expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent("big error");
+    expect(alert).toHaveTextContent("errorHeading");
   });
 });
