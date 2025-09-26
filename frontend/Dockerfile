@@ -49,7 +49,7 @@ COPY tsconfig.json .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
-COPY --from=dev node_modules ./node_modules
+#COPY --from=dev frontend/node_modules ./node_modules
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -101,12 +101,12 @@ RUN adduser --system --uid 1001 nextjs
 RUN chown nextjs:nodejs /frontend/.next/cache/images/
 USER nextjs
 
-COPY --from=builder /frontend/public ./public
+COPY public ./public
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /frontend/.next/static ./.next/static
+COPY --chown=nextjs:nodejs .next/standalone ./
+COPY --chown=nextjs:nodejs .next/static ./.next/static
 
 # Environment variables must be redefined at run time
 # ARG ENV_VARIABLE
