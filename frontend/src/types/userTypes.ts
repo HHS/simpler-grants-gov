@@ -13,7 +13,7 @@ export type UserProfileValidationErrors = {
   lastName?: string[];
 };
 
-export interface UserProfile {
+export interface UserDetailProfile {
   first_name: string;
   middle_name?: string;
   last_name: string;
@@ -22,7 +22,7 @@ export interface UserProfile {
 export interface UserDetail {
   user_id: string;
   email: string;
-  profile: UserProfile | null;
+  profile: UserDetailProfile | null;
 }
 
 export interface UserProfileResponse {

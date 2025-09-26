@@ -16,7 +16,7 @@ import {
   SearchAPIResponse,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
-import { UserDetail } from "src/types/userTypes";
+import { UserDetail, UserDetailProfile } from "src/types/userTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
@@ -545,8 +545,10 @@ export const fakeWidgetProps = {
 };
 
 export const fakeUser: UserDetail = {
-  id: "1",
+  user_id: "1",
   email: "not-the-real-email@fake.com",
-  first_name: "joe",
-  last_name: "quisling",
+  profile: {
+    first_name: "joe",
+    last_name: "quisling",
+  } as UserDetailProfile,
 };

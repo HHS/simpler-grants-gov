@@ -13,8 +13,8 @@ jest.mock("next-intl/server", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
-  updateUserDetails: (token: unknown, data: unknown) =>
-    mockUpdateUserDetails(token, data) as unknown,
+  updateUserDetails: (token: unknown, id: unknown, data: unknown) =>
+    mockUpdateUserDetails(token, id, data) as unknown,
 }));
 
 describe("user profile form action", () => {
@@ -22,7 +22,7 @@ describe("user profile form action", () => {
     jest.resetAllMocks();
   });
   it("returns validation warning if first name is missing", async () => {
-    getSessionMock.mockResolvedValue({ token: "logged in" });
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     const profileFormData = new FormData();
     profileFormData.append("firstName", "populated");
     const result = await userProfileAction(null, profileFormData);
@@ -31,7 +31,7 @@ describe("user profile form action", () => {
     });
   });
   it("returns validation warning if last name is missing", async () => {
-    getSessionMock.mockResolvedValue({ token: "logged in" });
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     const profileFormData = new FormData();
     profileFormData.append("lastName", "populated");
     const result = await userProfileAction(null, profileFormData);
@@ -46,8 +46,10 @@ describe("user profile form action", () => {
     expect(result.errorMessage).toEqual("Not logged in");
   });
   it("returns result of update on success", async () => {
-    getSessionMock.mockResolvedValue({ token: "logged in" });
-    mockUpdateUserDetails.mockImplementation((_token, data) => data as unknown);
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
+    mockUpdateUserDetails.mockImplementation((_token, _id, data) => {
+      return data as unknown;
+    });
 
     const profileFormData = new FormData();
     profileFormData.append("firstName", "jones");
@@ -62,7 +64,7 @@ describe("user profile form action", () => {
     });
   });
   it("returns API error when applicable", async () => {
-    getSessionMock.mockResolvedValue({ token: "logged in" });
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     mockUpdateUserDetails.mockRejectedValue(new Error("fake error"));
 
     const profileFormData = new FormData();

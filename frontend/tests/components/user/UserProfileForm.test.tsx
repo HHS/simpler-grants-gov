@@ -44,20 +44,29 @@ describe("userProfileForm", () => {
     expect(alert).toHaveTextContent("some error");
   });
   it("displays values from userDetail props if form is not submitted", () => {
+    if (!fakeUser.profile) {
+      throw new Error("this will not happen, just here to get TS to behave");
+    }
     mockUseActionState.mockReturnValue([{}, noop, false]);
 
     render(<UserProfileForm userDetails={fakeUser} />);
 
-    expect(screen.getByDisplayValue(fakeUser.first_name)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(fakeUser.last_name)).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(fakeUser.profile.first_name),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(fakeUser.profile.last_name),
+    ).toBeInTheDocument();
   });
   it("displays values from form action when available", () => {
     mockUseActionState.mockReturnValue([
       {
         data: {
-          first_name: "something",
-          middle_name: "else",
-          last_name: "entirely",
+          profile: {
+            first_name: "something",
+            middle_name: "else",
+            last_name: "entirely",
+          },
         },
       },
       noop,
