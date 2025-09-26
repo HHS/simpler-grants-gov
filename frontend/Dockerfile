@@ -108,6 +108,9 @@ COPY public ./public
 COPY --chown=nextjs:nodejs .next/standalone ./
 COPY --chown=nextjs:nodejs .next/static ./.next/static
 
+# Remove dev packages not removed by `npm prune` maybe from older storybook?
+RUN rm -rf /frontend/node_modules/@esbuild
+
 # Environment variables must be redefined at run time
 # ARG ENV_VARIABLE
 # ENV ENV_VARIABLE=${ENV_VARIABLE}
