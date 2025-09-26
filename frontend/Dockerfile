@@ -49,7 +49,7 @@ COPY tsconfig.json .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
-COPY .next/standalone .next/standalone
+COPY --from=dev node_modules ./node_modules
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -57,8 +57,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NEXT_BUILD true
 
 # Skip lint because it should have happened in the CI already
-#RUN npm run build -- --no-lint
-
+RUN npm run build -- --no-lint
+#COPY frontend/.next .next
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
