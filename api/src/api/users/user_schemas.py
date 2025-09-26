@@ -422,7 +422,7 @@ class UserRoleSchema(Schema):
         }
 
 
-class GetUserRoleAndPrivilegesOrganizationSchema(Schema):
+class GetUserRolesAndPrivilegesOrganizationSchema(Schema):
     organization_id = fields.String(
         metadata={
             "description": "The internal ID of the organization",
@@ -430,7 +430,7 @@ class GetUserRoleAndPrivilegesOrganizationSchema(Schema):
     )
 
 
-class GetUserRoleAndPrivilegesApplicationSchema(Schema):
+class GetUserRolesAndPrivilegesApplicationSchema(Schema):
     application_id = fields.String(
         metadata={
             "description": "The internal ID of the application",
@@ -438,7 +438,7 @@ class GetUserRoleAndPrivilegesApplicationSchema(Schema):
     )
 
 
-class GetUserRoleAndPrivilegesAgencySchema(Schema):
+class GetUserRolesAndPrivilegesAgencySchema(Schema):
     agency_id = fields.String(
         metadata={
             "description": "The internal ID of the agency",
@@ -450,7 +450,7 @@ class UserOrganization(Schema):
     """Schema representing a user's association with an organization and their roles."""
 
     organization = fields.Nested(
-        GetUserRoleAndPrivilegesOrganizationSchema,
+        GetUserRolesAndPrivilegesOrganizationSchema,
         metadata={"description": "Organization details"},
     )
     organization_user_roles = fields.List(
@@ -465,7 +465,7 @@ class UserApplication(Schema):
     """Schema representing a user's association with an application and their roles."""
 
     application = fields.Nested(
-        GetUserRoleAndPrivilegesApplicationSchema, metadata={"description": "Application details"}
+        GetUserRolesAndPrivilegesApplicationSchema, metadata={"description": "Application details"}
     )
     application_user_roles = fields.List(
         fields.Nested(
@@ -479,7 +479,7 @@ class UserAgency(Schema):
     """Schema representing a user's association with an agency and their roles."""
 
     agency = fields.Nested(
-        GetUserRoleAndPrivilegesAgencySchema, metadata={"description": "Agency details"}
+        GetUserRolesAndPrivilegesAgencySchema, metadata={"description": "Agency details"}
     )
     agency_user_roles = fields.List(
         fields.Nested(
