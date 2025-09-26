@@ -31,7 +31,7 @@ export const userProfileAction = async (
 ): Promise<UserProfileResponse> => {
   const session = await getSession();
 
-  if (!session || !session.token) {
+  if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Not logged in",
     };
@@ -52,7 +52,11 @@ export const userProfileAction = async (
 
   let userDetailsResponse;
   try {
-    userDetailsResponse = await updateUserDetails(session.token, rawFormData);
+    userDetailsResponse = await updateUserDetails(
+      session.token,
+      session.user_id,
+      rawFormData,
+    );
     return { data: userDetailsResponse };
   } catch (e) {
     // General try failure catch error

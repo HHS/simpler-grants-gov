@@ -40,14 +40,18 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         id="edit-user-first-name"
         name="firstName"
         type="text"
-        defaultValue={state.data?.first_name || userDetails.first_name}
+        defaultValue={
+          state.data?.profile?.first_name || userDetails.profile?.first_name
+        }
       />
       <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
       <TextInput
         id="edit-user-middle-name"
         name="middleName"
         type="text"
-        defaultValue={state.data?.middle_name || userDetails.middle_name}
+        defaultValue={
+          state.data?.profile?.middle_name || userDetails.profile?.middle_name
+        }
       />
       <Label htmlFor="lastName">
         <span>{t("inputs.lastName")}</span>
@@ -61,7 +65,9 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
         id="edit-user-last-name"
         name="lastName"
         type="text"
-        defaultValue={state.data?.last_name || userDetails.last_name}
+        defaultValue={
+          state.data?.profile?.last_name || userDetails.profile?.last_name
+        }
       />
       <Label htmlFor="email">{t("inputs.email")}</Label>
       <TextInput

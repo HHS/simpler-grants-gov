@@ -1,11 +1,11 @@
 "server only";
 
+import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
-  // fetchUserWithMethod,
+  fetchUserWithMethod,
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
-import { DynamicUserDetails, UserDetail } from "src/types/userTypes";
-import { fakeUser } from "src/utils/testing/fixtures";
+import { UserDetail } from "src/types/userTypes";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
@@ -13,38 +13,34 @@ export const postLogout = async (token: string) => {
 };
 
 export const getUserDetails = async (
-  _token: string,
-  _userId: string,
+  token: string,
+  userId: string,
 ): Promise<UserDetail> => {
-  return Promise.resolve(fakeUser);
-
-  // uncomment this once the API changes to add support for names are implemented
-
-  // const ssgToken = {
-  //   "X-SGG-Token": token,
-  // };
-  // const resp = await fetchUserWithMethod("GET")({
-  //   subPath: userId,
-  //   additionalHeaders: ssgToken,
-  // });
-  // const json = (await resp.json()) as { data: UserDetail };
-  // return json.data;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const resp = await fetchUserWithMethod("GET")({
+    subPath: userId,
+    additionalHeaders: ssgToken,
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
 };
 
 export const updateUserDetails = async (
-  _token: string,
-  updates: DynamicUserDetails,
+  token: string,
+  userId: string,
+  updates: JSONRequestBody,
 ): Promise<UserDetail> => {
-  return Promise.resolve({ ...fakeUser, ...updates } as UserDetail);
-  // uncomment this once the API changes to add support for names are implemented
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
 
-  // const ssgToken = {
-  //   "X-SGG-Token": token,
-  // };
-
-  // return fetchUserWithMethod("PUT")({
-  //   subPath: userId,
-  //   additionalHeaders: ssgToken,
-  //   body: payload,
-  // });
+  const response = await fetchUserWithMethod("PUT")({
+    subPath: `${userId}/profile`,
+    additionalHeaders: ssgToken,
+    body: updates,
+  });
+  const json = (await response.json()) as { data: UserDetail };
+  return json.data;
 };

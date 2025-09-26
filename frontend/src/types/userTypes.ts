@@ -13,15 +13,16 @@ export type UserProfileValidationErrors = {
   lastName?: string[];
 };
 
-export interface DynamicUserDetails {
+export interface UserProfile {
   first_name: string;
   middle_name?: string;
   last_name: string;
 }
 
-export interface UserDetail extends DynamicUserDetails {
-  id: string;
+export interface UserDetail {
+  user_id: string;
   email: string;
+  profile: UserProfile | null;
 }
 
 export interface UserProfileResponse {
