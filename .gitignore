@@ -120,6 +120,14 @@ ENV/
 env.bak/
 venv.bak/
 
+# Grants Tracker Sensitive Data
+*.db
+*.db-journal
+data/denials/
+logs/
+reports/
+evidence_bundle.zip
+
 # Spyder project settings
 .spyderproject
 .spyproject

@@ -1,0 +1,71 @@
+{
+  "organization_info": {
+    "name": "Example Organization",
+    "type": "nonprofit",
+    "ein": "12-3456789",
+    "duns_number": "123456789",
+    "cage_code": "ABCDE",
+    "address": {
+      "street": "123 Main Street",
+      "city": "Anytown",
+      "state": "ST",
+      "zip": "12345",
+      "country": "USA"
+    },
+    "phone": "555-123-4567",
+    "email": "contact@example.org",
+    "website": "https://www.example.org"
+  },
+  "primary_contact": {
+    "name": "Jane Doe",
+    "title": "Grant Manager",
+    "email": "jane.doe@example.org",
+    "phone": "555-123-4567 ext 123",
+    "address": {
+      "street": "123 Main Street",
+      "city": "Anytown",
+      "state": "ST",
+      "zip": "12345"
+    }
+  },
+  "authorized_representative": {
+    "name": "John Smith",
+    "title": "Executive Director",
+    "email": "john.smith@example.org",
+    "phone": "555-123-4567 ext 100",
+    "signature_authority": true
+  },
+  "financial_info": {
+    "annual_budget": 500000,
+    "federal_funds_received_last_year": 50000,
+    "indirect_cost_rate": 10.0,
+    "audit_required": true,
+    "audit_firm": "Example Auditors LLC"
+  },
+  "project_defaults": {
+    "performance_period": {
+      "start_date": "2024-01-01",
+      "end_date": "2024-12-31"
+    },
+    "budget_categories": {
+      "personnel": 0.60,
+      "fringe_benefits": 0.20,
+      "travel": 0.05,
+      "equipment": 0.05,
+      "supplies": 0.05,
+      "contractual": 0.03,
+      "indirect_costs": 0.02
+    }
+  },
+  "certifications": {
+    "drug_free_workplace": true,
+    "debarment_suspension": false,
+    "lobbying_restrictions": true,
+    "civil_rights_compliance": true
+  },
+  "tracking_info": {
+    "created_date": "2024-01-01T00:00:00Z",
+    "last_updated": "2024-01-01T00:00:00Z",
+    "notes": "Template for standard applicant information. Update with actual organization details."
+  }
+}

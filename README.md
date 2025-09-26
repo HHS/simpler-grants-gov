@@ -24,6 +24,53 @@ An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINT
 - [./documentation](./documentation) contains project guides, documentation, and decision records
 - [./frontend](./frontend) contains a web application built using Next.js
 - [./infra](./infra) contains Terraform modules and configuration for managing the AWS infrastructure
+- [./scripts](./scripts) contains grants scanning and tracking toolkit scripts
+
+## Grants Scanning and Tracking Toolkit
+
+This repository includes a comprehensive toolkit for scanning, recording, and tracking federal grants and applications. The toolkit provides automated scanning of Grants.gov opportunities, local tracking of applications and responses, and evidence collection capabilities.
+
+### Quickstart Guide
+
+1. **Setup Environment:**
+   ```bash
+   # Install dependencies
+   pip install -r requirements.txt
+   
+   # Copy environment template
+   cp .env.example .env
+   
+   # Edit .env file with your configuration
+   ```
+
+2. **Scan for Grant Opportunities:**
+   ```bash
+   python scripts/scan_grants.py
+   ```
+
+3. **Track Applications and Responses:**
+   ```bash
+   # Add a new application
+   python scripts/submit_tracker.py add-application --opportunity-id GRANT-123 --applicant applicant_name
+   
+   # Record a response
+   python scripts/submit_tracker.py add-response --application-id 1 --status denied --evidence-file denial_letter.pdf
+   ```
+
+4. **Export Reports:**
+   ```bash
+   python export_reports.py --output reports/
+   ```
+
+### Key Features
+
+- **Automated Scanning**: Daily automated scanning of Grants.gov with GitHub Actions
+- **Local Tracking**: SQLite database for tracking opportunities, applications, and responses
+- **Evidence Collection**: Systematic collection and archiving of denial/acceptance letters
+- **CSV Exports**: Generate reports for legal evidence or analysis
+- **Security**: Proper exclusion of sensitive data from version control
+
+For detailed documentation, see [denial-tracker.md](./denial-tracker.md).
 
 ## Development
 
