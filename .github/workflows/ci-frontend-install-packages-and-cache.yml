@@ -38,7 +38,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/frontend/node_modules
-          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+          key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
           lookup-only: true
 
       - name: Run npm ci
@@ -50,4 +50,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/frontend/node_modules
-          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+          key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
