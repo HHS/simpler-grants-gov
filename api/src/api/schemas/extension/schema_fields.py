@@ -283,6 +283,12 @@ class File(original_fields.File, MixinField):
 class Time(marshmallow_fields.Time, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time."),
+        "invalid_awareness": MarshmallowErrorContainer(
+            ValidationErrorType.INVALID, "Not a valid time."
+        ),
+        "format": MarshmallowErrorContainer(
+            ValidationErrorType.FORMAT, "'{input}' cannot be formatted as a time."
+        ),
     }
 
 
@@ -295,4 +301,8 @@ class URL(marshmallow_fields.Url, MixinField):
 class Float(marshmallow_fields.Float, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number."),
+        "special": MarshmallowErrorContainer(
+            ValidationErrorType.SPECIAL_NUMERIC,
+            "Special numeric values (nan or infinity) are not permitted.",
+        ),
     }
