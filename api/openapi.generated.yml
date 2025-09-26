@@ -3773,7 +3773,7 @@ components:
         organization_id:
           type: string
           description: The internal ID of the organization
-    UserRolesAndPrivileges:
+    UserRole:
       type: object
       properties:
         role_id:
@@ -3814,7 +3814,7 @@ components:
             description: Roles the user has for this organization
             type:
             - object
-            $ref: '#/components/schemas/UserRolesAndPrivileges'
+            $ref: '#/components/schemas/UserRole'
     GetUserRolesAndPrivilegesApplication:
       type: object
       properties:
@@ -3835,7 +3835,7 @@ components:
             description: Roles the user has for this application
             type:
             - object
-            $ref: '#/components/schemas/UserRolesAndPrivileges'
+            $ref: '#/components/schemas/UserRole'
     GetUserRolesAndPrivilegesAgency:
       type: object
       properties:
@@ -3856,7 +3856,7 @@ components:
             description: Roles the user has for this agency
             type:
             - object
-            $ref: '#/components/schemas/UserRolesAndPrivileges'
+            $ref: '#/components/schemas/UserRole'
     GetRolesAndPrivilegesResponse:
       type: object
       properties:
@@ -3891,7 +3891,7 @@ components:
             description: List of roles and the user's roles & privileges in each
             type:
             - object
-            $ref: '#/components/schemas/UserRolesAndPrivileges'
+            $ref: '#/components/schemas/UserRole'
     UserGetRolesAndPrivilegesResponse:
       type: object
       properties:
