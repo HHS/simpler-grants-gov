@@ -74,6 +74,12 @@ LINK_USER_NO_ORGS = factories.LinkExternalUserFactory.build(
     user=USER_NO_ORGS,
 )
 
+API_KEY_USER_NO_ORGS = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("daff1e8b-fbdd-486d-a9bc-69ff8df10011"),
+    key_id="no_org_user_key",
+    user=USER_NO_ORGS,
+)
+
 ###############################
 # User with a single organization
 ###############################
@@ -87,12 +93,19 @@ LINK_USER_ONE_ORGS = factories.LinkExternalUserFactory.build(
     user=USER_ONE_ORG,
 )
 
+API_KEY_USER_ONE_ORG = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("03db0a7e-d730-43c8-bf72-986fb7185acd"),
+    key_id="one_org_user_key",
+    user=USER_ONE_ORG,
+)
+
 USER_ONE_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("3ab87af3-66d3-4a44-9eb1-7da598ffb05b"),
     organization=ORG1,
     user=USER_ONE_ORG,
     is_organization_owner=True,
 )
+
 
 ###############################
 # User with two organizations
@@ -104,6 +117,12 @@ USER_TWO_ORGS = factories.UserFactory.build(
 LINK_USER_TWO_ORGS = factories.LinkExternalUserFactory.build(
     link_external_user_id=uuid.UUID("11aa7e08-e5ab-4c32-a25a-4583330297fa"),
     external_user_id="two_org_user",  # THIS IS WHAT WE USE TO LOGIN
+    user=USER_TWO_ORGS,
+)
+
+API_KEY_USER_TWO_ORGS = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("5a3ac8f2-1b0b-4cf9-a8a5-e52bea67939b"),
+    key_id="two_orgs_user_key",
     user=USER_TWO_ORGS,
 )
 
@@ -139,9 +158,12 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     ###############################
     # User without organizations
     ###############################
-    logger.info(f"Updating user with no orgs: '{LINK_USER_NO_ORGS.external_user_id}'")
+    logger.info(
+        f"Updating user with no orgs: '{LINK_USER_NO_ORGS.external_user_id}' with X-API-Key: '{API_KEY_USER_NO_ORGS.key_id}'"
+    )
     user_no_orgs = db_session.merge(USER_NO_ORGS, load=True)
     db_session.merge(LINK_USER_NO_ORGS, load=True)
+    db_session.merge(API_KEY_USER_NO_ORGS, load=True)
 
     _add_saved_opportunities(user_no_orgs, db_session)
     _add_saved_searches(user_no_orgs, db_session)
@@ -149,17 +171,23 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     ###############################
     # User with a single organization
     ###############################
-    logger.info(f"Updating user with one org: '{LINK_USER_ONE_ORGS.external_user_id}'")
+    logger.info(
+        f"Updating user with one org: '{LINK_USER_ONE_ORGS.external_user_id}' with X-API-Key: '{API_KEY_USER_ONE_ORG.key_id}'"
+    )
     db_session.merge(USER_ONE_ORG, load=True)
     db_session.merge(LINK_USER_ONE_ORGS, load=True)
+    db_session.merge(API_KEY_USER_ONE_ORG, load=True)
     db_session.merge(USER_ONE_ORG_ORG_USER1, load=True)
 
     ###############################
     # User with two organizations
     ###############################
-    logger.info(f"Updating user with two orgs: '{LINK_USER_TWO_ORGS.external_user_id}'")
+    logger.info(
+        f"Updating user with two orgs: '{LINK_USER_TWO_ORGS.external_user_id}' with X-API-Key: '{API_KEY_USER_TWO_ORGS.key_id}'"
+    )
     db_session.merge(USER_TWO_ORGS, load=True)
     db_session.merge(LINK_USER_TWO_ORGS, load=True)
+    db_session.merge(API_KEY_USER_TWO_ORGS, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER1, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
 
