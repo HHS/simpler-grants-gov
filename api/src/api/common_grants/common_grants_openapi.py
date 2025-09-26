@@ -40,7 +40,7 @@ IMPLEMENTATION
 - `fix_schema_composition()`: Generic recursive function that fixes composition patterns
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def transform_spec_composition_to_cg(spec: Dict[str, Any]) -> Dict[str, Any]:
