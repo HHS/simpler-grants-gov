@@ -1,6 +1,6 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
-import { Organization } from "src/types/UserTypes";
+import { Organization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
