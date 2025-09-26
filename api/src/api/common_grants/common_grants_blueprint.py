@@ -1,7 +1,8 @@
 import click
 import yaml
 from apiflask import APIBlueprint, APIFlask
-from common_grants_sdk.schemas.marshmallow import Error, HTTPValidationError
+
+from src.api.common_grants.common_grants_schemas import Error
 
 common_grants_blueprint = APIBlueprint(
     "common_grants",
@@ -27,7 +28,6 @@ def generate_openapi_spec(output_file: str | None) -> None:
     )
     app.description = "An implementation of the CommonGrants API specification"
     app.config["HTTP_ERROR_SCHEMA"] = Error
-    app.config["VALIDATION_ERROR_SCHEMA"] = HTTPValidationError
     app.register_blueprint(common_grants_blueprint)
 
     # Generate the OpenAPI schema using APIFlask spec attribute

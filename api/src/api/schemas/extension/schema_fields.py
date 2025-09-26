@@ -277,3 +277,21 @@ class File(original_fields.File, MixinField):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file."),
     }
+
+
+class Time(original_fields.Time, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time."),
+    }
+
+
+class URL(original_fields.URL, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL."),
+    }
+
+
+class Float(original_fields.Float, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number."),
+    }

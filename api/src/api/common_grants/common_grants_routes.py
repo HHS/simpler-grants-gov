@@ -4,17 +4,6 @@ import logging
 from http import HTTPStatus
 from uuid import UUID
 
-from common_grants_sdk.schemas.marshmallow import (
-    OpportunitiesListResponse as OpportunitiesListResponseSchema,
-)
-from common_grants_sdk.schemas.marshmallow import (
-    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
-)
-from common_grants_sdk.schemas.marshmallow import OpportunityResponse as OpportunityResponseSchema
-from common_grants_sdk.schemas.marshmallow import (
-    OpportunitySearchRequest as OpportunitySearchRequestSchema,
-)
-from common_grants_sdk.schemas.marshmallow import PaginatedQueryParams as PaginatedQueryParamsSchema
 from common_grants_sdk.schemas.pydantic import OpportunitySearchRequest, PaginatedBodyParams
 from pydantic import ValidationError
 
@@ -23,6 +12,21 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
+from src.api.common_grants.common_grants_schemas import (
+    OpportunitiesListResponse as OpportunitiesListResponseSchema,
+)
+from src.api.common_grants.common_grants_schemas import (
+    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+)
+from src.api.common_grants.common_grants_schemas import (
+    OpportunityResponse as OpportunityResponseSchema,
+)
+from src.api.common_grants.common_grants_schemas import (
+    OpportunitySearchRequest as OpportunitySearchRequestSchema,
+)
+from src.api.common_grants.common_grants_schemas import (
+    PaginatedQueryParams as PaginatedQueryParamsSchema,
+)
 from src.api.route_utils import raise_flask_error
 from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs

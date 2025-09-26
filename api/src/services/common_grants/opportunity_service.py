@@ -4,13 +4,6 @@ import logging
 from http import HTTPStatus
 from uuid import UUID
 
-from common_grants_sdk.schemas.marshmallow import (
-    OpportunitiesListResponse as OpportunitiesListResponseSchema,
-)
-from common_grants_sdk.schemas.marshmallow import (
-    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
-)
-from common_grants_sdk.schemas.marshmallow import OpportunityResponse as OpportunityResponseSchema
 from common_grants_sdk.schemas.pydantic import (
     OppFilters,
     OpportunitiesListResponse,
@@ -26,6 +19,15 @@ from common_grants_sdk.schemas.pydantic import (
 
 import src.adapters.db as db
 import src.adapters.search as search
+from src.api.common_grants.common_grants_schemas import (
+    OpportunitiesListResponse as OpportunitiesListResponseSchema,
+)
+from src.api.common_grants.common_grants_schemas import (
+    OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+)
+from src.api.common_grants.common_grants_schemas import (
+    OpportunityResponse as OpportunityResponseSchema,
+)
 from src.services.opportunities_v1.get_opportunity import get_opportunity
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 
