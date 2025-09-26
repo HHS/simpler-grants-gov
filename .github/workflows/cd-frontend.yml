@@ -1,4 +1,4 @@
-name: Deploy frontend
+name: Deploy Frontend
 run-name: Deploy ${{ inputs.version || 'main' }} to Frontend ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
 
 on:

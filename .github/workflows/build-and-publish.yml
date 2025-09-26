@@ -120,6 +120,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/frontend/node_modules
           key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
+          fail-on-cache-miss: true
 
       - id: restore-build-cache
         if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.app_name == 'frontend'
@@ -127,9 +128,10 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/frontend/.next/standalone
-          key: frontend-build-${{ github.sha }}ß
+          key: frontend-build-${{ github.sha }}
+          fail-on-cache-miss: true
 
-      - name: Build release
+      - name: Build release container
         if: steps.check-image-published.outputs.is_image_published == 'false' && steps.cache-buildx.outputs.cache-hit != 'true'
         run:
           make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
