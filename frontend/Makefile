@@ -26,6 +26,9 @@ export RUN_UID
 # Release
 ##################################################
 release-build:
+	ls .next -l
+	ls -l
+	echo "*****"
 	docker buildx build \
 	  --target release \
 		--platform=linux/amd64 \
