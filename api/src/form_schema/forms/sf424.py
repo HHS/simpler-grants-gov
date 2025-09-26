@@ -1230,6 +1230,6 @@ SF424_v4_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    json_to_xml_schema=FORM_XML_TRANSFORM_RULES
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # No form instructions at the moment.
 )
