@@ -374,6 +374,10 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
 
+    # Define a sequence for the legacy tracking number, note that
+    # we start it 80 million because we want to easily be able to
+    # separate it from grants.gov's value which at the time of writing
+    # is in the 10-millions.
     legacy_tracking_number_seq: Sequence = Sequence(
         "legacy_tracking_number_seq", start=80_000_000, schema="api"
     )
