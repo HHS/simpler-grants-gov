@@ -10,12 +10,14 @@ and then MODIFIED to change imports as described below.
     ORIGINAL:
         from marshmallow import Schema, fields, validate
     MODIFIED
-        from src.api.schemas.extension import Schema, fields, validators as validate
+        from src.api.schemas.extension import Schema, fields
+        from src.api.schemas.extension import validators as validate
 """
 
 from typing import Any
-from src.api.schemas.extension import Schema, fields, validators as validate
 
+from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension import validators as validate
 
 # =============================================================================
 # BASIC FIELD TYPES
