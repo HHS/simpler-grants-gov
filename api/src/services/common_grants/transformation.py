@@ -1,7 +1,8 @@
-"""Transformation utilities for converting native models to CommonGrants Protocol format."""
+"""Transformation utilities for transforming SGG v1 models to/from CG models."""
 
 import logging
 from datetime import date, datetime, timezone
+from typing import List
 from urllib.parse import urlparse
 
 from common_grants_sdk.schemas.pydantic import (
@@ -19,22 +20,25 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
+from pydantic import ValidationError
 
+from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
+from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
 
 
-def transform_status_to_cg(status: OpportunityStatus) -> OppStatusOptions:
+def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
     """
-    Transform opportunity status value to CommonGrants status.
+    Transform v1 enum to CG enum.
 
     Args:
-        status: The OpportunityStatus enum value
+        OpportunityStatus: The v1 enum value
 
     Returns:
-        OppStatusOptions: The CommonGrants status enum value
+        OppStatusOptions: The CG enum value
     """
 
     STATUS_TO_CG_MAP = {
@@ -44,23 +48,25 @@ def transform_status_to_cg(status: OpportunityStatus) -> OppStatusOptions:
         OpportunityStatus.ARCHIVED: OppStatusOptions.CUSTOM,
     }
 
-    new_status = STATUS_TO_CG_MAP.get(status, None)
-    if not new_status:
-        logger.error(f"Status transformation failed: unexpected OpportunityStatus value: {status}")
-        new_status = OppStatusOptions.FORECASTED
+    cg_status = STATUS_TO_CG_MAP.get(v1_status, None)
+    if not cg_status:
+        logger.error(
+            f"Transform failed for field `status`: unexpected OpportunityStatus value: {v1_status}"
+        )
+        cg_status = OppStatusOptions.FORECASTED
 
-    return new_status
+    return cg_status
 
 
-def transform_status_from_cg(status: OppStatusOptions) -> str:
+def transform_status_from_cg(cg_status: OppStatusOptions) -> str:
     """
-    Transform CommonGrants opportunity status to legacy format.
+    Transform CG enum value to v1 enum value.
 
     Args:
-        OppStatusOptions: The CommonGrants status value
+        OppStatusOptions: The CG enum value
 
     Returns:
-        status_value: The legacy format status value
+        v1_status: The v1 enum value
     """
 
     STATUS_FROM_CG_MAP = {
@@ -70,25 +76,25 @@ def transform_status_from_cg(status: OppStatusOptions) -> str:
         OppStatusOptions.CUSTOM: OpportunityStatus.ARCHIVED,
     }
 
-    new_status = STATUS_FROM_CG_MAP.get(status, None)
-    if not new_status:
+    v1_status = STATUS_FROM_CG_MAP.get(cg_status, None)
+    if not v1_status:
         logger.error(
-            f"Status transformation failed: unexpected OpportunityStatusOptions value: {status}"
+            f"Transform failed for field `status`: unexpected OpportunityStatusOptions value: {cg_status}"
         )
-        new_status = OpportunityStatus.FORECASTED
+        v1_status = OpportunityStatus.FORECASTED
 
-    return new_status
+    return v1_status
 
 
-def transform_sorting_from_cg(sortBy: OppSortBy) -> str:
+def transform_sorting_from_cg(cg_sort_by: OppSortBy) -> str:
     """
-    Transform CommonGrants sorting field to legacy format.
+    Transform CG enum value to v1 enum value.
 
     Args:
-        OppSortBy: The CommonGrants sorting field value
+        OppSortBy: The CG enum value
 
     Returns:
-        status_value: The legacy format sorting field value
+        sort_by: The v1 enum value
     """
 
     SORT_FIELD_MAPPING = {
@@ -102,7 +108,15 @@ def transform_sorting_from_cg(sortBy: OppSortBy) -> str:
         OppSortBy.TOTAL_FUNDING_AVAILABLE: "estimated_total_program_funding",
     }
 
-    return SORT_FIELD_MAPPING.get(sortBy, "updated_at")
+    v1_sort_by = SORT_FIELD_MAPPING.get(cg_sort_by, None)
+
+    if not v1_sort_by:
+        logger.error(
+            f"Transform failed for field `sort_by`: unexpected OppSortBy value: {cg_sort_by}"
+        )
+        v1_sort_by = OppSortBy.LAST_MODIFIED_AT
+
+    return v1_sort_by
 
 
 def _get_opportunity_summary(opportunity: Opportunity) -> OpportunitySummary | None:
@@ -139,7 +153,6 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
     if isinstance(date_value, datetime):
         return date_value.date()
 
-    # At this point, date_value must be a date object
     return date_value
 
 
@@ -167,9 +180,9 @@ def validate_url(value: str | None) -> str | None:
     return None
 
 
-def transform_opportunity_to_cg(opportunity: Opportunity) -> OpportunityBase:
+def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase | None:
     """
-    Transform a native Opportunity model to CommonGrants Protocol format.
+    Transform a v1 Opportunity model to CG format.
 
     Args:
         opportunity: A v1 Opportunity model instance
@@ -178,15 +191,15 @@ def transform_opportunity_to_cg(opportunity: Opportunity) -> OpportunityBase:
         OpportunityBase: A CommonGrants Protocol model instance
     """
     # Extract opportunity summary
-    summary = _get_opportunity_summary(opportunity)
+    summary = _get_opportunity_summary(v1_opportunity)
 
     # Convert model to dict
     opp_data = {
-        "opportunity_id": opportunity.opportunity_id,
-        "opportunity_title": opportunity.opportunity_title or "Untitled Opportunity",
-        "opportunity_status": opportunity.opportunity_status,
-        "created_at": opportunity.created_at,
-        "updated_at": opportunity.updated_at,
+        "opportunity_id": v1_opportunity.opportunity_id,
+        "opportunity_title": v1_opportunity.opportunity_title or "Untitled Opportunity",
+        "opportunity_status": v1_opportunity.opportunity_status,
+        "created_at": v1_opportunity.created_at,
+        "updated_at": v1_opportunity.updated_at,
         "summary": (
             {
                 "summary_description": summary.summary_description if summary else None,
@@ -204,12 +217,7 @@ def transform_opportunity_to_cg(opportunity: Opportunity) -> OpportunityBase:
         ),
     }
 
-    # Transform
-    result = transform_search_result_to_cg(opp_data)
-    if result is None:
-        raise ValueError("Failed to transform opportunity to CommonGrants format")
-
-    return result
+    return transform_search_result_to_cg(opp_data)
 
 
 def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
@@ -230,36 +238,30 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         description = summary.get("summary_description") or "No description available"
 
         # Transform status
-        status_value = opp_data.get("opportunity_status", OpportunityStatus.POSTED)
-        opp_status = transform_status_to_cg(status_value)
+        v1_status = opp_data.get("opportunity_status", OpportunityStatus.POSTED)
+        cg_status = transform_status_to_cg(v1_status)
 
         # Create timeline
+        post_date = summary.get("post_date") if isinstance(summary, dict) else summary.post_date
+        close_date = summary.get("close_date") if isinstance(summary, dict) else summary.close_date
+        # TODO: summary.close_date is not the correct value! deadlines are stored in competitions
         timeline = OppTimeline(
             postDate=(
                 SingleDateEvent(
                     name="Opportunity Posted",
-                    date=_transform_date_to_cg(
-                        summary.get("post_date") if isinstance(summary, dict) else summary.post_date
-                    ),
+                    date=_transform_date_to_cg(post_date),
                     description="Date when the opportunity was first posted",
                 )
-                if summary
-                and (summary.get("post_date") if isinstance(summary, dict) else summary.post_date)
+                if post_date
                 else None
             ),
             closeDate=(
                 SingleDateEvent(
                     name="Application Deadline",
-                    # TODO: close_date is not the correct value, deadlines are stored in competitions
-                    date=_transform_date_to_cg(
-                        summary.get("close_date")
-                        if isinstance(summary, dict)
-                        else summary.close_date
-                    ),
+                    date=_transform_date_to_cg(close_date),
                     description="Deadline for submitting applications",
                 )
-                if summary
-                and (summary.get("close_date") if isinstance(summary, dict) else summary.close_date)
+                if close_date
                 else None
             ),
         )
@@ -289,7 +291,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             id=opportunity_id,
             title=title,
             description=description,
-            status=OppStatus(value=opp_status),
+            status=OppStatus(value=cg_status),
             keyDates=timeline,
             funding=OppFunding(
                 totalAmountAvailable=total_amount_money,
@@ -307,25 +309,25 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
 
 
 def build_money_range_filter(
-    money_range_filter: MoneyRangeFilter | None, legacy_field_name: str, legacy_filters: dict
+    money_range_filter: MoneyRangeFilter | None, v1_field_name: str, v1_filters: dict
 ) -> None:
     """
-    Helper function to build money range filters for legacy search format.
+    Helper function to build money range filters for v1 search format.
 
     Args:
         money_range_filter: The CommonGrants money range filter
-        legacy_field_name: The field name in legacy search format
-        legacy_filters: The legacy filters dict to update
+        v1_field_name: The field name in v1 search format
+        v1_filters: The v1 filters dict to update
     """
     if not money_range_filter:
         return
 
     if money_range_filter.value.min:
-        legacy_filters[legacy_field_name] = {"min": int(float(money_range_filter.value.min.amount))}
+        v1_filters[v1_field_name] = {"min": int(float(money_range_filter.value.min.amount))}
     if money_range_filter.value.max:
-        if legacy_field_name not in legacy_filters:
-            legacy_filters[legacy_field_name] = {}
-        legacy_filters[legacy_field_name]["max"] = int(float(money_range_filter.value.max.amount))
+        if v1_field_name not in v1_filters:
+            v1_filters[v1_field_name] = {}
+        v1_filters[v1_field_name]["max"] = int(float(money_range_filter.value.max.amount))
 
 
 def build_filter_info(filters: OppFilters | None) -> FilterInfo:
@@ -333,7 +335,7 @@ def build_filter_info(filters: OppFilters | None) -> FilterInfo:
     Helper function to build FilterInfo from CommonGrants filters.
 
     Args:
-        filters: The CommonGrants filters to convert
+        filters: The CommonGrants filters to transform
 
     Returns:
         FilterInfo: The filter info for the response
@@ -365,25 +367,22 @@ def transform_search_request_from_cg(
     filters: OppFilters,
     sorting: OppSorting,
     pagination: PaginatedBodyParams,
-    search_query: str | None,
+    search_term: str | None,
 ) -> dict:
     """
-    Convert CommonGrants search parameters to legacy search format.
-
-    This function maps CommonGrants protocol parameters to the legacy
-    search API format used by the search client.
+    Transform CG search request to v1 search format.
 
     Args:
-        filters: CommonGrants filters to convert
-        sorting: CommonGrants sorting parameters to convert
-        pagination: CommonGrants pagination parameters to convert
+        filters: CommonGrants filters to transform
+        sorting: CommonGrants sorting parameters to transform
+        pagination: CommonGrants pagination parameters to transform
         search_query: Optional search query string
 
     Returns:
-        dict: Legacy search parameters in the format expected by the search client
+        dict: search parameters in v1 format
     """
     # Convert pagination
-    legacy_pagination = {
+    v1_pagination = {
         "page_offset": pagination.page,
         "page_size": pagination.page_size,
         "sort_order": [],
@@ -393,47 +392,70 @@ def transform_search_request_from_cg(
     sort_field = transform_sorting_from_cg(sorting.sort_by)
     sort_direction = "descending" if sorting.sort_order == "desc" else "ascending"
 
-    legacy_pagination["sort_order"] = [{"order_by": sort_field, "sort_direction": sort_direction}]
+    v1_pagination["sort_order"] = [{"order_by": sort_field, "sort_direction": sort_direction}]
 
     # Convert filters
-    legacy_filters = {}
+    v1_filters = {}
 
     if filters.status and filters.status.value:
-        legacy_statuses = [
-            transform_status_from_cg(status_value) for status_value in filters.status.value
-        ]
-        legacy_filters["opportunity_status"] = {"one_of": legacy_statuses}
+        v1_statuses = [transform_status_from_cg(cg_status) for cg_status in filters.status.value]
+        v1_filters["opportunity_status"] = {"one_of": v1_statuses}
 
     if filters.close_date_range:
         if filters.close_date_range.value.min:
-            legacy_filters["close_date"] = {
+            v1_filters["close_date"] = {
                 "start_date": filters.close_date_range.value.min.isoformat()
             }
         if filters.close_date_range.value.max:
-            if "close_date" not in legacy_filters:
-                legacy_filters["close_date"] = {}
-            legacy_filters["close_date"][
-                "end_date"
-            ] = filters.close_date_range.value.max.isoformat()
+            if "close_date" not in v1_filters:
+                v1_filters["close_date"] = {}
+            v1_filters["close_date"]["end_date"] = filters.close_date_range.value.max.isoformat()
 
     # Build money range filters
     build_money_range_filter(
-        filters.total_funding_available_range, "estimated_total_program_funding", legacy_filters
+        filters.total_funding_available_range, "estimated_total_program_funding", v1_filters
     )
-    build_money_range_filter(filters.min_award_amount_range, "award_floor", legacy_filters)
-    build_money_range_filter(filters.max_award_amount_range, "award_ceiling", legacy_filters)
+    build_money_range_filter(filters.min_award_amount_range, "award_floor", v1_filters)
+    build_money_range_filter(filters.max_award_amount_range, "award_ceiling", v1_filters)
 
-    # Build the complete legacy search parameters
-    legacy_params: dict[str, object] = {
-        "pagination": legacy_pagination,
+    # Build the complete v1 search parameters
+    v1_params: dict[str, object] = {
+        "pagination": v1_pagination,
         "experimental": {"scoring_rule": "default"},
     }
 
-    if search_query:
-        legacy_params["query"] = search_query
-        legacy_params["query_operator"] = "AND"
+    if search_term:
+        v1_params["query"] = search_term
+        v1_params["query_operator"] = "AND"
 
-    if legacy_filters:
-        legacy_params["filters"] = legacy_filters
+    if v1_filters:
+        v1_params["filters"] = v1_filters
 
-    return legacy_params
+    return v1_params
+
+
+def transform_validation_error_from_cg(
+    validation_error: ValidationError,
+) -> List[ValidationErrorDetail]:
+    """Transform a CG ValidationError to v1 format.
+
+    Args:
+        ValidationError: CG error object
+
+    Returns:
+        List of v1 error objects
+    """
+    validation_details: List[ValidationErrorDetail] = []
+
+    # Handle pydantic ValidationError
+    # Pydantic structures errors as: [{'loc': ('field',), 'msg': 'message', 'type': 'error_type'}]
+    for error in validation_error.errors():
+        field_path = ".".join(str(loc) for loc in error["loc"]) if error["loc"] else None
+        message = error["msg"]
+
+        detail = ValidationErrorDetail(
+            field=field_path, message=message, type=ValidationErrorType.INVALID
+        )
+        validation_details.append(detail)
+
+    return validation_details

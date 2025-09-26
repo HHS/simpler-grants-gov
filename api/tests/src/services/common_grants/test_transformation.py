@@ -347,7 +347,7 @@ class TestTransformation:
         )
 
         # Test unknown sorting field
-        assert transform_sorting_from_cg("unknown_field") == "updated_at"
+        assert transform_sorting_from_cg("unknown_field") == OppSortBy.LAST_MODIFIED_AT
 
     def test_transform_search_result_to_cg(self):
         """Test transformation of search result dictionary to CommonGrants format."""

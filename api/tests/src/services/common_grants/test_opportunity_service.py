@@ -7,6 +7,7 @@ import pytest
 from common_grants_sdk.schemas.pydantic import (
     ArrayOperator,
     OppFilters,
+    OpportunitySearchRequest,
     OppSortBy,
     OppSorting,
     OppStatusOptions,
@@ -44,8 +45,10 @@ class TestCommonGrantsOpportunityService:
 
     def test_get_opportunity_invalid_uuid(self, service, db_session):
         """Test getting an opportunity with an invalid UUID."""
-        result = CommonGrantsOpportunityService.get_opportunity(db_session, "invalid-uuid")
-        assert result is None
+        from sqlalchemy.exc import DataError
+
+        with pytest.raises(DataError):
+            CommonGrantsOpportunityService.get_opportunity(db_session, "invalid-uuid")
 
     def test_get_opportunity_nonexistent_id(self, service, db_session):
         """Test getting an opportunity with a valid UUID that doesn't exist."""
@@ -64,7 +67,8 @@ class TestCommonGrantsOpportunityService:
 
     def test_list_opportunities_default_pagination(self, service, mock_search_client):
         """Test listing opportunities with default pagination."""
-        response = CommonGrantsOpportunityService.list_opportunities(mock_search_client)
+        pagination = PaginatedBodyParams(page=1, page_size=10)
+        response = CommonGrantsOpportunityService.list_opportunities(mock_search_client, pagination)
 
         assert response["status"] == 200
         assert response["message"] == "Opportunities fetched successfully"
@@ -75,9 +79,8 @@ class TestCommonGrantsOpportunityService:
 
     def test_list_opportunities_custom_pagination(self, service, mock_search_client):
         """Test listing opportunities with custom pagination."""
-        response = CommonGrantsOpportunityService.list_opportunities(
-            mock_search_client, page=2, page_size=5
-        )
+        pagination = PaginatedBodyParams(page=2, page_size=5)
+        response = CommonGrantsOpportunityService.list_opportunities(mock_search_client, pagination)
 
         assert response["status"] == 200
         assert response["message"] == "Opportunities fetched successfully"
@@ -87,9 +90,8 @@ class TestCommonGrantsOpportunityService:
 
     def test_list_opportunities_empty_page(self, service, mock_search_client):
         """Test listing opportunities with a page that has no results."""
-        response = CommonGrantsOpportunityService.list_opportunities(
-            mock_search_client, page=999, page_size=10
-        )
+        pagination = PaginatedBodyParams(page=999, page_size=10)
+        response = CommonGrantsOpportunityService.list_opportunities(mock_search_client, pagination)
 
         assert response["status"] == 200
         assert response["message"] == "Opportunities fetched successfully"
@@ -105,7 +107,10 @@ class TestCommonGrantsOpportunityService:
             # Mock the return values
             mock_search.return_value = ([], {}, Mock(total_records=0, total_pages=0))
 
-            response = CommonGrantsOpportunityService.search_opportunities(mock_search_client)
+            search_request = OpportunitySearchRequest()
+            response = CommonGrantsOpportunityService.search_opportunities(
+                mock_search_client, search_request
+            )
 
             assert response["status"] == 200
             assert response["message"] == "Opportunities searched successfully using search client"
@@ -124,8 +129,9 @@ class TestCommonGrantsOpportunityService:
             mock_search.return_value = ([], {}, Mock(total_records=0, total_pages=0))
 
             pagination = PaginatedBodyParams(page=2, page_size=5)
+            search_request = OpportunitySearchRequest(pagination=pagination)
             response = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, pagination=pagination
+                mock_search_client, search_request
             )
 
             assert response["status"] == 200
@@ -142,8 +148,9 @@ class TestCommonGrantsOpportunityService:
             mock_search.return_value = ([], {}, Mock(total_records=0, total_pages=0))
 
             sorting = OppSorting(sort_by=OppSortBy.TITLE, sort_order=SortOrder.ASC)
+            search_request = OpportunitySearchRequest(sorting=sorting)
             response = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, sorting=sorting
+                mock_search_client, search_request
             )
 
             assert response["status"] == 200
@@ -164,8 +171,9 @@ class TestCommonGrantsOpportunityService:
                 operator=ArrayOperator.IN, value=[OppStatusOptions.OPEN]
             )
             filters = OppFilters(status=status_filter)
+            search_request = OpportunitySearchRequest(filters=filters)
             response = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, filters=filters
+                mock_search_client, search_request
             )
 
             assert response["status"] == 200
@@ -179,8 +187,9 @@ class TestCommonGrantsOpportunityService:
         ) as mock_search:
             mock_search.return_value = ([], {}, Mock(total_records=0, total_pages=0))
 
+            search_request = OpportunitySearchRequest(search="test")
             response = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client, search_query="test"
+                mock_search_client, search_request
             )
 
             assert response["status"] == 200
@@ -203,12 +212,14 @@ class TestCommonGrantsOpportunityService:
             sorting = OppSorting(sort_by=OppSortBy.TITLE, sort_order=SortOrder.ASC)
             pagination = PaginatedBodyParams(page=2, page_size=5)
 
-            response = CommonGrantsOpportunityService.search_opportunities(
-                mock_search_client,
+            search_request = OpportunitySearchRequest(
                 filters=filters,
                 sorting=sorting,
                 pagination=pagination,
-                search_query="test",
+                search="test",
+            )
+            response = CommonGrantsOpportunityService.search_opportunities(
+                mock_search_client, search_request
             )
 
             assert response["status"] == 200
@@ -222,9 +233,8 @@ class TestCommonGrantsOpportunityService:
 
     def test_list_opportunities_total_pages_calculation(self, service, mock_search_client):
         """Test that total pages calculation is correct."""
-        response = CommonGrantsOpportunityService.list_opportunities(
-            mock_search_client, page=1, page_size=3
-        )
+        pagination = PaginatedBodyParams(page=1, page_size=3)
+        response = CommonGrantsOpportunityService.list_opportunities(mock_search_client, pagination)
 
         assert response["status"] == 200
         assert response["paginationInfo"]["page"] == 1
