@@ -115,7 +115,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/frontend/node_modules
-          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+          key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
 
       - id: restore-build-cache
         if: steps.check-image-published.outputs.is_image_published == 'false'
