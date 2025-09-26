@@ -4,6 +4,7 @@ import typing
 
 from apiflask import fields as original_fields
 from marshmallow import ValidationError
+from marshmallow import fields as marshmallow_fields
 
 from src.api.schemas.extension.field_validators import Range
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
@@ -276,4 +277,22 @@ class File(original_fields.File, MixinField):
 
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file."),
+    }
+
+
+class Time(marshmallow_fields.Time, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time."),
+    }
+
+
+class URL(marshmallow_fields.Url, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL."),
+    }
+
+
+class Float(marshmallow_fields.Float, MixinField):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number."),
     }
