@@ -8,9 +8,11 @@ WORKDIR /frontend
 COPY package.json package-lock.json ./
 COPY public ./public
 COPY scripts ./scripts
-RUN npm ci --no-audit \
+COPY node_modules ./node_modules
+# RUN npm ci --no-audit \
   # Remove dev packages not removed by `npm prune` maybe from older storybook?
-  && rm -rf /frontend/node_modules/@esbuild
+#  && rm -rf /frontend/node_modules/@esbuild
+RUN rm -rf /frontend/node_modules/@esbuild
 
 # =============================================================================
 # Development stage
@@ -49,7 +51,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NEXT_BUILD true
 
 # Skip lint because it should have happened in the CI already
-RUN npm run build -- --no-lint
+COPY build ./build
+#RUN npm run build -- --no-lint
 
 # Run the Next.js server
 # =====================================

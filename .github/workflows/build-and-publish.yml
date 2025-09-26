@@ -12,6 +12,11 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
+      publish:
+        description: Should the action publish the docker image to ECR after building (no for vuln scans, yes for other builds)
+        required: false
+        default: true
+        type: boolean
     outputs:
       commit_hash:
         description: The SHA that was built
@@ -26,6 +31,11 @@ on:
         description: The branch, tag or SHA to checkout. When checking out the repository that triggered a workflow, this defaults to the reference or SHA for that event. Otherwise, use branch or tag that triggered the workflow run.
         required: true
         type: string
+      publish:
+        description: Should the action publish the docker image to ECR after building (no for vuln scans, yes for other builds)
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   get-commit-hash:
@@ -56,10 +66,19 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 1000
+
+      - name: Set shared outputs
+        id: shared-output
+        run: |
+          IMAGE_NAME=$(make APP_NAME=${{ inputs.app_name }} release-image-name)
+          IMAGE_TAG=$(make APP_NAME=${{ inputs.app_name }} release-image-tag)
+          echo "image=$IMAGE_NAME:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "image=$IMAGE_NAME:$IMAGE_TAG"
+          make APP_NAME=${{ inputs.app_name }} dump-env
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform
@@ -77,10 +96,55 @@ jobs:
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 
-      - name: Build release
+      - name: Cache Docker layers
+        id: cache-buildx
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ inputs.app_name }}-buildx-${{ needs.get-commit-hash.outputs.commit_hash }}
+          restore-keys: |
+            ${{ inputs.app_name }}-buildx-
+
+      - name: Ensure Buildx cache exists
+        run: |
+          mkdir -p /tmp/.buildx-cache
+
+      - id: restore-package-cache
         if: steps.check-image-published.outputs.is_image_published == 'false'
-        run: make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build
+        name: Restore cached node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+
+      - id: restore-build-cache
+        if: steps.check-image-published.outputs.is_image_published == 'false'
+        name: Restore build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/build
+          key: frontend-build-${{ github.sha }}ß
+
+      - name: Build release
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.cache-buildx.outputs.cache-hit != 'true'
+        run:
+          make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
+          OPTIONAL_BUILD_FLAGS=" \
+          --cache-from=type=local,src=/tmp/.buildx-cache \
+          --cache-to=type=local,dest=/tmp/.buildx-cache"
+
+      - name: Save Docker image
+        if: steps.cache-buildx.outputs.cache-hit != 'true'
+        run: |
+          docker save ${{ steps.shared-output.outputs.image }} > /tmp/docker-image.tar
+
+      - name: Cache Docker image
+        if: steps.cache-buildx.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
 
       - name: Publish release
-        if: steps.check-image-published.outputs.is_image_published == 'false'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.publish == true
         run: make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-publish
