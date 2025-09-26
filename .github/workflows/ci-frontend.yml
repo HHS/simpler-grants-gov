@@ -26,13 +26,23 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
-      - run: npm ci
+
+      - id: restore-cache
+        name: Restore cached node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+
+      - name: Run npm ci
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Run lint
         run: npm run lint
@@ -55,13 +65,13 @@ jobs:
           skip-step: none
           output: ${{ github.event.pull_request.head.repo.full_name == github.event.repository.name && 'comment' || 'report-markdown' }}
 
-  # Confirms the front end still builds successfully
-  check-frontend-builds:
-    name: FE Build Check
+  # Build the FE
+  frontend-build:
+    name: FE Build
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -80,8 +90,35 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
-      - run: npm ci
-      - run: npm run build -- --no-lint
+      - id: restore-cache
+        name: Restore cached node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+
+      - name: Run npm ci
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - id: check-build-cache
+        name: Check if cache node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/build
+          key: frontend-build-${{ github.sha }}
+          lookup-only: true
+
+      - name: Run build
+        if: steps.check-build-cache.outputs.cache-hit != 'true'
+        run: npm run build -- --no-lint
+
+      - name: Cache build
+        if: steps.check-build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/frontend/build
+          key: frontend-build-${{ github.sha }}
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:
@@ -89,11 +126,21 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
           cache: ${{ env.PACKAGE_MANAGER }}
-      - run: npm ci
+      - id: restore-cache
+        name: Restore cached node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+
+      - name: Run npm ci
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
       - run: npm run storybook-build
