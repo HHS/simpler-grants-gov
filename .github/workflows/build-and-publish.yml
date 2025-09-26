@@ -122,7 +122,7 @@ jobs:
         name: Restore build cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ github.workspace }}/frontend/build
+          path: ${{ github.workspace }}/frontend/.next/standalone
           key: frontend-build-${{ github.sha }}ß
 
       - name: Build release

@@ -105,7 +105,7 @@ jobs:
         name: Check if cached build
         uses: actions/cache/restore@v4
         with:
-          path: ${{ github.workspace }}/frontend/build
+          path: ${{ github.workspace }}/frontend/.next/standalone
           key: frontend-build-${{ github.sha }}
           lookup-only: true
 
@@ -117,7 +117,7 @@ jobs:
         if: steps.check-build-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ${{ github.workspace }}/frontend/build
+          path: ${{ github.workspace }}/frontend/.next/standalone
           key: frontend-build-${{ github.sha }}
 
   # Confirms Storybook still builds successfully
