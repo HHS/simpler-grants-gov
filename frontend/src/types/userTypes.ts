@@ -29,4 +29,5 @@ export interface UserProfileResponse {
   validationErrors?: UserProfileValidationErrors;
   errorMessage?: string;
   data?: UserDetail;
+  success?: boolean;
 }

@@ -1447,5 +1447,7 @@ export const messages = {
     },
     fetchError: "Error fetching user data. Please try refreshing the page.",
     pending: "Saving...",
+    errorHeading: "Error",
+    successHeading: "Account updated",
   },
 };

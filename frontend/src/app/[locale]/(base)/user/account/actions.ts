@@ -57,7 +57,7 @@ export const userProfileAction = async (
       session.user_id,
       rawFormData,
     );
-    return { data: userDetailsResponse };
+    return { data: userDetailsResponse, success: true };
   } catch (e) {
     // General try failure catch error
     const error = e as Error;
