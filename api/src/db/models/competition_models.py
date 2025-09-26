@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -373,6 +373,15 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
 
     file_location: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    legacy_tracking_number_seq: Sequence = Sequence(
+        "legacy_tracking_number_seq", start=80_000_000, schema="api"
+    )
+    legacy_tracking_number: Mapped[int] = mapped_column(
+        BigInteger,
+        legacy_tracking_number_seq,
+        server_default=legacy_tracking_number_seq.next_value(),
+    )
 
     @property
     def download_path(self) -> str:
