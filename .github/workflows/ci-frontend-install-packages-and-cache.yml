@@ -1,0 +1,53 @@
+name: CI Frontend npm ci and cache
+
+on:
+  workflow_call:
+  pull_request:
+    paths:
+      - frontend/**
+      - .github/workflows/ci-frontend.yml
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+env:
+  NODE_VERSION: 22
+  LOCKFILE_PATH: ./frontend/package-lock.json # or yarn.lock
+  PACKAGE_MANAGER: npm # or yarn
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-and-cache-node_modules:
+    name: Install and cache node_modules
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+
+      - id: check-cache
+        name: Check if cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}
+          lookup-only: true
+
+      - name: Run npm ci
+        if: steps.check-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Cache node_modules
+        if: steps.check-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('${{ github.workspace }}/frontend/package*.json') }}

@@ -29,12 +29,17 @@ on:
         description: Tag or branch or SHA to deploy
 
 jobs:
+  install-packages:
+    name: Install Packages and Cache
+    uses: ./.github/workflows/ci-frontend-install-packages-and-cache.yml
   frontend-checks:
     name: Run Frontend Checks
+    needs: [install-packages]
     uses: ./.github/workflows/ci-frontend.yml
 
   vulnerability-scans:
     name: Vulnerability Scans
+    needs: [install-packages]
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: frontend
