@@ -232,6 +232,7 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
         back_populates="application_user",
         uselist=True,
         cascade="all, delete-orphan",
+        lazy="selectin",  # preload roles
     )
 
     @property
@@ -266,6 +267,7 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
         back_populates="organization_user",
         uselist=True,
         cascade="all, delete-orphan",
+        lazy="selectin",  # preload roles
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
@@ -312,7 +314,10 @@ class Role(ApiSchemaTable, TimestampMixin):
     is_core: Mapped[bool] = mapped_column(default=False)
 
     link_privileges: Mapped[list["LinkRolePrivilege"]] = relationship(
-        back_populates="role", uselist=True, cascade="all, delete-orphan"
+        back_populates="role",
+        uselist=True,
+        cascade="all, delete-orphan",
+        lazy="selectin",  # preload privileges
     )
     link_role_types: Mapped[list["LinkRoleRoleType"]] = relationship(
         back_populates="role", uselist=True, cascade="all, delete-orphan"
@@ -367,7 +372,7 @@ class InternalUserRole(ApiSchemaTable, TimestampMixin):
     user: Mapped[User] = relationship(User)
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
-    role: Mapped[Role] = relationship(Role)
+    role: Mapped[Role] = relationship(Role, lazy="selectin")  # preload role
 
 
 class ApplicationUserRole(ApiSchemaTable, TimestampMixin):
@@ -379,7 +384,7 @@ class ApplicationUserRole(ApiSchemaTable, TimestampMixin):
     application_user: Mapped[ApplicationUser] = relationship(ApplicationUser)
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
-    role: Mapped[Role] = relationship(Role)
+    role: Mapped[Role] = relationship(Role, lazy="selectin")  # preload role
 
 
 class OrganizationUserRole(ApiSchemaTable, TimestampMixin):
@@ -388,10 +393,12 @@ class OrganizationUserRole(ApiSchemaTable, TimestampMixin):
     organization_user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(OrganizationUser.organization_user_id), primary_key=True
     )
-    organization_user: Mapped[OrganizationUser] = relationship(OrganizationUser)
+    organization_user: Mapped[OrganizationUser] = relationship(
+        OrganizationUser, back_populates="organization_user_roles"
+    )
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
-    role: Mapped[Role] = relationship(Role)
+    role: Mapped[Role] = relationship(Role, lazy="selectin")  # preload role
 
 
 class AgencyUser(ApiSchemaTable, TimestampMixin):
@@ -407,6 +414,7 @@ class AgencyUser(ApiSchemaTable, TimestampMixin):
         back_populates="agency_user",
         uselist=True,
         cascade="all, delete-orphan",
+        lazy="selectin",  # preload roles
     )
 
     @property
@@ -423,7 +431,7 @@ class AgencyUserRole(ApiSchemaTable, TimestampMixin):
     agency_user: Mapped[AgencyUser] = relationship(AgencyUser)
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Role.role_id), primary_key=True)
-    role: Mapped[Role] = relationship(Role)
+    role: Mapped[Role] = relationship(Role, lazy="selectin")  # preload role
 
 
 class UserProfile(ApiSchemaTable, TimestampMixin):
