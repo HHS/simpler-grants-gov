@@ -299,6 +299,7 @@ seed-local-legacy-tables:
 generate-internal-token:
 	$(FLASK_CMD) task generate-internal-token $(args)
 
+
 ##################################################
 # Tasks/Jobs
 ##################################################
@@ -362,3 +363,6 @@ start-mock-soap-services: ## start applicants soap api
 #   make setup-soap-proxy cert_dir="~/certs/dir/"
 setup-soap-proxy:
 	./bin/setup-soap.sh $(cert_dir)
+
+validate-simpler-endpoints:
+	$(PY_RUN_CMD) validate-simpler-endpoints

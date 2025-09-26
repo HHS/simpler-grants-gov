@@ -82,6 +82,7 @@ create-erds = "bin.create_erds:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
 setup-localstack = "bin.setup_localstack:main"
 dat-to-jsonschema = "src.form_schema.dat_to_jsonschema_cli:main"
+validate-simpler-endpoints = "tests.validate_legacy_soap_api.validate_soap_endpoints:validate_simpler_endpoints"
 
 [tool.black]
 line-length = 100
