@@ -2,8 +2,8 @@ import click
 import yaml
 from apiflask import APIBlueprint, APIFlask
 
-from src.api.common_grants.common_grants_schemas import Error
 from src.api.common_grants.common_grants_openapi import transform_spec_composition_to_cg
+from src.api.schemas import response_schema
 
 common_grants_blueprint = APIBlueprint(
     "common_grants",
@@ -28,7 +28,8 @@ def generate_openapi_spec(output_file: str | None) -> None:
         version="0.1.0",
     )
     app.description = "An implementation of the CommonGrants API specification"
-    app.config["HTTP_ERROR_SCHEMA"] = Error
+    app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
+    app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.register_blueprint(common_grants_blueprint)
 
     # Transform the APIFlask OpenAPI spec composition to meet CG expectations
