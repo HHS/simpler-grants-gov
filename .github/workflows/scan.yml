@@ -1,0 +1,158 @@
+name: Grant Opportunities Scanner
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC (adjust for your timezone)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  scan-grants:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create output directories
+      run: |
+        mkdir -p data/scans
+        mkdir -p logs
+    
+    - name: Run grants scanner
+      env:
+        GRANTS_API_ENDPOINT: ${{ vars.GRANTS_API_ENDPOINT || 'https://www.grants.gov/grantsws/rest/opportunities/search/' }}
+        DATABASE_PATH: data/tracker.db
+        OUTPUT_DIR: ./
+      run: |
+        python scripts/scan_grants.py 2>&1 | tee logs/scan-$(date +%Y%m%d-%H%M%S).log
+    
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if [ -f "opportunities.csv" ]; then
+          if git diff --quiet opportunities.csv 2>/dev/null; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "changes=true" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Commit and push changes
+      if: steps.check_changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add the CSV file and database (but exclude logs)
+        git add opportunities.csv
+        if [ -f "data/tracker.db" ]; then
+          git add data/tracker.db
+        fi
+        
+        # Get current date for commit message
+        SCAN_DATE=$(date '+%Y-%m-%d %H:%M UTC')
+        
+        # Count opportunities if CSV exists
+        if [ -f "opportunities.csv" ]; then
+          OPPORTUNITY_COUNT=$(tail -n +2 opportunities.csv | wc -l)
+          git commit -m "Update grant opportunities scan - $SCAN_DATE ($OPPORTUNITY_COUNT opportunities found)"
+        else
+          git commit -m "Update grant opportunities scan - $SCAN_DATE"
+        fi
+        
+        git push
+    
+    - name: Upload scan logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: scan-logs-${{ github.run_id }}
+        path: logs/
+        retention-days: 30
+    
+    - name: Create issue on failure
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const title = `Grant Scanner Failed - ${new Date().toISOString().split('T')[0]}`;
+          const body = `
+          The automated grant opportunities scanner failed during execution.
+          
+          **Run Details:**
+          - Run ID: ${{ github.run_id }}
+          - Triggered: ${{ github.event_name }}
+          - Commit: ${{ github.sha }}
+          
+          **Next Steps:**
+          1. Check the workflow logs for error details
+          2. Verify the Grants.gov API is accessible
+          3. Check if the database schema needs updates
+          4. Consider running the scanner manually to reproduce the issue
+          
+          **Manual Command:**
+          \`\`\`bash
+          python scripts/scan_grants.py
+          \`\`\`
+          
+          This issue was automatically created by the GitHub Actions workflow.
+          `;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['bug', 'automated', 'grants-scanner']
+          });
+    
+    - name: Summary
+      if: always()
+      run: |
+        echo "## Grant Scanner Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "opportunities.csv" ]; then
+          OPPORTUNITY_COUNT=$(tail -n +2 opportunities.csv | wc -l)
+          echo "- **Opportunities Found:** $OPPORTUNITY_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **CSV File:** ✅ Generated" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **CSV File:** ❌ Not generated" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ -f "data/tracker.db" ]; then
+          echo "- **Database:** ✅ Updated" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Database:** ❌ Not created" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "- **Scan Date:** $(date '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ steps.check_changes.outputs.changes }}" = "true" ]; then
+          echo "- **Changes:** ✅ New opportunities found and committed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Changes:** ℹ️ No new opportunities since last scan" >> $GITHUB_STEP_SUMMARY
+        fi
