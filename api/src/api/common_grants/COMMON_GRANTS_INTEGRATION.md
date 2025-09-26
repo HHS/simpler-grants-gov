@@ -203,11 +203,17 @@ The `make check-spec` target uses the `cg check spec` command from the CommonGra
 
 1. **Close Date Accuracy**: The close date mapping uses `summary.close_date` which may not be the correct deadline value (deadlines are stored in competitions)
 2. **Custom Fields**: All opportunities return empty `customFields` object `{}`
+3. **OpenAPI Spec Validation**: Spec validation currently fails due to the following issues:
+- Implementation schema has extra property 'data' not defined in base schema
+- Implementation schema has extra property 'internal_request_id' not defined in base schema
+- Implementation schema has extra property 'status_code' not defined in base schema
+- Missing required property 'status'
 
 ### Future Improvements
 
 - Fix close date mapping to use competition deadlines
 - Add support for custom fields
+- Resolve spec validation failures (likely requires change to CLI to loosen `additionalProperties` rules and allow alias for `status` property)
 
 ## Development
 
