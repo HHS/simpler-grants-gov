@@ -1431,4 +1431,23 @@ export const messages = {
     technicalSupportMessage:
       "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
   },
+  UserAccount: {
+    pageTitle: "User Account | Simpler.Grants.gov",
+    title: "User Account",
+    inputs: {
+      firstName: "First name",
+      middleName: "Middle name",
+      lastName: "Last name",
+      email: "Email",
+    },
+    save: "Save",
+    validationErrors: {
+      firstName: "First name is required",
+      lastName: "Last name is required",
+    },
+    fetchError: "Error fetching user data. Please try refreshing the page.",
+    pending: "Saving...",
+    errorHeading: "Error",
+    successHeading: "Account updated",
+  },
 };
