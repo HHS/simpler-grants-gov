@@ -96,6 +96,10 @@ jobs:
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 
+      - name: Set up Docker Buildx
+        if: steps.check-image-published.outputs.is_image_published == 'false'
+        uses: docker/setup-buildx-action@master
+
       - name: Cache Docker layers
         id: cache-buildx
         uses: actions/cache@v4
