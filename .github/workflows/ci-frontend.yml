@@ -117,7 +117,9 @@ jobs:
         if: steps.check-build-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: ${{ github.workspace }}/frontend/.next/standalone, ${{ github.workspace }}/frontend/.next/static
+          path: |
+            ${{ github.workspace }}/frontend/.next/standalone
+            ${{ github.workspace }}/frontend/.next/static
           key: frontend-build-${{ github.sha }}
 
   # Confirms Storybook still builds successfully

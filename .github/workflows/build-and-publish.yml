@@ -127,7 +127,9 @@ jobs:
         name: Restore build cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ github.workspace }}/frontend/.next/standalone, ${{ github.workspace }}/frontend/.next/static
+          path: |
+            ${{ github.workspace }}/frontend/.next/standalone
+            ${{ github.workspace }}/frontend/.next/static
           key: frontend-build-${{ github.sha }}
           fail-on-cache-miss: true
 
