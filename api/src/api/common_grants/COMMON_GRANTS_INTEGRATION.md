@@ -17,11 +17,11 @@ The CommonGrants Protocol provides standardized access to grant opportunity data
 - **Routes**: `src/api/common_grants/` - API endpoint definitions
 - **Service**: `src/services/common_grants/opportunity_service.py` - Business logic
 - **Transformation**: `src/services/common_grants/transformation.py` - Data mapping
-- **Dependency**: `common-grants-sdk = "^0.3.1"` - Protocol schemas and validation
+- **Dependency**: `common-grants-sdk = "~0.3.2"` - Protocol schemas and validation
 
 ### Search Integration
 
-The search endpoint (`POST /common-grants/opportunities/search`) is effectively a **wrapper** around the existing search infrastructure:
+Both the list (`GET /common-grants/opportunities`) and search (`POST /common-grants/opportunities/search`) endpoints are **wrappers** around the existing OpenSearch infrastructure:
 
 - **Reuses**: OpenSearch client and index used by `/v1/opportunities/search`
 - **Transforms**: CommonGrants protocol requests to legacy search format
@@ -32,9 +32,16 @@ This approach ensures search functionality consistency while providing the stand
 
 ### Data Flow
 
-**List/Get Endpoints:**
+**List Endpoint:**
 1. **Request** → Route handler validates input using APIFlask
-2. **Service** → Queries database and transforms opportunity models to Protocol format
+2. **Transformation** → Converts CommonGrants request to legacy search format (with empty search term)
+3. **Search Client** → Uses OpenSearch client to query indexed data
+4. **Transformation** → Converts legacy search results back to CommonGrants format
+5. **Response** → Returns standardized CommonGrants Protocol response
+
+**Get Endpoint:**
+1. **Request** → Route handler validates input using APIFlask
+2. **Service** → Uses `src.services.opportunities_v1.get_opportunity` service and transforms opportunity models to Protocol format
 3. **Response** → Returns standardized CommonGrants Protocol response
 
 **Search Endpoint:**
@@ -53,12 +60,12 @@ This approach ensures search functionality consistency while providing the stand
 ENABLE_COMMON_GRANTS_ENDPOINTS=true
 ```
 
-**Note**: This environment variable is not set in `local.env` by default, but the application defaults to `true` when not specified.
+**Note**: This environment variable is set to `true` in `local.env` by default. To disable CommonGrants endpoints, change the value to `false` in your environment.
 
 ### Dependencies
 
 ```toml
-common-grants-sdk = "^0.3.1"
+common-grants-sdk = "~0.3.2"
 ```
 
 ## Data Transformation
@@ -97,9 +104,11 @@ GET /common-grants/opportunities?page=1&pageSize=10
 ```
 
 **Features**:
+- **Authentication**: Requires API key authentication
 - Pagination support
 - Excludes draft opportunities (`is_draft = False`)
-- Orders by `updated_at` descending
+- Orders by `lastModifiedAt` descending (default)
+- Uses OpenSearch infrastructure (same as search endpoint)
 - Returns `OpportunitiesListResponse`
 
 ### Get Opportunity
@@ -109,9 +118,11 @@ GET /common-grants/opportunities/{oppId}
 ```
 
 **Features**:
+- **Authentication**: Requires API key authentication
 - UUID validation
 - Returns 404 if not found
 - Excludes draft opportunities
+- Uses `src.services.opportunities_v1.get_opportunity` service
 - Returns `OpportunityResponse`
 
 ### Search Opportunities
@@ -121,6 +132,7 @@ POST /common-grants/opportunities/search
 ```
 
 **Features**:
+- **Authentication**: Requires API key authentication
 - Status filtering
 - Text search across multiple fields
 - Sorting
@@ -162,16 +174,17 @@ The `make check-spec` target uses the `cg check spec` command from the CommonGra
 ### Service Architecture
 
 `CommonGrantsOpportunityService` handles:
-- **List/Get operations**: Database queries with filtering and eager loading
+- **List operations**: Acts as a wrapper around the legacy search infrastructure (uses OpenSearch)
+- **Get operations**: Uses `src.services.opportunities_v1.get_opportunity` service with filtering and eager loading
 - **Search operations**: Acts as a wrapper around the legacy search infrastructure
 - Pagination and sorting logic
-- Error handling
+- Error handling and validation error transformation
 
 ### Route Implementation
 
 - Uses APIFlask decorators for dependency injection:
-  - **List/Get endpoints**: `@flask_db.with_db_session()` for database session injection
-  - **Search endpoint**: `@flask_opensearch.with_search_client()` for OpenSearch client injection
+  - **List/Search endpoints**: `@flask_opensearch.with_search_client()` for OpenSearch client injection
+  - **Get endpoint**: `@flask_db.with_db_session()` for database session injection
 - Standard HTTP status codes and error responses
 - Custom error schemas for validation failures
 - Real-time data transformation to convert to and from Protocol format
@@ -182,6 +195,19 @@ The `make check-spec` target uses the `cg check spec` command from the CommonGra
 - Required fields have appropriate fallbacks
 - Date objects formatted for SDK compatibility
 - UUID validation for opportunity IDs
+- Validation errors are transformed from CommonGrants Pydantic format to application format
+
+## Known Limitations
+
+### Current Issues
+
+1. **Close Date Accuracy**: The close date mapping uses `summary.close_date` which may not be the correct deadline value (deadlines are stored in competitions)
+2. **Custom Fields**: All opportunities return empty `customFields` object `{}`
+
+### Future Improvements
+
+- Fix close date mapping to use competition deadlines
+- Add support for custom fields
 
 ## Development
 

@@ -3,6 +3,7 @@ import yaml
 from apiflask import APIBlueprint, APIFlask
 
 from src.api.common_grants.common_grants_schemas import Error
+from src.api.common_grants.common_grants_openapi import transform_spec_composition_to_cg
 
 common_grants_blueprint = APIBlueprint(
     "common_grants",
@@ -30,8 +31,9 @@ def generate_openapi_spec(output_file: str | None) -> None:
     app.config["HTTP_ERROR_SCHEMA"] = Error
     app.register_blueprint(common_grants_blueprint)
 
-    # Generate the OpenAPI schema using APIFlask spec attribute
-    yaml_content = yaml.dump(app.spec, sort_keys=False)
+    # Transform the APIFlask OpenAPI spec composition to meet CG expectations
+    spec = transform_spec_composition_to_cg(app.spec)  # type: ignore[arg-type]
+    yaml_content = yaml.dump(spec, sort_keys=False)
 
     if output_file:
         with open(output_file, "w") as f:

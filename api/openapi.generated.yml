@@ -3720,16 +3720,25 @@ components:
             don't fit other fields
         totalAmountAvailable:
           description: Total amount of funding available for this opportunity
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/Money'
           - type: 'null'
         minAwardAmount:
           description: Minimum amount of funding granted per award
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/Money'
           - type: 'null'
         maxAwardAmount:
           description: Maximum amount of funding granted per award
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/Money'
           - type: 'null'
@@ -3782,11 +3791,17 @@ components:
       properties:
         postDate:
           description: The date (and time) at which the opportunity is posted
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/SingleDateEvent'
           - type: 'null'
         closeDate:
           description: The date (and time) at which the opportunity closes
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/SingleDateEvent'
           - type: 'null'
@@ -3835,6 +3850,7 @@ components:
           - 'null'
           format: uuid
           description: Globally unique id for the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
         title:
           type:
           - string
@@ -3842,6 +3858,9 @@ components:
           description: Title or name of the funding opportunity
         status:
           description: Status of the opportunity
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/OppStatus'
           - type: 'null'
@@ -3852,12 +3871,18 @@ components:
           description: Description of the opportunity's purpose and scope
         funding:
           description: Details about the funding available
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/OppFunding'
           - type: 'null'
         keyDates:
           description: Key dates for the opportunity, such as when the application
             opens and closes
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/OppTimeline'
           - type: 'null'
@@ -3869,6 +3894,8 @@ components:
           - 'null'
           description: Additional custom fields specific to this opportunity
           additionalProperties:
+            type:
+            - object
             $ref: '#/components/schemas/CustomField'
     PaginatedResultsInfo:
       type: object
@@ -3905,9 +3932,13 @@ components:
           type: array
           description: The list of opportunities
           items:
+            type:
+            - object
             $ref: '#/components/schemas/OpportunityBase'
         paginationInfo:
           description: The pagination details
+          type:
+          - object
           $ref: '#/components/schemas/PaginatedResultsInfo'
       required:
       - items
@@ -4005,6 +4036,9 @@ components:
           description: The operator to apply to the filter value
         value:
           description: The date range value
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/DateRange1'
           - type: 'null'
@@ -4013,11 +4047,17 @@ components:
       properties:
         min:
           description: The minimum amount in the range
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/Money'
           - type: 'null'
         max:
           description: The maximum amount in the range
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/Money'
           - type: 'null'
@@ -4031,6 +4071,9 @@ components:
           description: The operator to apply to the filter value
         value:
           description: The money range value
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/MoneyRange'
           - type: 'null'
@@ -4039,26 +4082,41 @@ components:
       properties:
         status:
           description: '`status.value` matches one of the following values'
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/StringArrayFilter'
           - type: 'null'
         closeDateRange:
           description: '`keyDates.closeDate` is between the given range'
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/DateRangeFilter'
           - type: 'null'
         totalFundingAvailableRange:
           description: '`funding.totalAmountAvailable` is between the given range'
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/MoneyRangeFilter'
           - type: 'null'
         minAwardAmountRange:
           description: '`funding.minAwardAmount` is between the given range'
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/MoneyRangeFilter'
           - type: 'null'
         maxAwardAmountRange:
           description: '`funding.maxAwardAmount` is between the given range'
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/MoneyRangeFilter'
           - type: 'null'
@@ -4116,15 +4174,24 @@ components:
           description: Search query string
         filters:
           description: Filters to apply to the opportunity search
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/OppFilters'
           - type: 'null'
         sorting:
           description: Sorting parameters for opportunities
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/OppSorting'
           - type: 'null'
         pagination:
+          type:
+          - object
+          - 'null'
           anyOf:
           - $ref: '#/components/schemas/PaginatedBodyParams'
           - type: 'null'
@@ -4177,15 +4244,23 @@ components:
           type: array
           description: The list of opportunities
           items:
+            type:
+            - object
             $ref: '#/components/schemas/OpportunityBase'
         paginationInfo:
           description: The pagination details
+          type:
+          - object
           $ref: '#/components/schemas/PaginatedResultsInfo'
         sortInfo:
           description: The sorting details
+          type:
+          - object
           $ref: '#/components/schemas/SortedResultsInfo'
         filterInfo:
           description: The filter details
+          type:
+          - object
           $ref: '#/components/schemas/FilterInfo'
       required:
       - filterInfo
@@ -4205,6 +4280,8 @@ components:
           description: The message
         data:
           description: The opportunity
+          type:
+          - object
           $ref: '#/components/schemas/OpportunityBase'
       required:
       - data

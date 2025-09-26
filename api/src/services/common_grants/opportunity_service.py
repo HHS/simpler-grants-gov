@@ -131,7 +131,7 @@ class CommonGrantsOpportunityService:
         pagination = search_request.pagination or PaginatedBodyParams()
 
         # Get response data from v1 service
-        v1_search_params = transform_search_request_from_cg(filters, sorting, pagination, "")
+        v1_search_params = transform_search_request_from_cg(filters, sorting, pagination, search_request.search)
         opportunity_data, aggregations, pagination_data = search_opportunities(
             search_client, v1_search_params
         )
