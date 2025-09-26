@@ -39,7 +39,7 @@ jobs:
 
   vulnerability-scans:
     name: Vulnerability Scans
-    needs: [install-packages]
+    needs: [install-packages, frontend-checks]
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: frontend

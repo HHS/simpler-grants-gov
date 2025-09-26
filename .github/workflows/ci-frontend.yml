@@ -102,7 +102,7 @@ jobs:
         run: npm ci
 
       - id: check-build-cache
-        name: Check if cache node_modules
+        name: Check if cached build
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/frontend/build
