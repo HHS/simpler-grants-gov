@@ -129,9 +129,7 @@ jobs:
         if: steps.check-image-published.outputs.is_image_published == 'false' && steps.cache-buildx.outputs.cache-hit != 'true'
         run:
           make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
-          OPTIONAL_BUILD_FLAGS=" \
-          --cache-from=type=local,src=/tmp/.buildx-cache \
-          --cache-to=type=local,dest=/tmp/.buildx-cache"
+          OPTIONAL_BUILD_FLAGS=" --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache"
 
       - name: Save Docker image
         if: steps.cache-buildx.outputs.cache-hit != 'true'
