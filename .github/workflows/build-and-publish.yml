@@ -113,8 +113,8 @@ jobs:
         run: |
           mkdir -p /tmp/.buildx-cache
 
-      - id: restore-package-cache
-        if: steps.check-image-published.outputs.is_image_published == 'false'
+      - id: restore-frontend-package-cache
+        if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.app_name == 'frontend'
         name: Restore cached node_modules
         uses: actions/cache/restore@v4
         with:
@@ -122,7 +122,7 @@ jobs:
           key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
 
       - id: restore-build-cache
-        if: steps.check-image-published.outputs.is_image_published == 'false'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.app_name == 'frontend'
         name: Restore build cache
         uses: actions/cache/restore@v4
         with:

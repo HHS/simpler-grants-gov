@@ -8,11 +8,11 @@ WORKDIR /frontend
 COPY package.json package-lock.json ./
 COPY public ./public
 COPY scripts ./scripts
-COPY node_modules ./node_modules
+#COPY node_modules ./node_modules
 # RUN npm ci --no-audit \
   # Remove dev packages not removed by `npm prune` maybe from older storybook?
 #  && rm -rf /frontend/node_modules/@esbuild
-RUN rm -rf /frontend/node_modules/@esbuild
+#RUN rm -rf /frontend/node_modules/@esbuild
 
 # =============================================================================
 # Development stage
@@ -26,6 +26,11 @@ COPY *.d.ts .
 COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
+
+#only run this in the dev image as for base we don't need it
+RUN npm ci --no-audit \
+  # Remove dev packages not removed by `npm prune` maybe from older storybook?
+  && rm -rf /frontend/node_modules/@esbuild
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -44,6 +49,7 @@ COPY tsconfig.json .
 COPY *.config.js .
 COPY *.d.ts .
 COPY src ./src
+COPY .next/standalone .next/standalone
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
