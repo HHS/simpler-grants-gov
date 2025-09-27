@@ -165,7 +165,7 @@ jobs:
           key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
 
       - name: Restore cached Docker image
-        if: steps.build-release-container.outputs.built != 'true'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.build-release-container.outputs.built != 'true'
         uses: actions/cache/restore@v4
         with:
           fail-on-cache-miss: true
@@ -173,7 +173,7 @@ jobs:
           key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
 
       - name: Load cached Docker image
-        if: steps.build-release-container.outputs.built != 'true'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.build-release-container.outputs.built != 'true'
         run: |
           docker load < /tmp/docker-image.tar
 
