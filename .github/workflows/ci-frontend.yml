@@ -34,8 +34,6 @@ jobs:
       - name: Get commit hash
         id: get-commit-hash
         run: |
-          pwd
-          ls -la
           APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.ref}} -- .)
           COMMIT_HASH=$(git rev-parse ${{ github.ref }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
@@ -111,17 +109,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
-      - id: restore-cache
-        name: Restore cached node_modules
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ github.workspace }}/frontend/node_modules
-          key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
-
-      - name: Run npm ci
-        if: steps.restore-cache.outputs.cache-hit != 'true'
-        run: npm ci
-
       - id: check-build-cache
         name: Check if cached build
         uses: actions/cache/restore@v4
@@ -130,15 +117,29 @@ jobs:
           key: frontend-build-${{ needs.get-commit-hash.outputs.commit_hash }}
           lookup-only: true
 
+      - id: restore-cache
+        if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
+        name: Restore cached node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/frontend/node_modules
+          key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
+
+      - name: Run npm ci
+        if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key && steps.restore-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
       - name: Run build
+        id: run-build
         if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
         run: |
-          echo "Commit hash: *${{  needs.get-commit-hash.outputs.commit_hash }}*,*${{  job.get-commit-hash.outputs.commit_hash }}*"
+          echo "Commit hash: *${{  needs.get-commit-hash.outputs.commit_hash }}*"
           echo "Check cache result: *${{ steps.check-build-cache.outputs.cache-hit }}*, ${{ steps.check-build-cache.outputs.cache-matched-key }}, ${{ steps.check-build-cache.outputs.cache-primary-key }} "
           npm run build -- --no-lint
+          echo "built=true" >> "$GITHUB_OUTPUT"
 
       - name: Cache build
-        if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
+        if: steps.run-build.outputs.built == 'true'
         uses: actions/cache/save@v4
         with:
           path: |
