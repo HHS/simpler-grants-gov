@@ -134,10 +134,12 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Build release container
+        id: build-release-container
         if: steps.check-image-published.outputs.is_image_published == 'false' && steps.cache-buildx.outputs.cache-hit != 'true'
         run:
           make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
           OPTIONAL_BUILD_FLAGS=" --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache"
+          echo "built=true" >> "$GITHUB_OUTPUT"
 
       - name: Save Docker image
         if: steps.cache-buildx.outputs.cache-hit != 'true'
@@ -150,6 +152,20 @@ jobs:
         with:
           path: /tmp/docker-image.tar
           key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
+
+      - name: Restore cached Docker image
+        if: steps.build-release-container.outputs.built != 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
+          restore-keys: |
+            ${{ inputs.app_name }}-docker-img-
+
+      - name: Load cached Docker image
+        if: steps.build-release-container.outputs.built != 'true'
+        run: |
+          docker load < /tmp/docker-image.tar
 
       - name: Publish release
         if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.publish == true
