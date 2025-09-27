@@ -130,7 +130,9 @@ jobs:
 
       - name: Run build
         if: steps.check-build-cache.outputs.cache-hit != 'true'
-        run: npm run build -- --no-lint
+        run: |
+          echo "Check cache result: *${{ steps.check-build-cache.outputs.cache-hit }}*, ${{ steps.check-build-cache.outputs.cache-matched-key }}"
+          npm run build -- --no-lint
 
       - name: Cache build
         if: steps.check-build-cache.outputs.cache-hit != 'true'
