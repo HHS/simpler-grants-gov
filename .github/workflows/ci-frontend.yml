@@ -114,7 +114,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/frontend/.next/standalone
-          key: frontend-build-${{ needs.get-commit-hash.outputs.commit_hash }}
+          key: frontend-build-x-${{ needs.get-commit-hash.outputs.commit_hash }}
           lookup-only: true
 
       - id: restore-cache

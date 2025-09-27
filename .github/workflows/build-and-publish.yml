@@ -140,7 +140,7 @@ jobs:
           path: |
             ${{ github.workspace }}/frontend/.next/standalone
             ${{ github.workspace }}/frontend/.next/static
-          key: frontend-build-${{ needs.get-commit-hash.outputs.commit_hash }}
+          key: frontend-build-x-${{ needs.get-commit-hash.outputs.commit_hash }}
           fail-on-cache-miss: true
 
       - name: Build release container
