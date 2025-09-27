@@ -96,11 +96,20 @@ jobs:
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 
+      - name: Check cached Docker image
+        id: check-cached-docker-image
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
+          lookup-only: true
+
       - name: Set up Docker Buildx
-        if: steps.check-image-published.outputs.is_image_published == 'false'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true'
         uses: docker/setup-buildx-action@master
 
       - name: Cache Docker layers
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true'
         id: cache-buildx
         uses: actions/cache@v4
         with:
@@ -110,11 +119,12 @@ jobs:
             ${{ inputs.app_name }}-buildx-
 
       - name: Ensure Buildx cache exists
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true'
         run: |
           mkdir -p /tmp/.buildx-cache
 
       - id: restore-frontend-package-cache
-        if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.app_name == 'frontend'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true' && inputs.app_name == 'frontend'
         name: Restore cached node_modules
         uses: actions/cache/restore@v4
         with:
@@ -123,7 +133,7 @@ jobs:
           fail-on-cache-miss: true
 
       - id: restore-build-cache
-        if: steps.check-image-published.outputs.is_image_published == 'false' && inputs.app_name == 'frontend'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true' && inputs.app_name == 'frontend'
         name: Restore build cache
         uses: actions/cache/restore@v4
         with:
@@ -135,19 +145,19 @@ jobs:
 
       - name: Build release container
         id: build-release-container
-        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.cache-buildx.outputs.cache-hit != 'true'
+        if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true'
         run:
           make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
           OPTIONAL_BUILD_FLAGS=" --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache"
           echo "built=true" >> "$GITHUB_OUTPUT"
 
       - name: Save Docker image
-        if: steps.cache-buildx.outputs.cache-hit != 'true'
+        if: steps.build-release-container.outputs.built == 'true'
         run: |
           docker save ${{ steps.shared-output.outputs.image }} > /tmp/docker-image.tar
 
       - name: Cache Docker image
-        if: steps.cache-buildx.outputs.cache-hit != 'true'
+        if: steps.build-release-container.outputs.built == 'true'
         uses: actions/cache/save@v4
         with:
           path: /tmp/docker-image.tar
@@ -157,10 +167,9 @@ jobs:
         if: steps.build-release-container.outputs.built != 'true'
         uses: actions/cache/restore@v4
         with:
+          fail-on-cache-miss: true
           path: /tmp/docker-image.tar
           key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
-          restore-keys: |
-            ${{ inputs.app_name }}-docker-img-
 
       - name: Load cached Docker image
         if: steps.build-release-container.outputs.built != 'true'
