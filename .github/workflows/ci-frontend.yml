@@ -36,7 +36,7 @@ jobs:
         run: |
           pwd
           ls -la
-          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.ref}} -- frontend)
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.ref}} -- .)
           COMMIT_HASH=$(git rev-parse ${{ github.ref }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
