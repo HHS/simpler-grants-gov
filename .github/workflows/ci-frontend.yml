@@ -27,13 +27,15 @@ jobs:
     outputs:
       commit_hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-commit-hash
         run: |
+          pwd
+          ls -la
           APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.ref}} -- frontend)
           COMMIT_HASH=$(git rev-parse ${{ github.ref }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
@@ -131,7 +133,7 @@ jobs:
       - name: Run build
         if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
         run: |
-          echo "Commit hash: *${{  needs.get-commit-hash.outputs.commit_hash }}"
+          echo "Commit hash: *${{  needs.get-commit-hash.outputs.commit_hash }}*,*${{  job.get-commit-hash.outputs.commit_hash }}*"
           echo "Check cache result: *${{ steps.check-build-cache.outputs.cache-hit }}*, ${{ steps.check-build-cache.outputs.cache-matched-key }}, ${{ steps.check-build-cache.outputs.cache-primary-key }} "
           npm run build -- --no-lint
 
