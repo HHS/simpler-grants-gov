@@ -146,7 +146,8 @@ jobs:
       - name: Build release container
         id: build-release-container
         if: steps.check-image-published.outputs.is_image_published == 'false' && steps.check-cached-docker-image.outputs.cache-hit != 'true'
-        run:
+        run: |
+          echo "Check cache result: *${{ steps.check-cached-docker-image.outputs.cache-hit }}*"
           make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
           OPTIONAL_BUILD_FLAGS=" --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache"
           echo "built=true" >> "$GITHUB_OUTPUT"
