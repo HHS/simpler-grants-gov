@@ -21,6 +21,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  get-commit-hash:
+    name: Get commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-commit-hash
+        run: |
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{inputs.ref}} ${{ inputs.app_name}})
+          COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
   tests:
     name: FE Lint, Type Check, Format & Tests
     runs-on: ubuntu-22.04
@@ -68,6 +86,7 @@ jobs:
   # Build the FE
   frontend-build:
     name: FE Build
+    needs: [get-commit-hash]
     runs-on: ubuntu-22.04
 
     steps:
@@ -106,7 +125,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/frontend/.next/standalone
-          key: frontend-build-${{ github.sha }}
+          key: frontend-build-${{ needs.get-commit-hash.outputs.commit_hash }}
           lookup-only: true
 
       - name: Run build
@@ -120,7 +139,7 @@ jobs:
           path: |
             ${{ github.workspace }}/frontend/.next/standalone
             ${{ github.workspace }}/frontend/.next/static
-          key: frontend-build-${{ github.sha }}
+          key: frontend-build-${{ needs.get-commit-hash.outputs.commit_hash }}
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:
