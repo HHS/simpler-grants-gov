@@ -131,6 +131,7 @@ jobs:
       - name: Run build
         if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
         run: |
+          echo "Commit hash: *${{  needs.get-commit-hash.outputs.commit_hash }}"
           echo "Check cache result: *${{ steps.check-build-cache.outputs.cache-hit }}*, ${{ steps.check-build-cache.outputs.cache-matched-key }}, ${{ steps.check-build-cache.outputs.cache-primary-key }} "
           npm run build -- --no-lint
 
