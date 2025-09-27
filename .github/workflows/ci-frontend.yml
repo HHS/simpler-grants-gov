@@ -129,13 +129,13 @@ jobs:
           lookup-only: true
 
       - name: Run build
-        if: steps.check-build-cache.outputs.cache-hit != 'true'
+        if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
         run: |
-          echo "Check cache result: *${{ steps.check-build-cache.outputs.cache-hit }}*, ${{ steps.check-build-cache.outputs.cache-matched-key }}"
+          echo "Check cache result: *${{ steps.check-build-cache.outputs.cache-hit }}*, ${{ steps.check-build-cache.outputs.cache-matched-key }}, ${{ steps.check-build-cache.outputs.cache-primary-key }} "
           npm run build -- --no-lint
 
       - name: Cache build
-        if: steps.check-build-cache.outputs.cache-hit != 'true'
+        if: steps.check-build-cache.outputs.cache-matched-key != steps.check-build-cache.outputs.cache-primary-key
         uses: actions/cache/save@v4
         with:
           path: |
