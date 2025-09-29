@@ -210,6 +210,7 @@ class Form(ApiSchemaTable, TimestampMixin):
     )
 
     form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
+    json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):

@@ -1,7 +1,7 @@
 """add legacy tracking number
 
 Revision ID: 61af502af255
-Revises: bfd8ad9cf5d6
+Revises: b3690bdd8659
 Create Date: 2025-09-26 12:36:39.040896
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.schema import CreateSequence, DropSequence
 
 # revision identifiers, used by Alembic.
 revision = "61af502af255"
-down_revision = "bfd8ad9cf5d6"
+down_revision = "b3690bdd8659"
 branch_labels = None
 depends_on = None
 
