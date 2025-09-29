@@ -1,12 +1,16 @@
+"use server";
+
 import { isEmpty } from "lodash";
+import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
 import { getSession } from "src/services/auth/session";
+import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
 import { PropsWithChildren, ReactNode } from "react";
 
 import { UnauthenticatedMessage } from "./UnauthenticatedMessage";
 
 type AuthorizationGateProps = {
-  onUnauthorized: () => ReactNode;
+  onUnauthorized: (children: ReactNode) => ReactNode;
   onUnauthenticated?: () => ReactNode;
   permissions?: string[];
   resourcePromises?: { [resourceName: string]: Promise<unknown> };
@@ -20,6 +24,7 @@ export async function AuthorizationGate({
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
   const session = await getSession();
+
   if (!session?.token) {
     return onUnauthenticated();
   }
@@ -37,10 +42,18 @@ export async function AuthorizationGate({
   if (mappedResourcePromises) {
     try {
       const fetchedResources = await Promise.all(mappedResourcePromises);
-      console.log("!!! fetched resources", fetchedResources);
+      const allResources = fetchedResources.reduce(
+        (all, resource) => ({ ...all, ...resource }),
+        {},
+      );
+      return (
+        <FetchedResourcesProvider value={allResources}>
+          {children}
+        </FetchedResourcesProvider>
+      );
     } catch (e) {
       const error = e as Error;
-      if (error.cause.status === 403) {
+      if ((error.cause as FrontendErrorDetails).status === 403) {
         return onUnauthorized(children);
       }
     }
