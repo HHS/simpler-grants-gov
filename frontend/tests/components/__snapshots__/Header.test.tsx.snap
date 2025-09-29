@@ -257,35 +257,6 @@ exports[`Header About renders About submenu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
-                href="/user/account"
-              >
-                My account
-              </a>
-            </li>
-            <li
-              class="usa-nav__submenu-item"
-            >
-              <a
-                class="display-flex usa-button usa-button--unstyled text-no-underline"
-                href="/user/workspace"
-              >
-                Workspace
-                <svg
-                  aria-hidden="true"
-                  class="usa-icon usa-icon--size-3 display-block"
-                  role="img"
-                >
-                  <use
-                    href="/img.jpg#notifications_active"
-                  />
-                </svg>
-              </a>
-            </li>
-            <li
-              class="usa-nav__submenu-item"
-            >
-              <a
-                class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
                 Sign out
                 <svg
@@ -797,35 +768,6 @@ exports[`Header About renders Community submenu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
-                href="/user/account"
-              >
-                My account
-              </a>
-            </li>
-            <li
-              class="usa-nav__submenu-item"
-            >
-              <a
-                class="display-flex usa-button usa-button--unstyled text-no-underline"
-                href="/user/workspace"
-              >
-                Workspace
-                <svg
-                  aria-hidden="true"
-                  class="usa-icon usa-icon--size-3 display-block"
-                  role="img"
-                >
-                  <use
-                    href="/img.jpg#notifications_active"
-                  />
-                </svg>
-              </a>
-            </li>
-            <li
-              class="usa-nav__submenu-item"
-            >
-              <a
-                class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
                 Sign out
                 <svg
@@ -1330,35 +1272,6 @@ exports[`Header renders Header navbar menu 1`] = `
                 <div
                   class="padding-left-1"
                 />
-              </a>
-            </li>
-            <li
-              class="usa-nav__submenu-item"
-            >
-              <a
-                class="display-flex usa-button usa-button--unstyled text-no-underline"
-                href="/user/account"
-              >
-                My account
-              </a>
-            </li>
-            <li
-              class="usa-nav__submenu-item"
-            >
-              <a
-                class="display-flex usa-button usa-button--unstyled text-no-underline"
-                href="/user/workspace"
-              >
-                Workspace
-                <svg
-                  aria-hidden="true"
-                  class="usa-icon usa-icon--size-3 display-block"
-                  role="img"
-                >
-                  <use
-                    href="/img.jpg#notifications_active"
-                  />
-                </svg>
               </a>
             </li>
             <li
