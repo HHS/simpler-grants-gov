@@ -1,6 +1,7 @@
 """Core XML generation service."""
 
 import logging
+import re
 import xml.etree.ElementTree as ET
 from typing import Any
 
@@ -140,7 +141,14 @@ class XMLGenerationService:
         else:
             xml_bytes = lxml_etree.tostring(root, encoding="utf-8", xml_declaration=True)
 
-        return xml_bytes.decode("utf-8").strip()
+        xml_string = xml_bytes.decode("utf-8").strip()
+
+        # Post-process to add individual namespace declarations to elements
+        xml_string = self._add_individual_namespace_declarations(
+            xml_string, nsmap, namespace_fields
+        )
+
+        return xml_string
 
     def _generate_simple_xml(
         self, data: dict, root_element_name: str, pretty_print: bool = True
@@ -235,11 +243,12 @@ class XMLGenerationService:
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
         if isinstance(value, dict):
-            # Create nested element for dictionary values
+            # Create nested element for dictionary values with individual namespace declaration
             element_name = self._get_element_name(
                 field_name, namespace_fields, nsmap, root_element_name, default_namespace
             )
-            nested_element = lxml_etree.SubElement(parent, element_name)
+            element_nsmap = self._get_element_nsmap(field_name, namespace_fields, nsmap)
+            nested_element = lxml_etree.SubElement(parent, element_name, nsmap=element_nsmap)
 
             for nested_field, nested_value in value.items():
                 if nested_value is not None:
@@ -257,14 +266,71 @@ class XMLGenerationService:
             element_name = self._get_element_name(
                 field_name, namespace_fields, nsmap, root_element_name, default_namespace
             )
-            lxml_etree.SubElement(parent, element_name)
+            element_nsmap = self._get_element_nsmap(field_name, namespace_fields, nsmap)
+            lxml_etree.SubElement(parent, element_name, nsmap=element_nsmap)
         else:
-            # Simple value - create element with text content
+            # Simple value - create element with text content and individual namespace declaration
             element_name = self._get_element_name(
                 field_name, namespace_fields, nsmap, root_element_name, default_namespace
             )
-            element = lxml_etree.SubElement(parent, element_name)
+            element_nsmap = self._get_element_nsmap(field_name, namespace_fields, nsmap)
+            element = lxml_etree.SubElement(parent, element_name, nsmap=element_nsmap)
             element.text = str(value)
+
+    def _get_element_nsmap(self, field_name: str, namespace_fields: dict, nsmap: dict) -> dict:
+        if field_name in namespace_fields:
+            # This field uses a configured namespace, include its declaration
+            namespace_prefix = namespace_fields[field_name]
+            namespace_uri = nsmap.get(namespace_prefix, "")
+            if namespace_uri and namespace_prefix:
+                return {namespace_prefix: namespace_uri}
+        return {}
+
+    def _add_individual_namespace_declarations(
+        self, xml_string: str, nsmap: dict, namespace_fields: dict
+    ) -> str:
+        """Add individual namespace declarations to elements that use non-default namespaces."""
+        # For each field that uses a namespace, add the declaration to its element
+        for field_name, namespace_prefix in namespace_fields.items():
+            namespace_uri = nsmap.get(namespace_prefix, "")
+            if not (namespace_uri and namespace_prefix):
+                continue
+
+            # Pattern to match opening tags for this field with namespace prefix
+            pattern = f"<{namespace_prefix}:{field_name}([^>]*)>"
+            xmlns_declaration = f'xmlns:{namespace_prefix}="{namespace_uri}"'
+
+            xml_string = self._replace_element_with_xmlns(
+                xml_string, pattern, field_name, namespace_prefix, xmlns_declaration
+            )
+
+        return xml_string
+
+    def _replace_element_with_xmlns(
+        self, xml_string: str, pattern: str, field_name: str, namespace_prefix: str, xmlns_declaration: str
+    ) -> str:
+        """Replace elements matching the pattern with xmlns declarations added."""
+
+        def add_xmlns_to_match(match: re.Match[str]) -> str:
+            return self._add_xmlns_to_element(match, field_name, namespace_prefix, xmlns_declaration)
+
+        return re.sub(pattern, add_xmlns_to_match, xml_string)
+
+    def _add_xmlns_to_element(
+        self, match: re.Match[str], field_name: str, namespace_prefix: str, xmlns_declaration: str
+    ) -> str:
+        """Add xmlns declaration to a matched element if not already present."""
+        existing_attrs = match.group(1)
+
+        # Check if xmlns declaration is already present
+        if f"xmlns:{namespace_prefix}=" in existing_attrs:
+            return match.group(0)  # Return unchanged if already has xmlns
+
+        # Add the xmlns declaration
+        if existing_attrs.strip():
+            return f"<{namespace_prefix}:{field_name} {xmlns_declaration}{existing_attrs}>"
+        else:
+            return f"<{namespace_prefix}:{field_name} {xmlns_declaration}>"
 
     def _add_element_to_parent(self, parent: ET.Element, field_name: str, value: Any) -> None:
         """Add an element to a parent, handling both simple values and nested dictionaries."""
