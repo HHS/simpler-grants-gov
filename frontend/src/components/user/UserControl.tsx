@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
@@ -108,6 +109,10 @@ const LogoutNavItem = () => {
 const UserDropdown = ({ user }: { user: UserProfile }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
 
+  const { checkFeatureFlag } = useFeatureFlags();
+
+  const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
+
   return (
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative">
       <NavDropDownButton
@@ -142,11 +147,10 @@ const UserDropdown = ({ user }: { user: UserProfile }) => {
         id="user-control"
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
-          <AccountNavLink key="account" />,
-          <WorkspaceNavLink key="workspace" />,
-          // logoutNavItem, // todo - refactor logoutnavitem into independent component
+          showUserAdminNavItems && <AccountNavLink key="account" />,
+          showUserAdminNavItems && <WorkspaceNavLink key="workspace" />,
           <LogoutNavItem key="logout" />,
-        ]}
+        ].filter(Boolean)}
         type="subnav"
         isOpen={userProfileMenuOpen}
       />
