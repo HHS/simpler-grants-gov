@@ -280,3 +280,13 @@ resource "aws_api_gateway_rest_api_policy" "api_access_restriction" {
   rest_api_id = aws_api_gateway_rest_api.api[0].id
   policy      = data.aws_iam_policy_document.api_access_restriction[0].json
 }
+
+resource "aws_api_gateway_api_key" "frontend_api_access" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  name = "internal-frontend-${var.environment_name}-key"
+
+  # Because we can't automatically save the value of the token via terraform, we have to manually
+  # save it to SSM. That parameter is created below
+  description = "Frontend key for access the ${var.service_name} ECS service via the API Gateway"
+}

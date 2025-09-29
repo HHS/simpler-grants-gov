@@ -44,6 +44,7 @@ defusedxml = "^0.7.1"
 xmltodict = "^0.15.0"
 docraptor = "^3.0.0"
 jsonpath-ng = "^1.7.0"
+prettytable = "^3.16.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
