@@ -7,11 +7,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import {
-  IconListContent,
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 import { LoginButton } from "src/components/LoginButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -81,27 +77,36 @@ const UserEmailItem = ({
   );
 };
 
-const UserDropdown = ({
-  user,
-  navLogoutLinkText,
-  logout,
-}: {
-  user: UserProfile;
-  navLogoutLinkText: string;
-  logout: () => Promise<void>;
-}) => {
-  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+const LogoutNavItem = () => {
+  const t = useTranslations("Header.navLinks");
 
-  const logoutNavItem = (
+  const { logoutLocalUser } = useUser();
+  const router = useRouter();
+
+  const logout = useCallback(async (): Promise<void> => {
+    // this isn't using the clientFetch hook because we don't really need all that added functionality here
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    logoutLocalUser();
+    router.refresh();
+  }, [logoutLocalUser, router]);
+
+  return (
     <a
       className="display-flex usa-button usa-button--unstyled text-no-underline"
       // eslint-disable-next-line
       onClick={() => logout()}
     >
-      {navLogoutLinkText}
+      {t("logout")}
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
     </a>
   );
+};
+
+const UserDropdown = ({ user }: { user: UserProfile }) => {
+  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
 
   return (
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative">
@@ -139,7 +144,8 @@ const UserDropdown = ({
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
           <AccountNavLink key="account" />,
           <WorkspaceNavLink key="workspace" />,
-          logoutNavItem, // todo - refactor logoutnavitem into independent component
+          // logoutNavItem, // todo - refactor logoutnavitem into independent component
+          <LogoutNavItem key="logout" />,
         ]}
         type="subnav"
         isOpen={userProfileMenuOpen}
@@ -151,29 +157,12 @@ const UserDropdown = ({
 export const UserControl = () => {
   const t = useTranslations("Header");
 
-  const { user, logoutLocalUser } = useUser();
-  const router = useRouter();
-
-  const logout = useCallback(async (): Promise<void> => {
-    // this isn't using the clientFetch hook because we don't really need all that added functionality here
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-
-    logoutLocalUser();
-    router.refresh();
-  }, [logoutLocalUser, router]);
+  const { user } = useUser();
 
   return (
     <>
       {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
-      {!!user?.token && (
-        <UserDropdown
-          user={user}
-          navLogoutLinkText={t("navLinks.logout")}
-          logout={logout}
-        />
-      )}
+      {!!user?.token && <UserDropdown user={user} />}
     </>
   );
 };

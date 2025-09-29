@@ -257,7 +257,37 @@ exports[`Header About renders About submenu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/user/account"
               >
+                My account
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/user/workspace"
+              >
+                Workspace
+                <svg
+                  aria-hidden="true"
+                  class="usa-icon usa-icon--size-3 display-block"
+                  role="img"
+                >
+                  <use
+                    href="/img.jpg#notifications_active"
+                  />
+                </svg>
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
+              >
+                Sign out
                 <svg
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
@@ -267,12 +297,6 @@ exports[`Header About renders About submenu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
-                <div
-                  class="font-sans-sm usa-icon-list__content"
-                  data-testid="iconListContent"
-                >
-                  Sign out
-                </div>
               </a>
             </li>
           </ul>
@@ -773,7 +797,37 @@ exports[`Header About renders Community submenu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/user/account"
               >
+                My account
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/user/workspace"
+              >
+                Workspace
+                <svg
+                  aria-hidden="true"
+                  class="usa-icon usa-icon--size-3 display-block"
+                  role="img"
+                >
+                  <use
+                    href="/img.jpg#notifications_active"
+                  />
+                </svg>
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
+              >
+                Sign out
                 <svg
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
@@ -783,12 +837,6 @@ exports[`Header About renders Community submenu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
-                <div
-                  class="font-sans-sm usa-icon-list__content"
-                  data-testid="iconListContent"
-                >
-                  Sign out
-                </div>
               </a>
             </li>
           </ul>
@@ -1289,7 +1337,37 @@ exports[`Header renders Header navbar menu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/user/account"
               >
+                My account
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/user/workspace"
+              >
+                Workspace
+                <svg
+                  aria-hidden="true"
+                  class="usa-icon usa-icon--size-3 display-block"
+                  role="img"
+                >
+                  <use
+                    href="/img.jpg#notifications_active"
+                  />
+                </svg>
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
+              >
+                Sign out
                 <svg
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
@@ -1299,12 +1377,6 @@ exports[`Header renders Header navbar menu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
-                <div
-                  class="font-sans-sm usa-icon-list__content"
-                  data-testid="iconListContent"
-                >
-                  Sign out
-                </div>
               </a>
             </li>
           </ul>
