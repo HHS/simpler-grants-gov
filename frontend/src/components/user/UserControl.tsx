@@ -4,6 +4,7 @@ import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import {
@@ -14,6 +15,34 @@ import {
 
 import { LoginButton } from "src/components/LoginButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
+
+const AccountNavLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href="/user/account"
+    >
+      {t("account")}
+    </Link>
+  );
+};
+
+const WorkspaceNavLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href="/user/workspace"
+    >
+      {t("workspace")}
+      <USWDSIcon
+        name="notifications_active"
+        className="usa-icon--size-3 display-block"
+      />
+    </Link>
+  );
+};
 
 // used in three different places
 // 1. on desktop - nav item drop down button content
@@ -110,8 +139,10 @@ const UserDropdown = ({
         id="user-control"
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
-          logoutNavItem,
-        ].filter(Boolean)}
+          <AccountNavLink key="account" />,
+          <WorkspaceNavLink key="workspace" />,
+          logoutNavItem, // todo - refactor logoutnavitem into independent component
+        ]}
         type="subnav"
         isOpen={userProfileMenuOpen}
       />
