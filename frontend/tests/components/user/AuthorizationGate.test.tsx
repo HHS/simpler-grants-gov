@@ -38,7 +38,7 @@ describe("AuthorizationGate", () => {
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(mockOnUnauthenticated).toHaveBeenCalled();
   });
-  it("runs onUnauthorized handler if any resource promises resolve with a 401 or 403 status code", async () => {
+  it("runs onUnauthorized handler if any resource promises resolve with a 403 status code", async () => {
     const component = await AuthorizationGate({
       children: <div>HELLO</div>,
       onUnauthorized: mockOnUnauthorized,
@@ -55,29 +55,40 @@ describe("AuthorizationGate", () => {
     render(component as JSX.Element);
     expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
   });
-  // it("handles non auth related errors in any resource fetches", async () => {
-  //   const component = await AuthorizationGate({
-  //     children: <div>HELLO</div>,
-  //     onUnauthorized: mockOnUnauthorized,
-  //     resourcePromises: {
-  //       firstResource: new Promise((_resolve, reject) =>
-  //         reject(
-  //           new ApiRequestError(
-  //             "fake unauthorized error",
-  //             "APIRequestError",
-  //             403,
-  //           ),
-  //         ),
-  //       ),
-  //     },
-  //   });
-  //   render(component as JSX.Element);
-  //   expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
-  // });
-  // it("runs onUnauthorized handler if any passed permissions are not satisfied by fetched user permissions", async () => {});
-  // it("effectively runs an onUnauthorized handler to redirect", async () => {});
-  // it("effectively runs an onUnauthorized handler to render a new component", async () => {});
-  // it("effectively runs an onUnauthorized handler to render an existing child component with new props", async () => {});
+  it("handles non auth related errors in any resource fetches", async () => {
+    const fakeError = new ApiRequestError(
+      "fake application errors",
+      "application error",
+      500,
+    );
+    const mockOnError = jest.fn();
+    const component = await AuthorizationGate({
+      children: <div>HELLO</div>,
+      onUnauthorized: mockOnUnauthorized,
+      onError: mockOnError,
+      resourcePromises: {
+        firstResource: new Promise((_resolve, reject) => reject(fakeError)),
+      },
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).not.toHaveBeenCalled();
+    expect(mockOnError).toHaveBeenCalledTimes(1);
+    expect(mockOnError).toHaveBeenCalledWith(fakeError);
+  });
+  it("runs onUnauthorized handler if any passed permissions are not satisfied by fetched user permissions", async () => {
+    const component = await AuthorizationGate({
+      children: <div>HELLO</div>,
+      onUnauthorized: mockOnUnauthorized,
+      requiredPriviliges: [
+        {
+          resourceId: "1",
+          permissions: "modify_application",
+        },
+      ],
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
+  });
   it("renders children when all resource promises return with 200s and passes down all fetched resources via provider as expected", async () => {
     const ProviderTester = () => {
       const resources = useFetchedResources();
