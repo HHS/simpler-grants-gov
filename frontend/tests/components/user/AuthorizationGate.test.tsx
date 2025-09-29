@@ -37,12 +37,29 @@ describe("AuthorizationGate", () => {
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(mockOnUnauthenticated).toHaveBeenCalled();
   });
-  // it("runs onUnauthorized handler if any resource promises resolve with a 401 or 403 status code", async () => {
+  it.only("runs onUnauthorized handler if any resource promises resolve with a 401 or 403 status code", async () => {
+    const component = await AuthorizationGate({
+      children: <div>HELLO</div>,
+      onUnauthorized: mockOnUnauthorized,
+      resourcePromises: {
+        firstResource: Promise.reject(
+          new ApiRequestError(
+            "fake unauthorized error",
+            "APIRequestError",
+            403,
+          ),
+        ),
+      },
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
+  });
+  // it("handles non auth related errors in any resource fetches", async () => {
   //   const component = await AuthorizationGate({
   //     children: <div>HELLO</div>,
   //     onUnauthorized: mockOnUnauthorized,
-  //     resourcePromises: [
-  //       new Promise((_resolve, reject) =>
+  //     resourcePromises: {
+  //       firstResource: new Promise((_resolve, reject) =>
   //         reject(
   //           new ApiRequestError(
   //             "fake unauthorized error",
@@ -51,7 +68,7 @@ describe("AuthorizationGate", () => {
   //           ),
   //         ),
   //       ),
-  //     ],
+  //     },
   //   });
   //   render(component as JSX.Element);
   //   expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
@@ -60,6 +77,24 @@ describe("AuthorizationGate", () => {
   // it("effectively runs an onUnauthorized handler to redirect", async () => {});
   // it("effectively runs an onUnauthorized handler to render a new component", async () => {});
   // it("effectively runs an onUnauthorized handler to render an existing child component with new props", async () => {});
-  // it("renders children when all resource promises return with 200s", async () => {});
+  // it("renders children when all resource promises return with 200s and passes down all fetched resources as expected", async () => {
+  //   const component = await AuthorizationGate({
+  //     children: <div>HELLO</div>,
+  //     onUnauthorized: mockOnUnauthorized,
+  //     resourcePromises: {
+  //       firstResource: new Promise((_resolve, reject) =>
+  //         reject(
+  //           new ApiRequestError(
+  //             "fake unauthorized error",
+  //             "APIRequestError",
+  //             403,
+  //           ),
+  //         ),
+  //       ),
+  //     },
+  //   });
+  //   render(component as JSX.Element);
+  //   expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
+  // });
   // it("renders children when all passed permissions are satisfied", async () => {});
 });
