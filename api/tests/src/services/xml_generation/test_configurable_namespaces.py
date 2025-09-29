@@ -20,6 +20,7 @@ class TestConfigurableNamespaces:
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC",
+                "province": "Ontario",
                 "zip_code": "20001",
                 "country": "UNITED STATES",
             },
@@ -38,6 +39,7 @@ class TestConfigurableNamespaces:
         assert "globLib:Street1" in xml_content
         assert "globLib:City" in xml_content
         assert "globLib:State" in xml_content
+        assert "globLib:Province" in xml_content
         assert "globLib:ZipPostalCode" in xml_content
         assert "globLib:Country" in xml_content
 
