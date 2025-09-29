@@ -1,5 +1,9 @@
 """Tests for configurable XML namespaces feature."""
 
+from unittest.mock import patch
+
+import pytest
+
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -94,9 +98,6 @@ class TestConfigurableNamespaces:
 
     def test_missing_version_raises_error(self):
         """Test that missing version in xml_structure raises a clear error."""
-        import pytest
-        from unittest.mock import patch
-
         service = XMLGenerationService()
         application_data = {"submission_type": "Application"}
         request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
