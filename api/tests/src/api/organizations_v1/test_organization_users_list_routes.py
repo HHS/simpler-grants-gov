@@ -1,5 +1,7 @@
 import uuid
 
+import pytest
+
 from src.constants.lookup_constants import Privilege
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 from tests.src.db.models.factories import OrganizationFactory
@@ -39,7 +41,12 @@ class TestOrganizationUsers:
         assert data["message"] == "Success"
         assert len(data["data"]) == 2
 
-        # Verify user data structure
+        # Verify correct users are returned
+        returned_user_ids = {user["user_id"] for user in data["data"]}
+        expected_user_ids = {str(owner.user_id), str(member.user_id)}
+        assert returned_user_ids == expected_user_ids
+
+        # Verify user data structure and content
         for user_data in data["data"]:
             assert "user_id" in user_data
             assert "email" in user_data
@@ -77,35 +84,33 @@ class TestOrganizationUsers:
         assert len(data["data"]) == 1
         assert data["data"][0]["user_id"] == str(user.user_id)
 
-    def test_get_organization_users_200_empty_organization(
+    def test_get_organization_users_403_user_not_member_of_target_organization(
         self, enable_factory_create, client, db_session
     ):
-        """Test getting organization users when organization has no members"""
-        # Create user with privileges but in different organization
+        """Test that user from different organization cannot access another organization's users"""
+        # Create user with privileges in their own organization
         user, user_org, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             is_organization_owner=True,
         )
 
-        # Create empty organization
-        empty_organization = OrganizationFactory.create()
-
-        # Add user to empty organization with proper privileges
+        # Create different organization with its own member
+        other_organization = OrganizationFactory.create()
         _, _, _ = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            organization=empty_organization,
+            organization=other_organization,
             is_organization_owner=True,
         )
 
-        # Make request to empty organization
+        # User from first organization tries to access second organization's users
         resp = client.post(
-            f"/v1/organizations/{empty_organization.organization_id}/users",
+            f"/v1/organizations/{other_organization.organization_id}/users",
             headers={"X-SGG-Token": token},
         )
 
-        # This should return 403 because user is not a member of empty_organization
+        # This should return 403 because user is not a member of other_organization
         assert resp.status_code == 403
 
     def test_get_organization_users_403_no_privilege(
@@ -253,5 +258,37 @@ class TestOrganizationUsers:
         assert len(data["data"]) == 1
 
         user_data = data["data"][0]
-        assert user_data["email"] is not None
-        assert "@" in user_data["email"]  # Basic email format check
+        assert user_data["email"] == user.email  # Validate actual email value
+
+    @pytest.mark.parametrize(
+        "privilege_set,expected_status",
+        [
+            ([Privilege.VIEW_ORG_MEMBERSHIP], 200),
+            ([Privilege.MANAGE_ORG_MEMBERS], 403),
+            ([Privilege.VIEW_APPLICATION], 403),
+            ([Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS], 200),
+            ([], 403),
+        ],
+    )
+    def test_get_organization_users_privilege_requirements(
+        self, enable_factory_create, client, db_session, privilege_set, expected_status
+    ):
+        """Test various privilege combinations to ensure only VIEW_ORG_MEMBERSHIP grants access"""
+        # Create user in organization with specified privileges
+        user, organization, token = create_user_in_org(
+            privileges=privilege_set,
+            db_session=db_session,
+        )
+
+        # Make request
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == expected_status
+
+        if expected_status == 200:
+            data = resp.get_json()
+            assert data["message"] == "Success"
+            assert len(data["data"]) >= 1
