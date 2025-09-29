@@ -74,7 +74,12 @@ class XMLGenerationService:
         # Use lxml for proper namespace handling if namespaces are configured
         if namespace_fields or default_namespace:
             return self._generate_xml_with_namespaces(
-                data, root_element_name, namespace_config, namespace_fields, xml_structure, pretty_print
+                data,
+                root_element_name,
+                namespace_config,
+                namespace_fields,
+                xml_structure,
+                pretty_print,
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -92,10 +97,10 @@ class XMLGenerationService:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
         form_version = xml_structure.get("version", "4.0")
-        
+
         # Create namespace map for lxml with all required namespaces
         nsmap = {}
-        
+
         # Add the default namespace with the form's root element name as prefix
         if default_namespace:
             nsmap[root_element_name] = default_namespace
@@ -117,7 +122,15 @@ class XMLGenerationService:
 
         # Add data elements with namespace support
         for field_name, value in data.items():
-            self._add_lxml_element_to_parent(root, field_name, value, nsmap, namespace_fields, root_element_name, default_namespace)
+            self._add_lxml_element_to_parent(
+                root,
+                field_name,
+                value,
+                nsmap,
+                namespace_fields,
+                root_element_name,
+                default_namespace,
+            )
 
         # Generate XML string
         if pretty_print:
@@ -178,16 +191,23 @@ class XMLGenerationService:
         extract_from_rules(transform_config)
         return namespace_fields
 
-    def _get_element_name(self, field_name: str, namespace_fields: dict, nsmap: dict, root_element_name: str, default_namespace: str) -> str:
+    def _get_element_name(
+        self,
+        field_name: str,
+        namespace_fields: dict,
+        nsmap: dict,
+        root_element_name: str,
+        default_namespace: str,
+    ) -> str:
         """Get the properly namespaced element name for a field.
-        
+
         Args:
             field_name: The field name to create an element for
             namespace_fields: Dictionary mapping field names to their namespace prefixes
             nsmap: Namespace map with prefix -> URI mappings
             root_element_name: The root element name (used as default namespace prefix)
             default_namespace: The default namespace URI
-            
+
         Returns:
             The properly formatted element name with namespace
         """
@@ -204,26 +224,45 @@ class XMLGenerationService:
                 return field_name
 
     def _add_lxml_element_to_parent(
-        self, parent: Any, field_name: str, value: Any, nsmap: dict, namespace_fields: dict, root_element_name: str, default_namespace: str
+        self,
+        parent: Any,
+        field_name: str,
+        value: Any,
+        nsmap: dict,
+        namespace_fields: dict,
+        root_element_name: str,
+        default_namespace: str,
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
         if isinstance(value, dict):
             # Create nested element for dictionary values
-            element_name = self._get_element_name(field_name, namespace_fields, nsmap, root_element_name, default_namespace)
+            element_name = self._get_element_name(
+                field_name, namespace_fields, nsmap, root_element_name, default_namespace
+            )
             nested_element = lxml_etree.SubElement(parent, element_name)
 
             for nested_field, nested_value in value.items():
                 if nested_value is not None:
                     self._add_lxml_element_to_parent(
-                        nested_element, nested_field, nested_value, nsmap, namespace_fields, root_element_name, default_namespace
+                        nested_element,
+                        nested_field,
+                        nested_value,
+                        nsmap,
+                        namespace_fields,
+                        root_element_name,
+                        default_namespace,
                     )
         elif value is None:
             # Create empty element for None values (when include_null is configured)
-            element_name = self._get_element_name(field_name, namespace_fields, nsmap, root_element_name, default_namespace)
+            element_name = self._get_element_name(
+                field_name, namespace_fields, nsmap, root_element_name, default_namespace
+            )
             lxml_etree.SubElement(parent, element_name)
         else:
             # Simple value - create element with text content
-            element_name = self._get_element_name(field_name, namespace_fields, nsmap, root_element_name, default_namespace)
+            element_name = self._get_element_name(
+                field_name, namespace_fields, nsmap, root_element_name, default_namespace
+            )
             element = lxml_etree.SubElement(parent, element_name)
             element.text = str(value)
 
