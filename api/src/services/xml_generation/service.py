@@ -97,7 +97,11 @@ class XMLGenerationService:
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
-        form_version = xml_structure.get("version", "4.0")
+        form_version = xml_structure.get("version")
+        if not form_version:
+            raise ValueError(
+                f"Missing required 'version' in xml_structure configuration for form {root_element_name}"
+            )
 
         # Create namespace map for lxml with all required namespaces
         nsmap = {}
@@ -307,12 +311,19 @@ class XMLGenerationService:
         return xml_string
 
     def _replace_element_with_xmlns(
-        self, xml_string: str, pattern: str, field_name: str, namespace_prefix: str, xmlns_declaration: str
+        self,
+        xml_string: str,
+        pattern: str,
+        field_name: str,
+        namespace_prefix: str,
+        xmlns_declaration: str,
     ) -> str:
         """Replace elements matching the pattern with xmlns declarations added."""
 
         def add_xmlns_to_match(match: re.Match[str]) -> str:
-            return self._add_xmlns_to_element(match, field_name, namespace_prefix, xmlns_declaration)
+            return self._add_xmlns_to_element(
+                match, field_name, namespace_prefix, xmlns_declaration
+            )
 
         return re.sub(pattern, add_xmlns_to_match, xml_string)
 
