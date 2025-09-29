@@ -98,10 +98,8 @@ const UserDropdown = ({
       // eslint-disable-next-line
       onClick={() => logout()}
     >
+      {navLogoutLinkText}
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
-      <IconListContent className="font-sans-sm">
-        {navLogoutLinkText}
-      </IconListContent>
     </a>
   );
 
