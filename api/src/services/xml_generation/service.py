@@ -74,7 +74,7 @@ class XMLGenerationService:
         # Use lxml for proper namespace handling if namespaces are configured
         if namespace_fields or default_namespace:
             return self._generate_xml_with_namespaces(
-                data, root_element_name, namespace_config, namespace_fields, pretty_print
+                data, root_element_name, namespace_config, namespace_fields, xml_structure, pretty_print
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -86,24 +86,24 @@ class XMLGenerationService:
         root_element_name: str,
         namespace_config: dict,
         namespace_fields: dict,
+        xml_structure: dict,
         pretty_print: bool = True,
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
-
+        form_version = xml_structure.get("version", "4.0")
+        
         # Create namespace map for lxml with all required namespaces
-        nsmap = {
-            "SF424_4_0": default_namespace,  # SF424 namespace with prefix
-        }
+        nsmap = {}
+        
+        # Add the default namespace with the form's root element name as prefix
+        if default_namespace:
+            nsmap[root_element_name] = default_namespace
 
-        # Add additional namespaces
+        # Add additional namespaces from config
         for prefix, uri in namespace_config.items():
             if prefix != "default":
                 nsmap[prefix] = uri
-
-        # Add globLib namespace if any fields use it
-        if any(ns == "globLib" for ns in namespace_fields.values()):
-            nsmap["globLib"] = "http://apply.grants.gov/system/GlobalLibrary-V2.0"
 
         # Create root element with proper namespace prefix
         if default_namespace:
@@ -111,13 +111,13 @@ class XMLGenerationService:
             root = lxml_etree.Element(root_element_with_namespace, nsmap=nsmap)
 
             # Add FormVersion attribute with proper namespace prefix
-            root.set(f"{{{default_namespace}}}FormVersion", "4.0")
+            root.set(f"{{{default_namespace}}}FormVersion", form_version)
         else:
             root = lxml_etree.Element(root_element_name, nsmap=nsmap)
 
         # Add data elements with namespace support
         for field_name, value in data.items():
-            self._add_lxml_element_to_parent(root, field_name, value, nsmap, namespace_fields)
+            self._add_lxml_element_to_parent(root, field_name, value, nsmap, namespace_fields, root_element_name, default_namespace)
 
         # Generate XML string
         if pretty_print:
@@ -178,60 +178,53 @@ class XMLGenerationService:
         extract_from_rules(transform_config)
         return namespace_fields
 
+    def _get_element_name(self, field_name: str, namespace_fields: dict, nsmap: dict, root_element_name: str, default_namespace: str) -> str:
+        """Get the properly namespaced element name for a field.
+        
+        Args:
+            field_name: The field name to create an element for
+            namespace_fields: Dictionary mapping field names to their namespace prefixes
+            nsmap: Namespace map with prefix -> URI mappings
+            root_element_name: The root element name (used as default namespace prefix)
+            default_namespace: The default namespace URI
+            
+        Returns:
+            The properly formatted element name with namespace
+        """
+        if field_name in namespace_fields:
+            # Use configured namespace
+            namespace_prefix = namespace_fields[field_name]
+            namespace_uri = nsmap.get(namespace_prefix, "")
+            return f"{{{namespace_uri}}}{field_name}"
+        else:
+            # Use default namespace
+            if default_namespace:
+                return f"{{{default_namespace}}}{field_name}"
+            else:
+                return field_name
+
     def _add_lxml_element_to_parent(
-        self, parent: Any, field_name: str, value: Any, nsmap: dict, namespace_fields: dict
+        self, parent: Any, field_name: str, value: Any, nsmap: dict, namespace_fields: dict, root_element_name: str, default_namespace: str
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
         if isinstance(value, dict):
             # Create nested element for dictionary values
-            if field_name in namespace_fields:
-                # Use configured namespace
-                namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
-                nested_element = lxml_etree.SubElement(parent, element_name)
-            else:
-                # Use default namespace (SF424_4_0)
-                default_namespace = nsmap.get("SF424_4_0", "")
-                if default_namespace:
-                    element_name = f"{{{default_namespace}}}{field_name}"
-                    nested_element = lxml_etree.SubElement(parent, element_name)
-                else:
-                    nested_element = lxml_etree.SubElement(parent, field_name)
+            element_name = self._get_element_name(field_name, namespace_fields, nsmap, root_element_name, default_namespace)
+            nested_element = lxml_etree.SubElement(parent, element_name)
 
             for nested_field, nested_value in value.items():
                 if nested_value is not None:
                     self._add_lxml_element_to_parent(
-                        nested_element, nested_field, nested_value, nsmap, namespace_fields
+                        nested_element, nested_field, nested_value, nsmap, namespace_fields, root_element_name, default_namespace
                     )
         elif value is None:
             # Create empty element for None values (when include_null is configured)
-            if field_name in namespace_fields:
-                namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
-                lxml_etree.SubElement(parent, element_name)
-            else:
-                default_namespace = nsmap.get("SF424_4_0", "")
-                if default_namespace:
-                    element_name = f"{{{default_namespace}}}{field_name}"
-                    lxml_etree.SubElement(parent, element_name)
-                else:
-                    lxml_etree.SubElement(parent, field_name)
+            element_name = self._get_element_name(field_name, namespace_fields, nsmap, root_element_name, default_namespace)
+            lxml_etree.SubElement(parent, element_name)
         else:
             # Simple value - create element with text content
-            if field_name in namespace_fields:
-                namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
-                element = lxml_etree.SubElement(parent, element_name)
-            else:
-                default_namespace = nsmap.get("SF424_4_0", "")
-                if default_namespace:
-                    element_name = f"{{{default_namespace}}}{field_name}"
-                    element = lxml_etree.SubElement(parent, element_name)
-                else:
-                    element = lxml_etree.SubElement(parent, field_name)
+            element_name = self._get_element_name(field_name, namespace_fields, nsmap, root_element_name, default_namespace)
+            element = lxml_etree.SubElement(parent, element_name)
             element.text = str(value)
 
     def _add_element_to_parent(self, parent: ET.Element, field_name: str, value: Any) -> None:
