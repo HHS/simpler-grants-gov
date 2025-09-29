@@ -1,8 +1,5 @@
 """Tests for attachment data models."""
 
-import base64
-import hashlib
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -80,61 +77,46 @@ class TestAttachmentFile:
         # Compute using our utility
         computed_hash = AttachmentFile.compute_base64_sha1_from_content(test_content)
 
-        # Verify manually
-        expected_sha1 = hashlib.sha1(test_content)  # nosec B324
-        expected_base64 = base64.b64encode(expected_sha1.digest()).decode("utf-8")
+        # Expected value computed with: echo -n "This is test content for SHA-1 hash computation" | openssl sha1 -binary | base64
+        expected_hash = "CztP1K8N1PE3OYvIoYgP6lxkKD0="
 
-        assert computed_hash == expected_base64
+        assert computed_hash == expected_hash
         assert len(computed_hash) > 0
-        assert (
-            computed_hash.endswith("=")
-            or computed_hash.endswith("==")
-            or not computed_hash.endswith("=")
-        )  # Base64 padding
 
-    def test_from_file_path_with_temp_file(self):
+    def test_from_file_path_with_temp_file(self, tmp_path):
         """Test creating AttachmentFile from temporary file path."""
         test_content = b"This is test file content for attachment testing"
 
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
-            temp_file.write(test_content)
-            temp_file_path = Path(temp_file.name)
+        # Create temp file using pytest's tmp_path fixture
+        temp_file_path = tmp_path / "test_file.pdf"
+        temp_file_path.write_bytes(test_content)
 
-        try:
-            # Create AttachmentFile from file path
-            attachment = AttachmentFile.from_file_path(temp_file_path)
+        # Create AttachmentFile from file path
+        attachment = AttachmentFile.from_file_path(temp_file_path)
 
-            # Verify properties
-            assert attachment.filename == temp_file_path.name
-            assert attachment.mime_type == "application/pdf"  # Based on .pdf suffix
-            assert attachment.file_location == f"./attachments/{temp_file_path.name}"
-            assert attachment.hash_algorithm == "SHA-1"
+        # Verify properties
+        assert attachment.filename == temp_file_path.name
+        assert attachment.mime_type == "application/pdf"  # Based on .pdf suffix
+        assert attachment.file_location == f"./attachments/{temp_file_path.name}"
+        assert attachment.hash_algorithm == "SHA-1"
 
-            # Verify hash is correct
-            expected_hash = AttachmentFile.compute_base64_sha1(temp_file_path)
-            assert attachment.hash_value == expected_hash
+        # Verify hash is correct
+        expected_hash = AttachmentFile.compute_base64_sha1(temp_file_path)
+        assert attachment.hash_value == expected_hash
 
-        finally:
-            # Clean up
-            temp_file_path.unlink()
-
-    def test_from_file_path_with_custom_location(self):
+    def test_from_file_path_with_custom_location(self, tmp_path):
         """Test creating AttachmentFile with custom file location."""
         test_content = b"Custom location test content"
         custom_location = "https://example.com/custom/path/file.pdf"
 
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
-            temp_file.write(test_content)
-            temp_file_path = Path(temp_file.name)
+        # Create temp file using pytest's tmp_path fixture
+        temp_file_path = tmp_path / "custom_file.pdf"
+        temp_file_path.write_bytes(test_content)
 
-        try:
-            attachment = AttachmentFile.from_file_path(temp_file_path, custom_location)
+        attachment = AttachmentFile.from_file_path(temp_file_path, custom_location)
 
-            assert attachment.file_location == custom_location
-            assert attachment.filename == temp_file_path.name
-
-        finally:
-            temp_file_path.unlink()
+        assert attachment.file_location == custom_location
+        assert attachment.filename == temp_file_path.name
 
     def test_from_file_path_nonexistent_file(self):
         """Test creating AttachmentFile from nonexistent file."""
@@ -200,29 +182,25 @@ class TestAttachmentGroup:
 
         assert "Cannot add more than 100 files" in str(exc_info.value)
 
-    def test_attachment_group_add_file_from_path(self):
+    def test_attachment_group_add_file_from_path(self, tmp_path):
         """Test adding file from path to AttachmentGroup."""
         group = AttachmentGroup()
         test_content = b"Test content for group file"
 
-        with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as temp_file:
-            temp_file.write(test_content)
-            temp_file_path = Path(temp_file.name)
+        # Create temp file using pytest's tmp_path fixture
+        temp_file_path = tmp_path / "test_document.docx"
+        temp_file_path.write_bytes(test_content)
 
-        try:
-            group.add_file_from_path(temp_file_path)
+        group.add_file_from_path(temp_file_path)
 
-            assert len(group.attached_files) == 1
-            attachment = group.attached_files[0]
-            assert attachment.filename == temp_file_path.name
-            # MIME type detection may vary by system, so just check it's reasonable
-            assert attachment.mime_type in [
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "application/octet-stream",  # Fallback on some systems
-            ]
-
-        finally:
-            temp_file_path.unlink()
+        assert len(group.attached_files) == 1
+        attachment = group.attached_files[0]
+        assert attachment.filename == temp_file_path.name
+        # MIME type detection may vary by system, so just check it's reasonable
+        assert attachment.mime_type in [
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/octet-stream",  # Fallback on some systems
+        ]
 
 
 @pytest.mark.xml_validation
