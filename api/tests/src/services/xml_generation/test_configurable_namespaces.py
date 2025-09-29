@@ -20,7 +20,7 @@ class TestConfigurableNamespaces:
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC",
-                "zip_postal_code": "20001",
+                "zip_code": "20001",
                 "country": "UNITED STATES",
             },
             "authorized_representative": {"first_name": "John", "last_name": "Doe"},
