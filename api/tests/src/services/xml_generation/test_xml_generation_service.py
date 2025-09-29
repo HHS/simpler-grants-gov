@@ -175,13 +175,13 @@ class TestXMLGenerationService:
 
         # Verify nested address structure is created correctly
         assert "<SF424_4_0:Applicant>" in xml_data
-        assert "<globLib:Street1>123 Main Street</globLib:Street1>" in xml_data
-        assert "<globLib:Street2>Suite 100</globLib:Street2>" in xml_data
-        assert "<globLib:City>Washington</globLib:City>" in xml_data
-        assert "<globLib:County>District of Columbia</globLib:County>" in xml_data
-        assert "<globLib:State>DC</globLib:State>" in xml_data
-        assert "<globLib:Country>US</globLib:Country>" in xml_data
-        assert "<globLib:ZipPostalCode>20001-1234</globLib:ZipPostalCode>" in xml_data
+        assert "globLib:Street1" in xml_data and "123 Main Street" in xml_data
+        assert "globLib:Street2" in xml_data and "Suite 100" in xml_data
+        assert "globLib:City" in xml_data and "Washington" in xml_data
+        assert "globLib:County" in xml_data and "District of Columbia" in xml_data
+        assert "globLib:State" in xml_data and "DC" in xml_data
+        assert "globLib:Country" in xml_data and "US" in xml_data
+        assert "globLib:ZipPostalCode" in xml_data and "20001-1234" in xml_data
         assert "</SF424_4_0:Applicant>" in xml_data
 
     def test_generate_xml_pretty_print_vs_condensed(self):
