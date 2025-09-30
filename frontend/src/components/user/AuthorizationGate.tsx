@@ -7,6 +7,7 @@ import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import {
   UserPrivilegeDefinition,
+  UserPrivilegesDefinition,
   UserPrivilegesResponse,
 } from "src/types/UserTypes";
 
@@ -19,13 +20,58 @@ type AuthorizationGateProps = {
   onUnauthorized: (children: ReactNode) => ReactNode;
   onUnauthenticated?: () => ReactNode;
   onError?: (e: Error) => ReactNode;
-  requiredPriviliges?: UserPrivilegeDefinition[];
+  requiredPrivileges?: UserPrivilegeDefinition[];
   resourcePromises?: { [resourceName: string]: Promise<unknown> };
+};
+
+const checkPrivileges = (
+  requiredPrivileges: UserPrivilegeDefinition[],
+  userPrivileges: UserPrivilegesResponse,
+): boolean => {
+  const extractedUserPrivileges = extractPrivileges(userPrivileges);
+  const privilegesSatisfied = requiredPrivileges.every((requiredPrivilege) => {
+    return extractedUserPrivileges.some((userPrivilege) => {
+      const hasBasePrivilege = userPrivilege.privileges.includes(
+        requiredPrivilege.privilege,
+      );
+      return requiredPrivilege.resourceId
+        ? requiredPrivilege.resourceId === userPrivilege.resourceId &&
+            hasBasePrivilege
+        : hasBasePrivilege;
+    });
+  });
+  return privilegesSatisfied;
 };
 
 const extractPrivileges = (
   privilegesResponseData: UserPrivilegesResponse,
-) => {};
+): UserPrivilegesDefinition[] => {
+  const applicationPrivileges = privilegesResponseData.application_user_roles
+    .length
+    ? privilegesResponseData.application_user_roles.map(
+        ({ application_id, application_user_roles }) => ({
+          resourceId: application_id,
+          privileges: application_user_roles.reduce((acc, { privileges }) => {
+            return acc.concat(privileges);
+          }, [] as string[]),
+        }),
+      )
+    : [];
+
+  const organizationPrivileges = privilegesResponseData.organization_user_roles
+    .length
+    ? privilegesResponseData.organization_user_roles.map(
+        ({ organization_id, organization_user_roles }) => ({
+          resourceId: organization_id,
+          privileges: organization_user_roles.reduce((acc, { privileges }) => {
+            return acc.concat(privileges);
+          }, [] as string[]),
+        }),
+      )
+    : [];
+
+  return organizationPrivileges.concat(applicationPrivileges);
+};
 
 // will need to suspend any elements that are wrapped in this gate
 export async function AuthorizationGate({
@@ -35,7 +81,7 @@ export async function AuthorizationGate({
   onError = (e: Error) => (
     <Alert heading={e.message} type="error" headingLevel="h2" />
   ),
-  requiredPriviliges,
+  requiredPrivileges,
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
   const session = await getSession();
@@ -44,28 +90,21 @@ export async function AuthorizationGate({
     return onUnauthenticated();
   }
 
-  if (requiredPriviliges && requiredPriviliges.length) {
+  // check privileges
+  if (requiredPrivileges && requiredPrivileges.length) {
     const userPrivileges = await getUserPrivileges(
       session.token,
       session.user_id,
     );
-    const extractedPrivileges = extractPrivileges(userPrivileges);
-    const privilegesSatisfied = requiredPriviliges.every(
-      (requiredPrivilege) => {
-        return extractedPrivileges.some((userPrivilege) => {
-          const hasBasePrivilege =
-            userPrivilege.privilege === requiredPrivilege.privilege;
-          return requiredPrivilege.resourceId
-            ? requiredPrivilege.resourceId === userPrivilege.resourceId &&
-                hasBasePrivilege
-            : hasBasePrivilege;
-        });
-      },
+    const privilegesSatisfied = checkPrivileges(
+      requiredPrivileges,
+      userPrivileges,
     );
     if (!privilegesSatisfied) {
       return onUnauthorized(children);
     }
   }
+
   const mappedResourcePromises =
     resourcePromises && !isEmpty(resourcePromises)
       ? Object.entries(resourcePromises).map(
@@ -76,8 +115,10 @@ export async function AuthorizationGate({
         )
       : undefined;
 
+  // fetch resources and check for 403s
   if (mappedResourcePromises) {
     try {
+      // Note: there's a potential performance gain here if we make these fetches in parallel with the user privileges call
       const fetchedResources = await Promise.all(mappedResourcePromises);
       const allResources = fetchedResources.reduce(
         (all, resource) => ({ ...all, ...resource }),
@@ -96,5 +137,7 @@ export async function AuthorizationGate({
       return onError(error);
     }
   }
+
+  // on authorized, render children
   return children;
 }

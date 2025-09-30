@@ -13,6 +13,11 @@ export type UserPrivilegeDefinition = {
   privilege: string; // we can narrow this later
 };
 
+export type UserPrivilegesDefinition = {
+  resourceId?: string;
+  privileges: string[]; // we can narrow this later
+};
+
 export type UserRole = {
   role_id: string;
   role_name: string;
@@ -32,9 +37,5 @@ export type UserPrivilegesResponse = {
   application_user_roles: {
     application_id: string;
     application_user_roles: UserRole[];
-  }[];
-  agency_user_roles: {
-    agency_id: string;
-    agency_user_roles: UserRole[];
   }[];
 };

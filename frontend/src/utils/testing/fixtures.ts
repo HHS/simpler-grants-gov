@@ -542,3 +542,31 @@ export const fakeWidgetProps = {
   value: "hi",
   options: {},
 };
+
+export const fakeUserPrivilegesResponse = {
+  user_id: "1",
+  organization_user_roles: [
+    {
+      organization_id: "1",
+      organization_user_roles: [
+        {
+          role_id: "1",
+          role_name: "role_1",
+          privileges: ["read_organization", "modify_organization"],
+        },
+      ],
+    },
+  ],
+  application_user_roles: [
+    {
+      application_id: "2",
+      application_user_roles: [
+        {
+          role_id: "2",
+          role_name: "role_2",
+          privileges: ["read_application"],
+        },
+      ],
+    },
+  ],
+};
