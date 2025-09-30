@@ -128,7 +128,7 @@ class XmlValidator:
             response = self.service.generate_xml(request)
 
             if not response.success:
-                print(f"❌ FAILED: XML generation error: {response.error_message}")
+                print(f"FAILED: XML generation error: {response.error_message}")
                 self.tests_failed += 1
                 return
 
@@ -141,18 +141,18 @@ class XmlValidator:
                     missing_elements.append(expected)
 
             if missing_elements:
-                print(f"❌ FAILED: Missing expected XML elements:")
+                print(f"FAILED: Missing expected XML elements:")
                 for element in missing_elements:
                     print(f"  - {element}")
                 print(f"\nGenerated XML:\n{xml_output}")
                 self.tests_failed += 1
             else:
-                print(f"✅ PASSED: All expected elements found")
+                print(f"PASSED: All expected elements found")
                 print(f"\nGenerated XML preview (first 500 chars):")
                 print(xml_output[:500] + "...")
 
         except Exception as e:
-            print(f"❌ FAILED: Unexpected error: {e}")
+            print(f"FAILED: Unexpected error: {e}")
             self.tests_failed += 1
 
     def print_summary(self) -> None:
@@ -164,9 +164,9 @@ class XmlValidator:
         print(f"Tests passed: {self.tests_run - self.tests_failed}")
         print(f"Tests failed: {self.tests_failed}")
         if self.tests_failed == 0:
-            print(f"\n✅ All tests passed!")
+            print(f"\nAll tests passed!")
         else:
-            print(f"\n❌ {self.tests_failed} test(s) failed")
+            print(f"\n{self.tests_failed} test(s) failed")
 
 
 def run() -> int:
