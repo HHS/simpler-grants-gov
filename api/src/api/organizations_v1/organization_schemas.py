@@ -1,7 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.api.schemas.shared_schema import UserRoleSchema
-from src.constants.lookup_constants import Privilege
+from src.api.schemas.shared_schema import RoleSchema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -48,7 +47,7 @@ class OrganizationMemberSchema(Schema):
         metadata={"description": "User email from login.gov", "example": "user@example.com"},
     )
     roles = fields.List(
-        fields.Nested(UserRoleSchema),
+        fields.Nested(RoleSchema),
         metadata={"description": "User roles in this organization"},
     )
 
@@ -67,16 +66,6 @@ class OrganizationUsersResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(OrganizationMemberSchema),
         metadata={"description": "List of organization members"},
-    )
-
-
-class RoleSchema(Schema):
-    """Schema for role and privileges"""
-
-    role_id = fields.String(metadata={"description": "The internal ID of a role"})
-    role_name = fields.String(metadata={"description": "The name of the role"})
-    privileges = fields.List(
-        fields.Enum(Privilege, metadata={"description": "Privileges for the role"})
     )
 
 
