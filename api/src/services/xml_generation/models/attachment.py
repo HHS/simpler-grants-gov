@@ -8,6 +8,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
+from src.util import file_util
+
 
 class AttachmentFile(BaseModel):
     """Model for a single attachment file."""
@@ -86,7 +88,7 @@ class AttachmentFile(BaseModel):
         """
         sha1_hash = hashlib.sha1(usedforsecurity=False)
 
-        with open(file_path, "rb") as f:
+        with file_util.open_stream(file_path, "rb") as f:
             # Read file in chunks to handle large files efficiently
             for chunk in iter(lambda: f.read(4096), b""):
                 sha1_hash.update(chunk)
@@ -151,7 +153,7 @@ class AttachmentData(BaseModel):
     )
     debt_explanation: AttachmentFile | None = Field(None, description="Debt explanation document")
 
-    def to_xml_dict(self) -> dict[str, Any]:
+    def to_xml_dict(self, attachment_config: dict[str, Any]) -> dict[str, Any]:
         """Convert attachment data to XML-ready dictionary format.
 
         Returns:
@@ -159,26 +161,25 @@ class AttachmentData(BaseModel):
         """
         result = {}
 
-        # Single attachment fields
-        if self.areas_affected:
-            result["AreasAffected"] = self._attachment_to_dict(self.areas_affected)
+        for field_name, config in attachment_config.items():
+            field_value = getattr(self, field_name, None)
+            if field_value is None:
+                continue
 
-        if self.additional_congressional_districts:
-            result["AdditionalCongressionalDistricts"] = self._attachment_to_dict(
-                self.additional_congressional_districts
-            )
+            xml_element = config["xml_element"]
+            field_type = config["type"]
 
-        if self.debt_explanation:
-            result["DebtExplanation"] = self._attachment_to_dict(self.debt_explanation)
-
-        # Multiple attachment field
-        if self.additional_project_title and self.additional_project_title.attached_files:
-            result["AdditionalProjectTitle"] = {
-                "AttachedFile": [
-                    self._attachment_to_dict(file)
-                    for file in self.additional_project_title.attached_files
-                ]
-            }
+            if field_type == "single":
+                # Single attachment
+                result[xml_element] = self._attachment_to_dict(field_value)
+            elif field_type == "multiple":
+                # Multiple attachments (AttachmentGroup)
+                if hasattr(field_value, "attached_files") and field_value.attached_files:
+                    result[xml_element] = {
+                        "AttachedFile": [
+                            self._attachment_to_dict(file) for file in field_value.attached_files
+                        ]
+                    }
 
         return result
 

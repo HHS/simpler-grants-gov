@@ -207,6 +207,28 @@ class TestAttachmentGroup:
 class TestAttachmentData:
     """Test cases for AttachmentData model."""
 
+    @staticmethod
+    def get_default_attachment_config():
+        """Helper to get default SF-424 attachment configuration."""
+        return {
+            "areas_affected": {
+                "xml_element": "AreasAffected",
+                "type": "single",
+            },
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "debt_explanation": {
+                "xml_element": "DebtExplanation",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
+        }
+
     def test_attachment_data_empty(self):
         """Test creating empty AttachmentData."""
         data = AttachmentData()
@@ -280,7 +302,7 @@ class TestAttachmentData:
 
         data = AttachmentData(areas_affected=areas_file, additional_project_title=group)
 
-        xml_dict = data.to_xml_dict()
+        xml_dict = data.to_xml_dict(self.get_default_attachment_config())
 
         # Verify single attachment
         assert "AreasAffected" in xml_dict
@@ -304,7 +326,7 @@ class TestAttachmentData:
     def test_attachment_data_to_xml_dict_empty(self):
         """Test converting empty AttachmentData to XML dictionary."""
         data = AttachmentData()
-        xml_dict = data.to_xml_dict()
+        xml_dict = data.to_xml_dict(self.get_default_attachment_config())
 
         assert xml_dict == {}
 
@@ -313,8 +335,54 @@ class TestAttachmentData:
         empty_group = AttachmentGroup()
         data = AttachmentData(additional_project_title=empty_group)
 
-        xml_dict = data.to_xml_dict()
+        xml_dict = data.to_xml_dict(self.get_default_attachment_config())
 
         # Empty group should not appear in XML dict
         assert "AdditionalProjectTitle" not in xml_dict
         assert xml_dict == {}
+
+    def test_attachment_data_to_xml_dict_with_config(self):
+        """Test converting AttachmentData using configuration-based approach."""
+        # Create test data
+        areas_file = AttachmentFile(
+            filename="areas.pdf",
+            mime_type="application/pdf",
+            file_location="./areas.pdf",
+            hash_value="areashash",
+        )
+
+        group = AttachmentGroup()
+        project_file = AttachmentFile(
+            filename="project.docx",
+            mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_location="./project.docx",
+            hash_value="projecthash",
+        )
+        group.add_file(project_file)
+
+        data = AttachmentData(areas_affected=areas_file, additional_project_title=group)
+
+        # Configuration matching SF-424 form schema
+        attachment_config = {
+            "areas_affected": {
+                "xml_element": "AreasAffected",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
+        }
+
+        # Convert with configuration
+        xml_dict = data.to_xml_dict(attachment_config=attachment_config)
+
+        # Verify single attachment
+        assert "AreasAffected" in xml_dict
+        assert xml_dict["AreasAffected"]["FileName"] == "areas.pdf"
+
+        # Verify multiple attachments
+        assert "AdditionalProjectTitle" in xml_dict
+        assert "AttachedFile" in xml_dict["AdditionalProjectTitle"]
+        assert len(xml_dict["AdditionalProjectTitle"]["AttachedFile"]) == 1
+        assert xml_dict["AdditionalProjectTitle"]["AttachedFile"][0]["FileName"] == "project.docx"
