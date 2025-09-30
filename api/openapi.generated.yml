@@ -3941,7 +3941,7 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
-        organizations:
+        organization_users:
           type: array
           items:
             description: List of organizations and the user's roles in each
@@ -3955,7 +3955,7 @@ components:
             type:
             - object
             $ref: '#/components/schemas/UserApplication'
-        user_agencies:
+        agency_users:
           type: array
           items:
             description: List of agencies and the user's roles in each
