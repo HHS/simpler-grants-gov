@@ -1076,6 +1076,7 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
