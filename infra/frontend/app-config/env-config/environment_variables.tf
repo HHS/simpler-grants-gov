@@ -119,7 +119,7 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
     },
-    API_GATEWAY_API_TOKEN = {
+    API_AUTH_X_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/X-API-KEY"
     },
