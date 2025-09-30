@@ -636,6 +636,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
+      account: "My account",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -1449,5 +1450,10 @@ export const messages = {
     pending: "Saving...",
     errorHeading: "Error",
     successHeading: "Account updated",
+  },
+  UserWorkspace: {
+    pageTitle: "User Workspace | Simpler.Grants.gov",
+    title: "User Workspace",
+    fetchError: "Error fetching user data. Please try refreshing the page.",
   },
 };

@@ -8,22 +8,20 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { UserProfileForm } from "src/components/user/UserProfileForm";
-
 export async function generateMetadata({
   params,
 }: LocalizedPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("UserAccount.pageTitle"),
+    title: t("UserWorkspace.pageTitle"),
     description: t("Index.metaDescription"),
   };
   return meta;
 }
 
-async function UserAccount() {
-  const t = await getTranslations("UserAccount");
+async function UserWorkspace() {
+  const t = await getTranslations("UserWorkspace");
 
   const session = await getSession();
   if (!session?.email) {
@@ -41,15 +39,13 @@ async function UserAccount() {
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
       <h1>{t("title")}</h1>
-      {userDetails ? (
-        <UserProfileForm userDetails={userDetails} />
-      ) : (
-        <ErrorMessage>{t("fetchError")}</ErrorMessage>
-      )}
+      {userDetails ? <></> : <ErrorMessage>{t("fetchError")}</ErrorMessage>}
     </GridContainer>
   );
 }
 
-export default withFeatureFlag<object, never>(UserAccount, "userAdminOff", () =>
-  redirect("/maintenance"),
+export default withFeatureFlag<object, never>(
+  UserWorkspace,
+  "userAdminOff",
+  () => redirect("/maintenance"),
 );
