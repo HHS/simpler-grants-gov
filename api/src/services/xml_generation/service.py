@@ -65,6 +65,12 @@ class XMLGenerationService:
         xml_structure = xml_config.get("xml_structure", {})
         root_element_name = xml_structure.get("root_element", "SF424_4_0")
 
+        # Validate that version is present in xml_structure
+        if "version" not in xml_structure:
+            raise ValueError(
+                f"Missing required 'version' in xml_structure configuration for root element '{root_element_name}'"
+            )
+
         # Get namespace configuration
         namespace_config = xml_config.get("namespaces", {})
         default_namespace = namespace_config.get("default", "")
@@ -98,6 +104,11 @@ class XMLGenerationService:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
 
+        # Get version from config
+        xml_config = (transform_config or {}).get("_xml_config", {})
+        xml_structure = xml_config.get("xml_structure", {})
+        form_version = xml_structure.get("version")
+
         # Create namespace map for lxml with all required namespaces
         nsmap = {
             "SF424_4_0": default_namespace,  # SF424 namespace with prefix
@@ -118,7 +129,7 @@ class XMLGenerationService:
             root = lxml_etree.Element(root_element_with_namespace, nsmap=nsmap)
 
             # Add FormVersion attribute with proper namespace prefix
-            root.set(f"{{{default_namespace}}}FormVersion", "4.0")
+            root.set(f"{{{default_namespace}}}FormVersion", form_version)
         else:
             root = lxml_etree.Element(root_element_name, nsmap=nsmap)
 
