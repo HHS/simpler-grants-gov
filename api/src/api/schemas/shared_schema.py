@@ -3,7 +3,7 @@ from src.constants.lookup_constants import Privilege
 
 
 class RoleSchema(Schema):
-    """Generic schema for user role information with privileges"""
+    """Generic schema for role information with privileges"""
 
     role_id = fields.UUID(
         metadata={
