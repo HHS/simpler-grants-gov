@@ -1127,8 +1127,9 @@ FORM_XML_TRANSFORM_RULES = {
         "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},
         "county": {"xml_transform": {"target": "County", "namespace": "globLib"}},
         "state": {"xml_transform": {"target": "State", "namespace": "globLib"}},
+        "province": {"xml_transform": {"target": "Province", "namespace": "globLib"}},
         "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
-        "zip_postal_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
+        "zip_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
     },
     # Contact information - direct field mappings
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},

@@ -158,7 +158,7 @@ class TestXMLGenerationService:
                 "county": "District of Columbia",
                 "state": "DC",
                 "country": "US",
-                "zip_postal_code": "20001-1234",
+                "zip_code": "20001-1234",
             },
             "project_title": "Research Project",
         }

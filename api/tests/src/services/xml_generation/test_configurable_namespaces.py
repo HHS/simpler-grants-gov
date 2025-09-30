@@ -44,9 +44,10 @@ class TestConfigurableNamespaces:
             "applicant_address": {
                 "street1": "123 Main St",
                 "city": "Washington",
-                "state": "DC: District of Columbia",
-                "zip_postal_code": "20001",
-                "country": "USA: UNITED STATES",
+                "state": "DC",
+                "province": "Ontario",
+                "zip_code": "20001",
+                "country": "UNITED STATES",
             },
             "authorized_representative": {"first_name": "John", "last_name": "Doe"},
         }
@@ -63,6 +64,7 @@ class TestConfigurableNamespaces:
         assert "globLib:Street1" in xml_content
         assert "globLib:City" in xml_content
         assert "globLib:State" in xml_content
+        assert "globLib:Province" in xml_content
         assert "globLib:ZipPostalCode" in xml_content
         assert "globLib:Country" in xml_content
 
