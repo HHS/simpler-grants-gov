@@ -333,11 +333,14 @@ help: ## Prints the help documentation and info about each command
 # XML Validation Tests
 ##################################################
 
-test-xml-validation: ## Run XML validation tests (separate from main test suite). Use 'form=sf424' for SF-424 specific tests
-	$(PY_RUN_CMD) pytest tests/src/services/xml_generation/test_attachment_models.py tests/src/services/xml_generation/test_attachment_transformer.py -m "xml_validation" $(args)
+test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
+	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
 
-test-xml-validation-xsd: ## Run XML validation tests against specific XSD. Use 'xsd=URL_OR_PATH' and optionally 'form=FORM_NAME'
-	$(PY_RUN_CMD) python run_xml_validation.py --xsd-url "$(xsd)" $(if $(form),--form $(form)) $(args)
+test-xml-validation-xsd: ## Run XML validation with custom XSD URL (usage: make test-xml-validation-xsd xsd=URL form=SF424_4_0)
+	$(PY_RUN_CMD) flask task validate-xml-generation --xsd-url "$(xsd)" $(if $(form),--form $(form)) $(args)
+
+fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=./xsd_cache)
+	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--cache-dir $(cache_dir)) $(if $(form),--form $(form)) $(args)
 
 ##################################################
 # Load testing
