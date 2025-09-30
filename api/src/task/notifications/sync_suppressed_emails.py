@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 from sqlalchemy import select
@@ -8,6 +9,8 @@ from src.db.models.user_models import LinkExternalUser, SuppressedEmail
 from src.task.notifications import constants
 from src.task.notifications.constants import Metrics
 from src.task.task import Task
+
+logger = logging.getLogger(__name__)
 
 
 class SyncSuppressedEmailsTask(Task):
@@ -33,8 +36,11 @@ class SyncSuppressedEmailsTask(Task):
             start_time = last_record.last_update_time + timedelta(microseconds=1)
 
         resp = self.sesv2_client.list_suppressed_destinations(start_time=start_time)
-        emails = [d.email_address for d in resp.suppressed_destination_summaries]
+        suppressed_emails = resp.suppressed_destination_summaries
+
+        emails = [d.email_address for d in suppressed_emails]
         if not emails:
+            logger.info("No suppressed email destinations returned")
             return
 
         # Fetch relevant users
@@ -55,6 +61,7 @@ class SyncSuppressedEmailsTask(Task):
             .scalars()
             .all()
         )
+        logger.info("Updating %d existing suppressed emails", len(existing_suppressions))
 
         suppression_map = {s.email: s for s in existing_suppressions}
 

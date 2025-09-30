@@ -1,11 +1,16 @@
-from src.api.application_alpha.application_schemas import SamGovEntitySchema
+from typing import Any
+
+from marshmallow import pre_dump
+
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySearchRequestV1Schema,
     SavedOpportunityResponseV1Schema,
 )
+from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ApplicationStatus, ExternalUserType
+from src.db.models.user_models import LinkExternalUser
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -14,6 +19,30 @@ class UserTokenHeaderSchema(Schema):
         data_key="X-OAuth-login-gov",
         metadata={
             "description": "The login_gov header token",
+        },
+    )
+
+
+class UserProfile(Schema):
+    first_name = fields.String(
+        allow_none=False,
+        metadata={
+            "description": "The first name of the user",
+            "example": "John",
+        },
+    )
+    middle_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The middle name of the user",
+            "example": "Hoover",
+        },
+    )
+    last_name = fields.String(
+        allow_none=False,
+        metadata={
+            "description": "The last name of the user",
+            "example": "Smith",
         },
     )
 
@@ -38,6 +67,16 @@ class UserSchema(Schema):
             "example": ExternalUserType.LOGIN_GOV,
         },
     )
+    profile = fields.Nested(UserProfile, allow_none=True)
+
+    @pre_dump
+    def flatten_linked_user(self, external_user: LinkExternalUser, **kwargs: Any) -> dict:
+        return {
+            "user_id": str(external_user.user_id),
+            "email": external_user.email,
+            "external_user_type": external_user.external_user_type,
+            "profile": external_user.user.profile,
+        }
 
 
 class UserLoginGovCallbackSchema(Schema):
@@ -185,7 +224,7 @@ class UserOrganizationSchema(Schema):
         }
     )
     sam_gov_entity = fields.Nested(
-        SamGovEntitySchema,
+        SamGovEntityResponseSchema,
         allow_none=True,
         metadata={"description": "SAM.gov entity information for the organization"},
     )
@@ -342,3 +381,11 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
         fields.Nested(UserApiKeySchema),
         metadata={"description": "List of API keys for the user"},
     )
+
+
+class UserUpdateProfileRequestSchema(UserProfile):
+    pass
+
+
+class UserUpdateProfileResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(UserProfile, metadata={"description": "The updated user profile"})

@@ -39,11 +39,16 @@ export async function generateMetadata({
 }
 
 interface FormPageProps {
-  params: Promise<{ appFormId: string; applicationId: string; locale: string }>;
+  params: Promise<{
+    appFormId: string;
+    applicationId: string;
+    locale: string;
+    setAttachmentsChanged: (value: boolean) => void;
+  }>;
 }
 
 export default async function FormPage({ params }: FormPageProps) {
-  const { applicationId, appFormId } = await params;
+  const { applicationId, appFormId, setAttachmentsChanged } = await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
@@ -79,6 +84,7 @@ export default async function FormPage({ params }: FormPageProps) {
         formSchema={formSchema}
         uiSchema={formUiSchema}
         attachments={applicationAttachments}
+        setAttachmentsChanged={setAttachmentsChanged}
       />
     </>
   );

@@ -138,6 +138,31 @@ data "aws_iam_policy_document" "email_access" {
   }
 }
 
+data "aws_iam_policy_document" "api_gateway_access" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  # Only allows running the GET /apikeys request
+  statement {
+    sid     = "AllowGetApiKeys"
+    actions = ["apigateway:GET"]
+    resources = [
+      # Must be wildcarded for this to work. Someone using a dev key in prod would not work
+      # because the dev key's usage plan doesn't allow it to access other env's gateways
+      "arn:aws:apigateway:${data.aws_region.current.name}::/apikeys/*", # GetApiKey
+    ]
+  }
+
+  # Only allows running the POST /apikeys request
+  statement {
+    sid     = "AllowImportApiKeys"
+    actions = ["apigateway:POST"]
+    resources = [
+      # Must be wildcarded for this to work. Someone using a dev key in prod would not work
+      # because the dev key's usage plan doesn't allow it to access other env's gateways
+      "arn:aws:apigateway:${data.aws_region.current.name}::/apikeys", # ImportApiKeys
+    ]
+  }
+}
 
 resource "aws_iam_role_policy" "task_executor" {
   name   = "${var.service_name}-task-executor-role-policy"
@@ -148,6 +173,12 @@ resource "aws_iam_role_policy" "task_executor" {
 resource "aws_iam_policy" "runtime_logs" {
   name   = "${var.service_name}-task-executor-role-policy"
   policy = data.aws_iam_policy_document.runtime_logs.json
+}
+
+resource "aws_iam_policy" "api_gateway_access" {
+  count  = var.enable_api_gateway ? 1 : 0
+  name   = "${var.service_name}-api-gateway-access-role-policy"
+  policy = data.aws_iam_policy_document.api_gateway_access[0].json
 }
 
 resource "aws_iam_policy" "email_access" {
@@ -173,4 +204,11 @@ resource "aws_iam_role_policy_attachment" "email_access" {
 
   role       = aws_iam_role.app_service.name
   policy_arn = aws_iam_policy.email_access[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "api_gateway_access" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  role       = aws_iam_role.app_service.name
+  policy_arn = aws_iam_policy.api_gateway_access[0].arn
 }
