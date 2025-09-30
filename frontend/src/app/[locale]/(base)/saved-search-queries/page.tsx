@@ -88,6 +88,7 @@ export default async function SavedSearchQueries({
           resourcePromises={{
             savedSearches: fetchSavedSearches().then(formatSavedSearches),
           }}
+          requiredPrivileges={[{ privilege: "do_whatever" }]}
           onUnauthorized={() => <div>oops unauthorized</div>}
         >
           <SavedSearchesList

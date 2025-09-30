@@ -9,7 +9,10 @@ import {
   UserDetail,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
-import { fakeUser } from "src/utils/testing/fixtures";
+import {
+  fakeUser,
+  fakeUserPrivilegesResponse,
+} from "src/utils/testing/fixtures";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
@@ -17,18 +20,19 @@ export const postLogout = async (token: string) => {
 };
 
 export const getUserPrivileges = async (
-  token: string,
-  userId: string,
+  _token: string,
+  _userId: string,
 ): Promise<UserPrivilegesResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-  const resp = await fetchUserWithMethod("POST")({
-    subPath: `${userId}/privileges`,
-    additionalHeaders: ssgToken,
-  });
-  const json = (await resp.json()) as { data: UserPrivilegesResponse };
-  return json.data;
+  return Promise.resolve(fakeUserPrivilegesResponse);
+  // const ssgToken = {
+  //   "X-SGG-Token": token,
+  // };
+  // const resp = await fetchUserWithMethod("POST")({
+  //   subPath: `${userId}/privileges`,
+  //   additionalHeaders: ssgToken,
+  // });
+  // const json = (await resp.json()) as { data: UserPrivilegesResponse };
+  // return json.data;
 };
 export const getUserDetails = async (
   _token: string,
