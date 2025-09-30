@@ -36,9 +36,9 @@ def test_get_roles_and_privileges(enable_factory_create, client, user, db_sessio
     assert resp.status_code == 200
     assert data["user_id"] == str(user.user_id)
 
-    assert len(data["organizations"]) == 2
+    assert len(data["organization_users"]) == 2
     assert len(data["application_users"]) == 2
-    assert len(data["user_agencies"]) == 1
+    assert len(data["agency_users"]) == 1
     assert len(data["internal_user_roles"]) == 1
 
 
@@ -53,9 +53,9 @@ def test_get_roles_and_privileges_none(
     assert resp.status_code == 200
     assert data["user_id"] == str(user.user_id)
 
-    assert not data["organizations"]
+    assert not data["organization_users"]
     assert not data["application_users"]
-    assert not data["user_agencies"]
+    assert not data["agency_users"]
     assert not data["internal_user_roles"]
 
 

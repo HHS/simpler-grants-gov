@@ -48,11 +48,11 @@ class User(ApiSchemaTable, TimestampMixin):
         "ApplicationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
-    organizations: Mapped[list["OrganizationUser"]] = relationship(
+    organization_users: Mapped[list["OrganizationUser"]] = relationship(
         "OrganizationUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
-    user_agencies: Mapped[list["AgencyUser"]] = relationship(
+    agency_users: Mapped[list["AgencyUser"]] = relationship(
         "AgencyUser", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
 
@@ -271,7 +271,7 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
-    user: Mapped[User] = relationship(User, back_populates="organizations", uselist=False)
+    user: Mapped[User] = relationship(User, back_populates="organization_users", uselist=False)
 
     @property
     def roles(self) -> list["Role"]:

@@ -20,17 +20,11 @@ def get_roles_and_privileges(
         .where(User.user_id == user_id)
         .options(
             # Organization-related relationships
-            selectinload(User.organizations).selectinload(
-                OrganizationUser.organization
-            ),
+            selectinload(User.organization_users).selectinload(OrganizationUser.organization),
             # Application-related relationships
-            selectinload(User.application_users).selectinload(
-                ApplicationUser.application
-            ),
+            selectinload(User.application_users).selectinload(ApplicationUser.application),
             # Agency-related relationships
-            selectinload(User.user_agencies).selectinload(
-                AgencyUser.agency
-            ),
+            selectinload(User.agency_users).selectinload(AgencyUser.agency),
             # Internal roles
             selectinload(User.internal_user_roles),
         )

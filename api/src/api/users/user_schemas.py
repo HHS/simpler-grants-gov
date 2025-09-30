@@ -492,7 +492,7 @@ class GetRolesAndPrivilegesResponseSchema(Schema):
     """Schema for the full response containing user roles and privileges."""
 
     user_id = fields.UUID()
-    organizations = fields.List(
+    organization_users = fields.List(
         fields.Nested(
             UserOrganization,
             metadata={"description": "List of organizations and the user's roles in each"},
@@ -506,7 +506,7 @@ class GetRolesAndPrivilegesResponseSchema(Schema):
         ),
     )
 
-    user_agencies = fields.List(
+    agency_users = fields.List(
         fields.Nested(
             UserAgency, metadata={"description": "List of agencies and the user's roles in each"}
         ),
