@@ -24,6 +24,7 @@ tags:
 - name: Opportunity v1
 - name: Extract v1
 - name: Agency v1
+- name: Organization v1
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
@@ -580,6 +581,55 @@ paths:
               $ref: '#/components/schemas/FormUpdateRequest'
       security:
       - ApiKeyAuth: []
+  /v1/users/{user_id}/profile:
+    put:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdateProfileResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Profile Update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateProfileRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/api-keys:
     post:
       parameters:
@@ -869,6 +919,44 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}:
+    get:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Get organization information by ID
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}:
     get:
       parameters:
@@ -1129,6 +1217,44 @@ paths:
       security:
       - ApiUserKeyAuth: []
       - ApiKeyAuth: []
+  /v1/organizations/{organization_id}/users:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUsersResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Get all users in an organization
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -3241,9 +3367,7 @@ components:
       type: object
       properties:
         first_name:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The first name of the user
           example: John
         middle_name:
@@ -3253,9 +3377,7 @@ components:
           description: The middle name of the user
           example: Hoover
         last_name:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The last name of the user
           example: Smith
     User:
@@ -3592,6 +3714,39 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserUpdateProfileRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: The first name of the user
+          example: John
+        middle_name:
+          type:
+          - string
+          - 'null'
+          description: The middle name of the user
+          example: Hoover
+        last_name:
+          type: string
+          description: The last name of the user
+          example: Smith
+    UserUpdateProfileResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The updated user profile
+          type:
+          - object
+          $ref: '#/components/schemas/UserProfile'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserApiKeyCreateRequest:
       type: object
       properties:
@@ -3654,22 +3809,22 @@ components:
     UserApplicationListRequest:
       type: object
       properties: {}
-    SamGovEntity:
+    SamGovEntityResponse:
       type: object
       properties:
         uei:
           type: string
-          description: Unique Entity Identifier from SAM.gov
-          example: ABCDEFGHIJK1
+          description: Unique Entity Identifier
+          example: 000123456789
         legal_business_name:
           type: string
-          description: Legal business name as registered in SAM.gov
-          example: Example Research Corporation
+          description: Legal business name from SAM.gov
+          example: Example Inc.
         expiration_date:
           type: string
           format: date
-          description: The expiration date of the SAM.gov registration
-          example: '2025-12-31'
+          description: SAM.gov registration expiration date
+          example: '2025-08-11'
     UserOrganization:
       type: object
       properties:
@@ -3687,7 +3842,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
+          - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
     UserApplicationCompetition:
       type: object
@@ -4114,6 +4269,38 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OrganizationData:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        sam_gov_entity:
+          description: SAM.gov entity information
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntityResponse'
+          - type: 'null'
+    OrganizationGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAttachmentNoLink:
       type: object
       properties:
@@ -4248,7 +4435,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
+          - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
     ApplicationGetResponseData:
       type: object
@@ -4487,6 +4674,78 @@ components:
             type:
             - object
             $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserRole:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+          example: Organization Admin
+        privileges:
+          type: array
+          description: List of privileges for this role
+          example:
+          - !!python/object/apply:src.constants.lookup_constants.Privilege
+            - manage_org_members
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    OrganizationMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: User unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type:
+          - string
+          - 'null'
+          description: User email from login.gov
+          example: user@example.com
+        roles:
+          type: array
+          description: User roles in this organization
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserRole'
+    OrganizationUsersResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organization members
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OrganizationMember'
         status_code:
           type: integer
           description: The HTTP status code

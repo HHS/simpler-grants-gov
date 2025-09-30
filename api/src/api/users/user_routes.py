@@ -34,6 +34,8 @@ from src.api.users.user_schemas import (
     UserSaveSearchResponseSchema,
     UserTokenLogoutResponseSchema,
     UserTokenRefreshResponseSchema,
+    UserUpdateProfileRequestSchema,
+    UserUpdateProfileResponseSchema,
     UserUpdateSavedSearchRequestSchema,
     UserUpdateSavedSearchResponseSchema,
 )
@@ -60,6 +62,7 @@ from src.services.users.login_gov_callback_handler import (
 )
 from src.services.users.rename_api_key import rename_api_key
 from src.services.users.update_saved_searches import update_saved_search
+from src.services.users.update_user_profile import update_user_profile
 
 logger = logging.getLogger(__name__)
 
@@ -577,3 +580,39 @@ def user_list_api_keys(
         api_keys = get_user_api_keys(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=api_keys)
+
+
+@user_blueprint.put("/<uuid:user_id>/profile")
+@user_blueprint.input(UserUpdateProfileRequestSchema, location="json")
+@user_blueprint.output(UserUpdateProfileResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_profile_update(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("PUT /v1/users/:user_id/profile")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        updated_user_profile = update_user_profile(db_session, user_id, json_data)
+
+    logger.info(
+        "Updated profile for user",
+        extra={
+            "user_id": user_id,
+            "user_profile_id": updated_user_profile.user_profile_id,
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=updated_user_profile)

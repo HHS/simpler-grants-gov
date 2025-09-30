@@ -2,11 +2,11 @@ from typing import Any
 
 from marshmallow import pre_dump
 
-from src.api.application_alpha.application_schemas import SamGovEntitySchema
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunitySearchRequestV1Schema,
     SavedOpportunityResponseV1Schema,
 )
+from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ApplicationStatus, ExternalUserType
@@ -25,7 +25,7 @@ class UserTokenHeaderSchema(Schema):
 
 class UserProfile(Schema):
     first_name = fields.String(
-        allow_none=True,
+        allow_none=False,
         metadata={
             "description": "The first name of the user",
             "example": "John",
@@ -39,7 +39,7 @@ class UserProfile(Schema):
         },
     )
     last_name = fields.String(
-        allow_none=True,
+        allow_none=False,
         metadata={
             "description": "The last name of the user",
             "example": "Smith",
@@ -224,7 +224,7 @@ class UserOrganizationSchema(Schema):
         }
     )
     sam_gov_entity = fields.Nested(
-        SamGovEntitySchema,
+        SamGovEntityResponseSchema,
         allow_none=True,
         metadata={"description": "SAM.gov entity information for the organization"},
     )
@@ -381,3 +381,11 @@ class UserApiKeyListResponseSchema(AbstractResponseSchema):
         fields.Nested(UserApiKeySchema),
         metadata={"description": "List of API keys for the user"},
     )
+
+
+class UserUpdateProfileRequestSchema(UserProfile):
+    pass
+
+
+class UserUpdateProfileResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(UserProfile, metadata={"description": "The updated user profile"})
