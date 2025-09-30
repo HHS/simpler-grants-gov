@@ -7,12 +7,16 @@ from src.api import response
 from src.api.organizations_v1.organization_blueprint import organization_blueprint
 from src.api.organizations_v1.organization_schemas import (
     OrganizationGetResponseSchema,
+    OrganizationListRolesResponseSchema,
     OrganizationUsersResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.list_organization_roles import (
+    get_organization_roles_and_verify_access,
+)
 from src.services.organizations_v1.organization_users_list import (
     get_organization_users_and_verify_access,
 )
@@ -69,3 +73,25 @@ def organization_users_list(db_session: db.Session, organization_id: UUID) -> re
         )
 
     return response.ApiResponse(message="Success", data=users)
+
+
+@organization_blueprint.post("/<uuid:organization_id>/roles/list")
+@organization_blueprint.output(OrganizationListRolesResponseSchema)
+@organization_blueprint.doc(responses=[200, 401, 403, 404])
+@organization_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def organization_list_roles(db_session: db.Session, organization_id: UUID) -> response.ApiResponse:
+    """List organization roles"""
+    add_extra_data_to_current_request_logs({"organization_id": organization_id})
+    logger.info("GET /v1/organizations/:organization_id/roles/list")
+
+    # Get authenticated user
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    with db_session.begin():
+        db_session.add(user_token_session)
+        roles = get_organization_roles_and_verify_access(
+            db_session, user_token_session.user, organization_id
+        )
+
+    return response.ApiResponse(message="Success", data=roles)
