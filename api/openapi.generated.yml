@@ -1255,6 +1255,44 @@ paths:
       security:
       - ApiUserKeyAuth: []
       - ApiKeyAuth: []
+  /v1/organizations/{organization_id}/users:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUsersResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Get all users in an organization
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -4814,6 +4852,78 @@ components:
             type:
             - object
             $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserRole:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+          example: Organization Admin
+        privileges:
+          type: array
+          description: List of privileges for this role
+          example:
+          - !!python/object/apply:src.constants.lookup_constants.Privilege
+            - manage_org_members
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    OrganizationMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: User unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type:
+          - string
+          - 'null'
+          description: User email from login.gov
+          example: user@example.com
+        roles:
+          type: array
+          description: User roles in this organization
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserRole'
+    OrganizationUsersResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organization members
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OrganizationMember'
         status_code:
           type: integer
           description: The HTTP status code
