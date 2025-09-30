@@ -118,5 +118,24 @@ describe("AuthorizationGate", () => {
     expect(screen.getByText("firstResource")).toBeInTheDocument();
     expect(screen.getByText("some resolved value")).toBeInTheDocument();
   });
-  // it("renders children when all passed permissions are satisfied", async () => {});
+  it("renders children when all passed permissions are satisfied", async () => {
+    mockGetUserPrivileges.mockResolvedValue(fakeUserPrivilegesResponse);
+    const component = await AuthorizationGate({
+      children: <div>HELLO</div>,
+      onUnauthorized: mockOnUnauthorized,
+      requiredPrivileges: [
+        {
+          resourceId: "1",
+          privilege: "modify_organization",
+        },
+        {
+          resourceId: "2",
+          privilege: "read_application",
+        },
+      ],
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).not.toHaveBeenCalled();
+    expect(screen.getByText("HELLO")).toBeInTheDocument();
+  });
 });
