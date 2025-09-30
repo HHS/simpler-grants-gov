@@ -23,10 +23,6 @@ export type UserRole = {
   role_name: string;
   privileges: string[];
 };
-// export type ResourceUserRole<T_ID, T_UR> = {
-//   [T_ID]: string;
-//   [T_UR]: UserRole[];
-// }
 
 export type UserPrivilegesResponse = {
   user_id: string;

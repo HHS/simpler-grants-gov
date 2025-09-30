@@ -11,7 +11,13 @@ import {
   UserPrivilegesResponse,
 } from "src/types/UserTypes";
 
-import { PropsWithChildren, ReactNode } from "react";
+import {
+  cloneElement,
+  JSXElementConstructor,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+} from "react";
 import { Alert } from "@trussworks/react-uswds";
 
 import { UnauthenticatedMessage } from "./UnauthenticatedMessage";
@@ -124,9 +130,20 @@ export async function AuthorizationGate({
         (all, resource) => ({ ...all, ...resource }),
         {},
       );
+      // assumes any immediate children of the gate that want to accept fetchedResources via props
+      // have an optional `fetchedResources` prop in place that can accept the added data here
+      const childrenWithResources = children
+        ? cloneElement(
+            children as ReactElement<
+              { fetchedResources?: object },
+              string | JSXElementConstructor<unknown>
+            >,
+            { fetchedResources: allResources },
+          )
+        : children;
       return (
         <FetchedResourcesProvider value={allResources}>
-          {children}
+          {childrenWithResources}
         </FetchedResourcesProvider>
       );
     } catch (e) {
@@ -137,7 +154,6 @@ export async function AuthorizationGate({
       return onError(error);
     }
   }
-
   // on authorized, render children
   return children;
 }
