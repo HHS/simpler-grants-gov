@@ -26,6 +26,7 @@ def get_organization_roles(db_session: db.Session) -> Sequence[Role]:
         select(Role)
         .join(LinkRoleRoleType)
         .where(LinkRoleRoleType.role_type == RoleType.ORGANIZATION)
+        .where(Role.is_core.is_(True))
     )
 
     roles = db_session.execute(stmt).scalars().all()

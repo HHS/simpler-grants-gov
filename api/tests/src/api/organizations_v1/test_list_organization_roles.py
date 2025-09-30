@@ -8,13 +8,11 @@ from tests.src.db.models.factories import OrganizationFactory
 
 def test_list_organization_roles(client, db_session, enable_factory_create):
     """Test getting organization with required Privilege"""
-
     user, organization, token = create_user_in_org(
         privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
         db_session=db_session,
         is_organization_owner=True,
     )
-
     # Make request
     resp = client.post(
         f"/v1/organizations/{organization.organization_id}/roles/list",
