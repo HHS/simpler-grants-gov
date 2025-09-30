@@ -4678,7 +4678,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    OrganizationUserRole:
+    UserRole:
       type: object
       properties:
         role_id:
@@ -4694,9 +4694,23 @@ components:
           type: array
           description: List of privileges for this role
           example:
-          - manage_org_membership
+          - !!python/object/apply:src.constants.lookup_constants.Privilege
+            - manage_org_members
           items:
-            type: string
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
     OrganizationMember:
       type: object
       properties:
@@ -4717,7 +4731,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/OrganizationUserRole'
+            $ref: '#/components/schemas/UserRole'
     OrganizationUsersResponse:
       type: object
       properties:
