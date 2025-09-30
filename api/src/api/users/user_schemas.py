@@ -397,7 +397,7 @@ class UserUpdateProfileResponseSchema(AbstractResponseSchema):
     data = fields.Nested(UserProfile, metadata={"description": "The updated user profile"})
 
 
-class UserRoleSchema(Schema):
+class RoleSchema(Schema):
     """Schema for user role and privileges within a resource."""
 
     role_id = fields.String(metadata={"description": "The internal ID of a role"})
@@ -455,7 +455,7 @@ class UserOrganization(Schema):
     )
     organization_user_roles = fields.List(
         fields.Nested(
-            UserRoleSchema,
+            RoleSchema,
             metadata={"description": "Roles the user has for this organization"},
         )
     )
@@ -469,7 +469,7 @@ class UserApplication(Schema):
     )
     application_user_roles = fields.List(
         fields.Nested(
-            UserRoleSchema,
+            RoleSchema,
             metadata={"description": "Roles the user has for this application"},
         )
     )
@@ -483,7 +483,7 @@ class UserAgency(Schema):
     )
     agency_user_roles = fields.List(
         fields.Nested(
-            UserRoleSchema, metadata={"description": "Roles the user has for this agency"}
+            RoleSchema, metadata={"description": "Roles the user has for this agency"}
         )
     )
 
@@ -514,7 +514,7 @@ class GetRolesAndPrivilegesResponseSchema(Schema):
 
     internal_user_roles = fields.List(
         fields.Nested(
-            UserRoleSchema,
+            RoleSchema,
             metadata={"description": "List of roles and the user's roles & privileges in each"},
         ),
     )
