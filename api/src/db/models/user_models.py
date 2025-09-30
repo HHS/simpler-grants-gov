@@ -312,7 +312,7 @@ class Role(ApiSchemaTable, TimestampMixin):
     is_core: Mapped[bool] = mapped_column(default=False)
 
     link_privileges: Mapped[list["LinkRolePrivilege"]] = relationship(
-        back_populates="role", uselist=True, cascade="all, delete-orphan"
+        back_populates="role", uselist=True, cascade="all, delete-orphan", lazy="selectin"
     )
     link_role_types: Mapped[list["LinkRoleRoleType"]] = relationship(
         back_populates="role", uselist=True, cascade="all, delete-orphan"
