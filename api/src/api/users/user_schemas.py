@@ -482,9 +482,7 @@ class UserAgency(Schema):
         GetUserRolesAndPrivilegesAgencySchema, metadata={"description": "Agency details"}
     )
     agency_user_roles = fields.List(
-        fields.Nested(
-            RoleSchema, metadata={"description": "Roles the user has for this agency"}
-        )
+        fields.Nested(RoleSchema, metadata={"description": "Roles the user has for this agency"})
     )
 
 
