@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { ExternalRoutes } from "src/constants/routes";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
@@ -68,9 +69,6 @@ const NavLink = ({
   );
 };
 
-const wikiLink = "https://wiki.simpler.grants.gov/";
-const forumLink = "https://forum.simpler.grants.gov/";
-
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
@@ -114,8 +112,8 @@ const NavLinks = ({
           ...(showDeveloperPortal
             ? [{ text: t("developers"), href: "/developer" }]
             : []),
-          { text: t("wiki"), href: wikiLink },
-          { text: t("forum"), href: forumLink },
+          { text: t("wiki"), href: ExternalRoutes.WIKI },
+          { text: t("forum"), href: ExternalRoutes.FORUM },
         ],
       },
     ];
