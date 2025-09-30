@@ -1336,6 +1336,44 @@ paths:
               $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/roles/list:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListRolesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: List organization roles
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/api-keys/{api_key_id}:
     put:
       parameters:
@@ -4882,6 +4920,51 @@ components:
             type:
             - object
             $ref: '#/components/schemas/SavedOpportunityResponseV1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    Role:
+      type: object
+      properties:
+        role_id:
+          type: string
+          description: The internal ID of a role
+        role_name:
+          type: string
+          description: The name of the role
+        privileges:
+          type: array
+          items:
+            description: Privileges for the role
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    OrganizationListRolesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: Role information
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
         status_code:
           type: integer
           description: The HTTP status code
