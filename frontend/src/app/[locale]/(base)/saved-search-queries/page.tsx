@@ -17,32 +17,19 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+import { AuthorizationGate } from "src/components/user/AuthorizationGate";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const NoSavedSearches = () => {
-  const t = useTranslations("SavedSearches");
-  return (
-    <div className="grid-container display-flex">
-      <USWDSIcon
-        name="filter_list"
-        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
-      />
-      <div className="margin-top-2 grid-col-11">
-        <p>{t("noSavedCTAParagraphOne")}</p>
-        <p>{t("noSavedCTAParagraphTwo")}</p>
-        <p>
-          <Link href="/search" className="usa-button">
-            {t("searchButton")}
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
-};
+const formatSavedSearches = (savedSearches) =>
+  savedSearches.map((search) => ({
+    searchParams: searchToQueryParams(search.search_query),
+    name: search.name,
+    id: search.saved_search_id,
+  }));
 
 export default async function SavedSearchQueries({
   params,
@@ -60,20 +47,20 @@ export default async function SavedSearchQueries({
     {} as { [key in ValidSearchQueryParam]: string },
   );
 
-  try {
-    savedSearches = await fetchSavedSearches();
-  } catch (e) {
-    return (
-      <>
-        <GridContainer>
-          <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-            {t("heading")}
-          </h1>
-        </GridContainer>
-        <ServerErrorAlert callToAction={t("error")} />
-      </>
-    );
-  }
+  // try {
+  //   savedSearches = await fetchSavedSearches();
+  // } catch (e) {
+  //   return (
+  //     <>
+  //       <GridContainer>
+  //         <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
+  //           {t("heading")}
+  //         </h1>
+  //       </GridContainer>
+  //       <ServerErrorAlert callToAction={t("error")} />
+  //     </>
+  //   );
+  // }
 
   try {
     const agencies = await performAgencySearch();
@@ -82,11 +69,11 @@ export default async function SavedSearchQueries({
     console.error("Unable to fetch agencies list for saved search display", e);
   }
 
-  const formattedSavedSearches = savedSearches.map((search) => ({
-    searchParams: searchToQueryParams(search.search_query),
-    name: search.name,
-    id: search.saved_search_id,
-  }));
+  // const formattedSavedSearches = savedSearches.map((search) => ({
+  //   searchParams: searchToQueryParams(search.search_query),
+  //   name: search.name,
+  //   id: search.saved_search_id,
+  // }));
 
   return (
     <>
@@ -97,18 +84,44 @@ export default async function SavedSearchQueries({
         </h1>
       </GridContainer>
       <div className="padding-y-5">
-        {savedSearches.length > 0 ? (
+        <AuthorizationGate
+          resourcePromises={{
+            savedSearches: fetchSavedSearches().then(formatSavedSearches),
+          }}
+          onUnauthorized={() => <div>oops unauthorized</div>}
+        >
           <SavedSearchesList
-            savedSearches={formattedSavedSearches}
             paramDisplayMapping={paramDisplayMapping}
             editText={t("edit")}
             deleteText={t("delete")}
             agencyOptions={agencyOptions}
           />
-        ) : (
-          <NoSavedSearches />
-        )}
+        </AuthorizationGate>
       </div>
     </>
   );
+
+  // return (
+  //   <>
+  //     <GridContainer>
+  //       <Breadcrumbs breadcrumbList={SAVED_SEARCHES_CRUMBS} />
+  //       <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
+  //         {t("heading")}
+  //       </h1>
+  //     </GridContainer>
+  //     <div className="padding-y-5">
+  //       {savedSearches.length > 0 ? (
+  //         <SavedSearchesList
+  //           savedSearches={formattedSavedSearches}
+  //           paramDisplayMapping={paramDisplayMapping}
+  //           editText={t("edit")}
+  //           deleteText={t("delete")}
+  //           agencyOptions={agencyOptions}
+  //         />
+  //       ) : (
+  //         <NoSavedSearches />
+  //       )}
+  //     </div>
+  //   </>
+  // );
 }

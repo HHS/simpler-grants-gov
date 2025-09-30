@@ -1,19 +1,20 @@
 "server only";
+
 import {
   fetchUserWithMethod,
   postUserLogout,
-
-  // fetchUserWithMethod} from "src/services/fetch/fetchers/fetchers";
-import { UserPrivilegesResponse } from "src/types/UserTypes";
-
-import { DynamicUserDetails, UserDetail } from "src/types/userTypes";
+} from "src/services/fetch/fetchers/fetchers";
+import {
+  DynamicUserDetails,
+  UserDetail,
+  UserPrivilegesResponse,
+} from "src/types/userTypes";
 import { fakeUser } from "src/utils/testing/fixtures";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
   return postUserLogout({ additionalHeaders: jwtAuthHeader });
 };
-
 
 export const getUserPrivileges = async (
   token: string,
@@ -28,7 +29,7 @@ export const getUserPrivileges = async (
   });
   const json = (await resp.json()) as { data: UserPrivilegesResponse };
   return json.data;
-}
+};
 export const getUserDetails = async (
   _token: string,
   _userId: string,

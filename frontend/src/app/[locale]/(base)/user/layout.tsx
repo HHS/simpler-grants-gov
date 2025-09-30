@@ -20,3 +20,19 @@ export async function generateMetadata({
 export default function UserLayout({ children }: LayoutProps) {
   return <AuthenticationGate>{children}</AuthenticationGate>;
 }
+
+// export default async function UserLayout({ children }: LayoutProps) {
+//   const session = await getSession();
+//   if (!session) {
+//     return <div>no session</div>;
+//   }
+//   const userDetailsPromise = getUserDetails(session.token, session.user_id);
+//   return (
+//     <AuthorizationGate
+//       resourcePromises={{ userDetails: userDetailsPromise }}
+//       onUnauthorized={() => <div>not authorized!</div>}
+//     >
+//       {children}
+//     </AuthorizationGate>
+//   );
+// }

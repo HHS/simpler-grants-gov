@@ -1,6 +1,7 @@
 "use client";
 
 import { userProfileAction } from "src/app/[locale]/(base)/user/account/actions";
+import { useFetchedResources } from "src/hooks/useFetchedResources";
 import { UserDetail, UserProfileValidationErrors } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -18,8 +19,11 @@ import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
 const UserProfileValidationError =
   ConditionalFormActionError<UserProfileValidationErrors>;
 
-export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
+// export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
+export function UserProfileForm() {
   const t = useTranslations("UserAccount");
+
+  const { userDetails } = useFetchedResources();
 
   const [state, formAction, isPending] = useActionState(userProfileAction, {
     validationErrors: {},

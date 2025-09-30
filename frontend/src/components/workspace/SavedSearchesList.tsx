@@ -12,6 +12,7 @@ import {
   optionsForSearchParamKey,
 } from "src/utils/search/filterUtils";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -19,6 +20,27 @@ import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSear
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 
 type ParamMapping = { [key in ValidSearchQueryParam]: string };
+
+const NoSavedSearches = () => {
+  const t = useTranslations("SavedSearches");
+  return (
+    <div className="grid-container display-flex">
+      <USWDSIcon
+        name="filter_list"
+        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
+      />
+      <div className="margin-top-2 grid-col-11">
+        <p>{t("noSavedCTAParagraphOne")}</p>
+        <p>{t("noSavedCTAParagraphTwo")}</p>
+        <p>
+          <Link href="/search" className="usa-button">
+            {t("searchButton")}
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const toSavedSearchFilterDisplayValues = (
   mapping: ParamMapping,
@@ -54,22 +76,28 @@ const toSavedSearchFilterDisplayValues = (
 };
 
 export const SavedSearchesList = ({
-  savedSearches,
+  // savedSearches,
+  fetchedResources,
   paramDisplayMapping,
   editText,
   deleteText,
   agencyOptions,
 }: {
-  savedSearches: {
-    name: string;
-    id: string;
-    searchParams: ValidSearchQueryParamData;
-  }[];
+  // savedSearches: {
+  //   name: string;
+  //   id: string;
+  //   searchParams: ValidSearchQueryParamData;
+  // }[];
+  fetchedResources?: object;
   paramDisplayMapping: ParamMapping;
   editText: string;
   deleteText: string;
   agencyOptions: FilterOption[];
 }) => {
+  if (!fetchedResources?.savedSearches?.length) {
+    return <NoSavedSearches />;
+  }
+  const { savedSearches } = fetchedResources;
   return (
     <ul className="usa-list--unstyled grid-container">
       {savedSearches.map((savedSearch) => (
