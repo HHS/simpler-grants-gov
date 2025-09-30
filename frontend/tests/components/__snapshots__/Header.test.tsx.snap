@@ -258,7 +258,6 @@ exports[`Header About renders About submenu 1`] = `
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
-                Sign out
                 <svg
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
@@ -268,6 +267,7 @@ exports[`Header About renders About submenu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
+                Sign out
               </a>
             </li>
           </ul>
@@ -769,7 +769,6 @@ exports[`Header About renders Community submenu 1`] = `
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
-                Sign out
                 <svg
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
@@ -779,6 +778,7 @@ exports[`Header About renders Community submenu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
+                Sign out
               </a>
             </li>
           </ul>
@@ -1280,7 +1280,6 @@ exports[`Header renders Header navbar menu 1`] = `
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
-                Sign out
                 <svg
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
@@ -1290,6 +1289,7 @@ exports[`Header renders Header navbar menu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
+                Sign out
               </a>
             </li>
           </ul>
