@@ -4716,7 +4716,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    UserRole:
+    Role:
       type: object
       properties:
         role_id:
@@ -4769,7 +4769,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/UserRole'
+            $ref: '#/components/schemas/Role'
     OrganizationUsersResponse:
       type: object
       properties:
@@ -4924,33 +4924,6 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    Role:
-      type: object
-      properties:
-        role_id:
-          type: string
-          description: The internal ID of a role
-        role_name:
-          type: string
-          description: The name of the role
-        privileges:
-          type: array
-          items:
-            description: Privileges for the role
-            enum:
-            - manage_org_members
-            - manage_org_admin_members
-            - view_org_membership
-            - start_application
-            - list_application
-            - view_application
-            - modify_application
-            - submit_application
-            - update_form
-            - manage_agency_members
-            - get_submitted_applications
-            type:
-            - string
     OrganizationListRolesResponse:
       type: object
       properties:
