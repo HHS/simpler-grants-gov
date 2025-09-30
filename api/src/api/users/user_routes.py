@@ -622,7 +622,7 @@ def user_profile_update(
 
 @user_blueprint.post("/<uuid:user_id>/privileges")
 @user_blueprint.output(UserGetRolesAndPrivilegesResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.doc(responses=[200, 401, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
