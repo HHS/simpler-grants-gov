@@ -1,5 +1,6 @@
 import { ApiRequestError } from "src/errors";
 import { useFetchedResources } from "src/hooks/useFetchedResources";
+import { fakeUserPrivilegesResponse } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { render, screen } from "tests/react-utils";
 
@@ -10,6 +11,7 @@ import { AuthorizationGate } from "src/components/user/AuthorizationGate";
 const mockGetSession = jest.fn();
 const mockOnUnauthorized = jest.fn();
 const mockOnUnauthenticated = jest.fn();
+const mockGetUserPrivileges = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => mockGetSession(),
@@ -18,6 +20,10 @@ jest.mock("src/services/auth/session", () => ({
 jest.mock("next-intl", () => ({
   ...jest.requireActual<typeof import("next-intl")>("next-intl"),
   useTranslations: () => useTranslationsMock(),
+}));
+
+jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
+  getUserPrivileges: () => mockGetUserPrivileges() as unknown,
 }));
 
 describe("AuthorizationGate", () => {
@@ -76,13 +82,14 @@ describe("AuthorizationGate", () => {
     expect(mockOnError).toHaveBeenCalledWith(fakeError);
   });
   it("runs onUnauthorized handler if any passed permissions are not satisfied by fetched user permissions", async () => {
+    mockGetUserPrivileges.mockResolvedValue(fakeUserPrivilegesResponse);
     const component = await AuthorizationGate({
       children: <div>HELLO</div>,
       onUnauthorized: mockOnUnauthorized,
-      requiredPriviliges: [
+      requiredPrivileges: [
         {
-          resourceId: "1",
-          permissions: "modify_application",
+          resourceId: "2",
+          privilege: "modify_application",
         },
       ],
     });
