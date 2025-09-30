@@ -32,11 +32,11 @@ const WorkspaceNavLink = () => {
       className="display-flex usa-button usa-button--unstyled text-no-underline"
       href="/user/workspace"
     >
-      {t("workspace")}
       <USWDSIcon
         name="notifications_active"
         className="usa-icon--size-3 display-block"
       />
+      {t("workspace")}
     </Link>
   );
 };
@@ -100,8 +100,8 @@ const LogoutNavItem = () => {
       // eslint-disable-next-line
       onClick={() => logout()}
     >
-      {t("logout")}
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
+      {t("logout")}
     </a>
   );
 };
