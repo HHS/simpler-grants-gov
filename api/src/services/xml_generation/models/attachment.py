@@ -10,6 +10,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from src.util import file_util
 
+HASH_ALGORITHM = "SHA-1"
+
 
 class AttachmentFile(BaseModel):
     """Model for a single attachment file."""
@@ -20,7 +22,6 @@ class AttachmentFile(BaseModel):
     mime_type: str = Field(..., description="MIME type of the file")
     file_location: str = Field(..., description="URI/path to the file location")
     hash_value: str = Field(..., description="Base64-encoded SHA-1 hash of the file")
-    hash_algorithm: str = Field(default="SHA-1", description="Hash algorithm used")
 
     @field_validator("mime_type")
     @classmethod
@@ -30,23 +31,21 @@ class AttachmentFile(BaseModel):
             raise ValueError("MIME type must contain a slash (e.g., 'application/pdf')")
         return v
 
-    @field_validator("hash_algorithm")
-    @classmethod
-    def validate_hash_algorithm(cls, v: str) -> str:
-        """Ensure hash algorithm is SHA-1."""
-        if v != "SHA-1":
-            raise ValueError("Only SHA-1 hash algorithm is supported by Grants.gov")
-        return v
-
     @classmethod
     def from_file_path(
-        cls, file_path: str | Path, file_location: str | None = None
+        cls,
+        file_path: str | Path,
+        file_location: str | None = None,
+        mime_type: str | None = None,
     ) -> "AttachmentFile":
         """Create AttachmentFile from a file path.
 
         Args:
             file_path: Path to the file
             file_location: Custom file location URI (defaults to relative path)
+            mime_type: MIME type of the file. If provided, this will be used instead
+                      of guessing from file extension. This should be preferred when
+                      available from the application attachment table in the database.
 
         Returns:
             AttachmentFile instance with computed hash and MIME type
@@ -59,10 +58,12 @@ class AttachmentFile(BaseModel):
         # Generate base64-encoded SHA-1 hash
         hash_value = cls.compute_base64_sha1(file_path)
 
-        # Determine MIME type
-        mime_type, _ = mimetypes.guess_type(str(file_path))
+        # Determine MIME type - prefer provided mime_type from database
         if mime_type is None:
-            mime_type = "application/octet-stream"  # Default fallback
+            # Fall back to guessing from file extension
+            mime_type, _ = mimetypes.guess_type(str(file_path))
+            if mime_type is None:
+                mime_type = "application/octet-stream"  # Default fallback
 
         # Use provided file_location or generate relative path
         if file_location is None:
@@ -73,7 +74,6 @@ class AttachmentFile(BaseModel):
             mime_type=mime_type,
             file_location=file_location,
             hash_value=hash_value,
-            hash_algorithm="SHA-1",
         )
 
     @staticmethod
@@ -129,16 +129,6 @@ class AttachmentGroup(BaseModel):
         if len(self.attached_files) >= 100:
             raise ValueError("Cannot add more than 100 files to an attachment group")
         self.attached_files.append(attachment_file)
-
-    def add_file_from_path(self, file_path: str | Path, file_location: str | None = None) -> None:
-        """Add a file from a file path.
-
-        Args:
-            file_path: Path to the file
-            file_location: Custom file location URI
-        """
-        attachment_file = AttachmentFile.from_file_path(file_path, file_location)
-        self.add_file(attachment_file)
 
 
 class AttachmentData(BaseModel):
@@ -197,7 +187,7 @@ class AttachmentData(BaseModel):
             "MimeType": attachment.mime_type,
             "FileLocation": {"@href": attachment.file_location},
             "HashValue": {
-                "@hashAlgorithm": attachment.hash_algorithm,
+                "@hashAlgorithm": HASH_ALGORITHM,
                 "#text": attachment.hash_value,
             },
         }

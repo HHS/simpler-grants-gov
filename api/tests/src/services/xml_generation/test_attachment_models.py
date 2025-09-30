@@ -23,14 +23,12 @@ class TestAttachmentFile:
             mime_type="application/pdf",
             file_location="./attachments/test_document.pdf",
             hash_value="aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=",
-            hash_algorithm="SHA-1",
         )
 
         assert attachment.filename == "test_document.pdf"
         assert attachment.mime_type == "application/pdf"
         assert attachment.file_location == "./attachments/test_document.pdf"
         assert attachment.hash_value == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
-        assert attachment.hash_algorithm == "SHA-1"
 
     def test_attachment_file_invalid_mime_type(self):
         """Test AttachmentFile with invalid MIME type."""
@@ -40,35 +38,9 @@ class TestAttachmentFile:
                 mime_type="invalid_mime_type",  # Missing slash
                 file_location="./test.pdf",
                 hash_value="validhash123",
-                hash_algorithm="SHA-1",
             )
 
         assert "MIME type must contain a slash" in str(exc_info.value)
-
-    def test_attachment_file_invalid_hash_algorithm(self):
-        """Test AttachmentFile with invalid hash algorithm."""
-        with pytest.raises(ValidationError) as exc_info:
-            AttachmentFile(
-                filename="test.pdf",
-                mime_type="application/pdf",
-                file_location="./test.pdf",
-                hash_value="validhash123",
-                hash_algorithm="MD5",  # Not SHA-1
-            )
-
-        assert "Only SHA-1 hash algorithm is supported" in str(exc_info.value)
-
-    def test_attachment_file_default_hash_algorithm(self):
-        """Test AttachmentFile uses SHA-1 as default hash algorithm."""
-        attachment = AttachmentFile(
-            filename="test.pdf",
-            mime_type="application/pdf",
-            file_location="./test.pdf",
-            hash_value="validhash123",
-            # hash_algorithm not specified - should default to SHA-1
-        )
-
-        assert attachment.hash_algorithm == "SHA-1"
 
     def test_compute_base64_sha1_from_content(self):
         """Test computing base64-encoded SHA-1 from content."""
@@ -98,11 +70,26 @@ class TestAttachmentFile:
         assert attachment.filename == temp_file_path.name
         assert attachment.mime_type == "application/pdf"  # Based on .pdf suffix
         assert attachment.file_location == f"./attachments/{temp_file_path.name}"
-        assert attachment.hash_algorithm == "SHA-1"
 
         # Verify hash is correct
         expected_hash = AttachmentFile.compute_base64_sha1(temp_file_path)
         assert attachment.hash_value == expected_hash
+
+    def test_from_file_path_with_provided_mime_type(self, tmp_path):
+        """Test creating AttachmentFile with MIME type from database."""
+        test_content = b"Test file content"
+
+        # Create temp file using pytest's tmp_path fixture
+        temp_file_path = tmp_path / "document.xyz"  # Unknown extension
+        temp_file_path.write_bytes(test_content)
+
+        # Provide MIME type from database (preferred over guessing)
+        db_mime_type = "application/vnd.custom-format"
+        attachment = AttachmentFile.from_file_path(temp_file_path, mime_type=db_mime_type)
+
+        # Verify that the provided MIME type is used (not guessed)
+        assert attachment.mime_type == db_mime_type
+        assert attachment.filename == temp_file_path.name
 
     def test_from_file_path_with_custom_location(self, tmp_path):
         """Test creating AttachmentFile with custom file location."""
@@ -183,7 +170,7 @@ class TestAttachmentGroup:
         assert "Cannot add more than 100 files" in str(exc_info.value)
 
     def test_attachment_group_add_file_from_path(self, tmp_path):
-        """Test adding file from path to AttachmentGroup."""
+        """Test adding file from path to AttachmentGroup using from_file_path and add_file."""
         group = AttachmentGroup()
         test_content = b"Test content for group file"
 
@@ -191,7 +178,9 @@ class TestAttachmentGroup:
         temp_file_path = tmp_path / "test_document.docx"
         temp_file_path.write_bytes(test_content)
 
-        group.add_file_from_path(temp_file_path)
+        # Create attachment file and add to group
+        attachment_file = AttachmentFile.from_file_path(temp_file_path)
+        group.add_file(attachment_file)
 
         assert len(group.attached_files) == 1
         attachment = group.attached_files[0]

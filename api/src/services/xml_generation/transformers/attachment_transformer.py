@@ -4,7 +4,7 @@ from typing import Any
 
 from lxml import etree as lxml_etree
 
-from ..models.attachment import AttachmentFile, AttachmentGroup
+from ..models.attachment import HASH_ALGORITHM, AttachmentFile, AttachmentGroup
 
 
 class AttachmentTransformer:
@@ -179,7 +179,7 @@ class AttachmentTransformer:
             "MimeType": attachment_file.mime_type,
             "FileLocation": {"@href": attachment_file.file_location},
             "HashValue": {
-                "@hashAlgorithm": attachment_file.hash_algorithm,
+                "@hashAlgorithm": HASH_ALGORITHM,
                 "#text": attachment_file.hash_value,
             },
         }
