@@ -9,7 +9,10 @@ from src.services.organizations_v1.get_organization import get_organization_and_
 def get_organization_roles_and_verify_access(
     db_session: db.Session, user: User, organization_id: UUID
 ) -> list[Role]:
-    """Get all the roles for the organization specified"""
+    """Verifies that the user has access to the specified organization,
+    then returns the core roles associated with that organization.
+
+    Note: Currently only core (default) roles are returned, not custom roles."""
     # We are currently only grabbing the core roles
     get_organization_and_verify_access(db_session, user, organization_id)
     return get_organization_roles()
