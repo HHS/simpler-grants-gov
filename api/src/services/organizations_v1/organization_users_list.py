@@ -2,29 +2,29 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 
-def _fetch_organization_users(db_session: db.Session, organization_id: UUID) -> list[User]:
-    """Fetch all users in an organization with their roles and privileges eagerly loaded."""
+def _fetch_organization_users(
+    db_session: db.Session, organization_id: UUID
+) -> list[OrganizationUser]:
+    """Fetch all organization users with their roles and privileges eagerly loaded."""
     stmt = (
-        select(User)
-        .join(OrganizationUser)
+        select(OrganizationUser)
         .options(
-            # Only load the organization membership for the specific organization we're querying
-            joinedload(User.organizations.and_(OrganizationUser.organization_id == organization_id))
-            .joinedload(OrganizationUser.organization_user_roles)
-            .joinedload(OrganizationUserRole.role),
-            joinedload(User.linked_login_gov_external_user),
+            selectinload(OrganizationUser.user).selectinload(User.linked_login_gov_external_user),
+            selectinload(OrganizationUser.organization_user_roles).selectinload(
+                OrganizationUserRole.role
+            ),
         )
         .where(OrganizationUser.organization_id == organization_id)
     )
-    users = db_session.execute(stmt).scalars().unique().all()
-    return list(users)
+    org_users = db_session.execute(stmt).scalars().all()
+    return list(org_users)
 
 
 def get_organization_users_and_verify_access(
@@ -60,25 +60,20 @@ def get_organization_users(db_session: db.Session, organization_id: UUID) -> lis
     Returns:
         list[dict]: List of user data with roles and privileges
     """
-    users = _fetch_organization_users(db_session, organization_id)
+    org_users = _fetch_organization_users(db_session, organization_id)
 
     return [
         {
-            "user_id": user.user_id,
-            "email": (
-                user.linked_login_gov_external_user.email
-                if user.linked_login_gov_external_user
-                else None
-            ),
+            "user_id": org_user.user.user_id,
+            "email": org_user.user.email,
             "roles": [
                 {
                     "role_id": org_user_role.role.role_id,
                     "role_name": org_user_role.role.role_name,
                     "privileges": [priv.value for priv in org_user_role.role.privileges],
                 }
-                for org_user in user.organizations
                 for org_user_role in org_user.organization_user_roles
             ],
         }
-        for user in users
+        for org_user in org_users
     ]

@@ -1,5 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.shared_schema import UserRoleSchema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -32,27 +33,6 @@ class OrganizationDataSchema(Schema):
     )
 
 
-class OrganizationUserRoleSchema(Schema):
-    """Schema for user role information with privileges"""
-
-    role_id = fields.UUID(
-        metadata={
-            "description": "Role unique identifier",
-            "example": "123e4567-e89b-12d3-a456-426614174000",
-        }
-    )
-    role_name = fields.String(
-        metadata={"description": "Role name", "example": "Organization Admin"}
-    )
-    privileges = fields.List(
-        fields.String(),
-        metadata={
-            "description": "List of privileges for this role",
-            "example": ["manage_org_membership"],
-        },
-    )
-
-
 class OrganizationMemberSchema(Schema):
     """Schema for organization member information"""
 
@@ -67,7 +47,7 @@ class OrganizationMemberSchema(Schema):
         metadata={"description": "User email from login.gov", "example": "user@example.com"},
     )
     roles = fields.List(
-        fields.Nested(OrganizationUserRoleSchema),
+        fields.Nested(UserRoleSchema),
         metadata={"description": "User roles in this organization"},
     )
 
