@@ -32,6 +32,7 @@ from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 from src.services.common_grants.transformation import transform_validation_error_from_cg
+from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ def search_opportunities(
     search_client: search.SearchClient, json_data: dict
 ) -> tuple[OpportunitiesSearchResponseSchema, HTTPStatus]:
     """Search for opportunities based on the provided filters."""
-    add_extra_data_to_current_request_logs(json_data)
+    add_extra_data_to_current_request_logs(flatten_dict(json_data))
     logger.info("POST /common-grants/opportunities/search")
 
     try:
