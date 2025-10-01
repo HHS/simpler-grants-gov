@@ -1055,7 +1055,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 get_search_request(
                     close_date={
                         "start_date": (NOW + relativedelta(years=-10)).isoformat(),
-                        "end_date": "2019-12-01",
+                        "end_date": (NOW + relativedelta(years=-6)).isoformat(),
                     }
                 ),
                 [NASA_K12_DIVERSITY, DOC_SPACE_COAST],
