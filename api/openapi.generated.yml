@@ -4894,7 +4894,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    Role:
+    Role1:
       type: object
       properties:
         role_id:
@@ -4947,7 +4947,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/Role1'
     OrganizationUsersResponse:
       type: object
       properties:
@@ -5115,7 +5115,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/Role1'
         status_code:
           type: integer
           description: The HTTP status code
