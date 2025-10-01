@@ -555,9 +555,11 @@ export const fakeUser: UserDetail = {
 
 export const fakeUserPrivilegesResponse = {
   user_id: "1",
-  organization_user_roles: [
+  organization_users: [
     {
-      organization_id: "1",
+      organization: {
+        organization_id: "1",
+      },
       organization_user_roles: [
         {
           role_id: "1",
@@ -566,10 +568,24 @@ export const fakeUserPrivilegesResponse = {
         },
       ],
     },
-  ],
-  application_user_roles: [
     {
-      application_id: "2",
+      organization: {
+        organization_id: "4",
+      },
+      organization_user_roles: [
+        {
+          role_id: "4",
+          role_name: "role_4",
+          privileges: ["read_organization", "elucidate_organization"],
+        },
+      ],
+    },
+  ],
+  application_users: [
+    {
+      application: {
+        application_id: "1",
+      },
       application_user_roles: [
         {
           role_id: "2",
@@ -579,4 +595,54 @@ export const fakeUserPrivilegesResponse = {
       ],
     },
   ],
+  agency_users: [
+    {
+      agency: {
+        agency_id: "3",
+      },
+      agency_user_roles: [
+        {
+          role_id: "3",
+          role_name: "role_3",
+          privileges: ["read_agency", "be_agency", "ingest_agency"],
+        },
+      ],
+    },
+    {
+      agency: {
+        agency_id: "5",
+      },
+      agency_user_roles: [
+        {
+          role_id: "5",
+          role_name: "role_5",
+          privileges: ["excommunicate_agency"],
+        },
+      ],
+    },
+  ],
+  // organization_user_roles: [
+  //   {
+  //     organization_id: "1",
+  //     organization_user_roles: [
+  //       {
+  //         role_id: "1",
+  //         role_name: "role_1",
+  //         privileges: ["read_organization", "modify_organization"],
+  //       },
+  //     ],
+  //   },
+  // ],
+  // application_user_roles: [
+  //   {
+  //     application_id: "2",
+  //     application_user_roles: [
+  //       {
+  //         role_id: "2",
+  //         role_name: "role_2",
+  //         privileges: ["read_application"],
+  //       },
+  //     ],
+  //   },
+  // ],
 };

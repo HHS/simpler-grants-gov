@@ -5,11 +5,8 @@ import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
 import { getSession } from "src/services/auth/session";
 import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import {
-  UserPrivilegeDefinition,
-  UserPrivilegesDefinition,
-  UserPrivilegesResponse,
-} from "src/types/UserTypes";
+import { UserPrivilegeDefinition } from "src/types/UserTypes";
+import { checkPrivileges } from "src/utils/authUtils";
 
 import {
   cloneElement,
@@ -30,56 +27,13 @@ type AuthorizationGateProps = {
   resourcePromises?: { [resourceName: string]: Promise<unknown> };
 };
 
-const checkPrivileges = (
-  requiredPrivileges: UserPrivilegeDefinition[],
-  userPrivileges: UserPrivilegesResponse,
-): boolean => {
-  const extractedUserPrivileges = extractPrivileges(userPrivileges);
-  const privilegesSatisfied = requiredPrivileges.every((requiredPrivilege) => {
-    return extractedUserPrivileges.some((userPrivilege) => {
-      const hasBasePrivilege = userPrivilege.privileges.includes(
-        requiredPrivilege.privilege,
-      );
-      return requiredPrivilege.resourceId
-        ? requiredPrivilege.resourceId === userPrivilege.resourceId &&
-            hasBasePrivilege
-        : hasBasePrivilege;
-    });
-  });
-  return privilegesSatisfied;
-};
-
-const extractPrivileges = (
-  privilegesResponseData: UserPrivilegesResponse,
-): UserPrivilegesDefinition[] => {
-  const applicationPrivileges = privilegesResponseData.application_user_roles
-    .length
-    ? privilegesResponseData.application_user_roles.map(
-        ({ application_id, application_user_roles }) => ({
-          resourceId: application_id,
-          privileges: application_user_roles.reduce((acc, { privileges }) => {
-            return acc.concat(privileges);
-          }, [] as string[]),
-        }),
-      )
-    : [];
-
-  const organizationPrivileges = privilegesResponseData.organization_user_roles
-    .length
-    ? privilegesResponseData.organization_user_roles.map(
-        ({ organization_id, organization_user_roles }) => ({
-          resourceId: organization_id,
-          privileges: organization_user_roles.reduce((acc, { privileges }) => {
-            return acc.concat(privileges);
-          }, [] as string[]),
-        }),
-      )
-    : [];
-
-  return organizationPrivileges.concat(applicationPrivileges);
-};
-
-// will need to suspend any elements that are wrapped in this gate
+// will need to suspend any elements that are wrapped in this gate.
+// note that this supports gating on a single privilege or multiple privileges, where auth will
+// pass whenever any one of the required privileges is met (A OR B). This allows us to pass auth in the case
+// where a user has permissions to access an organization's application through application privileges
+// or organization privileges. In the future we can support (A AND B) situations (only pass auth if all
+// permissions are found) by, perhaps, allowing nested arrays of privilege definitions, or by accepting
+// a new "and/or" prop.
 export async function AuthorizationGate({
   children,
   onUnauthorized,
@@ -97,7 +51,7 @@ export async function AuthorizationGate({
   }
 
   // check privileges
-  if (requiredPrivileges && requiredPrivileges.length) {
+  if (requiredPrivileges) {
     const userPrivileges = await getUserPrivileges(
       session.token,
       session.user_id,

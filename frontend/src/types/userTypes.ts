@@ -8,8 +8,11 @@ export type Organization = {
   };
 };
 
+export type GatedResourceTypes = "application" | "organization" | "agency";
+
 export type UserPrivilegeDefinition = {
   resourceId?: string;
+  resourceType: GatedResourceTypes;
   privilege: string; // we can narrow this later
 };
 
@@ -24,16 +27,32 @@ export type UserRole = {
   privileges: string[];
 };
 
+export type OrganizationPrivilegesResponse = {
+  organization: {
+    organization_id: string;
+  };
+  organization_user_roles: UserRole[];
+};
+
+export type ApplicationPrivilegesResponse = {
+  application: {
+    application_id: string;
+  };
+  application_user_roles: UserRole[];
+};
+
+export type AgencyPrivilegesResponse = {
+  agency: {
+    agency_id: string;
+  };
+  agency_user_roles: UserRole[];
+};
+
 export type UserPrivilegesResponse = {
   user_id: string;
-  organization_user_roles: {
-    organization_id: string;
-    organization_user_roles: UserRole[];
-  }[];
-  application_user_roles: {
-    application_id: string;
-    application_user_roles: UserRole[];
-  }[];
+  organization_users: OrganizationPrivilegesResponse[];
+  application_users: ApplicationPrivilegesResponse[];
+  agency_users: AgencyPrivilegesResponse[];
 };
 
 export type UserProfileValidationErrors = {

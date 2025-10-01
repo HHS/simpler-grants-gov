@@ -89,6 +89,7 @@ describe("AuthorizationGate", () => {
       requiredPrivileges: [
         {
           resourceId: "2",
+          resourceType: "application",
           privilege: "modify_application",
         },
       ],
@@ -126,10 +127,12 @@ describe("AuthorizationGate", () => {
       requiredPrivileges: [
         {
           resourceId: "1",
+          resourceType: "organization",
           privilege: "modify_organization",
         },
         {
           resourceId: "2",
+          resourceType: "application",
           privilege: "read_application",
         },
       ],
