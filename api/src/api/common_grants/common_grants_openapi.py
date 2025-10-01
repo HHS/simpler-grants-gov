@@ -40,10 +40,10 @@ IMPLEMENTATION
 - `fix_schema_composition()`: Generic recursive function that fixes composition patterns
 """
 
-from typing import Any, Dict
+from typing import Any
 
 
-def transform_spec_composition_to_cg(spec: Dict[str, Any]) -> Dict[str, Any]:
+def transform_spec_composition_to_cg(spec: dict[str, Any]) -> dict[str, Any]:
     """Post-process the OpenAPI spec to match CommonGrants composition patterns."""
 
     # Fix response schema composition patterns
@@ -80,7 +80,7 @@ def transform_spec_composition_to_cg(spec: Dict[str, Any]) -> Dict[str, Any]:
     return spec
 
 
-def fix_schema_composition(schema: Dict[str, Any], all_schemas: Dict[str, Any]) -> Dict[str, Any]:
+def fix_schema_composition(schema: dict[str, Any], all_schemas: dict[str, Any]) -> dict[str, Any]:
     """
     Fix schema composition to match CommonGrants patterns.
     Recursively finds and fixes the problematic pattern: `type: [object] + allOf`
