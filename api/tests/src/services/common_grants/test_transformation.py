@@ -64,6 +64,7 @@ class TestTransformation:
                         )()
                     },
                 )()
+                self.summary = self.current_opportunity_summary.opportunity_summary
 
         opportunity = MockOpportunity()
 
@@ -155,6 +156,7 @@ class TestTransformation:
                             )()
                         },
                     )()
+                    self.summary = self.current_opportunity_summary.opportunity_summary
 
             opportunity = MockOpportunity(db_status)
             result = transform_opportunity_to_cg(opportunity)
@@ -175,6 +177,7 @@ class TestTransformation:
                     2024, 1, 1, 12, 0, 0
                 )  # Provide a default datetime instead of None
                 self.current_opportunity_summary = None
+                self.summary = None
 
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
@@ -224,6 +227,7 @@ class TestTransformation:
                         )()
                     },
                 )()
+                self.summary = self.current_opportunity_summary.opportunity_summary
 
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
@@ -264,6 +268,7 @@ class TestTransformation:
                         )()
                     },
                 )()
+                self.summary = self.current_opportunity_summary.opportunity_summary
 
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
@@ -299,6 +304,7 @@ class TestTransformation:
                         )()
                     },
                 )()
+                self.summary = self.current_opportunity_summary.opportunity_summary
 
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)

@@ -220,7 +220,7 @@ class TestGetOpportunityById:
         assert response.status_code == 404
         data = response.get_json()
         assert "message" in data
-        assert "The server cannot find the requested resource" in data["message"]
+        assert "Not Found" in data["message"]
 
     def test_opportunity_success(
         self, client: FlaskClient, enable_factory_create, db_session, api_auth_token

@@ -24,7 +24,7 @@ from pydantic import ValidationError
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import OpportunityStatus
-from src.db.models.opportunity_models import Opportunity, OpportunitySummary
+from src.db.models.opportunity_models import Opportunity
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -119,24 +119,6 @@ def transform_sorting_from_cg(cg_sort_by: OppSortBy) -> str:
     return v1_sort_by
 
 
-def _get_opportunity_summary(opportunity: Opportunity) -> OpportunitySummary | None:
-    """
-    Helper function to safely access the opportunity summary.
-
-    Args:
-        opportunity: The opportunity model
-
-    Returns:
-        The opportunity summary if available, None otherwise
-    """
-    if (
-        opportunity.current_opportunity_summary
-        and opportunity.current_opportunity_summary.opportunity_summary
-    ):
-        return opportunity.current_opportunity_summary.opportunity_summary
-    return None
-
-
 def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
     """
     Transform a date or datetime value to a date for CommonGrants format.
@@ -191,7 +173,7 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
         OpportunityBase: A CommonGrants Protocol model instance
     """
     # Extract opportunity summary
-    summary = _get_opportunity_summary(v1_opportunity)
+    summary = v1_opportunity.summary
 
     # Convert model to dict
     opp_data = {
