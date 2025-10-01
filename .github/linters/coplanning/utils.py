@@ -7,7 +7,6 @@ import json
 import logging
 import os
 import sys
-import urllib.parse
 import urllib.request
 
 # #######################################################
@@ -44,7 +43,8 @@ def get_env(name: str) -> str:
     """Get an environment variable and exit if it's not set."""
     value = os.environ.get(name)
     if not value:
-        err(f"{name} environment variable must be set")
+        err(f"{name} environment variable must be set", exit=True)
+        return ""  # For type checking, never reached due to sys.exit() in err()
     return value
 
 
@@ -72,11 +72,14 @@ def make_request(
         with urllib.request.urlopen(req) as response:
             return json.loads(response.read().decode())
     except urllib.request.HTTPError as e:
-        err(f"HTTP request failed: {e.code} - {e.reason}")
+        err(f"HTTP request failed: {e.code} - {e.reason}", exit=True)
+        return {}  # For type checking, never reached due to sys.exit() in err()
     except json.JSONDecodeError:
-        err("Failed to parse JSON response")
+        err("Failed to parse JSON response", exit=True)
+        return {}  # For type checking, never reached due to sys.exit() in err()
     except Exception as e:
-        err(f"Request failed: {e}")
+        err(f"Request failed: {e}", exit=True)
+        return {}  # For type checking, never reached due to sys.exit() in err()
 
 
 # #######################################################
