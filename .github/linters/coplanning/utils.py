@@ -95,37 +95,39 @@ def format_title(title: str) -> str:
 def format_post_description(
     url: str,
     description: str,
-    section: str | None = None,
+    sections: list[str],
 ) -> str:
-    """Format the post description by extracting content from a specific section or the entire description.
+    """Format the post description by extracting content from multiple sections.
 
     Args:
         url: The GitHub issue URL
         description: The issue description text
-        section: Optional section header to extract (e.g., "Description", "Context").
-                If None, extracts content between first and second ### headers.
-                If specified but not found, uses the entire description.
+        sections: List of section headers to extract (e.g., ["Summary", "Context"]).
+                 If specified sections not found, uses the entire description.
     """
-    # Set the appropriate pattern based on whether a section is specified
-    if section:
+    # Extract content from multiple sections
+    extracted_sections = []
+
+    for section in sections:
         pattern = rf"^###\s+{re.escape(section)}\s*\n+(?P<content>.*?)(?=\n###|\Z)"
-    else:
-        # Original behavior: extract text between first and second ### headers
-        pattern = r"^###\s+.*?\n+(?P<content>.*?)(?=\n###|\Z)"
+        match = re.search(pattern, description, re.DOTALL | re.MULTILINE)
 
-    # Single match block for both cases
-    match = re.search(pattern, description, re.DOTALL | re.MULTILINE)
+        if match:
+            # Extract and clean the matched content, stripping images and whitespace
+            extracted_text = match.group("content")
+            cleaned_text = re.sub(r"!\[.*?\]\(.*?\)", "", extracted_text).strip()
+            if cleaned_text:  # Only add non-empty sections
+                extracted_sections.append(f"### {section}\n{cleaned_text}")
 
-    if match:
-        # Extract and clean the matched content, stripping images and whitespace
-        extracted_text = match.group("content")
-        summary = re.sub(r"!\[.*?\]\(.*?\)", "", extracted_text).strip()
+    if extracted_sections:
+        # Join all sections with double newlines
+        summary = "\n\n".join(extracted_sections)
     else:
-        # No match found, use the entire description, stripping images and whitespace
+        # No sections found, use the entire description, stripping images and whitespace
         summary = re.sub(r"!\[.*?\]\(.*?\)", "", description).strip()
 
     # Format with GitHub link and summary
-    return f"{summary}\n\n**Technical details**\nFor more information, see the [GitHub issue]({url})"
+    return f"{summary}\n\n### Technical details\n\nFor more information, see the [GitHub issue]({url})"
 
 
 def format_issue_body(

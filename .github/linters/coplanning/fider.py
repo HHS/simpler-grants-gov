@@ -130,7 +130,7 @@ def update_post(
 def upsert_posts(
     github_issues: dict[str, GithubIssueData],
     fider_posts: dict[str, PostData],
-    issue_section: str = "Summary",
+    issue_sections: list[str],
     *,
     update_existing: bool = False,
     dry_run: bool = False,
@@ -151,7 +151,7 @@ def upsert_posts(
         formatted_description = format_post_description(
             issue_url,
             issue_data.body,
-            issue_section,
+            issue_sections,
         )
 
         if existing_post:
