@@ -82,7 +82,7 @@ class ListFormsTask(BaseFormTask):
                 [form.form_name, form.form_version, "n/a", "ALL"], divider=True
             )
 
-            update_cmd = get_update_cmd(self.environment, form_id, None)
+            update_cmd = get_update_cmd(self.environment, form_id)
 
             # Add a message to the out-of-date forms list so we can make it easier
             # to update those forms by generating the command with some messages for organization
@@ -97,10 +97,7 @@ class ListFormsTask(BaseFormTask):
             return
 
         # Make the local form a dict for easier comparison
-        # Note we don't have the form instruction ID configured locally
-        # so just reuse whatever was in the environment
-        form_instruction_id = get_form_instruction_id(env_form)
-        local_form = build_form_json(form, form_instruction_id)
+        local_form = build_form_json(form)
 
         # Diff the local and non-local forms
         results = diff_form(local_form, env_form)
@@ -125,7 +122,7 @@ class ListFormsTask(BaseFormTask):
                         f"Field {changed_field} will change from {existing_value} to {planned_value}"
                     )
 
-            update_cmd = get_update_cmd(self.environment, form_id, form_instruction_id)
+            update_cmd = get_update_cmd(self.environment, form_id)
             self.out_of_date_forms.extend([f"# {form_txt}\n", update_cmd, "\n---"])
 
     def print_outputs(self) -> None:
@@ -143,31 +140,6 @@ class ListFormsTask(BaseFormTask):
             for out_of_date in self.out_of_date_forms:
                 print(out_of_date)
             print()
-
-
-def get_form_from_env(url: str, headers: dict, form_id: str, environment: str) -> dict | None:
-    """Query the GET form endpoint"""
-    resp = requests.get(url, headers=headers, timeout=5)
-
-    if resp.status_code == 404:
-        logger.info(f"Form {form_id} does not yet exist in {environment}")
-        return None
-
-    if resp.status_code != 200:
-        raise Exception(f"Failed to fetch existing form from {environment}: {resp.text}")
-
-    existing_form_data = resp.json().get("data", None)
-    return existing_form_data
-
-
-def get_form_instruction_id(form_data: dict) -> str | None:
-    # The instruction ID isn't returned in the top-level object, but can be found
-    # in the form instructions object, so pull it out differently.
-    form_instruction_obj = form_data.get("form_instruction", {})
-    if form_instruction_obj is None:
-        return None
-
-    return form_instruction_obj.get("form_instruction_id", None)
 
 
 def diff_form(planned_put_request: dict, existing_form_data: dict) -> dict[str, dict]:
@@ -207,11 +179,33 @@ def format_timestamp(value: str | None) -> str | None:
     return timestamp.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
-def get_update_cmd(environment: str, form_id: str, form_instruction_id: str | None) -> str:
+def get_form_from_env(url: str, headers: dict, form_id: str, environment: str) -> dict | None:
+    """Query the GET form endpoint"""
+    resp = requests.get(url, headers=headers, timeout=5)
+
+    if resp.status_code == 404:
+        logger.info(f"Form {form_id} does not yet exist in {environment}")
+        return None
+
+    if resp.status_code != 200:
+        raise Exception(f"Failed to fetch existing form from {environment}: {resp.text}")
+
+    existing_form_data = resp.json().get("data", None)
+    return existing_form_data
+
+
+def get_form_instruction_id(form_data: dict) -> str | None:
+    # The instruction ID isn't returned in the top-level object, but can be found
+    # in the form instructions object, so pull it out differently.
+    form_instruction_obj = form_data.get("form_instruction", {})
+    if form_instruction_obj is None:
+        return None
+
+    return form_instruction_obj.get("form_instruction_id", None)
+
+
+def get_update_cmd(environment: str, form_id: str) -> str:
     """Build a command for running the update-form script paired with this one"""
     args = f"task update-form --environment={environment} --form-id={form_id}"
-
-    if form_instruction_id is not None:
-        args += f" --form-instruction-id={form_instruction_id}"
 
     return f'make cmd args="{args}"'

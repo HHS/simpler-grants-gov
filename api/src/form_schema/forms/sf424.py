@@ -1256,5 +1256,5 @@ SF424_v4_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
 )
