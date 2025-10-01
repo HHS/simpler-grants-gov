@@ -100,4 +100,16 @@ module "prod_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # ⚠️ Warning! It is not recommended to enable this in a production environment.
   # enable_command_execution = true
+
+  # The below parameters provides the ability to override the cpu and mem for each scheduled job. The default cpu and mem values are 768 cpu and 4096 mem.
+  scheduled_jobs_config = {
+    load-transform = {}
+    load-search-opportunity-data = {}
+    export-opportunity-data = {}
+    create-analytics-db-csvs = {}
+    load-search-agency-data = {}
+    email_notification_opportunity = {}
+    sam-extracts = {}
+    create-application-submission = {}
+  }
 }
