@@ -172,9 +172,6 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
     Returns:
         OpportunityBase: A CommonGrants Protocol model instance
     """
-    # Extract opportunity summary
-    summary = v1_opportunity.summary
-
     # Convert model to dict
     opp_data = {
         "opportunity_id": v1_opportunity.opportunity_id,
@@ -182,22 +179,20 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
         "opportunity_status": v1_opportunity.opportunity_status,
         "created_at": v1_opportunity.created_at,
         "updated_at": v1_opportunity.updated_at,
-        "summary": (
-            {
-                "summary_description": summary.summary_description if summary else None,
-                "post_date": summary.post_date if summary else None,
-                "close_date": summary.close_date if summary else None,
-                "estimated_total_program_funding": (
-                    summary.estimated_total_program_funding if summary else None
-                ),
-                "award_ceiling": summary.award_ceiling if summary else None,
-                "award_floor": summary.award_floor if summary else None,
-                "additional_info_url": summary.additional_info_url if summary else None,
-            }
-            if summary
-            else {}
-        ),
+        "summmary": {},
     }
+
+    # Extract opportunity summary
+    if v1_opportunity.summary:
+        opp_data["summary"] = {
+            "summary_description": v1_opportunity.summary.summary_description,
+            "post_date": v1_opportunity.summary.post_date,
+            "close_date": v1_opportunity.summary.close_date,
+            "estimated_total_program_funding": v1_opportunity.summary.estimated_total_program_funding,
+            "award_ceiling": v1_opportunity.summary.award_ceiling,
+            "award_floor": v1_opportunity.summary.award_floor,
+            "additional_info_url": v1_opportunity.summary.additional_info_url,
+        }
 
     return transform_search_result_to_cg(opp_data)
 
