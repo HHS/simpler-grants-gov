@@ -49,9 +49,7 @@ class CommonGrantsOpportunityService:
         return
 
     @staticmethod
-    def get_opportunity(
-        db_session: db.Session, opportunity_id: UUID
-    ) -> OpportunityResponseSchema | None:
+    def get_opportunity(db_session: db.Session, opportunity_id: UUID) -> OpportunityResponseSchema:
         """Get a specific opportunity by ID."""
 
         # Get response data from v1 service
