@@ -5,6 +5,7 @@ import typing
 from apiflask import fields as original_fields
 from marshmallow import ValidationError
 
+from src.api.schemas.extension.field_validators import URL as CustomURL
 from src.api.schemas.extension.field_validators import Range
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType
@@ -279,7 +280,7 @@ class File(original_fields.File, MixinField):
     }
 
 
-class Time(original_fields.Time, MixinField):
+class Time(MixinField, original_fields.Time):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time."),
         "invalid_awareness": MarshmallowErrorContainer(
@@ -291,13 +292,19 @@ class Time(original_fields.Time, MixinField):
     }
 
 
-class URL(original_fields.URL, MixinField):
+class URL(MixinField, original_fields.URL):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL."),
     }
 
+    def __init__(self, **kwargs: typing.Any):
+        super().__init__(**kwargs)
+        for i, validator in enumerate(self.validators):
+            if hasattr(validator, "error") and validator.error == "Not a valid URL.":
+                self.validators[i] = CustomURL()
 
-class Float(original_fields.Float, MixinField):
+
+class Float(MixinField, original_fields.Float):
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number."),
         "special": MarshmallowErrorContainer(
