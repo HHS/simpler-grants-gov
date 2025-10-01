@@ -1006,7 +1006,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
-                get_search_request(close_date={"start_date_relative": -2314}),
+                get_search_request(close_date={"start_date_relative": -2514}),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_SUPERSONIC,
@@ -1021,7 +1021,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
-                get_search_request(close_date={"end_date_relative": -2314}),
+                get_search_request(close_date={"end_date_relative": -2514}),
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
