@@ -636,6 +636,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
+      account: "My account",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -1430,5 +1431,29 @@ export const messages = {
       "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
     technicalSupportMessage:
       "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
+  },
+  UserAccount: {
+    pageTitle: "User Account | Simpler.Grants.gov",
+    title: "User Account",
+    inputs: {
+      firstName: "First name",
+      middleName: "Middle name",
+      lastName: "Last name",
+      email: "Email",
+    },
+    save: "Save",
+    validationErrors: {
+      firstName: "First name is required",
+      lastName: "Last name is required",
+    },
+    fetchError: "Error fetching user data. Please try refreshing the page.",
+    pending: "Saving...",
+    errorHeading: "Error",
+    successHeading: "Account updated",
+  },
+  UserWorkspace: {
+    pageTitle: "User Workspace | Simpler.Grants.gov",
+    title: "User Workspace",
+    fetchError: "Error fetching user data. Please try refreshing the page.",
   },
 };
