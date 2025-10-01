@@ -56,8 +56,6 @@ class CommonGrantsOpportunityService:
 
         # Get response data from v1 service
         opportunity_data_v1 = get_opportunity(db_session, opportunity_id)
-        if not opportunity_data_v1:
-            return None
 
         # Transform response data to CG model
         opportunity_data_cg = transform_opportunity_to_cg(opportunity_data_v1)
