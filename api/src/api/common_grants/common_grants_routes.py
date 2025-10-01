@@ -70,7 +70,7 @@ def list_opportunities(
     return response_object, HTTPStatus.OK
 
 
-@common_grants_blueprint.get("/opportunities/<oppId>")
+@common_grants_blueprint.get("/opportunities/<uuid:oppId>")
 @common_grants_blueprint.output(OpportunityResponseSchema)
 @api_key_multi_auth.login_required
 @common_grants_blueprint.doc(
@@ -81,7 +81,7 @@ def list_opportunities(
 )
 @flask_db.with_db_session()
 def get_opportunity(
-    db_session: db.Session, oppId: str
+    db_session: db.Session, oppId: UUID
 ) -> tuple[OpportunityResponseSchema, HTTPStatus]:
     """Get a specific opportunity by ID."""
     add_extra_data_to_current_request_logs({"oppId": oppId})
@@ -89,16 +89,10 @@ def get_opportunity(
 
     message_404 = "The server cannot find the requested resource"
 
-    # Validate input
-    try:
-        opp_uuid = UUID(oppId)
-    except ValueError:
-        raise_flask_error(HTTPStatus.NOT_FOUND, message_404)
-
     # Fetch data from service
     try:
         with db_session.begin():
-            response_object = CommonGrantsOpportunityService.get_opportunity(db_session, opp_uuid)
+            response_object = CommonGrantsOpportunityService.get_opportunity(db_session, oppId)
     except ValidationError as e:
         error_details = transform_validation_error_from_cg(e)
         raise_flask_error(
