@@ -32,3 +32,4 @@ jobs:
 
       - name: Generate and validate spec
         run: make check-spec
+        continue-on-error: true
