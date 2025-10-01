@@ -1,7 +1,7 @@
 import {
   UserPrivilegeDefinition,
   UserPrivilegesResponse,
-} from "src/types/UserTypes";
+} from "src/types/userTypes";
 
 const getApplicationPrivileges = (
   userPrivileges: UserPrivilegesResponse,

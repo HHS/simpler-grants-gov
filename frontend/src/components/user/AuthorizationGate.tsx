@@ -5,7 +5,7 @@ import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
 import { getSession } from "src/services/auth/session";
 import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { UserPrivilegeDefinition } from "src/types/UserTypes";
+import { UserPrivilegeDefinition } from "src/types/userTypes";
 import { checkPrivileges } from "src/utils/authUtils";
 
 import {
