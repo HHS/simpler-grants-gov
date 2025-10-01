@@ -142,6 +142,31 @@ class ListFormsTask(BaseFormTask):
             print()
 
 
+def get_form_from_env(url: str, headers: dict, form_id: str, environment: str) -> dict | None:
+    """Query the GET form endpoint"""
+    resp = requests.get(url, headers=headers, timeout=5)
+
+    if resp.status_code == 404:
+        logger.info(f"Form {form_id} does not yet exist in {environment}")
+        return None
+
+    if resp.status_code != 200:
+        raise Exception(f"Failed to fetch existing form from {environment}: {resp.text}")
+
+    existing_form_data = resp.json().get("data", None)
+    return existing_form_data
+
+
+def get_form_instruction_id(form_data: dict) -> str | None:
+    # The instruction ID isn't returned in the top-level object, but can be found
+    # in the form instructions object, so pull it out differently.
+    form_instruction_obj = form_data.get("form_instruction", {})
+    if form_instruction_obj is None:
+        return None
+
+    return form_instruction_obj.get("form_instruction_id", None)
+
+
 def diff_form(planned_put_request: dict, existing_form_data: dict) -> dict[str, dict]:
     """Diff what we plan to send to the Form endpoint with what it already has"""
     changed_fields = {}
@@ -177,31 +202,6 @@ def format_timestamp(value: str | None) -> str | None:
     timestamp = datetime.datetime.fromisoformat(value)
 
     return timestamp.strftime("%Y-%m-%d %H:%M:%S %Z")
-
-
-def get_form_from_env(url: str, headers: dict, form_id: str, environment: str) -> dict | None:
-    """Query the GET form endpoint"""
-    resp = requests.get(url, headers=headers, timeout=5)
-
-    if resp.status_code == 404:
-        logger.info(f"Form {form_id} does not yet exist in {environment}")
-        return None
-
-    if resp.status_code != 200:
-        raise Exception(f"Failed to fetch existing form from {environment}: {resp.text}")
-
-    existing_form_data = resp.json().get("data", None)
-    return existing_form_data
-
-
-def get_form_instruction_id(form_data: dict) -> str | None:
-    # The instruction ID isn't returned in the top-level object, but can be found
-    # in the form instructions object, so pull it out differently.
-    form_instruction_obj = form_data.get("form_instruction", {})
-    if form_instruction_obj is None:
-        return None
-
-    return form_instruction_obj.get("form_instruction_id", None)
 
 
 def get_update_cmd(environment: str, form_id: str) -> str:
