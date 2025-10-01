@@ -57,6 +57,13 @@ locals {
       "--sync-status"
     ],
   }
+  sam-extract-args = {
+    # In dev/staging we don't fetch extracts, but generate our own
+    dev      = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    staging  = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    training = ["poetry", "run", "flask", "task", "sam-extracts"]
+    prod     = ["poetry", "run", "flask", "task", "sam-extracts"]
+  }
   scheduled_jobs = {
     load-transform = {
       task_command = local.load-transform-args[var.environment]
@@ -95,7 +102,7 @@ locals {
       state               = "ENABLED"
     }
     sam-extracts = {
-      task_command = ["poetry", "run", "flask", "task", "sam-extracts"]
+      task_command = local.sam-extract-args[var.environment]
       # Every day at 8am Eastern Time during DST. 9am during non-DST.
       schedule_expression = "cron(0 13 * * ? *)"
       state               = "ENABLED"
