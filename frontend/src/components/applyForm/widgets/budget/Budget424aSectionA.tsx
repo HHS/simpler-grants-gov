@@ -165,7 +165,7 @@ function Budget424aSectionA<
 
       <Table
         bordered={false}
-        className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light"
+        className="sf424__table usa-table--borderless width-full border-1px border-base-light"
       >
         <thead className="text-bold">
           <tr className="bg-base-lighter">
