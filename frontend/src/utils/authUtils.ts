@@ -3,6 +3,9 @@ import {
   UserPrivilegesResponse,
 } from "src/types/userTypes";
 
+// yes, these functions are completely duplicative at the moment but
+// a) managing the typescript to create a resource agnostic function is really hard
+// b) we may need to support different behavior per resource type in the future anyway
 const getApplicationPrivileges = (
   userPrivileges: UserPrivilegesResponse,
   applicationId: string,

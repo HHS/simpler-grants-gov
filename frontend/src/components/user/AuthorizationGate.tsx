@@ -84,8 +84,12 @@ export async function AuthorizationGate({
         (all, resource) => ({ ...all, ...resource }),
         {},
       );
-      // assumes any immediate children of the gate that want to accept fetchedResources via props
+      // Allows for prop drilling of fetched resources into immediate child server components, as
+      // usage of the client side context provider won't be available to server components.
+      // Assumes any immediate children of the gate that want to accept fetchedResources via props
       // have an optional `fetchedResources` prop in place that can accept the added data here
+      // Note: this does NOT work if the gate is used in a layout component - if you're going to prop
+      // drill make sure you do it from a page component or further down the render chain
       const childrenWithResources = children
         ? cloneElement(
             children as ReactElement<
@@ -95,6 +99,9 @@ export async function AuthorizationGate({
             { fetchedResources: allResources },
           )
         : children;
+
+      // FetchedResourcesProvider allows any client component children of the gate to receive
+      // fetched resources via context.
       return (
         <FetchedResourcesProvider value={allResources}>
           {childrenWithResources}
