@@ -200,7 +200,7 @@ variable "secondary_domain_names" {
 
 variable "scheduled_jobs_config" {
   type = map(object({
-    cpu = optional(number, 768)
+    cpu = optional(number, 1024)
     mem = optional(number, 4096)
   }))
   description = ""
