@@ -1,8 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import {
-  ApplicationDetail,
-  Status,
-} from "src/types/applicationResponseTypes";
+import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 
@@ -12,12 +9,14 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-jest.mock("src/components/application/editAppFilingName/EditAppFilingName", () => ({
-  EditAppFilingName: () => <button>buttonText</button>,
-}));
+jest.mock(
+  "src/components/application/editAppFilingName/EditAppFilingName",
+  () => ({
+    EditAppFilingName: () => <button>buttonText</button>,
+  }),
+);
 
-const mockApplicationDetails =
-  applicationMock as unknown as ApplicationDetail;
+const mockApplicationDetails = applicationMock as unknown as ApplicationDetail;
 
 describe("InformationCard - Edit filing name button visibility", () => {
   const defaultProps = {
