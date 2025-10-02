@@ -669,7 +669,7 @@ paths:
           description: Forbidden
       tags:
       - User v1 - Internal Only
-      summary: User Profile Update
+      summary: Update the authenticated user's profile data'
       requestBody:
         content:
           application/json:
@@ -4509,7 +4509,7 @@ components:
           format: date
           description: SAM.gov registration expiration date
           example: '2025-08-11'
-    UserOrganization:
+    UserOrganization1:
       type: object
       properties:
         organization_id:
@@ -4585,7 +4585,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/UserOrganization'
+          - $ref: '#/components/schemas/UserOrganization1'
           - type: 'null'
         competition:
           description: Competition information
@@ -4623,7 +4623,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/UserOrganization'
+            $ref: '#/components/schemas/UserOrganization1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -5380,7 +5380,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    Role:
+    Role1:
       type: object
       properties:
         role_id:
@@ -5433,7 +5433,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/Role1'
     OrganizationUsersResponse:
       type: object
       properties:
@@ -5601,7 +5601,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/Role1'
         status_code:
           type: integer
           description: The HTTP status code

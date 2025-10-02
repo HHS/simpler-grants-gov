@@ -114,4 +114,4 @@ def test_ebiz_poc_organization_during_login_multiple_sam_entities(
         assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
     # Verify user is linked to both organizations
-    assert len(user.organizations) == 2
+    assert len(user.organization_users) == 2
