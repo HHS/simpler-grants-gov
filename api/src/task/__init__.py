@@ -11,6 +11,5 @@ import src.task.generate_internal_token  # noqa: F401 E402 isort:skip
 import src.task.forms.update_form_task  # noqa: F401 E402 isort:skip
 import src.task.forms.list_forms_task  # noqa: F401 E402 isort:skip
 import src.task.opportunities.generate_opportunity_sql  # noqa: F401 E402 isort:skip
-import src.task.xml_generation  # noqa: F401 E402 isort:skip
 
 __all__ = ["task_blueprint"]

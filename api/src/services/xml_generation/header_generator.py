@@ -1,5 +1,6 @@
-"""Header XML generation."""
+"""Submission XML generation."""
 
+import base64
 import hashlib
 import logging
 from datetime import date
@@ -16,7 +17,7 @@ HEADER_NAMESPACES = {
 }
 
 
-class HeaderXMLGenerator:
+class SubmissionXMLGenerator:
 
     def __init__(self, application: Application):
         self.application = application
@@ -68,6 +69,10 @@ class HeaderXMLGenerator:
 
         return xml_bytes.decode("utf-8").strip()
 
+    def generate_footer_xml(self, pretty_print: bool = True) -> str:
+        # TODO: Implement footer XML generation.
+        raise NotImplementedError("Footer XML generation not yet implemented")
+
     def _add_header_field(
         self, parent: lxml_etree.Element, field_name: str, value: str | None
     ) -> None:
@@ -107,11 +112,9 @@ class HeaderXMLGenerator:
         sha1_hash = hashlib.sha1(hash_data.encode("utf-8"), usedforsecurity=False)
 
         # Return base64-encoded hash
-        import base64
-
         return base64.b64encode(sha1_hash.digest()).decode("utf-8")
 
 
 def generate_application_header_xml(application: Application, pretty_print: bool = True) -> str:
-    generator = HeaderXMLGenerator(application)
+    generator = SubmissionXMLGenerator(application)
     return generator.generate_header_xml(pretty_print=pretty_print)

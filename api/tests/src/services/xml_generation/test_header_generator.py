@@ -7,7 +7,7 @@ from lxml import etree as lxml_etree
 
 from src.services.xml_generation.header_generator import (
     HEADER_NAMESPACES,
-    HeaderXMLGenerator,
+    SubmissionXMLGenerator,
     generate_application_header_xml,
 )
 from tests.src.db.models.factories import (
@@ -59,12 +59,12 @@ def application(enable_factory_create, db_session):
     return application
 
 
-class TestHeaderXMLGenerator:
-    """Test cases for HeaderXMLGenerator."""
+class TestSubmissionXMLGenerator:
+    """Test cases for SubmissionXMLGenerator."""
 
     def test_generate_header_with_all_fields(self, application):
         """Test header generation with all fields populated."""
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         # Parse the XML
@@ -125,7 +125,7 @@ class TestHeaderXMLGenerator:
         competition = CompetitionFactory.create(opportunity=opportunity)
         application = ApplicationFactory.create(competition=competition)
 
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
@@ -148,7 +148,7 @@ class TestHeaderXMLGenerator:
             application_name=None,
         )
 
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
@@ -185,7 +185,7 @@ class TestHeaderXMLGenerator:
         )
         application = ApplicationFactory.create(competition=competition)
 
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
@@ -202,7 +202,7 @@ class TestHeaderXMLGenerator:
         )
         application = ApplicationFactory.create(competition=competition)
 
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
@@ -215,10 +215,10 @@ class TestHeaderXMLGenerator:
 
     def test_hash_value_is_deterministic(self, application):
         """Test that hash value is deterministic for same input."""
-        generator1 = HeaderXMLGenerator(application)
+        generator1 = SubmissionXMLGenerator(application)
         xml_string1 = generator1.generate_header_xml()
 
-        generator2 = HeaderXMLGenerator(application)
+        generator2 = SubmissionXMLGenerator(application)
         xml_string2 = generator2.generate_header_xml()
 
         root1 = lxml_etree.fromstring(xml_string1.encode("utf-8"))
@@ -238,7 +238,7 @@ class TestHeaderXMLGenerator:
             competition=competition,
             application_name="First Application",
         )
-        generator1 = HeaderXMLGenerator(application1)
+        generator1 = SubmissionXMLGenerator(application1)
         xml_string1 = generator1.generate_header_xml()
 
         # Create a different application with different name
@@ -246,7 +246,7 @@ class TestHeaderXMLGenerator:
             competition=competition,
             application_name="Different Application",
         )
-        generator2 = HeaderXMLGenerator(application2)
+        generator2 = SubmissionXMLGenerator(application2)
         xml_string2 = generator2.generate_header_xml()
 
         root1 = lxml_etree.fromstring(xml_string1.encode("utf-8"))
@@ -259,7 +259,7 @@ class TestHeaderXMLGenerator:
 
     def test_generate_header_not_pretty_print(self, application):
         """Test header generation without pretty printing."""
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml(pretty_print=False)
 
         # Should still be valid XML
@@ -280,7 +280,7 @@ class TestHeaderXMLGenerator:
 
     def test_xml_has_declaration(self, application):
         """Test that generated XML includes XML declaration."""
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         assert xml_string.startswith("<?xml version=")
@@ -290,7 +290,7 @@ class TestHeaderXMLGenerator:
 
     def test_namespace_prefixes_in_output(self, application):
         """Test that namespace prefixes are correctly used in XML output."""
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         # Check that namespace declarations are present
@@ -313,7 +313,7 @@ class TestHeaderXMLGenerator:
         competition = CompetitionFactory.create(opportunity=opportunity)
         application = ApplicationFactory.create(competition=competition)
 
-        generator = HeaderXMLGenerator(application)
+        generator = SubmissionXMLGenerator(application)
         xml_string = generator.generate_header_xml()
 
         root = lxml_etree.fromstring(xml_string.encode("utf-8"))
