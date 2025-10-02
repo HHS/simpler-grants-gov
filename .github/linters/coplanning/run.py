@@ -6,9 +6,14 @@ Usage: From the root of the coplanning/ directory:
     --org HHS \
     --repo simpler-grants-gov \
     --label "Coplanning Proposal" \
-    --issue-section "Summary" \
+    --issue-sections "Summary" \
+    --issue-sections "Problem Statement" \
+    --issue-sections "Proposed Solution" \
+    --issue-sections "Success Criteria" \
+    --issue-sections "Additional Context" \
     --platform fider \
     --sync-direction github-to-platform \
+    --update-existing \
     --dry-run
 """
 
@@ -31,7 +36,7 @@ class CliArgs:
     org: str
     repo: str
     label: str
-    issue_section: str
+    issue_sections: list[str]
     platform: str
     sync_direction: str = "github-to-platform"
     state: str = "open"
@@ -49,9 +54,10 @@ def parse_args() -> CliArgs:
     parser.add_argument("--repo", required=True, help="GitHub repository")
     parser.add_argument("--label", required=True, help="GitHub issue label")
     parser.add_argument(
-        "--issue-section",
+        "--issue-sections",
         required=True,
-        help="GitHub issue section to use for post description",
+        action="append",
+        help="GitHub issue sections to use for post description (can be specified multiple times)",
     )
     parser.add_argument(
         "--sync-direction",
@@ -79,7 +85,7 @@ def parse_args() -> CliArgs:
         org=args.org,
         repo=args.repo,
         label=args.label,
-        issue_section=args.issue_section,
+        issue_sections=args.issue_sections,
         platform=args.platform,
         sync_direction=args.sync_direction,
         state=args.state,
@@ -114,7 +120,7 @@ def sync_github_to_fider(args: CliArgs) -> None:
     fider.upsert_posts(
         github_issues=github_issues,
         fider_posts=fider_posts,
-        issue_section=args.issue_section,
+        issue_sections=args.issue_sections,
         update_existing=args.update_existing,
         dry_run=args.dry_run,
     )
