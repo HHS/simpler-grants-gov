@@ -88,7 +88,7 @@ class TestSetupLowerEnvSamExtractsTask(BaseTestClass):
             verify_record_in_extract(
                 data_rows,
                 existing_org_user.email,
-                existing_org_user.user.organizations[0].organization.sam_gov_entity.uei,
+                existing_org_user.user.organization_users[0].organization.sam_gov_entity.uei,
             )
 
         assert len(data_rows) == len(new_org_users) + len(existing_org_users)

@@ -85,7 +85,7 @@ class SetupLowerEnvSamExtractsTask(Task):
                 select(User)
                 .join(LinkExternalUser)
                 .options(
-                    selectinload(User.organizations)
+                    selectinload(User.organization_users)
                     .selectinload(OrganizationUser.organization)
                     .selectinload(Organization.sam_gov_entity)
                 )
@@ -110,7 +110,7 @@ class SetupLowerEnvSamExtractsTask(Task):
         multiple orgs so it wouldn't matter much
         """
 
-        for org_user in user.organizations:
+        for org_user in user.organization_users:
             entity = org_user.organization.sam_gov_entity
             if (
                 entity is not None
