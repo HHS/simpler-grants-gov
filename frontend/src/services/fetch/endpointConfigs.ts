@@ -81,3 +81,10 @@ export const searchAgenciesEndpoint = {
   namespace: "agencies/search",
   method: "POST" as ApiMethod,
 };
+
+export const getOrganizationEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "organizations",
+  method: "GET" as ApiMethod,
+};
