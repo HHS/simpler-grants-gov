@@ -1,13 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 import opportunityMock from "stories/components/application/opportunity.mock.json";
+
+import ApplicationContainer from "src/components/application/ApplicationContainer";
 
 // Mock dependencies
 const mockRefresh = jest.fn();
@@ -40,15 +41,11 @@ jest.mock("src/components/application/attachments/AttachmentsCard", () => ({
 }));
 
 jest.mock("src/components/application/ApplicationFormsTable", () => ({
-  ApplicationFormsTable: () => (
-    <div data-testid="forms-table">Forms Table</div>
-  ),
+  ApplicationFormsTable: () => <div data-testid="forms-table">Forms Table</div>,
 }));
 
 jest.mock("src/components/application/OpportunityCard", () => ({
-  OpportunityCard: () => (
-    <div data-testid="opportunity-card">Opportunity</div>
-  ),
+  OpportunityCard: () => <div data-testid="opportunity-card">Opportunity</div>,
 }));
 
 jest.mock("src/components/application/ApplicationValidationAlert", () => ({
