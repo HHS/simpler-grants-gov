@@ -59,7 +59,15 @@ jest.mock("src/components/application/ApplicationValidationAlert", () => ({
 // Mock InformationCard to test props
 jest.mock("src/components/application/InformationCard", () => ({
   InformationCard: jest.fn(
-    ({ applicationSubmitted, applicationSubmitHandler, submissionLoading }) => (
+    ({
+      applicationSubmitted,
+      applicationSubmitHandler,
+      submissionLoading,
+    }: {
+      applicationSubmitted: boolean;
+      applicationSubmitHandler: () => void;
+      submissionLoading: boolean;
+    }) => (
       <div data-testid="information-card">
         <div data-testid="application-submitted">
           {String(applicationSubmitted)}
@@ -86,11 +94,11 @@ const mockAttachments: Attachment[] = [];
 describe("ApplicationContainer", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    jest.spyOn(console, "error").mockImplementation(jest.fn());
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ data: {} }),
+      json: () => Promise.resolve({ data: {} }),
     });
   });
 
@@ -178,7 +186,7 @@ describe("ApplicationContainer", () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: async () => ({ data: {} }),
+        json: () => Promise.resolve({ data: {} }),
       });
 
       render(
@@ -210,7 +218,7 @@ describe("ApplicationContainer", () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: async () => ({ data: {} }),
+        json: () => Promise.resolve({ data: {} }),
       });
 
       render(
@@ -241,7 +249,7 @@ describe("ApplicationContainer", () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: async () => ({ data: {} }),
+        json: () => Promise.resolve({ data: {} }),
       });
 
       render(
@@ -268,7 +276,7 @@ describe("ApplicationContainer", () => {
       };
 
       // Create a promise that we can control
-      let resolveSubmit: (value: unknown) => void;
+      let resolveSubmit: ((value: unknown) => void) | undefined;
       const submitPromise = new Promise((resolve) => {
         resolveSubmit = resolve;
       });
@@ -283,25 +291,26 @@ describe("ApplicationContainer", () => {
         />,
       );
 
-      const submitButton = screen.getByTestId(
-        "mock-submit-button",
-      ) as HTMLButtonElement;
+      const submitButton = screen.getByTestId("mock-submit-button");
       expect(submitButton).toHaveTextContent("Submit");
-      expect(submitButton.disabled).toBe(false);
+      expect(submitButton).toBeEnabled();
 
       await user.click(submitButton);
 
       await waitFor(() => {
         expect(submitButton).toHaveTextContent("Loading");
-        expect(submitButton.disabled).toBe(true);
       });
 
+      expect(submitButton).toBeDisabled();
+
       // Resolve the submission
-      resolveSubmit!({
-        ok: true,
-        status: 200,
-        json: async () => ({ data: {} }),
-      });
+      if (resolveSubmit) {
+        resolveSubmit({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ data: {} }),
+        });
+      }
 
       await waitFor(() => {
         expect(submitButton).toHaveTextContent("Submit");
