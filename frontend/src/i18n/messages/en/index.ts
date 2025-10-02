@@ -536,14 +536,14 @@ export const messages = {
       {
         description:
           "Make your first API request in minutes. Learn the basics of the Simpler.Grants.gov API.",
-        http: "https://github.com/HHS/simpler-grants-gov/tree/main/documentation",
+        http: "https://wiki.simpler.grants.gov/product/api",
         iconName: "code",
         link: "Get started",
         title: "Developer quickstart",
       },
       {
         description: "Learn more about integrating our API into your project.",
-        http: "https://api.simpler.grants.gov/docs#/Opportunity%20v1/post_v1_opportunities_search",
+        http: "https://api.simpler.grants.gov/docs#/",
         iconName: "local_library",
         link: "Read the docs",
         title: "API reference",
