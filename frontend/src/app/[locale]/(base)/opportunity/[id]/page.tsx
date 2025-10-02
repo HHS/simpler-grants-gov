@@ -51,7 +51,7 @@ export async function generateMetadata({
   }
   const meta: Metadata = {
     title,
-    description: t("OpportunityListing.metaDescription"),
+    description: t("Index.metaDescription"),
   };
   return meta;
 }

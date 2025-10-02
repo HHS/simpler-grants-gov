@@ -15,13 +15,13 @@ export enum Status {
   ACCEPTED = "accepted",
 }
 
-interface SamGovEntity {
+export interface SamGovEntity {
   expiration_date: string;
   legal_business_name: string;
   uei: string;
 }
 
-export interface Oranization {
+export interface Organization {
   organization_id: string;
   sam_gov_entity: SamGovEntity;
 }
@@ -55,7 +55,7 @@ export interface ApplicationDetail {
   application_status: string;
   competition: Competition;
   form_validation_warnings?: FormValidationWarnings;
-  organization: Oranization;
+  organization: Organization;
   users: {
     email: string;
     user_id: string;
