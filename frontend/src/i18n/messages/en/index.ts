@@ -1456,4 +1456,9 @@ export const messages = {
     title: "User Workspace",
     fetchError: "Error fetching user data. Please try refreshing the page.",
   },
+  OrganizationDetail: {
+    pageTitle: "Organization",
+    fetchError: "Unable to fetch organization details",
+    organizationDetailsHeader: "Organization details",
+  },
 };
