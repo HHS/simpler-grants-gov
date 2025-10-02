@@ -104,7 +104,7 @@ class HeaderXMLGenerator:
         hash_data = "|".join(hash_data_parts)
 
         # Calculate SHA-1 hash
-        sha1_hash = hashlib.sha1(hash_data.encode("utf-8"))
+        sha1_hash = hashlib.sha1(hash_data.encode("utf-8"), usedforsecurity=False)
 
         # Return base64-encoded hash
         import base64
