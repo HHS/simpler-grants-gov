@@ -4,7 +4,17 @@ import logging
 from http import HTTPStatus
 from uuid import UUID
 
-from common_grants_sdk.schemas.pydantic import OpportunitySearchRequest, PaginatedBodyParams
+from common_grants_sdk.schemas.pydantic import (
+    OppFilters,
+    OpportunitiesListResponse,
+    OpportunitiesSearchResponse,
+    OpportunityResponse,
+    OpportunitySearchRequest,
+    OppSortBy,
+    OppSorting,
+    PaginatedBodyParams,
+    SortedResultsInfo,
+)
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -30,6 +40,7 @@ from src.api.common_grants.common_grants_utils import with_cg_error_handler
 from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
+from src.services.common_grants.transformation import build_filter_info
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -56,13 +67,26 @@ def list_opportunities(
     logger.info("GET /common-grants/opportunities/")
 
     # Fetch data from service
-    pagination = PaginatedBodyParams.model_validate(query_data)
-    response_object = CommonGrantsOpportunityService.list_opportunities(
+    pagination_params = PaginatedBodyParams.model_validate(query_data)
+    opportunity_data, pagination_data = CommonGrantsOpportunityService.list_opportunities(
         search_client=search_client,
-        pagination=pagination,
+        pagination=pagination_params,
     )
 
-    return response_object, HTTPStatus.OK
+    # Define response data
+    opportunities_list_response = OpportunitiesListResponse(
+        status=HTTPStatus.OK,
+        message="Opportunities fetched successfully",
+        items=opportunity_data,
+        pagination_info=pagination_data,
+    )
+
+    # Transform response data from CG pydantic to CG marshmallow
+    response_json = opportunities_list_response.model_dump(by_alias=True, mode="json")
+    response_schema = OpportunitiesListResponseSchema()
+    validated_schema = response_schema.load(response_json)
+
+    return validated_schema, HTTPStatus.OK
 
 
 @common_grants_blueprint.get("/opportunities/<uuid:oppId>")
@@ -86,9 +110,21 @@ def get_opportunity(
 
     # Fetch data from service
     with db_session.begin():
-        response_object = CommonGrantsOpportunityService.get_opportunity(db_session, oppId)
+        opportunity_data = CommonGrantsOpportunityService.get_opportunity(db_session, oppId)
 
-    return response_object, HTTPStatus.OK
+    # Define response data
+    opportunity_response = OpportunityResponse(
+        status=HTTPStatus.OK,
+        message="Success",
+        data=opportunity_data,
+    )
+
+    # Transform response data from CG pydantic to CG marshmallow
+    response_json = opportunity_response.model_dump(by_alias=True, mode="json")
+    response_schema = OpportunityResponseSchema()
+    validated_schema = response_schema.load(response_json)
+
+    return validated_schema, HTTPStatus.OK
 
 
 @common_grants_blueprint.post("/opportunities/search")
@@ -113,9 +149,30 @@ def search_opportunities(
 
     # Fetch data from service
     search_request = OpportunitySearchRequest.model_validate(json_data)
-    response_object = CommonGrantsOpportunityService.search_opportunities(
+    opportunity_data, pagination_data = CommonGrantsOpportunityService.search_opportunities(
         search_client,
         search_request,
     )
 
-    return response_object, HTTPStatus.OK
+    # Define response data
+    sorting_data = search_request.sorting or OppSorting(sort_by=OppSortBy.LAST_MODIFIED_AT)
+    filter_data = search_request.filters or OppFilters()
+    opportunities_search_response = OpportunitiesSearchResponse(
+        status=HTTPStatus.OK,
+        message="Opportunities searched successfully using search client",
+        items=opportunity_data,
+        pagination_info=pagination_data,
+        sort_info=SortedResultsInfo(
+            sort_by=sorting_data.sort_by.value,
+            sort_order=sorting_data.sort_order,
+            errors=[],
+        ),
+        filter_info=build_filter_info(filter_data),
+    )
+
+    # Transform response data from CG pydantic to CG marshmallow
+    response_json = opportunities_search_response.model_dump(by_alias=True, mode="json")
+    response_schema = OpportunitiesSearchResponseSchema()
+    validated_schema = response_schema.load(response_json)
+
+    return validated_schema, HTTPStatus.OK
