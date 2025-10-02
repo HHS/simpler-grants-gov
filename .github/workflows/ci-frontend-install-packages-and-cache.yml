@@ -35,7 +35,7 @@ jobs:
 
       - id: check-cache
         name: Check if cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/frontend/node_modules
           key: frontend-node_modules-${{ hashFiles('frontend/package*.json') }}
