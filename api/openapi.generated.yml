@@ -766,40 +766,6 @@ paths:
       security:
       - ApiUserKeyAuth: []
       - ApiKeyAuth: []
-  /common-grants/opportunities/{oppId}:
-    get:
-      parameters:
-      - in: path
-        name: oppId
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpportunityResponse'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not found
-      tags:
-      - CommonGrants Protocol
-      summary: View opportunity details
-      description: View details about an opportunity
-      security:
-      - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/applications:
     post:
       parameters:
@@ -1184,6 +1150,40 @@ paths:
       summary: Competition Get
       security:
       - ApiJwtAuth: []
+      - ApiKeyAuth: []
+  /common-grants/opportunities/{oppId}:
+    get:
+      parameters:
+      - in: path
+        name: oppId
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - CommonGrants Protocol
+      summary: View opportunity details
+      description: View details about an opportunity
+      security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
@@ -4490,24 +4490,6 @@ components:
       - paginationInfo
       - sortInfo
       - status
-    OpportunityResponse:
-      type: object
-      properties:
-        status:
-          type: integer
-          description: The HTTP status code
-        message:
-          type: string
-          description: The message
-        data:
-          description: The opportunity
-          type:
-          - object
-          $ref: '#/components/schemas/OpportunityBase'
-      required:
-      - data
-      - message
-      - status
     UserApplicationListRequest:
       type: object
       properties: {}
@@ -5282,6 +5264,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OpportunityResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        data:
+          description: The opportunity
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityBase'
+      required:
+      - data
+      - message
+      - status
     UserSaveOpportunityRequest:
       type: object
       properties:
