@@ -86,5 +86,5 @@ ProjectAbstractSummary_v2_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    # This form does not have instructions.
 )

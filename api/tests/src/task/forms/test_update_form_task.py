@@ -2,16 +2,13 @@ from unittest import mock
 
 import pytest
 
-from src.task.forms.update_form_task import UpdateFormContainer, UpdateFormTask
+from src.task.forms.update_form_task import UpdateFormTask
 from tests.src.db.models.factories import FormFactory
 
 
 def test_update_form_task(db_session, enable_factory_create):
     form = FormFactory.create()
-    update_form_container = UpdateFormContainer(
-        environment="local", form_id=form.form_id, form_instruction_id=""
-    )
-    task = UpdateFormTask(db_session, update_form_container)
+    task = UpdateFormTask(db_session, environment="local", form_id=form.form_id)
 
     mocked_response = mock.MagicMock()
     mocked_response.status_code = 200
@@ -22,10 +19,7 @@ def test_update_form_task(db_session, enable_factory_create):
 
 def test_update_form_task_non_200(db_session, enable_factory_create):
     form = FormFactory.create()
-    update_form_container = UpdateFormContainer(
-        environment="local", form_id=form.form_id, form_instruction_id=""
-    )
-    task = UpdateFormTask(db_session, update_form_container)
+    task = UpdateFormTask(db_session, environment="local", form_id=form.form_id)
 
     mocked_response = mock.MagicMock()
     mocked_response.status_code = 403

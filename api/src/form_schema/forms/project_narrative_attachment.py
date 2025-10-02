@@ -49,5 +49,5 @@ ProjectNarrativeAttachment_v1_2 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("be89e8c1-06d2-4a81-b157-41c1a5db5acf"),
 )

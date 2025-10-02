@@ -39,7 +39,8 @@ class BaseFormTask(Task, ABC):
         }
 
 
-def build_form_json(form: Form, form_instruction_id: str | None) -> dict:
+def build_form_json(form: Form) -> dict:
+    form_instruction_id = str(form.form_instruction_id) if form.form_instruction_id else None
     return {
         "agency_code": form.agency_code,
         "form_instruction_id": form_instruction_id,
