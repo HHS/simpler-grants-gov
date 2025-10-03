@@ -1,6 +1,7 @@
 import uuid
 
 import src.form_schema.forms.shared_schema as shared_schema
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.services.xml_generation.constants import NO_VALUE
 
@@ -1257,4 +1258,7 @@ SF424_v4_0 = Form(
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # No form instructions at the moment.
+    form_type=FormType.SF424,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

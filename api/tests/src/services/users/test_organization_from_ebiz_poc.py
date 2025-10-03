@@ -188,7 +188,7 @@ def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
     # Should create organizations for all entities and return all organization users created
     assert result is not None
     assert len(result) == 2  # Should return both organization users
-    assert len(user.organizations) == 2  # User should be linked to both organizations
+    assert len(user.organization_users) == 2  # User should be linked to both organizations
 
     # All organization users should be marked as owners
     for org_user in result:

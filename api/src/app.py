@@ -18,6 +18,7 @@ import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
+from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.form_alpha import form_blueprint
@@ -55,6 +56,7 @@ class EndpointConfig(PydanticBaseEnvConfig):
     auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
 
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
+    enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
 
@@ -175,6 +177,10 @@ def register_blueprints(app: APIFlask) -> None:
         app.register_blueprint(application_blueprint)
         app.register_blueprint(form_blueprint)
         app.register_blueprint(competition_blueprint)
+
+    # CommonGrants Protocol endpoints
+    if endpoint_config.enable_common_grants_endpoints:
+        app.register_blueprint(common_grants_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)

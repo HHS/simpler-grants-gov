@@ -31,7 +31,7 @@ class CreateOrgsFromSamEntityTask(Task):
                 # we want to avoid them becoming the org owner of 500 random orgs
                 .where(SamGovEntity.ebiz_poc_email != "")
                 .options(selectinload(SamGovEntity.organization))
-                .options(selectinload(LinkExternalUser.user).selectinload(User.organizations))
+                .options(selectinload(LinkExternalUser.user).selectinload(User.organization_users))
             )
 
             for sam_gov_entity, link_external_user in sam_gov_entities:
