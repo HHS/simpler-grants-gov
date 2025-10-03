@@ -187,6 +187,32 @@ function Budget424aSectionB<
     );
   };
 
+  const ACTIVITY_COLUMN_COUNT = 4;
+  const activityColumnIndices: number[] = COLUMNS.slice(
+    0,
+    ACTIVITY_COLUMN_COUNT,
+  );
+  const renderObjectClassTitleCells = (): JSX.Element[] => {
+    return activityColumnIndices.map((columnIndex: number) => {
+      const title = getAsStringOrUndefined(
+        activityItems,
+        `[${columnIndex}].activity_title`,
+      );
+      const displayText = title && title.trim() !== "" ? title : "—";
+
+      return (
+        <td
+          key={`occ-title-${columnIndex}`}
+          className="padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
+        >
+          <div className="minw-15 font-sans-sm text-italic text-center">
+            {displayText}
+          </div>
+        </td>
+      );
+    });
+  };
+
   return (
     <div key={id} id={id}>
       <Table
@@ -213,9 +239,8 @@ function Budget424aSectionB<
 
             <th
               scope="colgroup"
-              colSpan={2}
-              rowSpan={2}
-              className="bg-base-lightest text-bold border-base-light border-x-1px verticle-align-bottom"
+              colSpan={3}
+              className="bg-base-lightest text-bold border-base-light border-x-1px verticle-align-bottom text-center"
             >
               Category total
               <div className="font-sans-2xs text-italic">(sum of 1 - 4)</div>
@@ -223,37 +248,30 @@ function Budget424aSectionB<
           </tr>
 
           <tr className="bg-base-lighter">
-            {/* columns 1-4 */}
-            {COLUMNS.map((index) => {
-              const title = getAsStringOrUndefined(
-                activityItems,
-                `[${index}].activity_title`,
-              );
-              const cfda = getAsStringOrUndefined(
-                activityItems,
-                `[${index}].assistance_listing_number`,
-              );
+            {/* first 4 columns */}
+            {COLUMNS.slice(0, 4).map((index: number) => (
+              <th
+                key={`col-${index}`}
+                className="bg-base-lightest text-center border-base-light border-x-1px"
+                scope="col"
+              >
+                <div className="text-center">
+                  <div className="text-bold">{index + 1}</div>
+                </div>
+              </th>
+            ))}
 
-              return (
-                <th
-                  key={`col-${index}`}
-                  className="bg-base-lightest text-center border-base-light border-x-1px"
-                  scope="col"
-                >
-                  <div className="text-center">
-                    <div className="text-bold">{index + 1}</div>
-                    <div className="font-sans-xs text-italic">
-                      {title?.trim() || "—"}
-                    </div>
-                    {cfda ? (
-                      <div className="font-sans-3xs text-base-dark text-italic">
-                        CFDA: {cfda}
-                      </div>
-                    ) : null}
-                  </div>
-                </th>
-              );
-            })}
+            {/* totals column (col 5) */}
+            <th
+              key="col-total"
+              className="bg-base-lightest text-center border-base-light border-x-1px"
+              scope="col"
+              colSpan={3}
+            >
+              <div className="text-center">
+                <div className="text-bold">5</div>
+              </div>
+            </th>
           </tr>
         </thead>
 
@@ -266,26 +284,7 @@ function Budget424aSectionB<
             >
               6. Object class categories
             </th>
-
-            {COLUMNS.map((columnIndex) => {
-              const title = getAsStringOrUndefined(
-                activityItems,
-                `[${columnIndex}].activity_title`,
-              );
-
-              return (
-                <td
-                  key={`occ-title-${columnIndex}`}
-                  className="padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
-                >
-                  {/* display-only title with fallback dash */}
-                  <div className="minw-15 font-sans-sm text-italic">
-                    {title && title.trim() !== "" ? title : "—"}
-                  </div>
-                </td>
-              );
-            })}
-
+            {renderObjectClassTitleCells()}
             <td colSpan={2} className="border-bottom-0 border-top-0" />
           </tr>
 
@@ -306,7 +305,7 @@ function Budget424aSectionB<
               </th>
 
               {/* Four activity columns */}
-              {COLUMNS.map((columnIndex) => {
+              {COLUMNS.slice(0, 4).map((columnIndex: number) => {
                 const extraPad =
                   row.key !== ROW_I_KEY && row.key !== ROW_K_KEY
                     ? " padding-top-5"
@@ -317,9 +316,8 @@ function Budget424aSectionB<
                   <td
                     key={`cell-${row.key}-${columnIndex}`}
                     className={`border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell ${extraPad}`}
-                    height={"inherit"}
                   >
-                    <div className="display-flex flex-column ">
+                    <div className="display-flex flex-column">
                       {row.key === ROW_I_KEY && (
                         <ColHelper
                           columnNumber={columnIndex + 1}
