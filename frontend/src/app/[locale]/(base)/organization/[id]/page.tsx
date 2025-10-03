@@ -59,26 +59,37 @@ const OrganizationInfo = ({
     uei,
   } = organizationDetails;
   return (
-    <Grid row>
-      <Grid tablet={{ col: 3 }}>
-        <span className="text-bold padding-right-2">{t("ebizPoc")}:</span>
-        <span>
-          {ebiz_poc_first_name} {ebiz_poc_last_name}
-        </span>
+    <>
+      <Grid row>
+        <Grid tablet={{ col: 3 }}>
+          <span className="text-bold padding-right-2">{t("ebizPoc")}:</span>
+          <span>
+            {ebiz_poc_first_name} {ebiz_poc_last_name}
+          </span>
+        </Grid>
+        <Grid tablet={{ col: 3 }}>
+          <span className="text-bold padding-right-2">{t("contact")}:</span>
+          <span>{ebiz_poc_email}</span>
+        </Grid>
+        <Grid tablet={{ col: 3 }}>
+          <span className="text-bold padding-right-2">{t("uei")}:</span>
+          <span>{uei}</span>
+        </Grid>
+        <Grid tablet={{ col: 3 }}>
+          <span className="text-bold padding-right-2">{t("expiration")}:</span>
+          <span>{expiration_date}</span>
+        </Grid>
       </Grid>
-      <Grid tablet={{ col: 3 }}>
-        <span className="text-bold padding-right-2">{t("contact")}:</span>
-        <span>{ebiz_poc_email}</span>
-      </Grid>
-      <Grid tablet={{ col: 3 }}>
-        <span className="text-bold padding-right-2">{t("uei")}:</span>
-        <span>{uei}</span>
-      </Grid>
-      <Grid tablet={{ col: 3 }}>
-        <span className="text-bold padding-right-2">{t("expiration")}:</span>
-        <span>{expiration_date}</span>
-      </Grid>
-    </Grid>
+      <div className="margin-top-2">
+        {t.rich("visitSam", {
+          link: (chunk) => (
+            <a href="https://sam.gov" target="_blank">
+              {chunk}
+            </a>
+          ),
+        })}
+      </div>
+    </>
   );
 };
 
