@@ -218,7 +218,12 @@ class Form(ApiSchemaTable, TimestampMixin):
     form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
     json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
 
-    form_type: Mapped[FormType | None] = mapped_column(LookupColumn(LkFormType))
+    form_type: Mapped[FormType] = mapped_column(
+        "form_type_id",
+        LookupColumn(LkFormType),
+        ForeignKey(LkFormType.form_type_id),
+        primary_key=True,
+    )
     sgg_version: Mapped[str | None]
     is_deprecated: Mapped[bool | None]
 
