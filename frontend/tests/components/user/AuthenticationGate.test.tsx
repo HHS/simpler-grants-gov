@@ -1,4 +1,4 @@
-import { identity } from "lodash";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { render, screen } from "tests/react-utils";
 
 import { JSX } from "react";
@@ -11,8 +11,9 @@ jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => mockGetSession(),
 }));
 
-jest.mock("next-intl/server", () => ({
-  getTranslations: () => identity,
+jest.mock("next-intl", () => ({
+  ...jest.requireActual<typeof import("next-intl")>("next-intl"),
+  useTranslations: () => useTranslationsMock(),
 }));
 
 describe("AuthenticationGate", () => {
