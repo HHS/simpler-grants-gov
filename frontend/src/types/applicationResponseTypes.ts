@@ -19,6 +19,9 @@ export interface SamGovEntity {
   expiration_date: string;
   legal_business_name: string;
   uei: string;
+  ebiz_poc_email: string;
+  ebiz_poc_first_name: string;
+  ebiz_poc_last_name: string;
 }
 
 export interface Organization {

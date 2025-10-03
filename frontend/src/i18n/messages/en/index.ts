@@ -1461,5 +1461,9 @@ export const messages = {
     pageTitle: "Organization",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
+    ebizPoc: "eBiz POC",
+    contact: "Contact",
+    uei: "UEI",
+    expiration: "Exp",
   },
 };

@@ -5,9 +5,10 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { SamGovEntity } from "src/types/applicationResponseTypes";
 
+import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
+import { ErrorMessage, Grid, GridContainer } from "@trussworks/react-uswds";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -49,15 +50,35 @@ const OrganizationInfo = ({
 }: {
   organizationDetails: SamGovEntity;
 }) => {
+  const t = useTranslations("OrganizationDetail");
+  const {
+    ebiz_poc_email,
+    ebiz_poc_first_name,
+    ebiz_poc_last_name,
+    expiration_date,
+    uei,
+  } = organizationDetails;
   return (
-    <>
-      {Object.entries(organizationDetails).map(([key, value]) => (
-        <div key={key}>
-          <span>{key}: </span>
-          <span>{value}</span>
-        </div>
-      ))}
-    </>
+    <Grid row>
+      <Grid tablet={{ col: 3 }}>
+        <span className="text-bold padding-right-2">{t("ebizPoc")}:</span>
+        <span>
+          {ebiz_poc_first_name} {ebiz_poc_last_name}
+        </span>
+      </Grid>
+      <Grid tablet={{ col: 3 }}>
+        <span className="text-bold padding-right-2">{t("contact")}:</span>
+        <span>{ebiz_poc_email}</span>
+      </Grid>
+      <Grid tablet={{ col: 3 }}>
+        <span className="text-bold padding-right-2">{t("uei")}:</span>
+        <span>{uei}</span>
+      </Grid>
+      <Grid tablet={{ col: 3 }}>
+        <span className="text-bold padding-right-2">{t("expiration")}:</span>
+        <span>{expiration_date}</span>
+      </Grid>
+    </Grid>
   );
 };
 
