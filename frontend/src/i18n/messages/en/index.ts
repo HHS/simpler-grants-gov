@@ -1465,5 +1465,7 @@ export const messages = {
     contact: "Contact",
     uei: "UEI",
     expiration: "Exp",
+    visitSam:
+      "Visit <link>sam.gov</link> to make changes to your organization’s details.",
   },
 };
