@@ -436,6 +436,11 @@ class GetUserRolesAndPrivilegesApplicationSchema(Schema):
             "description": "The internal ID of the application",
         }
     )
+    organization_id = fields.String(
+        metadata={
+            "description": "The internal ID of the organization that owns the application",
+        }
+    )
 
 
 class GetUserRolesAndPrivilegesAgencySchema(Schema):
