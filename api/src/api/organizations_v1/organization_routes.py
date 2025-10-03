@@ -8,8 +8,9 @@ from src.api.organizations_v1.organization_blueprint import organization_bluepri
 from src.api.organizations_v1.organization_schemas import (
     OrganizationGetResponseSchema,
     OrganizationListRolesResponseSchema,
-    OrganizationUsersResponseSchema, OrganizationUpdateUserRolesResponseSchema,
     OrganizationUpdateUserRolesRequestSchema,
+    OrganizationUpdateUserRolesResponseSchema,
+    OrganizationUsersResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.db.models.user_models import UserTokenSession
@@ -21,7 +22,9 @@ from src.services.organizations_v1.list_organization_roles import (
 from src.services.organizations_v1.organization_users_list import (
     get_organization_users_and_verify_access,
 )
-from src.services.organizations_v1.update_user_organization_roles import update_user_organization_roles
+from src.services.organizations_v1.update_user_organization_roles import (
+    update_user_organization_roles,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -99,16 +102,19 @@ def organization_list_roles(db_session: db.Session, organization_id: UUID) -> re
     return response.ApiResponse(message="Success", data=roles)
 
 
-
 @organization_blueprint.put("/<uuid:organization_id>/users/<uuid:user_id>")
 @organization_blueprint.input(OrganizationUpdateUserRolesRequestSchema, location="json")
 @organization_blueprint.output(OrganizationUpdateUserRolesResponseSchema)
 @organization_blueprint.doc(responses=[200, 401, 403, 404])
 @organization_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def organization_update_user_roles(db_session: db.Session, organization_id: UUID, user_id: UUID, json_data: dict) -> response.ApiResponse:
+def organization_update_user_roles(
+    db_session: db.Session, organization_id: UUID, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
     """Update roles for an organization user"""
-    add_extra_data_to_current_request_logs({"organization_id": organization_id})
+    add_extra_data_to_current_request_logs(
+        {"organization_id": organization_id, "target_user_id": user_id}
+    )
     logger.info("PUT /v1/organizations/:organization_id/users/:user_id")
     # Get authenticated user
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()

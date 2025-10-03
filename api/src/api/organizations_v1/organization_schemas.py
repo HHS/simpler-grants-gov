@@ -74,9 +74,12 @@ class OrganizationListRolesResponseSchema(AbstractResponseSchema):
 
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
 
+
 class OrganizationUpdateUserRolesRequestSchema(Schema):
     role_ids = fields.List(fields.String(required=True))
 
+
 class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
     """Schema for PUT /organizations/:organization_id/users/:user_id"""
+
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})

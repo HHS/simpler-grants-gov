@@ -2,7 +2,6 @@
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege
-from src.db.models.user_models import Role
 from tests.src.db.models.factories import (
     LinkExternalUserFactory,
     OrganizationFactory,
@@ -66,12 +65,14 @@ def create_user_in_org(
     if privileges:
         role = RoleFactory.create(privileges=privileges, is_org_role=True)
 
-    # Create organization-user relationship with role
+    # Create organization-user relationship
     org_user = OrganizationUserFactory.create(
         user=user, organization=organization, is_organization_owner=is_organization_owner
     )
-    OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
 
+    # Assign role to organization-user if either a role or privileges were provided
+    if privileges or role:
+        OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
 
     # Create JWT token
     token, _ = create_jwt_for_user(user, db_session)
@@ -98,6 +99,3 @@ def create_user_not_in_org(db_session) -> tuple:
     db_session.commit()
 
     return user, token
-
-
-
