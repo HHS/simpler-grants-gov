@@ -14,11 +14,12 @@ from tests.src.db.models.factories import (
 
 
 def create_user_in_org(
-    privileges: list[Privilege],
     db_session,
     is_organization_owner: bool = True,
     organization=None,
     sam_gov_entity=None,
+    role=None,
+    privileges: list[Privilege] = None,
     **kwargs
 ) -> tuple:
     """Create a user in an organization with specified privileges.
@@ -32,6 +33,7 @@ def create_user_in_org(
         is_organization_owner: Whether user should be organization owner
         organization: Existing organization to use (creates new one if None)
         sam_gov_entity: SAM.gov entity to associate with organization
+        role: Role to assign to user
         **kwargs: Additional arguments passed to factory creation
 
     Returns:
@@ -57,16 +59,14 @@ def create_user_in_org(
     if privileges:
         role = RoleFactory.create(privileges=privileges, is_org_role=True)
 
-        # Create organization-user relationship with role
-        org_user = OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=is_organization_owner
-        )
+    # Create organization-user relationship
+    org_user = OrganizationUserFactory.create(
+        user=user, organization=organization, is_organization_owner=is_organization_owner
+    )
+
+    # Assign role to organization-user if either a role or privileges were provided
+    if privileges or role:
         OrganizationUserRoleFactory.create(organization_user=org_user, role=role)
-    else:
-        # Create organization-user relationship without role (for testing no privileges)
-        OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=is_organization_owner
-        )
 
     # Create JWT token
     token, _ = create_jwt_for_user(user, db_session)
