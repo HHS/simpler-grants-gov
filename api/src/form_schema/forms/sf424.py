@@ -148,7 +148,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 30,
             # Based on applicant_idDataType
             # https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd
-            # From the instructions: "Enter the entity identifier assigned by the Federal agency, if any, or the applicant’s control number if applicable."
+            # From the instructions: "Enter the entity identifier assigned by the Federal agency, if any, or the applicant's control number if applicable."
         },
         "federal_entity_identifier": {
             "type": "string",
@@ -667,14 +667,14 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "name": "submission_info",
+        "name": "submission_type",
         "label": "1. Type of Submission",
         "children": [{"type": "field", "definition": "/properties/submission_type"}],
     },
     {
         "type": "section",
-        "name": "application_type",
-        "label": "2. Type of Application and Revision",
+        "name": "application_type_and_revision",
+        "label": "2. Type of Application",
         "children": [
             {"type": "field", "definition": "/properties/application_type"},
             {"type": "field", "definition": "/properties/revision_type"},
@@ -683,39 +683,48 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "name": "date_and_applicant_id",
-        "label": "3. Date Received & 4. Applicant Identifier",
-        "children": [
-            {"type": "null", "definition": "/properties/date_received"},
-            {"type": "field", "definition": "/properties/applicant_id"},
-        ],
+        "name": "date_received",
+        "label": "3. Date Received",
+        "children": [{"type": "null", "definition": "/properties/date_received"}],
     },
     {
         "type": "section",
-        "name": "federal_state_ids",
-        "label": "5–7. Federal and State Identifiers",
-        "children": [
-            {"type": "field", "definition": "/properties/federal_entity_identifier"},
-            {"type": "field", "definition": "/properties/federal_award_identifier"},
-            {"type": "null", "definition": "/properties/state_receive_date"},
-            {"type": "null", "definition": "/properties/state_application_id"},
-        ],
+        "name": "applicant_identifier",
+        "label": "4. Applicant Identifier",
+        "children": [{"type": "field", "definition": "/properties/applicant_id"}],
     },
     {
         "type": "section",
-        "name": "organization_info",
+        "name": "federal_identifiers",
+        "label": "5a. Federal Identifiers",
+        "children": [{"type": "field", "definition": "/properties/federal_entity_identifier"}],
+    },
+    {
+        "type": "section",
+        "name": "federal_award",
+        "label": "5b. Federal Award",
+        "children": [{"type": "field", "definition": "/properties/federal_award_identifier"}],
+    },
+    {
+        "type": "section",
+        "name": "date_received_by_state",
+        "label": "6. Date Received by State",
+        "children": [{"type": "null", "definition": "/properties/state_receive_date"}],
+    },
+    {
+        "type": "section",
+        "name": "state_application_identifier",
+        "label": "7. State Application Identifier",
+        "children": [{"type": "null", "definition": "/properties/state_application_id"}],
+    },
+    {
+        "type": "section",
+        "name": "applicant_information",
         "label": "8. Applicant Information",
         "children": [
             {"type": "field", "definition": "/properties/organization_name"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
             {"type": "field", "definition": "/properties/sam_uei"},
-        ],
-    },
-    {
-        "type": "section",
-        "name": "applicant_address",
-        "label": "8d. Applicant Address",
-        "children": [
             {"type": "field", "definition": "/properties/applicant/properties/street1"},
             {"type": "field", "definition": "/properties/applicant/properties/street2"},
             {"type": "field", "definition": "/properties/applicant/properties/city"},
@@ -723,22 +732,6 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/applicant/properties/province"},
             {"type": "field", "definition": "/properties/applicant/properties/country"},
             {"type": "field", "definition": "/properties/applicant/properties/zip_code"},
-        ],
-    },
-    {
-        "type": "section",
-        "name": "department_info",
-        "label": "8e. Department & Division Info",
-        "children": [
-            {"type": "field", "definition": "/properties/department_name"},
-            {"type": "field", "definition": "/properties/division_name"},
-        ],
-    },
-    {
-        "type": "section",
-        "name": "contact_info",
-        "label": "8f. Contact Person Information",
-        "children": [
             {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
             {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
             {"type": "field", "definition": "/properties/contact_person/properties/middle_name"},
@@ -753,7 +746,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "name": "applicant_type",
+        "name": "type_of_applicant",
         "label": "9. Type of Applicant",
         "children": [
             {"type": "field", "definition": "/properties/applicant_type_code"},
@@ -762,13 +755,13 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "name": "agency_info",
+        "name": "federal_agency",
         "label": "10. Name of Federal Agency",
         "children": [{"type": "field", "definition": "/properties/agency_name"}],
     },
     {
         "type": "section",
-        "name": "agency_info",
+        "name": "assistance_listing",
         "label": "11. Assistance Listing Number/Title",
         "children": [
             {"type": "field", "definition": "/properties/assistance_listing_number"},
@@ -786,7 +779,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "name": "competition_info",
+        "name": "competition_identification",
         "label": "13. Competition Identification Number/Title",
         "children": [
             {"type": "field", "definition": "/properties/competition_identification_number"},
@@ -804,7 +797,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "project_title",
-        "label": "15. Descriptive Title of Applicant’s Project",
+        "label": "15. Descriptive Title of Applicant's Project",
         "children": [
             {"type": "field", "definition": "/properties/project_title"},
             {
@@ -830,7 +823,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "name": "congressional_districts",
+        "name": "project_dates",
         "label": "17. Proposed Project Start and End Dates",
         "children": [
             {"type": "field", "definition": "/properties/project_start_date"},
@@ -854,7 +847,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "state_review",
-        "label": "19. Is Application Subject to Review by State Under Executive Order 12372?",
+        "label": "19. Is Application Subject to Review by State Under Executive Order?",
         "children": [
             {"type": "field", "definition": "/properties/state_review"},
             {"type": "field", "definition": "/properties/state_review_available_date"},
