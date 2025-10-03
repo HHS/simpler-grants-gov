@@ -20,7 +20,11 @@ python run.py \
     --org "HHS" \
     --repo "simpler-grants-gov" \
     --label "Coplanning Proposal" \
-    --issue-section "Summary" \
+    --issue-sections "Summary" \
+    --issue-sections "Problem Statement" \
+    --issue-sections "Proposed Solution" \
+    --issue-sections "Success Criteria" \
+    --issue-sections "Additional Context" \
     --platform "fider" \
     --sync-direction "github-to-platform" \
     --update-existing
@@ -37,7 +41,11 @@ python run.py \
     --org "HHS" \
     --repo "simpler-grants-gov" \
     --label "Coplanning Proposal" \
-    --issue-section "Summary" \
+    --issue-sections "Summary" \
+    --issue-sections "Problem Statement" \
+    --issue-sections "Proposed Solution" \
+    --issue-sections "Success Criteria" \
+    --issue-sections "Additional Context" \
     --platform "fider" \
     --sync-direction "platform-to-github"
 ```
@@ -51,7 +59,10 @@ The CLI supports the following options:
 - `--label`: The GitHub issue label to sync data from
 - `--state`: The GitHub issue state to sync data from (e.g. `open`, `closed`, `all`), defaults to `open`
 - `--batch`: The number of issues to sync at a time, defaults to `100` which is the max batch size for the GitHub API
-- `--issue-section`: The section of the GitHub issue body to use for the Fider post description
+- `--issue-sections`: The sections of the GitHub issue body to use for the Fider post description. Can be specified multiple times, or can receive multiple string arguments. When passing multiple arguments, each needs to be enclosed in quotes. For example:
+  ```bash
+  --issue-sections "Summary" "Problem Statement" "Proposed Solution" "Success Criteria" "Additional Context"
+  ```
 - `--platform`: The platform to sync to (currently only `fider` is supported) but it could be extended to other platforms in the future
 - `--sync-direction`: The direction of the sync `github-to-platform` or `platform-to-github`
 - `--update-existing`: Whether to update existing posts on the platform with the latest GitHub issue data

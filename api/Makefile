@@ -286,6 +286,12 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
+openapi-spec-common-grants:
+	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml 
+
+check-spec: openapi-spec-common-grants
+	cg check spec ./openapi-cg.generated.yml
+
 
 copy-oracle-data:
 	$(FLASK_CMD) data-migration copy-oracle-data
@@ -298,6 +304,7 @@ seed-local-legacy-tables:
 
 generate-internal-token:
 	$(FLASK_CMD) task generate-internal-token $(args)
+
 
 ##################################################
 # Tasks/Jobs
@@ -362,3 +369,6 @@ start-mock-soap-services: ## start applicants soap api
 #   make setup-soap-proxy cert_dir="~/certs/dir/"
 setup-soap-proxy:
 	./bin/setup-soap.sh $(cert_dir)
+
+validate-simpler-endpoints:
+	$(PY_RUN_CMD) validate-simpler-endpoints
