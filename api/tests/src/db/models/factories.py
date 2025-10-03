@@ -41,6 +41,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
+    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
@@ -1356,6 +1357,10 @@ class FormFactory(BaseFactory):
             },
         },
     ]
+
+    form_type = FormType.SF424
+    sgg_version = "1.0"
+    is_deprecated = False
 
     class Params:
         with_instruction = factory.Trait(
