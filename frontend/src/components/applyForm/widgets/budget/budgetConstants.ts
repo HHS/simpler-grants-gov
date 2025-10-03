@@ -1,4 +1,4 @@
-export const BUDGET_ACTIVITY_COLUMNS = [0, 1, 2, 3] as const;
+export const BUDGET_ACTIVITY_COLUMNS = [0, 1, 2, 3, 4] as const;
 
 export const QUARTERS = [
   { key: "first_quarter_amount", quarter: "1st Quarter", label: "A" },

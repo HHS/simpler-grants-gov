@@ -37,6 +37,7 @@ export const HelperText: React.FC<
       "width-full",
       "padding-top-2",
       "margin-top-1",
+      "text-nowrap",
       hasHorizontalLine && "border-top-2px",
       className,
     ]
