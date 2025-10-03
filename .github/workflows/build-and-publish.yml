@@ -155,6 +155,7 @@ jobs:
         run: |
           echo "Commit hash: *${{  needs.get-commit-hash.outputs.commit_hash }}*"
           echo "Check cache result: *${{ steps.check-cached-docker-image.outputs.cache-hit }}*, ${{ steps.check-cached-docker-image.outputs.cache-matched-key }}, ${{ steps.check-cached-docker-image.outputs.cache-primary-key }} "
+          echo "Will publish? ${{ inputs.publish }}"
           make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build \
           OPTIONAL_BUILD_FLAGS=" --cache-from=type=local,src=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache"
           echo "built=true" >> "$GITHUB_OUTPUT"
@@ -172,7 +173,7 @@ jobs:
           key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
 
       - name: Restore cached Docker image
-        if: steps.check-image-published.outputs.is_image_published != 'true' && steps.build-release-container.outputs.built != 'true'
+        if: steps.check-image-published.outputs.is_image_published != 'true' && steps.build-release-container.outputs.built != 'true' && inputs.publish == true
         uses: actions/cache/restore@v4
         with:
           fail-on-cache-miss: true
@@ -180,7 +181,7 @@ jobs:
           key: ${{ inputs.app_name }}-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
 
       - name: Load cached Docker image
-        if: steps.check-image-published.outputs.is_image_published != 'true' && steps.build-release-container.outputs.built != 'true'
+        if: steps.check-image-published.outputs.is_image_published != 'true' && steps.build-release-container.outputs.built != 'true' && inputs.publish == true
         run: |
           docker load < /tmp/docker-image.tar
 
