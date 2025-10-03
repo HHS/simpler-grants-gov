@@ -67,8 +67,11 @@ async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
 
   const session = await getSession();
   if (!session?.token) {
-    console.error("not logged in");
-    return;
+    return (
+      <GridContainer className="padding-top-2 tablet:padding-y-6">
+        <div>not logged in</div>
+      </GridContainer>
+    );
   }
   let organizationDetails;
   try {

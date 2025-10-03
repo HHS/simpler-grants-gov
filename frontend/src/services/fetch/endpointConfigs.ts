@@ -82,7 +82,7 @@ export const searchAgenciesEndpoint = {
   method: "POST" as ApiMethod,
 };
 
-export const getOrganizationsEndpoint = {
+export const getOrganizationEndpoint = {
   basePath: environment.API_URL,
   version: "v1",
   namespace: "organizations",

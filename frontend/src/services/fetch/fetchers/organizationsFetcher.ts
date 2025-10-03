@@ -1,10 +1,34 @@
 import { Organization } from "src/types/applicationResponseTypes";
-import { fakeOrganizationDetailsResponse } from "src/utils/testing/fixtures";
+
+import { fetchUserWithMethod, getOrganization } from "./fetchers";
 
 export const getOrganizationDetails = async (
-  _token: string,
-  _userId: string,
-  _organizationId: string,
+  token: string,
+  userId: string,
+  organizationId: string,
 ): Promise<Organization> => {
-  return Promise.resolve(fakeOrganizationDetailsResponse);
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const resp = await getOrganization({
+    subPath: organizationId,
+    additionalHeaders: ssgToken,
+  });
+  const json = (await resp.json()) as { data: Organization };
+  return json.data;
+};
+
+export const getUserOrganizations = async (
+  token: string,
+  userId: string,
+): Promise<Organization[]> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const resp = await fetchUserWithMethod("GET")({
+    subPath: `${userId}/organizations`,
+    additionalHeaders: ssgToken,
+  });
+  const json = (await resp.json()) as { data: Organization[] };
+  return json.data;
 };
