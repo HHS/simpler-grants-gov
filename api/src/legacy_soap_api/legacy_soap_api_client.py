@@ -85,7 +85,7 @@ class BaseSOAPClient:
 
         try:
             proxy_response_payload = SOAPPayload(
-                proxy_response.data.decode(errors="replace"),
+                proxy_response.to_bytes().decode(errors="replace"),
                 operation_name=self.operation_config.response_operation_name,
                 force_list_attributes=self.operation_config.force_list_attributes,
             )
@@ -150,7 +150,9 @@ class BaseSOAPClient:
                 },
             )
 
-    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
+    def get_simpler_soap_response(
+        self, proxy_response: SOAPResponse, compare: bool = False
+    ) -> tuple:
         """
         This method is responsible getting the simpler soap xml payload.
 
@@ -158,13 +160,6 @@ class BaseSOAPClient:
         proxy responses. We then utilize the SOAPPayload class to get the
         XML soap response from the validated XML dicts.
         """
-        proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
-        log_local(
-            msg="proxy response validated dict",
-            data=proxy_response_soap_dict,
-            formatter=json_formatter,
-        )
-
         simpler_response_soap_dict = self.get_soap_response_dict()
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
@@ -180,11 +175,18 @@ class BaseSOAPClient:
         )
         log_local(msg="simpler response XML", data=simpler_response_xml, formatter=xml_formatter)
 
-        # We will only run diffs for responses that do not match.
-        if proxy_response_soap_dict == simpler_response_soap_dict:
-            logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
-        else:
-            self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
+        if compare:
+            proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
+            log_local(
+                msg="proxy response validated dict",
+                data=proxy_response_soap_dict,
+                formatter=json_formatter,
+            )
+            # We will only run diffs for responses that do not match.
+            if proxy_response_soap_dict == simpler_response_soap_dict:
+                logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
+            else:
+                self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
 
         use_simpler_response = False
         return (
