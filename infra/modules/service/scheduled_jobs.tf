@@ -54,6 +54,8 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
               {
                 "Name" : var.service_name,
                 "Command" : each.value.task_command,
+                "Cpu" : each.value.cpu - 256,
+                "Memory" : each.value.mem - 256,
                 "Environment" : [
                   {
                     "Name" : "SCHEDULED_JOB_NAME",

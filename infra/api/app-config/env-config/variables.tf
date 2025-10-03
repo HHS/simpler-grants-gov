@@ -197,12 +197,3 @@ variable "secondary_domain_names" {
   description = "A list of domain names the ALB can also use"
   default     = []
 }
-
-variable "scheduled_jobs_config" {
-  type = map(object({
-    cpu = optional(number, 1024)
-    mem = optional(number, 4096)
-  }))
-  description = ""
-  default     = {}
-}
