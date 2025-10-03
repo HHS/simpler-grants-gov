@@ -281,8 +281,8 @@ variable "scheduled_jobs" {
     task_command        = list(string)
     schedule_expression = string
     state               = string
-    cpu                 = optional(number, 256)
-    mem                 = optional(number, 512)
+    cpu                 = optional(number, 1024)
+    mem                 = optional(number, 2048)
   }))
   default = {}
 }
