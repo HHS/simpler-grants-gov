@@ -185,5 +185,6 @@ jobs:
           docker load < /tmp/docker-image.tar
 
       - name: Publish release
-        if: steps.check-image-published.outputs.is_image_published != 'true' && inputs.publish == true
+        # only publish if we're going to deploy
+        if: ! contains(fromJSON('["pull_request"]'), github.event_name) && steps.check-image-published.outputs.is_image_published != 'true' && inputs.publish == true
         run: make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-publish
