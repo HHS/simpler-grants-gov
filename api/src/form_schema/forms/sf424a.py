@@ -1,5 +1,6 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.services.xml_generation.constants import CURRENCY_REGEX
 
@@ -409,4 +410,7 @@ SF424a_v1_0 = Form(
     # No rule schema yet, we'll likely but automated sums in this
     form_rule_schema=None,
     # No form instructions at the moment.
+    form_type=FormType.SF424A,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

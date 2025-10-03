@@ -138,11 +138,14 @@ export const InformationCard = ({
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
-            <EditAppFilingName
-              applicationId={applicationDetails.application_id}
-              applicationName={applicationDetails.application_name}
-              opportunityName={opportunityName}
-            />
+            {applicationDetails.application_status !== Status.SUBMITTED &&
+              applicationDetails.application_status !== Status.ACCEPTED && (
+                <EditAppFilingName
+                  applicationId={applicationDetails.application_id}
+                  applicationName={applicationDetails.application_name}
+                  opportunityName={opportunityName}
+                />
+              )}
           </h3>
         </Grid>
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
