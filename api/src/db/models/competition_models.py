@@ -222,7 +222,7 @@ class Form(ApiSchemaTable, TimestampMixin):
         "form_type_id",
         LookupColumn(LkFormType),
         ForeignKey(LkFormType.form_type_id),
-        primary_key=True,
+        nullable=False,
     )
     sgg_version: Mapped[str | None]
     is_deprecated: Mapped[bool | None]

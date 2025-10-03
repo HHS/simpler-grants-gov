@@ -1358,7 +1358,7 @@ class FormFactory(BaseFactory):
         },
     ]
 
-    form_type = FormType.SF424
+    form_type_id = FormType.SF424.value
     sgg_version = "1.0"
     is_deprecated = False
 
