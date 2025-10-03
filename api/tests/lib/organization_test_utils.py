@@ -55,12 +55,6 @@ def create_user_in_org(
 
         organization = OrganizationFactory.create(**org_kwargs)
 
-    if not privileges and not role:
-        # Create organization-user relationship without role (for testing no privileges)
-        OrganizationUserFactory.create(
-            user=user, organization=organization, is_organization_owner=is_organization_owner
-        )
-
     # Create role with specified privileges (only if privileges provided)
     if privileges:
         role = RoleFactory.create(privileges=privileges, is_org_role=True)
