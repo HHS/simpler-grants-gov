@@ -1455,6 +1455,7 @@ export const messages = {
     pageTitle: "User Workspace | Simpler.Grants.gov",
     title: "User Workspace",
     fetchError: "Error fetching user data. Please try refreshing the page.",
+    organizations: "Organizations",
   },
   OrganizationDetail: {
     pageTitle: "Organization",
