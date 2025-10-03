@@ -10,6 +10,7 @@ from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSc
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import ApplicationStatus, ExternalUserType, Privilege
+from src.db.models.competition_models import Application
 from src.db.models.user_models import (
     AgencyUserRole,
     ApplicationUserRole,
@@ -436,7 +437,11 @@ class GetUserRolesAndPrivilegesApplicationSchema(Schema):
             "description": "The internal ID of the application",
         }
     )
-
+    organization_id = fields.String(
+        metadata={
+            "description": "The internal ID of the organization that owns the application",
+        }
+    )
 
 class GetUserRolesAndPrivilegesAgencySchema(Schema):
     agency_id = fields.String(
