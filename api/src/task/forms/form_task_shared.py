@@ -48,6 +48,7 @@ def build_form_json(form: Form, form_instruction_id: str | None) -> dict:
         "form_rule_schema": form.form_rule_schema,
         "form_ui_schema": form.form_ui_schema,
         "form_version": form.form_version,
+        "json_to_xml_schema": form.json_to_xml_schema,
         "legacy_form_id": form.legacy_form_id,
         "omb_number": form.omb_number,
         "short_form_name": form.short_form_name,
