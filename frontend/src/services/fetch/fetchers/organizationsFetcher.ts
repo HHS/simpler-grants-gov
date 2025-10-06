@@ -4,7 +4,6 @@ import { fetchUserWithMethod, getOrganization } from "./fetchers";
 
 export const getOrganizationDetails = async (
   token: string,
-  userId: string,
   organizationId: string,
 ): Promise<Organization> => {
   const ssgToken = {
