@@ -9,6 +9,7 @@ import { notFound, redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
+import { OrganizationRoster } from "src/components/organization/OrganizationRoster";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -27,11 +28,7 @@ export async function generateMetadata({
     if (!session?.token) {
       throw new Error("not logged in");
     }
-    const organizationDetails = await getOrganizationDetails(
-      session.token,
-      session.user_id,
-      id,
-    );
+    const organizationDetails = await getOrganizationDetails(session.token, id);
     title = `${t("OrganizationDetail.pageTitle")} - ${organizationDetails.sam_gov_entity.legal_business_name || ""}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
@@ -59,11 +56,7 @@ async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
   }
   let organizationDetails;
   try {
-    organizationDetails = await getOrganizationDetails(
-      session.token,
-      session.user_id,
-      id,
-    );
+    organizationDetails = await getOrganizationDetails(session.token, id);
   } catch (e) {
     console.error("Unable to fetch user details", e);
   }
@@ -82,6 +75,7 @@ async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
       <OrganizationInfo
         organizationDetails={organizationDetails.sam_gov_entity}
       />
+      <OrganizationRoster organizationId={id} />
     </GridContainer>
   );
 }
