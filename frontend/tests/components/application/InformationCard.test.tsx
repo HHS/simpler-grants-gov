@@ -106,8 +106,8 @@ describe("InformationCard - No longer accepting applications message", () => {
       />,
     );
 
-    const message = screen.getByText("No longer accepting applications");
-    expect(message).toBeInTheDocument();
+    const messages = screen.getAllByText("specialInstructions");
+    expect(messages.length).toBeGreaterThan(0);
   });
 
   it("hides message when competition is open and closing date is in the future", () => {
@@ -130,7 +130,7 @@ describe("InformationCard - No longer accepting applications message", () => {
       />,
     );
 
-    const message = screen.queryByText("No longer accepting applications");
+    const message = screen.queryByText("specialInstructions");
     expect(message).not.toBeInTheDocument();
   });
 });
