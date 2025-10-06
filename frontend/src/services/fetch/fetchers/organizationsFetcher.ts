@@ -1,11 +1,7 @@
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserDetail } from "src/types/userTypes";
 
-import {
-  fetchOrganizationWithMethod,
-  fetchUserWithMethod,
-  getOrganization,
-} from "./fetchers";
+import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
 export const getOrganizationDetails = async (
   token: string,
