@@ -9,7 +9,7 @@ import {
 const getApplicationPrivileges = (
   userPrivileges: UserPrivilegesResponse,
   applicationId: string,
-) => {
+): string[] => {
   return userPrivileges.application_users
     .filter(
       (roleDefinition) =>
@@ -31,7 +31,7 @@ const getApplicationPrivileges = (
 const getOrganizationPrivileges = (
   userPrivileges: UserPrivilegesResponse,
   organizationId: string,
-) => {
+): string[] => {
   return userPrivileges.organization_users
     .filter(
       (roleDefinition) =>
@@ -53,7 +53,7 @@ const getOrganizationPrivileges = (
 export const getAgencyPrivileges = (
   userPrivileges: UserPrivilegesResponse,
   agencyId: string,
-) => {
+): string[] => {
   return userPrivileges.agency_users
     .filter((roleDefinition) => roleDefinition.agency.agency_id === agencyId)
     .reduce(
@@ -72,7 +72,7 @@ export const getAgencyPrivileges = (
 const getUserPermissionsForResource = (
   requiredPrivilege: UserPrivilegeDefinition,
   userPrivileges: UserPrivilegesResponse,
-) => {
+): string[] => {
   if (requiredPrivilege.resourceType === "application") {
     return getApplicationPrivileges(
       userPrivileges,
@@ -91,12 +91,16 @@ const getUserPermissionsForResource = (
       requiredPrivilege.resourceId || "",
     );
   }
+  console.error(
+    `unknown resource type ${requiredPrivilege.resourceType as string}`,
+  );
+  return [];
 };
 
 export const checkPrivileges = (
   requiredPrivileges: UserPrivilegeDefinition[],
   userPrivileges: UserPrivilegesResponse,
-) => {
+): boolean => {
   return requiredPrivileges.some((requiredPrivilege) => {
     // get relevant user permissions for each required resource
     const userPermissionsForResource = getUserPermissionsForResource(
