@@ -100,6 +100,11 @@ class FormAlphaSchema(Schema):
         allow_none=True, metadata={"description": "The rule schema for the form"}
     )
 
+    json_to_xml_schema = fields.Dict(
+        allow_none=True,
+        metadata={"description": "The JSON to XML schema mapping configuration for the form"},
+    )
+
     created_at = fields.DateTime(
         metadata={"description": "The timestamp when the form was created"}
     )
@@ -190,6 +195,11 @@ class FormUpdateRequestSchema(Schema):
 
     form_rule_schema = fields.Dict(
         allow_none=True, metadata={"description": "The rule schema for the form"}
+    )
+
+    json_to_xml_schema = fields.Dict(
+        allow_none=True,
+        metadata={"description": "The JSON to XML schema mapping configuration for the form"},
     )
 
 
