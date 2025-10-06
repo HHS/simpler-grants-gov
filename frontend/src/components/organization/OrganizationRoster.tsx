@@ -24,6 +24,16 @@ const OrganizationUserRow = ({ email, profile, roles }: UserDetail) => {
   );
 };
 
+const OrganizationRosterInfo = () => {
+  const t = useTranslations("OrganizationDetail.rosterTable");
+  return (
+    <>
+      <h3>{t("title")}</h3>
+      <div>{t("explanation")}</div>
+    </>
+  );
+};
+
 export const OrganizationRoster = async ({
   organizationId,
 }: {
@@ -52,26 +62,29 @@ export const OrganizationRoster = async ({
 
   if (organizationUsers?.length) {
     return (
-      <Table className="width-full overflow-wrap simpler-application-forms-table">
-        <thead>
-          <tr>
-            <th scope="col" className="bg-base-lightest padding-y-205">
-              {t("headings.email")}
-            </th>
-            <th scope="col" className="bg-base-lightest padding-y-205">
-              {t("headings.name")}
-            </th>
-            <th scope="col" className="bg-base-lightest padding-y-205">
-              {t("headings.roles")}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {organizationUsers.map((props: UserDetail) => (
-            <OrganizationUserRow {...props} key={props.email} />
-          ))}
-        </tbody>
-      </Table>
+      <>
+        <OrganizationRosterInfo />
+        <Table className="width-full overflow-wrap simpler-application-forms-table">
+          <thead>
+            <tr>
+              <th scope="col" className="bg-base-lightest padding-y-205">
+                {t("headings.email")}
+              </th>
+              <th scope="col" className="bg-base-lightest padding-y-205">
+                {t("headings.name")}
+              </th>
+              <th scope="col" className="bg-base-lightest padding-y-205">
+                {t("headings.roles")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {organizationUsers.map((props: UserDetail) => (
+              <OrganizationUserRow {...props} key={props.email} />
+            ))}
+          </tbody>
+        </Table>
+      </>
     );
   }
 };
