@@ -4317,6 +4317,9 @@ components:
         application_id:
           type: string
           description: The internal ID of the application
+        organization_id:
+          type: string
+          description: The internal ID of the organization that owns the application
     UserApplication:
       type: object
       properties:
