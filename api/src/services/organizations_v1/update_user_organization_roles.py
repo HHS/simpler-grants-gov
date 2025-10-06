@@ -24,12 +24,13 @@ logger = logging.getLogger(__name__)
 
 ADMIN_ROLES = [str(ORG_ADMIN_ID)]
 
+
 def get_role(db_session: db.Session, role_ids: set[str]) -> Sequence[Role]:
     """Retrieve Role objects matching the given role_ids"""
     # TODO: In the future, extend this query to check if the role is either:
     #         - a core role (shared across all orgs), OR
     #         - owned by the organization making the request
-    return (
+    roles = (
         db_session.execute(
             select(Role)
             .join(LinkRoleRoleType, LinkRoleRoleType.role_id == Role.role_id)
@@ -40,6 +41,11 @@ def get_role(db_session: db.Session, role_ids: set[str]) -> Sequence[Role]:
         .scalars()
         .all()
     )
+
+    if len(roles) != len(role_ids):
+        missing = role_ids - {str(r.role_id) for r in roles}
+        raise_flask_error(404, message=f"Could not find the following role IDs: {missing}")
+    return roles
 
 
 def validate_organization_user(
@@ -59,9 +65,6 @@ def validate_organization_user(
 def update_user_organization_roles(
     db_session: db.Session, user: User, target_user_id: UUID, organization_id: UUID, data: dict
 ) -> list[Role]:
-    import pdb
-
-    pdb.set_trace()
     """Update roles of a user in an organization, after validating permissions and membership."""
     logger.info("Attempting to update roles for user")
     # Lookup organization

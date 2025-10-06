@@ -263,3 +263,23 @@ class TestUpdateUserOrganizationRoles:
             .one()
         )
         assert db_user_role.created_at == org_user_role.created_at
+
+    def test_update_user_organization_roles_404_missing_role_ids(
+        self, client, db_session, enable_factory_create, role_b
+    ):
+        """Should raise error if any of the role_ids are not found in the database."""
+
+        # Create user in organization with given role
+        request_user, org, token = create_user_in_org(db_session=db_session, role=role_b)
+
+        # Create target user
+        org_user = OrganizationUserFactory.create(organization=org)
+
+        # Make request
+        resp = client.put(
+            f"/v1/organizations/{org.organization_id}/users/{org_user.user_id}",
+            headers={"X-SGG-Token": token},
+            json={"role_ids": [str(role_b.role_id), str(uuid4())]},
+        )
+
+        assert resp.status_code == 404
