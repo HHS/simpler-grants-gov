@@ -11,7 +11,8 @@ const OrganizationUserRow = ({ email, profile, roles }: UserDetail) => {
   const { first_name, last_name } = profile || {};
   const fullName = first_name && last_name ? `${first_name} ${last_name}` : "";
   const roleNames = roles?.reduce(
-    (joined, { role_name }) => joined + `, ${role_name}`,
+    (joined, { role_name }, index) =>
+      joined + `${index > 0 ? ", " : ""}${role_name}`,
     "",
   );
   return (
@@ -51,17 +52,25 @@ export const OrganizationRoster = async ({
 
   if (organizationUsers?.length) {
     return (
-      <Table>
+      <Table className="width-full overflow-wrap simpler-application-forms-table">
         <thead>
           <tr>
-            <th scope="col">{t("headings.email")}</th>
-            <th scope="col">{t("headings.name")}</th>
-            <th scope="col">{t("headings.roles")}</th>
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("headings.email")}
+            </th>
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("headings.name")}
+            </th>
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("headings.roles")}
+            </th>
           </tr>
         </thead>
-        {organizationUsers.map((props: UserDetail) => (
-          <OrganizationUserRow {...props} key={props.email} />
-        ))}
+        <tbody>
+          {organizationUsers.map((props: UserDetail) => (
+            <OrganizationUserRow {...props} key={props.email} />
+          ))}
+        </tbody>
       </Table>
     );
   }
