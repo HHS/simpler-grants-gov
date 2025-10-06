@@ -4,10 +4,10 @@ import pytest
 
 import src.services.organizations_v1.update_user_organization_roles as update_user_org_roles
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import Privilege, RoleType
+from src.db.models.user_models import OrganizationUserRole
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
-    OrganizationFactory,
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
     RoleFactory,
@@ -28,19 +28,25 @@ class TestUpdateUserOrganizationRoles:
                 Privilege.MANAGE_ORG_ADMIN_MEMBERS,
                 Privilege.MANAGE_ORG_MEMBERS,
                 Privilege.VIEW_ORG_MEMBERSHIP,
-            }
+            },
+            is_core=True,
+            role_types=[RoleType.ORGANIZATION],
         )
 
     @pytest.fixture
     def admin_role_b(self):
         return RoleFactory.create(
-            privileges={Privilege.MANAGE_ORG_ADMIN_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP}
+            privileges={Privilege.MANAGE_ORG_ADMIN_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP},
+            is_core=True,
+            role_types=[RoleType.ORGANIZATION],
         )
 
     @pytest.fixture
     def role_b(self):
         return RoleFactory.create(
-            privileges={Privilege.MANAGE_ORG_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP}
+            privileges={Privilege.MANAGE_ORG_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP},
+            is_core=True,
+            role_types=[RoleType.ORGANIZATION],
         )
 
     @pytest.fixture
@@ -50,7 +56,9 @@ class TestUpdateUserOrganizationRoles:
                 Privilege.VIEW_APPLICATION,
                 Privilege.SUBMIT_APPLICATION,
                 Privilege.LIST_APPLICATION,
-            }
+            },
+            is_core=True,
+            role_types=[RoleType.ORGANIZATION],
         )
 
     @pytest.fixture
@@ -170,17 +178,11 @@ class TestUpdateUserOrganizationRoles:
         assert resp.status_code == 404
 
     def test_update_user_organization_roles_403_target_user(
-        self,
-        client,
-        db_session,
-        user,
-        enable_factory_create,
+        self, client, db_session, user, enable_factory_create, role_b
     ):
         """Should return 403 if target user is not part of the organization."""
         # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        # Create Organization
-        org = OrganizationFactory.create()
+        _, org, token = create_user_in_org(db_session=db_session, role=role_b)
 
         # Make request
         resp = client.put(
@@ -188,7 +190,7 @@ class TestUpdateUserOrganizationRoles:
             headers={"X-SGG-Token": token},
             json={"role_ids": []},
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 404
 
     def test_update_user_organization_roles_403_no_access(
         self, client, db_session, user, enable_factory_create, role_c
@@ -230,3 +232,34 @@ class TestUpdateUserOrganizationRoles:
             json={"role_ids": [admin_role_a.role_id]},
         )
         assert resp.status_code == 403
+
+    def test_update_user_organization_roles_existing_roles(
+        self, client, db_session, user, enable_factory_create, role_b
+    ):
+        """Should not update if it is the same exact set of roles as the existing roles."""
+
+        # Create user in organization with given role
+        request_user, org, token = create_user_in_org(db_session=db_session, role=role_b)
+
+        # Create target user in organization with roles
+        org_user = OrganizationUserFactory.create(organization=org, user=user)
+        org_user_role = OrganizationUserRoleFactory(organization_user=org_user, role=role_b)
+
+        # target_user, _, _ = create_user_in_org(db_session=db_session, role=role_b, organization=org)
+
+        # Make request
+        resp = client.put(
+            f"/v1/organizations/{org.organization_id}/users/{user.user_id}",
+            headers={"X-SGG-Token": token},
+            json={"role_ids": get_role_id([role_b])},
+        )
+        data = resp.get_json()["data"]
+        assert resp.status_code == 200
+        assert len(data) == 1
+
+        db_user_role = (
+            db_session.query(OrganizationUserRole)
+            .filter(OrganizationUserRole.organization_user_id == org_user.organization_user_id)
+            .one()
+        )
+        assert db_user_role.created_at == org_user_role.created_at
