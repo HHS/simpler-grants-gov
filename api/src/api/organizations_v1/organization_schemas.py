@@ -1,4 +1,5 @@
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import RoleSchema
 
@@ -76,7 +77,7 @@ class OrganizationListRolesResponseSchema(AbstractResponseSchema):
 
 
 class OrganizationUpdateUserRolesRequestSchema(Schema):
-    role_ids = fields.List(fields.String(required=True))
+    role_ids = fields.List(fields.String(required=True), validate=Length(min=1))
 
 
 class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
