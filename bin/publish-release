@@ -14,15 +14,17 @@ echo "  app_name=${app_name}"
 echo "  image_name=${image_name}"
 echo "  image_tag=${image_tag}"
 
-# Need to init module when running in CD since GitHub actions does a fresh checkout of repo
-terraform -chdir="infra/${app_name}/app-config" init > /dev/null
-terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
-image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".name")"
 echo "*** Troubleshoot region"
 aws configure list
 echo "***"
 aws configure list | grep region
 echo "***"
+
+# Need to init module when running in CD since GitHub actions does a fresh checkout of repo
+terraform -chdir="infra/${app_name}/app-config" init > /dev/null
+terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
+image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".name")"
+
 region=$(./bin/current-region)
 echo "region: $region"
 echo "AWS_REGION: $AWS_REGION"
