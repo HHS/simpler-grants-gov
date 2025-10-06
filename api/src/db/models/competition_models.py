@@ -8,13 +8,19 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    CompetitionOpenToApplicant,
+    FormFamily,
+    FormType,
+)
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
+    LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
@@ -211,6 +217,14 @@ class Form(ApiSchemaTable, TimestampMixin):
 
     form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
     json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
+
+    form_type: Mapped[FormType | None] = mapped_column(
+        "form_type_id",
+        LookupColumn(LkFormType),
+        ForeignKey(LkFormType.form_type_id),
+    )
+    sgg_version: Mapped[str | None]
+    is_deprecated: Mapped[bool | None]
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):

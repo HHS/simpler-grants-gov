@@ -1,5 +1,6 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 
 FORM_JSON_SCHEMA = {
@@ -87,4 +88,7 @@ ProjectAbstractSummary_v2_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     # This form does not have instructions.
+    form_type=FormType.PROJECT_ABSTRACT_SUMMARY,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

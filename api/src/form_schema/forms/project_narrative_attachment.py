@@ -1,5 +1,6 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 
 FORM_JSON_SCHEMA = {
@@ -50,4 +51,7 @@ ProjectNarrativeAttachment_v1_2 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     form_instruction_id=uuid.UUID("be89e8c1-06d2-4a81-b157-41c1a5db5acf"),
+    form_type=FormType.PROJECT_NARRATIVE_ATTACHMENT,
+    sgg_version="1.0",
+    is_deprecated=False,
 )
