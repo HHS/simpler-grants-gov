@@ -8,7 +8,6 @@ from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import Privilege, RoleType
-from src.constants.static_role_values import ORG_ADMIN_ID
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import (
     LinkRoleRoleType,
@@ -20,9 +19,6 @@ from src.db.models.user_models import (
 from src.services.organizations_v1.get_organization import get_organization
 
 logger = logging.getLogger(__name__)
-
-
-ADMIN_ROLES = [str(ORG_ADMIN_ID)]
 
 
 def get_role(db_session: db.Session, role_ids: set[str]) -> Sequence[Role]:
@@ -74,10 +70,6 @@ def update_user_organization_roles(
     if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
         raise_flask_error(403, "Forbidden")
 
-    if any(role_id in ADMIN_ROLES for role_id in new_role_ids):
-        logger.info("Admin role assignment requested")
-        if not can_access(user, {Privilege.MANAGE_ORG_ADMIN_MEMBERS}, organization):
-            raise_flask_error(403, "Forbidden")
     # Validate target user exists
     org_user = validate_organization_user(db_session, target_user_id, organization)
 

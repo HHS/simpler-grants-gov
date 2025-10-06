@@ -2,7 +2,6 @@ from uuid import uuid4
 
 import pytest
 
-import src.services.organizations_v1.update_user_organization_roles as update_user_org_roles
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.user_models import OrganizationUserRole
@@ -22,21 +21,9 @@ class TestUpdateUserOrganizationRoles:
     """Test POST /v1/organizations/:organization_id/users/:user_id endpoint"""
 
     @pytest.fixture
-    def admin_role_a(self):
+    def role_a(self):
         return RoleFactory.create(
-            privileges={
-                Privilege.MANAGE_ORG_ADMIN_MEMBERS,
-                Privilege.MANAGE_ORG_MEMBERS,
-                Privilege.VIEW_ORG_MEMBERSHIP,
-            },
-            is_core=True,
-            role_types=[RoleType.ORGANIZATION],
-        )
-
-    @pytest.fixture
-    def admin_role_b(self):
-        return RoleFactory.create(
-            privileges={Privilege.MANAGE_ORG_ADMIN_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP},
+            privileges={Privilege.MANAGE_ORG_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP},
             is_core=True,
             role_types=[RoleType.ORGANIZATION],
         )
@@ -44,7 +31,12 @@ class TestUpdateUserOrganizationRoles:
     @pytest.fixture
     def role_b(self):
         return RoleFactory.create(
-            privileges={Privilege.MANAGE_ORG_MEMBERS, Privilege.VIEW_ORG_MEMBERSHIP},
+            privileges={
+                Privilege.VIEW_ORG_MEMBERSHIP,
+                Privilege.VIEW_APPLICATION,
+                Privilege.SUBMIT_APPLICATION,
+                Privilege.LIST_APPLICATION,
+            },
             is_core=True,
             role_types=[RoleType.ORGANIZATION],
         )
@@ -61,55 +53,16 @@ class TestUpdateUserOrganizationRoles:
             role_types=[RoleType.ORGANIZATION],
         )
 
-    @pytest.fixture
-    def override_admin_roles(self, monkeypatch_class, admin_role_a, admin_role_b):
-        """Override the global ADMIN_ROLES list for the test suite."""
-        monkeypatch_class.setattr(
-            update_user_org_roles,
-            "ADMIN_ROLES",
-            [str(role.role_id) for role in [admin_role_a, admin_role_b]],
-        )
-
-    def test_update_user_organization_roles_admin(
-        self,
-        client,
-        db_session,
-        enable_factory_create,
-        override_admin_roles,
-        admin_role_a,
-        admin_role_b,
-    ):
-        """Should allow user with admin privileges to assign admin roles to a user."""
-
-        # Create user in organization with given role
-        request_user, org, token = create_user_in_org(db_session=db_session, role=admin_role_a)
-
-        # Create target user in organization
-        org_user = OrganizationUserFactory.create(organization=org)
-        roles_assigned = get_role_id([admin_role_a, admin_role_b])
-
-        # Make request
-        resp = client.put(
-            f"/v1/organizations/{org.organization_id}/users/{org_user.user_id}",
-            headers={"X-SGG-Token": token},
-            json={"role_ids": roles_assigned},
-        )
-        data = resp.get_json()["data"]
-
-        assert resp.status_code == 200
-        assert len(data) == len(roles_assigned)
-        assert [role["role_id"] for role in data] == roles_assigned
-
-    def test_update_user_organization_roles_non_admin_role(
-        self, client, db_session, enable_factory_create, role_b, role_c
+    def test_update_user_organization_roles(
+        self, client, db_session, enable_factory_create, role_a, role_b, role_c
     ):
         """Should allow non-admin user with manage privileges to assign non-admin roles."""
         # Create user in organization with given role
-        request_user, org, token = create_user_in_org(db_session=db_session, role=role_b)
+        request_user, org, token = create_user_in_org(db_session=db_session, role=role_a)
 
         # Create target user in organization
         org_user = OrganizationUserFactory.create(organization=org)
-        roles_assigned = get_role_id([role_c])
+        roles_assigned = get_role_id([role_b, role_c])
 
         # Make request
         resp = client.put(
@@ -128,14 +81,13 @@ class TestUpdateUserOrganizationRoles:
         client,
         db_session,
         enable_factory_create,
-        admin_role_a,
+        role_a,
         role_b,
         role_c,
-        admin_role_b,
     ):
         """Should overwrite existing roles with the new set of roles."""
         # Create user in organization with given role
-        _, org, token = create_user_in_org(db_session=db_session, role=role_b)
+        _, org, token = create_user_in_org(db_session=db_session, role=role_a)
 
         # Create target user with existing roles
         org_user = OrganizationUserFactory.create(organization=org)
@@ -147,7 +99,7 @@ class TestUpdateUserOrganizationRoles:
         assert user_role_1.role_id in original_role_ids
         assert user_role_2.role_id in original_role_ids
 
-        roles_assigned = get_role_id([admin_role_b])
+        roles_assigned = get_role_id([role_a])
 
         # overwrite with new role
         resp = client.put(
@@ -162,7 +114,7 @@ class TestUpdateUserOrganizationRoles:
         assert [role["role_id"] for role in data] == roles_assigned
 
     def test_update_user_organization_roles_404_organization(
-        self, client, db_session, user, enable_factory_create, role_b
+        self, client, db_session, user, enable_factory_create, role_a
     ):
         """Should return 404 when organization does not exist."""
         # Create JWT token
@@ -173,22 +125,22 @@ class TestUpdateUserOrganizationRoles:
         resp = client.put(
             f"/v1/organizations/{uuid4()}/users/{user.user_id}",
             headers={"X-SGG-Token": token},
-            json={"role_ids": [role_b.role_id]},
+            json={"role_ids": [role_a.role_id]},
         )
         assert resp.status_code == 404
 
     def test_update_user_organization_roles_403_target_user(
-        self, client, db_session, user, enable_factory_create, role_b
+        self, client, db_session, user, enable_factory_create, role_a
     ):
         """Should return 403 if target user is not part of the organization."""
         # Create JWT token
-        _, org, token = create_user_in_org(db_session=db_session, role=role_b)
+        _, org, token = create_user_in_org(db_session=db_session, role=role_a)
 
         # Make request
         resp = client.put(
             f"/v1/organizations/{org.organization_id}/users/{uuid4()}",
             headers={"X-SGG-Token": token},
-            json={"role_ids": [role_b.role_id]},
+            json={"role_ids": [role_a.role_id]},
         )
         assert resp.status_code == 404
 
@@ -209,43 +161,23 @@ class TestUpdateUserOrganizationRoles:
         )
         assert resp.status_code == 403
 
-    def test_update_user_organization_roles_403_no_admin_access(
+    def test_update_user_organization_roles_existing_roles(
         self,
         client,
         db_session,
         user,
         enable_factory_create,
+        role_a,
         role_b,
-        override_admin_roles,
-        admin_role_a,
-    ):
-        """Should return 403 if acting user can manage members but not admin members."""
-        # Create user in organization with limited privileges
-        _, org, token = create_user_in_org(db_session=db_session, role=role_b)
-        # Create target user in organization
-        org_user = OrganizationUserFactory.create(user=user, organization=org)
-
-        # Make request
-        resp = client.put(
-            f"/v1/organizations/{org.organization_id}/users/{org_user.user_id}",
-            headers={"X-SGG-Token": token},
-            json={"role_ids": [admin_role_a.role_id]},
-        )
-        assert resp.status_code == 403
-
-    def test_update_user_organization_roles_existing_roles(
-        self, client, db_session, user, enable_factory_create, role_b
     ):
         """Should not update if it is the same exact set of roles as the existing roles."""
 
         # Create user in organization with given role
-        request_user, org, token = create_user_in_org(db_session=db_session, role=role_b)
+        request_user, org, token = create_user_in_org(db_session=db_session, role=role_a)
 
         # Create target user in organization with roles
         org_user = OrganizationUserFactory.create(organization=org, user=user)
         org_user_role = OrganizationUserRoleFactory(organization_user=org_user, role=role_b)
-
-        # target_user, _, _ = create_user_in_org(db_session=db_session, role=role_b, organization=org)
 
         # Make request
         resp = client.put(
@@ -265,12 +197,12 @@ class TestUpdateUserOrganizationRoles:
         assert db_user_role.created_at == org_user_role.created_at
 
     def test_update_user_organization_roles_404_missing_role_ids(
-        self, client, db_session, enable_factory_create, role_b
+        self, client, db_session, enable_factory_create, role_a, role_b
     ):
         """Should raise error if any of the role_ids are not found in the database."""
 
         # Create user in organization with given role
-        request_user, org, token = create_user_in_org(db_session=db_session, role=role_b)
+        request_user, org, token = create_user_in_org(db_session=db_session, role=role_a)
 
         # Create target user
         org_user = OrganizationUserFactory.create(organization=org)
