@@ -185,7 +185,7 @@ export const InformationCard = ({
             </div>
             {isCompetitionClosed() && (
               <div className="margin-bottom-1 text-bold text-orange">
-                No longer accepting applications
+                {t("specialInstructions")}
               </div>
             )}
             {!applicationDetails.competition.is_open ? (
