@@ -6,7 +6,6 @@ import { FormGroup } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -25,7 +24,7 @@ function PrintWidget<
   formClassName,
   inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, description } = schema as S;
+  const { title } = schema as S;
 
   const error = rawErrors.length ? true : undefined;
 
@@ -35,13 +34,14 @@ function PrintWidget<
       key={`form-group__text-input--${id}`}
       error={error}
     >
-      <DynamicFieldLabel
-        idFor={id}
-        title={title}
-        required={required}
-        description={description as string}
-        labelType={"hide-helper-text"}
-      />
+      <div className="text-bold">
+        {title}
+        {required && (
+          <span className="usa-hint usa-hint--required text-no-underline">
+            *
+          </span>
+        )}
+      </div>
       {error && (
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}

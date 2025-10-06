@@ -6,9 +6,7 @@ import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { useEffect, useState } from "react";
 import { FormGroup } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UploadedFile, UswdsWidgetProps } from "src/components/applyForm/types";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -26,7 +24,7 @@ function PrintAttachmentWidget<
   rawErrors = [],
   formClassName,
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, description } = schema as S;
+  const { title } = schema as S;
   const { attachments } = useApplicationAttachments();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
@@ -74,40 +72,23 @@ function PrintAttachmentWidget<
       key={`form-group__text-input--${id}`}
       error={error}
     >
-      <DynamicFieldLabel
-        idFor={id}
-        title={title}
-        required={required}
-        description={description as string}
-        labelType={"hide-helper-text"}
-      />
-      {error && (
-        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
-      )}
+      <div className="text-bold">
+        {title}
+        {required && (
+          <span className="usa-hint usa-hint--required text-no-underline">
+            *
+          </span>
+        )}
+      </div>
       {uploadedFiles.length > 0 && (
         <ul className="usa-list usa-list--unstyled margin-top-2">
           {uploadedFiles.map((file, index) => {
-            const attachment = attachments?.find(
-              (a) => a.application_attachment_id === file.id,
-            );
-
             return (
               <li
                 key={`${file.id}-${index}`}
-                className="margin-bottom-1 display-flex flex-align-center"
+                className="margin-bottom-1 display-flex flex-align-center border-1px bg-base-lightest font-family-mono padding-05 maxw-tablet border-base-lighter"
               >
-                {attachment?.download_path ? (
-                  <a
-                    href={attachment.download_path}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary display-inline-flex align-items-center"
-                  >
-                    {file.name}
-                  </a>
-                ) : (
-                  <span>{file.name}</span>
-                )}
+                <span className="">{file.name}</span>
               </li>
             );
           })}
