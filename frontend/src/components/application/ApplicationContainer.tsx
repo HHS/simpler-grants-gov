@@ -135,6 +135,7 @@ const ApplicationContainer = ({
       <AttachmentsCard
         applicationId={applicationId}
         attachments={attachments}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
     </>
   );
