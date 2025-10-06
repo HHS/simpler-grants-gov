@@ -56,7 +56,6 @@ export const userLogoutEndpoint = {
   method: "POST" as ApiMethod,
 };
 
-// can expand to support GET when the time comes
 export const toDynamicUsersEndpoint = (
   type: "POST" | "DELETE" | "PUT" | "GET",
 ) => {
@@ -80,4 +79,15 @@ export const searchAgenciesEndpoint = {
   version: "v1",
   namespace: "agencies/search",
   method: "POST" as ApiMethod,
+};
+
+export const toDynamicOrganizationsEndpoint = (
+  type: "POST" | "DELETE" | "PUT" | "GET",
+) => {
+  return {
+    basePath: environment.API_URL,
+    version: "v1",
+    namespace: "organizations",
+    method: type as ApiMethod,
+  };
 };

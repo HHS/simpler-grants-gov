@@ -1,12 +1,14 @@
-export type Organization = {
+import { Organization } from "./applicationResponseTypes";
+
+export interface UserOrganization extends Organization {
   is_organization_owner: boolean;
-  organization_id: string;
-  sam_gov_entity: {
-    expiration_date: string;
-    legal_business_name: string;
-    uei: string;
-  };
-};
+}
+
+export interface RoleDefinition {
+  privileges: string[];
+  role_id: string;
+  role_name: string;
+}
 
 export type UserProfileValidationErrors = {
   firstName?: string[];
@@ -23,6 +25,7 @@ export interface UserDetail {
   user_id: string;
   email: string;
   profile: UserDetailProfile | null;
+  roles?: RoleDefinition[];
 }
 
 export interface UserProfileResponse {

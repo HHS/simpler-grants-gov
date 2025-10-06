@@ -3,8 +3,8 @@
  */
 
 import { getUserOrganizations } from "src/app/api/user/organizations/handler";
-import { Organization } from "src/types/userTypes";
-import { fakeOrganization } from "src/utils/testing/fixtures";
+import { UserOrganization } from "src/types/userTypes";
+import { fakeUserOrganization } from "src/utils/testing/fixtures";
 
 const mockFetchOrganizations = jest.fn();
 const getSessionMock = jest.fn();
@@ -21,7 +21,7 @@ jest.mock("src/services/auth/session", () => ({
 describe("user/organizations GET requests", () => {
   beforeEach(() => {
     mockFetchOrganizations.mockResolvedValue({
-      json: () => Promise.resolve({ data: [fakeOrganization] }),
+      json: () => Promise.resolve({ data: [fakeUserOrganization] }),
     });
     getSessionMock.mockReturnValue({ token: "a token", user_id: "1" });
   });
@@ -39,8 +39,8 @@ describe("user/organizations GET requests", () => {
   it("returns a new response with competition data", async () => {
     const response = await getUserOrganizations();
     expect(response.status).toEqual(200);
-    const body = (await response.json()) as Organization[];
-    expect(body).toEqual([fakeOrganization]);
+    const body = (await response.json()) as UserOrganization[];
+    expect(body).toEqual([fakeUserOrganization]);
   });
 
   it("returns a new response with with error if error on data fetch", async () => {
