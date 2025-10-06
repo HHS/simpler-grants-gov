@@ -30,6 +30,19 @@ resource "aws_api_gateway_rest_api" "api" {
               "schema" : {
                 "type" : "string"
               }
+            },
+            # Temp, for full proxy mode
+            {
+              "name" : "accept",
+              "in" : "header",
+              "required" : false,
+              "type" : "string"
+            },
+            {
+              "name" : "X-Auth",
+              "in" : "header",
+              "required" : false,
+              "type" : "string"
             }
           ],
           "security" : [
@@ -44,6 +57,9 @@ resource "aws_api_gateway_rest_api" "api" {
             "uri" : "https://${var.optional_extra_alb_domains[0]}/{proxy}",
             "requestParameters" : {
               "integration.request.path.proxy" : "method.request.path.proxy",
+              # Temp, for full proxy mode
+              "integration.request.header.X-Auth" : "method.request.header.X-Auth",
+              "integration.request.header.accept" : "method.request.header.accept",
               # Might not be needed, but adding for testing
               "integration.request.header.Host" : "'${var.domain_name}'"
             },
