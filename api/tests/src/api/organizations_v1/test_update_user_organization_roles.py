@@ -162,7 +162,7 @@ class TestUpdateUserOrganizationRoles:
         assert [role["role_id"] for role in data] == roles_assigned
 
     def test_update_user_organization_roles_404_organization(
-        self, client, db_session, user, enable_factory_create
+        self, client, db_session, user, enable_factory_create, role_b
     ):
         """Should return 404 when organization does not exist."""
         # Create JWT token
@@ -173,7 +173,7 @@ class TestUpdateUserOrganizationRoles:
         resp = client.put(
             f"/v1/organizations/{uuid4()}/users/{user.user_id}",
             headers={"X-SGG-Token": token},
-            json={"role_ids": []},
+            json={"role_ids": [role_b.role_id]},
         )
         assert resp.status_code == 404
 
@@ -188,7 +188,7 @@ class TestUpdateUserOrganizationRoles:
         resp = client.put(
             f"/v1/organizations/{org.organization_id}/users/{uuid4()}",
             headers={"X-SGG-Token": token},
-            json={"role_ids": []},
+            json={"role_ids": [role_b.role_id]},
         )
         assert resp.status_code == 404
 
@@ -205,7 +205,7 @@ class TestUpdateUserOrganizationRoles:
         resp = client.put(
             f"/v1/organizations/{org.organization_id}/users/{org_user.user_id}",
             headers={"X-SGG-Token": token},
-            json={"role_ids": []},
+            json={"role_ids": [role_c.role_id]},
         )
         assert resp.status_code == 403
 
