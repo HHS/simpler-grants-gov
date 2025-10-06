@@ -1,6 +1,11 @@
 import { Organization } from "src/types/applicationResponseTypes";
+import { UserDetail } from "src/types/userTypes";
 
-import { fetchUserWithMethod, getOrganization } from "./fetchers";
+import {
+  fetchOrganizationWithMethod,
+  fetchUserWithMethod,
+  getOrganization,
+} from "./fetchers";
 
 export const getOrganizationDetails = async (
   token: string,
@@ -9,7 +14,7 @@ export const getOrganizationDetails = async (
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const resp = await getOrganization({
+  const resp = await fetchOrganizationWithMethod("GET")({
     subPath: organizationId,
     additionalHeaders: ssgToken,
   });
@@ -32,17 +37,17 @@ export const getUserOrganizations = async (
   return json.data;
 };
 
-export const getOrganizationUsers = (
+export const getOrganizationUsers = async (
   token: string,
   organizationId: string,
-): Promise<Organization> => {
+): Promise<UserDetail[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const resp = await getOrganization({
-    subPath: organizationId,
+  const resp = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/users`,
     additionalHeaders: ssgToken,
   });
-  const json = (await resp.json()) as { data: Organization };
+  const json = (await resp.json()) as { data: UserDetail[] };
   return json.data;
 };
