@@ -41,9 +41,7 @@ def test_get_roles_and_privileges(enable_factory_create, client, user, db_sessio
         f"/v1/users/{user.user_id}/privileges", headers={"X-SGG-Token": user_auth_token}
     )
     data = resp.get_json()["data"]
-    import pdb
 
-    pdb.set_trace()
     assert resp.status_code == 200
     assert data["user_id"] == str(user.user_id)
 
