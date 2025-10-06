@@ -5930,6 +5930,7 @@ components:
       properties:
         role_ids:
           type: array
+          minItems: 1
           items:
             type: string
     OrganizationUpdateUserRolesResponse:
