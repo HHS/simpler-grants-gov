@@ -267,12 +267,7 @@ exports[`Header About renders About submenu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
-                <div
-                  class="font-sans-sm usa-icon-list__content"
-                  data-testid="iconListContent"
-                >
-                  Sign out
-                </div>
+                Sign out
               </a>
             </li>
           </ul>
@@ -783,12 +778,7 @@ exports[`Header About renders Community submenu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
-                <div
-                  class="font-sans-sm usa-icon-list__content"
-                  data-testid="iconListContent"
-                >
-                  Sign out
-                </div>
+                Sign out
               </a>
             </li>
           </ul>
@@ -1299,12 +1289,7 @@ exports[`Header renders Header navbar menu 1`] = `
                     href="/img.jpg#logout"
                   />
                 </svg>
-                <div
-                  class="font-sans-sm usa-icon-list__content"
-                  data-testid="iconListContent"
-                >
-                  Sign out
-                </div>
+                Sign out
               </a>
             </li>
           </ul>

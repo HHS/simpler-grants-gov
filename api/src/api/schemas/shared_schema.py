@@ -2,8 +2,8 @@ from src.api.schemas.extension import Schema, fields
 from src.constants.lookup_constants import Privilege
 
 
-class UserRoleSchema(Schema):
-    """Generic schema for user role information with privileges"""
+class RoleSchema(Schema):
+    """Generic schema for role information with privileges"""
 
     role_id = fields.UUID(
         metadata={
