@@ -58,7 +58,11 @@ resource "aws_api_gateway_rest_api" "api" {
             "requestParameters" : {
               "integration.request.path.proxy" : "method.request.path.proxy",
               # Temp, for full proxy mode
-              "integration.request.header.X-Auth" : "method.request.header.X-Auth",
+              # Gateway converts all header values into lowercase for mapping, so we should default 
+              # to using lowercase for this to make sure we catch any x-auth headers. If we camel case
+              # this, it will forward both the lower case and upper at the same time, and the API will
+              # return an auth failure error
+              "integration.request.header.X-Auth" : "method.request.header.x-auth",
               "integration.request.header.accept" : "method.request.header.accept",
               # Might not be needed, but adding for testing
               "integration.request.header.Host" : "'${var.domain_name}'"
