@@ -50,6 +50,12 @@ class OrganizationMemberSchema(Schema):
         fields.Nested(RoleSchema),
         metadata={"description": "User roles in this organization"},
     )
+    first_name = fields.String(
+        allow_none=True, metadata={"description": "User first name", "example": "John"}
+    )
+    last_name = fields.String(
+        allow_none=True, metadata={"description": "User last name", "example": "Smith"}
+    )
 
 
 class OrganizationGetResponseSchema(AbstractResponseSchema):
