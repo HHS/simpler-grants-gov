@@ -63,12 +63,6 @@ locals {
     training = {
       cpu = 1024
       mem = 4096
-      environment_vars = [
-        {
-          "Name" : "test",
-          "Value" : "test-prasanth"
-        }
-      ]
       # To configure environment variables uncomment the below section
       /*
       environment_vars = [
