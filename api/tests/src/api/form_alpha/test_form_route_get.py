@@ -17,6 +17,7 @@ def test_form_get_200(client, api_auth_token, enable_factory_create):
     assert response_form["form_json_schema"] == form.form_json_schema
     assert response_form["form_ui_schema"] == form.form_ui_schema
     assert response_form["form_instruction"] is None
+    assert response_form["json_to_xml_schema"] == form.json_to_xml_schema
 
 
 def test_form_get_with_instructions_200(client, api_auth_token, enable_factory_create):

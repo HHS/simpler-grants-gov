@@ -4,9 +4,11 @@ from src.constants.lookup_constants import Privilege
 from tests.src.db.models.factories import (
     AgencyUserFactory,
     AgencyUserRoleFactory,
+    ApplicationFactory,
     ApplicationUserFactory,
     ApplicationUserRoleFactory,
     InternalUserRoleFactory,
+    OrganizationFactory,
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
     RoleFactory,
@@ -14,8 +16,14 @@ from tests.src.db.models.factories import (
 
 
 def test_get_roles_and_privileges(enable_factory_create, client, user, db_session, user_auth_token):
-    user_apps = ApplicationUserFactory.create_batch(2, user=user)
-    for user_app in user_apps:
+    org = OrganizationFactory.create()
+    app_1 = ApplicationUserFactory.create(
+        application=ApplicationFactory(organization=org), user=user
+    )
+    app_2 = ApplicationUserFactory.create(
+        application=ApplicationFactory(organization=org), user=user
+    )
+    for user_app in [app_1, app_2]:
         ApplicationUserRoleFactory.create(application_user=user_app)
     user_orgs = OrganizationUserFactory.create_batch(2, user=user)
     OrganizationUserRoleFactory.create(
@@ -33,6 +41,7 @@ def test_get_roles_and_privileges(enable_factory_create, client, user, db_sessio
         f"/v1/users/{user.user_id}/privileges", headers={"X-SGG-Token": user_auth_token}
     )
     data = resp.get_json()["data"]
+
     assert resp.status_code == 200
     assert data["user_id"] == str(user.user_id)
 

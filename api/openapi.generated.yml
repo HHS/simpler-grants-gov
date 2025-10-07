@@ -3770,6 +3770,12 @@ components:
           - 'null'
           description: The rule schema for the form
           additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
+          additionalProperties: {}
         created_at:
           type: string
           format: date-time
@@ -3882,6 +3888,12 @@ components:
           - object
           - 'null'
           description: The rule schema for the form
+          additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
           additionalProperties: {}
       required:
       - agency_code
@@ -4317,6 +4329,9 @@ components:
         application_id:
           type: string
           description: The internal ID of the application
+        organization_id:
+          type: string
+          description: The internal ID of the organization that owns the application
     UserApplication:
       type: object
       properties:
