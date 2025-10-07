@@ -1,4 +1,5 @@
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import RoleSchema
 
@@ -71,5 +72,15 @@ class OrganizationUsersResponseSchema(AbstractResponseSchema):
 
 class OrganizationListRolesResponseSchema(AbstractResponseSchema):
     """Schema for POST /organizations/:organization_id/roles/list response"""
+
+    data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationUpdateUserRolesRequestSchema(Schema):
+    role_ids = fields.List(fields.UUID(required=True), validate=Length(min=1))
+
+
+class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /organizations/:organization_id/users/:user_id"""
 
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
