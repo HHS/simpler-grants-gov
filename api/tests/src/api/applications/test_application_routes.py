@@ -7,12 +7,17 @@ from sqlalchemy import select
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.constants.lookup_constants import ApplicationFormStatus, CompetitionOpenToApplicant
+from src.constants.lookup_constants import (
+    ApplicationFormStatus,
+    CompetitionOpenToApplicant,
+    Privilege,
+)
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
@@ -2471,16 +2476,18 @@ def test_application_get_without_organization(
 
 
 def test_application_start_with_organization_success(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successful creation of an application with an organization"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
-    # Create organization and associate user with it
-    organization = OrganizationFactory.create()
-    OrganizationUserFactory.create(organization=organization, user=user)
-
+    # Create organization and associate user with required privileges
+    user, organization, token = create_user_in_org(
+        db_session=db_session, privileges=[Privilege.START_APPLICATION]
+    )
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
     competition_id = str(competition.competition_id)
@@ -2491,7 +2498,7 @@ def test_application_start_with_organization_success(
     }
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
     assert response.status_code == 200
@@ -2511,15 +2518,18 @@ def test_application_start_with_organization_success(
 
 
 def test_application_start_with_organization_and_custom_name(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application creation with organization and custom name"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
-    # Create organization and associate user with it
-    organization = OrganizationFactory.create()
-    OrganizationUserFactory.create(organization=organization, user=user)
+    # Create organization and associate user,with required privileges
+    user, organization, token = create_user_in_org(
+        db_session=db_session, privileges=[Privilege.START_APPLICATION]
+    )
 
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
@@ -2533,7 +2543,7 @@ def test_application_start_with_organization_and_custom_name(
     }
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
     assert response.status_code == 200
@@ -2728,17 +2738,14 @@ def test_application_start_organization_membership_validation_works_with_multipl
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
-    # Create organization
-    organization = OrganizationFactory.create()
-
     # Create two users - one is member, one is not
-    user_member = user  # This user will be a member
-    user_non_member = UserFactory.create()
-
-    # Associate only the first user with the organization
-    OrganizationUserFactory.create(organization=organization, user=user_member)
-
+    # Associate only the first user with the organization with required privileges
+    user_member, organization, token = create_user_in_org(
+        db_session=db_session, privileges=[Privilege.START_APPLICATION]
+    )
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+    #  non-member
+    user_non_member = UserFactory.create()
 
     competition_id = str(competition.competition_id)
     organization_id = str(organization.organization_id)
@@ -2749,7 +2756,7 @@ def test_application_start_organization_membership_validation_works_with_multipl
 
     # Test with member user - should succeed
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
     assert response.status_code == 200
@@ -2957,15 +2964,18 @@ def test_application_start_individual_not_allowed(
 
 
 def test_application_start_organization_allowed(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application creation succeeds when applying as organization and competition allows organizations"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
-    # Create organization and associate user with it
-    organization = OrganizationFactory.create()
-    OrganizationUserFactory.create(organization=organization, user=user)
+    # Create organization and associate user with required privileges
+    user, organization, token = create_user_in_org(
+        db_session=db_session, privileges=[Privilege.START_APPLICATION]
+    )
 
     # Create competition that allows organization applicants
     competition = CompetitionFactory.create(
@@ -2982,7 +2992,7 @@ def test_application_start_organization_allowed(
     }
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
     assert response.status_code == 200
@@ -3038,15 +3048,18 @@ def test_application_start_individual_allowed(
 
 
 def test_application_start_both_applicant_types_allowed(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application creation succeeds when both individual and organization applicants are allowed"""
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
-    # Create organization and associate user with it
-    organization = OrganizationFactory.create()
-    OrganizationUserFactory.create(organization=organization, user=user)
+    # Create organization and associate user with required privileges
+    user, organization, token = create_user_in_org(
+        db_session=db_session, privileges=[Privilege.START_APPLICATION]
+    )
 
     # Create competition that allows both individual and organization applicants
     competition = CompetitionFactory.create(
@@ -3067,7 +3080,7 @@ def test_application_start_both_applicant_types_allowed(
     response = client.post(
         "/alpha/applications/start",
         json=request_data_individual,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3082,7 +3095,7 @@ def test_application_start_both_applicant_types_allowed(
     response = client.post(
         "/alpha/applications/start",
         json=request_data_organization,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3255,7 +3268,9 @@ def test_application_start_organization_inactive_entity(
 
 
 def test_application_start_organization_valid_entity_success(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successful application creation when organization has valid (not expired and not inactive) SAM.gov entity"""
     today = get_now_us_eastern_date()
@@ -3266,8 +3281,12 @@ def test_application_start_organization_valid_entity_success(
     sam_gov_entity = SamGovEntityFactory.create(
         expiration_date=future_expiration_date, is_inactive=False
     )
-    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
-    OrganizationUserFactory.create(organization=organization, user=user)
+
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.START_APPLICATION],
+        sam_gov_entity=sam_gov_entity,
+    )
 
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
@@ -3279,7 +3298,7 @@ def test_application_start_organization_valid_entity_success(
     }
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
     assert response.status_code == 200
@@ -3337,7 +3356,7 @@ def test_application_form_inclusion_update_success_false(
 
 
 def test_application_start_organization_entity_expiring_today(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client, enable_factory_create, db_session
 ):
     """Test application creation fails when organization's SAM.gov entity expires today"""
     today = get_now_us_eastern_date()
@@ -3345,8 +3364,11 @@ def test_application_start_organization_entity_expiring_today(
 
     # Create organization with sam.gov entity expiring today
     sam_gov_entity = SamGovEntityFactory.create(expiration_date=today, is_inactive=False)
-    organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
-    OrganizationUserFactory.create(organization=organization, user=user)
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.START_APPLICATION],
+        sam_gov_entity=sam_gov_entity,
+    )
 
     competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
 
@@ -3358,7 +3380,7 @@ def test_application_start_organization_entity_expiring_today(
     }
 
     response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
     # Should succeed as expiration_date is today (not in the past)
@@ -3645,3 +3667,33 @@ def test_application_form_get_with_submitted_application_status(
     assert response.json["message"] == "Success"
     # Verify application_status field reflects the submitted status
     assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED
+
+
+def test_application_start_forbidden(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """Test that a user without the required privileges cannot start an application owned by an organization"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=10)
+
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+
+    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
+
+    competition_id = str(competition.competition_id)
+    request_data = {
+        "competition_id": competition_id,
+        "organization_id": organization.organization_id,
+    }
+
+    response = client.post(
+        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"

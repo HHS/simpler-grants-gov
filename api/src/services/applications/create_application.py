@@ -7,9 +7,11 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import (
     ApplicationStatus,
     CompetitionOpenToApplicant,
+    Privilege,
     SubmissionIssue,
 )
 from src.constants.static_role_values import APPLICATION_OWNER
@@ -199,6 +201,10 @@ def create_application(
         # Validate user membership and organization status
         _validate_organization_membership(db_session, organization, user)
         _validate_organization_expiration(organization)
+
+        # Check privileges
+        if not can_access(user, {Privilege.START_APPLICATION}, organization):
+            raise_flask_error(403, "Forbidden")
 
     # Get default application name if not provided
     if application_name is None:

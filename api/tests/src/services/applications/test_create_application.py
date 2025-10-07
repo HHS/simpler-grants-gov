@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 from apiflask.exceptions import HTTPError
 
+from src.constants.lookup_constants import Privilege
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.user_models import ApplicationUserRole
 from src.services.applications.create_application import (
@@ -15,6 +16,9 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     OrganizationFactory,
+    OrganizationUserFactory,
+    OrganizationUserRoleFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
@@ -159,3 +163,41 @@ def test_create_application_assigns_owner_role(db_session, enable_factory_create
 
     assert role_assignment is not None
     assert role_assignment.role_id == APPLICATION_OWNER.role_id
+
+
+def test_create_application_access_404(db_session, user, enable_factory_create):
+    competition = CompetitionFactory.create()
+    import pdb
+
+    pdb.set_trace()
+    # Create application owned by organization
+    with pytest.raises(HTTPError) as exc_info:
+        create_application(
+            db_session=db_session,
+            competition_id=competition.competition_id,
+            user=user,
+            application_name="Test Org Application",
+            organization_id=OrganizationFactory.create().organization_id,
+        )
+
+    assert exc_info.value.status_code == 403
+
+
+def test_create_application_access_200(db_session, user, enable_factory_create):
+    # Create org user with required privilege
+    org = OrganizationFactory.create()
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    competition = CompetitionFactory.create()
+
+    # Creating application should not raise user access exception
+    create_application(
+        db_session=db_session,
+        competition_id=competition.competition_id,
+        user=user,
+        application_name="Test Org Application",
+        organization_id=org.organization_id,
+    )
