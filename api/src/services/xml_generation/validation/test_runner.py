@@ -14,16 +14,23 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationTestRunner:
-    """Runs validation tests for XML generation against XSD schemas."""
+    """Runs validation tests for XML generation against XSD schemas.
 
-    def __init__(self, cache_dir: str | None = None):
+    **Prerequisites**: XSD files must be pre-downloaded using the fetch-xsds CLI command.
+    """
+
+    def __init__(self, xsd_cache_dir: str | Path):
         """Initialize validation test runner.
 
         Args:
-            cache_dir: Directory to cache XSD files
+            xsd_cache_dir: Directory containing cached XSD files.
+                          XSD files must be pre-downloaded using 'flask task fetch-xsds'.
+
+        Raises:
+            XSDValidationError: If cache directory doesn't exist
         """
         self.xml_service = XMLGenerationService()
-        self.xsd_validator = XSDValidator(cache_dir)
+        self.xsd_validator = XSDValidator(xsd_cache_dir)
         self.results: list[dict[str, Any]] = []
 
     def run_validation_test(
@@ -39,7 +46,7 @@ class ValidationTestRunner:
         Args:
             test_name: Name of the test case
             json_input: JSON input data
-            xsd_url_or_path: URL to XSD file or local file path
+            xsd_url_or_path: URL to XSD file (will be converted to cached file path)
             form_name: Form name for XML generation
             pretty_print: Whether to pretty-print XML
 
@@ -79,7 +86,10 @@ class ValidationTestRunner:
                     "validation_result": None,
                 }
 
-            validation_result = self.xsd_validator.validate_xml(response.xml_data, xsd_url_or_path)
+            # Convert URL to cached file path
+            xsd_file_path = self._get_xsd_file_path(xsd_url_or_path)
+
+            validation_result = self.xsd_validator.validate_xml(response.xml_data, xsd_file_path)
 
             result = {
                 "test_name": test_name,
@@ -94,6 +104,7 @@ class ValidationTestRunner:
             return result
 
         except Exception as e:
+            logger.exception(f"Test execution error for {test_name}")
             error_result = {
                 "test_name": test_name,
                 "success": False,
@@ -105,20 +116,14 @@ class ValidationTestRunner:
             self.results.append(error_result)
             return error_result
 
+    def _get_xsd_file_path(self, xsd_url: str) -> Path:
+        """Convert XSD URL to cached file path."""
+        # Extract filename from URL
+        xsd_filename = xsd_url.split("/")[-1]
+        return self.xsd_validator.xsd_cache_dir / xsd_filename
+
     def run_test_suite(self, test_cases: list[dict[str, Any]]) -> dict[str, Any]:
-        """Run a suite of validation tests.
-
-        Args:
-            test_cases: List of test case dictionaries with keys:
-                - name: Test case name
-                - json_input: JSON input data
-                - xsd_url: URL to XSD file or local file path
-                - form_name: Form name (optional, defaults to SF424_4_0)
-                - pretty_print: Whether to pretty-print (optional, defaults to True)
-
-        Returns:
-            Summary of test results
-        """
+        """Run a suite of validation tests."""
         logger.info(f"Running validation test suite with {len(test_cases)} test cases")
 
         self.results = []

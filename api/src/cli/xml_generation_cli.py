@@ -14,7 +14,7 @@ from src.services.xml_generation.validation.test_cases import (
     get_test_cases_by_form,
 )
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
-from src.services.xml_generation.validation.xsd_validator import XSDValidator
+from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
 
 
@@ -117,19 +117,15 @@ def generate_xml_command(
     help="Form name to test (e.g., SF424_4_0). If not specified, runs all forms.",
 )
 @click.option(
-    "--xsd-url",
-    help="XSD URL or local file path to use for validation. Overrides XSD URL from test cases.",
+    "--cache-dir",
+    type=click.Path(),
+    help="Directory containing cached XSD files (default: ./xsd_cache). Run 'flask task fetch-xsds' first.",
 )
 @click.option(
     "--output",
     "output_file",
     type=click.Path(),
     help="Output file to save results (JSON format)",
-)
-@click.option(
-    "--cache-dir",
-    type=click.Path(),
-    help="Directory to cache XSD files (default: system temp directory)",
 )
 @click.option(
     "--verbose",
@@ -139,12 +135,13 @@ def generate_xml_command(
 )
 def validate_xml_generation_command(
     form: str | None,
-    xsd_url: str | None,
-    output_file: str | None,
     cache_dir: str | None,
+    output_file: str | None,
     verbose: bool,
 ) -> None:
     """Run XML validation tests against XSD schemas.
+
+    **Prerequisites**: Run 'flask task fetch-xsds' first to download XSD files.
 
     This validates that generated XML conforms to Grants.gov XSD schemas.
     Flask handles DB/logging setup automatically.
@@ -169,6 +166,20 @@ def validate_xml_generation_command(
         logging.getLogger().setLevel(logging.DEBUG)
 
     try:
+        # Use default cache directory if not specified
+        if not cache_dir:
+            cache_dir = "./xsd_cache"
+
+        # Verify cache directory exists
+        cache_path = Path(cache_dir)
+        if not cache_path.exists():
+            click.echo(
+                f"Error: XSD cache directory not found: {cache_dir}\n"
+                "Run 'flask task fetch-xsds' first to download XSD files.",
+                err=True,
+            )
+            sys.exit(1)
+
         # Get test cases
         if form:
             test_cases = get_test_cases_by_form(form)
@@ -182,15 +193,11 @@ def validate_xml_generation_command(
                 sys.exit(1)
 
         click.echo(f"Found {len(test_cases)} test cases")
+        click.echo(f"XSD cache directory: {cache_dir}")
+        click.echo("")
 
-        # Override XSD URL if provided
-        if xsd_url:
-            click.echo(f"Overriding XSD URL with: {xsd_url}")
-            for test_case in test_cases:
-                test_case["xsd_url"] = xsd_url
-
-        # Initialize test runner
-        runner = ValidationTestRunner(cache_dir=cache_dir)
+        # Initialize test runner with cache directory
+        runner = ValidationTestRunner(xsd_cache_dir=cache_dir)
 
         # Run tests
         summary = runner.run_test_suite(test_cases)
@@ -219,7 +226,7 @@ def validate_xml_generation_command(
 @click.option(
     "--cache-dir",
     type=click.Path(),
-    help="Directory to cache XSD files (default: system temp directory)",
+    help="Directory to cache XSD files (default: ./xsd_cache)",
 )
 @click.option(
     "--form",
@@ -239,14 +246,14 @@ def fetch_xsds_command(
     """Pre-fetch and cache XSD files for offline validation.
 
     This command downloads XSD schema files and stores them in a local cache
-    directory, removing the need for network calls during validation runs.
+    directory. Run this before using the validate-xml-generation command.
 
     Examples:
-        # Fetch all XSD files
+        # Fetch all XSD files (uses ./xsd_cache by default)
         flask task fetch-xsds
 
         # Fetch XSDs to a specific cache directory
-        flask task fetch-xsds --cache-dir ./xsd_cache
+        flask task fetch-xsds --cache-dir /tmp/xsd_cache
 
         # Fetch XSD for a specific form
         flask task fetch-xsds --form SF424_4_0
@@ -257,6 +264,10 @@ def fetch_xsds_command(
         logging.getLogger().setLevel(logging.DEBUG)
 
     try:
+        # Use default cache directory if not specified
+        if not cache_dir:
+            cache_dir = "./xsd_cache"
+
         # Get test cases to determine which XSDs we need
         if form:
             test_cases = get_test_cases_by_form(form)
@@ -271,9 +282,9 @@ def fetch_xsds_command(
                 sys.exit(1)
             click.echo(f"Fetching XSDs for {len(test_cases)} test cases")
 
-        # Initialize validator with cache directory
-        validator = XSDValidator(cache_dir=cache_dir)
-        click.echo(f"Cache directory: {validator.cache_dir}")
+        # Initialize fetcher with cache directory
+        fetcher = XSDFetcher(cache_dir=cache_dir)
+        click.echo(f"Cache directory: {fetcher.cache_dir}")
         click.echo("")
 
         # Track unique XSD URLs to avoid duplicate downloads
@@ -301,7 +312,7 @@ def fetch_xsds_command(
 
             try:
                 # Recursively fetch XSD and all its dependencies
-                result = validator.fetch_xsd_with_dependencies(xsd_url)
+                result = fetcher.fetch_xsd_with_dependencies(xsd_url)
 
                 # Track statistics
                 fetched = result.get("fetched", [])
@@ -352,7 +363,7 @@ def fetch_xsds_command(
         if all_errors:
             click.echo(f"Errors encountered:      {len(all_errors)}")
         click.echo("")
-        click.echo(f"Cache location: {validator.cache_dir}")
+        click.echo(f"Cache location: {fetcher.cache_dir}")
 
         if all_errors:
             click.echo("")
