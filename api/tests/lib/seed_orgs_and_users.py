@@ -217,19 +217,14 @@ def _assign_organization_role(
 
     This ensures the role assignments actually get persisted to the database.
     """
-    # Check if role assignment already exists
-    existing_role = db_session.execute(
-        select(OrganizationUserRole).where(
-            OrganizationUserRole.organization_user_id == organization_user_id,
-            OrganizationUserRole.role_id == role_id,
-        )
-    ).scalar_one_or_none()
+    # Use merge() for idempotent operation
+    role_assignment = OrganizationUserRole(
+        organization_user_id=organization_user_id, role_id=role_id
+    )
+    merged_role = db_session.merge(role_assignment, load=True)
 
-    if not existing_role:
-        role_assignment = OrganizationUserRole(
-            organization_user_id=organization_user_id, role_id=role_id
-        )
-        db_session.add(role_assignment)
+    # Only log if this is a new assignment (merged object will have created_at == updated_at for new records)
+    if merged_role.created_at == merged_role.updated_at:
         logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
 
 
