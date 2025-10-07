@@ -4,8 +4,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from .attachment import AttachmentData, AttachmentFile, AttachmentGroup
-
 
 class XMLGenerationRequest(BaseModel):
     """Request model for XML generation."""
@@ -24,9 +22,6 @@ class XMLGenerationResponse(BaseModel):
 
 
 __all__ = [
-    "AttachmentData",
-    "AttachmentFile",
-    "AttachmentGroup",
     "XMLGenerationRequest",
     "XMLGenerationResponse",
 ]
