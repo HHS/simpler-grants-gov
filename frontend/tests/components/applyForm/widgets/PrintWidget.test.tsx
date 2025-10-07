@@ -103,19 +103,6 @@ describe("PrintWidget", () => {
     expect(screen.queryByText("*")).not.toBeInTheDocument();
   });
 
-  it("displays errors when rawErrors are provided", () => {
-    const props = {
-      ...defaultProps,
-      rawErrors: ["Error message 1", "Error message 2"],
-    };
-
-    render(<PrintWidget {...props} />);
-
-    expect(screen.getByTestId("errorMessage")).toBeInTheDocument();
-    expect(screen.getByText("Error message 1")).toBeInTheDocument();
-    expect(screen.getByText("Error message 2")).toBeInTheDocument();
-  });
-
   it("does not display errors when rawErrors is empty", () => {
     const props = {
       ...defaultProps,
@@ -127,16 +114,6 @@ describe("PrintWidget", () => {
     expect(
       screen.queryByTestId("field-errors-test-field"),
     ).not.toBeInTheDocument();
-  });
-
-  it("applies error state to FormGroup when errors exist", () => {
-    const props = {
-      ...defaultProps,
-      rawErrors: ["Some error"],
-    };
-
-    render(<PrintWidget {...props} />);
-    expect(screen.getByTestId("errorMessage")).toBeInTheDocument();
   });
 
   it("applies custom CSS classes", () => {

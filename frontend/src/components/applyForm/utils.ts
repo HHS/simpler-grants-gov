@@ -831,7 +831,10 @@ export const pointerToFieldName = (pointer: string): string => {
 export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
   return uiSchema.map((item) => {
     if (item.type === "field") {
-      if (item.widget && item.widget === "AttachmentArray") {
+      if (
+        item.widget &&
+        (item.widget === "AttachmentArray" || item.widget === "Attachment")
+      ) {
         return {
           ...item,
           widget: "PrintAttachment",
