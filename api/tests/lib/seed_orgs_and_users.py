@@ -6,12 +6,13 @@ from sqlalchemy import select
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import OpportunityStatus
+from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import User
+from src.db.models.user_models import OrganizationUserRole, User
 
 logger = logging.getLogger(__name__)
 
@@ -202,6 +203,36 @@ USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
 )
 
 
+def _assign_organization_role(
+    db_session: db.Session, organization_user_id: uuid.UUID, role_id: uuid.UUID
+) -> None:
+    """Helper function to assign a role to an organization user
+
+    NOTE: This manual role assignment is necessary because:
+    1. We use factory.build() + db_session.merge() in seed scripts (not factory.create())
+    2. The factory traits (as_admin, as_member) define RelatedFactory relationships
+    3. RelatedFactory only works with factory.create(), not with build() + merge()
+    4. Since we need deterministic IDs for seed data, we use build() + merge()
+    5. Therefore, we must manually create the OrganizationUserRole records after merging
+
+    This ensures the role assignments actually get persisted to the database.
+    """
+    # Check if role assignment already exists
+    existing_role = db_session.execute(
+        select(OrganizationUserRole).where(
+            OrganizationUserRole.organization_user_id == organization_user_id,
+            OrganizationUserRole.role_id == role_id,
+        )
+    ).scalar_one_or_none()
+
+    if not existing_role:
+        role_assignment = OrganizationUserRole(
+            organization_user_id=organization_user_id, role_id=role_id
+        )
+        db_session.add(role_assignment)
+        logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
+
+
 def _build_organizations_and_users(db_session: db.Session) -> None:
     logger.info("Creating/updating organizations and users")
     ############################################
@@ -240,6 +271,11 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(API_KEY_USER_ONE_ORG, load=True)
     db_session.merge(USER_ONE_ORG_ORG_USER1, load=True)
 
+    # Assign ORG_ADMIN role
+    _assign_organization_role(
+        db_session, USER_ONE_ORG_ORG_USER1.organization_user_id, ORG_ADMIN.role_id
+    )
+
     ###############################
     # User with two organizations
     ###############################
@@ -252,6 +288,14 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(USER_TWO_ORG_ORG_USER1, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
 
+    # Assign ORG_ADMIN roles for both organizations
+    _assign_organization_role(
+        db_session, USER_TWO_ORG_ORG_USER1.organization_user_id, ORG_ADMIN.role_id
+    )
+    _assign_organization_role(
+        db_session, USER_TWO_ORG_ORG_USER2.organization_user_id, ORG_ADMIN.role_id
+    )
+
     ###############################
     # User as organization member (not admin)
     ###############################
@@ -262,6 +306,11 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(LINK_USER_ORG_MEMBER, load=True)
     db_session.merge(API_KEY_USER_ORG_MEMBER, load=True)
     db_session.merge(USER_ORG_MEMBER_ORG_USER, load=True)
+
+    # Assign ORG_MEMBER role
+    _assign_organization_role(
+        db_session, USER_ORG_MEMBER_ORG_USER.organization_user_id, ORG_MEMBER.role_id
+    )
 
     ###############################
     # User with mixed organization roles
@@ -274,6 +323,23 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(API_KEY_USER_MIXED_ORG_ROLES, load=True)
     db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER1, load=True)
     db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER2, load=True)
+
+    # Assign mixed roles: Admin of ORG1, Member of ORG2
+    _assign_organization_role(
+        db_session, USER_MIXED_ORG_ROLES_ORG_USER1.organization_user_id, ORG_ADMIN.role_id
+    )
+    _assign_organization_role(
+        db_session, USER_MIXED_ORG_ROLES_ORG_USER2.organization_user_id, ORG_MEMBER.role_id
+    )
+
+    # Log summary of all created user scenarios
+    logger.info("=== USER SCENARIOS SUMMARY ===")
+    logger.info("Created 5 user scenarios with role-based access:")
+    logger.info("• no_org_user - Individual user (no organizations)")
+    logger.info("• one_org_user - Organization admin (Sally's Soup Emporium)")
+    logger.info("• two_org_user - Organization admin (both organizations)")
+    logger.info("• org_member_user - Organization member (Sally's Soup Emporium)")
+    logger.info("• mixed_roles_user - Admin of ORG1, Member of ORG2")
 
 
 def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:
