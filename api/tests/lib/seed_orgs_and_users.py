@@ -103,7 +103,7 @@ USER_ONE_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("3ab87af3-66d3-4a44-9eb1-7da598ffb05b"),
     organization=ORG1,
     user=USER_ONE_ORG,
-    is_organization_owner=True,
+    as_admin=True,  # This automatically sets up the role and is_organization_owner=True
 )
 
 
@@ -130,14 +130,75 @@ USER_TWO_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("d0203570-863e-40b7-a2f9-b85020eb7e65"),
     organization=ORG1,
     user=USER_TWO_ORGS,
-    is_organization_owner=True,
+    as_admin=True,
 )
 
 USER_TWO_ORG_ORG_USER2 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("ac0cf16c-3702-4d25-8a0f-0428dc68af3e"),
     organization=ORG2,
     user=USER_TWO_ORGS,
-    is_organization_owner=True,
+    as_admin=True,
+)
+
+
+###############################
+# User as organization member (not admin)
+###############################
+USER_ORG_MEMBER = factories.UserFactory.build(
+    user_id=uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e")
+)
+
+LINK_USER_ORG_MEMBER = factories.LinkExternalUserFactory.build(
+    link_external_user_id=uuid.UUID("c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f"),
+    external_user_id="org_member_user",
+    user=USER_ORG_MEMBER,
+)
+
+API_KEY_USER_ORG_MEMBER = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("d3e4f5a6-b7c8-4d9e-0f1a-2b3c4d5e6f7a"),
+    key_id="org_member_user_key",
+    user=USER_ORG_MEMBER,
+)
+
+USER_ORG_MEMBER_ORG_USER = factories.OrganizationUserFactory.build(
+    organization_user_id=uuid.UUID("e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"),
+    organization=ORG1,
+    user=USER_ORG_MEMBER,
+    as_member=True,  # Simple trait usage
+)
+
+###############################
+# User with mixed organization roles
+###############################
+USER_MIXED_ORG_ROLES = factories.UserFactory.build(
+    user_id=uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c")
+)
+
+LINK_USER_MIXED_ORG_ROLES = factories.LinkExternalUserFactory.build(
+    link_external_user_id=uuid.UUID("a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"),
+    external_user_id="mixed_roles_user",
+    user=USER_MIXED_ORG_ROLES,
+)
+
+API_KEY_USER_MIXED_ORG_ROLES = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"),
+    key_id="mixed_roles_user_key",
+    user=USER_MIXED_ORG_ROLES,
+)
+
+# Admin of ORG1, Member of ORG2
+USER_MIXED_ORG_ROLES_ORG_USER1 = factories.OrganizationUserFactory.build(
+    organization_user_id=uuid.UUID("c8d9e0f1-a2b3-4c4d-5e6f-7a8b9c0d1e2f"),
+    organization=ORG1,
+    user=USER_MIXED_ORG_ROLES,
+    as_admin=True,
+)
+
+USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
+    organization_user_id=uuid.UUID("d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"),
+    organization=ORG2,
+    user=USER_MIXED_ORG_ROLES,
+    as_member=True,
 )
 
 
@@ -190,6 +251,29 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(API_KEY_USER_TWO_ORGS, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER1, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
+
+    ###############################
+    # User as organization member (not admin)
+    ###############################
+    logger.info(
+        f"Updating user as org member: '{LINK_USER_ORG_MEMBER.external_user_id}' with X-API-Key: '{API_KEY_USER_ORG_MEMBER.key_id}'"
+    )
+    db_session.merge(USER_ORG_MEMBER, load=True)
+    db_session.merge(LINK_USER_ORG_MEMBER, load=True)
+    db_session.merge(API_KEY_USER_ORG_MEMBER, load=True)
+    db_session.merge(USER_ORG_MEMBER_ORG_USER, load=True)
+
+    ###############################
+    # User with mixed organization roles
+    ###############################
+    logger.info(
+        f"Updating user with mixed org roles: '{LINK_USER_MIXED_ORG_ROLES.external_user_id}' with X-API-Key: '{API_KEY_USER_MIXED_ORG_ROLES.key_id}'"
+    )
+    db_session.merge(USER_MIXED_ORG_ROLES, load=True)
+    db_session.merge(LINK_USER_MIXED_ORG_ROLES, load=True)
+    db_session.merge(API_KEY_USER_MIXED_ORG_ROLES, load=True)
+    db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER1, load=True)
+    db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER2, load=True)
 
 
 def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:
