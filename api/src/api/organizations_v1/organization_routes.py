@@ -123,4 +123,5 @@ def organization_update_user_roles(
         roles = update_user_organization_roles(
             db_session, user_token_session.user, user_id, organization_id, json_data
         )
+
     return response.ApiResponse(message="Success", data=roles)

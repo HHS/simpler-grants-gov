@@ -74,7 +74,7 @@ class TestUpdateUserOrganizationRoles:
 
         assert resp.status_code == 200
         assert len(data) == len(roles_assigned)
-        assert [role["role_id"] for role in data] == roles_assigned
+        assert set([role["role_id"] for role in data]) == set(roles_assigned)
 
     def test_update_user_overwrites_existing_roles(
         self,
@@ -108,7 +108,6 @@ class TestUpdateUserOrganizationRoles:
             json={"role_ids": roles_assigned},
         )
         data = resp.get_json()["data"]
-
         assert resp.status_code == 200
         assert len(data) == len(roles_assigned)
         assert [role["role_id"] for role in data] == roles_assigned

@@ -77,7 +77,7 @@ class OrganizationListRolesResponseSchema(AbstractResponseSchema):
 
 
 class OrganizationUpdateUserRolesRequestSchema(Schema):
-    role_ids = fields.List(fields.String(required=True), validate=Length(min=1))
+    role_ids = fields.List(fields.UUID(required=True), validate=Length(min=1))
 
 
 class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
