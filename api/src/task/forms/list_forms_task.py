@@ -82,7 +82,7 @@ class ListFormsTask(BaseFormTask):
                 [form.form_name, form.form_version, "n/a", "ALL"], divider=True
             )
 
-            update_cmd = get_update_cmd(self.environment, form_id, None)
+            update_cmd = get_update_cmd(self.environment, form_id)
 
             # Add a message to the out-of-date forms list so we can make it easier
             # to update those forms by generating the command with some messages for organization
@@ -97,10 +97,7 @@ class ListFormsTask(BaseFormTask):
             return
 
         # Make the local form a dict for easier comparison
-        # Note we don't have the form instruction ID configured locally
-        # so just reuse whatever was in the environment
-        form_instruction_id = get_form_instruction_id(env_form)
-        local_form = build_form_json(form, form_instruction_id)
+        local_form = build_form_json(form)
 
         # Diff the local and non-local forms
         results = diff_form(local_form, env_form)
@@ -125,7 +122,7 @@ class ListFormsTask(BaseFormTask):
                         f"Field {changed_field} will change from {existing_value} to {planned_value}"
                     )
 
-            update_cmd = get_update_cmd(self.environment, form_id, form_instruction_id)
+            update_cmd = get_update_cmd(self.environment, form_id)
             self.out_of_date_forms.extend([f"# {form_txt}\n", update_cmd, "\n---"])
 
     def print_outputs(self) -> None:
@@ -207,11 +204,8 @@ def format_timestamp(value: str | None) -> str | None:
     return timestamp.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
-def get_update_cmd(environment: str, form_id: str, form_instruction_id: str | None) -> str:
+def get_update_cmd(environment: str, form_id: str) -> str:
     """Build a command for running the update-form script paired with this one"""
     args = f"task update-form --environment={environment} --form-id={form_id}"
-
-    if form_instruction_id is not None:
-        args += f" --form-instruction-id={form_instruction_id}"
 
     return f'make cmd args="{args}"'
