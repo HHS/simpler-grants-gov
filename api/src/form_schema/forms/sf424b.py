@@ -123,7 +123,7 @@ SF424b_v1_1 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("9db8ab35-f677-482c-93ea-9fb3eb86d7c7"),
     form_type=FormType.SF424B,
     sgg_version="1.0",
     is_deprecated=False,
