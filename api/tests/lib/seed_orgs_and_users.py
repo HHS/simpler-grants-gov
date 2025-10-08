@@ -217,15 +217,11 @@ def _assign_organization_role(
 
     This ensures the role assignments actually get persisted to the database.
     """
-    # Use merge() for idempotent operation
     role_assignment = OrganizationUserRole(
         organization_user_id=organization_user_id, role_id=role_id
     )
-    merged_role = db_session.merge(role_assignment, load=True)
-
-    # Only log if this is a new assignment (merged object will have created_at == updated_at for new records)
-    if merged_role.created_at == merged_role.updated_at:
-        logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
+    db_session.merge(role_assignment, load=True)
+    logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
 
 
 def _build_organizations_and_users(db_session: db.Session) -> None:
