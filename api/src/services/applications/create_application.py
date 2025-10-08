@@ -173,12 +173,6 @@ def create_application(
         )
         raise_flask_error(404, "Competition not found")
 
-    # Verify the competition is open
-    validate_competition_open(competition, ApplicationAction.START)
-
-    # Validate applicant type is allowed for this competition
-    _validate_applicant_type(competition, organization_id)
-
     # Validate organization if provided
     if organization_id is not None:
         # Fetch the organization with its sam_gov_entity relationship
@@ -198,13 +192,21 @@ def create_application(
             )
             raise_flask_error(404, "Organization not found")
 
-        # Validate user membership and organization status
+        # Validate user membership
         _validate_organization_membership(db_session, organization, user)
-        _validate_organization_expiration(organization)
 
         # Check privileges
         if not can_access(user, {Privilege.START_APPLICATION}, organization):
             raise_flask_error(403, "Forbidden")
+
+        # Validate organization status
+        _validate_organization_expiration(organization)
+
+    # Verify the competition is open
+    validate_competition_open(competition, ApplicationAction.START)
+
+    # Validate applicant type is allowed for this competition
+    _validate_applicant_type(competition, organization_id)
 
     # Get default application name if not provided
     if application_name is None:
