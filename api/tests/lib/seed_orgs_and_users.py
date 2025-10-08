@@ -2,6 +2,7 @@ import logging
 import uuid
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
@@ -208,19 +209,18 @@ def _assign_organization_role(
 ) -> None:
     """Helper function to assign a role to an organization user
 
-    NOTE: This manual role assignment is necessary because:
-    1. We use factory.build() + db_session.merge() in seed scripts (not factory.create())
-    2. The factory traits (as_admin, as_member) define RelatedFactory relationships
-    3. RelatedFactory only works with factory.create(), not with build() + merge()
-    4. Since we need deterministic IDs for seed data, we use build() + merge()
-    5. Therefore, we must manually create the OrganizationUserRole records after merging
-
-    This ensures the role assignments actually get persisted to the database.
+    Uses upsert pattern to handle CI environment differences gracefully.
     """
-    role_assignment = OrganizationUserRole(
+    stmt = insert(OrganizationUserRole).values(
         organization_user_id=organization_user_id, role_id=role_id
     )
-    db_session.merge(role_assignment, load=True)
+
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["organization_user_id", "role_id"],
+        set_={"updated_at": stmt.excluded.updated_at},
+    )
+
+    db_session.execute(stmt)
     logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
 
 
