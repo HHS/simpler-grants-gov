@@ -56,6 +56,8 @@ export type WidgetTypes =
   | "Radio"
   | "Select"
   | "MultiSelect"
+  | "Print"
+  | "PrintAttachment"
   | "Budget424aSectionA"
   | "Budget424aSectionB"
   | "Budget424aSectionC"

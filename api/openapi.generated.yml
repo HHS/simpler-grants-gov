@@ -1672,6 +1672,102 @@ paths:
               $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/users/{user_id}:
+    put:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUpdateUserRolesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Update roles for an organization user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateUserRolesRequest'
+      security:
+      - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationRemoveUserResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Remove a user from an organization
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -3770,6 +3866,12 @@ components:
           - 'null'
           description: The rule schema for the form
           additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
+          additionalProperties: {}
         created_at:
           type: string
           format: date-time
@@ -3882,6 +3984,12 @@ components:
           - object
           - 'null'
           description: The rule schema for the form
+          additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
           additionalProperties: {}
       required:
       - agency_code
@@ -4317,6 +4425,9 @@ components:
         application_id:
           type: string
           description: The internal ID of the application
+        organization_id:
+          type: string
+          description: The internal ID of the organization that owns the application
     UserApplication:
       type: object
       properties:
@@ -5612,6 +5723,18 @@ components:
             type:
             - object
             $ref: '#/components/schemas/Role1'
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: User first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: User last name
+          example: Smith
     OrganizationUsersResponse:
       type: object
       properties:
@@ -5852,6 +5975,47 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationUpdateUserRolesRequest:
+      type: object
+      properties:
+        role_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    OrganizationUpdateUserRolesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: Role information
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationRemoveUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: No data returned on successful removal
         status_code:
           type: integer
           description: The HTTP status code

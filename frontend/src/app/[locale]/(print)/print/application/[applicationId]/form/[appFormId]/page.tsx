@@ -6,6 +6,7 @@ import getFormData from "src/utils/getFormData";
 import { headers } from "next/headers";
 
 import PrintForm from "src/components/applyForm/PrintForm";
+import { addPrintWidgetToFields } from "src/components/applyForm/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -76,13 +77,15 @@ export default async function FormPage({ params }: FormPageProps) {
     applicationAttachments,
   } = data;
 
+  const modifiedUiSchema = addPrintWidgetToFields(formUiSchema);
+
   return (
     <>
       <h1>{formName}</h1>
       <PrintForm
         savedFormData={applicationResponse}
         formSchema={formSchema}
-        uiSchema={formUiSchema}
+        uiSchema={modifiedUiSchema}
         attachments={applicationAttachments}
         setAttachmentsChanged={setAttachmentsChanged}
       />
