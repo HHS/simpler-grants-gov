@@ -204,13 +204,16 @@ USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
 
 
 def _assign_organization_role(
-    db_session: db.Session, organization_user_id: uuid.UUID, role_id: uuid.UUID
+    db_session: db.Session, organization_user, role_id: uuid.UUID
 ) -> None:
+    """Helper function to assign a role to an organization user"""
     role_assignment = factories.OrganizationUserRoleFactory.build(
-        organization_user_id=organization_user_id, role_id=role_id
+        organization_user=organization_user, role_id=role_id
     )
     db_session.merge(role_assignment, load=True)
-    logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
+    logger.info(
+        f"Assigned role {role_id} to organization user {organization_user.organization_user_id}"
+    )
 
 
 def _build_organizations_and_users(db_session: db.Session) -> None:
@@ -252,9 +255,7 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(USER_ONE_ORG_ORG_USER1, load=True)
 
     # Assign ORG_ADMIN role
-    _assign_organization_role(
-        db_session, USER_ONE_ORG_ORG_USER1.organization_user_id, ORG_ADMIN.role_id
-    )
+    _assign_organization_role(db_session, USER_ONE_ORG_ORG_USER1, ORG_ADMIN.role_id)
 
     ###############################
     # User with two organizations
@@ -269,12 +270,8 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
 
     # Assign ORG_ADMIN roles for both organizations
-    _assign_organization_role(
-        db_session, USER_TWO_ORG_ORG_USER1.organization_user_id, ORG_ADMIN.role_id
-    )
-    _assign_organization_role(
-        db_session, USER_TWO_ORG_ORG_USER2.organization_user_id, ORG_ADMIN.role_id
-    )
+    _assign_organization_role(db_session, USER_TWO_ORG_ORG_USER1, ORG_ADMIN.role_id)
+    _assign_organization_role(db_session, USER_TWO_ORG_ORG_USER2, ORG_ADMIN.role_id)
 
     ###############################
     # User as organization member (not admin)
@@ -288,9 +285,7 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(USER_ORG_MEMBER_ORG_USER, load=True)
 
     # Assign ORG_MEMBER role
-    _assign_organization_role(
-        db_session, USER_ORG_MEMBER_ORG_USER.organization_user_id, ORG_MEMBER.role_id
-    )
+    _assign_organization_role(db_session, USER_ORG_MEMBER_ORG_USER, ORG_MEMBER.role_id)
 
     ###############################
     # User with mixed organization roles
@@ -305,12 +300,8 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER2, load=True)
 
     # Assign mixed roles: Admin of ORG1, Member of ORG2
-    _assign_organization_role(
-        db_session, USER_MIXED_ORG_ROLES_ORG_USER1.organization_user_id, ORG_ADMIN.role_id
-    )
-    _assign_organization_role(
-        db_session, USER_MIXED_ORG_ROLES_ORG_USER2.organization_user_id, ORG_MEMBER.role_id
-    )
+    _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER1, ORG_ADMIN.role_id)
+    _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER2, ORG_MEMBER.role_id)
 
     # Log summary of all created user scenarios
     logger.info("=== USER SCENARIOS SUMMARY ===")
