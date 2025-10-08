@@ -113,6 +113,7 @@ def test_do_diff_with_diff(enable_factory_create):
     planned_request["form_json_schema"] = {}
     planned_request["form_rule_schema"] = {}
     planned_request["omb_number"] = "1234-567823"
+    planned_request["json_to_xml_schema"] = {"new": "schema"}
 
     schema = FormAlphaSchema()
     endpoint_response = schema.dump(form)
@@ -128,4 +129,8 @@ def test_do_diff_with_diff(enable_factory_create):
         "form_json_schema": {"existing_value": form.form_json_schema, "planned_value": {}},
         "form_rule_schema": {"existing_value": form.form_rule_schema, "planned_value": {}},
         "omb_number": {"existing_value": form.omb_number, "planned_value": "1234-567823"},
+        "json_to_xml_schema": {
+            "existing_value": form.json_to_xml_schema,
+            "planned_value": {"new": "schema"},
+        },
     }

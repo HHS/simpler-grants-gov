@@ -29,6 +29,7 @@ tags:
 - name: Application Alpha
 - name: Form Alpha
 - name: Competition Alpha
+- name: CommonGrants Protocol
 servers: .
 paths:
   /health:
@@ -581,6 +582,52 @@ paths:
               $ref: '#/components/schemas/FormUpdateRequest'
       security:
       - ApiKeyAuth: []
+  /common-grants/opportunities:
+    get:
+      parameters:
+      - in: query
+        name: page
+        description: The page number to retrieve
+        schema:
+          type:
+          - integer
+          - 'null'
+        required: false
+      - in: query
+        name: pageSize
+        description: The number of items per page
+        schema:
+          type:
+          - integer
+          - 'null'
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitiesListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - CommonGrants Protocol
+      summary: List opportunities
+      description: Get a paginated list of opportunities, sorted by `lastModifiedAt`
+        with most recent first.
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /v1/users/{user_id}/profile:
     put:
       parameters:
@@ -622,7 +669,7 @@ paths:
           description: Forbidden
       tags:
       - User v1 - Internal Only
-      summary: User Profile Update
+      summary: Update the authenticated user's profile data'
       requestBody:
         content:
           application/json:
@@ -685,6 +732,78 @@ paths:
               $ref: '#/components/schemas/UserApiKeyCreateRequest'
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/privileges:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGetRolesAndPrivilegesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Get the roles and privileges for the authenticated user
+      security:
+      - ApiJwtAuth: []
+  /common-grants/opportunities/search:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitiesSearchResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - CommonGrants Protocol
+      summary: Search opportunities
+      description: Search for opportunities based on the provided filters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunitySearchRequest'
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /v1/users/{user_id}/applications:
     post:
       parameters:
@@ -1069,6 +1188,40 @@ paths:
       summary: Competition Get
       security:
       - ApiJwtAuth: []
+      - ApiKeyAuth: []
+  /common-grants/opportunities/{oppId}:
+    get:
+      parameters:
+      - in: path
+        name: oppId
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - CommonGrants Protocol
+      summary: View opportunity details
+      description: View details about an opportunity
+      security:
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
@@ -1517,6 +1670,60 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/users/{user_id}:
+    put:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUpdateUserRolesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Update roles for an organization user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateUserRolesRequest'
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
@@ -3617,6 +3824,12 @@ components:
           - 'null'
           description: The rule schema for the form
           additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
+          additionalProperties: {}
         created_at:
           type: string
           format: date-time
@@ -3730,6 +3943,12 @@ components:
           - 'null'
           description: The rule schema for the form
           additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
+          additionalProperties: {}
       required:
       - agency_code
       - form_json_schema
@@ -3752,6 +3971,272 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OppStatus:
+      type: object
+      properties:
+        value:
+          type:
+          - string
+          - 'null'
+          description: The status value, from a predefined set of options
+        customValue:
+          type:
+          - string
+          - 'null'
+          description: A custom status value
+        description:
+          type:
+          - string
+          - 'null'
+          description: A human-readable description of the status
+    Money:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: The amount of money
+        currency:
+          type: string
+          description: The ISO 4217 currency code (e.g., 'USD', 'EUR')
+      required:
+      - amount
+      - currency
+    OppFunding:
+      type: object
+      properties:
+        details:
+          type:
+          - string
+          - 'null'
+          description: Details about the funding available for this opportunity that
+            don't fit other fields
+        totalAmountAvailable:
+          description: Total amount of funding available for this opportunity
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        minAwardAmount:
+          description: Minimum amount of funding granted per award
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        maxAwardAmount:
+          description: Maximum amount of funding granted per award
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        minAwardCount:
+          type:
+          - integer
+          - 'null'
+          description: Minimum number of awards granted
+        maxAwardCount:
+          type:
+          - integer
+          - 'null'
+          description: Maximum number of awards granted
+        estimatedAwardCount:
+          type:
+          - integer
+          - 'null'
+          description: Estimated number of awards that will be granted
+    SingleDateEvent:
+      type: object
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+          description: Human-readable name of the event
+        eventType:
+          type:
+          - string
+          - 'null'
+          description: Type of event
+        description:
+          type:
+          - string
+          - 'null'
+          description: Description of what this event represents
+        date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: 'Date of the event in ISO 8601 format: YYYY-MM-DD'
+        time:
+          type:
+          - string
+          - 'null'
+          description: 'Time of the event in ISO 8601 format: HH:MM:SS'
+    OppTimeline:
+      type: object
+      properties:
+        postDate:
+          description: The date (and time) at which the opportunity is posted
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SingleDateEvent'
+          - type: 'null'
+        closeDate:
+          description: The date (and time) at which the opportunity closes
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SingleDateEvent'
+          - type: 'null'
+        otherDates:
+          description: An optional map of other key dates or events in the opportunity
+            timeline
+    CustomField:
+      type: object
+      properties:
+        name:
+          type: string
+        fieldType:
+          type: string
+          enum:
+          - string
+          - number
+          - integer
+          - boolean
+          - object
+          - array
+          description: The JSON schema type to use when de-serializing the value field
+        schema:
+          type:
+          - string
+          - 'null'
+          format: url
+        value: {}
+        description:
+          type:
+          - string
+          - 'null'
+      required:
+      - fieldType
+      - name
+      - value
+    OpportunityBase:
+      type: object
+      properties:
+        createdAt:
+          description: The timestamp (in UTC) at which the record was created.
+        lastModifiedAt:
+          description: The timestamp (in UTC) at which the record was last modified.
+        id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Globally unique id for the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        title:
+          type:
+          - string
+          - 'null'
+          description: Title or name of the funding opportunity
+        status:
+          description: Status of the opportunity
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppStatus'
+          - type: 'null'
+        description:
+          type:
+          - string
+          - 'null'
+          description: Description of the opportunity's purpose and scope
+        funding:
+          description: Details about the funding available
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppFunding'
+          - type: 'null'
+        keyDates:
+          description: Key dates for the opportunity, such as when the application
+            opens and closes
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppTimeline'
+          - type: 'null'
+        source:
+          description: URL for the original source of the opportunity
+        customFields:
+          type:
+          - object
+          - 'null'
+          description: Additional custom fields specific to this opportunity
+          additionalProperties:
+            type:
+            - object
+            $ref: '#/components/schemas/CustomField'
+    PaginatedResultsInfo:
+      type: object
+      properties:
+        page:
+          type:
+          - integer
+          - 'null'
+          description: The page number to retrieve
+        pageSize:
+          type:
+          - integer
+          - 'null'
+          description: The number of items per page
+        totalItems:
+          type: integer
+          description: The total number of items
+        totalPages:
+          type: integer
+          description: The total number of pages
+      required:
+      - totalItems
+      - totalPages
+    OpportunitiesListResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        items:
+          type: array
+          description: The list of opportunities
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OpportunityBase'
+        paginationInfo:
+          description: The pagination details
+          type:
+          - object
+          $ref: '#/components/schemas/PaginatedResultsInfo'
+      required:
+      - items
+      - message
+      - paginationInfo
+      - status
     UserUpdateProfileRequest:
       type: object
       properties:
@@ -3844,6 +4329,414 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    GetUserRolesAndPrivilegesOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+    Role:
+      type: object
+      properties:
+        role_id:
+          type: string
+          description: The internal ID of a role
+        role_name:
+          type: string
+          description: The name of the role
+        privileges:
+          type: array
+          items:
+            description: Privileges for the role
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    UserOrganization:
+      type: object
+      properties:
+        organization:
+          description: Organization details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesOrganization'
+        organization_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this organization
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    GetUserRolesAndPrivilegesApplication:
+      type: object
+      properties:
+        application_id:
+          type: string
+          description: The internal ID of the application
+        organization_id:
+          type: string
+          description: The internal ID of the organization that owns the application
+    UserApplication:
+      type: object
+      properties:
+        application:
+          description: Application details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesApplication'
+        application_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this application
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    GetUserRolesAndPrivilegesAgency:
+      type: object
+      properties:
+        agency_id:
+          type: string
+          description: The internal ID of the agency
+    UserAgency:
+      type: object
+      properties:
+        agency:
+          description: Agency details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesAgency'
+        agency_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this agency
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    GetRolesAndPrivilegesResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_users:
+          type: array
+          items:
+            description: List of organizations and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
+        application_users:
+          type: array
+          items:
+            description: List of applications and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserApplication'
+        agency_users:
+          type: array
+          items:
+            description: List of agencies and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserAgency'
+        internal_user_roles:
+          type: array
+          items:
+            description: List of roles and the user's roles & privileges in each
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    UserGetRolesAndPrivilegesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/GetRolesAndPrivilegesResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    StringArrayFilter:
+      type: object
+      properties:
+        operator:
+          type:
+          - string
+          - 'null'
+          description: The operator to apply to the filter value
+        value:
+          type:
+          - array
+          - 'null'
+          description: The array of string values
+          items:
+            type: string
+    DateRange1:
+      type: object
+      properties:
+        min:
+          description: The minimum date in the range
+        max:
+          description: The maximum date in the range
+    DateRangeFilter:
+      type: object
+      properties:
+        operator:
+          type:
+          - string
+          - 'null'
+          description: The operator to apply to the filter value
+        value:
+          description: The date range value
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/DateRange1'
+          - type: 'null'
+    MoneyRange:
+      type: object
+      properties:
+        min:
+          description: The minimum amount in the range
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        max:
+          description: The maximum amount in the range
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+    MoneyRangeFilter:
+      type: object
+      properties:
+        operator:
+          type:
+          - string
+          - 'null'
+          description: The operator to apply to the filter value
+        value:
+          description: The money range value
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRange'
+          - type: 'null'
+    OppFilters:
+      type: object
+      properties:
+        status:
+          description: '`status.value` matches one of the following values'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/StringArrayFilter'
+          - type: 'null'
+        closeDateRange:
+          description: '`keyDates.closeDate` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/DateRangeFilter'
+          - type: 'null'
+        totalFundingAvailableRange:
+          description: '`funding.totalAmountAvailable` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRangeFilter'
+          - type: 'null'
+        minAwardAmountRange:
+          description: '`funding.minAwardAmount` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRangeFilter'
+          - type: 'null'
+        maxAwardAmountRange:
+          description: '`funding.maxAwardAmount` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRangeFilter'
+          - type: 'null'
+        customFilters:
+          description: Additional custom filters to apply to the search
+    OppSorting:
+      type: object
+      properties:
+        sortBy:
+          type: string
+          enum:
+          - lastModifiedAt
+          - createdAt
+          - title
+          - status.value
+          - keyDates.closeDate
+          - funding.maxAwardAmount
+          - funding.minAwardAmount
+          - funding.totalAmountAvailable
+          - funding.estimatedAwardCount
+          - custom
+          description: The field to sort by
+        sortOrder:
+          type:
+          - string
+          - 'null'
+          description: The sort order (asc or desc)
+        customSortBy:
+          type:
+          - string
+          - 'null'
+          description: The custom field to sort by when sortBy is 'custom'
+      required:
+      - sortBy
+    PaginatedBodyParams:
+      type: object
+      properties:
+        page:
+          type:
+          - integer
+          - 'null'
+          description: The page number to retrieve
+        pageSize:
+          type:
+          - integer
+          - 'null'
+          description: The number of items per page
+    OpportunitySearchRequest:
+      type: object
+      properties:
+        search:
+          type:
+          - string
+          - 'null'
+          description: Search query string
+        filters:
+          description: Filters to apply to the opportunity search
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppFilters'
+          - type: 'null'
+        sorting:
+          description: Sorting parameters for opportunities
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppSorting'
+          - type: 'null'
+        pagination:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/PaginatedBodyParams'
+          - type: 'null'
+    SortedResultsInfo:
+      type: object
+      properties:
+        sortBy:
+          type: string
+          description: The field to sort by
+        customSortBy:
+          type:
+          - string
+          - 'null'
+          description: Implementation-defined sort key
+        sortOrder:
+          type: string
+          description: The order in which the results are sorted
+        errors:
+          type: array
+          default: []
+          description: Non-fatal errors that occurred during sorting
+          items:
+            type: string
+      required:
+      - sortBy
+      - sortOrder
+    FilterInfo:
+      type: object
+      properties:
+        filters:
+          description: The filters applied to the response items
+        errors:
+          type: array
+          default: []
+          description: Non-fatal errors that occurred during filtering
+          items:
+            type: string
+      required:
+      - filters
+    OpportunitiesSearchResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        items:
+          type: array
+          description: The list of opportunities
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OpportunityBase'
+        paginationInfo:
+          description: The pagination details
+          type:
+          - object
+          $ref: '#/components/schemas/PaginatedResultsInfo'
+        sortInfo:
+          description: The sorting details
+          type:
+          - object
+          $ref: '#/components/schemas/SortedResultsInfo'
+        filterInfo:
+          description: The filter details
+          type:
+          - object
+          $ref: '#/components/schemas/FilterInfo'
+      required:
+      - filterInfo
+      - items
+      - message
+      - paginationInfo
+      - sortInfo
+      - status
     UserApplicationListRequest:
       type: object
       properties: {}
@@ -3863,7 +4756,7 @@ components:
           format: date
           description: SAM.gov registration expiration date
           example: '2025-08-11'
-    UserOrganization:
+    UserOrganization1:
       type: object
       properties:
         organization_id:
@@ -3939,7 +4832,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/UserOrganization'
+          - $ref: '#/components/schemas/UserOrganization1'
           - type: 'null'
         competition:
           description: Competition information
@@ -3977,7 +4870,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/UserOrganization'
+            $ref: '#/components/schemas/UserOrganization1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -4618,6 +5511,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OpportunityResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        data:
+          description: The opportunity
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityBase'
+      required:
+      - data
+      - message
+      - status
     UserSaveOpportunityRequest:
       type: object
       properties:
@@ -4716,7 +5627,7 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
-    Role:
+    Role1:
       type: object
       properties:
         role_id:
@@ -4769,7 +5680,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/Role1'
     OrganizationUsersResponse:
       type: object
       properties:
@@ -4937,7 +5848,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/Role1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -5010,6 +5921,34 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationUpdateUserRolesRequest:
+      type: object
+      properties:
+        role_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    OrganizationUpdateUserRolesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: Role information
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
         status_code:
           type: integer
           description: The HTTP status code
