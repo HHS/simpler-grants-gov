@@ -6,12 +6,13 @@ from sqlalchemy import select
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import OpportunityStatus
+from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import User
+from src.db.models.user_models import OrganizationUser, Role, User
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +104,7 @@ USER_ONE_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("3ab87af3-66d3-4a44-9eb1-7da598ffb05b"),
     organization=ORG1,
     user=USER_ONE_ORG,
-    is_organization_owner=True,
+    is_organization_owner=True,  # Keep the flag for now, but don't use traits
 )
 
 
@@ -139,6 +140,80 @@ USER_TWO_ORG_ORG_USER2 = factories.OrganizationUserFactory.build(
     user=USER_TWO_ORGS,
     is_organization_owner=True,
 )
+
+
+###############################
+# User as organization member (not admin)
+###############################
+USER_ORG_MEMBER = factories.UserFactory.build(
+    user_id=uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e")
+)
+
+LINK_USER_ORG_MEMBER = factories.LinkExternalUserFactory.build(
+    link_external_user_id=uuid.UUID("c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f"),
+    external_user_id="org_member_user",
+    user=USER_ORG_MEMBER,
+)
+
+API_KEY_USER_ORG_MEMBER = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("d3e4f5a6-b7c8-4d9e-0f1a-2b3c4d5e6f7a"),
+    key_id="org_member_user_key",
+    user=USER_ORG_MEMBER,
+)
+
+USER_ORG_MEMBER_ORG_USER = factories.OrganizationUserFactory.build(
+    organization_user_id=uuid.UUID("e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"),
+    organization=ORG1,
+    user=USER_ORG_MEMBER,
+    is_organization_owner=False,
+)
+
+###############################
+# User with mixed organization roles
+###############################
+USER_MIXED_ORG_ROLES = factories.UserFactory.build(
+    user_id=uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c")
+)
+
+LINK_USER_MIXED_ORG_ROLES = factories.LinkExternalUserFactory.build(
+    link_external_user_id=uuid.UUID("a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"),
+    external_user_id="mixed_roles_user",
+    user=USER_MIXED_ORG_ROLES,
+)
+
+API_KEY_USER_MIXED_ORG_ROLES = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"),
+    key_id="mixed_roles_user_key",
+    user=USER_MIXED_ORG_ROLES,
+)
+
+# Admin of ORG1, Member of ORG2
+USER_MIXED_ORG_ROLES_ORG_USER1 = factories.OrganizationUserFactory.build(
+    organization_user_id=uuid.UUID("c8d9e0f1-a2b3-4c4d-5e6f-7a8b9c0d1e2f"),
+    organization=ORG1,
+    user=USER_MIXED_ORG_ROLES,
+    is_organization_owner=True,
+)
+
+USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
+    organization_user_id=uuid.UUID("d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"),
+    organization=ORG2,
+    user=USER_MIXED_ORG_ROLES,
+    is_organization_owner=False,
+)
+
+
+def _assign_organization_role(
+    db_session: db.Session, organization_user: OrganizationUser, role: Role
+) -> None:
+    """Helper function to assign a role to an organization user"""
+    role_assignment = factories.OrganizationUserRoleFactory.build(
+        organization_user=organization_user, role=role
+    )
+    db_session.merge(role_assignment, load=True)
+    logger.info(
+        f"Assigned role {role.role_id} to organization user {organization_user.organization_user_id}"
+    )
 
 
 def _build_organizations_and_users(db_session: db.Session) -> None:
@@ -179,6 +254,9 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(API_KEY_USER_ONE_ORG, load=True)
     db_session.merge(USER_ONE_ORG_ORG_USER1, load=True)
 
+    # Assign ORG_ADMIN role
+    _assign_organization_role(db_session, USER_ONE_ORG_ORG_USER1, ORG_ADMIN)
+
     ###############################
     # User with two organizations
     ###############################
@@ -190,6 +268,49 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     db_session.merge(API_KEY_USER_TWO_ORGS, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER1, load=True)
     db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
+
+    # Assign ORG_ADMIN roles for both organizations
+    _assign_organization_role(db_session, USER_TWO_ORG_ORG_USER1, ORG_ADMIN)
+    _assign_organization_role(db_session, USER_TWO_ORG_ORG_USER2, ORG_ADMIN)
+
+    ###############################
+    # User as organization member (not admin)
+    ###############################
+    logger.info(
+        f"Updating user as org member: '{LINK_USER_ORG_MEMBER.external_user_id}' with X-API-Key: '{API_KEY_USER_ORG_MEMBER.key_id}'"
+    )
+    db_session.merge(USER_ORG_MEMBER, load=True)
+    db_session.merge(LINK_USER_ORG_MEMBER, load=True)
+    db_session.merge(API_KEY_USER_ORG_MEMBER, load=True)
+    db_session.merge(USER_ORG_MEMBER_ORG_USER, load=True)
+
+    # Assign ORG_MEMBER role
+    _assign_organization_role(db_session, USER_ORG_MEMBER_ORG_USER, ORG_MEMBER)
+
+    ###############################
+    # User with mixed organization roles
+    ###############################
+    logger.info(
+        f"Updating user with mixed org roles: '{LINK_USER_MIXED_ORG_ROLES.external_user_id}' with X-API-Key: '{API_KEY_USER_MIXED_ORG_ROLES.key_id}'"
+    )
+    db_session.merge(USER_MIXED_ORG_ROLES, load=True)
+    db_session.merge(LINK_USER_MIXED_ORG_ROLES, load=True)
+    db_session.merge(API_KEY_USER_MIXED_ORG_ROLES, load=True)
+    db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER1, load=True)
+    db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER2, load=True)
+
+    # Assign mixed roles: Admin of ORG1, Member of ORG2
+    _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER1, ORG_ADMIN)
+    _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER2, ORG_MEMBER)
+
+    # Log summary of all created user scenarios
+    logger.info("=== USER SCENARIOS SUMMARY ===")
+    logger.info("Created 5 user scenarios with role-based access:")
+    logger.info("• no_org_user - Individual user (no organizations)")
+    logger.info("• one_org_user - Organization admin (Sally's Soup Emporium)")
+    logger.info("• two_org_user - Organization admin (both organizations)")
+    logger.info("• org_member_user - Organization member (Sally's Soup Emporium)")
+    logger.info("• mixed_roles_user - Admin of ORG1, Member of ORG2")
 
 
 def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:

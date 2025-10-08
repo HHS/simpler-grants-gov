@@ -67,6 +67,7 @@ class SimplerSoapAPI(StrEnum):
 class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
+    compare_endpoints: bool = False
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -95,6 +96,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="GetOpportunityListResponse",
             force_list_attributes=("OpportunityDetails",),
             key_indexes={"OpportunityDetails": "CompetitionID"},
+            compare_endpoints=True,
             namespace_keymap={
                 "GetOpportunityListResponse": "ns2",
                 "OpportunityDetails": "ns5",
