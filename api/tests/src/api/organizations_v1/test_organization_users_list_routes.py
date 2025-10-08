@@ -4,7 +4,7 @@ import pytest
 
 from src.constants.lookup_constants import Privilege
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
-from tests.src.db.models.factories import OrganizationFactory
+from tests.src.db.models.factories import OrganizationFactory, UserProfileFactory
 
 
 class TestOrganizationUsers:
@@ -71,6 +71,9 @@ class TestOrganizationUsers:
             is_organization_owner=True,
         )
 
+        # Create profile
+        user_profile = UserProfileFactory.create(user=user)
+
         # Make request
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
@@ -83,6 +86,8 @@ class TestOrganizationUsers:
         assert data["message"] == "Success"
         assert len(data["data"]) == 1
         assert data["data"][0]["user_id"] == str(user.user_id)
+        assert data["data"][0]["first_name"] == user_profile.first_name
+        assert data["data"][0]["last_name"] == user_profile.last_name
 
     def test_get_organization_users_403_user_not_member_of_target_organization(
         self, enable_factory_create, client, db_session
@@ -285,7 +290,6 @@ class TestOrganizationUsers:
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
         )
-
         assert resp.status_code == expected_status
 
         if expected_status == 200:

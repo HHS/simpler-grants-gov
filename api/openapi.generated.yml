@@ -5681,6 +5681,18 @@ components:
             type:
             - object
             $ref: '#/components/schemas/Role1'
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: User first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: User last name
+          example: Smith
     OrganizationUsersResponse:
       type: object
       properties:
