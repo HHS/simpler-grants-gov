@@ -8,8 +8,15 @@ from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import Organization
-from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
+from src.db.models.user_models import (
+    LinkRolePrivilege,
+    OrganizationUser,
+    OrganizationUserRole,
+    Role,
+    User,
+)
 from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.organization_user_utils import validate_organization_user_exists
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +34,6 @@ def check_last_admin_protection(
     Raises:
         FlaskError: 403 if this would remove the last admin
     """
-    from src.db.models.user_models import LinkRolePrivilege, Role
 
     # Get all user IDs in the organization who have.MANAGE_ORG_MEMBERS privilege
     admin_user_ids_stmt = (
@@ -49,34 +55,6 @@ def check_last_admin_protection(
         raise_flask_error(403, message="Cannot remove the last administrator from organization")
 
 
-def validate_organization_user_exists(
-    db_session: db.Session, user_id: UUID, organization: Organization
-) -> OrganizationUser:
-    """Validate that the user is a member of the specified organization.
-
-    Args:
-        db_session: Database session
-        user_id: ID of user to validate
-        organization: Organization to check membership in
-
-    Returns:
-        OrganizationUser: The organization user record
-
-    Raises:
-        FlaskError: 404 if user is not a member of the organization
-    """
-    org_user = db_session.execute(
-        select(OrganizationUser)
-        .where(OrganizationUser.organization_id == organization.organization_id)
-        .where(OrganizationUser.user_id == user_id)
-    ).scalar_one_or_none()
-
-    if not org_user:
-        raise_flask_error(404, message=f"Could not find User with ID {user_id}")
-
-    return org_user
-
-
 def remove_user_from_organization(
     db_session: db.Session, user: User, target_user_id: UUID, organization_id: UUID
 ) -> None:
@@ -91,14 +69,7 @@ def remove_user_from_organization(
     Raises:
         FlaskError: 403 if forbidden, 404 if not found
     """
-    logger.info(
-        "Attempting to remove user from organization",
-        extra={
-            "requesting_user_id": user.user_id,
-            "target_user_id": target_user_id,
-            "organization_id": organization_id,
-        },
-    )
+    logger.info("Attempting to remove user from organization")
 
     # Get organization and validate it exists
     organization = get_organization(db_session, organization_id)
@@ -116,11 +87,4 @@ def remove_user_from_organization(
     # Perform the deletion - cascade delete will handle OrganizationUserRole records
     db_session.delete(org_user)
 
-    logger.info(
-        "Successfully removed user from organization",
-        extra={
-            "requesting_user_id": user.user_id,
-            "target_user_id": target_user_id,
-            "organization_id": organization_id,
-        },
-    )
+    logger.info("Successfully removed user from organization")
