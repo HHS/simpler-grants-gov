@@ -2,7 +2,6 @@ import logging
 import uuid
 
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
@@ -13,7 +12,7 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import OrganizationUserRole, User
+from src.db.models.user_models import User
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +104,7 @@ USER_ONE_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("3ab87af3-66d3-4a44-9eb1-7da598ffb05b"),
     organization=ORG1,
     user=USER_ONE_ORG,
-    as_admin=True,  # This automatically sets up the role and is_organization_owner=True
+    is_organization_owner=True,  # Keep the flag for now, but don't use traits
 )
 
 
@@ -132,14 +131,14 @@ USER_TWO_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("d0203570-863e-40b7-a2f9-b85020eb7e65"),
     organization=ORG1,
     user=USER_TWO_ORGS,
-    as_admin=True,
+    is_organization_owner=True,
 )
 
 USER_TWO_ORG_ORG_USER2 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("ac0cf16c-3702-4d25-8a0f-0428dc68af3e"),
     organization=ORG2,
     user=USER_TWO_ORGS,
-    as_admin=True,
+    is_organization_owner=True,
 )
 
 
@@ -166,7 +165,7 @@ USER_ORG_MEMBER_ORG_USER = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"),
     organization=ORG1,
     user=USER_ORG_MEMBER,
-    as_member=True,  # Simple trait usage
+    is_organization_owner=False,
 )
 
 ###############################
@@ -193,34 +192,24 @@ USER_MIXED_ORG_ROLES_ORG_USER1 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("c8d9e0f1-a2b3-4c4d-5e6f-7a8b9c0d1e2f"),
     organization=ORG1,
     user=USER_MIXED_ORG_ROLES,
-    as_admin=True,
+    is_organization_owner=True,
 )
 
 USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
     organization_user_id=uuid.UUID("d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"),
     organization=ORG2,
     user=USER_MIXED_ORG_ROLES,
-    as_member=True,
+    is_organization_owner=False,
 )
 
 
 def _assign_organization_role(
     db_session: db.Session, organization_user_id: uuid.UUID, role_id: uuid.UUID
 ) -> None:
-    """Helper function to assign a role to an organization user
-
-    Uses upsert pattern to handle CI environment differences gracefully.
-    """
-    stmt = insert(OrganizationUserRole).values(
+    role_assignment = factories.OrganizationUserRoleFactory.build(
         organization_user_id=organization_user_id, role_id=role_id
     )
-
-    stmt = stmt.on_conflict_do_update(
-        index_elements=["organization_user_id", "role_id"],
-        set_={"updated_at": stmt.excluded.updated_at},
-    )
-
-    db_session.execute(stmt)
+    db_session.merge(role_assignment, load=True)
     logger.info(f"Assigned role {role_id} to organization user {organization_user_id}")
 
 
