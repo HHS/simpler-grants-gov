@@ -90,3 +90,11 @@ class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
     """Schema for PUT /organizations/:organization_id/users/:user_id"""
 
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/users/:user_id response"""
+
+    data = fields.Raw(
+        allow_none=True, metadata={"description": "No data returned on successful removal"}
+    )
