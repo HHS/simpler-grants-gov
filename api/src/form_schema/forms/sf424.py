@@ -746,6 +746,21 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
+        "name": "department_info",
+        "label": "Department & Division Info",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/department_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/division_name",
+            },
+        ],
+    },
+    {
+        "type": "section",
         "name": "type_of_applicant",
         "label": "9. Type of Applicant",
         "children": [
