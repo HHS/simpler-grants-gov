@@ -1,5 +1,6 @@
 import logging
 from datetime import date, timedelta
+from uuid import uuid4
 
 import pytest
 
@@ -25,6 +26,7 @@ from src.task.notifications.constants import (
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import UTM_TAG, OpportunityNotificationTask
 from tests.lib.db_testing import cascade_delete_from_db_table
+from tests.src.db.models.factories import UserFactory
 
 
 def build_opp_and_version(
@@ -1137,11 +1139,21 @@ class TestOpportunityNotification:
         user,
     ):
         """Test that the user notification does not pick up user on suppression_list"""
-        # create a suppressed email
-        factories.SuppressedEmailFactory(email=user.email)
-
         # create opportunity
         opp = factories.OpportunityFactory.create(is_posted_summary=True)
+
+        # create a saved opp with suppressed user
+        suppressed_user = UserFactory.create()
+        factories.LinkExternalUserFactory.create(
+            user=suppressed_user, email="testing@example.com"
+        ).user
+
+        factories.SuppressedEmailFactory(email=suppressed_user.email)
+        factories.UserSavedOpportunityFactory.create(
+            user=suppressed_user,
+            opportunity=opp,
+        )
+        # Create a different user with the same saved opportunity
         factories.UserSavedOpportunityFactory.create(
             user=user,
             opportunity=opp,
@@ -1151,4 +1163,6 @@ class TestOpportunityNotification:
         # Instantiate the task
         results = notification_task._get_latest_opportunity_versions()
 
-        assert len(results) == 0
+        # Assert correct user saved opportunity is returned
+        assert len(results) == 1
+        assert results[0][0].user_id == user.user_id
