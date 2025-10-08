@@ -7,12 +7,7 @@ from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import Privilege, RoleType
-from src.db.models.user_models import (
-    LinkRoleRoleType,
-    OrganizationUserRole,
-    Role,
-    User,
-)
+from src.db.models.user_models import LinkRoleRoleType, OrganizationUserRole, Role, User
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.organization_user_utils import validate_organization_user_exists
 
