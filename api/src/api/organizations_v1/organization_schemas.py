@@ -1,4 +1,5 @@
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import RoleSchema
 
@@ -50,6 +51,12 @@ class OrganizationMemberSchema(Schema):
         fields.Nested(RoleSchema),
         metadata={"description": "User roles in this organization"},
     )
+    first_name = fields.String(
+        allow_none=True, metadata={"description": "User first name", "example": "John"}
+    )
+    last_name = fields.String(
+        allow_none=True, metadata={"description": "User last name", "example": "Smith"}
+    )
 
 
 class OrganizationGetResponseSchema(AbstractResponseSchema):
@@ -73,3 +80,21 @@ class OrganizationListRolesResponseSchema(AbstractResponseSchema):
     """Schema for POST /organizations/:organization_id/roles/list response"""
 
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationUpdateUserRolesRequestSchema(Schema):
+    role_ids = fields.List(fields.UUID(required=True), validate=Length(min=1))
+
+
+class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /organizations/:organization_id/users/:user_id"""
+
+    data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/users/:user_id response"""
+
+    data = fields.Raw(
+        allow_none=True, metadata={"description": "No data returned on successful removal"}
+    )

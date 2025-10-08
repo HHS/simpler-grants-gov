@@ -283,6 +283,10 @@ variable "scheduled_jobs" {
     state               = string
     cpu                 = optional(number, 1024)
     mem                 = optional(number, 2048)
+    environment_vars = optional(list(object({
+      Name  = string
+      Value = string
+    })), [])
   }))
   default = {}
 }
