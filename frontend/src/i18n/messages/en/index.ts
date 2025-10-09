@@ -339,7 +339,7 @@ export const messages = {
       attachedDocument: "Attached document",
       attachments: "Attachments",
       attachmentsInstructions:
-        "If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+        "If the <instructionsLink>opportunity instructions</instructionsLink> require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
       action: "Action",
       cancelUpload: "Cancel upload",
       delete: "Delete",

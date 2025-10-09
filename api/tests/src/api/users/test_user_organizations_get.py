@@ -24,10 +24,16 @@ class TestUserOrganizationsGet:
         sam_gov_entity_1 = SamGovEntityFactory.create(
             legal_business_name="Test Organization LLC",
             expiration_date=date(2025, 12, 31),
+            ebiz_poc_email="ebiz1@testorg.com",
+            ebiz_poc_first_name="Jane",
+            ebiz_poc_last_name="Doe",
         )
         sam_gov_entity_2 = SamGovEntityFactory.create(
             legal_business_name="Another Test Org Inc",
             expiration_date=date(2026, 6, 30),
+            ebiz_poc_email="ebiz2@anothertestorg.com",
+            ebiz_poc_first_name="John",
+            ebiz_poc_last_name="Smith",
         )
 
         # Create organizations with SAM.gov entities
@@ -61,6 +67,9 @@ class TestUserOrganizationsGet:
         assert org_data_1["sam_gov_entity"]["uei"] == sam_gov_entity_1.uei
         assert org_data_1["sam_gov_entity"]["legal_business_name"] == "Test Organization LLC"
         assert org_data_1["sam_gov_entity"]["expiration_date"] == "2025-12-31"
+        assert org_data_1["sam_gov_entity"]["ebiz_poc_email"] == "ebiz1@testorg.com"
+        assert org_data_1["sam_gov_entity"]["ebiz_poc_first_name"] == "Jane"
+        assert org_data_1["sam_gov_entity"]["ebiz_poc_last_name"] == "Doe"
 
         # Check second organization (org_2 - user is owner: False)
         org_data_2 = organizations[1]
@@ -69,6 +78,9 @@ class TestUserOrganizationsGet:
         assert org_data_2["sam_gov_entity"]["uei"] == sam_gov_entity_2.uei
         assert org_data_2["sam_gov_entity"]["legal_business_name"] == "Another Test Org Inc"
         assert org_data_2["sam_gov_entity"]["expiration_date"] == "2026-06-30"
+        assert org_data_2["sam_gov_entity"]["ebiz_poc_email"] == "ebiz2@anothertestorg.com"
+        assert org_data_2["sam_gov_entity"]["ebiz_poc_first_name"] == "John"
+        assert org_data_2["sam_gov_entity"]["ebiz_poc_last_name"] == "Smith"
 
     def test_get_user_organizations_200_without_sam_gov_entities(
         self, enable_factory_create, client, db_session
@@ -177,6 +189,9 @@ class TestUserOrganizationsGet:
             uei="MIXED123456789",
             legal_business_name="Mixed Test Org",
             expiration_date=date(2025, 3, 15),
+            ebiz_poc_email="ebiz@mixedorg.com",
+            ebiz_poc_first_name="Alice",
+            ebiz_poc_last_name="Johnson",
         )
         org_with_sam = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
 
@@ -221,6 +236,9 @@ class TestUserOrganizationsGet:
         assert org_with_sam_data["sam_gov_entity"]["uei"] == "MIXED123456789"
         assert org_with_sam_data["sam_gov_entity"]["legal_business_name"] == "Mixed Test Org"
         assert org_with_sam_data["sam_gov_entity"]["expiration_date"] == "2025-03-15"
+        assert org_with_sam_data["sam_gov_entity"]["ebiz_poc_email"] == "ebiz@mixedorg.com"
+        assert org_with_sam_data["sam_gov_entity"]["ebiz_poc_first_name"] == "Alice"
+        assert org_with_sam_data["sam_gov_entity"]["ebiz_poc_last_name"] == "Johnson"
 
         # Check organization without SAM.gov entity
         assert org_without_sam_data is not None
