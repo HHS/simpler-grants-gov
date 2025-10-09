@@ -9,6 +9,7 @@ from lxml import etree as lxml_etree
 
 from .config import load_xml_transform_config
 from .models import XMLGenerationRequest, XMLGenerationResponse
+from .transformers.attachment_transformer import AttachmentTransformer
 from .transformers.base_transformer import RecursiveXMLTransformer
 
 logger = logging.getLogger(__name__)
@@ -140,6 +141,10 @@ class XMLGenerationService:
             "xsd_url", "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd"
         )
         self._add_ordered_form_elements(root, data, nsmap, namespace_fields, xsd_url)
+
+        # Add attachment elements if present in data
+        attachment_transformer = AttachmentTransformer()
+        attachment_transformer.add_attachment_elements(root, data, nsmap)
 
         # Generate XML string
         if pretty_print:
@@ -524,21 +529,33 @@ class XMLGenerationService:
 
         Dynamically extracts the correct order from the XSD schema.
         """
+        # Handled separately by AttachmentTransformer
+        attachment_fields = {
+            "debt_explanation",
+            "areas_affected",
+            "additional_congressional_districts",
+            "additional_project_title",
+        }
+
         # Get element order from XSD schema
         sf424_order = self._get_xsd_element_order(xsd_url)
 
-        # Add elements in the correct order
+        # Add elements in the correct order (skip attachment fields)
         for field_name in sf424_order:
-            if field_name in data:
+            if field_name in data and field_name not in attachment_fields:
                 field_value = data[field_name]
                 if field_value is not None:
                     self._add_lxml_element_to_parent(
                         root, field_name, field_value, nsmap, namespace_fields, xsd_url
                     )
 
-        # Add any remaining fields that weren't in the predefined order
+        # Add any remaining fields that weren't in the predefined order (skip attachment fields)
         for field_name, field_value in data.items():
-            if field_name not in sf424_order and field_value is not None:
+            if (
+                field_name not in sf424_order
+                and field_name not in attachment_fields
+                and field_value is not None
+            ):
                 self._add_lxml_element_to_parent(
                     root, field_name, field_value, nsmap, namespace_fields, xsd_url
                 )

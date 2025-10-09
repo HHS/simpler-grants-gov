@@ -3,11 +3,7 @@
 import pytest
 from lxml import etree as lxml_etree
 
-from src.services.xml_generation.models.attachment import (
-    AttachmentData,
-    AttachmentFile,
-    AttachmentGroup,
-)
+from src.services.xml_generation.models.attachment import AttachmentFile, AttachmentGroup
 from src.services.xml_generation.transformers.attachment_transformer import AttachmentTransformer
 
 
@@ -184,4 +180,3 @@ class TestAttachmentIntegration:
         assert "areas.pdf" in xml_string
         assert "<DebtExplanation>" in xml_string
         assert "debt.docx" in xml_string
-
