@@ -183,9 +183,7 @@ export const InformationCard = ({
                 (12:00am ET)
               </dd>
             </div>
-            {isCompetitionClosed() ? (
-              <SpecialInstructions />
-            ) : null}
+            {isCompetitionClosed() ? <SpecialInstructions /> : null}
             <div className="margin-bottom-1">
               <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
               <dd className="margin-right-1 text-bold text-orange">
