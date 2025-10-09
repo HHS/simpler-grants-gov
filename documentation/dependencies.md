@@ -129,6 +129,7 @@ flowchart LR
         HHS/simpler-grants-gov#4353["CommonGrants - Developer tools ✔️"]:::Done
         HHS/simpler-grants-gov#5892["CommonGrants: Co-Planning * 🛠️"]:::InProgress
         HHS/simpler-grants-gov#6195["CommonGrants: Form library"]
+        HHS/simpler-grants-gov#6201["CommonGrants: Schema versioning"]
     end
 
 
@@ -143,6 +144,7 @@ flowchart LR
     %% ─────────────────────────────
     HHS/simpler-grants-gov#4353 --> HHS/simpler-grants-gov#6201
     HHS/simpler-grants-gov#5892 --> HHS/simpler-grants-gov#6195
+    HHS/simpler-grants-gov#6201 --> HHS/simpler-grants-gov#6195
 
   end
 
