@@ -5,6 +5,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import click
+
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -183,19 +185,19 @@ class ValidationTestRunner:
         Args:
             summary: Test results summary
         """
-        print("\n" + "=" * 60)
-        print("XML VALIDATION TEST SUMMARY")
-        print("=" * 60)
-        print(f"Total Tests: {summary['total_tests']}")
-        print(f"Successful: {summary['successful_tests']}")
-        print(f"Failed: {summary['failed_tests']}")
-        print(f"Success Rate: {summary['success_rate']:.1f}%")
+        click.echo("\n" + "=" * 60)
+        click.echo("XML VALIDATION TEST SUMMARY")
+        click.echo("=" * 60)
+        click.echo(f"Total Tests: {summary['total_tests']}")
+        click.echo(f"Successful: {summary['successful_tests']}")
+        click.echo(f"Failed: {summary['failed_tests']}")
+        click.echo(f"Success Rate: {summary['success_rate']:.1f}%")
 
         if summary["error_summary"]:
-            print("\nFAILURE BREAKDOWN:")
+            click.echo("\nFAILURE BREAKDOWN:")
             for error_type, test_names in summary["error_summary"].items():
-                print(f"  {error_type}: {len(test_names)} tests")
+                click.echo(f"  {error_type}: {len(test_names)} tests")
                 for test_name in test_names:
-                    print(f"    - {test_name}")
+                    click.echo(f"    - {test_name}")
 
-        print("=" * 60)
+        click.echo("=" * 60)
