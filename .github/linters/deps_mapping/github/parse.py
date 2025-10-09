@@ -16,9 +16,15 @@ def parse_repo_response(response_data: list[dict], args: CliArgs) -> Diagram:
 
     # Extract issues from GraphQL response
     for issue_data in response_data:
+        # Extract status and group
+        status = extract_field_value(issue_data, args.project, "status", default="Todo")
+        group = extract_field_value(issue_data, args.project, "pillar", default="Other")
+
+        # Filter issues
+        if status not in args.statuses:
+            continue
+
         # Parse issue and dependencies
-        status = extract_field_value(issue_data, args.project, "status")
-        group = extract_field_value(issue_data, args.project, "pillar")
         issue, issue_dependencies = _parse_issue_data(issue_data, status, group)
 
         # Add to appropriate group
@@ -41,16 +47,19 @@ def parse_project_response(response_data: list[dict], args: CliArgs) -> Diagram:
 
     # Extract issues from project response data
     for item_data in response_data:
+        # Extract issue data
         content = item_data.get("content", {})
         issue_type = content.get("issueType", {}).get("name")
+        status = content.get("status", {}).get("name", "Todo")
+        group = content.get("pillar", {}).get("name", "Other")
 
         # Filter issues
         if not content or issue_type != args.issue_type:
             continue
+        if status not in args.statuses:
+            continue
 
         # Parse issue and dependencies
-        status = item_data.get("status", {}).get("name", "Todo")
-        group = item_data.get("pillar", {}).get("name", "Other")
         issue, issue_dependencies = _parse_issue_data(content, status, group)
 
         # Add to appropriate group

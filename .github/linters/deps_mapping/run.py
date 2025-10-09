@@ -49,7 +49,11 @@ def parse_args() -> CliArgs:
         action="append",
         help="GitHub issue label, can be specified multiple times",
     )
-    parser.add_argument("--state", default="open", help="GitHub issue state")
+    parser.add_argument(
+        "--statuses",
+        action="append",
+        help="GitHub issue status, can be specified multiple times",
+    )
     parser.add_argument("--batch", type=int, default=100, help="Batch size")
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
 
@@ -61,7 +65,7 @@ def parse_args() -> CliArgs:
         project=args.project,
         issue_type=args.issue_type,
         labels=args.labels,
-        state=args.state,
+        statuses=args.statuses,
         batch=args.batch,
         dry_run=args.dry_run,
     )

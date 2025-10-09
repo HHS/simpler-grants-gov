@@ -11,10 +11,10 @@ STATUS_CLASSES = {
     "Closed": ":::Done",
 }
 STATUS_ICONS = {
-    "In Progress": "🛠️",
-    "In Review": "🛠️",
-    "Done": "✔️",
-    "Closed": "✔️",
+    "In Progress": " 🛠️",
+    "In Review": " 🛠️",
+    "Done": " ✔️",
+    "Closed": " ✔️",
 }
 
 
@@ -233,17 +233,11 @@ def format_subgraph_items(issues: list[Issue]) -> str:
     # Format issue with status styling
     items = []
     for issue in issues:
-        if issue.status in STATUS_CLASSES:
-            title = f"{issue.title} {STATUS_ICONS[issue.status]}"
-            status_class = STATUS_CLASSES[issue.status]
-        else:
-            title = issue.title
-            status_class = ""
         items.append(
             ISSUE_TEMPLATE.format(
                 slug=issue.slug,
-                title=title,
-                status_class=status_class,
+                title=issue.title + STATUS_ICONS.get(issue.status, ""),
+                status_class=STATUS_CLASSES.get(issue.status, ""),
             )
         )
     return "\n".join(items)
