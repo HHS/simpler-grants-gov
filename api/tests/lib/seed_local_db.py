@@ -9,7 +9,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.db.models.competition_models import Form
+from src.db.models.competition_models import Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -106,15 +106,40 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
     """Load all of our forms into the DB"""
     logger.info("Rebuilding forms")
 
-    forms = dict(
-        sf424=db_session.merge(SF424_v4_0, load=True),
-        sf424a=db_session.merge(SF424a_v1_0, load=True),
-        project_abstract_summary=db_session.merge(ProjectAbstractSummary_v2_0, load=True),
-        project_narrative_attachment=db_session.merge(ProjectNarrativeAttachment_v1_2, load=True),
-        budget_narrative_attachment=db_session.merge(BudgetNarrativeAttachment_v1_2, load=True),
-        sf424b=db_session.merge(SF424b_v1_1, load=True),
-        sflll=db_session.merge(SFLLL_v2_0, load=True),
+    forms_raw = {
+        "sf424": SF424_v4_0,
+        "sf424a": SF424a_v1_0,
+        "project_abstract_summary": ProjectAbstractSummary_v2_0,
+        "project_narrative_attachment": ProjectNarrativeAttachment_v1_2,
+        "budget_narrative_attachment": BudgetNarrativeAttachment_v1_2,
+        "sf424b": SF424b_v1_1,
+        "sflll": SFLLL_v2_0,
+    }
+
+    # For each form we need to sync the form record into
+    # the database. If the form has form instructions
+    # we'll create that if it doesn't already exist.
+    forms = {}
+
+    existing_form_instruction_ids = set(
+        db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
     )
+    for form_name, form in forms_raw.items():
+
+        # We can't use our merge approach here because
+        # we want the factory to create a file on s3
+        # and that requires we run create and not build
+        form_instruction_id = form.form_instruction_id
+        if (
+            form_instruction_id is not None
+            and form_instruction_id not in existing_form_instruction_ids
+        ):
+            # Note that we make these text files as generating valid PDFs is surprisingly complex.
+            factories.FormInstructionFactory.create(
+                form_instruction_id=form.form_instruction_id, file_name=f"{form_name}.txt"
+            )
+
+        forms[form_name] = db_session.merge(form, load=True)
 
     return forms
 

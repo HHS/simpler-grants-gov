@@ -6,6 +6,7 @@ import sflllSchema from "tests/components/applyForm/sflll.mock.json";
 
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
 import {
+  addPrintWidgetToFields,
   buildWarningTree,
   condenseFormSchemaProperties,
   determineFieldType,
@@ -886,5 +887,260 @@ describe("pointerToFieldName", () => {
     expect(pointerToFieldName("$.somethig[0].another.this_one")).toEqual(
       "somethig[0]--another--this_one",
     );
+  });
+});
+
+describe("addPrintWidgetToFields", () => {
+  it("converts regular fields to Print widget", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "field" as const,
+        definition: "/properties/name" as const,
+        schema: { title: "Name", type: "string" },
+      },
+      {
+        type: "field" as const,
+        definition: "/properties/email" as const,
+        schema: { title: "Email", type: "string" },
+        widget: "Text",
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "field",
+        definition: "/properties/name",
+        schema: { title: "Name", type: "string" },
+        widget: "Print",
+      },
+      {
+        type: "field",
+        definition: "/properties/email",
+        schema: { title: "Email", type: "string" },
+        widget: "Print",
+      },
+    ]);
+  });
+
+  it("converts AttachmentArray widget to PrintAttachment widget", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "field" as const,
+        definition: "/properties/attachments" as const,
+        schema: { title: "Attachments", type: "array" },
+        widget: "AttachmentArray",
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "field",
+        definition: "/properties/attachments",
+        schema: { title: "Attachments", type: "array" },
+        widget: "PrintAttachment",
+      },
+    ]);
+  });
+
+  it("handles sections with nested fields", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "section" as const,
+        name: "personal-info",
+        label: "Personal Information",
+        children: [
+          {
+            type: "field" as const,
+            definition: "/properties/firstName" as const,
+            schema: { title: "First Name", type: "string" },
+          },
+          {
+            type: "field" as const,
+            definition: "/properties/documents" as const,
+            schema: { title: "Documents", type: "array" },
+            widget: "AttachmentArray",
+          },
+        ],
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "section",
+        name: "personal-info",
+        label: "Personal Information",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/firstName",
+            schema: { title: "First Name", type: "string" },
+            widget: "Print",
+          },
+          {
+            type: "field",
+            definition: "/properties/documents",
+            schema: { title: "Documents", type: "array" },
+            widget: "PrintAttachment",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("handles nested sections", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "section" as const,
+        name: "main-section",
+        label: "Main Section",
+        children: [
+          {
+            type: "section" as const,
+            name: "sub-section",
+            label: "Sub Section",
+            children: [
+              {
+                type: "field" as const,
+                definition: "/properties/nestedField" as const,
+                schema: { title: "Nested Field", type: "string" },
+                widget: "TextArea",
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "section",
+        name: "main-section",
+        label: "Main Section",
+        children: [
+          {
+            type: "section",
+            name: "sub-section",
+            label: "Sub Section",
+            children: [
+              {
+                type: "field",
+                definition: "/properties/nestedField",
+                schema: { title: "Nested Field", type: "string" },
+                widget: "Print",
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("handles mixed field and section types", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "field" as const,
+        definition: "/properties/topLevelField" as const,
+        schema: { title: "Top Level Field", type: "string" },
+      },
+      {
+        type: "section" as const,
+        name: "form-section",
+        label: "Form Section",
+        children: [
+          {
+            type: "field" as const,
+            definition: "/properties/sectionField" as const,
+            schema: { title: "Section Field", type: "string" },
+            widget: "Select",
+          },
+          {
+            type: "field" as const,
+            definition: "/properties/files" as const,
+            schema: { title: "Files", type: "array" },
+            widget: "AttachmentArray",
+          },
+        ],
+      },
+      {
+        type: "field" as const,
+        definition: "/properties/anotherTopField" as const,
+        schema: { title: "Another Top Field", type: "boolean" },
+        widget: "Checkbox",
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "field",
+        definition: "/properties/topLevelField",
+        schema: { title: "Top Level Field", type: "string" },
+        widget: "Print",
+      },
+      {
+        type: "section",
+        name: "form-section",
+        label: "Form Section",
+        children: [
+          {
+            type: "field",
+            definition: "/properties/sectionField",
+            schema: { title: "Section Field", type: "string" },
+            widget: "Print",
+          },
+          {
+            type: "field",
+            definition: "/properties/files",
+            schema: { title: "Files", type: "array" },
+            widget: "PrintAttachment",
+          },
+        ],
+      },
+      {
+        type: "field",
+        definition: "/properties/anotherTopField",
+        schema: { title: "Another Top Field", type: "boolean" },
+        widget: "Print",
+      },
+    ]);
+  });
+
+  it("handles empty ui schema", () => {
+    const uiSchema: UiSchema = [];
+    const result = addPrintWidgetToFields(uiSchema);
+    expect(result).toEqual([]);
+  });
+
+  it("preserves other field properties", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "field" as const,
+        definition: "/properties/customField" as const,
+        schema: { title: "Custom Field", type: "string", maxLength: 100 },
+        widget: "Text",
+        name: "customFieldName",
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "field",
+        definition: "/properties/customField",
+        schema: { title: "Custom Field", type: "string", maxLength: 100 },
+        widget: "Print",
+        name: "customFieldName",
+      },
+    ]);
   });
 });

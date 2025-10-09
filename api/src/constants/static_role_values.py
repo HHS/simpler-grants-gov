@@ -22,7 +22,6 @@ ORG_ADMIN = Role(
         ORG_ADMIN_ID,
         [
             Privilege.MANAGE_ORG_MEMBERS,
-            Privilege.MANAGE_ORG_ADMIN_MEMBERS,
             Privilege.VIEW_ORG_MEMBERSHIP,
             Privilege.START_APPLICATION,
             Privilege.LIST_APPLICATION,

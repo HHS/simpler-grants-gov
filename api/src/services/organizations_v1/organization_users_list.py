@@ -61,7 +61,6 @@ def get_organization_users(db_session: db.Session, organization_id: UUID) -> lis
         list[dict]: List of user data with roles and privileges
     """
     org_users = _fetch_organization_users(db_session, organization_id)
-
     return [
         {
             "user_id": org_user.user.user_id,
@@ -74,6 +73,8 @@ def get_organization_users(db_session: db.Session, organization_id: UUID) -> lis
                 }
                 for org_user_role in org_user.organization_user_roles
             ],
+            "first_name": org_user.user.profile.first_name if org_user.user.profile else None,
+            "last_name": org_user.user.profile.last_name if org_user.user.profile else None,
         }
         for org_user in org_users
     ]
