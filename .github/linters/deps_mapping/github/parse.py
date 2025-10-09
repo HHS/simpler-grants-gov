@@ -17,7 +17,7 @@ def parse_repo_response(response_data: list[dict], args: CliArgs) -> Diagram:
     # Extract issues from GraphQL response
     for issue_data in response_data:
         # Extract status and group
-        status = extract_field_value(issue_data, args.project, "status", default="Todo")
+        status = extract_field_value(issue_data, args.project, "status", default="")
         group = extract_field_value(issue_data, args.project, "pillar", default="Other")
 
         # Filter issues
