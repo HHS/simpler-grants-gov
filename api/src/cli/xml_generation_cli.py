@@ -125,7 +125,7 @@ def generate_xml_command(
     "--output",
     "output_file",
     type=click.Path(),
-    help="Output file to save results (JSON format)",
+    help="Output file to save results (JSON format). Defaults to {cache_dir}/validation_results.json",
 )
 @click.option(
     "--verbose",
@@ -146,15 +146,17 @@ def validate_xml_generation_command(
     This validates that generated XML conforms to Grants.gov XSD schemas.
     Flask handles DB/logging setup automatically.
 
+    By default, results are saved to validation_results.json in the XSD cache directory.
+
     Examples:
 
-        # Run all validation tests
+        # Run all validation tests (results saved to ./xsd_cache/validation_results.json)
         flask task validate-xml-generation
 
         # Run only SF-424 tests
         flask task validate-xml-generation --form SF424_4_0
 
-        # Save results to file
+        # Save results to custom file
         flask task validate-xml-generation --output validation_results.json
 
         # Use custom cache directory
@@ -180,6 +182,10 @@ def validate_xml_generation_command(
             )
             sys.exit(1)
 
+        # Default output file to cache directory if not specified
+        if not output_file:
+            output_file = str(cache_path / "validation_results.json")
+
         # Get test cases
         if form:
             test_cases = get_test_cases_by_form(form)
@@ -194,6 +200,7 @@ def validate_xml_generation_command(
 
         click.echo(f"Found {len(test_cases)} test cases")
         click.echo(f"XSD cache directory: {cache_dir}")
+        click.echo(f"Results will be saved to: {output_file}")
         click.echo("")
 
         # Initialize test runner with cache directory
@@ -205,10 +212,9 @@ def validate_xml_generation_command(
         # Print summary
         runner.print_summary(summary)
 
-        # Save results if requested
-        if output_file:
-            runner.save_results(output_file)
-            click.echo(f"Results saved to: {output_file}")
+        # Save results (now always saves, since we have a default)
+        runner.save_results(output_file)
+        click.echo(f"\nResults saved to: {output_file}")
 
         # Exit with appropriate code
         sys.exit(0 if summary["failed_tests"] == 0 else 1)
