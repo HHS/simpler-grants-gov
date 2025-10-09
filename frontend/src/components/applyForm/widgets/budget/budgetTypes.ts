@@ -20,12 +20,12 @@ export type RowDef = {
   letter: string;
   note?: string;
 };
-export interface ActivityItem extends BaseActivityItem {
-  budget_categories?: BudgetCategories;
-  budget_summary?: { total_amount?: MoneyString };
-}
 
 export interface BaseActivityItem {
   activity_title?: string;
   assistance_listing_number?: string;
+}
+export interface ActivityItem extends BaseActivityItem {
+  budget_categories?: BudgetCategories;
+  budget_summary?: { total_amount?: MoneyString };
 }

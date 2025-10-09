@@ -284,12 +284,21 @@ function Budget424aSectionB<
         <tbody>
           {/* Program income — total column only (Line 7) */}
           <tr className="bg-base-lightest">
-            <th scope="row" className="padding-05 padding-right-8 verticle-align-bottom">
+            <th
+              scope="row"
+              className="padding-05 padding-right-8 verticle-align-bottom"
+            >
               7. Program income
             </th>
             {activityColumnIndices.map((columnIndex) => (
-              <td key={`pi-${columnIndex}`} className="padding-05 verticle-align-bottom">
-                {cellInput({ fieldKey: "program_income_amount", index: columnIndex })}
+              <td
+                key={`pi-${columnIndex}`}
+                className="padding-05 verticle-align-bottom"
+              >
+                {cellInput({
+                  fieldKey: "program_income_amount",
+                  index: columnIndex,
+                })}
               </td>
             ))}
             <EqualsSpacer />
@@ -297,7 +306,7 @@ function Budget424aSectionB<
               <HelperText hasHorizontalLine={false}>Sum of row 7</HelperText>
               {totalInput({ fieldKey: "program_income_amount" })}
             </td>
-            </tr>
+          </tr>
         </tbody>
       </Table>
     </div>
