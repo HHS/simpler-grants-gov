@@ -49,9 +49,9 @@ def parse_project_response(response_data: list[dict], args: CliArgs) -> Diagram:
     for item_data in response_data:
         # Extract issue data
         content = item_data.get("content", {})
-        issue_type = content.get("issueType", {}).get("name")
-        status = content.get("status", {}).get("name", "Todo")
-        group = content.get("pillar", {}).get("name", "Other")
+        status = (item_data.get("status") or {}).get("name", "Todo")
+        group = (item_data.get("pillar") or {}).get("name", "Other")
+        issue_type = (content.get("issueType") or {}).get("name")
 
         # Filter issues
         if not content or issue_type != args.issue_type:

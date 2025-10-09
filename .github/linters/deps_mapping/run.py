@@ -3,13 +3,15 @@ Map dependencies amongst GitHub issues using a mermaid diagram.
 
 Usage: From the root of the deps_mapping/ directory:
   python run.py \
-    --scope "issue" \
     --org "HHS" \
-    --repo "simpler-grants-protocol" \
-    --project 17 \
-    --issue-type "Epic" \
-    --label "Co-planning" \
-    --state "open" \
+    --repo "simpler-grants-gov" \
+    --project 12 \
+    --issue-type "Deliverable" \
+    --statuses "Prioritized" \
+    --statuses "Planning" \
+    --statuses "In Progress" \
+    --statuses "Done" \
+    --scope "repo" \
     --dry-run
 """
 
@@ -32,7 +34,7 @@ def parse_args() -> CliArgs:
     parser.add_argument(
         "--scope",
         required=True,
-        choices=["issue", "repo"],
+        choices=["issue", "repo", "project"],
         help="Scope of the dependencies to map",
     )
     parser.add_argument("--org", required=True, help="GitHub organization")
@@ -86,6 +88,8 @@ def main() -> int:
         github.map_issue_dependencies(args)
     elif args.scope == "repo":
         github.map_repo_dependencies(args)
+    elif args.scope == "project":
+        github.map_project_dependencies(args)
     return 0  # success
 
 
