@@ -12,12 +12,7 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import (
-    LinkExternalUser,
-    SuppressedEmail,
-    UserSavedOpportunity,
-    UserSavedSearch,
-)
+from src.db.models.user_models import LinkExternalUser, SuppressedEmail, UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig

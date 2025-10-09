@@ -263,9 +263,7 @@ class TestClosingDateNotification:
         """Test that the user notification does not pick up users on suppression_list"""
         # create a suppressed email
         suppressed_user = factories.UserFactory.create()
-        factories.LinkExternalUserFactory.create(
-            user=suppressed_user, email="testing@example.com"
-        ).user
+        factories.LinkExternalUserFactory.create(user=suppressed_user, email="testing@example.com")
 
         factories.SuppressedEmailFactory(email=suppressed_user.email)
 
@@ -286,6 +284,6 @@ class TestClosingDateNotification:
         task = ClosingDateNotificationTask(db_session, self.notification_config)
         results = task.collect_email_notifications()
 
-        # Verify opportunity is not picked up
+        # Verify opportunity from suppressed user is not picked up
         assert len(results) == 1
         assert results[0].user_id == user_with_email.user_id

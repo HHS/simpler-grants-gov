@@ -1,6 +1,5 @@
 import logging
 from datetime import date, timedelta
-from uuid import uuid4
 
 import pytest
 
@@ -1144,9 +1143,7 @@ class TestOpportunityNotification:
 
         # create a saved opp with suppressed user
         suppressed_user = UserFactory.create()
-        factories.LinkExternalUserFactory.create(
-            user=suppressed_user, email="testing@example.com"
-        ).user
+        factories.LinkExternalUserFactory.create(user=suppressed_user, email="testing@example.com")
 
         factories.SuppressedEmailFactory(email=suppressed_user.email)
         factories.UserSavedOpportunityFactory.create(

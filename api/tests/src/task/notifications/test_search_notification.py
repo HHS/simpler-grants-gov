@@ -666,7 +666,7 @@ def test_search_notification_suppressed_email(
     """Test that the user notification does not pick up users on suppression_list"""
     # create a suppressed email
     suppressed_user = factories.UserFactory.create()
-    factories.LinkExternalUserFactory.create(user=suppressed_user, email="testing@example.com").user
+    factories.LinkExternalUserFactory.create(user=suppressed_user, email="testing@example.com")
 
     factories.SuppressedEmailFactory(email=suppressed_user.email)
 
@@ -702,6 +702,6 @@ def test_search_notification_suppressed_email(
 
     results = notification_task.collect_email_notifications()
 
-    # assert saved search is not picked up
+    # assert suppressed user saved search is not picked up
     assert len(results) == 1
     assert results[0].user_id == user_with_email.user_id
