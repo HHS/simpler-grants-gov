@@ -47,6 +47,11 @@ fragment ProjectItems on Issue {
           name
         }
       }
+      pillar: fieldValueByName(name: "Pillar") {
+        ... on ProjectV2ItemFieldSingleSelectValue {
+          name
+        }
+      }
     }
   }
 }

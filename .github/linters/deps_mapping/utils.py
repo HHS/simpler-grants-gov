@@ -82,16 +82,18 @@ def update_markdown_section(
     content: str,
     section: str,
     new_content: str,
+    level: int = 3,
 ) -> str:
     """Updates or adds a section to the markdown content."""
     # Create the section header to search for
-    section_header = f"### {section}"
+    header = "#" * level
+    section_header = f"{header} {section}"
 
     # Check if the section already exists
     if section_header in content:
         # Section exists, update it with new content
         # Find the section and replace its content
-        pattern = rf"({re.escape(section_header)}.*?)(?=\n###|\Z)"
+        pattern = rf"({re.escape(section_header)}.*?)(?=\n{header}|\Z)"
         replacement = f"{section_header}\n{new_content}"
 
         # Use re.sub with DOTALL flag to match across multiple lines

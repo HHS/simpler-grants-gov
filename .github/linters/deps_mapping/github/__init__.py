@@ -16,7 +16,6 @@ from .main import (
     map_repo_dependencies,
 )
 from .parse import (
-    extract_status,
     parse_repo_response,
     parse_project_response,
 )
@@ -35,9 +34,7 @@ __all__ = [
     "fetch_and_parse_issues_from_repo",
     "map_issue_dependencies",
     "map_repo_dependencies",
-    "write_diagram_to_file",
     # Parse functions
-    "extract_status",
     "parse_repo_response",
     "parse_project_response",
 ]

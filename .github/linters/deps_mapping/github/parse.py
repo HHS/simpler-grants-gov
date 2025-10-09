@@ -17,11 +17,11 @@ def parse_repo_response(response_data: list[dict], args: CliArgs) -> Diagram:
     # Extract issues from GraphQL response
     for issue_data in response_data:
         # Parse issue and dependencies
-        status = extract_status(issue_data, args.project)
-        issue, issue_dependencies = _parse_issue_data(issue_data, status)
+        status = extract_field_value(issue_data, args.project, "status")
+        group = extract_field_value(issue_data, args.project, "pillar")
+        issue, issue_dependencies = _parse_issue_data(issue_data, status, group)
 
         # Add to appropriate group
-        group = issue.group or "Other"
         if group not in subgraphs:
             subgraphs[group] = []
         subgraphs[group].append(issue)
@@ -50,10 +50,10 @@ def parse_project_response(response_data: list[dict], args: CliArgs) -> Diagram:
 
         # Parse issue and dependencies
         status = item_data.get("status", {}).get("name", "Todo")
-        issue, issue_dependencies = _parse_issue_data(content, status)
+        group = item_data.get("pillar", {}).get("name", "Other")
+        issue, issue_dependencies = _parse_issue_data(content, status, group)
 
         # Add to appropriate group
-        group = issue.group or "Other"
         if group not in subgraphs:
             subgraphs[group] = []
         subgraphs[group].append(issue)
@@ -73,14 +73,14 @@ def parse_project_response(response_data: list[dict], args: CliArgs) -> Diagram:
 def _parse_issue_data(
     issue_data: dict,
     status: str,
+    group: str,
 ) -> tuple[Issue, list[Dependency]]:
     """Parse a single issue's data into an Issue object and its dependencies.
 
     Args:
         issue_data: The issue data from the API response
         status: The status string for this issue
-        args: Command line arguments for filtering
-
+        group: The group string for this issue
     Returns:
         Tuple of (Issue object, list of Dependencies)
     """
@@ -89,16 +89,8 @@ def _parse_issue_data(
     issue_number = issue_data["number"]
     issue_slug = f"{issue_repo}#{issue_number}"
 
-    # Parse group name from title pattern: "[<group name>] <Issue title>"
-    title = issue_data["title"]
-    group = "Other"
-    match = re.match(r"^\[([^\]]+)\]\s*(.*)$", title)
-    if match:
-        group = match.group(1).strip()
-        # Remove the prefix from the title
-        clean_title = match.group(2).strip()
-    else:
-        clean_title = title
+    # Clean title by removing group prefix if present
+    clean_title = _clean_prefix_from_title(issue_data["title"])
 
     # Create Issue object
     issue = Issue(
@@ -128,19 +120,40 @@ def _parse_issue_data(
     return issue, dependencies
 
 
-def extract_status(issue_data: dict, project: int, default: str = "Todo") -> str:
-    """Extract status from project items filtered by project number.
+def _clean_prefix_from_title(title: str) -> str:
+    """Remove bracket prefix from title pattern: "[<prefix>] <Issue title>"""
+    match = re.match(r"^\[([^\]]+)\]\s*(.*)$", title)
+    if match:
+        return match.group(2).strip()
+    return title
+
+
+def extract_field_value(
+    issue_data: dict,
+    project: int,
+    field: str,
+    default: str = "Todo",
+) -> str:
+    """Extract field value from project items filtered by project number.
 
     Defaults to "Todo" if no match found, or if the issue has no project items.
 
     This is equivalent to the following jq expression:
-    (.[] | select(.project.number == $project) | .status.name) // $default
+    (.[] | select(.project.number == $project) | .field.name) // $default
     """
+    project_items = issue_data.get("projectItems", {}).get("nodes", [])
+
     return next(
         (
-            item.get("status", {}).get("name")
-            for item in issue_data.get("projectItems", {}).get("nodes", [])
-            if item.get("project", {}).get("number") == project
+            field_value.get("name", "")
+            for item in project_items
+            if (
+                item is not None
+                and item.get("project", {}).get("number") == project
+                and (field_value := item.get(field)) is not None
+                and isinstance(field_value, dict)
+                and field_value.get("name") is not None
+            )
         ),
-        default,  # Default value if no match found
+        default,
     )

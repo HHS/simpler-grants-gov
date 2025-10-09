@@ -8,6 +8,11 @@ query ($org: String!, $project: Int!, $batch: Int!, $cursor: String) {
               name
             }
           }
+          pillar: fieldValueByName(name: "Pillar") {
+            ... on ProjectV2ItemFieldSingleSelectValue {
+              name
+            }
+          }
           content {
             ... on Issue {
               ...IssueDetails

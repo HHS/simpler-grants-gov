@@ -94,7 +94,7 @@ def write_diagram_to_file(
 
         # Generate the diagram content
         section_content = f"""
-Here are the dependencies between features on our co-planning board:
+Here are the dependencies amongst deliverables:
 
 ```mermaid
 {diagram.generate_diagram()}
@@ -104,8 +104,9 @@ Here are the dependencies between features on our co-planning board:
         # Update the dependency graph section
         updated_content = update_markdown_section(
             content=readme_content,
-            section="Feature dependencies",
+            section="Dependency diagram",
             new_content=section_content,
+            level=2,
         )
 
         # Write the updated content back to the README

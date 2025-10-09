@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -222,6 +223,8 @@ class Diagram:
 
 def format_slug(name: str) -> str:
     """Format a string to a valid slug."""
+    # Remove emojis and other non-ASCII characters
+    name = re.sub(r"[^\w\s-]", "", name)
     return name.lower().strip().replace(" ", "_")
 
 
