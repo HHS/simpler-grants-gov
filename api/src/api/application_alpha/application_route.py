@@ -197,6 +197,8 @@ def application_form_get(
         user = None
 
     with db_session.begin():
+        if user:
+            db_session.add(multi_auth_user.user)
         application_form, warnings = get_application_form(
             db_session, application_id, app_form_id, user
         )
@@ -226,6 +228,7 @@ def application_get(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application, warnings = get_application_with_warnings(db_session, application_id, user)
 
     # Return the application form data
@@ -303,6 +306,7 @@ def application_attachment_get(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application_attachment = get_application_attachment(
             db_session, application_id, application_attachment_id, user
         )

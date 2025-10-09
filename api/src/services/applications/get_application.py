@@ -6,6 +6,8 @@ from sqlalchemy.orm import selectinload
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import can_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import (
     Application,
     ApplicationForm,
@@ -104,6 +106,9 @@ def get_application_with_warnings(
     """
     # Fetch an application, handles the auth checks as well
     application = get_application(db_session, application_id, user, is_internal_user)
+    # Check privileges
+    if not can_access(user, {Privilege.VIEW_APPLICATION}, application):
+        raise_flask_error(403, "Forbidden")
 
     # See what validation issues remain on the application's forms
     form_warnings, form_warning_map = get_application_form_errors(

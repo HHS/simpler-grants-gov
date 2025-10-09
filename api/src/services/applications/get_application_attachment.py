@@ -5,7 +5,8 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import SubmissionIssue
+from src.auth.endpoint_access_util import can_access
+from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
@@ -22,6 +23,9 @@ def get_application_attachment(
 
     # Fetch the application which also validates if the user can access it
     application = get_application(db_session, application_id, user)
+    # Check privileges
+    if not can_access(user, {Privilege.VIEW_APPLICATION}, application):
+        raise_flask_error(403, "Forbidden")
 
     # Fetch the attachment
     application_attachment = db_session.execute(
