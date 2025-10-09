@@ -58,10 +58,20 @@ locals {
     ],
   }
 
+  # Below is the config for overriding the defaults for the step functions.
   scheduled_jobs_config = {
     training = {
       cpu = 1024
       mem = 4096
+      # To configure environment variables uncomment the below section
+      /*
+      environment_vars = [
+        {
+          "Name" : "test",
+          "Value" : "test-value"
+        }
+      ]
+      */
     }
     prod = {
       cpu = 1024
@@ -83,6 +93,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     load-search-opportunity-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]
@@ -91,6 +102,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     export-opportunity-data = {
       task_command = ["poetry", "run", "flask", "task", "export-opportunity-data"]
@@ -99,6 +111,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     create-analytics-db-csvs = {
       task_command = ["poetry", "run", "flask", "task", "create-analytics-db-csvs"]
@@ -107,6 +120,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     load-search-agency-data = {
       task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
@@ -115,6 +129,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     email_notification_opportunity = {
       task_command = ["poetry", "run", "flask", "task", "email-notifications"]
@@ -123,6 +138,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     sam-extracts = {
       task_command = local.sam-extract-args[var.environment]
@@ -131,6 +147,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     create-application-submission = {
       task_command = ["poetry", "run", "flask", "task", "create-application-submission"]
@@ -139,6 +156,7 @@ locals {
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
   }
 }

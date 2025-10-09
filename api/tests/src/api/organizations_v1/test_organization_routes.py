@@ -20,6 +20,9 @@ class TestOrganizationGet:
             uei="TEST123456789",
             legal_business_name="Test Organization LLC",
             expiration_date=date(2025, 12, 31),
+            ebiz_poc_email="ebiz@testorg.com",
+            ebiz_poc_first_name="Jane",
+            ebiz_poc_last_name="Doe",
         )
 
         # Create user in organization with required privileges
@@ -44,6 +47,9 @@ class TestOrganizationGet:
         assert data["data"]["sam_gov_entity"]["uei"] == "TEST123456789"
         assert data["data"]["sam_gov_entity"]["legal_business_name"] == "Test Organization LLC"
         assert data["data"]["sam_gov_entity"]["expiration_date"] == "2025-12-31"
+        assert data["data"]["sam_gov_entity"]["ebiz_poc_email"] == "ebiz@testorg.com"
+        assert data["data"]["sam_gov_entity"]["ebiz_poc_first_name"] == "Jane"
+        assert data["data"]["sam_gov_entity"]["ebiz_poc_last_name"] == "Doe"
 
     def test_get_organization_200_without_sam_gov_entity(
         self, enable_factory_create, client, db_session

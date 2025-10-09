@@ -74,7 +74,7 @@ async function FormPage({ params }: formPageProps) {
 
   return (
     <>
-      <GridContainer>
+      <GridContainer className="overflow-auto maxh-viewport">
         <Breadcrumbs
           breadcrumbList={[
             { title: "home", path: "/" },
