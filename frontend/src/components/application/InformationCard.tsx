@@ -183,12 +183,7 @@ export const InformationCard = ({
                 (12:00am ET)
               </dd>
             </div>
-            {isCompetitionClosed() && (
-              <div className="margin-bottom-1 text-bold text-orange">
-                {t("specialInstructions")}
-              </div>
-            )}
-            {!applicationDetails.competition.is_open ? (
+            {isCompetitionClosed() ? (
               <SpecialInstructions />
             ) : null}
             <div className="margin-bottom-1">
@@ -197,7 +192,7 @@ export const InformationCard = ({
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && (
+            {!applicationSubmitted && !isCompetitionClosed() && (
               <SubmitApplicationButton
                 buttonText={t("submit")}
                 submitHandler={applicationSubmitHandler}
