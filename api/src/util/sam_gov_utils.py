@@ -3,8 +3,9 @@ import uuid
 from typing import Callable
 
 import src.adapters.db as db
+from src.constants.static_role_values import ORG_ADMIN
 from src.db.models.entity_models import Organization, SamGovEntity
-from src.db.models.user_models import OrganizationUser, User
+from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ def link_sam_gov_entity_if_not_exists(
 
     # If the user is not already a member of the organization, add them
     organization_user = None
-    for org_user in user.organizations:
+    for org_user in user.organization_users:
         if org_user.organization_id == organization.organization_id:
             organization_user = org_user
             break
@@ -82,4 +83,30 @@ def link_sam_gov_entity_if_not_exists(
         organization_user.is_organization_owner = True
         logger.info("Made user an owner of the organization", extra=log_extra)
 
+    # Ensure the organization user has the Organization Admin role
+    _assign_organization_admin_role(db_session, organization_user, log_extra, increment_metric)
+
     return organization_user
+
+
+def _assign_organization_admin_role(
+    db_session: db.Session,
+    organization_user: OrganizationUser,
+    log_extra: dict,
+    increment_metric: Callable[[str], None],
+) -> None:
+    """Assign the Organization Admin role to an organization user if they don't already have it."""
+
+    # Check if the user already has the Organization Admin role
+    for role_assignment in organization_user.organization_user_roles:
+        if role_assignment.role_id == ORG_ADMIN.role_id:
+            # User already has the role, nothing to do
+            return
+
+    # User doesn't have the role, assign it
+    increment_metric("new_organization_admin_role_assigned_count")
+    org_user_role = OrganizationUserRole(
+        organization_user=organization_user, role_id=ORG_ADMIN.role_id
+    )
+    db_session.add(org_user_role)
+    logger.info("Assigned Organization Admin role to organization user", extra=log_extra)

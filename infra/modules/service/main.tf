@@ -144,8 +144,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = local.container_name,
       image                  = local.image_url,
-      memory                 = var.memory,
-      cpu                    = var.cpu,
+      memory                 = var.fargate_memory - var.fluent_bit_memory,
+      cpu                    = var.fargate_cpu - var.fluent_bit_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = var.readonly_root_filesystem,
@@ -185,8 +185,8 @@ resource "aws_ecs_task_definition" "app" {
     {
       name                   = "${local.container_name}-fluentbit"
       image                  = local.fluent_bit_image_url,
-      memory                 = 256,
-      cpu                    = 256,
+      memory                 = var.fluent_bit_memory,
+      cpu                    = var.fluent_bit_cpu,
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
@@ -234,8 +234,8 @@ resource "aws_ecs_task_definition" "app" {
   # we need to create extra room in the task definition for the application container
   #
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
-  cpu    = var.cpu * 2
-  memory = var.memory * 2
+  cpu    = var.fargate_cpu
+  memory = var.fargate_memory
 
   requires_compatibilities = ["FARGATE"]
 

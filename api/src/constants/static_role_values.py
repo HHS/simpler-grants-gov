@@ -18,7 +18,18 @@ ORG_ADMIN = Role(
     role_id=ORG_ADMIN_ID,
     role_name="Organization Admin",
     is_core=True,
-    link_privileges=get_link_privileges(ORG_ADMIN_ID, list(Privilege)),
+    link_privileges=get_link_privileges(
+        ORG_ADMIN_ID,
+        [
+            Privilege.MANAGE_ORG_MEMBERS,
+            Privilege.VIEW_ORG_MEMBERSHIP,
+            Privilege.START_APPLICATION,
+            Privilege.LIST_APPLICATION,
+            Privilege.VIEW_APPLICATION,
+            Privilege.MODIFY_APPLICATION,
+            Privilege.SUBMIT_APPLICATION,
+        ],
+    ),
     link_role_types=[LinkRoleRoleType(role_id=ORG_ADMIN_ID, role_type=RoleType.ORGANIZATION)],
 )
 

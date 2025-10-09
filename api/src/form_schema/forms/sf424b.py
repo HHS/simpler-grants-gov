@@ -1,5 +1,6 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 
 DIRECTIONS = """Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0040), Washington, DC 20503.
@@ -122,5 +123,8 @@ SF424b_v1_1 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("9db8ab35-f677-482c-93ea-9fb3eb86d7c7"),
+    form_type=FormType.SF424B,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

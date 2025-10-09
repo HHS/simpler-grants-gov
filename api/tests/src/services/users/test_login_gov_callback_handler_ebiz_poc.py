@@ -1,3 +1,4 @@
+from src.constants.static_role_values import ORG_ADMIN
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
 from tests.src.db.models.factories import (
     LinkExternalUserFactory,
@@ -26,6 +27,12 @@ def test_ebiz_poc_organization_during_login_creates_organization(enable_factory_
     assert org_user.user == user
     assert org_user.organization.sam_gov_entity == sam_gov_entity
     assert org_user.is_organization_owner is True
+
+    db_session.flush()
+
+    # Verify the user has the Organization Admin role
+    assert len(org_user.organization_user_roles) == 1
+    assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
 
 def test_ebiz_poc_organization_during_login_existing_organization(
@@ -61,6 +68,12 @@ def test_ebiz_poc_organization_during_login_existing_organization(
     assert org_user.organization == organization
     assert org_user.is_organization_owner is True
 
+    db_session.flush()
+
+    # Verify the user has the Organization Admin role
+    assert len(org_user.organization_user_roles) == 1
+    assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
+
 
 def test_ebiz_poc_organization_during_login_not_ebiz_poc(enable_factory_create, db_session):
     """Test that users who are not ebiz POCs don't get organizations created"""
@@ -90,10 +103,15 @@ def test_ebiz_poc_organization_during_login_multiple_sam_entities(
     assert result is not None
     assert len(result) == 2  # Should return both organization users
 
+    db_session.flush()
+
     # Verify all organization users are for the same user and are owners
     for org_user in result:
         assert org_user.user == user
         assert org_user.is_organization_owner is True
+        # Verify each user has the Organization Admin role
+        assert len(org_user.organization_user_roles) == 1
+        assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
     # Verify user is linked to both organizations
-    assert len(user.organizations) == 2
+    assert len(user.organization_users) == 2

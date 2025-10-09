@@ -89,9 +89,10 @@ const ApplyForm = ({
   });
 
   const [formChanged, setFormChanged] = useState<boolean>(false);
+  const [attachmentsChanged, setAttachmentsChanged] = useState<boolean>(false);
 
   useNavigationGuard({
-    enabled: formChanged,
+    enabled: formChanged || attachmentsChanged,
     confirm: () =>
       // eslint-disable-next-line no-alert
       window.confirm(translate("unsavedChangesWarning")),
@@ -128,18 +129,23 @@ const ApplyForm = ({
       // turns off html5 validation so all error displays are consistent
       noValidate
     >
-      <div className="display-flex flex-justify">
-        <div>{required}</div>
-        <Button
-          data-testid="apply-form-save"
-          type="submit"
-          name="apply-form-button"
-          className="margin-top-0"
-          value="save"
-          onClick={() => setFormChanged(false)}
-        >
-          {pending ? "Saving..." : "Save"}
-        </Button>
+      <div className="position-sticky top-0 bg-white z-100">
+        <div className="display-flex flex-justify padding-top-2">
+          <div>{required}</div>
+          <Button
+            data-testid="apply-form-save"
+            type="submit"
+            name="apply-form-button"
+            className="margin-top-0"
+            value="save"
+            onClick={() => {
+              setFormChanged(false);
+              setAttachmentsChanged(false);
+            }}
+          >
+            {pending ? "Saving..." : "Save"}
+          </Button>
+        </div>
       </div>
       <div className="usa-in-page-nav-container">
         <FormGroup className="order-2 width-full">
@@ -149,7 +155,9 @@ const ApplyForm = ({
             validationWarnings={validationWarnings}
             isBudgetForm={isBudgetForm}
           />
-          <AttachmentsProvider value={attachments ?? []}>
+          <AttachmentsProvider
+            value={{ attachments: attachments ?? [], setAttachmentsChanged }}
+          >
             <FormFields
               key={saved ? "after-save" : "before-save"}
               errors={saved ? validationWarnings : null}

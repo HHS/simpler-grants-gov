@@ -20,7 +20,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
 def test_format_local_soap_response() -> None:
     mock_uuid = "mockuuid4"
     mock_response = b"mockresponse"
-    expected = b'--uuid:mockuuid4\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>mockresponse\n--uuid:mockuuid4--'
+    expected = b'--uuid:mockuuid4\r\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>mockresponse\r\n--uuid:mockuuid4--'
 
     with patch.object(uuid, "uuid4", return_value=mock_uuid):
         given = format_local_soap_response(mock_response)
@@ -67,7 +67,7 @@ def test_get_streamed_soap_response_success():
     expected_headers = {"Content-Type": "application/xml"}
 
     assert isinstance(result, SOAPResponse)
-    assert result.data == expected_data
+    assert b"".join(result.data) == expected_data
     assert result.status_code, 200
     assert result.headers == expected_headers
 

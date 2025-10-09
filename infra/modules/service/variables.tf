@@ -9,12 +9,6 @@ variable "image_repository_name" {
   default     = null
 }
 
-variable "cpu" {
-  type        = number
-  default     = 256
-  description = "Number of cpu units used by the task, expessed as an integer value, e.g 512 "
-}
-
 variable "container_port" {
   type        = number
   description = "The port number on the container that's bound to the user-specified"
@@ -247,10 +241,28 @@ variable "is_temporary" {
   default     = false
 }
 
-variable "memory" {
+variable "fluent_bit_memory" {
   type        = number
-  default     = 512
-  description = "Amount (in MiB) of memory used by the task. e.g. 2048"
+  default     = 256
+  description = "Amount (in MB) of memory used by the fluent bit container"
+}
+
+variable "fluent_bit_cpu" {
+  type        = number
+  default     = 256
+  description = "Amount of cpu used by the fluent bit container"
+}
+
+variable "fargate_cpu" {
+  type        = number
+  default     = 2048
+  description = "Total CPU for all the containers in the task definiton, must be equal to or less than the total cpu allocated for the app and fluentbit container"
+}
+
+variable "fargate_memory" {
+  type        = number
+  default     = 4096
+  description = "Total memory for all the containers in the task definiton, must be equal to or less than the total memory allocated for the app and fluentbit container"
 }
 
 variable "private_subnet_ids" {
@@ -269,6 +281,12 @@ variable "scheduled_jobs" {
     task_command        = list(string)
     schedule_expression = string
     state               = string
+    cpu                 = optional(number, 1024)
+    mem                 = optional(number, 2048)
+    environment_vars = optional(list(object({
+      Name  = string
+      Value = string
+    })), [])
   }))
   default = {}
 }
