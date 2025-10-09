@@ -7,15 +7,9 @@ from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import Privilege, RoleType
-from src.db.models.entity_models import Organization
-from src.db.models.user_models import (
-    LinkRoleRoleType,
-    OrganizationUser,
-    OrganizationUserRole,
-    Role,
-    User,
-)
+from src.db.models.user_models import LinkRoleRoleType, OrganizationUserRole, Role, User
 from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.organization_user_utils import validate_organization_user_exists
 
 logger = logging.getLogger(__name__)
 
@@ -42,20 +36,6 @@ def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> None:
         raise_flask_error(404, message=f"Could not find the following role IDs: {missing}")
 
 
-def validate_organization_user(
-    db_session: db.Session, user_id: UUID, organization: Organization
-) -> OrganizationUser:
-    """Validate that the user is a member of the specified organization"""
-    org_user = db_session.execute(
-        select(OrganizationUser)
-        .where(OrganizationUser.organization_id == organization.organization_id)
-        .where(OrganizationUser.user_id == user_id)
-    ).scalar_one_or_none()
-    if not org_user:
-        raise_flask_error(404, message=f"Could not find User with ID {user_id}")
-    return org_user
-
-
 def update_user_organization_roles(
     db_session: db.Session, user: User, target_user_id: UUID, organization_id: UUID, data: dict
 ) -> list[Role]:
@@ -68,7 +48,7 @@ def update_user_organization_roles(
         raise_flask_error(403, "Forbidden")
 
     # Validate target user exists
-    org_user = validate_organization_user(db_session, target_user_id, organization)
+    org_user = validate_organization_user_exists(db_session, target_user_id, organization)
 
     existing_role_ids = {our.role_id for our in org_user.organization_user_roles}
     new_role_ids = set(data["role_ids"])

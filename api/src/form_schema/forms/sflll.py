@@ -609,7 +609,7 @@ SFLLL_v2_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("17646cbc-76ea-4acc-b9bf-2582defbf0dc"),
     form_type=FormType.SFLLL,
     sgg_version="1.0",
     is_deprecated=False,

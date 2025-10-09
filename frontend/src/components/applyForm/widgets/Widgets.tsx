@@ -11,6 +11,8 @@ import Budget424aSectionF from "./budget/Budget424aSectionF";
 import CheckboxWidget from "./CheckboxWidget";
 import AttachmentArrayWidget from "./MultipleAttachmentUploadWidget";
 import MultiSelect from "./MultiSelectWidget";
+import PrintAttachmentWidget from "./PrintAttachmentWidget";
+import PrintWidget from "./PrintWidget";
 import RadioWidget from "./RadioWidget";
 import SelectWidget from "./SelectWidget";
 import TextAreaWidget from "./TextAreaWidget";
@@ -25,6 +27,9 @@ export const widgetComponents: Record<
   Radio: (widgetProps: UswdsWidgetProps) => RadioWidget(widgetProps),
   Select: (widgetProps: UswdsWidgetProps) => SelectWidget(widgetProps),
   Checkbox: (widgetProps: UswdsWidgetProps) => CheckboxWidget(widgetProps),
+  Print: (widgetProps: UswdsWidgetProps) => PrintWidget(widgetProps),
+  PrintAttachment: (widgetProps: UswdsWidgetProps) =>
+    PrintAttachmentWidget(widgetProps),
   Attachment: (widgetProps: UswdsWidgetProps) => AttachmentWidget(widgetProps),
   AttachmentArray: (widgetProps: UswdsWidgetProps) =>
     AttachmentArrayWidget(widgetProps),

@@ -1726,6 +1726,48 @@ paths:
               $ref: '#/components/schemas/OrganizationUpdateUserRolesRequest'
       security:
       - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationRemoveUserResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Remove a user from an organization
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -5681,6 +5723,18 @@ components:
             type:
             - object
             $ref: '#/components/schemas/Role1'
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: User first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: User last name
+          example: Smith
     OrganizationUsersResponse:
       type: object
       properties:
@@ -5949,6 +6003,19 @@ components:
             type:
             - object
             $ref: '#/components/schemas/Role1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationRemoveUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: No data returned on successful removal
         status_code:
           type: integer
           description: The HTTP status code
