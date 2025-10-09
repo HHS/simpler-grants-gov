@@ -9,6 +9,7 @@ from src.constants.lookup_constants import (
     ExternalUserType,
     ExtractType,
     FormFamily,
+    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
@@ -141,6 +142,18 @@ FORM_FAMILY_CONFIG = LookupConfig(
         LookupStr(FormFamily.RR, 3),
         LookupStr(FormFamily.SF_424_MANDATORY, 4),
         LookupStr(FormFamily.SF_424_SHORT_ORGANIZATION, 5),
+    ]
+)
+
+FORM_TYPE_CONFIG = LookupConfig(
+    [
+        LookupStr(FormType.SF424, 1),
+        LookupStr(FormType.SF424A, 2),
+        LookupStr(FormType.SF424B, 3),
+        LookupStr(FormType.SFLLL, 4),
+        LookupStr(FormType.PROJECT_NARRATIVE_ATTACHMENT, 5),
+        LookupStr(FormType.BUDGET_NARRATIVE_ATTACHMENT, 6),
+        LookupStr(FormType.PROJECT_ABSTRACT_SUMMARY, 7),
     ]
 )
 
@@ -358,6 +371,18 @@ class LkFormFamily(LookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> "LkFormFamily":
         return LkFormFamily(form_family_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(FORM_TYPE_CONFIG)
+class LkFormType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_form_type"
+
+    form_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkFormType":
+        return LkFormType(form_type_id=lookup.lookup_val, description=lookup.get_description())
 
 
 @LookupRegistry.register_lookup(COMPETITION_OPEN_TO_APPLICANT_CONFIG)

@@ -13,7 +13,7 @@ def test_user_update_profile_new(client, db_session, user_auth_token, user):
 
     assert response.status_code == 200
 
-    res = db_session.query(UserProfile).first()
+    res = db_session.query(UserProfile).filter(UserProfile.user_id == user.user_id).first()
     assert res.first_name == "Henry"
     assert res.last_name == "Ford"
     assert not res.middle_name

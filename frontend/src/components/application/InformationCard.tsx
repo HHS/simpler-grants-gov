@@ -2,6 +2,7 @@
 
 import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
@@ -63,6 +64,13 @@ export const InformationCard = ({
         <dd>{t("applicantTypeIndividual")}</dd>
       </div>
     );
+  };
+
+  const isCompetitionClosed = () => {
+    const isPastCloseDate = getConfiguredDayJs()().isAfter(
+      getConfiguredDayJs()(applicationDetails.competition.closing_date),
+    );
+    return !applicationDetails.competition.is_open || isPastCloseDate;
   };
 
   const ApplicationInstructionsDownload = () => {
@@ -138,11 +146,14 @@ export const InformationCard = ({
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
-            <EditAppFilingName
-              applicationId={applicationDetails.application_id}
-              applicationName={applicationDetails.application_name}
-              opportunityName={opportunityName}
-            />
+            {applicationDetails.application_status !== Status.SUBMITTED &&
+              applicationDetails.application_status !== Status.ACCEPTED && (
+                <EditAppFilingName
+                  applicationId={applicationDetails.application_id}
+                  applicationName={applicationDetails.application_name}
+                  opportunityName={opportunityName}
+                />
+              )}
           </h3>
         </Grid>
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
@@ -172,16 +183,14 @@ export const InformationCard = ({
                 (12:00am ET)
               </dd>
             </div>
-            {!applicationDetails.competition.is_open ? (
-              <SpecialInstructions />
-            ) : null}
+            {isCompetitionClosed() ? <SpecialInstructions /> : null}
             <div className="margin-bottom-1">
               <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
               <dd className="margin-right-1 text-bold text-orange">
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && (
+            {!applicationSubmitted && !isCompetitionClosed() && (
               <SubmitApplicationButton
                 buttonText={t("submit")}
                 submitHandler={applicationSubmitHandler}
