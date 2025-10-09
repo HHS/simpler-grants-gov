@@ -1,12 +1,10 @@
 import { get } from "lodash";
 
-import React from "react";
+import React, { JSX } from "react";
 
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
+import { DATA_CELL_BASE_CLASS } from "./budgetConstants";
 import { amountSchema } from "./budgetSchemas";
-
-export const DATA_CELL_BASE_CLASS =
-  "border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell";
 
 export type DataCellProps = {
   children: React.ReactNode;
@@ -27,6 +25,15 @@ export const DataCell: React.FC<DataCellProps> = ({
   </td>
 );
 
+interface ActivityItemForTitles {
+  activity_title?: string;
+}
+
+interface ActivityTitlesRowProps {
+  activityItems: ReadonlyArray<ActivityItemForTitles>;
+  columnIndices: ReadonlyArray<number>;
+}
+
 export const HelperText: React.FC<
   React.PropsWithChildren<{ hasHorizontalLine?: boolean; className?: string }>
 > = ({ hasHorizontalLine = false, className, children }) => (
@@ -37,7 +44,7 @@ export const HelperText: React.FC<
       "width-full",
       "padding-top-2",
       "margin-top-1",
-      "text-nowrap",
+      "text-no-wrap",
       hasHorizontalLine && "border-top-2px",
       className,
     ]
@@ -156,7 +163,7 @@ export function getHeaderCellClass(index: number, totalCount: number): string {
 }
 
 /**
- * Column helper text like “Sum of column 3”
+ * Column helper text like "Sum of column 3”
  * Lets you opt into the horizontal line
  * */
 export const ColumnHelperText: React.FC<{
@@ -169,7 +176,7 @@ export const ColumnHelperText: React.FC<{
 );
 
 /**
- * Row helper text like “Sum of row 12”
+ * Row helper text like "Sum of row 12”
  * Lets you opt into the horizontal line
  * */
 export const RowHelperText: React.FC<
@@ -182,3 +189,31 @@ export const RowHelperText: React.FC<
     {children ?? `Sum of row ${rowLabel}`}
   </HelperText>
 );
+
+/**
+ * Section B
+ * Activity Titles
+ * */
+export function ActivityTitlesRow({
+  activityItems,
+  columnIndices,
+}: ActivityTitlesRowProps): JSX.Element {
+  return (
+    <>
+      {columnIndices.map((columnIndex) => {
+        const title = activityItems?.[columnIndex]?.activity_title ?? "";
+        const displayText = title.trim() !== "" ? title : "—";
+        return (
+          <td
+            key={`occ-title-${columnIndex}`}
+            className="padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
+          >
+            <div className="minw-15 font-sans-sm text-italic text-center">
+              {displayText}
+            </div>
+          </td>
+        );
+      })}
+    </>
+  );
+}
