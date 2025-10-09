@@ -43,8 +43,8 @@ export default function Layout({ children, locale }: Props) {
                 <div className="grid-row grid-gap-4 font-sans-2xs">
                   <div className="tablet-lg:grid-col-5">
                     There has been a lapse in appropriated federal funds as of
-                    October 1, 2025. <a href="https://grants.gov/">Grants.gov</a>{" "}
-                    and{" "}
+                    October 1, 2025.{" "}
+                    <a href="https://grants.gov/">Grants.gov</a> and{" "}
                     <a href="https://simpler.grants.gov/">Simpler.Grants.gov</a>{" "}
                     will still be available, but service may be delayed with
                     reduced Federal support staff presence.
@@ -53,9 +53,9 @@ export default function Layout({ children, locale }: Props) {
                     For those programs affected by the funding lapse, the{" "}
                     <a href="https://grants.gov/">Grants.gov</a> and{" "}
                     <a href="https://simpler.grants.gov/">Simpler.Grants.gov</a>{" "}
-                    systems will accept and store applications until such time as
-                    the responsible awarding agency has the authority and funding
-                    to return to normal business operations.
+                    systems will accept and store applications until such time
+                    as the responsible awarding agency has the authority and
+                    funding to return to normal business operations.
                   </div>
                 </div>
               </div>
