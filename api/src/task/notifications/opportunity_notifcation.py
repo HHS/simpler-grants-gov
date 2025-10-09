@@ -234,7 +234,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
             .where(
                 UserSavedOpportunity.is_deleted.isnot(True),
-                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
+                ~exists().where(
+                    and_(
+                        SuppressedEmail.email == LinkExternalUser.email,
+                        LinkExternalUser.user_id == UserSavedOpportunity.user_id,
+                    )
+                ),
             )
         )
 
