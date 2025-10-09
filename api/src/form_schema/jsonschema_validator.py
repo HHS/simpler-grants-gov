@@ -5,6 +5,7 @@ import jsonschema
 
 from src.api.response import ValidationErrorDetail
 from src.db.models.competition_models import Form
+from src.util.input_sanitizer import InputValidationError, validate_json_safe_dict
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,18 @@ def _get_validator(json_schema: dict) -> jsonschema.Draft202012Validator:
 
 def validate_json_schema(data: dict, json_schema: dict) -> list[ValidationErrorDetail]:
     """Validate data against a given json schema"""
+    # First, validate that the data structure is safe for processing
+    try:
+        validate_json_safe_dict(data, max_depth=20, max_keys=10000)
+        validate_json_safe_dict(json_schema, max_depth=20, max_keys=1000)
+    except InputValidationError as e:
+        logger.warning(f"Input structure validation failed: {e}")
+        return [ValidationErrorDetail(
+            message=f"Invalid input structure: {e}",
+            type="structure_validation",
+            field="$"
+        )]
+    
     validator = _get_validator(json_schema)
 
     validation_issues = []

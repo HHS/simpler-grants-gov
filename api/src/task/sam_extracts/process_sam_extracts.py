@@ -20,6 +20,7 @@ from src.db.models.sam_extract_models import SamExtractFile
 from src.task.task import Task
 from src.util import file_util
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.input_sanitizer import InputValidationError, sanitize_delimited_line, sanitize_string
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +202,32 @@ class ProcessSamExtractsTask(Task):
         container = SamGovEntityContainer()
 
         for raw_line in dat_file:
-            line = raw_line.decode("utf-8")
+            try:
+                # Safely decode the line with error handling
+                line = raw_line.decode("utf-8", errors="replace").strip()
+                
+                # Skip empty lines
+                if not line:
+                    continue
+                
+                # Validate line length to prevent memory issues
+                if len(line) > 100000:  # Reasonable limit for SAM.gov lines
+                    logger.warning("Skipping extremely long line", extra=extract_log_extra)
+                    self.increment(self.Metrics.ROWS_SKIPPED_COUNT)
+                    continue
+                
+                # Sanitize the line for basic security
+                line = sanitize_string(line, max_length=100000, allow_html=False)
+                
+            except UnicodeDecodeError:
+                logger.warning("Failed to decode line, skipping", extra=extract_log_extra)
+                self.increment(self.Metrics.ROWS_SKIPPED_COUNT)
+                continue
+            except InputValidationError as e:
+                logger.warning(f"Line validation failed: {e}", extra=extract_log_extra)
+                self.increment(self.Metrics.ROWS_SKIPPED_COUNT)
+                continue
+            
             # The header and footer are formatted as
             # BOF/EOF FOUO V2 STARTDATE ENDDATE RECORD_COUNT SEQUENCE_NUMBER
             # For example:
@@ -212,23 +238,51 @@ class ProcessSamExtractsTask(Task):
             #
             # Sequence number just increments by 1 every day
             if line.startswith("BOF") or line.startswith("EOF"):
-                tokens = line.split()
-                if len(tokens) != 7:
-                    raise Exception("Unexpected format for header/footer")
-                sequence_num, record_count = tokens[-1], tokens[-2]
-                logger.info(
-                    "Processing header/footer of dat file",
-                    extra=extract_log_extra
-                    | {"sequence_number": sequence_num, "record_count": record_count},
-                )
+                try:
+                    tokens = line.split()
+                    if len(tokens) != 7:
+                        logger.warning("Unexpected format for header/footer", extra=extract_log_extra)
+                        continue
+                    sequence_num, record_count = tokens[-1], tokens[-2]
+                    
+                    # Validate that sequence_num and record_count are numeric
+                    if not sequence_num.isdigit() or not record_count.isdigit():
+                        logger.warning("Invalid sequence number or record count in header/footer", extra=extract_log_extra)
+                        continue
+                        
+                    logger.info(
+                        "Processing header/footer of dat file",
+                        extra=extract_log_extra
+                        | {"sequence_number": sequence_num, "record_count": record_count},
+                    )
+                except Exception as e:
+                    logger.warning(f"Error processing header/footer: {e}", extra=extract_log_extra)
                 continue
 
-            tokens = line.split("|")
+            try:
+                # Safely parse the delimited line
+                tokens = sanitize_delimited_line(
+                    line, 
+                    delimiter="|", 
+                    expected_fields=None,  # Let the schema handle field count validation
+                    max_field_length=10000
+                )
+            except InputValidationError as e:
+                logger.warning(f"Line parsing failed: {e}", extra=extract_log_extra)
+                self.increment(self.Metrics.ROWS_SKIPPED_COUNT)
+                continue
+            
             self.increment(self.Metrics.ROWS_PROCESSED_COUNT)
 
-            uei = get_token_value(tokens, ExtractIndex.UEI)
-            eft_indicator = get_token_value(tokens, ExtractIndex.ENTITY_EFT_INDICATOR)
-            extract_code = get_token_value(tokens, ExtractIndex.SAM_EXTRACT_CODE)
+            try:
+                uei = get_token_value(tokens, ExtractIndex.UEI)
+                eft_indicator = get_token_value(tokens, ExtractIndex.ENTITY_EFT_INDICATOR)
+                extract_code = get_token_value(tokens, ExtractIndex.SAM_EXTRACT_CODE)
+            except (ValueError, IndexError) as e:
+                logger.warning(f"Failed to extract required fields: {e}", extra=extract_log_extra)
+                self.increment(self.Metrics.ROWS_SKIPPED_COUNT)
+                continue
+                
             log_extra = {"uei": uei, "extract_code": extract_code} | extract_log_extra
 
             # We can receive multiple rows for a given UEI in an extract
@@ -566,13 +620,30 @@ def get_token_value(tokens: list[str], index: int, can_be_blank: bool = True) ->
     Indexes passed in are decreased by 1 as sam.gov's docs
     start counting from 1.
     """
+    if not isinstance(tokens, list):
+        raise ValueError("Tokens must be a list")
+    
+    if not isinstance(index, int) or index < 1:
+        raise ValueError("Index must be a positive integer starting from 1")
+    
     actual_index = index - 1
 
-    if actual_index > len(tokens):
-        raise Exception(f"Line contains fewer values than expected ({len(tokens)}), cannot process")
+    if actual_index >= len(tokens):
+        raise ValueError(f"Line contains fewer values than expected ({len(tokens)}), cannot access index {index}")
 
     value = tokens[actual_index]
+    
+    # Validate that value is a string
+    if not isinstance(value, str):
+        raise ValueError(f"Expected string value at index {index}, got {type(value)}")
 
+    # Check for maximum field length to prevent memory issues
+    if len(value) > 10000:  # Reasonable limit for SAM.gov fields
+        raise ValueError(f"Field at index {index} exceeds maximum length of 10000 characters")
+    
+    # Remove null bytes and dangerous control characters
+    value = value.replace('\x00', '')
+    
     if not can_be_blank and value == "":
         raise ValueError(f"Expected field at index {index} to never be blank, and it was")
 
