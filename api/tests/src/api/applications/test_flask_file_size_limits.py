@@ -4,7 +4,13 @@ from pathlib import Path
 import pytest
 
 from src.app_config import AppConfig
-from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory
+from src.constants.lookup_constants import Privilege
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
+)
 
 attachment_dir = Path(__file__).parent / "attachments"
 
@@ -48,8 +54,10 @@ def test_flask_max_content_length_file_within_limit(
 ):
     """Test that Flask's MAX_CONTENT_LENGTH allows files within the configured limit."""
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     # Create a small file that's well within the 2GB limit
     small_file_content = b"This is a small test file content"
     small_file = BytesIO(small_file_content)
@@ -83,8 +91,10 @@ def test_flask_max_content_length_with_real_file(
 ):
     """Test Flask's MAX_CONTENT_LENGTH with a real file from the test directory."""
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     # Use a real test file that should be well within the 2GB limit
     test_file_path = attachment_dir / "pdf_file.pdf"
 

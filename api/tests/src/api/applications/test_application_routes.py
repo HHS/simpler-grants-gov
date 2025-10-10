@@ -7,7 +7,11 @@ from sqlalchemy import select
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.constants.lookup_constants import ApplicationFormStatus, CompetitionOpenToApplicant
+from src.constants.lookup_constants import (
+    ApplicationFormStatus,
+    CompetitionOpenToApplicant,
+    Privilege,
+)
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util import datetime_util
@@ -18,12 +22,14 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
     OrganizationUserFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
@@ -399,8 +405,10 @@ def test_application_form_update_success_create(
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
     request_data = {"application_response": {"name": "John Doe"}}
@@ -448,8 +456,10 @@ def test_application_form_update_success_update(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {"application_response": {"name": "Updated Name"}}
 
     response = client.put(
@@ -526,8 +536,10 @@ def test_application_form_update_with_validation_warnings(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {"application_response": application_response}
 
     response = client.put(
@@ -571,8 +583,10 @@ def test_application_form_update_with_rule_validation_issues(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_response = {"attachment_field": "90b413f3-b0f3-4aed-9f30-c109991db0fc"}
     request_data = {"application_response": application_response}
 
@@ -623,8 +637,10 @@ def test_application_form_update_with_invalid_schema_500(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {"application_response": {"name": "Changed Name"}}
 
     response = client.put(
@@ -684,8 +700,10 @@ def test_application_form_update_form_not_found(
     application = ApplicationFactory.create()
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     non_existent_form_id = str(uuid.uuid4())
     request_data = {"application_response": {"name": "John Doe"}}
@@ -786,8 +804,10 @@ def test_application_form_update_complex_json(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     complex_json = {
         "personal_info": {
             "name": "John Doe",
@@ -837,8 +857,10 @@ def test_application_form_update_with_is_included_in_submission_true(
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
     request_data = {
@@ -880,8 +902,10 @@ def test_application_form_update_with_is_included_in_submission_false(
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
     request_data = {
@@ -923,8 +947,10 @@ def test_application_form_update_without_is_included_in_submission(
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
     request_data = {"application_response": {"name": "John Doe"}}
@@ -975,8 +1001,10 @@ def test_application_form_update_existing_form_preserves_is_included_in_submissi
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {"application_response": {"name": "Updated Name"}}
 
     response = client.put(
@@ -1018,8 +1046,10 @@ def test_application_form_update_existing_form_updates_is_included_in_submission
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {
         "application_response": {"name": "Updated Name"},
         "is_included_in_submission": False,
@@ -1969,7 +1999,10 @@ def test_application_form_update_forbidden_not_in_progress(
     application = ApplicationFactory.create(application_status=initial_status)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
@@ -2258,8 +2291,10 @@ def test_application_form_update_success_when_associated(
 
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {"application_response": {"name": "John Doe"}}
 
     response = client.put(
@@ -3115,8 +3150,10 @@ def test_application_form_inclusion_update_success_true(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(form.form_id)
     request_data = {"is_included_in_submission": True}
@@ -3305,8 +3342,10 @@ def test_application_form_inclusion_update_success_false(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(form.form_id)
     request_data = {"is_included_in_submission": False}
@@ -3416,8 +3455,10 @@ def test_application_form_inclusion_update_application_form_not_found(
     CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(form.form_id)
     request_data = {"is_included_in_submission": True}
@@ -3533,8 +3574,10 @@ def test_application_form_update_with_pre_population(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
 
@@ -3595,8 +3638,10 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     request_data = {
         "application_response": {"opportunity_number_field": "User Tried To Change Again"}
     }

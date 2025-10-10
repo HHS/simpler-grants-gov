@@ -1,8 +1,13 @@
 import pytest
 
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.validation.validation_constants import ValidationErrorType
-from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
+)
 
 
 def test_application_update_success(
@@ -13,7 +18,10 @@ def test_application_update_success(
     application = ApplicationFactory.create(application_name="Original Name")
 
     # Associate the user with the application using factory
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Update the application name
     new_name = "Updated Application Name"
@@ -57,7 +65,10 @@ def test_application_update_empty_name(
     application = ApplicationFactory.create(application_name="Original Name")
 
     # Associate the user with the application using factory
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Try to update with empty name
     request_data = {"application_name": ""}
@@ -110,7 +121,10 @@ def test_application_form_update_forbidden_not_in_progress(
     application = ApplicationFactory.create(application_status=initial_status)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     response = client.put(
         f"/alpha/applications/{application.application_id}",

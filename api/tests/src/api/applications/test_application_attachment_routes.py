@@ -7,11 +7,14 @@ import requests
 from sqlalchemy import select
 
 import src.util.file_util as file_util
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
 )
 
 attachment_dir = Path(__file__).parent / "attachments"
@@ -40,8 +43,10 @@ def test_application_attachment_create_200(
     expected_mimetype,
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     response = client.post(
         f"/alpha/applications/{application.application_id}/attachments",
         headers={"X-SGG-Token": user_auth_token},
