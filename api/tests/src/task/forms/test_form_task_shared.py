@@ -24,11 +24,11 @@ def test_get_url(db_session, environment, expected_url):
 
 def test_build_form_json(db_session, enable_factory_create):
     form = FormFactory.create()
-    form_request = build_form_json(form, "my-form-instruction-id")
+    form_request = build_form_json(form)
 
     # Check a few of the parameters are right
     assert form_request["agency_code"] == form.agency_code
-    assert form_request["form_instruction_id"] == "my-form-instruction-id"
+    assert form_request["form_instruction_id"] == form.form_instruction_id
     assert form_request["form_rule_schema"] == form.form_rule_schema
     assert form_request["form_ui_schema"] == form.form_ui_schema
     assert form_request["form_json_schema"] == form.form_json_schema

@@ -33,11 +33,13 @@ import { DeleteAttachmentModal } from "./DeleteAttachmentModal";
 interface AttachmentsCardProps {
   applicationId: string;
   attachments: Attachment[];
+  competitionInstructionsDownloadPath: string;
 }
 
 export const AttachmentsCard = ({
   applicationId,
   attachments,
+  competitionInstructionsDownloadPath,
 }: AttachmentsCardProps) => {
   /**
    * Refs
@@ -175,7 +177,15 @@ export const AttachmentsCard = ({
         <h3 className="margin-top-4">{t("attachments")}</h3>
         <Grid row gap>
           <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-            {t("attachmentsInstructions")}
+            {t.rich("attachmentsInstructions", {
+              instructionsLink: (chunks) => {
+                return competitionInstructionsDownloadPath ? (
+                  <a href={competitionInstructionsDownloadPath}>{chunks}</a>
+                ) : (
+                  <span>{chunks}</span>
+                );
+              },
+            })}
           </Grid>
           <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
             <AttachmentsCardForm
