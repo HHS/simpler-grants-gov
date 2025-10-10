@@ -4,19 +4,24 @@ from enum import StrEnum
 
 from data import Dependency, Issue, issue_slug
 
+# #######################################################
+# Constants
+# #######################################################
+
+
+BLOCKED = "blocked"
+BLOCKED_BY = "blocked_by"
+SUBGRAPH_STYLE = "fill:#F7F7F4,stroke:#171716"
 STATUS_CLASSES = {
     "In Progress": ":::InProgress",
     "In Review": ":::InProgress",
     "Done": ":::Done",
-    "Closed": ":::Done",
 }
 STATUS_ICONS = {
     "In Progress": " 🛠️",
     "In Review": " 🛠️",
     "Done": " ✔️",
-    "Closed": " ✔️",
 }
-
 
 # #######################################################
 # Templates
@@ -33,7 +38,7 @@ flowchart LR
   classDef InProgress fill:#e1f3f8,stroke:#07648d,stroke-width:2px,color:#000
   classDef Done fill:#8DE28D,stroke:#204e34,stroke-width:3px,color:#000
   style Canvas fill:transparent,stroke:#171716
-  style Legend fill:#F7F7F4,stroke:#171716
+  style Legend {legend_style}
 {styles}
 
   %% ─────────────────────────────
@@ -102,6 +107,7 @@ class Diagram:
                                display all issues directly in the canvas.
         """
         return DIAGRAM_TEMPLATE.format(
+            legend_style=SUBGRAPH_STYLE,
             styles=self._format_styles(),
             issues=self._format_issues(group_issues),
             relationships=self._format_relationships(),
@@ -155,11 +161,11 @@ class Diagram:
 
             # Set up direction-specific logic
             if direction == Direction.UPSTREAM:
-                curr_field = "blocked"
-                next_field = "blocked_by"
+                curr_field = BLOCKED
+                next_field = BLOCKED_BY
             elif direction == Direction.DOWNSTREAM:
-                curr_field = "blocked_by"
-                next_field = "blocked"
+                curr_field = BLOCKED_BY
+                next_field = BLOCKED
 
             # Traverse the dependencies recursively
             for dependency in self.dependencies:
@@ -184,8 +190,7 @@ class Diagram:
     def _format_styles(self) -> str:
         """Format the subgraph styles."""
         return "\n".join(
-            f"  style {format_slug(name)} fill:#F7F7F4,stroke:#171716"
-            for name in self.subgraphs
+            f"  style {format_slug(name)} {SUBGRAPH_STYLE}" for name in self.subgraphs
         )
 
     def _format_issues(self, group_issues: bool = True) -> str:
@@ -203,10 +208,7 @@ class Diagram:
             return "\n".join(subgraphs)
         else:
             # Display all issues directly in the canvas without subgraph grouping
-            all_issues = []
-            for issue in self.issues.values():
-                all_issues.append(issue)
-            return format_subgraph_items(all_issues)
+            return format_subgraph_items(list(self.issues.values()))
 
     def _format_relationships(self) -> str:
         """Format the subgraph relationships."""

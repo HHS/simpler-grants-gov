@@ -5,6 +5,12 @@ from utils import get_env, get_query_from_file, log, make_request
 
 
 GITHUB_API_TOKEN = get_env("GITHUB_API_TOKEN")
+GITHUB_URL = "https://api.github.com"
+HEADERS = {
+    "Authorization": f"token {GITHUB_API_TOKEN}",
+    "Accept": "application/vnd.github.v3+json",
+    "Content-Type": "application/json",
+}
 
 # #######################################################
 # GraphQL helper functions
@@ -14,16 +20,11 @@ GITHUB_API_TOKEN = get_env("GITHUB_API_TOKEN")
 def make_graphql_request(query: str, variables: dict) -> dict:
     """Make a GraphQL request."""
     # Prepare the request
-    url = "https://api.github.com/graphql"
-    headers = {
-        "Authorization": f"token {GITHUB_API_TOKEN}",
-        "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-    }
+    url = f"{GITHUB_URL}/graphql"
     # Make the request
     response = make_request(
         url,
-        headers,
+        HEADERS,
         method="POST",
         data=json.dumps({"query": query, "variables": variables}),
     )
@@ -134,18 +135,13 @@ def update_github_issue(
     """Update a GitHub issue."""
     log(f"Updating GitHub issue #{issue_number} in {repoWithOwner}")
 
-    headers = {
-        "Authorization": f"token {GITHUB_API_TOKEN}",
-        "Accept": "application/vnd.github.v3+json",
-    }
-
-    url = f"https://api.github.com/repos/{repoWithOwner}/issues/{issue_number}"
+    url = f"{GITHUB_URL}/repos/{repoWithOwner}/issues/{issue_number}"
 
     # Prepare the data to update
     data = {"body": issue_body}
 
     # Make PATCH request to update the issue
-    response = make_request(url, headers, method="PATCH", data=json.dumps(data))
+    response = make_request(url, HEADERS, method="PATCH", data=json.dumps(data))
 
     if response:
         log(f"Successfully updated GitHub issue #{issue_number}")
