@@ -2406,6 +2406,9 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     sam_gov_entity = SamGovEntityFactory.create(
         legal_business_name="Test Organization LLC",
         expiration_date=date(2025, 12, 31),
+        ebiz_poc_email="ebiz@testorg.com",
+        ebiz_poc_first_name="Jane",
+        ebiz_poc_last_name="Doe",
     )
 
     # Create an organization linked to the SAM.gov entity
@@ -2442,6 +2445,9 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     assert sam_gov_data["uei"] == sam_gov_entity.uei
     assert sam_gov_data["legal_business_name"] == "Test Organization LLC"
     assert sam_gov_data["expiration_date"] == "2025-12-31"
+    assert sam_gov_data["ebiz_poc_email"] == "ebiz@testorg.com"
+    assert sam_gov_data["ebiz_poc_first_name"] == "Jane"
+    assert sam_gov_data["ebiz_poc_last_name"] == "Doe"
 
 
 def test_application_get_includes_organization_without_sam_gov_entity(
