@@ -5,7 +5,7 @@ from utils import get_env, get_query_from_file, log, make_request
 
 
 GITHUB_API_TOKEN = get_env("GITHUB_API_TOKEN")
-GITHUB_URL = "https://api.github.com"
+GITHUB_API_URL = "https://api.github.com"
 HEADERS = {
     "Authorization": f"token {GITHUB_API_TOKEN}",
     "Accept": "application/vnd.github.v3+json",
@@ -20,7 +20,7 @@ HEADERS = {
 def make_graphql_request(query: str, variables: dict) -> dict:
     """Make a GraphQL request."""
     # Prepare the request
-    url = f"{GITHUB_URL}/graphql"
+    url = f"{GITHUB_API_URL}/graphql"
     # Make the request
     response = make_request(
         url,
@@ -135,7 +135,7 @@ def update_github_issue(
     """Update a GitHub issue."""
     log(f"Updating GitHub issue #{issue_number} in {repoWithOwner}")
 
-    url = f"{GITHUB_URL}/repos/{repoWithOwner}/issues/{issue_number}"
+    url = f"{GITHUB_API_URL}/repos/{repoWithOwner}/issues/{issue_number}"
 
     # Prepare the data to update
     data = {"body": issue_body}
