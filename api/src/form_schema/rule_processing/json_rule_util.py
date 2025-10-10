@@ -62,11 +62,11 @@ def get_field_values(data: dict, fields: list[str], path: list[str]) -> list:
 
     fields should be a list of paths that can either be:
     * absolute: "x.y[*].z[0]"
-    * relative: "$THIS.x.y[*]"
+    * relative: "@THIS.x.y[*]"
 
     Relative paths get appended to the path we're currently processing at
     after removing the current node
-    For example: a path of ["a[*]", "b"] and a relative path of $THIS.x.y will be treated as ["a[*]", "x", "y"]
+    For example: a path of ["a[*]", "b"] and a relative path of @THIS.x.y will be treated as ["a[*]", "x", "y"]
 
     Arrays are supported, we will fetch all values under that path if [*] is specified
     """
