@@ -339,6 +339,7 @@ def application_attachment_update(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application_attachment = update_application_attachment(
             db_session, application_id, application_attachment_id, user, form_and_files_data
         )
@@ -367,6 +368,7 @@ def application_attachment_delete(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         delete_application_attachment(db_session, application_id, application_attachment_id, user)
 
     return response.ApiResponse(message="Success")

@@ -87,6 +87,7 @@ def get_application(
 
     # Check if the user has access to the application (skip for internal users or when user is None)
     if not is_internal_user and user is not None:
+
         check_user_application_access(application, user)
 
     # Add application metadata to logs
@@ -107,7 +108,7 @@ def get_application_with_warnings(
     # Fetch an application, handles the auth checks as well
     application = get_application(db_session, application_id, user, is_internal_user)
     # Check privileges
-    if not can_access(user, {Privilege.VIEW_APPLICATION}, application):
+    if user and not can_access(user, {Privilege.VIEW_APPLICATION}, application):
         raise_flask_error(403, "Forbidden")
 
     # See what validation issues remain on the application's forms

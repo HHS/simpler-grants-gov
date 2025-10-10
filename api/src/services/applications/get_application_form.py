@@ -16,7 +16,6 @@ from src.services.applications.application_validation import (
     validate_application_form,
 )
 from src.services.applications.get_application import get_application
-from tests.src.services.xml_generation.test_header_generator import application
 
 
 def get_application_form(

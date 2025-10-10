@@ -7,11 +7,14 @@ import requests
 from sqlalchemy import select
 
 import src.util.file_util as file_util
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
 )
 
 attachment_dir = Path(__file__).parent / "attachments"
@@ -148,7 +151,10 @@ def test_application_attachment_get_200(
     file_contents = "this is text in my file"
 
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     application_attachment = ApplicationAttachmentFactory.create(
         application=application, file_contents=file_contents
     )
@@ -193,7 +199,10 @@ def test_application_attachment_get_404_application_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     application_attachment_id = uuid.uuid4()
 
     response = client.get(
@@ -264,8 +273,10 @@ def test_application_attachment_update_200(
     expected_mimetype,
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Create an existing attachment first
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt"
@@ -311,7 +322,10 @@ def test_application_attachment_update_404_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     attachment_id = uuid.uuid4()
 
     response = client.put(
@@ -430,8 +444,10 @@ def test_application_attachment_update_deletes_old_file_different_name(
 ):
     """Test that updating an attachment with different filename deletes the old file"""
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt", file_contents="old file contents"
@@ -473,8 +489,10 @@ def test_application_attachment_update_same_filename_overwrites(
 ):
     """Test that updating an attachment with same filename updates the attachment"""
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="text_file.txt", file_contents="old content"
@@ -512,7 +530,10 @@ def test_application_attachment_delete_200(
     db_session, enable_factory_create, client, user, user_auth_token, s3_config
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     application_attachment = ApplicationAttachmentFactory.create(application=application)
     second_attachment = ApplicationAttachmentFactory.create(application=application)
 
@@ -559,7 +580,10 @@ def test_application_attachment_delete_404_application_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     application_attachment_id = uuid.uuid4()
 
     response = client.delete(
