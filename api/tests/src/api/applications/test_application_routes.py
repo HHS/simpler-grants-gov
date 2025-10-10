@@ -3721,25 +3721,37 @@ def test_application_form_get_with_submitted_application_status(
     assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED
 
 
-# @pytest.mark.parametrize(
-#     "method, path",
-#     [
-#         ("get", "/alpha/applications/:application_id"),
-#         ("get", "/alpha/applications/:application_id/application_form/:app_form_id"),
-#         ("get", "/alpha/applications/:application_id//attachments/:application_attachment_id")
-#     ]
-# )
-# def test_get_application_access_404(client, enable_factory_create, db_session, user, user_auth_token, endpoints):
-#     """Test that user can not access the application without correct privilege"""
-#     application = ApplicationFactory.create()
-#     # Associate user with application
-#     ApplicationUserFactory.create(user=user, application=application)
-#     response = client.get(
-#         f"/alpha/applications/{application.application_id}",
-#         headers={"X-SGG-Token": user_auth_token},
-#     )
-#
-#     assert response.status_code == 404
-#     assert response.json["message"] == "Success"
-#     # Verify application_status field reflects the submitted status
-#     assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED
+def test_get_application_access_403(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_application_form_access_403(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403

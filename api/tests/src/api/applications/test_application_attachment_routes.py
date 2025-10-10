@@ -322,10 +322,8 @@ def test_application_attachment_update_404_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    ApplicationUserFactory.create(user=user, application=application)
+
     attachment_id = uuid.uuid4()
 
     response = client.put(
@@ -489,10 +487,8 @@ def test_application_attachment_update_same_filename_overwrites(
 ):
     """Test that updating an attachment with same filename updates the attachment"""
     application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    ApplicationUserFactory.create(user=user, application=application)
+
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="text_file.txt", file_contents="old content"
@@ -530,10 +526,8 @@ def test_application_attachment_delete_200(
     db_session, enable_factory_create, client, user, user_auth_token, s3_config
 ):
     application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    ApplicationUserFactory.create(user=user, application=application)
+
     application_attachment = ApplicationAttachmentFactory.create(application=application)
     second_attachment = ApplicationAttachmentFactory.create(application=application)
 
@@ -580,10 +574,7 @@ def test_application_attachment_delete_404_application_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    ApplicationUserFactory.create(user=user, application=application)
     application_attachment_id = uuid.uuid4()
 
     response = client.delete(
@@ -628,3 +619,22 @@ def test_application_attachment_delete_403_not_the_owner(
 
     assert response.status_code == 403
     assert response.json["message"] == "Unauthorized"
+
+
+def test_application_attachment_get_403_access(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_attachment = ApplicationAttachmentFactory.create(
+        application=application,
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
