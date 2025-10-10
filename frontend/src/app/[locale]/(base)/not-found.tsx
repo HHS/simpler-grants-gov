@@ -6,8 +6,6 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import BetaAlert from "src/components/BetaAlert";
-
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -24,7 +22,6 @@ export default function NotFound() {
 
   return (
     <>
-      <BetaAlert />
       <GridContainer className="padding-y-1 tablet:padding-y-3 desktop-lg:padding-y-15 measure-2">
         <h1>{t("title")}</h1>
         <p className="margin-bottom-2">{t("messageContent")}</p>
