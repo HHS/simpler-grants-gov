@@ -1,0 +1,66 @@
+query (
+  $org: String!
+  $repo: String!
+  $issueType: String!
+  $labels: [String!]
+  $batch: Int!
+  $cursor: String
+) {
+  repository(owner: $org, name: $repo) {
+    issues(
+      first: $batch
+      after: $cursor
+      filterBy: { type: $issueType, labels: $labels }
+    ) {
+      nodes {
+        body
+        ...IssueDetails
+        ...ProjectItems
+        ...BlockedItems
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+# Issue details
+fragment IssueDetails on Issue {
+  repository {
+    nameWithOwner
+  }
+  number
+  title
+}
+
+# Project items
+fragment ProjectItems on Issue {
+  projectItems(first: 10) {
+    nodes {
+      project {
+        number
+      }
+      status: fieldValueByName(name: "Status") {
+        ... on ProjectV2ItemFieldSingleSelectValue {
+          name
+        }
+      }
+      pillar: fieldValueByName(name: "Pillar") {
+        ... on ProjectV2ItemFieldSingleSelectValue {
+          name
+        }
+      }
+    }
+  }
+}
+
+# Blocked items
+fragment BlockedItems on Issue {
+  blocking(first: $batch) {
+    nodes {
+      ...IssueDetails
+    }
+  }
+}
