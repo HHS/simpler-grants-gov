@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from sqlalchemy import select
@@ -7,7 +8,7 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import (
     Application,
     ApplicationForm,
@@ -24,6 +25,8 @@ from src.services.applications.application_validation import (
     is_form_required,
 )
 from src.services.applications.auth_utils import check_user_application_access
+
+logger = logging.getLogger(__name__)
 
 
 def get_application(
@@ -106,10 +109,7 @@ def get_application_with_warnings(
     Fetch an application along with validation warnings
     """
     # Fetch an application, handles the auth checks as well
-    application = get_application(db_session, application_id, user, is_internal_user)
-    # Check privileges
-    if user and not can_access(user, {Privilege.VIEW_APPLICATION}, application):
-        raise_flask_error(403, "Forbidden")
+    application = get_application_with_auth(db_session, application_id, user, is_internal_user)
 
     # See what validation issues remain on the application's forms
     form_warnings, form_warning_map = get_application_form_errors(
@@ -125,3 +125,26 @@ def get_application_with_warnings(
         application_form.is_required = is_form_required(application_form)  # type: ignore[attr-defined]
 
     return application, form_warnings
+
+
+def get_application_with_auth(
+    db_session: db.Session,
+    application_id: UUID,
+    user: User | None = None,
+    is_internal_user: bool = False,
+) -> Application:
+
+    application = get_application(db_session, application_id, user, is_internal_user)
+    # Check privileges
+    if user and not can_access(user, {Privilege.VIEW_APPLICATION}, application):
+        logger.info(
+            "User attempted to access an application they are not associated with",
+            extra={
+                "user_id": user.user_id,
+                "application_id": application.application_id,
+                "submission_issue": SubmissionIssue.UNAUTHORIZED_APPLICATION_ACCESS,
+            },
+        )
+        raise_flask_error(403, "Forbidden")
+
+    return application

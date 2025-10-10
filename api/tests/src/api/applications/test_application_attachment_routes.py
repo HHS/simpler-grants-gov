@@ -14,6 +14,9 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationUserFactory,
     ApplicationUserRoleFactory,
+    OrganizationFactory,
+    OrganizationUserFactory,
+    OrganizationUserRoleFactory,
     RoleFactory,
 )
 
@@ -638,3 +641,25 @@ def test_application_attachment_get_403_access(
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_get_access_with_organization_role(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    """User should get access to application via organization role"""
+    org = OrganizationFactory.create()
+    application = ApplicationFactory.create(organization=org)
+
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"

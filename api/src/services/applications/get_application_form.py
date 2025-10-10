@@ -5,8 +5,6 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Application, ApplicationForm
 from src.db.models.user_models import User
 from src.form_schema.jsonschema_validator import ValidationErrorDetail
@@ -15,7 +13,7 @@ from src.services.applications.application_validation import (
     is_form_required,
     validate_application_form,
 )
-from src.services.applications.get_application import get_application
+from src.services.applications.get_application import get_application_with_auth
 
 
 def get_application_form(
@@ -30,10 +28,7 @@ def get_application_form(
     is_internal_user = user is None
 
     # Ensure the application exists and user has access (if not internal)
-    application = get_application(db_session, application_id, user, is_internal_user)
-    # Check privileges
-    if user and not can_access(user, {Privilege.VIEW_APPLICATION}, application):
-        raise_flask_error(403, "Forbidden")
+    get_application_with_auth(db_session, application_id, user, is_internal_user)
 
     # Get the application form with eagerly loaded application and its attachments
     application_form = db_session.execute(

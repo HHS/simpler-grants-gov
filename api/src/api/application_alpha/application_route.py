@@ -23,19 +23,18 @@ from src.api.application_alpha.application_schemas import (
     ApplicationUpdateRequestSchema,
     ApplicationUpdateResponseSchema,
 )
-from src.api.route_utils import raise_flask_error
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.endpoint_access_util import can_access
 from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
-from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
 from src.services.applications.delete_application_attachment import delete_application_attachment
 from src.services.applications.get_application import get_application_with_warnings
-from src.services.applications.get_application_attachment import get_application_attachment
+from src.services.applications.get_application_attachment import (
+    get_application_attachment_with_auth,
+)
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
@@ -310,12 +309,9 @@ def application_attachment_get(
 
     with db_session.begin():
         db_session.add(token_session)
-        application_attachment = get_application_attachment(
+        application_attachment = get_application_attachment_with_auth(
             db_session, application_id, application_attachment_id, user
         )
-        # Check privileges
-        if not can_access(user, {Privilege.VIEW_APPLICATION}, application_attachment.application):
-            raise_flask_error(403, "Forbidden")
 
     return response.ApiResponse(message="Success", data=application_attachment)
 
