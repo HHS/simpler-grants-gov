@@ -3690,3 +3690,63 @@ def test_application_form_get_with_submitted_application_status(
     assert response.json["message"] == "Success"
     # Verify application_status field reflects the submitted status
     assert response.json["data"]["application_status"] == ApplicationStatus.SUBMITTED
+
+
+def test_application_form_update_create_403_access(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test forbidden creation of an application form response"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(competition_form.form_id)
+    request_data = {"application_response": {"name": "John Doe"}}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_form_inclusion_update_403_access(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test forbidden setting form inclusion to true"""
+    # Create application with a form
+    application = ApplicationFactory.create()
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+
+    # Create an application form with some data but no inclusion flag set
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "John Doe"},
+        is_included_in_submission=None,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    application_id = str(application.application_id)
+    form_id = str(form.form_id)
+    request_data = {"is_included_in_submission": True}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"

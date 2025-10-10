@@ -147,3 +147,26 @@ def test_application_form_update_forbidden_not_in_progress(
 
     db_session.refresh(application)
     assert application.application_name != "something new"
+
+
+def test_application_update_403_access(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test forbidden update of an application's name"""
+    # Create application
+    application = ApplicationFactory.create(application_name="Original Name")
+
+    # Associate the user with the application using factory
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Update the application name
+    new_name = "Updated Application Name"
+    request_data = {"application_name": new_name}
+    response = client.put(
+        f"/alpha/applications/{application.application_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+    # Check response
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
