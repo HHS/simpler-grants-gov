@@ -19,6 +19,10 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
+  # Zipfile Module
+  # We don't a potch available yet in the python 3.13.x version. The latest version 3.13.8 still has the vulnerability.
+  - vulnerability: CVE-2025-8291
+
   # This is a vulnerability in python when using bytes.decode("unicode_escape", error="ignore|replace")
   # We don't use this anywhere, and I can't find any uses of decode
   # in this manner in any library we use (but won't guarantee there are zero).
