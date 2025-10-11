@@ -257,6 +257,8 @@ RUN poetry config virtualenvs.in-project false && poetry env use python
 
 # Install all dependencies including dev dependencies
 RUN poetry install --no-root --with dev
+# Prune pip, setuptools, and wheel from the dev virtualenv
+RUN poetry run python -c "import site,shutil,glob,os,sys; sp=(site.getsitepackages()[0] if hasattr(site,'getsitepackages') else site.getusersitepackages()); patterns=['pip*','setuptools*','wheel*','_distutils_hack']; [ (shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else (os.remove(p) if os.path.exists(p) else None)) for pat in patterns for p in glob.glob(os.path.join(sp, pat)) ]; bindir=os.path.dirname(sys.executable); [ os.remove(p) for p in glob.glob(os.path.join(bindir,'pip*')) if os.path.exists(p) ]; [ os.remove(p) for p in glob.glob(os.path.join(bindir,'easy_install*')) if os.path.exists(p) ]"
 
 COPY . /api
 
