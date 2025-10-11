@@ -105,7 +105,7 @@ RUN for lib in /lib64/libresolv.so.2 /usr/lib64/libresolv.so.2 \
 
 # Collect only the required libraries for minimal runtime binaries
 RUN mkdir -p /runtime/system-libs && \
-    for binary in /usr/bin/sh /usr/bin/bash /usr/sbin/useradd /usr/bin/ls /usr/bin/cat /usr/bin/curl; do \
+    for binary in /usr/bin/sh /usr/bin/bash /usr/sbin/useradd /usr/bin/ls /usr/bin/cat /usr/bin/curl /usr/bin/wget; do \
         [ -f "$binary" ] && ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/system-libs/ 2>/dev/null || true; \
     done
 
@@ -132,6 +132,7 @@ COPY --from=builder /usr/sbin/useradd /usr/sbin/useradd
 COPY --from=builder /usr/bin/ls /usr/bin/ls
 COPY --from=builder /usr/bin/cat /usr/bin/cat
 COPY --from=builder /usr/bin/curl /usr/bin/curl
+COPY --from=builder /usr/bin/wget /usr/bin/wget
 
 
 # Copy only the specific system libraries required by the selected binaries
@@ -297,6 +298,7 @@ COPY --from=builder /usr/bin/ls /usr/bin/ls
 COPY --from=builder /usr/bin/cat /usr/bin/cat
 COPY --from=builder /usr/bin/sh /bin/sh
 COPY --from=builder /usr/bin/curl /usr/bin/curl
+COPY --from=builder /usr/bin/wget /usr/bin/wget
 
 # Working directory and app
 WORKDIR /api
