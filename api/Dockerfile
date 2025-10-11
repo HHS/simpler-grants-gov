@@ -175,20 +175,18 @@ RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
     ) && \
     "/usr/local/bin/python${PY_MM}" -c "import os,stat; [ (os.makedirs(d, exist_ok=True), os.chmod(d, (stat.S_IRWXU|stat.S_IRWXG|stat.S_IRWXO|stat.S_ISVTX))) for d in ('/tmp','/var/tmp','/usr/tmp') ]"
 
-# --- Release build steps moved into base (formerly in release-build stage) ---
 WORKDIR /api
 
-COPY . /api
+COPY pyproject.toml poetry.lock ./
 
-# Remove any existing virtual environments
 RUN "/usr/local/bin/python${PY_MM}" -c "import shutil; shutil.rmtree('/api/.venv', ignore_errors=True)"
 
-# Configure Poetry/virtualenv for an in-project, self-contained venv
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV VIRTUALENV_ALWAYS_COPY=1
 
-# Install production runtime dependencies only
 RUN poetry install --no-root --only main
+
+COPY . /api
 
 # Build the application wheel and install it into the venv
 RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
@@ -302,9 +300,9 @@ COPY --from=builder /usr/bin/wget /usr/bin/wget
 
 # Working directory and app
 WORKDIR /api
-COPY --from=base /api/.venv /api/.venv
-COPY --from=base /api/src /api/src
-COPY --from=base /api/newrelic.ini /api/newrelic.ini
+# Copy entire application directory from base to ensure all runtime files are present
+COPY --from=base /api /api
+# Ensure tmp dir ownership for runtime user remains correct
 COPY --from=base --chown=${RUN_USER}:${RUN_USER} /api/tmp /api/tmp
 
 
