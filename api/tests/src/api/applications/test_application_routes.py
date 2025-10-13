@@ -17,6 +17,7 @@ from src.db.models.user_models import ApplicationUser
 from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
@@ -3741,6 +3742,28 @@ def test_get_application_form_access_403(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_application_form_access_with_organization(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can access the application if organization member"""
+    user, org, token = create_user_in_org(db_session, is_organization_owner=True)
+
     application = ApplicationFactory.create()
     application_form = ApplicationFormFactory.create(
         application=application,

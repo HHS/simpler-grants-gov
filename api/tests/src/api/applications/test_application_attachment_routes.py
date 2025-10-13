@@ -9,14 +9,13 @@ from sqlalchemy import select
 import src.util.file_util as file_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAttachment
+from tests.lib.application_test_utils import create_user_in_app
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationUserFactory,
     ApplicationUserRoleFactory,
-    OrganizationFactory,
-    OrganizationUserFactory,
-    OrganizationUserRoleFactory,
     RoleFactory,
 )
 
@@ -154,6 +153,7 @@ def test_application_attachment_get_200(
     file_contents = "this is text in my file"
 
     application = ApplicationFactory.create()
+
     ApplicationUserRoleFactory.create(
         application_user=ApplicationUserFactory.create(user=user, application=application),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
@@ -625,10 +625,11 @@ def test_application_attachment_delete_403_not_the_owner(
 
 
 def test_application_attachment_get_403_access(
-    db_session, enable_factory_create, client, user, user_auth_token
+    db_session,
+    enable_factory_create,
+    client,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(user=user, application=application)
+    user, application, token = create_user_in_app(db_session)
 
     application_attachment = ApplicationAttachmentFactory.create(
         application=application,
@@ -636,7 +637,7 @@ def test_application_attachment_get_403_access(
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 403
@@ -644,21 +645,19 @@ def test_application_attachment_get_403_access(
 
 
 def test_application_attachment_get_access_with_organization_role(
-    db_session, enable_factory_create, client, user, user_auth_token
+    db_session,
+    enable_factory_create,
+    client,
 ):
-    """User should get access to application via organization role"""
-    org = OrganizationFactory.create()
-    application = ApplicationFactory.create(organization=org)
+    """Test that user can access the application if organization member"""
+    user, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
-    OrganizationUserRoleFactory.create(
-        organization_user=OrganizationUserFactory.create(user=user, organization=org),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    application = ApplicationFactory.create(organization=org)
     application_attachment = ApplicationAttachmentFactory.create(application=application)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
