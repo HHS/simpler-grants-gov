@@ -3759,22 +3759,26 @@ def test_get_application_form_access_403(
 
 
 def test_get_application_form_access_with_organization(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test that user can access the application if organization member"""
-    user, org, token = create_user_in_org(db_session, is_organization_owner=True)
-
-    application = ApplicationFactory.create()
+    # Associate user with organization
+    _, org, token = create_user_in_org(
+        db_session, is_organization_owner=True, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    # Create application owned by org
+    application = ApplicationFactory.create(organization=org)
     application_form = ApplicationFormFactory.create(
         application=application,
         application_response={"name": "John Doe"},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
-    assert response.status_code == 403
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"

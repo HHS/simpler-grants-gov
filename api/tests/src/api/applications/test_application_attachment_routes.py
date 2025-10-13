@@ -650,8 +650,9 @@ def test_application_attachment_get_access_with_organization_role(
     client,
 ):
     """Test that user can access the application if organization member"""
-    user, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
-
+    # Associate user with organization
+    _, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
+    # Create application owned by org
     application = ApplicationFactory.create(organization=org)
     application_attachment = ApplicationAttachmentFactory.create(application=application)
 

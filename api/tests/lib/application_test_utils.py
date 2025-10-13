@@ -23,7 +23,7 @@ def create_user_in_app(
     """
     Create a user and associates them with an application, optionally creating related roles and privileges.
 
-    This function is primarily used for test setup or seeding purposes. It will:
+    This function is primarily used for test setup or seeding purposes.
 
     Args:
         db_session: Database session for creating JWT token.
