@@ -2,7 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.form_schema.forms import shared_schema
+from src.form_schema.shared import shared_form_constants
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -339,13 +339,13 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "state",
             "description": "US state or Territory Code",
-            "enum": shared_schema.STATES,
+            "enum": shared_form_constants.STATES,
         },
         "country_code": {
             "type": "string",
             "title": "country",
             "description": "country Code",
-            "enum": shared_schema.COUNTRIES,
+            "enum": shared_form_constants.COUNTRIES,
         },
     },
 }
