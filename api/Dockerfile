@@ -160,7 +160,7 @@ ENV PATH="/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     LD_LIBRARY_PATH="/lib:/lib64:/usr/lib64:/usr/local/lib" \
     SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
     SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem" \
-    TMPDIR="/dev/shm"
+    TMPDIR="/tmp"
 
 ARG RUN_UID
 ARG RUN_USER
@@ -189,7 +189,7 @@ RUN poetry install --no-root --only main
 COPY . /api
 
 # Build the application wheel and install it into the venv
-RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
+RUN poetry build --format wheel && poetry run pip install --no-cache-dir 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
 # Prune pip and build tools from the in-project venv to keep the final image clean
 RUN /api/.venv/bin/python -c "import site,shutil,glob,os; sp=(site.getsitepackages()[0] if hasattr(site,'getsitepackages') else site.getusersitepackages()); patterns=['pip*','setuptools*','wheel*','_distutils_hack']; [ (shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else (os.remove(p) if os.path.exists(p) else None)) for pat in patterns for p in glob.glob(os.path.join(sp, pat)) ]; bindir=os.path.join(os.path.dirname(os.path.dirname(sp)),'bin'); [ os.remove(p) for p in glob.glob(os.path.join(bindir,'pip*')) if os.path.exists(p) ]; [ os.remove(p) for p in glob.glob(os.path.join(bindir,'easy_install*')) if os.path.exists(p) ]"
 
@@ -257,15 +257,10 @@ RUN poetry config virtualenvs.in-project false && poetry env use python
 
 # Install all dependencies including dev dependencies
 RUN poetry install --no-root --with dev
-# Prune pip, setuptools, and wheel from the dev virtualenv
-RUN poetry run python -c "import site,shutil,glob,os,sys; sp=(site.getsitepackages()[0] if hasattr(site,'getsitepackages') else site.getusersitepackages()); patterns=['pip*','setuptools*','wheel*','_distutils_hack']; [ (shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else (os.remove(p) if os.path.exists(p) else None)) for pat in patterns for p in glob.glob(os.path.join(sp, pat)) ]; bindir=os.path.dirname(sys.executable); [ os.remove(p) for p in glob.glob(os.path.join(bindir,'pip*')) if os.path.exists(p) ]; [ os.remove(p) for p in glob.glob(os.path.join(bindir,'easy_install*')) if os.path.exists(p) ]"
 
 COPY . /api
 
-ENV HOST=0.0.0.0
-
-CMD ["poetry", "run", "gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]
-
+CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
 #==============================================
 # Stage 5: Minimal release runtime
