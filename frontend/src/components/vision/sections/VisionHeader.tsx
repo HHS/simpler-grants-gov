@@ -15,7 +15,7 @@ export default function VisionHeader() {
               {t("pageHeaderParagraph")}
             </p>
           </Grid>
-          <Grid tablet={{ col: "auto" }}>
+          <Grid tablet={{ col: 6 }} tabletLg={{ col: "auto" }}>
             <Grid className="display-flex flex-justify-center flex-align-center margin-x-neg-2 tablet:margin-x-0">
               <Image
                 src="/img/statue-of-liberty.jpg"
