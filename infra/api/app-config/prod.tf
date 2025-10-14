@@ -82,6 +82,9 @@ module "prod_config" {
     GRANTS_GOV_PORT = 443
     ENABLE_SOAP_API = 1
 
+    # Simpler Grants
+    USE_SIMPLER = "false"
+
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 

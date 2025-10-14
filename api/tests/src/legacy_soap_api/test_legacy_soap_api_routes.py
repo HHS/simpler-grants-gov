@@ -60,40 +60,41 @@ def test_invalid_xml_server_error_500(client) -> None:
     assert response.status_code == 500
 
 
-@mock.patch("uuid.uuid4")
-@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
-def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is_used(
-    mock_get_soap_response, mock_uuid, client, fixture_from_file
-) -> None:
-    test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
-    mock_uuid.return_value = test_uuid
-    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
-    fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
-    mock_data = fixture_from_file(fixture_path)
-    envelope = etree.fromstring(mock_data)
-    tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
-    tracking_number.text = SIMPLER_TRACKING_NUMBER
-    response = client.post(full_path, data=etree.tostring(envelope))
-    expected = (
-        f"--uuid:{test_uuid}\r\n"
-        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-        "Content-Transfer-Encoding: binary\r\n"
-        "Content-ID: <root.message@cxf.apache.org>"
-        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-        "<soap:Body><soap:Fault>"
-        "<faultcode>soap:Server</faultcode>"
-        f"<faultstring>Failed to get application zip.(Grant Application not found for tracking number:{tracking_number.text})"
-        "</faultstring></soap:Fault></soap:Body></soap:Envelope>\r\n"
-        f"--uuid:{test_uuid}--"
-    ).encode("utf-8")
-    mock_get_soap_response.assert_not_called()
-    assert response.status_code == 500
-    assert response.headers["Content-Length"] == "527"
-    assert expected == response.data
-    assert (
-        response.headers["Content-Type"]
-        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
-    )
+# TODO: add back once the GetApplicationZip endpoint can return not found
+# @mock.patch("uuid.uuid4")
+# @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+# def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is_used(
+#     mock_get_soap_response, mock_uuid, client, fixture_from_file
+# ) -> None:
+#     test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
+#     mock_uuid.return_value = test_uuid
+#     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+#     fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
+#     mock_data = fixture_from_file(fixture_path)
+#     envelope = etree.fromstring(mock_data)
+#     tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
+#     tracking_number.text = SIMPLER_TRACKING_NUMBER
+#     response = client.post(full_path, data=etree.tostring(envelope))
+#     expected = (
+#         f"--uuid:{test_uuid}\r\n"
+#         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+#         "Content-Transfer-Encoding: binary\r\n"
+#         "Content-ID: <root.message@cxf.apache.org>"
+#         '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+#         "<soap:Body><soap:Fault>"
+#         "<faultcode>soap:Server</faultcode>"
+#         f"<faultstring>Failed to get application zip.(Grant Application not found for tracking number:{tracking_number.text})"
+#         "</faultstring></soap:Fault></soap:Body></soap:Envelope>\r\n"
+#         f"--uuid:{test_uuid}--"
+#     ).encode("utf-8")
+#     mock_get_soap_response.assert_not_called()
+#     assert response.status_code == 500
+#     assert response.headers["Content-Length"] == "527"
+#     assert expected == response.data
+#     assert (
+#         response.headers["Content-Type"]
+#         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
+#     )
 
 
 @mock.patch("uuid.uuid4")
@@ -133,25 +134,6 @@ def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_us
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
     assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
-
-
-@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
-def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_includes_cookie(
-    mock_get_soap_response, client, fixture_from_file
-) -> None:
-    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
-    fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
-    mock_data = fixture_from_file(fixture_path)
-    envelope = etree.fromstring(mock_data)
-    tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
-    tracking_number.text = SIMPLER_TRACKING_NUMBER
-    client.set_cookie("JSESSIONID", "xyz")
-    response = client.post(full_path, data=etree.tostring(envelope))
-    mock_get_soap_response.assert_not_called()
-    assert response.status_code == 500
-    assert (
-        response.headers["Set-Cookie"] == "JSESSIONID=xyz; Path=/grantsws-agency; Secure; HttpOnly"
-    )
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")

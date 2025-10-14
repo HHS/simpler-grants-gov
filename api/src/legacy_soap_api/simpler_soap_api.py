@@ -1,4 +1,5 @@
 import logging
+import os
 
 import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_client import (
@@ -28,7 +29,7 @@ def get_simpler_soap_response(
         else SimplerGrantorsS2SClient
     )
 
-    use_simpler = False
+    use_simpler = os.environ.get("USE_SIMPLER") == "true"
 
     try:
         simpler_soap_client = simpler_soap_client_type(
@@ -62,9 +63,7 @@ def get_simpler_soap_response(
         )
         return soap_proxy_response
 
-    simpler_soap_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
-        soap_proxy_response
-    )
+    simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_proxy_response)
 
     if simpler_soap_response is not None and use_simpler:
         logger.info(
