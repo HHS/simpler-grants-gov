@@ -1,0 +1,62 @@
+name: "Deliverable mapping: Issue level"
+
+on:
+  pull_request:
+    paths:
+      - ".github/linters/deps_mapping/**"
+      - ".github/workflows/deps-mapping-issue.yml"
+  workflow_dispatch: # for manual runs
+  schedule:
+    - cron: "0 0 * * 1" # run weekly at midnight on Monday
+
+permissions:
+  issues: write
+
+defaults:
+  run:
+    working-directory: ./.github/linters/deps_mapping
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_API_TOKEN: ${{ secrets.GH_TOKEN_PROJECT_ACCESS }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Run script (dry run)
+        if: github.event_name == 'pull_request'
+        run: |
+          python run.py \
+            --org "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --project 12 \
+            --statuses "Prioritized" \
+            --statuses "Planning" \
+            --statuses "In Progress" \
+            --statuses "Done" \
+            --issue-type "Deliverable" \
+            --scope "issue" \
+            --dry-run
+
+      - name: Run script (real run)
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        run: |
+          python run.py \
+            --org "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --project 12 \
+            --statuses "Prioritized" \
+            --statuses "Planning" \
+            --statuses "In Progress" \
+            --statuses "Done" \
+            --issue-type "Deliverable" \
+            --scope "issue"
