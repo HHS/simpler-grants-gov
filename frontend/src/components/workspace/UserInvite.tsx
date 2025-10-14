@@ -1,73 +1,46 @@
+import { getSession } from "src/services/auth/session";
+import { getOrganizationRoles } from "src/services/fetch/fetchers/organizationsFetcher";
 import { UserRole } from "src/types/userTypes";
-import { useTranslations } from "use-intl";
 
-import {
-  Button,
-  FormGroup,
-  Label,
-  Select,
-  TextInput,
-} from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
 
-export const rolesToOptions = (roles) => {
-  return [<option key="a">hi</option>];
+import { UserInviteForm } from "./UserInviteForm";
+
+export const rolesToOptions = (roles: UserRole[]) => {
+  // return [<option key="a">hi</option>];
+  return roles.map((role) => (
+    <option key={role.role_id} value={role.role_id}>
+      {role.role_name}
+    </option>
+  ));
 };
-
-export function UserInviteButton({ success = false, disabled = false }) {
-  const t = useTranslations("ManageUsers.inviteUser.button");
-  if (success) {
-    return <div>{t("success")}</div>;
-  }
-  return (
-    <Button disabled={disabled} type="button">
-      {t("label")}
-    </Button>
-  );
-}
-
-export function UserInviteForm({
+export async function UserInvite({
   organizationId,
-  roles,
 }: {
   organizationId: string;
-  roles: UserRole[];
 }) {
-  // handle form action and state (server action)
-  const t = useTranslations("ManageUsers.inviteUser");
-  const roleOptions = rolesToOptions(roles);
-  return (
-    <form>
-      <FormGroup>
-        <Label htmlFor="email">{t("inputs.email.label")}</Label>
-        <TextInput
-          name="email"
-          id="inviteUser-email"
-          type="email"
-          placeholder={t("inputs.email.placeholder")}
-        />
-        <Label htmlFor="email">{t("inputs.role.label")}</Label>
-        <Select
-          name="role"
-          id="inviteUser-role"
-          defaultValue={t("inputs.role.placeholder")}
-        >
-          {roleOptions}
-        </Select>
-      </FormGroup>
-      <UserInviteButton />
-    </form>
-  );
-}
-
-export function UserInvite({ organizationId }: { organizationId: string }) {
   // fetch roles for organization (this will happen in page gate eventually)
-  // display heading info
   const t = useTranslations("ManageUsers.inviteUser");
+  const session = await getSession();
+  if (!session?.token) {
+    console.error("unable to display user invites, not logged in");
+    return;
+  }
+  let roleOptions: UserRole[] = [];
+  try {
+    const organizationRoles = getOrganizationRoles(
+      session.token,
+      organizationId,
+    );
+    roleOptions = rolesToOptions(organizationRoles);
+  } catch (e) {
+    console.error("unable to fetch organization roles", e);
+  }
   return (
     <>
       <h3>{t("heading")}</h3>
       <div>{t("description")}</div>
-      <UserInviteForm organizationId={organizationId} roles={[]} />
+      <UserInviteForm organizationId={organizationId} roles={roleOptions} />
     </>
   );
 }
