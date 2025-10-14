@@ -11,7 +11,7 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
-import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { ACTIVITY_COLUMN_COUNT, BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
 import { getErrorsForSection } from "./budgetErrors";
 import {
   activityTitleSchema,
@@ -126,8 +126,11 @@ function Budget424aSectionA<
     row: number,
     path: keyof BudgetSummary,
   ): string | undefined => itemAt(row).budget_summary?.[path];
-
-  const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
+    const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
+    const activityRowIndices: number[] = COLUMNS.slice(
+      0,
+      ACTIVITY_COLUMN_COUNT,
+    );
 
   return (
     <div key={id} id={id}>
@@ -237,11 +240,14 @@ function Budget424aSectionA<
         </thead>
 
         <tbody>
-          {COLUMNS.map((row) => (
+          {activityRowIndices.map((row) => (
             <tr key={row}>
               {/* Column A: activity title */}
               <DataCell>
                 <div className="display-flex flex-align-end">
+                  <span className="text-bold text-no-wrap margin-right-2">
+                    {row + 1}.
+                  </span>
                   <div className="margin-top-05 padding-top-0">
                     <TextWidget
                       schema={activityTitleSchema}
