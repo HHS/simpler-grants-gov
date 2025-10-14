@@ -2,6 +2,7 @@ import pytest
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.validation.validation_constants import ValidationErrorType
+from tests.lib.application_test_utils import create_user_in_app
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationUserFactory,
@@ -114,22 +115,18 @@ def test_application_update_missing_field(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_form_update_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user_auth_token, user, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test application update fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
-
-    # Associate user with application
-    ApplicationUserRoleFactory(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION], status=initial_status
     )
 
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json={"application_name": "something new"},
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response

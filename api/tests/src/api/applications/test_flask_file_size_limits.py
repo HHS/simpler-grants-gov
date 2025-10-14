@@ -5,12 +5,8 @@ import pytest
 
 from src.app_config import AppConfig
 from src.constants.lookup_constants import Privilege
-from tests.src.db.models.factories import (
-    ApplicationFactory,
-    ApplicationUserFactory,
-    ApplicationUserRoleFactory,
-    RoleFactory,
-)
+from tests.lib.application_test_utils import create_user_in_app
+from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory
 
 attachment_dir = Path(__file__).parent / "attachments"
 
@@ -50,13 +46,11 @@ def test_flask_max_content_length_file_too_large(
 
 
 def test_flask_max_content_length_file_within_limit(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+    db_session, enable_factory_create, client, s3_config
 ):
     """Test that Flask's MAX_CONTENT_LENGTH allows files within the configured limit."""
-    application = ApplicationFactory.create()
-    ApplicationUserRoleFactory(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     # Create a small file that's well within the 2GB limit
     small_file_content = b"This is a small test file content"
@@ -64,7 +58,7 @@ def test_flask_max_content_length_file_within_limit(
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/attachments",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (small_file, "small_file.txt")},
     )
 
@@ -87,13 +81,11 @@ def test_flask_max_content_length_configuration(app):
 
 
 def test_flask_max_content_length_with_real_file(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+    db_session, enable_factory_create, client, s3_config
 ):
     """Test Flask's MAX_CONTENT_LENGTH with a real file from the test directory."""
-    application = ApplicationFactory.create()
-    ApplicationUserRoleFactory(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     # Use a real test file that should be well within the 2GB limit
     test_file_path = attachment_dir / "pdf_file.pdf"
@@ -101,7 +93,7 @@ def test_flask_max_content_length_with_real_file(
     if test_file_path.exists():
         response = client.post(
             f"/alpha/applications/{application.application_id}/attachments",
-            headers={"X-SGG-Token": user_auth_token},
+            headers={"X-SGG-Token": token},
             data={"file_attachment": test_file_path.open("rb")},
         )
 
