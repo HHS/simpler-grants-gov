@@ -16,6 +16,24 @@ class SamGovEntityResponseSchema(Schema):
     expiration_date = fields.Date(
         metadata={"description": "SAM.gov registration expiration date", "example": "2025-08-11"}
     )
+    ebiz_poc_email = fields.String(
+        metadata={
+            "description": "Email address of the Electronic Business Point of Contact",
+            "example": "ebiz@example.com",
+        }
+    )
+    ebiz_poc_first_name = fields.String(
+        metadata={
+            "description": "First name of the Electronic Business Point of Contact",
+            "example": "John",
+        }
+    )
+    ebiz_poc_last_name = fields.String(
+        metadata={
+            "description": "Last name of the Electronic Business Point of Contact",
+            "example": "Smith",
+        }
+    )
 
 
 class OrganizationDataSchema(Schema):
@@ -90,3 +108,11 @@ class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
     """Schema for PUT /organizations/:organization_id/users/:user_id"""
 
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/users/:user_id response"""
+
+    data = fields.Raw(
+        allow_none=True, metadata={"description": "No data returned on successful removal"}
+    )

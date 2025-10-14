@@ -79,3 +79,58 @@ describe("InformationCard - Edit filing name button visibility", () => {
     expect(editButton).not.toBeInTheDocument();
   });
 });
+
+describe("InformationCard - No longer accepting applications message", () => {
+  const defaultProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+  };
+
+  it("shows message when competition is closed (is_open is false)", () => {
+    const closedCompetitionApplication = {
+      ...mockApplicationDetails,
+      competition: {
+        ...mockApplicationDetails.competition,
+        is_open: false,
+      },
+    };
+
+    render(
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={closedCompetitionApplication}
+      />,
+    );
+
+    const messages = screen.getAllByText("specialInstructions");
+    expect(messages.length).toBeGreaterThan(0);
+  });
+
+  it("hides message when competition is open and closing date is in the future", () => {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 30);
+
+    const openCompetitionApplication = {
+      ...mockApplicationDetails,
+      competition: {
+        ...mockApplicationDetails.competition,
+        is_open: true,
+        closing_date: futureDate.toISOString(),
+      },
+    };
+
+    render(
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={openCompetitionApplication}
+      />,
+    );
+
+    const message = screen.queryByText("specialInstructions");
+    expect(message).not.toBeInTheDocument();
+  });
+});

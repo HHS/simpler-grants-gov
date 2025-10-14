@@ -8,7 +8,6 @@ import Link from "next/link";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -29,8 +28,6 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
 
   return (
     <>
-      <BetaAlert />
-
       <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
         <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
         <h1>{t("title")}</h1>

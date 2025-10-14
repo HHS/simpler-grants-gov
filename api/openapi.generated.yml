@@ -1726,6 +1726,48 @@ paths:
               $ref: '#/components/schemas/OrganizationUpdateUserRolesRequest'
       security:
       - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationRemoveUserResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Remove a user from an organization
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
     put:
       parameters:
@@ -4756,6 +4798,18 @@ components:
           format: date
           description: SAM.gov registration expiration date
           example: '2025-08-11'
+        ebiz_poc_email:
+          type: string
+          description: Email address of the Electronic Business Point of Contact
+          example: ebiz@example.com
+        ebiz_poc_first_name:
+          type: string
+          description: First name of the Electronic Business Point of Contact
+          example: John
+        ebiz_poc_last_name:
+          type: string
+          description: Last name of the Electronic Business Point of Contact
+          example: Smith
     UserOrganization1:
       type: object
       properties:
@@ -5961,6 +6015,19 @@ components:
             type:
             - object
             $ref: '#/components/schemas/Role1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationRemoveUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: No data returned on successful removal
         status_code:
           type: integer
           description: The HTTP status code

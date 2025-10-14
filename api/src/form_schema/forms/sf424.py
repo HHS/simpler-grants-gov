@@ -937,6 +937,7 @@ FORM_XML_TRANSFORM_RULES = {
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "att": "https://apply07.grants.gov/apply/system/schemas/Attachments-V1.0.xsd",
         },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
         "null_handling_options": {
             "exclude": "Default - exclude field entirely from XML (recommended)",
@@ -959,7 +960,7 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {"target": "EmployerTaxpayerIdentificationNumber"}
     },
     "sam_uei": {"xml_transform": {"target": "SAMUEI"}},
-    # Address information - nested structure
+    # Address information - nested structure with GlobalLibrary namespace
     "applicant_address": {
         "xml_transform": {"target": "Applicant", "type": "nested_object"},
         "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
@@ -1055,7 +1056,7 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
-    # Authorized representative - nested structure for name fields
+    # Authorized representative - nested structure with GlobalLibrary namespace for names
     "authorized_representative": {
         "xml_transform": {"target": "AuthorizedRepresentative", "type": "nested_object"},
         "first_name": {
@@ -1075,7 +1076,6 @@ FORM_XML_TRANSFORM_RULES = {
             }
         },
     },
-    # Authorized representative - direct field mappings
     "authorized_representative_title": {
         "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
     },
@@ -1085,6 +1085,7 @@ FORM_XML_TRANSFORM_RULES = {
     "authorized_representative_email": {
         "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
     },
+    "aor_signature": {"xml_transform": {"target": "AORSignature"}},
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
     # One-to-many mapping example - applicant type codes
     "applicant_type_code_mapping": {
@@ -1115,6 +1116,7 @@ SF424_v4_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
+    form_instruction_id=uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
     # No form instructions at the moment.
     form_type=FormType.SF424,
     sgg_version="1.0",

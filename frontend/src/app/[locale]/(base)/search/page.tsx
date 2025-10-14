@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { SEARCH_CRUMBS } from "src/constants/breadcrumbs";
 import { environment } from "src/constants/environments";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -17,7 +16,6 @@ import { redirect } from "next/navigation";
 import { Suspense, use } from "react";
 
 import BetaAlert from "src/components/BetaAlert";
-import Breadcrumbs from "src/components/Breadcrumbs";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
 import { FilterPillPanel } from "src/components/search/FilterPillPanel";
@@ -84,7 +82,7 @@ function Search({ searchParams, params }: SearchPageProps) {
       />
       <div className="bg-base-lightest">
         <BetaAlert
-          containerClasses="padding-top-5"
+          containerClasses="padding-y-3"
           alertMessage={t.rich("betaAlert.alert", {
             ethnioSurveyLink: (chunks) => (
               <a
@@ -98,10 +96,6 @@ function Search({ searchParams, params }: SearchPageProps) {
           })}
         />
         <div className="grid-container">
-          <Breadcrumbs
-            breadcrumbList={SEARCH_CRUMBS}
-            className="bg-base-lightest"
-          />
           <SearchCallToAction />
           <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">
             <div className="flex-6 flex-align-self-end">
