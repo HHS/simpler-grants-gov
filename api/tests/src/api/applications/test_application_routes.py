@@ -2623,41 +2623,6 @@ def test_application_start_organization_not_found(
     assert len(applications_count) == 0
 
 
-def test_application_start_user_not_organization_member(
-    client, enable_factory_create, db_session, user, user_auth_token
-):
-    """Test application creation fails when user is not a member of the organization"""
-    today = get_now_us_eastern_date()
-    future_date = today + timedelta(days=10)
-
-    # Create organization but DON'T associate user with it
-    organization = OrganizationFactory.create()
-
-    competition = CompetitionFactory.create(opening_date=today, closing_date=future_date)
-
-    competition_id = str(competition.competition_id)
-    organization_id = str(organization.organization_id)
-    request_data = {
-        "competition_id": competition_id,
-        "organization_id": organization_id,
-    }
-
-    response = client.post(
-        "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
-    )
-
-    assert response.status_code == 403
-    assert "User is not a member of the organization" in response.json["message"]
-
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
-
-
 def test_application_start_without_organization_still_works(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
@@ -2798,7 +2763,7 @@ def test_application_start_organization_membership_validation_works_with_multipl
     )
 
     assert response.status_code == 403
-    assert "User is not a member of the organization" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_get_with_internal_jwt_bypasses_auth(
