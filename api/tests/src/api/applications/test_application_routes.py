@@ -7,23 +7,30 @@ from sqlalchemy import select
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.constants.lookup_constants import ApplicationFormStatus, CompetitionOpenToApplicant
+from src.constants.lookup_constants import (
+    ApplicationFormStatus,
+    CompetitionOpenToApplicant,
+    Privilege,
+)
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
 from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
+from tests.lib.application_test_utils import create_user_in_app
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
     OrganizationUserFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
@@ -1678,7 +1685,9 @@ def test_application_form_get_with_invalid_schema(
 
 
 def test_application_submit_success(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successful submission of an application"""
     # Create a competition with a future closing date
@@ -1694,9 +1703,13 @@ def test_application_submit_success(
     )
 
     # Create an application in the IN_PROGRESS state
-    application = ApplicationFactory.create(
-        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
     )
+
     ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
@@ -1705,12 +1718,9 @@ def test_application_submit_success(
 
     application_id = str(application.application_id)
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert response
@@ -1722,9 +1732,7 @@ def test_application_submit_success(
     assert application.application_status == ApplicationStatus.SUBMITTED
 
 
-def test_application_submit_logging_enhancement(
-    client, enable_factory_create, db_session, user, user_auth_token, caplog
-):
+def test_application_submit_logging_enhancement(client, enable_factory_create, db_session, caplog):
     """Test that the Submit Application endpoint adds application metadata to logs for New Relic dashboards"""
     # Create a competition with a future closing date and opportunity with agency_code
     today = get_now_us_eastern_date()
@@ -1743,8 +1751,11 @@ def test_application_submit_logging_enhancement(
     )
 
     # Create an application in the IN_PROGRESS state
-    application = ApplicationFactory.create(
-        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
     )
     ApplicationFormFactory.create(
         application=application,
@@ -1754,15 +1765,12 @@ def test_application_submit_logging_enhancement(
 
     application_id = str(application.application_id)
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     # Set log level to capture INFO messages
     caplog.set_level(logging.INFO)
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert response
@@ -1794,7 +1802,9 @@ def test_application_submit_logging_enhancement(
 
 
 def test_application_submit_validation_issues(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
@@ -1808,18 +1818,19 @@ def test_application_submit_validation_issues(
     )
 
     # Create an application in the IN_PROGRESS state
-    application = ApplicationFactory.create(
-        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
     )
     application_form = ApplicationFormFactory.create(
         application=application, competition_form=competition_form, application_response={"name": 5}
     )
 
-    ApplicationUserFactory.create(application=application, user=user)
-
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert response
@@ -1853,8 +1864,6 @@ def test_application_submit_rule_validation_issue(
     client,
     enable_factory_create,
     db_session,
-    user,
-    user_auth_token,
 ):
     # Create a form with our test schema
     form = FormFactory.create(
@@ -1864,8 +1873,9 @@ def test_application_submit_rule_validation_issue(
 
     # Create application with the form
     competition = CompetitionFactory.create(competition_forms=[])
-    application = ApplicationFactory.create(competition=competition)
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.SUBMIT_APPLICATION], competition=competition
+    )
     competition_form = CompetitionFormFactory.create(
         competition=application.competition,
         form=form,
@@ -1878,12 +1888,9 @@ def test_application_submit_rule_validation_issue(
         application_response={"attachment_field": "30092ec9-9553-4eb2-a6be-dac919df6867"},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert response
@@ -1914,7 +1921,9 @@ def test_application_submit_rule_validation_issue(
 
 
 def test_application_submit_invalid_required_form(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
@@ -1927,11 +1936,12 @@ def test_application_submit_invalid_required_form(
     )
 
     # Create an application in the IN_PROGRESS state
-    application = ApplicationFactory.create(
-        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
     )
-
-    ApplicationUserFactory.create(application=application, user=user)
 
     # Setup an application form without any answers yet
     application_form = ApplicationFormFactory.create(
@@ -1940,7 +1950,7 @@ def test_application_submit_invalid_required_form(
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert response
@@ -1962,14 +1972,15 @@ def test_application_submit_invalid_required_form(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_form_update_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user, user_auth_token, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test form update fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=initial_status,
+    )
 
     form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
@@ -1979,7 +1990,7 @@ def test_application_form_update_forbidden_not_in_progress(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response
@@ -2000,19 +2011,20 @@ def test_application_form_update_forbidden_not_in_progress(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_submit_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user, user_auth_token, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test submission fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=initial_status,
+    )
     application_id = str(application.application_id)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response
@@ -2217,7 +2229,10 @@ def test_application_get_success_when_associated(
     """Test application get succeeds when user is associated with the application"""
     application = ApplicationFactory.create(with_forms=True)
 
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(application=application, user=user),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2284,7 +2299,9 @@ def test_application_form_update_success_when_associated(
 
 
 def test_application_submit_success_when_associated(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application submit succeeds when user is associated with the application"""
 
@@ -2300,8 +2317,11 @@ def test_application_submit_success_when_associated(
     )
 
     # Create an application in the IN_PROGRESS state
-    application = ApplicationFactory.create(
-        application_status=ApplicationStatus.IN_PROGRESS, competition=competition
+    _, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.SUBMIT_APPLICATION],
+        status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
     )
 
     # Create an application form with valid data to ensure validation passes
@@ -2311,12 +2331,9 @@ def test_application_submit_success_when_associated(
         application_response={"name": "Valid Name"},
     )
 
-    # Create ApplicationUser association
-    ApplicationUserFactory.create(application=application, user=user)
-
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
