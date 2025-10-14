@@ -46,7 +46,7 @@ def get_application_attachment(
 ) -> ApplicationAttachment:
 
     # Fetch the application which also validates if the user can access it
-    application = get_application(db_session, application_id, user)
+    application = get_application_with_auth(db_session, application_id, user)
 
     return _get_application_attachment_by_application(
         db_session, application, application_attachment_id
