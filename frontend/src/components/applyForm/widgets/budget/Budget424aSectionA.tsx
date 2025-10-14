@@ -12,8 +12,7 @@ import {
 } from "src/components/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 import {
-  ACTIVITY_COLUMN_COUNT,
-  BUDGET_ACTIVITY_COLUMNS,
+  ACTIVITY_ITEMS,
 } from "./budgetConstants";
 import { getErrorsForSection } from "./budgetErrors";
 import {
@@ -129,8 +128,6 @@ function Budget424aSectionA<
     row: number,
     path: keyof BudgetSummary,
   ): string | undefined => itemAt(row).budget_summary?.[path];
-  const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
-  const activityRowIndices: number[] = COLUMNS.slice(0, ACTIVITY_COLUMN_COUNT);
 
   return (
     <div key={id} id={id}>
@@ -240,7 +237,7 @@ function Budget424aSectionA<
         </thead>
 
         <tbody>
-          {activityRowIndices.map((row) => (
+          {ACTIVITY_ITEMS.map((row) => (
             <tr key={row}>
               {/* Column A: activity title */}
               <DataCell>

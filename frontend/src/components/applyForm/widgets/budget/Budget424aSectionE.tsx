@@ -9,7 +9,7 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { ACTIVITY_ITEMS, BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
@@ -119,8 +119,6 @@ function Budget424aSectionE<
   function getErrorMessagesForField(fieldId: string): string[] {
     return getBudgetErrors({ errors, id: fieldId, section: "C" });
   }
-
-  const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
   const YEARS = [
     { key: "first_year_amount", short: "First year", colLabel: "B" },
@@ -254,7 +252,7 @@ function Budget424aSectionE<
         </thead>
 
         <tbody>
-          {ROWS.map((rowIndex) => (
+          {ACTIVITY_ITEMS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
               <td className="border-bottom-0 border-top-0 verticle-align-bottom">
                 {rowIndex + 16}.
