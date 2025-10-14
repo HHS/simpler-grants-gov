@@ -65,6 +65,7 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application = create_application(
             db_session, competition_id, user, application_name, organization_id
         )
