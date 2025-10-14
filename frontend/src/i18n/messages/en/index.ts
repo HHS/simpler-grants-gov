@@ -1479,4 +1479,25 @@ export const messages = {
       },
     },
   },
+  ManageUsers: {
+    inviteUser: {
+      heading: "Add users to collaborate on opportunities.",
+      description:
+        "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
+      inputs: {
+        email: {
+          label: "Email address",
+          placeholder: "Enter a valid email address",
+        },
+        role: {
+          label: "Role",
+          placeholder: "- Select a role -",
+        },
+      },
+      button: {
+        label: "Add to organization",
+        success: "User added!",
+      },
+    },
+  },
 };
