@@ -278,7 +278,7 @@ class TestSimplerBaseSOAPClient:
         }
         assert proxy_soap_response_dict == expected
 
-    def test_get_simpler_soap_response_when_operation_is_get_ooportunity_list_request_compares_responses(
+    def test_get_simpler_soap_response_when_operation_is_get_opportunity_list_request_compares_responses(
         self, db_session, caplog
     ):
         soap_request = SOAPRequest(
