@@ -242,6 +242,9 @@ function Budget424aSectionA<
               {/* Column A: activity title */}
               <DataCell>
                 <div className="display-flex flex-align-end">
+                  <span className="text-bold text-no-wrap margin-right-2">
+                    {row + 1}.
+                  </span>
                   <div className="margin-top-05 padding-top-0">
                     <TextWidget
                       schema={activityTitleSchema}
