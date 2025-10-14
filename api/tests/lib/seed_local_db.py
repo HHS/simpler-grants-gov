@@ -121,15 +121,10 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
     # we'll create that if it doesn't already exist.
     forms = {}
 
-    import jsonref
-
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
     )
     for form_name, form in forms_raw.items():
-        form.form_json_schema = jsonref.replace_refs(
-            form.form_json_schema, lazy_load=False, proxies=False
-        )
 
         # We can't use our merge approach here because
         # we want the factory to create a file on s3
@@ -143,6 +138,7 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
             factories.FormInstructionFactory.create(
                 form_instruction_id=form.form_instruction_id, file_name=f"{form_name}.txt"
             )
+
         forms[form_name] = db_session.merge(form, load=True)
 
     return forms
