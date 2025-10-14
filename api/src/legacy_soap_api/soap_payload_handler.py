@@ -320,3 +320,61 @@ def _build_xml_elements(
         else:
             el = SubElement(parent, tag)
             el.text = str(value)
+
+
+def _build_mtom_nested_elements(
+    parent_element: etree._Element,
+    data_dict: dict,
+    namespaces: dict,
+    bound_prefixes: set,
+    response_operation_name: str,
+) -> None:
+    for local_name, value in data_dict.items():
+        # if the local_name is @href, assign the href value to the element
+        if local_name[0] == "@":
+            parent_element.set(local_name[1:], str(value))
+            continue
+        prefix, local_name = local_name.split(":")
+        ns_uri = namespaces.get(prefix) if prefix else None
+        new_element_nsmap = {}
+        if ns_uri:
+            tag = QName(ns_uri, local_name)
+            if local_name == response_operation_name:
+                nsmap_to_apply = {p: namespaces[p] for p in namespaces if p not in ("soap", "xop")}
+                child_element = SubElement(parent_element, tag, nsmap=nsmap_to_apply)
+                bound_prefixes = set(namespaces.keys()).union(bound_prefixes)
+            elif local_name == "Include":
+                new_element_nsmap["xop"] = namespaces["xop"]
+                child_element = SubElement(parent_element, tag, nsmap=new_element_nsmap)
+                bound_prefixes = bound_prefixes.union({"xop"})
+            else:
+                child_element = SubElement(parent_element, tag)
+        else:
+            child_element = SubElement(parent_element, local_name)
+        if isinstance(value, dict):
+            _build_mtom_nested_elements(
+                child_element, value, namespaces, bound_prefixes, response_operation_name
+            )
+        elif value is not None:
+            child_element.text = str(value)
+
+
+# Handle building the MTOM xml for responses like GetApplicationZipResponse
+# the basic structure (without most namespaces) looks like this
+#     <soap:Envelope>
+#       <soap:Body>
+#           <ns2:GetApplicationZipResponse>
+#               <ns2:FileDataHandler><xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:{CID_UUID}-0001@apply.grants.gov"/></ns2:FileDataHandler>
+#           </ns2:GetApplicationZipResponse>
+#       </soap:Body>
+#     </soap:Envelope>
+def build_mtom_xml_from_dict(
+    namespaces: dict, pydantic_data_dict: dict, response_operation_name: str
+) -> bytes:
+    ns_soap = namespaces["soap"]
+    nsmap_root = {"soap": ns_soap}
+    envelope = etree.Element(QName(ns_soap, "Envelope"), nsmap=nsmap_root)
+    if body_data := pydantic_data_dict.get("Body"):
+        body = SubElement(envelope, QName(ns_soap, "Body"))
+        _build_mtom_nested_elements(body, body_data, namespaces, {"soap"}, response_operation_name)
+    return etree.tostring(envelope, encoding="UTF-8")

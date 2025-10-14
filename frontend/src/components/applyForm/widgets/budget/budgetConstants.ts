@@ -7,6 +7,11 @@ export const ACTIVITY_COLUMN_COUNT = 4;
 
 export const BUDGET_ACTIVITY_COLUMNS = [0, 1, 2, 3, 4] as const;
 
+export const ACTIVITY_ITEMS: number[] = BUDGET_ACTIVITY_COLUMNS.slice(
+  0,
+  ACTIVITY_COLUMN_COUNT,
+);
+
 export const SECTION_B_ROW_I_KEY: FieldKey = "total_direct_charge_amount";
 export const SECTION_B_ROW_K_KEY: FieldKey = "total_amount";
 
