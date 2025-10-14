@@ -5,7 +5,6 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 
 class SharedSchemaConfig(PydanticBaseEnvConfig):
-    environment: str
     shared_schema_base_uri: str = "https://files.simpler.grants.gov/schemas"
 
 shared_schema_config: SharedSchemaConfig | None = None
@@ -26,6 +25,7 @@ class SharedSchema:
     schema_uri: str = dataclasses.field(init=False)
 
     def __post_init__(self):
+        # Setup the schema URI
         config = get_shared_schema_config()
         self.schema_uri = file_util.join(config.shared_schema_base_uri, self.schema_name + ".json")
 
@@ -34,7 +34,7 @@ class SharedSchema:
 
            For example, if you wanted to refer to field "example_field" in this shared schema,
            this would return something like:
-        
+
                 https://files.simpler.grants.gov/schemas/my-example-schema.json#/example_field
         """
         return f"{self.schema_uri}#/{field}"
@@ -57,5 +57,7 @@ What changes would we need to make?
 * Switch update-form/list-form and local seed script to use resolved schemas
   * Also update form tests to test schemas against resolved ones
 * Update all schemas to reference shared schema
+  * Probably do this across more than one ticket
+  * Needs to change tests to resolve the schema
 
 """
