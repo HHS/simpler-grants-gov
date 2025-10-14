@@ -29,7 +29,6 @@ from tests.src.db.models.factories import (
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
-    OrganizationUserFactory,
     RoleFactory,
     SamGovEntityFactory,
     UserFactory,
