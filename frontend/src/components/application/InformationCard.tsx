@@ -85,39 +85,6 @@ export const InformationCard = ({
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
 
-  const ApplicantDetails = () => {
-    if (hasOrganization) {
-      const { legal_business_name, uei, expiration_date } =
-        applicationDetails.organization.sam_gov_entity;
-
-      return (
-        <>
-          <div className="margin-bottom-1">
-            <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-            <dd>{legal_business_name ?? "-"}</dd>
-          </div>
-          <Grid row className="margin-bottom-1">
-            <div>
-              <dt className="margin-right-1 text-bold">{t("uei")}: </dt>
-              <dd>{uei ?? "-"}</dd>
-            </div>
-            <div className="margin-left-4">
-              <dt className="margin-right-1 text-bold">{t("renewal")}: </dt>
-              <dd>{expiration_date ?? "-"}</dd>
-            </div>
-          </Grid>
-        </>
-      );
-    }
-
-    return (
-      <div className="margin-bottom-1">
-        <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-        <dd>{t("applicantTypeIndividual")}</dd>
-      </div>
-    );
-  };
-
   const isCompetitionClosed = () => {
     const isPastCloseDate = getConfiguredDayJs()().isAfter(
       getConfiguredDayJs()(applicationDetails.competition.closing_date),
