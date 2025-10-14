@@ -9,7 +9,7 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import { ACTIVITY_ITEMS, BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";

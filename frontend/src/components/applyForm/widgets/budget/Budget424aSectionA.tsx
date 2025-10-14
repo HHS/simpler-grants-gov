@@ -11,9 +11,7 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
-import {
-  ACTIVITY_ITEMS,
-} from "./budgetConstants";
+import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getErrorsForSection } from "./budgetErrors";
 import {
   activityTitleSchema,
