@@ -63,5 +63,7 @@ const config = {
   typescript: {
     reactDocgen: "react-docgen-typescript",
   },
+
+  features: { experimentalRSC: true },
 };
 export default config;

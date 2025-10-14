@@ -1,6 +1,7 @@
 import { Organization } from "src/types/applicationResponseTypes";
+import { UserRole } from "src/types/userTypes";
 
-import { fetchUserWithMethod, getOrganization } from "./fetchers";
+import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
 export const getOrganizationDetails = async (
   token: string,
@@ -9,11 +10,11 @@ export const getOrganizationDetails = async (
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const resp = await getOrganization({
+  const resp = await fetchOrganizationWithMethod("GET")({
     subPath: organizationId,
     additionalHeaders: ssgToken,
   });
-  const json = (await resp.json()) as { data: Organization };
+  const json = (await resp.json()) as { data: Organization[] };
   return json.data;
 };
 
@@ -29,5 +30,20 @@ export const getUserOrganizations = async (
     additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: Organization[] };
+  return json.data;
+};
+
+export const getOrganizationRoles = async (
+  token: string,
+  organizationId: string,
+): Promise<Organization[]> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const resp = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/roles/list`,
+    additionalHeaders: ssgToken,
+  });
+  const json = (await resp.json()) as { data: UserRole[] };
   return json.data;
 };
