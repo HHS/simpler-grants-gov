@@ -827,3 +827,29 @@ export const condenseFormSchemaProperties = (schema: object): object => {
 export const pointerToFieldName = (pointer: string): string => {
   return pointer.replace("$.", "").replace(/\./g, "--");
 };
+
+export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
+  return uiSchema.map((item) => {
+    if (item.type === "field") {
+      if (
+        item.widget &&
+        (item.widget === "AttachmentArray" || item.widget === "Attachment")
+      ) {
+        return {
+          ...item,
+          widget: "PrintAttachment",
+        };
+      }
+      return {
+        ...item,
+        widget: "Print",
+      };
+    } else if (item.type === "section") {
+      return {
+        ...item,
+        children: addPrintWidgetToFields(item.children),
+      };
+    }
+    return item;
+  });
+}

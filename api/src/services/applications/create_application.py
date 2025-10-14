@@ -7,15 +7,17 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import (
     ApplicationStatus,
     CompetitionOpenToApplicant,
+    Privilege,
     SubmissionIssue,
 )
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
-from src.db.models.user_models import ApplicationUser, ApplicationUserRole, OrganizationUser, User
+from src.db.models.user_models import ApplicationUser, ApplicationUserRole, User
 from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
@@ -43,27 +45,6 @@ def _assign_application_owner_role(
             "user_id": application_user.user_id,
         },
     )
-
-
-def _validate_organization_membership(
-    db_session: db.Session, organization: Organization, user: User
-) -> None:
-    """
-    Validate that the user is a member of the organization.
-    """
-    # Check if the user is a member of the organization
-    is_member = db_session.execute(
-        select(OrganizationUser)
-        .where(OrganizationUser.organization_id == organization.organization_id)
-        .where(OrganizationUser.user_id == user.user_id)
-    ).scalar_one_or_none()
-
-    if not is_member:
-        logger.info(
-            "User is not a member of the organization",
-            extra={"submission_issue": SubmissionIssue.NOT_A_MEMBER_OF_ORG},
-        )
-        raise_flask_error(403, "User is not a member of the organization")
 
 
 def _validate_organization_expiration(organization: Organization) -> None:
@@ -171,12 +152,6 @@ def create_application(
         )
         raise_flask_error(404, "Competition not found")
 
-    # Verify the competition is open
-    validate_competition_open(competition, ApplicationAction.START)
-
-    # Validate applicant type is allowed for this competition
-    _validate_applicant_type(competition, organization_id)
-
     # Validate organization if provided
     if organization_id is not None:
         # Fetch the organization with its sam_gov_entity relationship
@@ -196,9 +171,18 @@ def create_application(
             )
             raise_flask_error(404, "Organization not found")
 
-        # Validate user membership and organization status
-        _validate_organization_membership(db_session, organization, user)
+        # Check privileges
+        if not can_access(user, {Privilege.START_APPLICATION}, organization):
+            raise_flask_error(403, "Forbidden")
+
+        # Validate organization status
         _validate_organization_expiration(organization)
+
+    # Verify the competition is open
+    validate_competition_open(competition, ApplicationAction.START)
+
+    # Validate applicant type is allowed for this competition
+    _validate_applicant_type(competition, organization_id)
 
     # Get default application name if not provided
     if application_name is None:

@@ -12,7 +12,6 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 
-import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import ContentLayout from "src/components/ContentLayout";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
@@ -146,7 +145,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
 
   return (
     <div>
-      <BetaAlert />
       <div className="grid-container">
         <Breadcrumbs breadcrumbList={breadcrumbs} />
       </div>

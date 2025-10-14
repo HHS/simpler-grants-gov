@@ -8,6 +8,53 @@ export type Organization = {
   };
 };
 
+export type GatedResourceTypes = "application" | "organization" | "agency";
+
+export type UserPrivilegeDefinition = {
+  resourceId?: string;
+  resourceType: GatedResourceTypes;
+  privilege: string; // we can narrow this later
+};
+
+export type UserPrivilegesDefinition = {
+  resourceId?: string;
+  privileges: string[]; // we can narrow this later
+};
+
+export type UserRole = {
+  role_id: string;
+  role_name: string;
+  privileges: string[];
+};
+
+export type OrganizationPrivilegesResponse = {
+  organization: {
+    organization_id: string;
+  };
+  organization_user_roles: UserRole[];
+};
+
+export type ApplicationPrivilegesResponse = {
+  application: {
+    application_id: string;
+  };
+  application_user_roles: UserRole[];
+};
+
+export type AgencyPrivilegesResponse = {
+  agency: {
+    agency_id: string;
+  };
+  agency_user_roles: UserRole[];
+};
+
+export type UserPrivilegesResponse = {
+  user_id: string;
+  organization_users: OrganizationPrivilegesResponse[];
+  application_users: ApplicationPrivilegesResponse[];
+  agency_users: AgencyPrivilegesResponse[];
+};
+
 export type UserProfileValidationErrors = {
   firstName?: string[];
   lastName?: string[];
