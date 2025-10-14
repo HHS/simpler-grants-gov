@@ -571,8 +571,13 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "11. Signature",
         "name": "Signature",
+        "description": "Information requested through this form is authorized by title 31 U.S.C. section 1352. This disclosure of lobbying activities is a material representation of fact upon which reliance was placed by the tier above when the transaction was made or entered into. This disclosure is required pursuant to 31 U.S.C. 1352. This information will be reported to the Congress semi- annually and will be available for public inspection. Any person who fails to file the required disclosure shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure.",
         "children": [
             {"type": "null", "definition": "/properties/signature_block/properties/signature"},
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/prefix",
+            },
             {
                 "type": "field",
                 "definition": "/properties/signature_block/properties/name/properties/first_name",
@@ -587,11 +592,15 @@ FORM_UI_SCHEMA = [
             },
             {
                 "type": "field",
-                "definition": "/properties/signature_block/properties/name/properties/prefix",
+                "definition": "/properties/signature_block/properties/name/properties/suffix",
             },
             {
                 "type": "field",
-                "definition": "/properties/signature_block/properties/name/properties/suffix",
+                "definition": "/properties/signature_block/properties/title",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/telephone",
             },
             {"type": "null", "definition": "/properties/signature_block/properties/signed_date"},
         ],
