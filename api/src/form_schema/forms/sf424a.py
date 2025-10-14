@@ -319,6 +319,7 @@ FORM_UI_SCHEMA = [
         "name": "SectionB",
         "type": "section",
         "label": "Section B - Budget categories",
+        "description": "Enter funds required for each object class category for the selected program.",
         "children": [
             {
                 "type": "multiField",
@@ -335,6 +336,7 @@ FORM_UI_SCHEMA = [
         "name": "SectionC",
         "type": "section",
         "label": "Section C - Non-federal resources",
+        "description": "Enter resources provided by the applicant, state, or other sources (e.g., donors) for the selected program.",
         "children": [
             {
                 "type": "multiField",

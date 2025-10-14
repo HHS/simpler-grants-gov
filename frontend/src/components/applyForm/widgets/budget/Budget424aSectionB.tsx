@@ -10,8 +10,7 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import {
-  ACTIVITY_COLUMN_COUNT,
-  BUDGET_ACTIVITY_COLUMNS,
+  ACTIVITY_ITEMS,
   SECTION_B_ROW_I_KEY,
   SECTION_B_ROW_K_KEY,
   SECTION_B_ROWS,
@@ -41,7 +40,6 @@ function Budget424aSectionB<
 
   const rawValue: unknown = rootFormDataFromContext ?? value ?? {};
   const errors = (rawErrors as FormValidationWarning[]) || [];
-  const COLUMNS = BUDGET_ACTIVITY_COLUMNS;
 
   // Normalize incoming value:
   // multiField passes an object with activity_line_items + total_budget_categories
@@ -131,11 +129,6 @@ function Budget424aSectionB<
     );
   };
 
-  const activityColumnIndices: number[] = COLUMNS.slice(
-    0,
-    ACTIVITY_COLUMN_COUNT,
-  );
-
   return (
     <div key={id} id={id}>
       <Table
@@ -172,7 +165,7 @@ function Budget424aSectionB<
 
           <tr className="bg-base-lighter">
             {/* first 4 columns */}
-            {activityColumnIndices.map((columnIndex: number) => (
+            {ACTIVITY_ITEMS.map((columnIndex: number) => (
               <th
                 key={`col-${columnIndex}`}
                 className="bg-base-lightest text-center border-base-light border-x-1px"
@@ -209,7 +202,7 @@ function Budget424aSectionB<
             </th>
             <ActivityTitlesRow
               activityItems={activityItems}
-              columnIndices={activityColumnIndices}
+              columnIndices={ACTIVITY_ITEMS}
             />
             <td colSpan={2} className="border-bottom-0 border-top-0" />
           </tr>
@@ -231,7 +224,7 @@ function Budget424aSectionB<
               </th>
 
               {/* Four activity columns */}
-              {activityColumnIndices.map((columnIndex: number) => {
+              {ACTIVITY_ITEMS.map((columnIndex: number) => {
                 const extraPad =
                   row.key !== SECTION_B_ROW_I_KEY &&
                   row.key !== SECTION_B_ROW_K_KEY
@@ -290,7 +283,7 @@ function Budget424aSectionB<
             >
               7. Program income
             </th>
-            {activityColumnIndices.map((columnIndex) => (
+            {ACTIVITY_ITEMS.map((columnIndex) => (
               <td
                 key={`pi-${columnIndex}`}
                 className="padding-05 verticle-align-bottom"

@@ -51,3 +51,8 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly
   - vulnerability: GHSA-67mh-4wv8-2f99
+
+  # Last Check - October 14th
+  # Issue with zip64 in the zipfile module which we aren't using
+  # Fixed in latest Python version
+  - vulnerability: CVE-2025-8291
