@@ -730,6 +730,21 @@ six = ">=1.10"
 urllib3 = ">=1.25.3"
 
 [[package]]
+name = "elementpath"
+version = "4.8.0"
+description = "XPath 1.0/2.0/3.0/3.1 parsers and selectors for ElementTree and lxml"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "elementpath-4.8.0-py3-none-any.whl", hash = "sha256:5393191f84969bcf8033b05ec4593ef940e58622ea13cefe60ecefbbf09d58d9"},
+    {file = "elementpath-4.8.0.tar.gz", hash = "sha256:5822a2560d99e2633d95f78694c7ff9646adaa187db520da200a8e9479dc46ae"},
+]
+
+[package.extras]
+dev = ["Sphinx", "coverage", "flake8", "lxml", "lxml-stubs", "memory-profiler", "memray", "mypy", "tox", "xmlschema (>=3.3.2)"]
+
+[[package]]
 name = "eralchemy"
 version = "1.5.0"
 description = "Simple entity relation (ER) diagrams generation"
@@ -3555,6 +3570,26 @@ files = [
 ]
 
 [[package]]
+name = "xmlschema"
+version = "3.4.5"
+description = "An XML Schema validator and decoder"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "xmlschema-3.4.5-py3-none-any.whl", hash = "sha256:c91a2fca387dc4e8a2f2cb4a411ed23bef9da539968e5d858a3fe7f76a65464e"},
+    {file = "xmlschema-3.4.5.tar.gz", hash = "sha256:243244743f151ec859ec0bbf1368fa3f70e5f29e977b77f72e1c9b8f8ae670f6"},
+]
+
+[package.dependencies]
+elementpath = ">=4.4.0,<5.0.0"
+
+[package.extras]
+codegen = ["jinja2"]
+dev = ["coverage", "flake8", "lxml", "lxml-stubs", "memory_profiler", "mypy", "tox", "xmlschema[docs]"]
+docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
+
+[[package]]
 name = "xmltodict"
 version = "0.15.1"
 description = "Makes working with XML feel like you are working with JSON"
@@ -3569,4 +3604,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.13"
-content-hash = "0627698307b65727b3c8890e1677829d183f3abf8da27ef5a4231800283c13e1"
+content-hash = "97247a5210271b4cd23ed61d44776936a5ff355e62cc65a6da37d42428cf4004"

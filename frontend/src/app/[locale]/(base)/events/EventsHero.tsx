@@ -8,10 +8,7 @@ export default function EventsHero() {
   const t = useTranslations("Events");
 
   return (
-    <div
-      data-testid="events-hero"
-      className="text-white bg-primary-darkest padding-top-4 tablet:padding-y-6"
-    >
+    <div className="text-white bg-primary-darkest padding-top-2 tablet:padding-y-6">
       <GridContainer>
         <Grid row gap>
           <Grid tablet={{ col: "fill" }}>
