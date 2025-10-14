@@ -15,8 +15,6 @@ from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationUserFactory,
-    ApplicationUserRoleFactory,
-    RoleFactory,
 )
 
 attachment_dir = Path(__file__).parent / "attachments"
@@ -147,24 +145,17 @@ def test_application_attachment_create_403_not_the_owner(
 ##########################################
 
 
-def test_application_attachment_get_200(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
-):
+def test_application_attachment_get_200(db_session, enable_factory_create, client, s3_config):
     file_contents = "this is text in my file"
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
-    application = ApplicationFactory.create()
-
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
     application_attachment = ApplicationAttachmentFactory.create(
         application=application, file_contents=file_contents
     )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -199,18 +190,18 @@ def test_application_attachment_get_404_application_not_found(
 
 
 def test_application_attachment_get_404_application_attachment_not_found(
-    db_session, enable_factory_create, client, user, user_auth_token
+    db_session,
+    enable_factory_create,
+    client,
+    user,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
+
     application_attachment_id = uuid.uuid4()
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
@@ -269,17 +260,12 @@ def test_application_attachment_update_200(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
     file_name,
     expected_mimetype,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
+
     # Create an existing attachment first
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt"
@@ -287,7 +273,7 @@ def test_application_attachment_update_200(
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / file_name).open("rb")},
     )
 
@@ -439,16 +425,11 @@ def test_application_attachment_update_deletes_old_file_different_name(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
 ):
     """Test that updating an attachment with different filename deletes the old file"""
-    application = ApplicationFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
+
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt", file_contents="old file contents"
@@ -461,7 +442,7 @@ def test_application_attachment_update_deletes_old_file_different_name(
     # Update with new file
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
     )
 

@@ -57,7 +57,7 @@ def create_user_in_app(
 
     # Create role with specified privileges (only if privileges provided)
     if privileges:
-        role = RoleFactory.create(privileges=privileges, is_app_role=True)
+        role = RoleFactory.create(privileges=privileges, is_application_role=True)
 
     # Create application-user relationship
     app_user = ApplicationUserFactory.create(user=user, application=application)

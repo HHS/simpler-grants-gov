@@ -17,6 +17,7 @@ from src.db.models.user_models import ApplicationUser
 from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
+from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
@@ -1129,21 +1130,18 @@ def test_application_form_get_application_not_found(
 
 
 def test_application_form_get_form_not_found(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
-    application = ApplicationFactory.create()
-
     # Associate user with application
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
     non_existent_app_form_id = str(uuid.uuid4())
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{non_existent_app_form_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
@@ -1300,9 +1298,12 @@ def test_application_get_success(client, enable_factory_create, db_session, user
 
 
 def test_application_get_with_attachments(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
-    application = ApplicationFactory.create()
+    # Associate user with application
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
     attachment1 = ApplicationAttachmentFactory.create(
         application=application, file_name="my_file_a.txt"
     )
@@ -1310,14 +1311,9 @@ def test_application_get_with_attachments(
         application=application, file_name="my_file_b.pdf"
     )
 
-    # Associate user with application
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -2274,19 +2270,16 @@ def test_application_submit_forbidden_if_not_associated(
 
 
 def test_application_get_success_when_associated(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application get succeeds when user is associated with the application"""
-    application = ApplicationFactory.create(with_forms=True)
-
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
-    )
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -2403,8 +2396,6 @@ def test_application_get_includes_application_name_and_users(
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, application_name="Test Application Name"
     )
-
-    # Associate user with application
     ApplicationUserRoleFactory.create(
         application_user=ApplicationUserFactory.create(user=user, application=application),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
