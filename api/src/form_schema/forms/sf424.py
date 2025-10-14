@@ -737,7 +737,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "organizational_unit",
-        "label": "Organizational Unit",
+        "label": "8e. Organizational Unit",
         "children": [
             {
                 "type": "field",
@@ -752,7 +752,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "contact_person",
-        "label": "Name and contact information of person to be contacted on matters involving this application",
+        "label": "8f. Name and contact information of person to be contacted on matters involving this application",
         "children": [
             {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
             {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
