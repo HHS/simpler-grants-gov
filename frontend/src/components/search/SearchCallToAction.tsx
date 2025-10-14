@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
 import React from "react";
+import { Grid } from "@trussworks/react-uswds";
 
 import { ReturnToGrantsNotification } from "src/components/ReturnToGrantsNotification";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 const SearchCallToAction = () => {
   const t = useTranslations("Search");
