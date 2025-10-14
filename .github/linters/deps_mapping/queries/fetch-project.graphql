@@ -1,0 +1,52 @@
+query ($org: String!, $project: Int!, $batch: Int!, $cursor: String) {
+  organization(login: $org) {
+    projectV2(number: $project) {
+      items(first: $batch, after: $cursor) {
+        nodes {
+          status: fieldValueByName(name: "Status") {
+            ... on ProjectV2ItemFieldSingleSelectValue {
+              name
+            }
+          }
+          pillar: fieldValueByName(name: "Pillar") {
+            ... on ProjectV2ItemFieldSingleSelectValue {
+              name
+            }
+          }
+          content {
+            ... on Issue {
+              ...IssueDetails
+              ...BlockedItems
+              issueType {
+                name
+              }
+              body
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+}
+
+# Issue details
+fragment IssueDetails on Issue {
+  repository {
+    nameWithOwner
+  }
+  number
+  title
+}
+
+# Blocked items
+fragment BlockedItems on Issue {
+  blocking(first: $batch) {
+    nodes {
+      ...IssueDetails
+    }
+  }
+}
