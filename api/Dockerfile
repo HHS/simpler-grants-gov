@@ -5,7 +5,6 @@ ARG PY_MM=3.13
 ARG POETRY_VERSION=2.2.1
 ARG PIP_VERSION=25.2
 
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN set -euo pipefail; \
@@ -109,7 +108,6 @@ RUN mkdir -p /runtime/system-libs && \
         [ -f "$binary" ] && ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/system-libs/ 2>/dev/null || true; \
     done
 
-
 #==============================================
 # Stage 2: Minimal base FROM SCRATCH
 #==============================================
@@ -193,7 +191,6 @@ RUN poetry build --format wheel && poetry run pip install --no-cache-dir 'dist/s
 # Prune pip and build tools from the in-project venv to keep the final image clean
 RUN /api/.venv/bin/python -c "import site,shutil,glob,os; sp=(site.getsitepackages()[0] if hasattr(site,'getsitepackages') else site.getusersitepackages()); patterns=['pip*','setuptools*','wheel*','_distutils_hack']; [ (shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else (os.remove(p) if os.path.exists(p) else None)) for pat in patterns for p in glob.glob(os.path.join(sp, pat)) ]; bindir=os.path.join(os.path.dirname(os.path.dirname(sp)),'bin'); [ os.remove(p) for p in glob.glob(os.path.join(bindir,'pip*')) if os.path.exists(p) ]; [ os.remove(p) for p in glob.glob(os.path.join(bindir,'easy_install*')) if os.path.exists(p) ]"
 
-
 #==============================================
 # Stage 3: Dev image
 #==============================================
@@ -215,13 +212,9 @@ COPY --from=builder /usr/lib64 /usr/lib64
 COPY --from=builder /usr/share/graphviz /usr/share/graphviz
 
 # Pango / GDK-Pixbuf / Fontconfig runtime data & helpers required by Graphviz plugins (optional in dev)
-# These paths may not exist depending on the repository snapshot; the dev image already copies /usr/lib64 and /lib64
-# which should include most transitive dependencies. We avoid hard COPYs that can fail the build.
 COPY --from=builder /etc/fonts /etc/fonts
 COPY --from=builder /usr/share/fonts /usr/share/fonts
 
-# Also copy core system lib directories and dynamic linker configs to satisfy transitive deps
-# (kept only in dev to avoid bloating release)
 COPY --from=builder /lib64 /lib64
 COPY --from=builder /lib /lib
 COPY --from=builder /etc/ld.so.cache /etc/ld.so.cache
@@ -265,52 +258,18 @@ CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "
 #==============================================
 # Stage 5: Minimal release runtime
 #==============================================
-FROM scratch AS release
+FROM base AS release
 ARG RUN_USER
-ARG RUN_UID
 
-# Copy dynamic loader and runtime libs collected in builder
-COPY --from=builder /runtime/python-libs /lib
-COPY --from=builder /runtime/python-libs /lib64
-# Also copy minimal system libs needed by coreutils we include below
-COPY --from=builder /runtime/system-libs /usr/lib64
-
-# Minimal etc files with created user
-COPY --from=base /etc/passwd /etc/passwd
-COPY --from=base /etc/group /etc/group
-# Copy CA certs for TLS verification
-COPY --from=base /etc/ssl/certs /etc/ssl/certs
-COPY --from=base /etc/pki/ca-trust /etc/pki/ca-trust
-
-COPY --from=base /usr/local /usr/local
-
-COPY --from=base /tmp /tmp
-COPY --from=base /var/tmp /var/tmp
-COPY --from=base /usr/tmp /usr/tmp
-
-# Include minimal coreutils used by tests and diagnostics
-COPY --from=builder /usr/bin/ls /usr/bin/ls
-COPY --from=builder /usr/bin/cat /usr/bin/cat
-COPY --from=builder /usr/bin/sh /bin/sh
-COPY --from=builder /usr/bin/curl /usr/bin/curl
-COPY --from=builder /usr/bin/wget /usr/bin/wget
-
-# Working directory and app
+# Working directory and runtime environment
 WORKDIR /api
-# Copy entire application directory from base to ensure all runtime files are present
-COPY --from=base /api /api
-# Ensure tmp dir ownership for runtime user remains correct
-COPY --from=base --chown=${RUN_USER}:${RUN_USER} /api/tmp /api/tmp
-
-
-# Runtime env
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
     TMPDIR="/dev/shm" \
     SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
     SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem"
 
-# Run as the non-root user created in release
+# Run as the non-root user created in base
 USER ${RUN_USER}
 
 CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]
