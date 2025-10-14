@@ -24,7 +24,6 @@ import time
 import uuid
 
 import flask
-import newrelic.agent
 import newrelic.api.time_trace
 
 from src.util.deploy_metadata import get_deploy_metadata_config

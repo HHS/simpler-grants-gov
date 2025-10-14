@@ -20,6 +20,20 @@ resource "aws_api_gateway_rest_api" "api" {
       #     }
       #   }
       # },
+      # Will need to have endpoints with no auth for the following
+      # GET /robots.txt
+      # GET /.well-known/pki-validation/{proxy}
+      # POST /<service_name>/services/v2/<service_port_name>
+      "/" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
       "/{proxy+}" : {
         "x-amazon-apigateway-any-method" : {
           "parameters" : [

@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Any
 
 from pydantic import ValidationError
@@ -6,6 +7,8 @@ from pydantic import ValidationError
 import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
+from src.legacy_soap_api.grantors import schemas as grantors_schemas
+from src.legacy_soap_api.grantors.services import get_application_zip_response
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
@@ -19,6 +22,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
 )
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPPayload,
+    build_mtom_xml_from_dict,
     build_xml_from_dict,
     get_envelope_dict,
     get_soap_operation_dict,
@@ -221,4 +225,51 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/grantor-system-to-system/web-services
     """
 
-    pass
+    def GetApplicationZipRequest(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
+        return get_application_zip_response(
+            db_session=self.db_session,
+            get_application_zip_request=grantors_schemas.GetApplicationZipRequest(
+                **self.get_soap_request_dict()
+            ),
+        )
+
+    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
+        if not self.operation_config.is_mtom:
+            return super().get_simpler_soap_response(proxy_response)
+        # MTOM message is assembled here
+        # 1. --uuid: {boundary_uuid}\n
+        # 2. headers:
+        #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+        #    "Content-Transfer-Encoding: binary\n"
+        #    "Content-Id: <root.message@cxf.apache.org>\n\n"
+        # 3. MTOM xml body
+        # 4. --uuid: {boundary_uuid}
+        # 5. the file bytes from the file being attached
+        simpler_response_soap_dict = self.get_soap_response_dict()
+        log_local(
+            msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
+        )
+        simpler_response_xml = build_mtom_xml_from_dict(
+            self.operation_config.namespaces,
+            simpler_response_soap_dict,
+            self.operation_config.response_operation_name,
+        ).decode()
+        boundary_uuid = str(uuid.uuid4())
+        update_headers = {
+            "MIME-Version": "1.0",
+            "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+        }
+        boundary = "--uuid:" + boundary_uuid + "\n"
+        mime_message = (
+            f"{boundary}"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+            "Content-Transfer-Encoding: binary\n"
+            "Content-Id: <root.message@cxf.apache.org>\n\n"
+            f"{simpler_response_xml}\n"
+            f"{boundary}"
+        ).encode("utf-8")
+        use_simpler_response = False
+        return (
+            get_soap_response(data=mime_message, headers=update_headers),
+            use_simpler_response,
+        )

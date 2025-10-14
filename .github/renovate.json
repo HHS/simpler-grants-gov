@@ -136,7 +136,9 @@
       "enabled": false,
       "matchFileNames": [
         "analytics/pyproject.toml",
-        "api/pyproject.toml"
+        "api/pyproject.toml",
+        "api/Dockerfile",
+        "analytics/Dockerfile"
       ],
       "matchPackagePatterns": ["python"]
     }

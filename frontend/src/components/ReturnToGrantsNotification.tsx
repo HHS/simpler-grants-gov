@@ -9,11 +9,7 @@ import { useSearchParams } from "next/navigation";
 export function ReturnToGrantsNotification() {
   const t = useTranslations("returnToGrants");
   const searchParams = useSearchParams();
-  const GrantsLink = (
-    <div className="display-flex flex-1 tablet:text-right tablet:margin-bottom-0 margin-bottom-3 tablet:padding-top-3 tablet:flex-justify-end">
-      <a href={environment.LEGACY_HOST}>{t("message")}</a>
-    </div>
-  );
+  const GrantsLink = <a href={environment.LEGACY_HOST}>{t("message")}</a>;
   if (searchParams.get("utm_source") === "Grants.gov") {
     SessionStorage.setItem("showLegacySearchReturnNotification", "true");
     return GrantsLink;

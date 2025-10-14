@@ -9,7 +9,7 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
@@ -82,7 +82,7 @@ function normalizeSectionCValue(rawValue: unknown): NormalizedC {
     }
 
     const items: ActivityItem[] = [];
-    for (const index of BUDGET_ACTIVITY_COLUMNS) {
+    for (const index of ACTIVITY_ITEMS) {
       items.push(pickActivityItem(rawValue[String(index)]));
     }
 
@@ -133,8 +133,6 @@ function Budget424aSectionC<
   const errors = (rawErrors as FormValidationWarning[]) || [];
 
   const { items: activityItems, totals } = normalizeSectionCValue(rawValue);
-
-  const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
   function getErrorMessagesForField(fieldId: string): string[] {
     return getBudgetErrors({ errors, id: fieldId, section: "C" });
@@ -286,7 +284,7 @@ function Budget424aSectionC<
 
         <tbody>
           {/* Rows 1-4: one per activity → numbered 8–11 per SF-424A */}
-          {ROWS.map((rowIndex) => (
+          {ACTIVITY_ITEMS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
               <th
                 scope="row"
