@@ -59,7 +59,8 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         # * Then exactly 2 digits - if there was a decimal
         "pattern": r"^(-)?\d*([.]\d{2})?$",
         # Limit the max amount based on the length (11-digits, allows up to 99 billion)
-        "maxLength": 14, # TODO - should we add a min length, "" is valid which might be an issue
+        "minLength": 1,
+        "maxLength": 14,
     },
     "phone_number": {
         "type": "string",
@@ -70,6 +71,5 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
 
 
 COMMON_SHARED_V1 = SharedSchema(
-    schema_name="common_shared_v1",
-    json_schema=COMMON_SHARED_JSON_SCHEMA_V1
+    schema_name="common_shared_v1", json_schema=COMMON_SHARED_JSON_SCHEMA_V1
 )

@@ -38,6 +38,10 @@ EXAMPLE_SHARED_JSON_SCHEMA_V1 = {
 }
 
 EXAMPLE_SHARED_V1 = SharedSchema(
-    schema_name=""
+    schema_name="example_shared_v1",
+    json_schema=EXAMPLE_SHARED_JSON_SCHEMA_V1
 )
 ```
+
+Then make sure to add this schema to `get_shared_schemas` in
+the `__init__.py` file in this folder.

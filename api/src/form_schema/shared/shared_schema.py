@@ -1,5 +1,6 @@
-from typing import Any
 import dataclasses
+from typing import Any
+
 import src.util.file_util as file_util
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -7,7 +8,9 @@ from src.util.env_config import PydanticBaseEnvConfig
 class SharedSchemaConfig(PydanticBaseEnvConfig):
     shared_schema_base_uri: str = "https://files.simpler.grants.gov/schemas"
 
+
 shared_schema_config: SharedSchemaConfig | None = None
+
 
 def get_shared_schema_config() -> SharedSchemaConfig:
     global shared_schema_config
@@ -15,6 +18,7 @@ def get_shared_schema_config() -> SharedSchemaConfig:
         shared_schema_config = SharedSchemaConfig()
 
     return shared_schema_config
+
 
 @dataclasses.dataclass
 class SharedSchema:
@@ -24,7 +28,7 @@ class SharedSchema:
 
     schema_uri: str = dataclasses.field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Setup the schema URI
         config = get_shared_schema_config()
         self.schema_uri = file_util.join(config.shared_schema_base_uri, self.schema_name + ".json")
@@ -32,32 +36,9 @@ class SharedSchema:
     def field_ref(self, field: str) -> str:
         """Build the field ref for a json schema to refer to a field in this shared schema.
 
-           For example, if you wanted to refer to field "example_field" in this shared schema,
-           this would return something like:
+        For example, if you wanted to refer to field "example_field" in this shared schema,
+        this would return something like:
 
-                https://files.simpler.grants.gov/schemas/my-example-schema.json#/example_field
+             https://files.simpler.grants.gov/schemas/my-example-schema.json#/example_field
         """
         return f"{self.schema_uri}#/{field}"
-
-# TODO
-"""
-
-Assuming
-* in DB -> Resolved
-* in code -> Not Resolved
-* in s3 -> Not Resolved (is this needed in the near-term?)
-
-What does that mean?
-* Frontend AND API never need to do resolution
- * Can organize however we want
-* We should make our unit tests test against the resolved value NOT the base (so it's testing what we actually use)
-
-
-What changes would we need to make?
-* Switch update-form/list-form and local seed script to use resolved schemas
-  * Also update form tests to test schemas against resolved ones
-* Update all schemas to reference shared schema
-  * Probably do this across more than one ticket
-  * Needs to change tests to resolve the schema
-
-"""

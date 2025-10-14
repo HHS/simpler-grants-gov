@@ -81,49 +81,49 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
     },
     # An address containing the core address fields
     "simple_address": {
-            "type": "object",
-            "title": "Address",
-            "description": "Enter an address.",
-            "required": [
-                "street1",
-                "city",
-            ],
-            "properties": {
-                "street1": {
-                    "type": "string",
-                    "title": "Street 1",
-                    "description": "Enter the first line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "street2": {
-                    "type": "string",
-                    "title": "Street 2",
-                    "description": "Enter the second line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "city": {
-                    "type": "string",
-                    "title": "City",
-                    "description": "Enter the city.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "state": {
-                    "allOf": [{"$ref": "#/state_code"}],
-                    "title": "State",
-                    "description": "Enter the state.",
-                },
-                "zip_code": {
-                    "type": "string",
-                    "title": "Zip / Postal Code",
-                    "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
-                    "minLength": 1,
-                    "maxLength": 30,
-                },
+        "type": "object",
+        "title": "Address",
+        "description": "Enter an address.",
+        "required": [
+            "street1",
+            "city",
+        ],
+        "properties": {
+            "street1": {
+                "type": "string",
+                "title": "Street 1",
+                "description": "Enter the first line of the Street Address.",
+                "minLength": 1,
+                "maxLength": 55,
+            },
+            "street2": {
+                "type": "string",
+                "title": "Street 2",
+                "description": "Enter the second line of the Street Address.",
+                "minLength": 1,
+                "maxLength": 55,
+            },
+            "city": {
+                "type": "string",
+                "title": "City",
+                "description": "Enter the city.",
+                "minLength": 1,
+                "maxLength": 35,
+            },
+            "state": {
+                "allOf": [{"$ref": "#/state_code"}],
+                "title": "State",
+                "description": "Enter the state.",
+            },
+            "zip_code": {
+                "type": "string",
+                "title": "Zip / Postal Code",
+                "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
+                "minLength": 1,
+                "maxLength": 30,
             },
         },
+    },
     "state_code": {
         "type": "string",
         "title": "State",
@@ -139,6 +139,5 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
 }
 
 ADDRESS_SHARED_V1 = SharedSchema(
-    schema_name="address_shared_v1",
-    json_schema=ADDRESS_SHARED_JSON_SCHEMA_V1
+    schema_name="address_shared_v1", json_schema=ADDRESS_SHARED_JSON_SCHEMA_V1
 )
