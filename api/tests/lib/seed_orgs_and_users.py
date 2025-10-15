@@ -16,9 +16,10 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import OrganizationUser, Role, User
+from src.db.models.user_models import Role, User, OrganizationUserRole
 from src.services.applications.application_validation import validate_application_form, ApplicationAction
 from src.util import file_util
+from tests.lib.seed_data_utils import CompetitionContainer
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +50,15 @@ ORG1 = factories.OrganizationFactory.build(
     sam_gov_entity=SAM_GOV_ENTITY1,
 )
 
+###############################
+# Simple organization #2
+###############################
+
 SAM_GOV_ENTITY2 = factories.SamGovEntityFactory.build(
     sam_gov_entity_id=uuid.UUID("d5bcaa08-ff13-4bb9-a1af-7cfeef56c720"),
     legal_business_name="Fred's Fabric Hut",
     uei="FAKEUEI22222",
 )
-
-###############################
-# Simple organization #2
-###############################
 
 ORG2 = factories.OrganizationFactory.build(
     organization_id=uuid.UUID("50a7692e-743b-4c7b-bdb0-46ae087db33c"),
@@ -69,14 +70,14 @@ ORG2 = factories.OrganizationFactory.build(
 ###############################
 
 SAM_GOV_ENTITY3 = factories.SamGovEntityFactory.build(
-    sam_gov_entity_id=uuid.UUID("a4758f41-2854-4325-9269-2c2b0cf4ccb5"),
+    sam_gov_entity_id=uuid.UUID("6995737d-80f2-4de4-a035-45b6219a6bd6"),
     # We want a really long name for testing
     legal_business_name="Michelangelo's Moderately Malevolent Moving Marketplace",
     uei="FAKEUEI33333",
 )
 
 ORG3 = factories.OrganizationFactory.build(
-    organization_id=uuid.UUID("2dae77a8-3e18-45e8-8d7d-0b662bc8b4b6"),
+    organization_id=uuid.UUID("71507bdc-fa0e-44a7-b17c-d79d15320476"),
     sam_gov_entity=SAM_GOV_ENTITY3,
 )
 
@@ -139,13 +140,15 @@ class UserBuilder:
             org_user = factories.OrganizationUserFactory.build(
                 user=self.user, organization=organization
             )
+            self.db_session.add(org_user)
 
-        # Add any roles - note that this won't remove roles
+        organization_user_roles = []
         for role in roles:
-            org_user_role = factories.OrganizationUserRoleFactory.build(
-                organization_user=org_user, role=role
-            )
-            self.db_session.merge(org_user_role, load=True)
+            organization_user_roles.append(OrganizationUserRole(
+                organization_user=org_user, role_id=role.role_id
+            ))
+
+        org_user.organization_user_roles = organization_user_roles
 
         return self
 
@@ -156,25 +159,25 @@ class UserBuilder:
         return self.user
 
 
-def _build_organizations_and_users(db_session: db.Session) -> None:
+def _build_organizations_and_users(db_session: db.Session, competition_container: CompetitionContainer) -> None:
     logger.info("Creating/updating organizations and users")
     ############################################
     # Organization 1
     ############################################
     db_session.merge(SAM_GOV_ENTITY1, load=True)
-    db_session.merge(ORG1, load=True)
+    org1 = db_session.merge(ORG1, load=True)
 
     ############################################
     # Organization 2
     ############################################
     db_session.merge(SAM_GOV_ENTITY2, load=True)
-    db_session.merge(ORG2, load=True)
+    org2 = db_session.merge(ORG2, load=True)
 
     ############################################
     # Organization 3
     ############################################
     db_session.merge(SAM_GOV_ENTITY3, load=True)
-    db_session.merge(ORG3, load=True)
+    org3 = db_session.merge(ORG3, load=True)
 
     ##############################################################
     # Users
@@ -207,7 +210,7 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
         )
         .with_oauth_login("one_org_user")
         .with_api_key("one_org_user_key")
-        .with_organization(ORG1, roles=[ORG_ADMIN])
+        .with_organization(org1, roles=[ORG_ADMIN])
         .build()
     )
 
@@ -219,9 +222,9 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     UserBuilder(
         uuid.UUID("0f4ae584-c310-472d-9d6c-57201b5f84cc"), db_session, "user with two orgs"
     ).with_oauth_login("two_org_user").with_api_key("two_orgs_user_key").with_organization(
-        ORG1, roles=[ORG_ADMIN]
+        org1, roles=[ORG_ADMIN]
     ).with_organization(
-        ORG2, roles=[ORG_ADMIN]
+        org2, roles=[ORG_ADMIN]
     ).build()
 
     user_scenarios.append("two_org_user - Organization admin (both organizations)")
@@ -232,7 +235,7 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
 
     UserBuilder(
         uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"), db_session, "user as org member"
-    ).with_oauth_login("org_member_user").with_api_key("org_member_user_key").with_organization(ORG1, roles=[ORG_MEMBER]).build()
+    ).with_oauth_login("org_member_user").with_api_key("org_member_user_key").with_organization(org1, roles=[ORG_MEMBER]).build()
 
 
     user_scenarios.append("org_member_user - Organization member (Sally's Soup Emporium)")
@@ -245,10 +248,28 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
         uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"),
         db_session,
         "user with mixed org roles",
-    ).with_oauth_login("mixed_roles_user").with_api_key("mixed_roles_user_key").with_organization(ORG1, roles=[ORG_ADMIN]).with_organization(ORG2, roles=[ORG_MEMBER]).build()
+    ).with_oauth_login("mixed_roles_user").with_api_key("mixed_roles_user_key").with_organization(org1, roles=[ORG_ADMIN]).with_organization(org2, roles=[ORG_MEMBER]).build()
 
 
     user_scenarios.append("mixed_roles_user - Admin of ORG1, Member of ORG2")
+
+    ###############################
+    # User with many applications across orgs
+    ###############################
+
+    (UserBuilder(
+        uuid.UUID("5b4807c5-57d4-4867-b722-1658b47c59ba"),
+        db_session,
+        "user with many different applications"
+    ).with_oauth_login("many_app_user")
+     .with_api_key("many_app_user_key")
+     .with_organization(org1, roles=[ORG_ADMIN])
+     .with_organization(org2, roles=[ORG_ADMIN])
+     .with_organization(org3, roles=[ORG_ADMIN])
+     .build()
+    )
+
+    _add_application(competition_container.competition_with_all_forms, org3)
 
     # Log summary of all created user scenarios
     logger.info("=== USER SCENARIOS SUMMARY ===")
@@ -334,6 +355,7 @@ def _add_application(competition: Competition, organization: Organization | None
         app_params["organization"] = organization
 
     application = factories.ApplicationFactory.create(**app_params)
+    print(application.application_id)
 
     # This bit is mostly copied from the start application endpoint
     # and at least sets up the application forms with prepopulation run
