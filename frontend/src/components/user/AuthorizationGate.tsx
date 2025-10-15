@@ -1,12 +1,18 @@
 "use server";
 
 import { isEmpty } from "lodash";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
 import { getSession } from "src/services/auth/session";
-import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
+import {
+  checkUserPrivilege,
+  getUserPrivileges,
+} from "src/services/fetch/fetchers/userFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { UserPrivilegeDefinition } from "src/types/userTypes";
-import { checkPrivileges } from "src/utils/authUtils";
+import {
+  UserPrivilegeDefinition,
+  UserPrivilegeResult,
+} from "src/types/userTypes";
 
 import {
   cloneElement,
@@ -25,34 +31,71 @@ type FetchedResource = {
   error?: string;
 };
 
+type FetchedResourceMap = {
+  [key: string]: FetchedResource;
+};
+
 type AuthorizedData = {
-  fetchedResources: { [key: string]: FetchedResource };
+  fetchedResources: FetchedResourceMap;
   requiredPermissions: {
     [key: string]: boolean;
   };
 };
 
-const resolveAndFormatResources = (
-  resourcePromises: Promise<unknown>[],
-): Promise<FetchedResource>[] => {
-  return resourcePromises
-    .map((resourcePromise) => {
-      return resourcePromise.then((resourceData) => {
-        return {
-          data: resourceData,
-          statusCode: 200,
-        };
-      });
-    })
-    .catch((e) => {
-      return {
-        error: e,
-        statusCode: e.status,
-      };
-    });
+type ResourcePromiseDefinitions = {
+  [resourceName: string]: Promise<unknown>;
 };
 
-const checkRequiredPrivileges = () => {};
+// will need to make sure any resource promises throw errors that include a status code...
+const resolveAndFormatResources = (
+  resourcePromises: ResourcePromiseDefinitions,
+): Promise<FetchedResourceMap>[] => {
+  const fetchResourcePromises = Object.entries(resourcePromises).map(
+    ([resourceName, resourcePromise]) => {
+      return resourcePromise
+        .then((resourceData) => {
+          return {
+            [resourceName]: {
+              data: resourceData,
+              statusCode: 200,
+            } as FetchedResource,
+          };
+        })
+        .catch((e: Error) => {
+          return {
+            [resourceName]: {
+              error: e.message,
+              statusCode: 200,
+            } as FetchedResource,
+          };
+        });
+    },
+  );
+  return fetchResourcePromises;
+};
+
+const checkRequiredPrivileges = async (
+  token: string,
+  userId: string,
+  privileges: UserPrivilegeDefinition[],
+): Promise<UserPrivilegeResult[]> => {
+  const privilegeCheckResults = await Promise.all(
+    privileges.map((privilege) => {
+      // const key = `${privilege.resourceType}_${privilege.resourceId || "0"}_${privilege.privilege}`;
+      return checkUserPrivilege(token, userId, privilege)
+        .then(() => {
+          return { ...privilege, authorized: true };
+        })
+        .catch((e: Error) => {
+          if (parseErrorStatus(e) === 403) {
+            return { ...privilege, authorized: false };
+          }
+          throw e;
+        });
+    }),
+  );
+  return privilegeCheckResults;
+};
 
 // requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
 type AuthorizationGateProps = {
@@ -62,14 +105,14 @@ type AuthorizationGateProps = {
 } & (
   | {
       requiredPrivileges: UserPrivilegeDefinition[];
-      resourcePromises?: { [resourceName: string]: Promise<unknown> };
+      resourcePromises?: ResourcePromiseDefinitions;
     }
   | {
-      resourcePromises: { [resourceName: string]: Promise<unknown> };
+      resourcePromises: ResourcePromiseDefinitions;
       requiredPrivileges?: UserPrivilegeDefinition[];
     }
   | {
-      resourcePromises: { [resourceName: string]: Promise<unknown> };
+      resourcePromises: ResourcePromiseDefinitions;
       requiredPrivileges: UserPrivilegeDefinition[];
     }
 );
@@ -84,7 +127,7 @@ export async function AuthorizationGate({
   requiredPrivileges,
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
-  let userPrivileges = [];
+  let userPrivileges: UserPrivilegeResult[] = [];
   let allResources = {};
 
   const session = await getSession();
@@ -141,7 +184,7 @@ export async function AuthorizationGate({
     const childrenWithResources = children
       ? cloneElement(
           children as ReactElement<
-            { authorziedData?: AuthorizedData },
+            { authorizedData?: AuthorizedData },
             string | JSXElementConstructor<unknown>
           >,
           { authorizedData },
