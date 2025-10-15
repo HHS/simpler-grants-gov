@@ -189,14 +189,14 @@ FORM_JSON_SCHEMA = {
                 },
                 "title": {
                     "type": "string",
-                    "title": "Signature Title",
+                    "title": "Title",
                     "description": "Enter the title of the Certifying Official.",
                     "minLength": 1,
                     "maxLength": 45,
                 },
                 "telephone": {
                     "type": "string",
-                    "title": "Signature Telephone Number",
+                    "title": "Telephone No.",
                     "description": "Enter the telephone number of the certifying official.",
                     "minLength": 1,
                     "maxLength": 25,
