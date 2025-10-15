@@ -1,18 +1,24 @@
 import logging
 import uuid
+import zipfile
+from typing import Self
 
 from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import OpportunityStatus
+from src.constants.lookup_constants import OpportunityStatus, ApplicationStatus
 from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
+from src.db.models.competition_models import Competition, Application, ApplicationSubmission
+from src.db.models.entity_models import Organization
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunitySummary,
 )
 from src.db.models.user_models import OrganizationUser, Role, User
+from src.services.applications.application_validation import validate_application_form, ApplicationAction
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -49,196 +55,145 @@ SAM_GOV_ENTITY2 = factories.SamGovEntityFactory.build(
     uei="FAKEUEI22222",
 )
 
+###############################
+# Simple organization #2
+###############################
+
 ORG2 = factories.OrganizationFactory.build(
     organization_id=uuid.UUID("50a7692e-743b-4c7b-bdb0-46ae087db33c"),
     sam_gov_entity=SAM_GOV_ENTITY2,
 )
 
 ###############################
-# Simple organization #2
+# Simple organization #3
 ###############################
 
-#############################################################
-# User Setup
-#############################################################
-
-###############################
-# User without organizations
-###############################
-USER_NO_ORGS = factories.UserFactory.build(
-    user_id=uuid.UUID("a3f77afe-c293-414b-a2c0-53c1be5f2936")
+SAM_GOV_ENTITY3 = factories.SamGovEntityFactory.build(
+    sam_gov_entity_id=uuid.UUID("a4758f41-2854-4325-9269-2c2b0cf4ccb5"),
+    # We want a really long name for testing
+    legal_business_name="Michelangelo's Moderately Malevolent Moving Marketplace",
+    uei="FAKEUEI33333",
 )
 
-LINK_USER_NO_ORGS = factories.LinkExternalUserFactory.build(
-    link_external_user_id=uuid.UUID("786218f1-433e-4f30-b14b-ab9c1d170ca3"),
-    external_user_id="no_org_user",  # THIS IS WHAT WE USE TO LOGIN
-    user=USER_NO_ORGS,
-)
-
-API_KEY_USER_NO_ORGS = factories.UserApiKeyFactory.build(
-    api_key_id=uuid.UUID("daff1e8b-fbdd-486d-a9bc-69ff8df10011"),
-    key_id="no_org_user_key",
-    user=USER_NO_ORGS,
-)
-
-###############################
-# User with a single organization
-###############################
-USER_ONE_ORG = factories.UserFactory.build(
-    user_id=uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63")
-)
-
-LINK_USER_ONE_ORGS = factories.LinkExternalUserFactory.build(
-    link_external_user_id=uuid.UUID("357cdff0-77a5-4e95-8de0-98f5e7e98bda"),
-    external_user_id="one_org_user",  # THIS IS WHAT WE USE TO LOGIN
-    user=USER_ONE_ORG,
-)
-
-API_KEY_USER_ONE_ORG = factories.UserApiKeyFactory.build(
-    api_key_id=uuid.UUID("03db0a7e-d730-43c8-bf72-986fb7185acd"),
-    key_id="one_org_user_key",
-    user=USER_ONE_ORG,
-)
-
-USER_ONE_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
-    organization_user_id=uuid.UUID("3ab87af3-66d3-4a44-9eb1-7da598ffb05b"),
-    organization=ORG1,
-    user=USER_ONE_ORG,
-    is_organization_owner=True,  # Keep the flag for now, but don't use traits
+ORG3 = factories.OrganizationFactory.build(
+    organization_id=uuid.UUID("2dae77a8-3e18-45e8-8d7d-0b662bc8b4b6"),
+    sam_gov_entity=SAM_GOV_ENTITY3,
 )
 
 
-###############################
-# User with two organizations
-###############################
-USER_TWO_ORGS = factories.UserFactory.build(
-    user_id=uuid.UUID("0f4ae584-c310-472d-9d6c-57201b5f84cc")
-)
+class UserBuilder:
+    """Builder class for setting up a user for local development"""
 
-LINK_USER_TWO_ORGS = factories.LinkExternalUserFactory.build(
-    link_external_user_id=uuid.UUID("11aa7e08-e5ab-4c32-a25a-4583330297fa"),
-    external_user_id="two_org_user",  # THIS IS WHAT WE USE TO LOGIN
-    user=USER_TWO_ORGS,
-)
+    def __init__(self, user_id: uuid.UUID, db_session: db.Session, scenario_name: str) -> None:
+        self.user: User = db_session.merge(factories.UserFactory.build(user_id=user_id), load=True)
+        self.db_session = db_session
+        self.scenario_name = scenario_name
 
-API_KEY_USER_TWO_ORGS = factories.UserApiKeyFactory.build(
-    api_key_id=uuid.UUID("5a3ac8f2-1b0b-4cf9-a8a5-e52bea67939b"),
-    key_id="two_orgs_user_key",
-    user=USER_TWO_ORGS,
-)
+        self.link_external_id = None
+        self.api_key_id = None
 
-USER_TWO_ORG_ORG_USER1 = factories.OrganizationUserFactory.build(
-    organization_user_id=uuid.UUID("d0203570-863e-40b7-a2f9-b85020eb7e65"),
-    organization=ORG1,
-    user=USER_TWO_ORGS,
-    is_organization_owner=True,
-)
+    def with_oauth_login(self, external_user_id: str) -> Self:
+        """Add an oauth login record that you can use to login as a user
 
-USER_TWO_ORG_ORG_USER2 = factories.OrganizationUserFactory.build(
-    organization_user_id=uuid.UUID("ac0cf16c-3702-4d25-8a0f-0428dc68af3e"),
-    organization=ORG2,
-    user=USER_TWO_ORGS,
-    is_organization_owner=True,
-)
+        For example, if you passed in "my_example_user", you could
+        manually login to that user by typing "my_example_user" into
+        the Mock OAuth login page.
+        """
+        external_user = self.user.linked_login_gov_external_user
+        if external_user is None:
+            external_user = factories.LinkExternalUserFactory.build(user=self.user)
 
+        external_user.external_user_id = external_user_id
+        self.db_session.add(external_user)
 
-###############################
-# User as organization member (not admin)
-###############################
-USER_ORG_MEMBER = factories.UserFactory.build(
-    user_id=uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e")
-)
+        self.link_external_id = external_user_id
+        return self
 
-LINK_USER_ORG_MEMBER = factories.LinkExternalUserFactory.build(
-    link_external_user_id=uuid.UUID("c2d3e4f5-a6b7-4c8d-9e0f-1a2b3c4d5e6f"),
-    external_user_id="org_member_user",
-    user=USER_ORG_MEMBER,
-)
+    def with_api_key(self, key_id: str) -> Self:
+        # See if we previously setup this API key
+        user_api_key = None
+        for key in self.user.api_keys:
+            if key.key_id == key_id:
+                user_api_key = key
+                break
 
-API_KEY_USER_ORG_MEMBER = factories.UserApiKeyFactory.build(
-    api_key_id=uuid.UUID("d3e4f5a6-b7c8-4d9e-0f1a-2b3c4d5e6f7a"),
-    key_id="org_member_user_key",
-    user=USER_ORG_MEMBER,
-)
+        if user_api_key is None:
+            user_api_key = factories.UserApiKeyFactory.build(user=self.user)
 
-USER_ORG_MEMBER_ORG_USER = factories.OrganizationUserFactory.build(
-    organization_user_id=uuid.UUID("e4f5a6b7-c8d9-4e0f-1a2b-3c4d5e6f7a8b"),
-    organization=ORG1,
-    user=USER_ORG_MEMBER,
-    is_organization_owner=False,
-)
+        user_api_key.key_id = key_id
 
-###############################
-# User with mixed organization roles
-###############################
-USER_MIXED_ORG_ROLES = factories.UserFactory.build(
-    user_id=uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c")
-)
+        self.db_session.add(user_api_key)
 
-LINK_USER_MIXED_ORG_ROLES = factories.LinkExternalUserFactory.build(
-    link_external_user_id=uuid.UUID("a6b7c8d9-e0f1-4a2b-3c4d-5e6f7a8b9c0d"),
-    external_user_id="mixed_roles_user",
-    user=USER_MIXED_ORG_ROLES,
-)
+        self.api_key_id = key_id
+        return self
 
-API_KEY_USER_MIXED_ORG_ROLES = factories.UserApiKeyFactory.build(
-    api_key_id=uuid.UUID("b7c8d9e0-f1a2-4b3c-4d5e-6f7a8b9c0d1e"),
-    key_id="mixed_roles_user_key",
-    user=USER_MIXED_ORG_ROLES,
-)
+    def with_organization(self, organization: Organization, roles: list[Role]) -> Self:
+        # First see if this user is already a member of the organization provided
+        org_user = None
+        for organization_user in self.user.organization_users:
+            if organization_user.organization_id == organization.organization_id:
+                org_user = organization_user
+                break
 
-# Admin of ORG1, Member of ORG2
-USER_MIXED_ORG_ROLES_ORG_USER1 = factories.OrganizationUserFactory.build(
-    organization_user_id=uuid.UUID("c8d9e0f1-a2b3-4c4d-5e6f-7a8b9c0d1e2f"),
-    organization=ORG1,
-    user=USER_MIXED_ORG_ROLES,
-    is_organization_owner=True,
-)
+        if org_user is None:
+            org_user = factories.OrganizationUserFactory.build(
+                user=self.user, organization=organization
+            )
 
-USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
-    organization_user_id=uuid.UUID("d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"),
-    organization=ORG2,
-    user=USER_MIXED_ORG_ROLES,
-    is_organization_owner=False,
-)
+        # Add any roles - note that this won't remove roles
+        for role in roles:
+            org_user_role = factories.OrganizationUserRoleFactory.build(
+                organization_user=org_user, role=role
+            )
+            self.db_session.merge(org_user_role, load=True)
 
+        return self
 
-def _assign_organization_role(
-    db_session: db.Session, organization_user: OrganizationUser, role: Role
-) -> None:
-    """Helper function to assign a role to an organization user"""
-    role_assignment = factories.OrganizationUserRoleFactory.build(
-        organization_user=organization_user, role=role
-    )
-    db_session.merge(role_assignment, load=True)
-    logger.info(
-        f"Assigned role {role.role_id} to organization user {organization_user.organization_user_id}"
-    )
+    def build(self) -> User:
+        logger.info(
+            f"Updating {self.scenario_name}: '{self.link_external_id}' with X-API-Key: '{self.api_key_id}'"
+        )
+        return self.user
 
 
 def _build_organizations_and_users(db_session: db.Session) -> None:
     logger.info("Creating/updating organizations and users")
     ############################################
-    # Simple Organization 1
+    # Organization 1
     ############################################
     db_session.merge(SAM_GOV_ENTITY1, load=True)
     db_session.merge(ORG1, load=True)
 
     ############################################
-    # Simple Organization 1
+    # Organization 2
     ############################################
     db_session.merge(SAM_GOV_ENTITY2, load=True)
     db_session.merge(ORG2, load=True)
 
+    ############################################
+    # Organization 3
+    ############################################
+    db_session.merge(SAM_GOV_ENTITY3, load=True)
+    db_session.merge(ORG3, load=True)
+
+    ##############################################################
+    # Users
+    ##############################################################
+    user_scenarios = []
+
     ###############################
     # User without organizations
     ###############################
-    logger.info(
-        f"Updating user with no orgs: '{LINK_USER_NO_ORGS.external_user_id}' with X-API-Key: '{API_KEY_USER_NO_ORGS.key_id}'"
+    user_no_orgs = (
+        UserBuilder(
+            uuid.UUID("a3f77afe-c293-414b-a2c0-53c1be5f2936"), db_session, "user with no orgs"
+        )
+        .with_oauth_login("no_org_user")
+        .with_api_key("no_org_user_key")
+        .build()
     )
-    user_no_orgs = db_session.merge(USER_NO_ORGS, load=True)
-    db_session.merge(LINK_USER_NO_ORGS, load=True)
-    db_session.merge(API_KEY_USER_NO_ORGS, load=True)
+
+    user_scenarios.append("no_org_user - Individual user (no organizations)")
 
     _add_saved_opportunities(user_no_orgs, db_session)
     _add_saved_searches(user_no_orgs, db_session)
@@ -246,71 +201,60 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     ###############################
     # User with a single organization
     ###############################
-    logger.info(
-        f"Updating user with one org: '{LINK_USER_ONE_ORGS.external_user_id}' with X-API-Key: '{API_KEY_USER_ONE_ORG.key_id}'"
+    (
+        UserBuilder(
+            uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user with one org"
+        )
+        .with_oauth_login("one_org_user")
+        .with_api_key("one_org_user_key")
+        .with_organization(ORG1, roles=[ORG_ADMIN])
+        .build()
     )
-    db_session.merge(USER_ONE_ORG, load=True)
-    db_session.merge(LINK_USER_ONE_ORGS, load=True)
-    db_session.merge(API_KEY_USER_ONE_ORG, load=True)
-    db_session.merge(USER_ONE_ORG_ORG_USER1, load=True)
 
-    # Assign ORG_ADMIN role
-    _assign_organization_role(db_session, USER_ONE_ORG_ORG_USER1, ORG_ADMIN)
+    user_scenarios.append("one_org_user - Organization admin (Sally's Soup Emporium)")
 
     ###############################
     # User with two organizations
     ###############################
-    logger.info(
-        f"Updating user with two orgs: '{LINK_USER_TWO_ORGS.external_user_id}' with X-API-Key: '{API_KEY_USER_TWO_ORGS.key_id}'"
-    )
-    db_session.merge(USER_TWO_ORGS, load=True)
-    db_session.merge(LINK_USER_TWO_ORGS, load=True)
-    db_session.merge(API_KEY_USER_TWO_ORGS, load=True)
-    db_session.merge(USER_TWO_ORG_ORG_USER1, load=True)
-    db_session.merge(USER_TWO_ORG_ORG_USER2, load=True)
+    UserBuilder(
+        uuid.UUID("0f4ae584-c310-472d-9d6c-57201b5f84cc"), db_session, "user with two orgs"
+    ).with_oauth_login("two_org_user").with_api_key("two_orgs_user_key").with_organization(
+        ORG1, roles=[ORG_ADMIN]
+    ).with_organization(
+        ORG2, roles=[ORG_ADMIN]
+    ).build()
 
-    # Assign ORG_ADMIN roles for both organizations
-    _assign_organization_role(db_session, USER_TWO_ORG_ORG_USER1, ORG_ADMIN)
-    _assign_organization_role(db_session, USER_TWO_ORG_ORG_USER2, ORG_ADMIN)
+    user_scenarios.append("two_org_user - Organization admin (both organizations)")
 
     ###############################
     # User as organization member (not admin)
     ###############################
-    logger.info(
-        f"Updating user as org member: '{LINK_USER_ORG_MEMBER.external_user_id}' with X-API-Key: '{API_KEY_USER_ORG_MEMBER.key_id}'"
-    )
-    db_session.merge(USER_ORG_MEMBER, load=True)
-    db_session.merge(LINK_USER_ORG_MEMBER, load=True)
-    db_session.merge(API_KEY_USER_ORG_MEMBER, load=True)
-    db_session.merge(USER_ORG_MEMBER_ORG_USER, load=True)
 
-    # Assign ORG_MEMBER role
-    _assign_organization_role(db_session, USER_ORG_MEMBER_ORG_USER, ORG_MEMBER)
+    UserBuilder(
+        uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"), db_session, "user as org member"
+    ).with_oauth_login("org_member_user").with_api_key("org_member_user_key").with_organization(ORG1, roles=[ORG_MEMBER]).build()
+
+
+    user_scenarios.append("org_member_user - Organization member (Sally's Soup Emporium)")
 
     ###############################
     # User with mixed organization roles
     ###############################
-    logger.info(
-        f"Updating user with mixed org roles: '{LINK_USER_MIXED_ORG_ROLES.external_user_id}' with X-API-Key: '{API_KEY_USER_MIXED_ORG_ROLES.key_id}'"
-    )
-    db_session.merge(USER_MIXED_ORG_ROLES, load=True)
-    db_session.merge(LINK_USER_MIXED_ORG_ROLES, load=True)
-    db_session.merge(API_KEY_USER_MIXED_ORG_ROLES, load=True)
-    db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER1, load=True)
-    db_session.merge(USER_MIXED_ORG_ROLES_ORG_USER2, load=True)
 
-    # Assign mixed roles: Admin of ORG1, Member of ORG2
-    _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER1, ORG_ADMIN)
-    _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER2, ORG_MEMBER)
+    UserBuilder(
+        uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"),
+        db_session,
+        "user with mixed org roles",
+    ).with_oauth_login("mixed_roles_user").with_api_key("mixed_roles_user_key").with_organization(ORG1, roles=[ORG_ADMIN]).with_organization(ORG2, roles=[ORG_MEMBER]).build()
+
+
+    user_scenarios.append("mixed_roles_user - Admin of ORG1, Member of ORG2")
 
     # Log summary of all created user scenarios
     logger.info("=== USER SCENARIOS SUMMARY ===")
-    logger.info("Created 5 user scenarios with role-based access:")
-    logger.info("• no_org_user - Individual user (no organizations)")
-    logger.info("• one_org_user - Organization admin (Sally's Soup Emporium)")
-    logger.info("• two_org_user - Organization admin (both organizations)")
-    logger.info("• org_member_user - Organization member (Sally's Soup Emporium)")
-    logger.info("• mixed_roles_user - Admin of ORG1, Member of ORG2")
+    logger.info(f"Created {len(user_scenarios)} user scenarios with role-based access:")
+    for scenario in user_scenarios:
+        logger.info(f"• {scenario}")
 
 
 def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:
@@ -379,3 +323,52 @@ def _add_saved_searches(user: User, db_session: db.Session, count: int = 2) -> N
             },
             searched_opportunity_ids=opportunity_ids,
         )
+
+
+def _add_application(competition: Competition, organization: Organization | None, application_status: ApplicationStatus = ApplicationStatus.IN_PROGRESS) -> Application:
+    app_params: dict = {
+        "competition": competition,
+        "application_status": application_status,
+    }
+    if organization:
+        app_params["organization"] = organization
+
+    application = factories.ApplicationFactory.create(**app_params)
+
+    # This bit is mostly copied from the start application endpoint
+    # and at least sets up the application forms with prepopulation run
+    for competition_form in competition.competition_forms:
+        application_form = factories.ApplicationFormFactory.create(application=application, competition_form=competition_form, application_response={})
+
+        validate_application_form(application_form, ApplicationAction.START)
+
+    # We make a very very rough approximation of what an application submission
+    # looks like. We make a ZIP file with roughly the files we'd expect in it
+    # although they won't be PDFs or properly formatted.
+    if application_status == ApplicationStatus.ACCEPTED:
+        s3_path = f"s3://local-mock-public-bucket/applications/{application.application_id}/submissions/{uuid.uuid4()}/submission.zip"
+        with file_util.open_stream(s3_path, "wb") as outfile:
+            with zipfile.ZipFile(outfile, "w") as submission_zip:
+
+                # Create a dummy manifest file
+                with submission_zip.open("manifest.txt", "w") as manifest_file:
+                    manifest_file.write(f"Manifest for Grant Application {application.application_id}".encode("utf-8"))
+
+                # Add a file for each application form
+                # Note we make these text files as even a very simple
+                # PDF is quite complex
+                for app_form in application.application_forms:
+                    with submission_zip.open(f"{app_form.form.short_form_name}.txt", "w") as form_file:
+                        form_file.write(str(app_form.application_response).encode("utf-8"))
+
+                # Add some random attachments
+                with submission_zip.open("dummy-attachment-1.txt", "w") as dummy_attachment:
+                    dummy_attachment.write(b"This is an attachment file")
+
+                with submission_zip.open("dummy-attachment-2.txt", "w") as dummy_attachment:
+                    dummy_attachment.write(b"This is a different attachment file")
+
+        factories.ApplicationSubmissionFactory(application=application, file_location=s3_path, file_contents="SKIP")
+
+
+    return application

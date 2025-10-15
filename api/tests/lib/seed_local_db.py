@@ -185,27 +185,43 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
     )
 
 
-def _build_simple_competition(forms: dict[str, Form]) -> None:
-    logger.info("Creating a very simple competition for local development")
-
-    simple_competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="Local Very Simple Opportunity",
+def _build_competition_for_form(form: Form) -> None:
+    competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title=f"Test Opportunity for {form.short_form_name} {form.form_version}",
         competition_forms=[],
         with_instruction=True,
     )
-    factories.CompetitionFormFactory.create(
-        competition=simple_competition, form=forms["project_abstract_summary"], is_required=True
-    )
+    factories.CompetitionFormFactory.create(competition=competition, form=form, is_required=False)
 
     logger.info(
-        f"Created a very simple local opportunity - http://localhost:3000/opportunity/{simple_competition.opportunity_id}"
+        f"Created a competition for form '{form.short_form_name} {form.form_version}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
+    )
+
+
+def _build_competition_with_all_forms(forms: list[Form]) -> None:
+    competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title=f"Test Opportunity with ALL forms",
+        competition_forms=[],
+        with_instruction=True,
+    )
+    for form in forms:
+        factories.CompetitionFormFactory.create(
+            competition=competition, form=form, is_required=False
+        )
+
+    logger.info(
+        f"Created a competition with ALL forms' - http://localhost:3000/opportunity/{competition.opportunity_id}"
     )
 
 
 def _build_competitions(forms_map: dict[str, Form]) -> None:
     logger.info("Creating competitions")
-    _build_simple_competition(forms_map)
     _build_pilot_competition(forms_map)
+
+    for form in forms_map.values():
+        _build_competition_for_form(form)
+
+    _build_competition_with_all_forms(list(forms_map.values()))
 
 
 def _build_user_organizations(db_session: db.Session) -> None:
