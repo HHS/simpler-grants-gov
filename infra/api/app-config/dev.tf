@@ -48,9 +48,6 @@ module "dev_config" {
     ENABLE_APPLY_ENDPOINTS = 1
     ENABLE_SOAP_API        = 1
 
-    # Simpler Grants
-    USE_SIMPLER = "true"
-
     # CommonGrants Protocol
     ENABLE_COMMON_GRANTS_ENDPOINTS = 1
 
