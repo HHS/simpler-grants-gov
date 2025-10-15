@@ -9,7 +9,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.db.models.competition_models import Form, FormInstruction, Competition
+from src.db.models.competition_models import Competition, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms.budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -232,6 +232,7 @@ def _build_competitions(forms_map: dict[str, Form]) -> CompetitionContainer:
 
     return competition_container
 
+
 def _build_user_organizations(db_session: db.Session) -> None:
     logger.info("Creating user organizations")
 
@@ -292,15 +293,14 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
 
     if seed_config.seed_opportunities:
         # TODO
-        #_build_opportunities(db_session, seed_config.iterations, seed_config.cover_all_agencies)
+        # _build_opportunities(db_session, seed_config.iterations, seed_config.cover_all_agencies)
         # Need to commit to force any updates made
         # after factories created objects
         db_session.commit()
 
     competition_container: CompetitionContainer | None = None
     if seed_config.seed_agencies:
-        #_build_agencies(db_session) # TODO
-        pass
+        _build_agencies(db_session)
     if seed_config.seed_forms:
         forms_map = _build_forms(db_session)
         competition_container = _build_competitions(forms_map)
@@ -308,6 +308,6 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         _build_organizations_and_users(db_session, competition_container)
     if seed_config.seed_e2e:
         # TODO - need to fix to work the same as the others
-        #_build_users_and_tokens(db_session)
+        # _build_users_and_tokens(db_session)
         pass
     db_session.commit()
