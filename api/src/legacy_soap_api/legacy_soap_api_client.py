@@ -1,6 +1,5 @@
 import logging
 import uuid
-import os
 from typing import Any
 
 from pydantic import ValidationError
