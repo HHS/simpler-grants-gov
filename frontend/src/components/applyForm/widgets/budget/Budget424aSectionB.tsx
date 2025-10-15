@@ -102,9 +102,11 @@ function Budget424aSectionB<
   const cellInput = ({
     fieldKey,
     index,
+    disabled,
   }: {
     fieldKey: FieldKey;
     index: number;
+    disabled?: boolean;
   }): JSX.Element => {
     const idPath = `activity_line_items[${index}]--budget_categories--${fieldKey}`;
     return (
@@ -112,19 +114,26 @@ function Budget424aSectionB<
         id={idPath}
         rawErrors={getErrors({ errors, id: idPath })}
         value={activityItems?.[index]?.budget_categories?.[fieldKey]}
+        disabled={disabled}
       />
     );
   };
 
   // Category total (rightmost column)
-  const totalInput = ({ fieldKey }: { fieldKey: FieldKey }): JSX.Element => {
+  const totalInput = ({
+    fieldKey,
+    disabled = false,
+  }: {
+    fieldKey: FieldKey;
+    disabled?: boolean;
+  }): JSX.Element => {
     const idPath = `total_budget_categories--${fieldKey}`;
     return (
       <CurrencyInput
-        disabled
         id={idPath}
         rawErrors={getErrors({ errors, id: idPath })}
         value={totals?.[fieldKey]}
+        disabled={disabled}
         bordered
       />
     );
@@ -208,69 +217,77 @@ function Budget424aSectionB<
             <td colSpan={2} className="border-bottom-0 border-top-0" />
           </tr>
 
-          {SECTION_B_ROWS.map((row) => (
-            <tr key={row.key} className="sf424a__row">
-              <th
-                scope="row"
-                className="padding-05 text-normal border-bottom-0 border-top-0 sf424a__cell sf424a__cell--row-headers"
-              >
-                <div className="display-flex flex-column">
-                  <span className="text-bold">{row.label}</span>
-                  {row.note ? (
-                    <span className="font-sans-3xs text-italic">
-                      {row.note}
-                    </span>
-                  ) : null}
-                </div>
-              </th>
+          {SECTION_B_ROWS.map((row) => {
+            const isRowI = row.key === SECTION_B_ROW_I_KEY;
+            const isRowK = row.key === SECTION_B_ROW_K_KEY;
+            const disableActivityCells = isRowI || isRowK;
 
-              {/* Four activity columns */}
-              {ACTIVITY_ITEMS.map((columnIndex: number) => {
-                const extraPad =
-                  row.key !== SECTION_B_ROW_I_KEY &&
-                  row.key !== SECTION_B_ROW_K_KEY
-                    ? " padding-top-5"
-                    : "";
-                const showLine =
-                  row.key === SECTION_B_ROW_I_KEY ||
-                  row.key === SECTION_B_ROW_K_KEY;
+            return (
+              <tr key={row.key} className="sf424a__row">
+                <th
+                  scope="row"
+                  className="padding-05 text-normal border-bottom-0 border-top-0 sf424a__cell sf424a__cell--row-headers"
+                >
+                  <div className="display-flex flex-column">
+                    <span className="text-bold">{row.label}</span>
+                    {row.note ? (
+                      <span className="font-sans-3xs text-italic">
+                        {row.note}
+                      </span>
+                    ) : null}
+                  </div>
+                </th>
 
-                return (
-                  <td
-                    key={`cell-${row.key}-${columnIndex}`}
-                    className={`border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell ${extraPad}`}
-                  >
-                    <div className="display-flex flex-column">
-                      {row.key === SECTION_B_ROW_I_KEY && (
-                        <ColHelper
-                          columnNumber={columnIndex + 1}
-                          hasHorizontalLine={showLine}
-                        />
-                      )}
-                      {row.key === SECTION_B_ROW_K_KEY && (
-                        <HelperText hasHorizontalLine={showLine}>
-                          Sum of i and j
-                        </HelperText>
-                      )}
-                      <div className="margin-top-auto">
-                        {cellInput({ fieldKey: row.key, index: columnIndex })}
+                {/* Activity columns (1–4) */}
+                {ACTIVITY_ITEMS.map((columnIndex: number) => {
+                  const needsExtraPadding =
+                    row.key !== SECTION_B_ROW_I_KEY &&
+                    row.key !== SECTION_B_ROW_K_KEY;
+                  const showHelperLine = isRowI || isRowK;
+
+                  return (
+                    <td
+                      key={`cell-${row.key}-${columnIndex}`}
+                      className={`border-bottom-0 border-top-0 padding-05 verticle-align-top sf424a__cell${
+                        needsExtraPadding ? " padding-top-5" : ""
+                      }`}
+                    >
+                      <div className="display-flex flex-column">
+                        {isRowI && (
+                          <ColHelper
+                            columnNumber={columnIndex + 1}
+                            hasHorizontalLine={showHelperLine}
+                          />
+                        )}
+                        {isRowK && (
+                          <HelperText hasHorizontalLine={showHelperLine}>
+                            Sum of i and j
+                          </HelperText>
+                        )}
+                        <div className="margin-top-auto">
+                          {cellInput({
+                            fieldKey: row.key,
+                            index: columnIndex,
+                            disabled: disableActivityCells,
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                );
-              })}
+                    </td>
+                  );
+                })}
 
-              <td className="border-bottom-0 border-top-0 verticle-align-bottom">
-                <div className="display-flex flex-column">=</div>
-              </td>
+                <td className="border-bottom-0 border-top-0 verticle-align-bottom">
+                  <div className="display-flex flex-column">=</div>
+                </td>
 
-              {/* TOTAL (Column 5) */}
-              <td className="border-bottom-0 border-top-0 padding-05 margin-top-auto">
-                <TotalColHelper rowKey={row.key} letter={row.letter} />
-                {totalInput({ fieldKey: row.key })}
-              </td>
-            </tr>
-          ))}
+                {/* Column 5 totals — always disabled */}
+                <td className="border-bottom-0 border-top-0 padding-05 margin-top-auto">
+                  <TotalColHelper rowKey={row.key} letter={row.letter} />
+                  {totalInput({ fieldKey: row.key, disabled: true })}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </Table>
 
@@ -298,7 +315,10 @@ function Budget424aSectionB<
             <EqualsSpacer />
             <td className="padding-05 padding-left-2 verticle-align-bottom">
               <HelperText hasHorizontalLine={false}>Sum of row 7</HelperText>
-              {totalInput({ fieldKey: "program_income_amount" })}
+              {totalInput({
+                fieldKey: "program_income_amount",
+                disabled: true,
+              })}
             </td>
           </tr>
         </tbody>
