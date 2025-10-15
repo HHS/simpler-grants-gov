@@ -102,7 +102,7 @@ function Budget424aSectionD<
     const idPath = `forecasted_cash_needs--${rowKey}--${colKey}`;
     const rowObj = root[rowKey];
     const value = rowObj ? rowObj[colKey] : undefined;
-    const isComputedFields =
+    const isComputedField =
       rowKey === "total_forecasted_cash_needs" || colKey === "total_amount";
 
     return (
@@ -126,7 +126,7 @@ function Budget424aSectionD<
             colKey === "total_amount" ||
             rowKey === "total_forecasted_cash_needs"
           }
-          disabled={isComputedFields}
+          disabled={isComputedField}
         />
       </div>
     );
