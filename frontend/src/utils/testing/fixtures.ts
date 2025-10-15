@@ -1,6 +1,7 @@
 import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { Organization } from "src/types/applicationResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -16,7 +17,11 @@ import {
   SearchAPIResponse,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
-import { UserDetail, UserDetailProfile } from "src/types/userTypes";
+import {
+  UserDetail,
+  UserDetailProfile,
+  UserOrganization,
+} from "src/types/userTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
@@ -380,10 +385,25 @@ export const fakeFilterPillLabelData: FilterPillLabelData[] = [
   },
 ];
 
-export const fakeOrganization = {
+export const fakeUserOrganization: UserOrganization = {
   is_organization_owner: true,
   organization_id: "great id",
   sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
+
+export const fakeOrganizationDetailsResponse: Organization = {
+  organization_id: "great id",
+  sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
     expiration_date: "1-1-25",
     legal_business_name: "Completely Legal Organization",
     uei: "unique entity identifier",

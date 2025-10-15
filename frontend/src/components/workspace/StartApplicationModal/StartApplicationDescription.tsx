@@ -1,6 +1,6 @@
 import { ExternalRoutes } from "src/constants/routes";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
-import { Organization } from "src/types/userTypes";
+import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 
@@ -8,7 +8,7 @@ export const StartApplicationDescription = ({
   organizations,
   applicantTypes,
 }: {
-  organizations: Organization[];
+  organizations: UserOrganization[];
   applicantTypes: ApplicantTypes[];
 }) => {
   const t = useTranslations(
