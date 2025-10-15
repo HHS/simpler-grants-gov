@@ -6,8 +6,8 @@ import {
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import {
-  UserDetail,
   UserDetailProfile,
+  UserDetailWithProfile,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
 
@@ -19,7 +19,7 @@ export const postLogout = async (token: string) => {
 export const getUserDetails = async (
   token: string,
   userId: string,
-): Promise<UserDetail> => {
+): Promise<UserDetailWithProfile> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -27,7 +27,7 @@ export const getUserDetails = async (
     subPath: userId,
     additionalHeaders: ssgToken,
   });
-  const json = (await resp.json()) as { data: UserDetail };
+  const json = (await resp.json()) as { data: UserDetailWithProfile };
   return json.data;
 };
 

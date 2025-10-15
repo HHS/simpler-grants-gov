@@ -68,6 +68,13 @@ export interface UserDetail extends UserDetailProfile {
   roles?: UserRole[];
 }
 
+export interface UserDetailWithProfile {
+  user_id: string;
+  email: string;
+  external_user_type: string;
+  profile: UserDetailProfile;
+}
+
 export interface UserProfileResponse {
   validationErrors?: UserProfileValidationErrors;
   errorMessage?: string;

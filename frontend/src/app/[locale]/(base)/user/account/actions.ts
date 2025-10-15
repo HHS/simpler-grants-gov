@@ -50,14 +50,14 @@ export const userProfileAction = async (
     last_name: formData.get("lastName") as string,
   };
 
-  let userDetailsResponse;
+  let userDetailsUpdateResponse;
   try {
-    userDetailsResponse = await updateUserDetails(
+    userDetailsUpdateResponse = await updateUserDetails(
       session.token,
       session.user_id,
       rawFormData,
     );
-    return { data: userDetailsResponse, success: true };
+    return { data: userDetailsUpdateResponse, success: true };
   } catch (e) {
     // General try failure catch error
     const error = e as Error;
