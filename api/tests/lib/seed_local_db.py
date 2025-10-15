@@ -292,8 +292,7 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
 def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
 
     if seed_config.seed_opportunities:
-        # TODO
-        # _build_opportunities(db_session, seed_config.iterations, seed_config.cover_all_agencies)
+        _build_opportunities(db_session, seed_config.iterations, seed_config.cover_all_agencies)
         # Need to commit to force any updates made
         # after factories created objects
         db_session.commit()
