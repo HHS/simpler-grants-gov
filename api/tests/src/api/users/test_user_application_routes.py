@@ -1,13 +1,18 @@
 from src.api.users.user_schemas import UserApplicationListItemSchema
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, Privilege
+from tests.conftest import db_session
+from tests.lib.application_list_utils import create_user_in_app
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationUserFactory,
     CompetitionFactory,
     OrganizationFactory,
     SamGovEntityFactory,
-    UserFactory,
+    UserFactory, ApplicationUserRoleFactory, RoleFactory,
 )
+import pytest
+
+from tests.src.services.xml_generation.test_header_generator import application
 
 
 def test_user_get_applications_success(
@@ -41,8 +46,8 @@ def test_user_get_applications_success(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1, is_application_owner=True)
-    ApplicationUserFactory.create(user=user, application=application2, is_application_owner=True)
+    ApplicationUserFactory.create(user=user, application=application1,  as_owner=True)
+    ApplicationUserFactory.create(user=user, application=application2, as_owner=True)
 
     # Make the request
     response = client.post(
@@ -169,8 +174,8 @@ def test_user_get_applications_multiple_competitions(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1)
-    ApplicationUserFactory.create(user=user, application=application2)
+    ApplicationUserFactory.create(user=user, application=application1, as_owner=True)
+    ApplicationUserFactory.create(user=user, application=application2, as_owner=True)
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
@@ -222,3 +227,71 @@ def test_user_application_list_item_schema():
     result = schema.load(test_data)
     assert result["application_name"] == "Test Application"
     assert result["competition"]["competition_title"] == "Test Competition"
+
+@pytest.fixture
+def app_a(enable_factory_create):
+    return ApplicationFactory.create()
+
+@pytest.fixture
+def app_b(enable_factory_create):
+    return ApplicationFactory.create()
+
+@pytest.mark.parametrize(
+    "privileges,apps_count",
+    [
+        ([Privilege.VIEW_APPLICATION], 1), # Correct Privilege
+        ([Privilege.LIST_APPLICATION], 0), # Wrong Privilege
+        ([Privilege.VIEW_APPLICATION, Privilege.LIST_APPLICATION], 1), # Mixed Privilege
+        (None, 0), # No role
+    ]
+)
+def test_user_application_list_access(client, enable_factory_create, db_session,privileges, app_a, apps_count
+):
+    """
+        Test that a user can only see applications they have VIEW_APPLICATION privilege for.
+    """
+    user, application, token = create_user_in_app(db_session, application=app_a, privileges=privileges)
+
+    response = client.post(
+            f"/v1/users/{user.user_id}/applications",
+            json={},
+            headers={"X-SGG-Token": token},
+        )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Validate the returned applications count
+    applications = response.json["data"]
+    assert len(applications) == apps_count
+    # If privileges included VIEW, returned application should be app_a
+    if apps_count > 0:
+        assert applications[0]["application_id"] == str(app_a.application_id)
+
+
+def test_user_application_list_access_multi_applications(client, enable_factory_create, db_session, app_a, app_b
+):
+    """
+        Test that when a user has multiple applications,only those with VIEW_APPLICATION privilege are returned
+        """
+    # Create user with VIEW privilege on app_a
+    user, application, token = create_user_in_app(db_session,application=app_a, privileges=[Privilege.VIEW_APPLICATION])
+    # Give the same user LIST privilege on a different application (app_b)
+    ApplicationUserRoleFactory(application_user=ApplicationUserFactory.create(user=user, application=app_b), role=RoleFactory.create(privileges=[Privilege.LIST_APPLICATION]))
+    # create an application-user link with no roles/privileges
+    ApplicationUserFactory.create(user=user)
+
+    response = client.post(
+
+            f"/v1/users/{user.user_id}/applications",
+            json={},
+            headers={"X-SGG-Token": token},
+        )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # assert only application with correct privilege is returned
+    applications = response.json["data"]
+    assert len(applications) == 1
+    assert applications[0]["application_id"] == str(app_a.application_id)
