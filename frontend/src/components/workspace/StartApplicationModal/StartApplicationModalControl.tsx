@@ -6,7 +6,7 @@ import {
   ApplicantTypes,
   Competition,
 } from "src/types/competitionsResponseTypes";
-import { Organization } from "src/types/userTypes";
+import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -30,7 +30,7 @@ export const StartApplicationModalControl = ({
   const { user } = useUser();
 
   const { clientFetch: fetchUserOrganizations } = useClientFetch<
-    Organization[]
+    UserOrganization[]
   >("Error fetching user organizations");
   const { clientFetch: fetchCompetition } = useClientFetch<Competition>(
     "Error fetching competition",
@@ -42,9 +42,9 @@ export const StartApplicationModalControl = ({
   const [competitionApplicantTypes, setCompetitionApplicantTypes] = useState<
     ApplicantTypes[]
   >([]);
-  const [userOrganizations, setUserOrganizations] = useState<Organization[]>(
-    [],
-  );
+  const [userOrganizations, setUserOrganizations] = useState<
+    UserOrganization[]
+  >([]);
 
   const token = user?.token || null;
 

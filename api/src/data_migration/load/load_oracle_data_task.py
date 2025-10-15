@@ -248,7 +248,7 @@ class LoadOracleDataTask(src.task.task.Task):
         with self.db_session.begin():
             result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
-        delete_count = result.rowcount
+        delete_count = result.rowcount  # type: ignore[attr-defined]
 
         self.increment("count.delete.total", delete_count)
 
