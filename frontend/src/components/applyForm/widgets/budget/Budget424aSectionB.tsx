@@ -280,7 +280,7 @@ function Budget424aSectionB<
                   <div className="display-flex flex-column">=</div>
                 </td>
 
-                {/* Column 5 totals — always disabled */}
+                {/* TOTAL (Column 5) */}
                 <td className="border-bottom-0 border-top-0 padding-05 margin-top-auto">
                   <TotalColHelper rowKey={row.key} letter={row.letter} />
                   {totalInput({ fieldKey: row.key, disabled: true })}
