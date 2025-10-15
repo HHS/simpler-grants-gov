@@ -25,7 +25,7 @@ const OrganizationDetailsDisplay = ({
   samGovEntity?: SamGovEntity;
 }) => {
   const t = useTranslations("Application.information");
-  const {expiration_date, legal_business_name, uei} = samGovEntity ?? {};
+  const { expiration_date, legal_business_name, uei } = samGovEntity ?? {};
 
   return (
     <>
