@@ -66,4 +66,3 @@ module "dev_config" {
 
   enable_identity_provider = local.enable_identity_provider
 }
-

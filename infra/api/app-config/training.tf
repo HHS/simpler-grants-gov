@@ -49,9 +49,6 @@ module "training_config" {
     ENABLE_APPLY_ENDPOINTS = 1
     ENABLE_SOAP_API        = 1
 
-    # Simpler Grants
-    USE_SIMPLER = "true"
-
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 
     # Email notification
