@@ -11,6 +11,7 @@ from .config import load_xml_transform_config
 from .models import XMLGenerationRequest, XMLGenerationResponse
 from .transformers.attachment_transformer import AttachmentTransformer
 from .transformers.base_transformer import RecursiveXMLTransformer
+from .utils.attachment_mapping import AttachmentInfo
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class XMLGenerationService:
         data: dict,
         transform_config: dict,
         pretty_print: bool = True,
-        attachment_mapping: dict | None = None,
+        attachment_mapping: dict[str, AttachmentInfo] | None = None,
     ) -> str:
         """Generate XML string from transformed data."""
         # Get XML configuration from the config metadata
@@ -109,7 +110,7 @@ class XMLGenerationService:
         namespace_fields: dict,
         pretty_print: bool = True,
         transform_config: dict | None = None,
-        attachment_mapping: dict | None = None,
+        attachment_mapping: dict[str, AttachmentInfo] | None = None,
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")

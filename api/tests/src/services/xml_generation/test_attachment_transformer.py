@@ -35,20 +35,21 @@ class TestAttachmentTransformer:
         }
 
         # Sample attachment mapping
+        # Use string keys as the mapping now uses string UUIDs instead of UUID objects
         self.attachment_mapping = {
-            self.uuid1: AttachmentInfo(
+            str(self.uuid1): AttachmentInfo(
                 filename="test_document.pdf",
                 mime_type="application/pdf",
                 file_location="./attachments/test_document.pdf",
                 hash_value="aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=",
             ),
-            self.uuid2: AttachmentInfo(
+            str(self.uuid2): AttachmentInfo(
                 filename="document1.pdf",
                 mime_type="application/pdf",
                 file_location="./attachments/document1.pdf",
                 hash_value="ZG9jdW1lbnQxaGFzaA==",
             ),
-            self.uuid3: AttachmentInfo(
+            str(self.uuid3): AttachmentInfo(
                 filename="document2.xlsx",
                 mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 file_location="./attachments/document2.xlsx",
@@ -270,101 +271,6 @@ class TestAttachmentTransformer:
         assert "FileName" not in xml_string
         assert "MimeType" not in xml_string
 
-    def test_process_attachment_data_single_fields(self):
-        """Test processing attachment data for single fields."""
-        input_data = {
-            "areas_affected": {
-                "FileName": "areas.pdf",
-                "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/areas.pdf"},
-                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "YXJlYXNoYXNo"},
-            },
-            "debt_explanation": {
-                "FileName": "debt.docx",
-                "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "FileLocation": {"@href": "./attachments/debt.docx"},
-                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "ZGVidGhhc2g="},
-            },
-        }
-
-        result = self.transformer.process_attachment_data(input_data)
-
-        assert "AreasAffected" in result
-        assert "DebtExplanation" in result
-        assert result["AreasAffected"]["FileName"] == "areas.pdf"
-        assert result["DebtExplanation"]["FileName"] == "debt.docx"
-
-    def test_process_attachment_data_multiple_fields(self):
-        """Test processing attachment data for multiple fields."""
-        input_data = {
-            "additional_project_title": [
-                {
-                    "FileName": "project1.pdf",
-                    "MimeType": "application/pdf",
-                    "FileLocation": {"@href": "./attachments/project1.pdf"},
-                    "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "cHJvamVjdDFoYXNo"},
-                },
-                {
-                    "FileName": "project2.xlsx",
-                    "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    "FileLocation": {"@href": "./attachments/project2.xlsx"},
-                    "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "cHJvamVjdDJoYXNo"},
-                },
-            ]
-        }
-
-        result = self.transformer.process_attachment_data(input_data)
-
-        assert "AdditionalProjectTitle" in result
-        assert "AttachedFile" in result["AdditionalProjectTitle"]
-        assert len(result["AdditionalProjectTitle"]["AttachedFile"]) == 2
-        assert result["AdditionalProjectTitle"]["AttachedFile"][0]["FileName"] == "project1.pdf"
-        assert result["AdditionalProjectTitle"]["AttachedFile"][1]["FileName"] == "project2.xlsx"
-
-    def test_process_attachment_data_empty(self):
-        """Test processing empty attachment data."""
-        result = self.transformer.process_attachment_data({})
-        assert result == {}
-
-        result = self.transformer.process_attachment_data({"other_field": "value"})
-        assert result == {}
-
-    def test_create_placeholder_attachment(self):
-        """Test creating placeholder attachment structure."""
-        attachment_info = {
-            "filename": "placeholder.pdf",
-            "mime_type": "application/pdf",
-            "file_location": "./attachments/placeholder.pdf",
-        }
-
-        result = self.transformer._create_placeholder_attachment(attachment_info)
-
-        assert result["FileName"] == "placeholder.pdf"
-        assert result["MimeType"] == "application/pdf"
-        assert result["FileLocation"]["@href"] == "./attachments/placeholder.pdf"
-        assert result["HashValue"]["@hashAlgorithm"] == "SHA-1"
-        assert result["HashValue"]["#text"] == "placeholder_base64_hash"
-
-    def test_create_attachment_from_data(self):
-        """Test creating attachment from provided data."""
-        attachment_info = {
-            "filename": "data_attachment.docx",
-            "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "file_location": "./attachments/data_attachment.docx",
-            "hash_value": "ZGF0YWF0dGFjaG1lbnRoYXNo",
-        }
-
-        result = self.transformer._create_attachment_from_data(attachment_info)
-
-        assert result["FileName"] == "data_attachment.docx"
-        assert (
-            result["MimeType"]
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-        assert result["FileLocation"]["@href"] == "./attachments/data_attachment.docx"
-        assert result["HashValue"]["@hashAlgorithm"] == "SHA-1"
-        assert result["HashValue"]["#text"] == "ZGF0YWF0dGFjaG1lbnRoYXNo"
-
     def test_uuid_based_single_attachment(self):
         """Test adding single attachment using UUID."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -415,7 +321,7 @@ class TestAttachmentTransformer:
         assert unknown_uuid in str(exc_info.value)
 
     def test_invalid_uuid_format_error(self):
-        """Test error when UUID format is invalid."""
+        """Test error when UUID is invalid/unknown."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
 
         # Invalid UUID string
@@ -424,7 +330,9 @@ class TestAttachmentTransformer:
         with pytest.raises(ValueError) as exc_info:
             self.transformer.add_attachment_elements(root, data, self.nsmap)
 
-        assert "Invalid UUID format" in str(exc_info.value)
+        # With string-based mapping, invalid UUIDs are treated as not found
+        assert "not found in attachment mapping" in str(exc_info.value)
+        assert "not-a-valid-uuid" in str(exc_info.value)
 
     def test_mixed_single_and_multiple_attachments(self):
         """Test adding both single and multiple attachments together."""

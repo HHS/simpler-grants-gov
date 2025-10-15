@@ -2,11 +2,10 @@
 
 import logging
 from typing import Any
-from uuid import UUID
 
 from lxml import etree as lxml_etree
 
-from ..models.attachment import HASH_ALGORITHM, AttachmentFile
+from ..utils.attachment_mapping import AttachmentInfo
 
 logger = logging.getLogger(__name__)
 
@@ -17,14 +16,14 @@ class AttachmentTransformer:
     def __init__(
         self,
         attachment_namespace: str = "http://apply.grants.gov/system/Attachments-V1.0",
-        attachment_mapping: dict[UUID, Any] | None = None,
+        attachment_mapping: dict[str, AttachmentInfo] | None = None,
         attachment_field_config: dict[str, Any] | None = None,
     ):
         """Initialize the attachment transformer.
 
         Args:
             attachment_namespace: The XML namespace for attachments
-            attachment_mapping: Mapping of attachment UUIDs to attachment info objects
+            attachment_mapping: Mapping of attachment UUID strings to AttachmentInfo objects
             attachment_field_config: Configuration for attachment fields from form config
         """
         self.attachment_namespace = attachment_namespace
@@ -63,7 +62,7 @@ class AttachmentTransformer:
                     parent, xml_element, field_value, field_name, nsmap
                 )
 
-    def _resolve_attachment_uuid(self, uuid_value: UUID | str, field_name: str) -> dict[str, Any]:
+    def _resolve_attachment_uuid(self, uuid_value: str, field_name: str) -> dict[str, Any]:
         """Resolve a UUID to attachment data.
 
         Args:
@@ -74,43 +73,28 @@ class AttachmentTransformer:
             Attachment data dictionary ready for XML generation
 
         Raises:
-            ValueError: If UUID format is invalid or UUID not found in mapping
+            ValueError: If UUID not found in mapping
         """
-        # Convert string UUID to UUID object
-        if isinstance(uuid_value, str):
-            try:
-                uuid_value = UUID(uuid_value)
-            except (ValueError, AttributeError) as e:
-                raise ValueError(
-                    f"Invalid UUID format for field '{field_name}': {uuid_value}"
-                ) from e
+        # UUID values from JSON are already strings, use directly
+        uuid_str = str(uuid_value) if not isinstance(uuid_value, str) else uuid_value
 
         # Look up UUID in mapping
-        if uuid_value not in self.attachment_mapping:
+        if uuid_str not in self.attachment_mapping:
             raise ValueError(
-                f"Attachment UUID {uuid_value} for field '{field_name}' not found in attachment mapping. "
+                f"Attachment UUID {uuid_str} for field '{field_name}' not found in attachment mapping. "
                 f"Available UUIDs: {list(self.attachment_mapping.keys())}"
             )
 
-        attachment_info = self.attachment_mapping[uuid_value]
+        attachment_info = self.attachment_mapping[uuid_str]
 
-        # Convert AttachmentInfo to dict
-        if hasattr(attachment_info, "to_dict"):
-            return attachment_info.to_dict()
-
-        # If it's already a dict, return it
-        if isinstance(attachment_info, dict):
-            return attachment_info
-
-        raise ValueError(
-            f"Unexpected attachment info type for UUID {uuid_value}: {type(attachment_info)}"
-        )
+        # attachment_mapping is typed as dict[str, AttachmentInfo], so we can directly call to_dict()
+        return attachment_info.to_dict()
 
     def _add_multiple_attachment_from_uuids(
         self,
         parent: lxml_etree._Element,
         element_name: str,
-        uuid_list: list[UUID | str] | UUID | str,
+        uuid_list: list[str] | str,
         field_name: str,
         nsmap: dict[str, str],
     ) -> None:
@@ -240,150 +224,3 @@ class AttachmentTransformer:
             elif isinstance(hash_data, str):
                 hashvalue_elem.set("hashAlgorithm", "SHA-1")  # Default
                 hashvalue_elem.text = hash_data
-
-    def _attachment_file_to_dict(self, attachment_file: AttachmentFile) -> dict[str, Any]:
-        """Convert AttachmentFile to dictionary format.
-
-        Args:
-            attachment_file: The attachment file object
-
-        Returns:
-            Dictionary representation
-        """
-        return {
-            "FileName": attachment_file.filename,
-            "MimeType": attachment_file.mime_type,
-            "FileLocation": {"@href": attachment_file.file_location},
-            "HashValue": {
-                "@hashAlgorithm": HASH_ALGORITHM,
-                "#text": attachment_file.hash_value,
-            },
-        }
-
-    def process_attachment_data(self, input_data: dict[str, Any]) -> dict[str, Any]:
-        """Process raw attachment data into XML-ready format.
-
-        Args:
-            input_data: Raw input data containing attachment information
-
-        Returns:
-            Processed data ready for XML generation
-        """
-        result = {}
-
-        # Process single attachment fields
-        single_fields = [
-            ("areas_affected", "AreasAffected"),
-            ("additional_congressional_districts", "AdditionalCongressionalDistricts"),
-            ("debt_explanation", "DebtExplanation"),
-        ]
-
-        for input_key, xml_key in single_fields:
-            if input_data.get(input_key) is not None:
-                attachment_info = input_data[input_key]
-                if isinstance(attachment_info, dict):
-                    result[xml_key] = self._process_single_attachment(attachment_info)
-
-        # Process multiple attachment field
-        if input_data.get("additional_project_title") is not None:
-            additional_title = input_data["additional_project_title"]
-            if isinstance(additional_title, list):
-                result["AdditionalProjectTitle"] = {
-                    "AttachedFile": [
-                        self._process_single_attachment(item) for item in additional_title
-                    ]
-                }
-            elif isinstance(additional_title, dict):
-                result["AdditionalProjectTitle"] = {
-                    "AttachedFile": [self._process_single_attachment(additional_title)]
-                }
-
-        return result
-
-    def _process_single_attachment(self, attachment_info: dict[str, Any]) -> dict[str, Any]:
-        """Process a single attachment info dictionary.
-
-        Args:
-            attachment_info: Dictionary containing attachment information
-
-        Returns:
-            Processed attachment data
-        """
-        # If it's already in the correct format, return as-is
-        if all(
-            key in attachment_info for key in ["FileName", "MimeType", "FileLocation", "HashValue"]
-        ):
-            return attachment_info
-
-        # Process file path-based attachment
-        if "file_path" in attachment_info:
-            try:
-                attachment_file = AttachmentFile.from_file_path(
-                    attachment_info["file_path"], attachment_info.get("file_location")
-                )
-                return self._attachment_file_to_dict(attachment_file)
-            except (FileNotFoundError, Exception):
-                # If file doesn't exist, create a placeholder structure
-                return self._create_placeholder_attachment(attachment_info)
-
-        # Process direct attachment data
-        return self._create_attachment_from_data(attachment_info)
-
-    def _create_placeholder_attachment(self, attachment_info: dict[str, Any]) -> dict[str, Any]:
-        """Create a placeholder attachment structure.
-
-        Args:
-            attachment_info: Basic attachment information
-
-        Returns:
-            Placeholder attachment data
-        """
-        filename = attachment_info.get("filename", "placeholder.pdf")
-        mime_type = attachment_info.get("mime_type", "application/pdf")
-        file_location = attachment_info.get("file_location", f"./attachments/{filename}")
-
-        return {
-            "FileName": filename,
-            "MimeType": mime_type,
-            "FileLocation": {"@href": file_location},
-            "HashValue": {
-                "@hashAlgorithm": "SHA-1",
-                "#text": "placeholder_base64_hash",  # Would be replaced with actual hash
-            },
-        }
-
-    def _create_attachment_from_data(self, attachment_info: dict[str, Any]) -> dict[str, Any]:
-        """Create attachment data from provided information.
-
-        Args:
-            attachment_info: Attachment information dictionary
-
-        Returns:
-            Complete attachment data
-        """
-        filename = attachment_info.get("filename", attachment_info.get("FileName", "document.pdf"))
-        mime_type = attachment_info.get(
-            "mime_type", attachment_info.get("MimeType", "application/pdf")
-        )
-        file_location = attachment_info.get(
-            "file_location", attachment_info.get("FileLocation", f"./attachments/{filename}")
-        )
-        hash_value = attachment_info.get(
-            "hash_value", attachment_info.get("HashValue", "placeholder_hash")
-        )
-        hash_algorithm = attachment_info.get("hash_algorithm", "SHA-1")
-
-        # Handle FileLocation format
-        if isinstance(file_location, str):
-            file_location = {"@href": file_location}
-
-        # Handle HashValue format
-        if isinstance(hash_value, str):
-            hash_value = {"@hashAlgorithm": hash_algorithm, "#text": hash_value}
-
-        return {
-            "FileName": filename,
-            "MimeType": mime_type,
-            "FileLocation": file_location,
-            "HashValue": hash_value,
-        }

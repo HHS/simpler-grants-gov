@@ -23,32 +23,33 @@ class TestAttachmentIntegration:
         self.uuid_project2 = UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
 
         # Create attachment mapping (simulates what create_attachment_mapping() would return)
+        # Use string keys as the mapping now uses string UUIDs instead of UUID objects
         self.attachment_mapping = {
-            self.uuid_areas: AttachmentInfo(
+            str(self.uuid_areas): AttachmentInfo(
                 filename="geographic_areas.pdf",
                 mime_type="application/pdf",
                 file_location="./attachments/geographic_areas.pdf",
                 hash_value="aGVsbG8gd29ybGQ=",
             ),
-            self.uuid_districts: AttachmentInfo(
+            str(self.uuid_districts): AttachmentInfo(
                 filename="districts.txt",
                 mime_type="text/plain",
                 file_location="./attachments/districts.txt",
                 hash_value="ZGlzdHJpY3RzaGFzaA==",
             ),
-            self.uuid_debt: AttachmentInfo(
+            str(self.uuid_debt): AttachmentInfo(
                 filename="debt.docx",
                 mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 file_location="./attachments/debt.docx",
                 hash_value="ZGVidGhhc2g=",
             ),
-            self.uuid_project1: AttachmentInfo(
+            str(self.uuid_project1): AttachmentInfo(
                 filename="project1.pdf",
                 mime_type="application/pdf",
                 file_location="./attachments/project1.pdf",
                 hash_value="cHJvamVjdDFoYXNo",
             ),
-            self.uuid_project2: AttachmentInfo(
+            str(self.uuid_project2): AttachmentInfo(
                 filename="project2.xlsx",
                 mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 file_location="./attachments/project2.xlsx",
@@ -174,7 +175,7 @@ class TestAttachmentIntegration:
         assert unknown_uuid in str(exc_info.value)
 
     def test_invalid_uuid_format_raises_error(self):
-        """Test that invalid UUID format raises helpful error."""
+        """Test that invalid/unknown UUID raises helpful error."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
 
         data = {"debt_explanation": "not-a-valid-uuid"}
@@ -182,7 +183,9 @@ class TestAttachmentIntegration:
         with pytest.raises(ValueError) as exc_info:
             self.transformer.add_attachment_elements(root, data, self.nsmap)
 
-        assert "Invalid UUID format" in str(exc_info.value)
+        # With string-based mapping, invalid UUIDs are treated as not found
+        assert "not found in attachment mapping" in str(exc_info.value)
+        assert "not-a-valid-uuid" in str(exc_info.value)
 
     def test_mixed_single_and_multiple_uuids(self):
         """Test handling both single and multiple UUID attachments together."""

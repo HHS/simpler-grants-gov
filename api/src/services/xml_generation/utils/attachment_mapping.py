@@ -2,7 +2,6 @@
 
 import logging
 from typing import Any
-from uuid import UUID
 
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.services.xml_generation.models.attachment import HASH_ALGORITHM, AttachmentFile
@@ -45,19 +44,20 @@ class AttachmentInfo:
 
 
 def create_attachment_mapping(
-    application: Application, filename_overrides: dict[UUID, str] | None = None
-) -> dict[UUID, AttachmentInfo]:
+    application: Application, filename_overrides: dict[str, str] | None = None
+) -> dict[str, AttachmentInfo]:
     filename_overrides = filename_overrides or {}
-    mapping: dict[UUID, AttachmentInfo] = {}
+    mapping: dict[str, AttachmentInfo] = {}
 
     # Get all attachments for this application
     attachments = application.application_attachments
 
     for attachment in attachments:
+        # Convert UUID to string for the mapping key
+        attachment_id_str = str(attachment.application_attachment_id)
+
         # Determine the filename to use (override or original)
-        filename = filename_overrides.get(
-            attachment.application_attachment_id, attachment.file_name
-        )
+        filename = filename_overrides.get(attachment_id_str, attachment.file_name)
 
         try:
             # Compute hash from file content
@@ -84,11 +84,10 @@ def create_attachment_mapping(
             hash_value=hash_value,
         )
 
-        mapping[attachment.application_attachment_id] = attachment_info
+        # Add to mapping keyed by string UUID
+        mapping[attachment_id_str] = attachment_info
 
-        logger.debug(
-            f"Mapped attachment {attachment.application_attachment_id} with filename {filename}"
-        )
+        logger.debug(f"Mapped attachment {attachment_id_str} with filename {filename}")
 
     logger.info(
         f"Created attachment mapping for {len(mapping)} attachments",
@@ -99,16 +98,17 @@ def create_attachment_mapping(
 
 
 def create_attachment_mapping_from_list(
-    attachments: list[ApplicationAttachment], filename_overrides: dict[UUID, str] | None = None
-) -> dict[UUID, AttachmentInfo]:
+    attachments: list[ApplicationAttachment], filename_overrides: dict[str, str] | None = None
+) -> dict[str, AttachmentInfo]:
     filename_overrides = filename_overrides or {}
-    mapping: dict[UUID, AttachmentInfo] = {}
+    mapping: dict[str, AttachmentInfo] = {}
 
     for attachment in attachments:
+        # Convert UUID to string for the mapping key
+        attachment_id_str = str(attachment.application_attachment_id)
+
         # Determine the filename to use (override or original)
-        filename = filename_overrides.get(
-            attachment.application_attachment_id, attachment.file_name
-        )
+        filename = filename_overrides.get(attachment_id_str, attachment.file_name)
 
         try:
             # Compute hash from file content
@@ -134,11 +134,10 @@ def create_attachment_mapping_from_list(
             hash_value=hash_value,
         )
 
-        mapping[attachment.application_attachment_id] = attachment_info
+        # Add to mapping keyed by string UUID
+        mapping[attachment_id_str] = attachment_info
 
-        logger.debug(
-            f"Mapped attachment {attachment.application_attachment_id} with filename {filename}"
-        )
+        logger.debug(f"Mapped attachment {attachment_id_str} with filename {filename}")
 
     logger.info(f"Created attachment mapping for {len(mapping)} attachments from list")
 
