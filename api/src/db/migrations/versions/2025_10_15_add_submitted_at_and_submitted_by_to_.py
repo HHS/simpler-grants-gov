@@ -33,7 +33,6 @@ def upgrade():
         source_schema="api",
         referent_schema="api",
     )
-    op.drop_column("form", "form_type", schema="api")
     # ### end Alembic commands ###
 
 
