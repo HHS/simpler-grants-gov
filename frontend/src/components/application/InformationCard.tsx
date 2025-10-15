@@ -1,6 +1,10 @@
 "use client";
 
-import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  SamGovEntity,
+  Status,
+} from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
 
@@ -14,6 +18,54 @@ type CompetitionDetails = { competition: Competition };
 
 export type ApplicationDetailsCardProps = ApplicationDetail &
   CompetitionDetails;
+
+const OrganizationDetailsDisplay = ({
+  samGovEntity,
+}: {
+  samGovEntity: SamGovEntity;
+}) => {
+  const t = useTranslations("Application.information");
+  const { legal_business_name, uei, expiration_date } = samGovEntity;
+
+  return (
+    <>
+      <div className="margin-bottom-1">
+        <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
+        <dd>{legal_business_name ?? "-"}</dd>
+      </div>
+      <Grid row className="margin-bottom-1">
+        <div>
+          <dt className="margin-right-1 text-bold">{t("uei")}: </dt>
+          <dd>{uei ?? "-"}</dd>
+        </div>
+        <div className="margin-left-4">
+          <dt className="margin-right-1 text-bold">{t("renewal")}: </dt>
+          <dd>{expiration_date ?? "-"}</dd>
+        </div>
+      </Grid>
+    </>
+  );
+};
+
+const ApplicantDetails = ({
+  hasOrganization,
+  samGovEntity,
+}: {
+  hasOrganization: boolean;
+  samGovEntity: SamGovEntity;
+}) => {
+  const t = useTranslations("Application.information");
+  if (hasOrganization) {
+    return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
+  }
+
+  return (
+    <div className="margin-bottom-1">
+      <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
+      <dd>{t("applicantTypeIndividual")}</dd>
+    </div>
+  );
+};
 
 export const InformationCard = ({
   applicationDetails,
@@ -32,39 +84,6 @@ export const InformationCard = ({
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
-
-  const ApplicantDetails = () => {
-    if (hasOrganization) {
-      const { legal_business_name, uei, expiration_date } =
-        applicationDetails.organization.sam_gov_entity;
-
-      return (
-        <>
-          <div className="margin-bottom-1">
-            <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-            <dd>{legal_business_name ?? "-"}</dd>
-          </div>
-          <Grid row className="margin-bottom-1">
-            <div>
-              <dt className="margin-right-1 text-bold">{t("uei")}: </dt>
-              <dd>{uei ?? "-"}</dd>
-            </div>
-            <div className="margin-left-4">
-              <dt className="margin-right-1 text-bold">{t("renewal")}: </dt>
-              <dd>{expiration_date ?? "-"}</dd>
-            </div>
-          </Grid>
-        </>
-      );
-    }
-
-    return (
-      <div className="margin-bottom-1">
-        <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-        <dd>{t("applicantTypeIndividual")}</dd>
-      </div>
-    );
-  };
 
   const isCompetitionClosed = () => {
     const isPastCloseDate = getConfiguredDayJs()().isAfter(
@@ -158,7 +177,10 @@ export const InformationCard = ({
         </Grid>
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
           <dl>
-            <ApplicantDetails />
+            <ApplicantDetails
+              hasOrganization={hasOrganization}
+              samGovEntity={applicationDetails.organization.sam_gov_entity}
+            />
             {applicationDetails.competition.competition_instructions.length ? (
               <ApplicationInstructionsDownload />
             ) : (
