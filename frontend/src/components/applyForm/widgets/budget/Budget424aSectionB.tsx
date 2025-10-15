@@ -121,6 +121,7 @@ function Budget424aSectionB<
     const idPath = `total_budget_categories--${fieldKey}`;
     return (
       <CurrencyInput
+        disabled
         id={idPath}
         rawErrors={getErrors({ errors, id: idPath })}
         value={totals?.[fieldKey]}
