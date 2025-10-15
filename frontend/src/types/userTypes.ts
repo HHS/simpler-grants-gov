@@ -23,12 +23,6 @@ export type UserRole = {
   privileges: string[];
 };
 
-export interface RoleDefinition {
-  privileges: string[];
-  role_id: string;
-  role_name: string;
-}
-
 export type OrganizationPrivilegesResponse = {
   organization: {
     organization_id: string;
@@ -72,7 +66,7 @@ export interface UserDetail {
   user_id: string;
   email: string;
   profile: UserDetailProfile | null;
-  roles?: RoleDefinition[];
+  roles?: UserRole[];
 }
 
 export interface UserProfileResponse {
