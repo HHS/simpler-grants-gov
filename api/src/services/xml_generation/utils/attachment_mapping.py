@@ -51,7 +51,7 @@ def create_attachment_mapping(
     mapping: dict[UUID, AttachmentInfo] = {}
 
     # Get all attachments for this application
-    attachments = getattr(application, "attachments", [])
+    attachments = application.application_attachments
 
     for attachment in attachments:
         # Determine the filename to use (override or original)
