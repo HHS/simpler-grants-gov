@@ -1,11 +1,11 @@
 import logging
-import os
 
 import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
+from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SimplerSoapAPI,
@@ -29,7 +29,7 @@ def get_simpler_soap_response(
         else SimplerGrantorsS2SClient
     )
 
-    use_simpler = os.environ.get("USE_SIMPLER") == "true"
+    use_simpler = get_soap_config().use_simpler
 
     try:
         simpler_soap_client = simpler_soap_client_type(
@@ -62,18 +62,17 @@ def get_simpler_soap_response(
             },
         )
         return soap_proxy_response
-
-    simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_proxy_response)
-
-    if simpler_soap_response is not None and use_simpler:
-        logger.info(
-            "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
-            extra={
-                "soap_api_event": LegacySoapApiEvent.RETURNING_SIMPLER_RESPONSE,
-                "used_simpler_response": use_simpler,
-            },
-        )
-        return simpler_soap_response
+    if use_simpler:
+        simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_proxy_response)
+        if simpler_soap_response is not None:
+            logger.info(
+                "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.RETURNING_SIMPLER_RESPONSE,
+                    "used_simpler_response": use_simpler,
+                },
+            )
+            return simpler_soap_response
 
     logger.info(
         "simpler_soap_api: Successfully processed request and returning SOAP proxy response",

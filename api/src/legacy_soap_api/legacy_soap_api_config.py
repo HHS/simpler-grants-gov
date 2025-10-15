@@ -22,6 +22,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_auth_content: str | None = Field(None, alias="SOAP_AUTH_CONTENT")
     soap_auth_map: dict = Field(default_factory=dict)
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
+    use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
 
     @property
     def gg_url(self) -> str:
