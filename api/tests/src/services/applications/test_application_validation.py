@@ -482,7 +482,7 @@ def test_validate_application_form_non_required_form_null_is_included_in_submiss
     assert len(validation_errors) == 1
     assert validation_errors[0].type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
     assert validation_errors[0].field == "is_included_in_submission"
-    assert validation_errors[0].value is None
+    assert validation_errors[0].value is application_form.application_form_id
     assert (
         validation_errors[0].message
         == "is_included_in_submission must be set on all non-required forms"
