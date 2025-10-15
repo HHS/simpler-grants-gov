@@ -1,9 +1,12 @@
 """Tests for attachment transformer."""
 
+from uuid import UUID
+
 import pytest
 from lxml import etree as lxml_etree
 
 from src.services.xml_generation.transformers.attachment_transformer import AttachmentTransformer
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 
 @pytest.mark.xml_validation
@@ -12,7 +15,52 @@ class TestAttachmentTransformer:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.transformer = AttachmentTransformer()
+        # Sample UUIDs for testing
+        self.uuid1 = UUID("11111111-1111-1111-1111-111111111111")
+        self.uuid2 = UUID("22222222-2222-2222-2222-222222222222")
+        self.uuid3 = UUID("33333333-3333-3333-3333-333333333333")
+
+        # Sample attachment field configuration
+        self.attachment_config = {
+            "areas_affected": {"xml_element": "AreasAffected", "type": "single"},
+            "debt_explanation": {"xml_element": "DebtExplanation", "type": "single"},
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
+        }
+
+        # Sample attachment mapping
+        self.attachment_mapping = {
+            self.uuid1: AttachmentInfo(
+                filename="test_document.pdf",
+                mime_type="application/pdf",
+                file_location="./attachments/test_document.pdf",
+                hash_value="aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=",
+            ),
+            self.uuid2: AttachmentInfo(
+                filename="document1.pdf",
+                mime_type="application/pdf",
+                file_location="./attachments/document1.pdf",
+                hash_value="ZG9jdW1lbnQxaGFzaA==",
+            ),
+            self.uuid3: AttachmentInfo(
+                filename="document2.xlsx",
+                mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                file_location="./attachments/document2.xlsx",
+                hash_value="ZG9jdW1lbnQyaGFzaA==",
+            ),
+        }
+
+        self.transformer = AttachmentTransformer(
+            attachment_mapping=self.attachment_mapping,
+            attachment_field_config=self.attachment_config,
+        )
+
         self.nsmap = {
             None: "http://apply.grants.gov/forms/SF424_4_0-V4.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
@@ -316,3 +364,102 @@ class TestAttachmentTransformer:
         assert result["FileLocation"]["@href"] == "./attachments/data_attachment.docx"
         assert result["HashValue"]["@hashAlgorithm"] == "SHA-1"
         assert result["HashValue"]["#text"] == "ZGF0YWF0dGFjaG1lbnRoYXNo"
+
+    def test_uuid_based_single_attachment(self):
+        """Test adding single attachment using UUID."""
+        root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
+
+        # Data with UUID reference
+        data = {"areas_affected": str(self.uuid1)}
+
+        self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+
+        assert "<AreasAffected>" in xml_string
+        assert "<FileName>test_document.pdf</FileName>" in xml_string
+        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        assert 'href="./attachments/test_document.pdf"' in xml_string
+        assert 'hashAlgorithm="SHA-1"' in xml_string
+        assert "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=" in xml_string
+
+    def test_uuid_based_multiple_attachments(self):
+        """Test adding multiple attachments using UUIDs."""
+        root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
+
+        # Data with UUID references
+        data = {"additional_project_title": [str(self.uuid2), str(self.uuid3)]}
+
+        self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+
+        assert "<AdditionalProjectTitle>" in xml_string
+        assert xml_string.count("<AttachedFile>") == 2
+        assert "<FileName>document1.pdf</FileName>" in xml_string
+        assert "<FileName>document2.xlsx</FileName>" in xml_string
+        assert "spreadsheetml.sheet" in xml_string
+
+    def test_uuid_not_found_error(self):
+        """Test error when UUID not found in mapping."""
+        root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
+
+        # UUID that doesn't exist in mapping
+        unknown_uuid = "99999999-9999-9999-9999-999999999999"
+        data = {"debt_explanation": unknown_uuid}
+
+        with pytest.raises(ValueError) as exc_info:
+            self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        assert "not found in attachment mapping" in str(exc_info.value)
+        assert unknown_uuid in str(exc_info.value)
+
+    def test_invalid_uuid_format_error(self):
+        """Test error when UUID format is invalid."""
+        root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
+
+        # Invalid UUID string
+        data = {"debt_explanation": "not-a-valid-uuid"}
+
+        with pytest.raises(ValueError) as exc_info:
+            self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        assert "Invalid UUID format" in str(exc_info.value)
+
+    def test_mixed_single_and_multiple_attachments(self):
+        """Test adding both single and multiple attachments together."""
+        root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
+
+        data = {
+            "debt_explanation": str(self.uuid1),
+            "additional_project_title": [str(self.uuid2), str(self.uuid3)],
+        }
+
+        self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+
+        # Check single attachment
+        assert "<DebtExplanation>" in xml_string
+        assert "<FileName>test_document.pdf</FileName>" in xml_string
+
+        # Check multiple attachments
+        assert "<AdditionalProjectTitle>" in xml_string
+        assert xml_string.count("<AttachedFile>") == 2
+        assert "<FileName>document1.pdf</FileName>" in xml_string
+        assert "<FileName>document2.xlsx</FileName>" in xml_string
+
+    def test_no_attachments_in_data(self):
+        """Test handling when no attachments are in the data."""
+        root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
+
+        data = {"some_other_field": "value"}
+
+        self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+
+        # Should not add any attachment elements
+        assert "AreasAffected" not in xml_string
+        assert "DebtExplanation" not in xml_string
+        assert "AdditionalProjectTitle" not in xml_string

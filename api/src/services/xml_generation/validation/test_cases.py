@@ -241,15 +241,7 @@ SF424_TEST_CASES = [
             "total_estimated_funding": "100000.00",
             "state_review": "c. Program is not covered by E.O. 12372.",
             "delinquent_federal_debt": True,
-            "debt_explanation": {
-                "FileName": "debt_explanation.pdf",
-                "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/debt_explanation.pdf"},
-                "HashValue": {
-                    "@hashAlgorithm": "SHA-1",
-                    "#text": "aGVsbG8gd29ybGQxMjM0NTY3ODk=",
-                },
-            },
+            "debt_explanation": "11111111-1111-1111-1111-111111111111",  # UUID reference
             "certification_agree": True,
             "authorized_representative": {"first_name": "John", "last_name": "Doe"},
             "authorized_representative_title": "CEO",
@@ -261,6 +253,17 @@ SF424_TEST_CASES = [
         "form_name": "SF424_4_0",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "debt_explanation.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "./attachments/debt_explanation.pdf"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "aGVsbG8gd29ybGQxMjM0NTY3ODk=",
+                },
+            }
+        },
     },
     {
         "name": "sf424_with_multiple_attachments",
@@ -298,28 +301,10 @@ SF424_TEST_CASES = [
             "total_estimated_funding": "100000.00",
             "state_review": "c. Program is not covered by E.O. 12372.",
             "delinquent_federal_debt": False,
-            "additional_project_title": {
-                "AttachedFile": [
-                    {
-                        "FileName": "project_description.pdf",
-                        "MimeType": "application/pdf",
-                        "FileLocation": {"@href": "./attachments/project_description.pdf"},
-                        "HashValue": {
-                            "@hashAlgorithm": "SHA-1",
-                            "#text": "cHJvamVjdERlc2NyaXB0aW9uSGFzaA==",
-                        },
-                    },
-                    {
-                        "FileName": "project_timeline.xlsx",
-                        "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "FileLocation": {"@href": "./attachments/project_timeline.xlsx"},
-                        "HashValue": {
-                            "@hashAlgorithm": "SHA-1",
-                            "#text": "cHJvamVjdFRpbWVsaW5lSGFzaA==",
-                        },
-                    },
-                ]
-            },
+            "additional_project_title": [
+                "22222222-2222-2222-2222-222222222222",
+                "33333333-3333-3333-3333-333333333333",
+            ],
             "certification_agree": True,
             "authorized_representative": {"first_name": "John", "last_name": "Doe"},
             "authorized_representative_title": "CEO",
@@ -331,6 +316,26 @@ SF424_TEST_CASES = [
         "form_name": "SF424_4_0",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "pretty_print": True,
+        "attachment_mapping": {
+            "22222222-2222-2222-2222-222222222222": {
+                "FileName": "project_description.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "./attachments/project_description.pdf"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "cHJvamVjdERlc2NyaXB0aW9uSGFzaA==",
+                },
+            },
+            "33333333-3333-3333-3333-333333333333": {
+                "FileName": "project_timeline.xlsx",
+                "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "FileLocation": {"@href": "./attachments/project_timeline.xlsx"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "cHJvamVjdFRpbWVsaW5lSGFzaA==",
+                },
+            },
+        },
     },
     {
         "name": "sf424_with_all_attachment_types",
@@ -357,15 +362,7 @@ SF424_TEST_CASES = [
             "project_title": "Test Project Title",
             "congressional_district_applicant": "DC-00",
             "congressional_district_program_project": "DC-00, VA-08",
-            "additional_congressional_districts": {
-                "FileName": "additional_districts.pdf",
-                "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/additional_districts.pdf"},
-                "HashValue": {
-                    "@hashAlgorithm": "SHA-1",
-                    "#text": "YWRkaXRpb25hbERpc3RyaWN0c0hhc2g=",
-                },
-            },
+            "additional_congressional_districts": "44444444-4444-4444-4444-444444444444",
             "project_start_date": "2024-04-01",
             "project_end_date": "2025-03-31",
             "federal_estimated_funding": "100000.00",
@@ -375,57 +372,15 @@ SF424_TEST_CASES = [
             "other_estimated_funding": "0.00",
             "program_income_estimated_funding": "0.00",
             "total_estimated_funding": "100000.00",
-            "areas_affected": {
-                "FileName": "geographic_areas.pdf",
-                "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/geographic_areas.pdf"},
-                "HashValue": {
-                    "@hashAlgorithm": "SHA-1",
-                    "#text": "Z2VvZ3JhcGhpY0FyZWFzSGFzaA==",
-                },
-            },
+            "areas_affected": "55555555-5555-5555-5555-555555555555",
             "state_review": "c. Program is not covered by E.O. 12372.",
             "delinquent_federal_debt": True,
-            "debt_explanation": {
-                "FileName": "debt_explanation_detailed.docx",
-                "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "FileLocation": {"@href": "./attachments/debt_explanation_detailed.docx"},
-                "HashValue": {
-                    "@hashAlgorithm": "SHA-1",
-                    "#text": "ZGVidEV4cGxhbmF0aW9uSGFzaA==",
-                },
-            },
-            "additional_project_title": {
-                "AttachedFile": [
-                    {
-                        "FileName": "project_overview.pdf",
-                        "MimeType": "application/pdf",
-                        "FileLocation": {"@href": "./attachments/project_overview.pdf"},
-                        "HashValue": {
-                            "@hashAlgorithm": "SHA-1",
-                            "#text": "cHJvamVjdE92ZXJ2aWV3SGFzaA==",
-                        },
-                    },
-                    {
-                        "FileName": "project_budget.xlsx",
-                        "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "FileLocation": {"@href": "./attachments/project_budget.xlsx"},
-                        "HashValue": {
-                            "@hashAlgorithm": "SHA-1",
-                            "#text": "cHJvamVjdEJ1ZGdldEhhc2g=",
-                        },
-                    },
-                    {
-                        "FileName": "project_partners.txt",
-                        "MimeType": "text/plain",
-                        "FileLocation": {"@href": "./attachments/project_partners.txt"},
-                        "HashValue": {
-                            "@hashAlgorithm": "SHA-1",
-                            "#text": "cHJvamVjdFBhcnRuZXJzSGFzaA==",
-                        },
-                    },
-                ]
-            },
+            "debt_explanation": "66666666-6666-6666-6666-666666666666",
+            "additional_project_title": [
+                "77777777-7777-7777-7777-777777777777",
+                "88888888-8888-8888-8888-888888888888",
+                "99999999-9999-9999-9999-999999999999",
+            ],
             "certification_agree": True,
             "authorized_representative": {"first_name": "John", "last_name": "Doe"},
             "authorized_representative_title": "CEO",
@@ -437,6 +392,62 @@ SF424_TEST_CASES = [
         "form_name": "SF424_4_0",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "pretty_print": True,
+        "attachment_mapping": {
+            "44444444-4444-4444-4444-444444444444": {
+                "FileName": "additional_districts.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "./attachments/additional_districts.pdf"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "YWRkaXRpb25hbERpc3RyaWN0c0hhc2g=",
+                },
+            },
+            "55555555-5555-5555-5555-555555555555": {
+                "FileName": "geographic_areas.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "./attachments/geographic_areas.pdf"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "Z2VvZ3JhcGhpY0FyZWFzSGFzaA==",
+                },
+            },
+            "66666666-6666-6666-6666-666666666666": {
+                "FileName": "debt_explanation_detailed.docx",
+                "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "FileLocation": {"@href": "./attachments/debt_explanation_detailed.docx"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "ZGVidEV4cGxhbmF0aW9uSGFzaA==",
+                },
+            },
+            "77777777-7777-7777-7777-777777777777": {
+                "FileName": "project_overview.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "./attachments/project_overview.pdf"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "cHJvamVjdE92ZXJ2aWV3SGFzaA==",
+                },
+            },
+            "88888888-8888-8888-8888-888888888888": {
+                "FileName": "project_budget.xlsx",
+                "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "FileLocation": {"@href": "./attachments/project_budget.xlsx"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "cHJvamVjdEJ1ZGdldEhhc2g=",
+                },
+            },
+            "99999999-9999-9999-9999-999999999999": {
+                "FileName": "project_partners.txt",
+                "MimeType": "text/plain",
+                "FileLocation": {"@href": "./attachments/project_partners.txt"},
+                "HashValue": {
+                    "@hashAlgorithm": "SHA-1",
+                    "#text": "cHJvamVjdFBhcnRuZXJzSGFzaA==",
+                },
+            },
+        },
     },
 ]
 

@@ -43,7 +43,10 @@ class XMLGenerationService:
 
             # Generate XML
             xml_string = self._generate_xml_string(
-                transformed_data, transform_config, request.pretty_print
+                transformed_data,
+                transform_config,
+                request.pretty_print,
+                request.attachment_mapping,
             )
 
             # Log transformation results for development
@@ -58,7 +61,11 @@ class XMLGenerationService:
             return XMLGenerationResponse(success=False, error_message=str(e))
 
     def _generate_xml_string(
-        self, data: dict, transform_config: dict, pretty_print: bool = True
+        self,
+        data: dict,
+        transform_config: dict,
+        pretty_print: bool = True,
+        attachment_mapping: dict | None = None,
     ) -> str:
         """Generate XML string from transformed data."""
         # Get XML configuration from the config metadata
@@ -88,6 +95,7 @@ class XMLGenerationService:
                 namespace_fields,
                 pretty_print,
                 transform_config,
+                attachment_mapping,
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -101,6 +109,7 @@ class XMLGenerationService:
         namespace_fields: dict,
         pretty_print: bool = True,
         transform_config: dict | None = None,
+        attachment_mapping: dict | None = None,
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
@@ -140,10 +149,21 @@ class XMLGenerationService:
         xsd_url = xml_config.get(
             "xsd_url", "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd"
         )
-        self._add_ordered_form_elements(root, data, nsmap, namespace_fields, xsd_url)
+
+        # Get attachment field configuration
+        attachment_field_config = xml_config.get("attachment_fields", {})
+        attachment_field_names = set(attachment_field_config.keys())
+
+        # Add regular form elements (excluding attachments)
+        self._add_ordered_form_elements(
+            root, data, nsmap, namespace_fields, xsd_url, attachment_field_names
+        )
 
         # Add attachment elements if present in data
-        attachment_transformer = AttachmentTransformer()
+        attachment_transformer = AttachmentTransformer(
+            attachment_mapping=attachment_mapping or {},
+            attachment_field_config=attachment_field_config,
+        )
         attachment_transformer.add_attachment_elements(root, data, nsmap)
 
         # Generate XML string
@@ -523,19 +543,29 @@ class XMLGenerationService:
                     )
 
     def _add_ordered_form_elements(
-        self, root: Any, data: dict, nsmap: dict, namespace_fields: dict, xsd_url: str
+        self,
+        root: Any,
+        data: dict,
+        nsmap: dict,
+        namespace_fields: dict,
+        xsd_url: str,
+        attachment_fields: set[str] | None = None,
     ) -> None:
         """Add form elements in the correct sequence order for SF424.
 
         Dynamically extracts the correct order from the XSD schema.
+
+        Args:
+            root: Root XML element
+            data: Data dictionary
+            nsmap: Namespace map
+            namespace_fields: Field to namespace mapping
+            xsd_url: URL to XSD schema
+            attachment_fields: Set of field names that are attachments (handled separately)
         """
-        # Handled separately by AttachmentTransformer
-        attachment_fields = {
-            "debt_explanation",
-            "areas_affected",
-            "additional_congressional_districts",
-            "additional_project_title",
-        }
+        # Default attachment fields if not provided (for backward compatibility)
+        if attachment_fields is None:
+            attachment_fields = set()
 
         # Get element order from XSD schema
         sf424_order = self._get_xsd_element_order(xsd_url)

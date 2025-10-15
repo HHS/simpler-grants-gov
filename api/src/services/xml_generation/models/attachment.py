@@ -52,9 +52,6 @@ class AttachmentFile(BaseModel):
         """
         file_path = Path(file_path)
 
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
-
         # Generate base64-encoded SHA-1 hash
         hash_value = cls.compute_base64_sha1(file_path)
 

@@ -944,6 +944,24 @@ FORM_XML_TRANSFORM_RULES = {
             "include_null": "Include empty XML element: <Field></Field>",
             "default_value": "Use configured default value when field is None",
         },
+        "attachment_fields": {
+            "areas_affected": {
+                "xml_element": "AreasAffected",
+                "type": "single",
+            },
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "debt_explanation": {
+                "xml_element": "DebtExplanation",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
+        },
     },
     # Core application information - direct field mappings
     "submission_type": {"xml_transform": {"target": "SubmissionType"}},

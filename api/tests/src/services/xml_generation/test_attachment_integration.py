@@ -1,37 +1,92 @@
 """Integration tests for attachment handling in XML generation."""
 
+from uuid import UUID
+
 import pytest
 from lxml import etree as lxml_etree
 
-from src.services.xml_generation.models.attachment import AttachmentFile, AttachmentGroup
 from src.services.xml_generation.transformers.attachment_transformer import AttachmentTransformer
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 
 @pytest.mark.xml_validation
 class TestAttachmentIntegration:
-    """Integration tests for complete attachment workflows."""
+    """Integration tests for complete attachment workflows using UUID-based approach."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.transformer = AttachmentTransformer()
+        # Sample UUIDs for testing
+        self.uuid_areas = UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+        self.uuid_districts = UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+        self.uuid_debt = UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
+        self.uuid_project1 = UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
+        self.uuid_project2 = UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+
+        # Create attachment mapping (simulates what create_attachment_mapping() would return)
+        self.attachment_mapping = {
+            self.uuid_areas: AttachmentInfo(
+                filename="geographic_areas.pdf",
+                mime_type="application/pdf",
+                file_location="./attachments/geographic_areas.pdf",
+                hash_value="aGVsbG8gd29ybGQ=",
+            ),
+            self.uuid_districts: AttachmentInfo(
+                filename="districts.txt",
+                mime_type="text/plain",
+                file_location="./attachments/districts.txt",
+                hash_value="ZGlzdHJpY3RzaGFzaA==",
+            ),
+            self.uuid_debt: AttachmentInfo(
+                filename="debt.docx",
+                mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                file_location="./attachments/debt.docx",
+                hash_value="ZGVidGhhc2g=",
+            ),
+            self.uuid_project1: AttachmentInfo(
+                filename="project1.pdf",
+                mime_type="application/pdf",
+                file_location="./attachments/project1.pdf",
+                hash_value="cHJvamVjdDFoYXNo",
+            ),
+            self.uuid_project2: AttachmentInfo(
+                filename="project2.xlsx",
+                mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                file_location="./attachments/project2.xlsx",
+                hash_value="cHJvamVjdDJoYXNo",
+            ),
+        }
+
+        # Attachment field configuration
+        self.attachment_config = {
+            "areas_affected": {"xml_element": "AreasAffected", "type": "single"},
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "debt_explanation": {"xml_element": "DebtExplanation", "type": "single"},
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
+        }
+
+        self.transformer = AttachmentTransformer(
+            attachment_mapping=self.attachment_mapping,
+            attachment_field_config=self.attachment_config,
+        )
+
         self.nsmap = {
             None: "http://apply.grants.gov/forms/SF424_4_0-V4.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "att": "http://apply.grants.gov/system/Attachments-V1.0",
         }
 
-    def test_add_attachment_elements_with_single_attachment_file(self):
-        """Test add_attachment_elements with AttachmentFile object."""
+    def test_add_attachment_elements_with_single_attachment(self):
+        """Test add_attachment_elements with single UUID attachment."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
 
-        areas_file = AttachmentFile(
-            filename="geographic_areas.pdf",
-            mime_type="application/pdf",
-            file_location="./attachments/geographic_areas.pdf",
-            hash_value="aGVsbG8gd29ybGQ=",
-        )
-
-        data = {"areas_affected": areas_file}
+        # Data contains UUID reference
+        data = {"areas_affected": str(self.uuid_areas)}
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
 
@@ -45,27 +100,12 @@ class TestAttachmentIntegration:
         assert "<HashValue" in xml_string
         assert "aGVsbG8gd29ybGQ=" in xml_string
 
-    def test_add_attachment_elements_with_attachment_group(self):
-        """Test add_attachment_elements with AttachmentGroup object."""
+    def test_add_attachment_elements_with_multiple_attachments(self):
+        """Test add_attachment_elements with multiple UUID attachments."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
 
-        group = AttachmentGroup()
-        file1 = AttachmentFile(
-            filename="project1.pdf",
-            mime_type="application/pdf",
-            file_location="./attachments/project1.pdf",
-            hash_value="cHJvamVjdDFoYXNo",
-        )
-        file2 = AttachmentFile(
-            filename="project2.xlsx",
-            mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            file_location="./attachments/project2.xlsx",
-            hash_value="cHJvamVjdDJoYXNo",
-        )
-        group.add_file(file1)
-        group.add_file(file2)
-
-        data = {"additional_project_title": group}
+        # Data contains list of UUID references
+        data = {"additional_project_title": [str(self.uuid_project1), str(self.uuid_project2)]}
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
 
@@ -81,42 +121,12 @@ class TestAttachmentIntegration:
         """Test add_attachment_elements with all four attachment types."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
 
-        # Create all attachment types
-        areas_file = AttachmentFile(
-            filename="areas.pdf",
-            mime_type="application/pdf",
-            file_location="./areas.pdf",
-            hash_value="areashash",
-        )
-
-        districts_file = AttachmentFile(
-            filename="districts.txt",
-            mime_type="text/plain",
-            file_location="./districts.txt",
-            hash_value="districtshash",
-        )
-
-        debt_file = AttachmentFile(
-            filename="debt.docx",
-            mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            file_location="./debt.docx",
-            hash_value="debthash",
-        )
-
-        project_group = AttachmentGroup()
-        project_file = AttachmentFile(
-            filename="project.pdf",
-            mime_type="application/pdf",
-            file_location="./project.pdf",
-            hash_value="projecthash",
-        )
-        project_group.add_file(project_file)
-
+        # Data with all attachment field UUIDs
         data = {
-            "areas_affected": areas_file,
-            "additional_congressional_districts": districts_file,
-            "debt_explanation": debt_file,
-            "additional_project_title": project_group,
+            "areas_affected": str(self.uuid_areas),
+            "additional_congressional_districts": str(self.uuid_districts),
+            "debt_explanation": str(self.uuid_debt),
+            "additional_project_title": [str(self.uuid_project1)],
         }
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
@@ -130,10 +140,10 @@ class TestAttachmentIntegration:
         assert "<AdditionalProjectTitle>" in xml_string
 
         # Verify filenames
-        assert "areas.pdf" in xml_string
+        assert "geographic_areas.pdf" in xml_string
         assert "districts.txt" in xml_string
         assert "debt.docx" in xml_string
-        assert "project.pdf" in xml_string
+        assert "project1.pdf" in xml_string
 
     def test_add_attachment_elements_empty_data(self):
         """Test add_attachment_elements with no attachments."""
@@ -150,33 +160,72 @@ class TestAttachmentIntegration:
         assert "<DebtExplanation>" not in xml_string
         assert "<AdditionalProjectTitle>" not in xml_string
 
-    def test_add_attachment_elements_mixed_dict_and_objects(self):
-        """Test add_attachment_elements with both dict and object formats."""
+    def test_uuid_not_in_mapping_raises_error(self):
+        """Test that using a UUID not in mapping raises helpful error."""
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
 
-        # Mix AttachmentFile object and dict
-        areas_file = AttachmentFile(
-            filename="areas.pdf",
-            mime_type="application/pdf",
-            file_location="./areas.pdf",
-            hash_value="areashash",
-        )
+        unknown_uuid = "99999999-9999-9999-9999-999999999999"
+        data = {"debt_explanation": unknown_uuid}
 
-        debt_dict = {
-            "FileName": "debt.docx",
-            "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "FileLocation": {"@href": "./debt.docx"},
-            "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "debthash"},
+        with pytest.raises(ValueError) as exc_info:
+            self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        assert "not found in attachment mapping" in str(exc_info.value)
+        assert unknown_uuid in str(exc_info.value)
+
+    def test_invalid_uuid_format_raises_error(self):
+        """Test that invalid UUID format raises helpful error."""
+        root = lxml_etree.Element("Application", nsmap=self.nsmap)
+
+        data = {"debt_explanation": "not-a-valid-uuid"}
+
+        with pytest.raises(ValueError) as exc_info:
+            self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        assert "Invalid UUID format" in str(exc_info.value)
+
+    def test_mixed_single_and_multiple_uuids(self):
+        """Test handling both single and multiple UUID attachments together."""
+        root = lxml_etree.Element("Application", nsmap=self.nsmap)
+
+        data = {
+            "areas_affected": str(self.uuid_areas),
+            "debt_explanation": str(self.uuid_debt),
+            "additional_project_title": [str(self.uuid_project1), str(self.uuid_project2)],
         }
-
-        data = {"areas_affected": areas_file, "debt_explanation": debt_dict}
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        # Both should be present
+        # Verify single attachments
         assert "<AreasAffected>" in xml_string
-        assert "areas.pdf" in xml_string
+        assert "geographic_areas.pdf" in xml_string
         assert "<DebtExplanation>" in xml_string
         assert "debt.docx" in xml_string
+
+        # Verify multiple attachments
+        assert "<AdditionalProjectTitle>" in xml_string
+        assert xml_string.count("<AttachedFile>") == 2
+        assert "project1.pdf" in xml_string
+        assert "project2.xlsx" in xml_string
+
+    def test_uuid_objects_instead_of_strings(self):
+        """Test that UUID objects (not just strings) work correctly."""
+        root = lxml_etree.Element("Application", nsmap=self.nsmap)
+
+        # Use UUID objects directly instead of strings
+        data = {
+            "areas_affected": self.uuid_areas,
+            "additional_project_title": [self.uuid_project1, self.uuid_project2],
+        }
+
+        self.transformer.add_attachment_elements(root, data, self.nsmap)
+
+        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+
+        assert "<AreasAffected>" in xml_string
+        assert "geographic_areas.pdf" in xml_string
+        assert "<AdditionalProjectTitle>" in xml_string
+        assert "project1.pdf" in xml_string
+        assert "project2.xlsx" in xml_string
