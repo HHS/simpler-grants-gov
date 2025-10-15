@@ -1,135 +1,275 @@
-# Use the official python3 image based on Debian 11 "Bullseye".
-# https://hub.docker.com/_/python
+FROM amazonlinux:2023 AS builder
 
-# The build stage that will be used to deploy to the various environments
-# needs to be called `release` in order to integrate with the repo's
-# top-level Makefile
-FROM python:3.13-slim AS base
-# See /documentation/api/package-depedency-management.md#Upgrading Python
-# for details on upgrading your Python version
+ARG PYTHON_VERSION=3.13.8
+ARG PY_MM=3.13
+ARG POETRY_VERSION=2.2.1
+ARG PIP_VERSION=25.2
 
-# Install poetry, the package manager.
-# https://python-poetry.org
-RUN pip install --no-cache-dir poetry==2.1.3 --upgrade
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update \
-    # Remove existing packages before installing their never versions
-    && apt-get remove --yes \
-        build-essential \
-        libpq-dev \
-        postgresql \
-        wget \
-    # Install security updates
-    # https://pythonspeed.com/articles/security-updates-in-docker/ \
-    # You can check currently installed package versions by running "make login" \
-    # to go into the Docker container, and then apt list --installed | grep <whatever>
-    && apt-get upgrade --yes \
-    && apt-get install --no-install-recommends --yes \
-        build-essential \
-        libpq-dev \
-        postgresql \
-        wget \
-        libgnutls30 \
-        linux-libc-dev \
-        libxslt1.1 \
-    # Reduce the image size by clear apt cached lists
-    # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-    && apt-get clean \
-    && rm -fr /var/lib/apt/lists/* \
-    && rm /etc/ssl/private/ssl-cert-snakeoil.key
+RUN set -euo pipefail; \
+    dnf -q -y makecache; \
+    yum install -y --allowerasing \
+      gcc-11.5.0-5.amzn2023.0.5 \
+      libstdc++-14.2.1-7.amzn2023.0.2 \
+      make-1:4.3-5.amzn2023.0.2 \
+      wget-1.21.3-1.amzn2023.0.4 \
+      tar-2:1.34-1.amzn2023.0.4 \
+      gzip-1.12-1.amzn2023.0.1 \
+      openssl-devel-1:3.2.2-1.amzn2023.0.1 \
+      zlib-devel-1.2.11-33.amzn2023.0.5 \
+      libffi-devel-3.4.4-1.amzn2023.0.1 \
+      sqlite-devel-3.40.0-1.amzn2023.0.6 \
+      bzip2-devel-1.0.8-6.amzn2023.0.2 \
+      readline-devel-8.1-2.amzn2023.0.2 \
+      ncurses-devel-6.2-4.20200222.amzn2023.0.6 \
+      xz-devel-5.2.5-9.amzn2023.0.2 \
+      gdbm-devel-1:1.19-2.amzn2023.0.2 \
+      shadow-utils-2:4.9-12.amzn2023.0.4 \
+      graphviz-2.44.0-25.amzn2023.0.7 \
+     curl-8.11.1-4.amzn2023.0.1 \
+    && yum clean all && rm -rf /var/cache/yum
+
+# Download and build Python with optimizations
+WORKDIR /tmp
+RUN wget -q https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && tar xzf Python-${PYTHON_VERSION}.tgz
+WORKDIR /tmp/Python-${PYTHON_VERSION}
+RUN ./configure \
+        --prefix=/usr/local \
+        --enable-optimizations \
+        --enable-shared \
+        --with-ensurepip=install \
+        LDFLAGS="-Wl,-rpath=/usr/local/lib" && \
+    make -j"$(nproc)" && \
+    make install
+WORKDIR /tmp
+# Clean Python build artifacts, ensure pip version, create symlinks, and install Poetry in one layer
+RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
+    python3 -m pip install --no-cache-dir --upgrade "pip==${PIP_VERSION}" && \
+    ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
+    ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
+    pip3 install --no-cache-dir poetry==${POETRY_VERSION}
+
+# Provide lightweight shims for 'cat' and 'ls' so subprocess can always find them
+RUN printf '%s\n' '#!/usr/bin/bash' 'exec /usr/bin/cat "$@"' > /usr/local/bin/cat && chmod +x /usr/local/bin/cat && \
+    printf '%s\n' '#!/usr/bin/bash' 'exec /usr/bin/ls  "$@"' > /usr/local/bin/ls  && chmod +x /usr/local/bin/ls
+
+# Remove pip from runtime (keep Poetry, remove vulnerable pip)
+RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
+    /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
+    /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
+    /usr/local/bin/pip* \
+    /usr/local/bin/easy_install* \
+    /root/.cache
+
+# Strip binaries to reduce size
+RUN find /usr/local -type f -executable -exec strip --strip-all {} + 2>/dev/null || true && \
+    find /usr/local -name "*.so*" -exec strip --strip-all {} + 2>/dev/null || true
+
+# Collect required shared libraries for Python
+RUN mkdir -p /runtime/python-libs && \
+    ldd /usr/local/bin/python${PY_MM} | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/python-libs/ 2>/dev/null || true && \
+    for lib in /lib64/ld-*.so.* /lib/ld-*.so.*; do [ -f "$lib" ] && cp "$lib" /runtime/python-libs/; done 2>/dev/null || true
+# Also copy generic dynamic loader symlinks required by execve on common arches
+RUN for link in /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-aarch64.so.1; do \
+      [ -e "$link" ] && cp -P "$link" /runtime/python-libs/ || true; \
+    done
+
+# Also collect libraries required by Python extension modules (e.g., zlib, bz2, lzma, ssl, sqlite3)
+RUN shopt -s nullglob; for so in "/usr/local/lib/python${PY_MM}/lib-dynload/"*.so; do \
+      ldd "$so" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/python-libs/ 2>/dev/null || true; \
+    done
+# Explicitly include common GCC/C++ runtime libraries needed by native wheels (e.g., pydantic-core, numpy)
+RUN for lib in /lib64/libgcc_s.so.1 /usr/lib64/libgcc_s.so.1 /lib64/libstdc++.so.6 /usr/lib64/libstdc++.so.6; do \
+      [ -f "$lib" ] && cp "$lib" /runtime/python-libs/ || true; \
+    done
+# Explicitly include essential glibc runtime libraries commonly required by C extensions
+RUN for lib in /lib64/libpthread.so.0 /usr/lib64/libpthread.so.0 \
+               /lib64/libc.so.6 /usr/lib64/libc.so.6 \
+               /lib64/libm.so.6 /usr/lib64/libm.so.6 \
+               /lib64/libdl.so.2 /usr/lib64/libdl.so.2 \
+               /lib64/librt.so.1 /usr/lib64/librt.so.1 \
+               /lib64/libutil.so.1 /usr/lib64/libutil.so.1 \
+               /lib64/libnsl.so.1 /usr/lib64/libnsl.so.1 \
+               /lib64/libcrypt.so.1 /usr/lib64/libcrypt.so.1; do \
+      [ -f "$lib" ] && cp "$lib" /runtime/python-libs/ || true; \
+    done
+# Resolver and NSS libraries required by network clients (e.g., psycopg binary)
+RUN for lib in /lib64/libresolv.so.2 /usr/lib64/libresolv.so.2 \
+               /lib64/libnss_dns.so.2 /usr/lib64/libnss_dns.so.2 \
+               /lib64/libnss_files.so.2 /usr/lib64/libnss_files.so.2; do \
+      [ -f "$lib" ] && cp "$lib" /runtime/python-libs/ || true; \
+    done
+
+
+# Collect only the required libraries for minimal runtime binaries
+RUN mkdir -p /runtime/system-libs && \
+    for binary in /usr/bin/sh /usr/bin/bash /usr/sbin/useradd /usr/bin/ls /usr/bin/cat /usr/bin/curl /usr/bin/wget; do \
+        [ -f "$binary" ] && ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/system-libs/ 2>/dev/null || true; \
+    done
+
+#==============================================
+# Stage 2: Minimal base FROM SCRATCH
+#==============================================
+FROM scratch AS base
+
+# Ensure /bin/sh exists for RUN in this stage
+COPY --from=builder /usr/bin/sh /bin/sh
+
+# Copy Python runtime
+COPY --from=builder /usr/local /usr/local
+
+# Copy Python shared libraries (including dynamic loader)
+COPY --from=builder /runtime/python-libs /lib
+COPY --from=builder /runtime/python-libs /lib64
+
+# Copy minimal required system binaries
+COPY --from=builder /usr/bin/sh /usr/bin/sh
+COPY --from=builder /usr/bin/bash /usr/bin/bash
+COPY --from=builder /usr/sbin/useradd /usr/sbin/useradd
+COPY --from=builder /usr/bin/ls /usr/bin/ls
+COPY --from=builder /usr/bin/cat /usr/bin/cat
+COPY --from=builder /usr/bin/curl /usr/bin/curl
+COPY --from=builder /usr/bin/wget /usr/bin/wget
+
+
+# Copy only the specific system libraries required by the selected binaries
+COPY --from=builder /runtime/system-libs /usr/lib64
+
+# Copy essential system files
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+# Include shadow since we create users in this stage
+COPY --from=builder /etc/shadow /etc/shadow
+# Copy CA certificates bundle for TLS verification
+COPY --from=builder /etc/ssl/certs /etc/ssl/certs
+COPY --from=builder /etc/pki/ca-trust /etc/pki/ca-trust
+
+# Create necessary directories
+COPY --from=builder /tmp /tmp
+
+# Use bash as the shell for RUN in this stage to avoid /bin/sh resolution issues
+SHELL ["/usr/bin/bash", "-lc"]
+
+# Set environment for Python
+ENV PATH="/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    LD_LIBRARY_PATH="/lib:/lib64:/usr/lib64:/usr/local/lib" \
+    SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
+    SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem" \
+    TMPDIR="/tmp"
 
 ARG RUN_UID
 ARG RUN_USER
 
-# The following logic creates the RUN_USER home directory and the directory where
-# we will be storing the application in the image. This runs when the user is not root
+# Create user and directories
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
     [ "${RUN_USER}" = "root" ] || \
-    (useradd --create-home --create --user-group --home "/home/${RUN_USER}" --uid ${RUN_UID} "${RUN_USER}" \
-    && mkdir /api \
-    && chown -R ${RUN_UID} "/home/${RUN_USER}" /api)
+    ( \
+      "/usr/local/bin/python${PY_MM}" -c "import os; os.makedirs('/var/spool/mail', exist_ok=True); os.makedirs('/api', exist_ok=True); os.makedirs('/api/tmp', exist_ok=True)" && \
+      /usr/sbin/useradd --create-home --user-group --home "/home/${RUN_USER}" --uid "${RUN_UID}" "${RUN_USER}" && \
+      "/usr/local/bin/python${PY_MM}" -c "import os,pwd,stat; uid=int('${RUN_UID}'); user='${RUN_USER}'; gid=pwd.getpwnam(user).pw_gid; [os.path.exists(p) and os.chown(p, uid, gid) for p in (f'/home/{user}','/api','/api/tmp')]; os.chmod('/api/tmp', stat.S_IRWXU)" \
+    ) && \
+    "/usr/local/bin/python${PY_MM}" -c "import os,stat; [ (os.makedirs(d, exist_ok=True), os.chmod(d, (stat.S_IRWXU|stat.S_IRWXG|stat.S_IRWXO|stat.S_ISVTX))) for d in ('/tmp','/var/tmp','/usr/tmp') ]"
 
-#-----------
-# Dev image
-#-----------
+WORKDIR /api
 
+COPY pyproject.toml poetry.lock ./
+
+RUN "/usr/local/bin/python${PY_MM}" -c "import shutil; shutil.rmtree('/api/.venv', ignore_errors=True)"
+
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+ENV VIRTUALENV_ALWAYS_COPY=1
+
+RUN poetry install --no-root --only main
+
+COPY . /api
+
+# Build the application wheel and install it into the venv
+RUN poetry build --format wheel && poetry run pip install --no-cache-dir 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
+# Prune pip and build tools from the in-project venv to keep the final image clean
+RUN /api/.venv/bin/python -c "import site,shutil,glob,os; sp=(site.getsitepackages()[0] if hasattr(site,'getsitepackages') else site.getusersitepackages()); patterns=['pip*','setuptools*','wheel*','_distutils_hack']; [ (shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else (os.remove(p) if os.path.exists(p) else None)) for pat in patterns for p in glob.glob(os.path.join(sp, pat)) ]; bindir=os.path.join(os.path.dirname(os.path.dirname(sp)),'bin'); [ os.remove(p) for p in glob.glob(os.path.join(bindir,'pip*')) if os.path.exists(p) ]; [ os.remove(p) for p in glob.glob(os.path.join(bindir,'easy_install*')) if os.path.exists(p) ]"
+
+#==============================================
+# Stage 3: Dev image
+#==============================================
 FROM base AS dev
 ARG RUN_USER
 
-# In between ARG RUN_USER and USER ${RUN_USER}, the user is still root
-# If there is anything that needs to be ran as root, this is the spot
+# Add Graphviz tools only for dev image
+COPY --from=builder /usr/bin/dot /usr/bin/dot
+COPY --from=builder /usr/bin/neato /usr/bin/neato
+COPY --from=builder /usr/bin/fdp /usr/bin/fdp
+COPY --from=builder /usr/bin/sfdp /usr/bin/sfdp
+COPY --from=builder /usr/bin/twopi /usr/bin/twopi
+COPY --from=builder /usr/bin/circo /usr/bin/circo
+# Graphviz libraries and plugins: copy recursively for simplicity in dev
+COPY --from=builder /usr/lib64/graphviz /usr/lib64/graphviz
+# Also copy the full /usr/lib64 so all transitive deps (pango/cairo/etc.) are present in dev
+COPY --from=builder /usr/lib64 /usr/lib64
+# Optional: copy Graphviz shared data (layouts, config), harmless if absent
+COPY --from=builder /usr/share/graphviz /usr/share/graphviz
 
-# Install graphviz which is used to generate ERD diagrams
-RUN apt-get update && apt-get install --no-install-recommends --yes graphviz \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Pango / GDK-Pixbuf / Fontconfig runtime data & helpers required by Graphviz plugins (optional in dev)
+COPY --from=builder /etc/fonts /etc/fonts
+COPY --from=builder /usr/share/fonts /usr/share/fonts
+
+COPY --from=builder /lib64 /lib64
+COPY --from=builder /lib /lib
+COPY --from=builder /etc/ld.so.cache /etc/ld.so.cache
+COPY --from=builder /etc/ld.so.conf /etc/ld.so.conf
+COPY --from=builder /etc/ld.so.conf.d /etc/ld.so.conf.d
+
+# Generate caches for fontconfig, gdk-pixbuf loaders, and pango modules, then init Graphviz plugins (all optional in dev)
+RUN "/usr/local/bin/python${PY_MM}" -c "import os; os.makedirs('/etc/pango', exist_ok=True); os.makedirs('/usr/lib64/gdk-pixbuf-2.0/2.10.0', exist_ok=True)" && \
+    ([ -x /usr/bin/fc-cache ] && fc-cache -f || true) && \
+    ([ -x /usr/bin/gdk-pixbuf-query-loaders ] && (gdk-pixbuf-query-loaders --update-cache || gdk-pixbuf-query-loaders > /usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache) || true) && \
+    ([ -x /usr/bin/pango-querymodules ] && pango-querymodules > /etc/pango/pango.modules || true) && \
+    (dot -c || true)
+
+# Ensure Graphviz and related image/text renderers can discover their plugins and caches
+ENV GV_PLUGIN_PATH=/usr/lib64/graphviz \
+    GDK_PIXBUF_MODULE_FILE=/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache \
+    PANGO_LIBDIR=/usr/lib64 \
+    PANGO_SYSCONFDIR=/etc \
+    FONTCONFIG_PATH=/etc/fonts \
+    FONTCONFIG_FILE=/etc/fonts/fonts.conf \
+    TMPDIR="/tmp"
 
 USER ${RUN_USER}
 WORKDIR /api
 
+# In dev, prefer external venv to avoid mutating release venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false
+
 COPY pyproject.toml poetry.lock ./
-# Explicitly create a new virtualenv to avoid getting overridden by mounted .venv folders
+
+# Explicitly create a new virtualenv
 RUN poetry config virtualenvs.in-project false && poetry env use python
+
 # Install all dependencies including dev dependencies
 RUN poetry install --no-root --with dev
 
 COPY . /api
 
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
+CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
-# Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
-
-#---------
-# Release
-#---------
-
+#==============================================
+# Stage 5: Minimal release runtime
+#==============================================
 FROM base AS release
 ARG RUN_USER
 
-# Gunicorn requires this workaround to create writable temporary directory in
-# our readonly root file system. https://github.com/aws/containers-roadmap/issues/736
-RUN mkdir -p /tmp
-VOLUME ["/tmp"]
-
-# TODO(https://github.com/navapbc/template-application-flask/issues/23) Productionize the Docker image
-
+# Working directory and runtime environment
 WORKDIR /api
+ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
+    HOST=0.0.0.0 \
+    TMPDIR="/dev/shm" \
+    SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
+    SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem"
 
-COPY . /api
-
-# Remove any existing virtual environments that might exist. This
-# might happen if testing out building the release image from a local machine
-# that has a virtual environment within the project api folder.
-RUN rm -fr /api/.venv
-
-# Set virtualenv location to be in project to be easy to find
-# This will create a virtualenv in /api/.venv/
-# See https://python-poetry.org/docs/configuration/#virtualenvsin-project
-# See https://python-poetry.org/docs/configuration/#using-environment-variables
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-
-# Install production runtime dependencies only
-RUN poetry install --no-root --only main
-
-# Build the application binary (python wheel) defined in pyproject.toml
-# Note that this will only copy over python files, and files stated in the
-# include section in pyproject.toml. Also note that if you change the name or
-# version section in pyproject.toml, you will need to change the dist/... to match
-# or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
-
-# Add project's virtual env to the PATH so we can directly run poetry scripts
-# defiend in pyproject.toml
-ENV PATH="/api/.venv/bin:$PATH"
-
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
-
+# Run as the non-root user created in base
 USER ${RUN_USER}
 
-# Run the application.
-CMD ["poetry", "run", "gunicorn", "src.app:create_app()"]
+CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]
