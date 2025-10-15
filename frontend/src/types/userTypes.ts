@@ -62,16 +62,15 @@ export interface UserDetailProfile {
   last_name: string;
 }
 
-export interface UserDetail {
+export interface UserDetail extends UserDetailProfile {
   user_id: string;
   email: string;
-  profile: UserDetailProfile | null;
   roles?: UserRole[];
 }
 
 export interface UserProfileResponse {
   validationErrors?: UserProfileValidationErrors;
   errorMessage?: string;
-  data?: UserDetail;
+  data?: UserDetailProfile;
   success?: boolean;
 }

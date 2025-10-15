@@ -7,8 +7,12 @@ import { Alert, Table } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
-const OrganizationUserRow = ({ email, profile, roles }: UserDetail) => {
-  const { first_name, last_name } = profile || {};
+const OrganizationUserRow = ({
+  email,
+  first_name,
+  last_name,
+  roles,
+}: UserDetail) => {
   const fullName = first_name && last_name ? `${first_name} ${last_name}` : "";
   const roleNames = roles?.reduce(
     (joined, { role_name }, index) =>
