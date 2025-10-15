@@ -17,8 +17,8 @@ from src.db.models.user_models import ApplicationUser
 from src.util import datetime_util
 from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
-from tests.lib.organization_test_utils import create_user_in_org
 from tests.lib.application_test_utils import create_user_in_app
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
@@ -30,7 +30,6 @@ from tests.src.db.models.factories import (
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
-    OrganizationUserFactory,
     RoleFactory,
     SamGovEntityFactory,
     UserFactory,
