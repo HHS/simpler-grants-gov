@@ -195,7 +195,7 @@ def validate_application_form(
                     message="is_included_in_submission must be set on all non-required forms",
                     type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
                     field="is_included_in_submission",
-                    value=None,
+                    value=application_form.application_form_id,
                 )
             )
 
