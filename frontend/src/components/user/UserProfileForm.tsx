@@ -1,7 +1,10 @@
 "use client";
 
 import { userProfileAction } from "src/app/[locale]/(base)/user/account/actions";
-import { UserDetail, UserProfileValidationErrors } from "src/types/userTypes";
+import {
+  UserDetailWithProfile,
+  UserProfileValidationErrors,
+} from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useActionState } from "react";
@@ -13,7 +16,15 @@ import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
 const UserProfileValidationError =
   ConditionalFormActionError<UserProfileValidationErrors>;
 
-export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
+// note that the userDetails passed in from the user details fetch via the parent
+// does nest the user profile information within a profile object, but the
+// response from the update call does not, resulting in dealing with
+// two different data shapes here.
+export function UserProfileForm({
+  userDetails,
+}: {
+  userDetails: UserDetailWithProfile;
+}) {
   const t = useTranslations("UserAccount");
 
   const [state, formAction, isPending] = useActionState(userProfileAction, {
@@ -49,7 +60,7 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
           name="firstName"
           type="text"
           defaultValue={
-            state.data?.profile?.first_name || userDetails.profile?.first_name
+            state.data?.first_name || userDetails.profile?.first_name
           }
         />
         <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
@@ -58,7 +69,7 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
           name="middleName"
           type="text"
           defaultValue={
-            state.data?.profile?.middle_name || userDetails.profile?.middle_name
+            state.data?.middle_name || userDetails.profile?.middle_name
           }
         />
         <Label htmlFor="lastName">
@@ -73,9 +84,7 @@ export function UserProfileForm({ userDetails }: { userDetails: UserDetail }) {
           id="edit-user-last-name"
           name="lastName"
           type="text"
-          defaultValue={
-            state.data?.profile?.last_name || userDetails.profile?.last_name
-          }
+          defaultValue={state.data?.last_name || userDetails.profile?.last_name}
         />
         <Label htmlFor="email">{t("inputs.email")}</Label>
         <TextInput
