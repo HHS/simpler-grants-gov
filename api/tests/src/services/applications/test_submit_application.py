@@ -59,9 +59,15 @@ def test_submit_application_success(enable_factory_create, db_session):
     # Verify the application status was updated
     assert updated_application.application_status == ApplicationStatus.SUBMITTED
 
+    # Verify submitted_at and submitted_by are set
+    assert updated_application.submitted_at is not None
+    assert updated_application.submitted_by == user.user_id
+
     # Fetch the application from the database to verify the status has been updated
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
+    assert application.submitted_at is not None
+    assert application.submitted_by == user.user_id
 
 
 def test_submit_application_with_missing_required_form(enable_factory_create, db_session):
