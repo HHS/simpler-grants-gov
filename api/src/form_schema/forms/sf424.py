@@ -895,6 +895,10 @@ FORM_UI_SCHEMA = [
         "children": [
             {
                 "type": "field",
+                "definition": "/properties/certification_agree",
+            },
+            {
+                "type": "field",
                 "definition": "/properties/authorized_representative/properties/prefix",
             },
             {
