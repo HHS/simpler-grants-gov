@@ -62,17 +62,19 @@ def get_simpler_soap_response(
             },
         )
         return soap_proxy_response
-    if use_simpler:
+
+    if use_simpler or simpler_soap_client.operation_config.always_call_simpler:
         simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_proxy_response)
-        if simpler_soap_response is not None:
-            logger.info(
-                "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
-                extra={
-                    "soap_api_event": LegacySoapApiEvent.RETURNING_SIMPLER_RESPONSE,
-                    "used_simpler_response": use_simpler,
-                },
-            )
-            return simpler_soap_response
+
+    if use_simpler and simpler_soap_response is not None:
+        logger.info(
+            "simpler_soap_api: Successfully processed request and returning Simpler SOAP response",
+            extra={
+                "soap_api_event": LegacySoapApiEvent.RETURNING_SIMPLER_RESPONSE,
+                "used_simpler_response": use_simpler,
+            },
+        )
+        return simpler_soap_response
 
     logger.info(
         "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
