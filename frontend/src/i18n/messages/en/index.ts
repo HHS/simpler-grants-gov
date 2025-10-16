@@ -1469,8 +1469,9 @@ export const messages = {
       "Visit <link>sam.gov</link> to make changes to your organization’s details.",
     rosterTable: {
       title: "Organization roster",
-      explanation:
-        "Your organization's active members are listed below. Manage Users to add or update roles and permissions.",
+      explanation: "Your organization's active members are listed below.",
+      manageUsersExplanation:
+        "Manage Users to add or update roles and permissions.",
       headings: {
         email: "Email",
         name: "Name",

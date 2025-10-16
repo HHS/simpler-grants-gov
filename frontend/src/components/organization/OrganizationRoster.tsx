@@ -3,9 +3,43 @@ import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsF
 import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Alert, Table } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+
+export const OrganizationRosterSkeleton = () => {
+  const t = useTranslations("OrganizationDetail.rosterTable");
+  return (
+    <>
+      <OrganizationRosterInfo />
+      <Table className="width-full overflow-wrap simpler-application-forms-table">
+        <thead>
+          <tr>
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("headings.email")}
+            </th>
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("headings.name")}
+            </th>
+            <th scope="col" className="bg-base-lightest padding-y-205">
+              {t("headings.roles")}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <OrganizationUserRow
+            email="Loading"
+            user_id="0"
+            first_name="Loading"
+            last_name="Loading"
+            key="suspended"
+          />
+        </tbody>
+      </Table>
+    </>
+  );
+};
 
 const OrganizationUserRow = ({
   email,
@@ -33,7 +67,9 @@ const OrganizationRosterInfo = () => {
   return (
     <>
       <h3>{t("title")}</h3>
-      <div>{t("explanation")}</div>
+      <div>
+        {t("explanation")} {t("manageUsersExplanation")}
+      </div>
     </>
   );
 };
@@ -43,7 +79,7 @@ export const OrganizationRoster = async ({
 }: {
   organizationId: string;
 }) => {
-  const t = useTranslations("OrganizationDetail.rosterTable");
+  const t = await getTranslations("OrganizationDetail.rosterTable");
   const session = await getSession();
   if (!session?.token) {
     return (
