@@ -135,6 +135,8 @@ def get_application_with_auth(
 ) -> Application:
 
     application = get_application(db_session, application_id, user, is_internal_user)
+    if not user and not is_internal_user:
+        raise Exception("No user found, but not marked as internal auth")
     # Check privileges
     if user and not can_access(user, {Privilege.VIEW_APPLICATION}, application):
         logger.info(
