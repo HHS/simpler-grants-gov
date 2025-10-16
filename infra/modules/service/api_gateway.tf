@@ -9,21 +9,6 @@ resource "aws_api_gateway_rest_api" "api" {
   body = jsonencode({
     "openapi" : "3.0.1",
     "paths" : {
-      # Temp disable as we work on fully testing this out
-      # "/health" : {
-      #   "get" : {
-      #     "x-amazon-apigateway-integration" : {
-      #       "type" : "http_proxy",
-      #       "httpMethod" : "GET",
-      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/health",
-      #       "passthroughBehavior" : "when_no_match"
-      #     }
-      #   }
-      # },
-      # Will need to have endpoints with no auth for the following
-      # GET /robots.txt
-      # GET /.well-known/pki-validation/{proxy}
-      # POST /<service_name>/services/v2/<service_port_name>
       "/" : {
         "get" : {
           "x-amazon-apigateway-integration" : {
@@ -34,6 +19,176 @@ resource "aws_api_gateway_rest_api" "api" {
           }
         }
       },
+      "/health" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/health",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      # Login flow endpoints
+      "/v1/users/login" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/v1/users/login/callback" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/callback",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/v1/users/login/result" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/result",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/v1/users/token/logout" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/token/logout",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/v1/users/token/refresh" : {
+        "post" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "POST",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/token/refresh",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      # Swagger
+      "/docs" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/docs",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/static/{proxy+}" : {
+        "get" : {
+          "parameters" : [
+            {
+              "name" : "proxy",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/static/{proxy}",
+            "requestParameters" : {
+              "integration.request.path.proxy" : "method.request.path.proxy"
+            },
+            "passthroughBehavior" : "when_no_match",
+            "cacheKeyParameters" : [
+              "method.request.path.proxy"
+            ]
+          }
+        }
+      },
+      # DNS
+      "/.well-known/pki-validation/{proxy+}" : {
+        "get" : {
+          "parameters" : [
+            {
+              "name" : "proxy",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/.well-known/pki-validation/{proxy}",
+            "requestParameters" : {
+              "integration.request.path.proxy" : "method.request.path.proxy"
+            },
+            "passthroughBehavior" : "when_no_match",
+            "cacheKeyParameters" : [
+              "method.request.path.proxy"
+            ]
+          }
+        }
+      },
+      # Bots
+      "/robots.txt" : {
+        "get" : {
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "GET",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/robots.txt",
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      # Legacy SOAP endpoint
+      "/{service_name}services/v2/{service_port_name}" : {
+        "post" : {
+          "parameters" : [
+            {
+              "name" : "service_name",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            },
+            {
+              "name" : "service_port_name",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "POST",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/{service_name}services/v2/{service_port_name}",
+            "requestParameters" : {
+              "integration.request.path.service_name" : "method.request.path.service_name",
+              "integration.request.path.service_port_name" : "method.request.path.service_port_name",
+            },
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      # Else, proxy and require API token auth
       "/{proxy+}" : {
         "x-amazon-apigateway-any-method" : {
           "parameters" : [
@@ -47,10 +202,9 @@ resource "aws_api_gateway_rest_api" "api" {
             }
           ],
           "security" : [
-            # Temp disable as we work on fully testing this out
-            # {
-            #   "api_key" : []
-            # }
+            {
+              "api_key" : []
+            }
           ],
           "x-amazon-apigateway-integration" : {
             "type" : "http_proxy",
@@ -58,77 +212,12 @@ resource "aws_api_gateway_rest_api" "api" {
             "uri" : "https://${var.optional_extra_alb_domains[0]}/{proxy}",
             "requestParameters" : {
               "integration.request.path.proxy" : "method.request.path.proxy",
-              # Might not be needed, but adding for testing
-              "integration.request.header.Host" : "'${var.domain_name}'"
             },
             "passthroughBehavior" : "when_no_match",
             "timeoutInMillis" : 29000
           }
         }
       },
-      # Temp disable as we work on fully testing this out
-      # "/v1/users/login" : {
-      #   "get" : {
-      #     "x-amazon-apigateway-integration" : {
-      #       "type" : "http_proxy",
-      #       "httpMethod" : "GET",
-      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login",
-      #       "requestParameters" : {
-      #         "integration.request.header.Host" : "'${var.domain_name}'"
-      #       },
-      #       "passthroughBehavior" : "when_no_match"
-      #     }
-      #   }
-      # },
-      # "/v1/users/login/callback" : {
-      #   "get" : {
-      #     "x-amazon-apigateway-integration" : {
-      #       "type" : "http_proxy",
-      #       "httpMethod" : "GET",
-      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/callback",
-      #       "requestParameters" : {
-      #         "integration.request.header.Host" : "'${var.domain_name}'"
-      #       },
-      #       "passthroughBehavior" : "when_no_match"
-      #     }
-      #   }
-      # },
-      # "/docs" : {
-      #   "get" : {
-      #     "x-amazon-apigateway-integration" : {
-      #       "type" : "http_proxy",
-      #       "httpMethod" : "GET",
-      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/docs",
-      #       "passthroughBehavior" : "when_no_match"
-      #     }
-      #   }
-      # },
-      # "/static/{proxy+}" : {
-      #   "get" : {
-      #     "parameters" : [
-      #       {
-      #         "name" : "proxy",
-      #         "in" : "path",
-      #         "required" : true,
-      #         "schema" : {
-      #           "type" : "string"
-      #         }
-      #       }
-      #     ],
-      #     "x-amazon-apigateway-integration" : {
-      #       "type" : "http_proxy",
-      #       "httpMethod" : "GET",
-      #       "uri" : "https://${var.optional_extra_alb_domains[0]}/static/{proxy}",
-      #       "requestParameters" : {
-      #         "integration.request.path.proxy" : "method.request.path.proxy"
-      #       },
-      #       "passthroughBehavior" : "when_no_match",
-      #       "cacheKeyParameters" : [
-      #         "method.request.path.proxy"
-      #       ]
-      #     }
-      #   }
-      # }
     }
   })
   # checkov:skip=CKV_AWS_237: Create before destroy is defined in deployment below
