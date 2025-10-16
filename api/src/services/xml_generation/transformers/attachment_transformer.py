@@ -159,21 +159,26 @@ class AttachmentTransformer:
         """
         group_elem = lxml_etree.SubElement(parent, element_name)
 
-        # Handle direct list of attachments
+        # Normalize to list of file data
+        files_to_add: list[Any] = []
         if isinstance(attachment_data, list):
-            for file_data in attachment_data:
-                file_elem = lxml_etree.SubElement(group_elem, "AttachedFile")
-                self._populate_attachment_content(file_elem, file_data, nsmap)
+            files_to_add = attachment_data
         elif isinstance(attachment_data, dict) and "AttachedFile" in attachment_data:
             attached_files = attachment_data["AttachedFile"]
-            if isinstance(attached_files, list):
-                for file_data in attached_files:
-                    file_elem = lxml_etree.SubElement(group_elem, "AttachedFile")
-                    self._populate_attachment_content(file_elem, file_data, nsmap)
-            else:
-                # Single file in the list
-                file_elem = lxml_etree.SubElement(group_elem, "AttachedFile")
-                self._populate_attachment_content(file_elem, attached_files, nsmap)
+            files_to_add = attached_files if isinstance(attached_files, list) else [attached_files]
+
+        # Add each file
+        for file_data in files_to_add:
+            self._add_attached_file_element(group_elem, file_data, nsmap)
+
+    def _add_attached_file_element(
+        self,
+        parent: lxml_etree._Element,
+        file_data: Any,
+        nsmap: dict[str, str],
+    ) -> None:
+        file_elem = lxml_etree.SubElement(parent, "AttachedFile")
+        self._populate_attachment_content(file_elem, file_data, nsmap)
 
     def _populate_attachment_content(
         self,
