@@ -420,16 +420,16 @@ def test_application_start_invalid_request(
 
 
 def test_application_form_update_success_create(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successful creation of an application form response"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     competition_form = CompetitionFormFactory.create(competition=application.competition)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
@@ -438,7 +438,7 @@ def test_application_form_update_success_create(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert
@@ -458,12 +458,15 @@ def test_application_form_update_success_create(
 
 
 def test_application_form_update_success_update(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successful update of an existing application form response"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
@@ -477,15 +480,12 @@ def test_application_form_update_success_update(
         application_response={"name": "Original Name"},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     request_data = {"application_response": {"name": "Updated Name"}}
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -534,14 +534,13 @@ def test_application_form_update_with_validation_warnings(
     client,
     enable_factory_create,
     db_session,
-    user,
-    user_auth_token,
     application_response,
     expected_warnings,
     expected_form_status,
 ):
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
@@ -555,15 +554,12 @@ def test_application_form_update_with_validation_warnings(
         application_response={"name": "Original Name"},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     request_data = {"application_response": application_response}
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -577,13 +573,11 @@ def test_application_form_update_with_validation_warnings(
 
 
 def test_application_form_update_with_rule_validation_issues(
-    client,
-    enable_factory_create,
-    db_session,
-    user,
-    user_auth_token,
+    client, enable_factory_create, db_session
 ):
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(
         form_json_schema=SIMPLE_ATTACHMENT_JSON_SCHEMA,
         form_rule_schema=SIMPLE_ATTACHMENT_RULE_SCHEMA,
@@ -600,16 +594,13 @@ def test_application_form_update_with_rule_validation_issues(
         application_response={},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     application_response = {"attachment_field": "90b413f3-b0f3-4aed-9f30-c109991db0fc"}
     request_data = {"application_response": application_response}
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -633,12 +624,11 @@ def test_application_form_update_with_invalid_schema_500(
     client,
     enable_factory_create,
     db_session,
-    user,
-    user_auth_token,
 ):
     """In this test we intentionally create a bad JSON schema"""
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema={"properties": ["bad"]})
 
     competition_form = CompetitionFormFactory.create(
@@ -652,15 +642,12 @@ def test_application_form_update_with_invalid_schema_500(
         application_response={"name": "Original Name"},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     request_data = {"application_response": {"name": "Changed Name"}}
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 500
@@ -706,16 +693,15 @@ def test_application_form_update_application_not_found(
 
 
 def test_application_form_update_form_not_found(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application form update fails when form doesn't exist"""
-
-    # Create application
-    application = ApplicationFactory.create()
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     application_id = str(application.application_id)
     non_existent_form_id = str(uuid.uuid4())
     request_data = {"application_response": {"name": "John Doe"}}
@@ -723,7 +709,7 @@ def test_application_form_update_form_not_found(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{non_existent_form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert
@@ -803,20 +789,20 @@ def test_application_form_update_invalid_request(
 
 
 def test_application_form_update_complex_json(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application form update with complex JSON data"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     competition_form = CompetitionFormFactory.create(competition=application.competition)
 
     application_form = ApplicationFormFactory.create(
         application=application, competition_form=competition_form
     )
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
 
     complex_json = {
         "personal_info": {
@@ -838,7 +824,7 @@ def test_application_form_update_complex_json(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{competition_form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert
@@ -858,16 +844,16 @@ def test_application_form_update_complex_json(
 
 
 def test_application_form_update_with_is_included_in_submission_true(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application form update with is_included_in_submission set to true"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     competition_form = CompetitionFormFactory.create(competition=application.competition)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
@@ -879,7 +865,7 @@ def test_application_form_update_with_is_included_in_submission_true(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert
@@ -901,17 +887,17 @@ def test_application_form_update_with_is_included_in_submission_true(
 
 
 def test_application_form_update_with_is_included_in_submission_false(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application form update with is_included_in_submission set to false"""
     # Create application
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
 
     competition_form = CompetitionFormFactory.create(competition=application.competition)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
     request_data = {
@@ -922,7 +908,7 @@ def test_application_form_update_with_is_included_in_submission_false(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert
@@ -944,16 +930,16 @@ def test_application_form_update_with_is_included_in_submission_false(
 
 
 def test_application_form_update_without_is_included_in_submission(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application form update without is_included_in_submission field defaults to None"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     competition_form = CompetitionFormFactory.create(competition=application.competition)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
 
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
@@ -962,7 +948,7 @@ def test_application_form_update_without_is_included_in_submission(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert
@@ -984,12 +970,15 @@ def test_application_form_update_without_is_included_in_submission(
 
 
 def test_application_form_update_existing_form_preserves_is_included_in_submission(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test updating existing application form preserves is_included_in_submission when not provided"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
@@ -1004,15 +993,12 @@ def test_application_form_update_existing_form_preserves_is_included_in_submissi
         is_included_in_submission=True,
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     request_data = {"application_response": {"name": "Updated Name"}}
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -1027,12 +1013,15 @@ def test_application_form_update_existing_form_preserves_is_included_in_submissi
 
 
 def test_application_form_update_existing_form_updates_is_included_in_submission(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test updating existing application form updates is_included_in_submission when provided"""
     # Create application
-    application = ApplicationFactory.create()
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
 
     competition_form = CompetitionFormFactory.create(
@@ -1047,9 +1036,6 @@ def test_application_form_update_existing_form_updates_is_included_in_submission
         is_included_in_submission=True,
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     request_data = {
         "application_response": {"name": "Updated Name"},
         "is_included_in_submission": False,
@@ -1058,7 +1044,7 @@ def test_application_form_update_existing_form_updates_is_included_in_submission
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -2020,14 +2006,13 @@ def test_application_submit_invalid_required_form(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_form_update_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user, user_auth_token, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test form update fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION], status=initial_status
+    )
 
     form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
@@ -2037,7 +2022,7 @@ def test_application_form_update_forbidden_not_in_progress(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response
@@ -2313,21 +2298,22 @@ def test_application_form_get_success_when_associated(
 
 
 def test_application_form_update_success_when_associated(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application form update succeeds when user is associated with the application"""
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
 
     competition_form = CompetitionFormFactory.create(competition=application.competition)
-
-    ApplicationUserFactory.create(application=application, user=user)
-
     request_data = {"application_response": {"name": "John Doe"}}
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{competition_form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3157,11 +3143,15 @@ def test_application_start_both_applicant_types_allowed(
 
 
 def test_application_form_inclusion_update_success_true(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successfully setting form inclusion to true"""
     # Create application with a form
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
@@ -3173,9 +3163,6 @@ def test_application_form_inclusion_update_success_true(
         is_included_in_submission=None,
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     application_id = str(application.application_id)
     form_id = str(form.form_id)
     request_data = {"is_included_in_submission": True}
@@ -3183,7 +3170,7 @@ def test_application_form_inclusion_update_success_true(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3365,11 +3352,15 @@ def test_application_start_organization_valid_entity_success(
 
 
 def test_application_form_inclusion_update_success_false(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test successfully setting form inclusion to false"""
     # Create application with a form
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
@@ -3381,9 +3372,6 @@ def test_application_form_inclusion_update_success_false(
         is_included_in_submission=True,
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     application_id = str(application.application_id)
     form_id = str(form.form_id)
     request_data = {"is_included_in_submission": False}
@@ -3391,7 +3379,7 @@ def test_application_form_inclusion_update_success_false(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3491,17 +3479,17 @@ def test_application_start_organization_entity_expiring_yesterday(
 
 
 def test_application_form_inclusion_update_application_form_not_found(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test form inclusion update fails when application form doesn't exist"""
     # Create application and form, but no application form record
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     form = FormFactory.create()
     CompetitionFormFactory.create(competition=application.competition, form=form)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     application_id = str(application.application_id)
     form_id = str(form.form_id)
     request_data = {"is_included_in_submission": True}
@@ -3509,7 +3497,7 @@ def test_application_form_inclusion_update_application_form_not_found(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
@@ -3588,7 +3576,9 @@ def test_application_start_with_pre_population(
 
 
 def test_application_form_update_with_pre_population(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test that updating an application form triggers pre-population of new fields"""
     # Create application
@@ -3596,7 +3586,9 @@ def test_application_form_update_with_pre_population(
         opportunity_number="UPDATE-OPP-456", opportunity_title="Updated Opportunity Title"
     )
 
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     application.competition.opportunity = opportunity
 
     # Create a form with pre-population rules
@@ -3615,10 +3607,6 @@ def test_application_form_update_with_pre_population(
         competition=application.competition,
         form=form,
     )
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     application_id = str(application.application_id)
     form_id = str(competition_form.form_id)
 
@@ -3628,7 +3616,7 @@ def test_application_form_update_with_pre_population(
     response = client.put(
         f"/alpha/applications/{application_id}/forms/{form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3650,13 +3638,17 @@ def test_application_form_update_with_pre_population(
 
 
 def test_application_form_update_overwrites_user_changes_with_pre_population(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test that pre-population overwrites user values for pre-populated fields"""
     # Create application
     opportunity = OpportunityFactory.create(opportunity_number="PRESERVE-OPP-789")
 
-    application = ApplicationFactory.create()
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     application.competition.opportunity = opportunity
 
     # Create a form with pre-population rules
@@ -3678,9 +3670,6 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
         application_response={"opportunity_number_field": "User Changed This Value"},
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     request_data = {
         "application_response": {"opportunity_number_field": "User Tried To Change Again"}
     }
@@ -3688,7 +3677,7 @@ def test_application_form_update_overwrites_user_changes_with_pre_population(
     response = client.put(
         f"/alpha/applications/{application.application_id}/forms/{form.form_id}",
         json=request_data,
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -3760,6 +3749,66 @@ def test_application_start_forbidden(
 
     response = client.post(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_form_update_create_403_access(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test forbidden creation of an application form response"""
+    # Create application
+    application = ApplicationFactory.create()
+
+    competition_form = CompetitionFormFactory.create(competition=application.competition)
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+
+    application_id = str(application.application_id)
+    form_id = str(competition_form.form_id)
+    request_data = {"application_response": {"name": "John Doe"}}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    # Assert
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_form_inclusion_update_403_access(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test forbidden setting form inclusion to true"""
+    # Create application with a form
+    application = ApplicationFactory.create()
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
+
+    # Create an application form with some data but no inclusion flag set
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "John Doe"},
+        is_included_in_submission=None,
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    application_id = str(application.application_id)
+    form_id = str(form.form_id)
+    request_data = {"is_included_in_submission": True}
+
+    response = client.put(
+        f"/alpha/applications/{application_id}/forms/{form_id}/inclusion",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert response.status_code == 403
