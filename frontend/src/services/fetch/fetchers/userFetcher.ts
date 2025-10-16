@@ -51,6 +51,7 @@ export const updateUserDetails = async (
   return json.data;
 };
 
+// unused, but we may want it later
 export const getUserPrivileges = async (
   token: string,
   userId: string,

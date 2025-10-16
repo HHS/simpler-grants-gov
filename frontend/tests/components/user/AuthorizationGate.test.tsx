@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ApiRequestError } from "src/errors";
-import { useFetchedResources } from "src/hooks/useFetchedResources";
+import { useAuthorizedData } from "src/hooks/useAuthorizedData";
 import { AuthorizedData } from "src/types/authTypes";
 import { UserPrivilegeDefinition } from "src/types/userTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
@@ -133,7 +133,7 @@ describe("AuthorizationGate", () => {
   });
   it("passes down all fetched resources via provider", async () => {
     const ProviderTester = () => {
-      const resources = useFetchedResources();
+      const resources = useAuthorizedData();
       return (
         <div>
           fetchedResources
@@ -170,7 +170,7 @@ describe("AuthorizationGate", () => {
       },
     );
     const ProviderTester = () => {
-      const resources = useFetchedResources();
+      const resources = useAuthorizedData();
       return (
         <div>
           requiredPermissions

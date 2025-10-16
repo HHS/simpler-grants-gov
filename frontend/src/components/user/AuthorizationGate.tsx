@@ -2,7 +2,7 @@
 
 import { isEmpty } from "lodash";
 import { parseErrorStatus } from "src/errors";
-import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
+import { AuthorizedDataProvider } from "src/hooks/useAuthorizedData";
 import { getSession } from "src/services/auth/session";
 import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
 import {
@@ -191,11 +191,11 @@ export async function AuthorizationGate({
       )
     : children;
 
-  // FetchedResourcesProvider allows any client component children of the gate to receive
+  // AuthorizedDataProvider allows any client component children of the gate to receive
   // fetched resources via context.
   return (
-    <FetchedResourcesProvider value={authorizedData}>
+    <AuthorizedDataProvider value={authorizedData}>
       {childrenWithResources}
-    </FetchedResourcesProvider>
+    </AuthorizedDataProvider>
   );
 }
