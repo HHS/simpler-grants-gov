@@ -13,6 +13,7 @@ from src.services.applications.application_validation import (
     validate_forms,
 )
 from src.services.applications.get_application import get_application
+from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +32,10 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     validate_competition_open(application.competition, ApplicationAction.SUBMIT)
     validate_forms(application, ApplicationAction.SUBMIT)
 
-    # Update application status
+    # Update application status and submission metadata
     application.application_status = ApplicationStatus.SUBMITTED
+    application.submitted_at = utcnow()
+    application.submitted_by = user.user_id
     logger.info("Application successfully submitted")
 
     # Add application metadata to logs

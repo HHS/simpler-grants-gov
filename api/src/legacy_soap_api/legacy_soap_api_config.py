@@ -22,6 +22,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_auth_content: str | None = Field(None, alias="SOAP_AUTH_CONTENT")
     soap_auth_map: dict = Field(default_factory=dict)
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
+    use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
 
     @property
     def gg_url(self) -> str:
@@ -69,6 +70,7 @@ class SOAPOperationConfig:
     response_operation_name: str
     compare_endpoints: bool = False
     is_mtom: bool = False
+    always_call_simpler: bool = False
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -98,6 +100,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             force_list_attributes=("OpportunityDetails",),
             key_indexes={"OpportunityDetails": "CompetitionID"},
             compare_endpoints=True,
+            always_call_simpler=True,
             namespace_keymap={
                 "GetOpportunityListResponse": "ns2",
                 "OpportunityDetails": "ns5",
