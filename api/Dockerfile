@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:prasnava-6746-optimize-api-container-ed93a7b@sha256:6cb38afc19d761a8c2cf94fbd540f30c67e849f843b83efbdf6303ae210d44af AS base
+FROM ghcr.io/hhs/python-base-image:c2ba32a AS base
 
 ARG RUN_UID
 ARG RUN_USER
