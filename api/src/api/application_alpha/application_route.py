@@ -94,6 +94,7 @@ def application_update(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         # Call the service to update the application
         application = update_application(db_session, application_id, updates, user)
 
@@ -123,6 +124,7 @@ def application_form_update(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         # Call the service to update the application form
         application_form, warnings = update_application_form(
             db_session,
@@ -156,6 +158,7 @@ def application_form_inclusion_update(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         # Use the existing service with inclusion-only update
         application_form, _ = update_application_form(
             db_session,
@@ -276,6 +279,7 @@ def application_attachment_create(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application_attachment = create_application_attachment(
             db_session, application_id, user, form_and_files_data
         )
@@ -336,6 +340,7 @@ def application_attachment_update(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application_attachment = update_application_attachment(
             db_session, application_id, application_attachment_id, user, form_and_files_data
         )
@@ -364,6 +369,7 @@ def application_attachment_delete(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         delete_application_attachment(db_session, application_id, application_attachment_id, user)
 
     return response.ApiResponse(message="Success")
