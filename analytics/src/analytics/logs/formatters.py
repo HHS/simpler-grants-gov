@@ -10,10 +10,11 @@ See https://docs.python.org/3/library/logging.html#formatter-objects
 
 import json
 import logging
+from collections.abc import Callable
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
 
 from analytics.logs import decodelog
