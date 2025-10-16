@@ -18,6 +18,36 @@ from tests.src.db.models.factories import (
 )
 
 
+@pytest.fixture
+def app_a():
+    return ApplicationFactory.create()
+
+
+@pytest.fixture
+def app_b():
+    return ApplicationFactory.create()
+
+
+@pytest.fixture
+def org_a():
+    return OrganizationFactory.create()
+
+
+@pytest.fixture
+def org_b():
+    return OrganizationFactory.create()
+
+
+@pytest.fixture
+def apps_owned_org_a(org_a):
+    return ApplicationFactory.create_batch(2, organization=org_a)
+
+
+@pytest.fixture
+def app_owned_org_b(org_b):
+    return ApplicationFactory.create(organization=org_b)
+
+
 def test_user_get_applications_success(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
@@ -232,36 +262,6 @@ def test_user_application_list_item_schema():
     assert result["competition"]["competition_title"] == "Test Competition"
 
 
-@pytest.fixture
-def app_a():
-    return ApplicationFactory.create()
-
-
-@pytest.fixture
-def app_b():
-    return ApplicationFactory.create()
-
-
-@pytest.fixture
-def org_a():
-    return OrganizationFactory.create()
-
-
-@pytest.fixture
-def org_b():
-    return OrganizationFactory.create()
-
-
-@pytest.fixture
-def apps_owned_org_a(org_a):
-    return ApplicationFactory.create_batch(2, organization=org_a)
-
-
-@pytest.fixture
-def app_owned_org_b(org_b):
-    return ApplicationFactory.create(organization=org_b)
-
-
 @pytest.mark.parametrize(
     "privileges,apps_count",
     [
@@ -381,7 +381,7 @@ def test_user_application_list_access_multi_applications_orgs(
     # Give the same user LIST privilege on a different organization (org_b)
     OrganizationUserRoleFactory(
         organization_user=OrganizationUserFactory.create(user=user, organization=org_b),
-        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+        role=RoleFactory.create(privileges=[Privilege.LIST_APPLICATION]),
     )
 
     # create an organization-user link with no roles/privileges
@@ -399,13 +399,13 @@ def test_user_application_list_access_multi_applications_orgs(
 
     # assert only applications with correct privilege is returned
     applications = response.json["data"]
-    assert len(applications) == 3
+    assert len(applications) == 2
     assert set(app["application_id"] for app in applications) == set(
-        str(app.application_id) for app in apps_owned_org_a + [app_owned_org_b]
+        str(app.application_id) for app in apps_owned_org_a
     )
 
 
-def test_user_application_list_access_org_and_app_privilege(
+def test_user_application_list_access_org_and_app_privilege_no_duplication(
     client, enable_factory_create, db_session, app_owned_org_b, org_b, user
 ):
     """Test that if a user has both APP-LEVEL and ORG-LEVEL VIEW_APPLICATION privileges
@@ -432,3 +432,37 @@ def test_user_application_list_access_org_and_app_privilege(
     applications = response.json["data"]
     assert len(applications) == 1
     assert applications[0]["application_id"] == str(app_owned_org_b.application_id)
+
+
+def test_user_application_list_access_org_and_app_privilege(
+    client, enable_factory_create, db_session, org_a, org_b, app_owned_org_b, apps_owned_org_a, user
+):
+    """Test that if a user has:
+    - ORG-LEVEL VIEW privilege on Org A (covering multiple apps)
+    - APP-LEVEL VIEW privilege on a specific app in Org B"""
+
+    # Create user and give APP-LEVEL VIEW on app_org_b
+    user, _, token = create_user_in_app(
+        db_session, application=app_owned_org_b, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    # Give ORG-LEVEL VIEW on org_a
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify all apps are returned, no duplicates
+    applications = response.json["data"]
+    assert len(applications) == 3
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in apps_owned_org_a + [app_owned_org_b]
+    )
