@@ -1,11 +1,47 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { ApiRequestError } from "src/errors";
 import { useFetchedResources } from "src/hooks/useFetchedResources";
+import { AuthorizedData } from "src/types/authTypes";
+import { UserPrivilegeDefinition } from "src/types/userTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { render, screen } from "tests/react-utils";
 
 import { JSX } from "react";
 
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
+
+const PropTester = ({
+  authorizedData,
+}: {
+  authorizedData?: AuthorizedData;
+}) => {
+  return (
+    <>
+      <div>
+        fetchedResources
+        {Object.entries(authorizedData!.fetchedResources).map(
+          ([resourceKey, resourceValue]) => (
+            <div key={resourceKey}>
+              <div>{resourceKey}</div>
+              <div>{resourceValue.data as string}</div>
+            </div>
+          ),
+        )}
+      </div>
+      <div>
+        requiredPermissions
+        {authorizedData!.confirmedPrivileges.map((permission) => (
+          <div key={`${permission.privilege}-${permission.resourceType}`}>
+            <div>
+              {permission.privilege} : {permission.authorized.toString()}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};
 
 const mockGetSession = jest.fn();
 const mockOnUnauthorized = jest.fn();
@@ -22,7 +58,11 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
-  checkUserPrivilege: () => mockCheckUserPrivilege() as unknown,
+  checkUserPrivilege: (
+    _token: string,
+    _userId: string,
+    privilegeDefinition: UserPrivilegeDefinition,
+  ) => mockCheckUserPrivilege(privilegeDefinition) as unknown,
 }));
 
 describe("AuthorizationGate", () => {
@@ -87,7 +127,7 @@ describe("AuthorizationGate", () => {
     expect(mockOnError).toHaveBeenCalledTimes(1);
     expect(mockOnError).toHaveBeenCalledWith(fakeError);
   });
-  it("renders children when all resource promises return with 200s and passes down all fetched resources via provider as expected", async () => {
+  it("passes down all fetched resources via provider", async () => {
     const ProviderTester = () => {
       const resources = useFetchedResources();
       return (
@@ -116,8 +156,15 @@ describe("AuthorizationGate", () => {
     expect(screen.getByText("firstResource")).toBeInTheDocument();
     expect(screen.getByText("some resolved value")).toBeInTheDocument();
   });
-  it("renders children and passes down all fetched permission check results via provider as expected", async () => {
-    mockCheckUserPrivilege.mockResolvedValue([]);
+  it("passes down all fetched permission check results via provider", async () => {
+    mockCheckUserPrivilege.mockImplementation(
+      (privilegeDefinition: UserPrivilegeDefinition) => {
+        if (privilegeDefinition.resourceId === "1") {
+          return Promise.resolve([]);
+        }
+        return Promise.reject(new ApiRequestError("", "", 403));
+      },
+    );
     const ProviderTester = () => {
       const resources = useFetchedResources();
       return (
@@ -152,6 +199,36 @@ describe("AuthorizationGate", () => {
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(screen.getByText("modify_organization : true")).toBeInTheDocument();
-    expect(screen.getByText("read_application : true")).toBeInTheDocument();
+    expect(screen.getByText("read_application : false")).toBeInTheDocument();
+  });
+  it("passes fetched resources and privilege check results as prop to top level child", async () => {
+    mockCheckUserPrivilege.mockImplementation(
+      (privilegeDefinition: UserPrivilegeDefinition) => {
+        if (privilegeDefinition.resourceId === "1") {
+          return Promise.resolve([]);
+        }
+        return Promise.reject(new ApiRequestError("", "", 403));
+      },
+    );
+    const component = await AuthorizationGate({
+      children: <PropTester />,
+      onUnauthorized: mockOnUnauthorized,
+      requiredPrivileges: [
+        {
+          resourceId: "1",
+          resourceType: "organization",
+          privilege: "modify_organization",
+        },
+        {
+          resourceId: "2",
+          resourceType: "application",
+          privilege: "read_application",
+        },
+      ],
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).not.toHaveBeenCalled();
+    expect(screen.getByText("modify_organization : true")).toBeInTheDocument();
+    expect(screen.getByText("read_application : false")).toBeInTheDocument();
   });
 });
