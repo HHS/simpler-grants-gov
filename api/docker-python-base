@@ -160,6 +160,7 @@ COPY --from=builder /usr/bin/sfdp /usr/bin/sfdp
 COPY --from=builder /usr/bin/twopi /usr/bin/twopi
 COPY --from=builder /usr/bin/circo /usr/bin/circo
 COPY --from=builder /usr/bin/fc-cache /usr/bin/fc-cache
+# Helper binaries to generate image/text rendering caches (may be absent on AL2023); skip copying if unavailable
 
 # Copy only the specific system libraries required by the selected binaries
 COPY --from=builder /runtime/system-libs /usr/lib64
@@ -179,6 +180,8 @@ COPY --from=builder /etc/ld.so.conf.d /etc/ld.so.conf.d
 # Graphviz plugins and shared data
 COPY --from=builder /usr/lib64/graphviz /usr/lib64/graphviz
 COPY --from=builder /usr/share/graphviz /usr/share/graphviz
+# GDK-Pixbuf loaders required by Graphviz PNG renderer
+COPY --from=builder /usr/lib64/gdk-pixbuf-2.0 /usr/lib64/gdk-pixbuf-2.0
 # Fonts and fontconfig
 COPY --from=builder /etc/fonts /etc/fonts
 COPY --from=builder /usr/share/fonts /usr/share/fonts
