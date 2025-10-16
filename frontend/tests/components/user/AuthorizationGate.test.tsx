@@ -1,6 +1,5 @@
 import { ApiRequestError } from "src/errors";
 import { useFetchedResources } from "src/hooks/useFetchedResources";
-import { fakeUserPrivilegesResponse } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { render, screen } from "tests/react-utils";
 
@@ -98,26 +97,12 @@ describe("AuthorizationGate", () => {
             ([resourceKey, resourceValue]) => (
               <div key={resourceKey}>
                 <div>{resourceKey}</div>
-                <div>{resourceValue.data}</div>
+                <div>{resourceValue.data as string}</div>
               </div>
             ),
           )}
         </div>
       );
-
-      // return Object.entries(resources).map(([dataType, dataValue]) => (
-      //   <div key={dataType}>
-      //     <div>{dataType}</div>
-      //     <div>
-      //       {Object.entries(dataValue).map(([resourceKey, resourceValue]) => (
-      //         <>
-      //           <div key={resourceKey}>{resourceKey}</div>
-      //           <div>{resourceValue.data || resourceValue.authorized}</div>
-      //         </>
-      //       ))}
-      //     </div>
-      //   </div>
-      // ));
     };
     const component = await AuthorizationGate({
       children: <ProviderTester />,
@@ -125,20 +110,13 @@ describe("AuthorizationGate", () => {
       resourcePromises: {
         firstResource: Promise.resolve("some resolved value"),
       },
-      // requiredPrivileges: [
-      //   {
-      //     resourceType: "application",
-      //     resourceId: "1",
-      //     privilege: "view_application",
-      //   },
-      // ],
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(screen.getByText("firstResource")).toBeInTheDocument();
     expect(screen.getByText("some resolved value")).toBeInTheDocument();
   });
-  it.only("renders children and passes down all fetched permission check results via provider as expected", async () => {
+  it("renders children and passes down all fetched permission check results via provider as expected", async () => {
     mockCheckUserPrivilege.mockResolvedValue([]);
     const ProviderTester = () => {
       const resources = useFetchedResources();

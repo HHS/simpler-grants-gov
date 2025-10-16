@@ -79,7 +79,7 @@ export type UserProviderState = {
 };
 
 export type FetchedResource = {
-  data?: object;
+  data?: unknown; // we can make this generic if we want
   statusCode: number;
   error?: string;
 };

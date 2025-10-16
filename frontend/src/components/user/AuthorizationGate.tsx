@@ -134,10 +134,6 @@ export async function AuthorizationGate({
       session.user_id,
       requiredPrivileges,
     );
-    // userPrivileges = userPrivilegeResults.reduce(
-    //   (all, privilegeResult) => ({ ...all, ...privilegeResult }),
-    //   {},
-    // );
   }
 
   const mappedResourcePromises =
