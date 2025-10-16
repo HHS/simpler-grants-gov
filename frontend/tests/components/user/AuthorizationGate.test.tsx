@@ -91,8 +91,9 @@ describe("AuthorizationGate", () => {
     expect(mockOnUnauthenticated).toHaveBeenCalled();
   });
   it("runs onUnauthorized handler if any resource promises resolve with a 403 status code", async () => {
+    const child = <div>HELLO</div>;
     const component = await AuthorizationGate({
-      children: <div>HELLO</div>,
+      children: child,
       onUnauthorized: mockOnUnauthorized,
       resourcePromises: {
         firstResource: Promise.reject(
@@ -106,6 +107,9 @@ describe("AuthorizationGate", () => {
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).toHaveBeenCalledTimes(1);
+    expect(mockOnUnauthorized).toHaveBeenCalledWith(child, {
+      firstResource: { statusCode: 403, error: "fake unauthorized error" },
+    });
   });
   it("handles non auth related errors in any resource fetches", async () => {
     const fakeError = new ApiRequestError(

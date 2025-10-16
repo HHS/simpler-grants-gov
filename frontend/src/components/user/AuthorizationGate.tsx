@@ -90,7 +90,10 @@ const checkRequiredPrivileges = async (
 
 // requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
 type AuthorizationGateProps = {
-  onUnauthorized?: (children: ReactNode) => ReactNode;
+  onUnauthorized?: (
+    children: ReactNode,
+    fetchedResources?: FetchedResourceMap,
+  ) => ReactNode;
   onUnauthenticated?: () => ReactNode;
   onError?: (e: Error) => ReactNode;
 } & (
@@ -146,22 +149,22 @@ export async function AuthorizationGate({
     try {
       // Note: there's a potential performance gain here if we make these fetches in parallel with the user privileges calls
       const fetchedResources = await Promise.all(mappedResourcePromises);
+      allResources = fetchedResources.reduce(
+        (all, resource) => ({ ...all, ...resource }),
+        {},
+      );
       // Note: we will handle errors based on the order that their respective promise was passed in. If multiple promises throw errors
       // any after the first error encountered will be swallowed, as we have not accounted for the ability to handle multiple errors.
       // We can improve this later
       const firstError = findFirstError(fetchedResources);
       if (firstError) {
         if (firstError.statusCode === 403 && onUnauthorized) {
-          return onUnauthorized(children);
+          return onUnauthorized(children, allResources);
         }
         if (firstError.statusCode !== 403) {
           return onError(new Error(firstError.error));
         }
       }
-      allResources = fetchedResources.reduce(
-        (all, resource) => ({ ...all, ...resource }),
-        {},
-      );
     } catch (e) {
       return onError(e as Error);
     }
