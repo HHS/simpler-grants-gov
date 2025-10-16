@@ -27,6 +27,30 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { UnauthenticatedMessage } from "./UnauthenticatedMessage";
 
+// requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
+type AuthorizationGateProps = {
+  onUnauthorized?: (
+    children: ReactNode,
+    fetchedResources?: FetchedResourceMap,
+  ) => ReactNode;
+  onUnauthenticated?: () => ReactNode;
+  onError?: (e: Error) => ReactNode;
+} & (
+  | {
+      requiredPrivileges: UserPrivilegeDefinition[];
+      resourcePromises?: ResourcePromiseDefinitions;
+    }
+  | {
+      resourcePromises: ResourcePromiseDefinitions;
+      requiredPrivileges?: UserPrivilegeDefinition[];
+    }
+  | {
+      resourcePromises: ResourcePromiseDefinitions;
+      requiredPrivileges: UserPrivilegeDefinition[];
+    }
+);
+
+// unpack the fetched resource maps to get the first actual error
 const findFirstError = (
   fetchedResources: FetchedResourceMap[],
 ): FetchedResource | undefined => {
@@ -38,7 +62,11 @@ const findFirstError = (
   return firstError ? Object.values(firstError)[0] : undefined;
 };
 
-// will need to make sure any resource promises throw errors that include a status code in the cause...
+// we need to expose status codes and possible errors as well as fetched data
+// so that components can use this full context down stream.
+// the promises generated here will be consumed in a Promise.all downstream.
+// for this to work, will need to make sure any resource promises throw errors
+// that include a status code in the cause...
 const resolveAndFormatResources = (
   resourcePromises: ResourcePromiseDefinitions,
 ): Promise<FetchedResourceMap>[] => {
@@ -66,6 +94,8 @@ const resolveAndFormatResources = (
   return fetchResourcePromises;
 };
 
+// calls the API to check all required privileges,
+// and formats results into a format to be used downstream
 const checkRequiredPrivileges = async (
   token: string,
   userId: string,
@@ -88,29 +118,12 @@ const checkRequiredPrivileges = async (
   return privilegeCheckResults;
 };
 
-// requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
-type AuthorizationGateProps = {
-  onUnauthorized?: (
-    children: ReactNode,
-    fetchedResources?: FetchedResourceMap,
-  ) => ReactNode;
-  onUnauthenticated?: () => ReactNode;
-  onError?: (e: Error) => ReactNode;
-} & (
-  | {
-      requiredPrivileges: UserPrivilegeDefinition[];
-      resourcePromises?: ResourcePromiseDefinitions;
-    }
-  | {
-      resourcePromises: ResourcePromiseDefinitions;
-      requiredPrivileges?: UserPrivilegeDefinition[];
-    }
-  | {
-      resourcePromises: ResourcePromiseDefinitions;
-      requiredPrivileges: UserPrivilegeDefinition[];
-    }
-);
-
+/*
+  makes calls for required resources, if passed
+  checks for required permissions, if passed
+  optionally returns results of onUnauthorized function, if user is unauthorized based on calls to required resources
+  passes results from required resource and required permission calls via both props and context
+*/
 export async function AuthorizationGate({
   children,
   onUnauthorized,
