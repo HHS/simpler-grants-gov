@@ -10,7 +10,6 @@ import src.util.file_util as file_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.lib.application_test_utils import create_user_in_app
-from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
