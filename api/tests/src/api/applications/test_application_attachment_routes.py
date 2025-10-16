@@ -7,7 +7,9 @@ import requests
 from sqlalchemy import select
 
 import src.util.file_util as file_util
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAttachment
+from tests.lib.application_test_utils import create_user_in_app
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
@@ -33,18 +35,16 @@ def test_application_attachment_create_200(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
     file_name,
     expected_mimetype,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     response = client.post(
         f"/alpha/applications/{application.application_id}/attachments",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / file_name).open("rb")},
     )
 
@@ -257,15 +257,13 @@ def test_application_attachment_update_200(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
     file_name,
     expected_mimetype,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     # Create an existing attachment first
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt"
@@ -273,7 +271,7 @@ def test_application_attachment_update_200(
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / file_name).open("rb")},
     )
 
@@ -424,14 +422,12 @@ def test_application_attachment_update_deletes_old_file_different_name(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
 ):
     """Test that updating an attachment with different filename deletes the old file"""
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt", file_contents="old file contents"
@@ -444,7 +440,7 @@ def test_application_attachment_update_deletes_old_file_different_name(
     # Update with new file
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
     )
 
@@ -467,14 +463,12 @@ def test_application_attachment_update_same_filename_overwrites(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
 ):
     """Test that updating an attachment with same filename updates the attachment"""
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="text_file.txt", file_contents="old content"
@@ -484,7 +478,7 @@ def test_application_attachment_update_same_filename_overwrites(
     # Update with new file with same name
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
     )
 
@@ -508,17 +502,17 @@ def test_application_attachment_update_same_filename_overwrites(
 ##########################################
 
 
-def test_application_attachment_delete_200(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
-):
+def test_application_attachment_delete_200(db_session, enable_factory_create, client, s3_config):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     application_attachment = ApplicationAttachmentFactory.create(application=application)
     second_attachment = ApplicationAttachmentFactory.create(application=application)
 
     response = client.delete(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -604,3 +598,66 @@ def test_application_attachment_delete_403_not_the_owner(
 
     assert response.status_code == 403
     assert response.json["message"] == "Unauthorized"
+
+
+def test_application_attachment_update_403_access(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Create an existing attachment first
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt"
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_delete_403_access(
+    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.delete(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_create_403_access(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/attachments",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"

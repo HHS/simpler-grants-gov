@@ -19,7 +19,7 @@ import {
 } from "src/types/search/searchRequestTypes";
 import {
   UserDetail,
-  UserDetailProfile,
+  UserDetailWithProfile,
   UserOrganization,
 } from "src/types/userTypes";
 
@@ -567,10 +567,18 @@ export const fakeWidgetProps = {
 export const fakeUser: UserDetail = {
   user_id: "1",
   email: "not-the-real-email@fake.com",
+  first_name: "joe",
+  last_name: "quisling",
+};
+
+export const fakeUserWithProfile: UserDetailWithProfile = {
+  user_id: "1",
+  email: "not-the-real-email@fake.com",
+  external_user_type: "whatever",
   profile: {
     first_name: "joe",
     last_name: "quisling",
-  } as UserDetailProfile,
+  },
 };
 
 export const fakeUserPrivilegesResponse = {

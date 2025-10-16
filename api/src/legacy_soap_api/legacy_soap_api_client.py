@@ -154,7 +154,7 @@ class BaseSOAPClient:
                 },
             )
 
-    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
+    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
         """
         This method is responsible getting the simpler soap xml payload.
 
@@ -189,11 +189,7 @@ class BaseSOAPClient:
             else:
                 self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
 
-        use_simpler_response = False
-        return (
-            get_soap_response(data=simpler_response_xml),
-            use_simpler_response,
-        )
+        return get_soap_response(data=simpler_response_xml)
 
     def _get_simpler_soap_response_schema(self) -> Any | None:
         if self.soap_request.api_name == SimplerSoapAPI.APPLICANTS:
@@ -233,7 +229,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             ),
         )
 
-    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> tuple:
+    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
         if not self.operation_config.is_mtom:
             return super().get_simpler_soap_response(proxy_response)
         # MTOM message is assembled here
@@ -268,8 +264,4 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             f"{simpler_response_xml}\n"
             f"{boundary}"
         ).encode("utf-8")
-        use_simpler_response = False
-        return (
-            get_soap_response(data=mime_message, headers=update_headers),
-            use_simpler_response,
-        )
+        return get_soap_response(data=mime_message, headers=update_headers)

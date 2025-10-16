@@ -57,9 +57,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
         assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
         assert client.GetOpportunityListRequest() is not None
-        simpler_soap_response, use_simpler = client.get_simpler_soap_response(
-            mock_proxy_request_response
-        )
+        simpler_soap_response = client.get_simpler_soap_response(mock_proxy_request_response)
         assert isinstance(simpler_soap_response, SOAPResponse)
 
     @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_proxy_response")
@@ -235,9 +233,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
 
         # This is only testing the simpler soap response so we can leave proxy response empty.
         mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
-            mock_proxy_response
-        )
+        simpler_response = simpler_soap_client.get_simpler_soap_response(mock_proxy_response)
 
         assert simpler_response.data == expected_simpler_soap_response_xml.encode()
         assert (

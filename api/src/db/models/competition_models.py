@@ -268,6 +268,9 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     application_name: Mapped[str | None]
 
+    submitted_at: Mapped[datetime | None]
+    submitted_by: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(Organization.organization_id)
     )

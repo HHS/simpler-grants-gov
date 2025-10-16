@@ -6,7 +6,8 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import SubmissionIssue
+from src.auth.endpoint_access_util import can_access
+from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import ApplicationForm, CompetitionForm
 from src.db.models.user_models import User
 from src.services.applications.application_validation import (
@@ -59,6 +60,10 @@ def update_application_form(
 
     # Check if application exists
     application = get_application(db_session, application_id, user)
+
+    # Check privileges
+    if not can_access(user, {Privilege.MODIFY_APPLICATION}, application):
+        raise_flask_error(403, "Forbidden")
 
     # Validate the application is in progress and can be modified
     validate_application_in_progress(application, ApplicationAction.MODIFY)

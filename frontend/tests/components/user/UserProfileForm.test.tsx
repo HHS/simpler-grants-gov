@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { noop } from "lodash";
-import { fakeUser } from "src/utils/testing/fixtures";
+import { fakeUserWithProfile } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
@@ -26,7 +26,9 @@ describe("userProfileForm", () => {
   });
   it("matches snapshot", () => {
     mockUseActionState.mockReturnValue([{}, noop, false]);
-    const { container } = render(<UserProfileForm userDetails={fakeUser} />);
+    const { container } = render(
+      <UserProfileForm userDetails={fakeUserWithProfile} />,
+    );
     expect(container).toMatchSnapshot();
   });
   it("renders validation errors", () => {
@@ -36,7 +38,7 @@ describe("userProfileForm", () => {
       false,
     ]);
 
-    render(<UserProfileForm userDetails={fakeUser} />);
+    render(<UserProfileForm userDetails={fakeUserWithProfile} />);
 
     const alert = screen.getByRole("alert");
 
@@ -44,36 +46,34 @@ describe("userProfileForm", () => {
     expect(alert).toHaveTextContent("some error");
   });
   it("displays values from userDetail props if form is not submitted", () => {
-    if (!fakeUser.profile) {
+    if (!fakeUserWithProfile.profile) {
       throw new Error("this will not happen, just here to get TS to behave");
     }
     mockUseActionState.mockReturnValue([{}, noop, false]);
 
-    render(<UserProfileForm userDetails={fakeUser} />);
+    render(<UserProfileForm userDetails={fakeUserWithProfile} />);
 
     expect(
-      screen.getByDisplayValue(fakeUser.profile.first_name),
+      screen.getByDisplayValue(fakeUserWithProfile.profile.first_name),
     ).toBeInTheDocument();
     expect(
-      screen.getByDisplayValue(fakeUser.profile.last_name),
+      screen.getByDisplayValue(fakeUserWithProfile.profile.last_name),
     ).toBeInTheDocument();
   });
   it("displays values from form action when available", () => {
     mockUseActionState.mockReturnValue([
       {
         data: {
-          profile: {
-            first_name: "something",
-            middle_name: "else",
-            last_name: "entirely",
-          },
+          first_name: "something",
+          middle_name: "else",
+          last_name: "entirely",
         },
       },
       noop,
       false,
     ]);
 
-    render(<UserProfileForm userDetails={fakeUser} />);
+    render(<UserProfileForm userDetails={fakeUserWithProfile} />);
 
     expect(screen.getByDisplayValue("something")).toBeInTheDocument();
     expect(screen.getByDisplayValue("else")).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("userProfileForm", () => {
       false,
     ]);
 
-    render(<UserProfileForm userDetails={fakeUser} />);
+    render(<UserProfileForm userDetails={fakeUserWithProfile} />);
 
     const alert = screen.getByRole("heading");
     expect(alert).toBeInTheDocument();
