@@ -1,13 +1,10 @@
 "use server";
 
 import { isEmpty } from "lodash";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { parseErrorStatus } from "src/errors";
 import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
 import { getSession } from "src/services/auth/session";
-import {
-  checkUserPrivilege,
-  getUserPrivileges,
-} from "src/services/fetch/fetchers/userFetcher";
+import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import {
   UserPrivilegeDefinition,
@@ -38,7 +35,7 @@ type FetchedResourceMap = {
 type AuthorizedData = {
   fetchedResources: FetchedResourceMap;
   requiredPermissions: {
-    [key: string]: boolean;
+    [key: string]: UserPrivilegeResult;
   };
 };
 
@@ -46,7 +43,18 @@ type ResourcePromiseDefinitions = {
   [resourceName: string]: Promise<unknown>;
 };
 
-// will need to make sure any resource promises throw errors that include a status code...
+const findFirstError = (
+  fetchedResources: FetchedResourceMap[],
+): FetchedResource | undefined => {
+  const firstError = fetchedResources.find((resource) =>
+    Object.values(resource).some(
+      (resourceDefinition) => resourceDefinition.statusCode !== 200,
+    ),
+  );
+  return firstError ? Object.values(firstError)[0] : undefined;
+};
+
+// will need to make sure any resource promises throw errors that include a status code in the cause...
 const resolveAndFormatResources = (
   resourcePromises: ResourcePromiseDefinitions,
 ): Promise<FetchedResourceMap>[] => {
@@ -65,7 +73,7 @@ const resolveAndFormatResources = (
           return {
             [resourceName]: {
               error: e.message,
-              statusCode: 200,
+              statusCode: parseErrorStatus(e),
             } as FetchedResource,
           };
         });
@@ -81,7 +89,6 @@ const checkRequiredPrivileges = async (
 ): Promise<UserPrivilegeResult[]> => {
   const privilegeCheckResults = await Promise.all(
     privileges.map((privilege) => {
-      // const key = `${privilege.resourceType}_${privilege.resourceId || "0"}_${privilege.privilege}`;
       return checkUserPrivilege(token, userId, privilege)
         .then(() => {
           return { ...privilege, authorized: true };
@@ -127,7 +134,7 @@ export async function AuthorizationGate({
   requiredPrivileges,
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
-  let userPrivileges: UserPrivilegeResult[] = [];
+  let userPrivileges = {};
   let allResources = {};
 
   const session = await getSession();
@@ -138,10 +145,14 @@ export async function AuthorizationGate({
 
   // check privileges
   if (requiredPrivileges) {
-    userPrivileges = await checkRequiredPrivileges(
+    const userPrivilegeResults = await checkRequiredPrivileges(
       session.token,
       session.user_id,
       requiredPrivileges,
+    );
+    userPrivileges = userPrivilegeResults.reduce(
+      (all, privilegeResult) => ({ ...all, ...privilegeResult }),
+      {},
     );
   }
 
@@ -155,19 +166,24 @@ export async function AuthorizationGate({
     try {
       // Note: there's a potential performance gain here if we make these fetches in parallel with the user privileges calls
       const fetchedResources = await Promise.all(mappedResourcePromises);
+      // Note: we will handle errors based on the order that their respective promise was passed in. If multiple promises throw errors
+      // any after the first error encountered will be swallowed, as we have not accounted for the ability to handle multiple errors.
+      // We can improve this later
+      const firstError = findFirstError(fetchedResources);
+      if (firstError) {
+        if (firstError.statusCode === 403 && onUnauthorized) {
+          return onUnauthorized(children);
+        }
+        if (firstError.statusCode !== 403) {
+          return onError(new Error(firstError.error));
+        }
+      }
       allResources = fetchedResources.reduce(
         (all, resource) => ({ ...all, ...resource }),
         {},
       );
     } catch (e) {
-      const error = e as Error;
-      if (
-        (error.cause as FrontendErrorDetails).status === 403 &&
-        onUnauthorized
-      ) {
-        return onUnauthorized(children);
-      }
-      return onError(error);
+      return onError(e as Error);
     }
 
     const authorizedData = {
@@ -184,7 +200,7 @@ export async function AuthorizationGate({
     const childrenWithResources = children
       ? cloneElement(
           children as ReactElement<
-            { authorizedData?: AuthorizedData },
+            { authorizedData?: object },
             string | JSXElementConstructor<unknown>
           >,
           { authorizedData },
