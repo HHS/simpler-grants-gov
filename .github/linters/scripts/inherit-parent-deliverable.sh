@@ -73,8 +73,8 @@ mutation_query=$(cat $query_dir/updateProjectFieldValue.graphql)
 log "Fetching issue and parent milestone details using gh CLI..."
 data=$(
   gh api graphql \
-    -F url="$issue_url" \
-    -f query="$fetch_query" \
+    --field url="$issue_url" \
+    --raw-field query="$fetch_query" \
     --jq '.data.resource'
 )
 
@@ -137,11 +137,13 @@ fi
 # #######################################################
 
 # Update the deliverable field
+# Note: We need to pass the value as a raw field to prevent the gh CLI from parsing
+#       the option ID as a number if there are no alphabetic characters e.g. 360523
 log "Updating deliverable field to match parent: '$parent_deliverable_option_name'"
 gh api graphql \
-  -F projectId="$child_project_id" \
-  -F itemId="$child_item_id" \
-  -F fieldId="$parent_deliverable_field_id" \
-  -F value="$parent_deliverable_option_id" \
-  -f query="$mutation_query"
+  --field projectId="$child_project_id" \
+  --field itemId="$child_item_id" \
+  --field fieldId="$parent_deliverable_field_id" \
+  --raw-field value="$parent_deliverable_option_id" \
+  --raw-field query="$mutation_query"
 log "Deliverable field updated successfully to '$parent_deliverable_option_name'"

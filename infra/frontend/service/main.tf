@@ -140,8 +140,8 @@ module "service" {
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
   hostname        = module.app_config.hostname
 
-  cpu                      = local.service_config.instance_cpu
-  memory                   = local.service_config.instance_memory
+  fargate_cpu              = local.service_config.instance_cpu
+  fargate_memory           = local.service_config.instance_memory
   enable_command_execution = local.service_config.enable_command_execution
   max_capacity             = local.service_config.instance_scaling_max_capacity
   min_capacity             = local.service_config.instance_scaling_min_capacity

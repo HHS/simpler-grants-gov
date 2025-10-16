@@ -23,6 +23,13 @@ INVALID_STRING_PATTERN = MarshmallowErrorContainer(
 )
 INVALID_DATE = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid date.")
 INVALID_DATETIME = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid datetime.")
+INVALID_TIME = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time.")
+INVALID_URL = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL.")
+INVALID_FLOAT = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number.")
+INVALID_SPECIAL_FLOAT = MarshmallowErrorContainer(
+    ValidationErrorType.SPECIAL_NUMERIC,
+    "Special numeric values (nan or infinity) are not permitted.",
+)
 INVALID_BOOLEAN = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid boolean.")
 INVALID_SCHEMA_MSG = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Invalid input type.")
 INVALID_SCHEMA = {"_schema": [INVALID_SCHEMA_MSG]}
@@ -140,6 +147,8 @@ class FieldTestSchema(Schema):
     field_str_regex = fields.String(validate=[validators.Regexp("^\\d{3}$")])
     field_str_email = fields.String(validate=[validators.Email()])
 
+    field_url = fields.URL()
+
     field_int = fields.Integer()
     field_int_required = fields.Integer(required=True)
     field_int_strict = fields.Integer(strict=True)
@@ -152,6 +161,10 @@ class FieldTestSchema(Schema):
     field_decimal_required = fields.Decimal(required=True)
     field_decimal_special = fields.Decimal(allow_nan=False)
 
+    field_float = fields.Float()
+    field_float_required = fields.Float(required=True)
+    field_float_special = fields.Float(allow_nan=False)
+
     field_uuid = fields.UUID()
     field_uuid_required = fields.UUID(required=True)
 
@@ -162,6 +175,10 @@ class FieldTestSchema(Schema):
     field_datetime = fields.DateTime()
     field_datetime_required = fields.DateTime(required=True)
     field_datetime_format = fields.DateTime(format="iso8601")
+
+    field_time = fields.Time()
+    field_time_required = fields.Time(required=True)
+    field_time_format = fields.Time(format="%H:%M:%S")
 
     field_list = fields.List(fields.Boolean())
     field_list_required = fields.List(fields.Integer(), required=True)
@@ -205,6 +222,7 @@ def get_valid_field_test_schema_req():
         "field_str_equal": "abc",
         "field_str_regex": "123",
         "field_str_email": "person@example.com",
+        "field_url": "https://example.com",
         "field_int": 1,
         "field_int_required": 2,
         "field_int_strict": 3,
@@ -214,6 +232,9 @@ def get_valid_field_test_schema_req():
         "field_decimal": "2.5",
         "field_decimal_required": "555",
         "field_decimal_special": "4",
+        "field_float": 3.14,
+        "field_float_required": 2.71,
+        "field_float_special": 1.41,
         "field_uuid": "1234a5b6-7c8d-90ef-1ab2-c3d45678e9f0",
         "field_uuid_required": "1234a5b6-7c8d-90ef-1ab2-c3d45678e9f0",
         "field_date": "2000-01-01",
@@ -222,6 +243,9 @@ def get_valid_field_test_schema_req():
         "field_datetime": "2000-01-01T00:01:01Z",
         "field_datetime_required": "2010-02-02T00:02:02Z",
         "field_datetime_format": "2020-03-03T00:03:03Z",
+        "field_time": "14:30:00",
+        "field_time_required": "09:15:30",
+        "field_time_format": "16:45:00",
         "field_list": [True],
         "field_list_required": [],
         "field_list_indexed": [1, 2, 3],
@@ -261,6 +285,7 @@ def get_invalid_field_test_schema_req():
         "field_str_equal": "a",
         "field_str_regex": "abc",
         "field_str_email": "not an email",
+        "field_url": "not a url",
         "field_int": {},
         # field_int_required not present
         "field_int_strict": "123",
@@ -270,6 +295,9 @@ def get_invalid_field_test_schema_req():
         "field_decimal": "hello",
         # field_decimal_required not present
         "field_decimal_special": "NaN",
+        "field_float": "not a number",
+        # field_float_required not present
+        "field_float_special": "inf",
         "field_uuid": "hello",
         # field_uuid_required not present
         "field_date": 1234,
@@ -278,6 +306,9 @@ def get_invalid_field_test_schema_req():
         "field_datetime": 1234,
         # field_datetime_required not present
         "field_datetime_format": "02022020 7-20PM PDT",
+        "field_time": 1234,
+        # field_time_required not present
+        "field_time_format": "not a time",
         "field_list": "not_a_list",
         # field_list_required not present
         "field_list_indexed": ["text", 1, "text"],
@@ -315,6 +346,7 @@ def get_expected_validation_errors():
         "field_str_equal": [get_length_equal_error_msg(3)],
         "field_str_regex": [INVALID_STRING_PATTERN],
         "field_str_email": [INVALID_EMAIL],
+        "field_url": [INVALID_URL],
         "field_int": [INVALID_INTEGER],
         "field_int_required": [MISSING_DATA],
         "field_int_strict": [INVALID_INTEGER],
@@ -324,6 +356,9 @@ def get_expected_validation_errors():
         "field_decimal": [INVALID_DECIMAL],
         "field_decimal_required": [MISSING_DATA],
         "field_decimal_special": [INVALID_SPECIAL_DECIMAL],
+        "field_float": [INVALID_FLOAT],
+        "field_float_required": [MISSING_DATA],
+        "field_float_special": [INVALID_SPECIAL_FLOAT],
         "field_uuid": [INVALID_UUID],
         "field_uuid_required": [MISSING_DATA],
         "field_date": [INVALID_DATE],
@@ -332,6 +367,9 @@ def get_expected_validation_errors():
         "field_datetime": [INVALID_DATETIME],
         "field_datetime_required": [MISSING_DATA],
         "field_datetime_format": [INVALID_DATETIME],
+        "field_time": [INVALID_TIME],
+        "field_time_required": [MISSING_DATA],
+        "field_time_format": [INVALID_TIME],
         "field_list": [INVALID_LIST],
         "field_list_required": [MISSING_DATA],
         "field_list_indexed": {0: [INVALID_INTEGER], 2: [INVALID_INTEGER]},

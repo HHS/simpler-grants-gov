@@ -6,6 +6,7 @@ import getFormData from "src/utils/getFormData";
 import { headers } from "next/headers";
 
 import PrintForm from "src/components/applyForm/PrintForm";
+import { addPrintWidgetToFields } from "src/components/applyForm/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -39,11 +40,16 @@ export async function generateMetadata({
 }
 
 interface FormPageProps {
-  params: Promise<{ appFormId: string; applicationId: string; locale: string }>;
+  params: Promise<{
+    appFormId: string;
+    applicationId: string;
+    locale: string;
+    setAttachmentsChanged: (value: boolean) => void;
+  }>;
 }
 
 export default async function FormPage({ params }: FormPageProps) {
-  const { applicationId, appFormId } = await params;
+  const { applicationId, appFormId, setAttachmentsChanged } = await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
@@ -71,14 +77,17 @@ export default async function FormPage({ params }: FormPageProps) {
     applicationAttachments,
   } = data;
 
+  const modifiedUiSchema = addPrintWidgetToFields(formUiSchema);
+
   return (
     <>
       <h1>{formName}</h1>
       <PrintForm
         savedFormData={applicationResponse}
         formSchema={formSchema}
-        uiSchema={formUiSchema}
+        uiSchema={modifiedUiSchema}
         attachments={applicationAttachments}
+        setAttachmentsChanged={setAttachmentsChanged}
       />
     </>
   );

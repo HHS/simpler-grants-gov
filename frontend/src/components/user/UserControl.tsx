@@ -1,19 +1,45 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import {
-  IconListContent,
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 import { LoginButton } from "src/components/LoginButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
+
+const AccountNavLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href="/user/account"
+    >
+      {t("account")}
+    </Link>
+  );
+};
+
+const WorkspaceNavLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href="/user/workspace"
+    >
+      <USWDSIcon
+        name="notifications_active"
+        className="usa-icon--size-3 display-block"
+      />
+      {t("workspace")}
+    </Link>
+  );
+};
 
 // used in three different places
 // 1. on desktop - nav item drop down button content
@@ -52,29 +78,40 @@ const UserEmailItem = ({
   );
 };
 
-const UserDropdown = ({
-  user,
-  navLogoutLinkText,
-  logout,
-}: {
-  user: UserProfile;
-  navLogoutLinkText: string;
-  logout: () => Promise<void>;
-}) => {
-  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+const LogoutNavItem = () => {
+  const t = useTranslations("Header.navLinks");
 
-  const logoutNavItem = (
+  const { logoutLocalUser } = useUser();
+  const router = useRouter();
+
+  const logout = useCallback(async (): Promise<void> => {
+    // this isn't using the clientFetch hook because we don't really need all that added functionality here
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    logoutLocalUser();
+    router.refresh();
+  }, [logoutLocalUser, router]);
+
+  return (
     <a
       className="display-flex usa-button usa-button--unstyled text-no-underline"
       // eslint-disable-next-line
       onClick={() => logout()}
     >
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
-      <IconListContent className="font-sans-sm">
-        {navLogoutLinkText}
-      </IconListContent>
+      {t("logout")}
     </a>
   );
+};
+
+const UserDropdown = ({ user }: { user: UserProfile }) => {
+  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+
+  const { checkFeatureFlag } = useFeatureFlags();
+
+  const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
 
   return (
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative">
@@ -110,7 +147,9 @@ const UserDropdown = ({
         id="user-control"
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
-          logoutNavItem,
+          showUserAdminNavItems && <AccountNavLink key="account" />,
+          showUserAdminNavItems && <WorkspaceNavLink key="workspace" />,
+          <LogoutNavItem key="logout" />,
         ].filter(Boolean)}
         type="subnav"
         isOpen={userProfileMenuOpen}
@@ -122,29 +161,12 @@ const UserDropdown = ({
 export const UserControl = () => {
   const t = useTranslations("Header");
 
-  const { user, logoutLocalUser } = useUser();
-  const router = useRouter();
-
-  const logout = useCallback(async (): Promise<void> => {
-    // this isn't using the clientFetch hook because we don't really need all that added functionality here
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-
-    logoutLocalUser();
-    router.refresh();
-  }, [logoutLocalUser, router]);
+  const { user } = useUser();
 
   return (
     <>
       {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
-      {!!user?.token && (
-        <UserDropdown
-          user={user}
-          navLogoutLinkText={t("navLinks.logout")}
-          logout={logout}
-        />
-      )}
+      {!!user?.token && <UserDropdown user={user} />}
     </>
   );
 };

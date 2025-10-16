@@ -67,6 +67,8 @@ class SimplerSoapAPI(StrEnum):
 class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
+    compare_endpoints: bool = False
+    is_mtom: bool = False
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -95,6 +97,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="GetOpportunityListResponse",
             force_list_attributes=("OpportunityDetails",),
             key_indexes={"OpportunityDetails": "CompetitionID"},
+            compare_endpoints=True,
             namespace_keymap={
                 "GetOpportunityListResponse": "ns2",
                 "OpportunityDetails": "ns5",
@@ -115,7 +118,13 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             },
         )
     },
-    SimplerSoapAPI.GRANTORS: {},
+    SimplerSoapAPI.GRANTORS: {
+        "GetApplicationZipRequest": SOAPOperationConfig(
+            request_operation_name="GetApplicationZipRequest",
+            response_operation_name="GetApplicationZipResponse",
+            is_mtom=True,
+        )
+    },
 }
 
 # This is a standard global namespace for SOAP XML.
@@ -132,7 +141,20 @@ SOAP_API_NAMESPACES: dict[SimplerSoapAPI, dict[str | None, str]] = {
         None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
     },
     SimplerSoapAPI.GRANTORS: {
-        "soap": SOAP_NS,
+        "ns12": "http://schemas.xmlsoap.org/wsdl/soap/",
+        "ns11": "http://schemas.xmlsoap.org/wsdl/",
+        "ns10": "http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0",
+        "ns9": "http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0",
+        "ns8": "http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0",
+        "ns7": "http://apply.grants.gov/system/AgencyManagePackage-V1.0",
+        "ns6": "http://apply.grants.gov/system/GrantsPackage-V1.0",
+        "ns5": "http://apply.grants.gov/system/GrantsOpportunity-V1.0",
+        "ns4": "http://apply.grants.gov/system/GrantsRelatedDocument-V1.0",
+        "ns3": "http://apply.grants.gov/system/GrantsTemplate-V1.0",
+        "ns2": "http://apply.grants.gov/services/AgencyWebServices-V2.0",
+        "soap": "http://schemas.xmlsoap.org/soap/envelope/",
+        "xop": "http://www.w3.org/2004/08/xop/include",
+        None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
     },
 }
 

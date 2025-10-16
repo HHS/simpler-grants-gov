@@ -1,6 +1,7 @@
 import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { Organization } from "src/types/applicationResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -16,6 +17,11 @@ import {
   SearchAPIResponse,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
+import {
+  UserDetail,
+  UserDetailProfile,
+  UserOrganization,
+} from "src/types/userTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
@@ -379,10 +385,25 @@ export const fakeFilterPillLabelData: FilterPillLabelData[] = [
   },
 ];
 
-export const fakeOrganization = {
+export const fakeUserOrganization: UserOrganization = {
   is_organization_owner: true,
   organization_id: "great id",
   sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
+
+export const fakeOrganizationDetailsResponse: Organization = {
+  organization_id: "great id",
+  sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
     expiration_date: "1-1-25",
     legal_business_name: "Completely Legal Organization",
     uei: "unique entity identifier",
@@ -541,4 +562,83 @@ export const fakeWidgetProps = {
   rawErrors: [],
   value: "hi",
   options: {},
+};
+
+export const fakeUser: UserDetail = {
+  user_id: "1",
+  email: "not-the-real-email@fake.com",
+  profile: {
+    first_name: "joe",
+    last_name: "quisling",
+  } as UserDetailProfile,
+};
+
+export const fakeUserPrivilegesResponse = {
+  user_id: "1",
+  organization_users: [
+    {
+      organization: {
+        organization_id: "1",
+      },
+      organization_user_roles: [
+        {
+          role_id: "1",
+          role_name: "role_1",
+          privileges: ["read_organization", "modify_organization"],
+        },
+      ],
+    },
+    {
+      organization: {
+        organization_id: "4",
+      },
+      organization_user_roles: [
+        {
+          role_id: "4",
+          role_name: "role_4",
+          privileges: ["read_organization", "elucidate_organization"],
+        },
+      ],
+    },
+  ],
+  application_users: [
+    {
+      application: {
+        application_id: "1",
+      },
+      application_user_roles: [
+        {
+          role_id: "2",
+          role_name: "role_2",
+          privileges: ["read_application"],
+        },
+      ],
+    },
+  ],
+  agency_users: [
+    {
+      agency: {
+        agency_id: "3",
+      },
+      agency_user_roles: [
+        {
+          role_id: "3",
+          role_name: "role_3",
+          privileges: ["read_agency", "be_agency", "ingest_agency"],
+        },
+      ],
+    },
+    {
+      agency: {
+        agency_id: "5",
+      },
+      agency_user_roles: [
+        {
+          role_id: "5",
+          role_name: "role_5",
+          privileges: ["excommunicate_agency"],
+        },
+      ],
+    },
+  ],
 };

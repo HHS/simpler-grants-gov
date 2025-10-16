@@ -41,6 +41,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
+    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
@@ -52,6 +53,12 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+)
+from src.constants.static_role_values import (
+    APPLICATION_CONTRIBUTOR,
+    APPLICATION_OWNER,
+    ORG_ADMIN,
+    ORG_MEMBER,
 )
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
@@ -891,6 +898,26 @@ class UserFactory(BaseFactory):
 
     user_id = Generators.UuidObj
 
+    class Params:
+        with_profile = factory.Trait(
+            profile=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.UserProfileFactory",
+                factory_related_name="user",
+                size=1,
+            )
+        )
+
+
+class UserProfileFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserProfile
+
+    user_profile_id = Generators.UuidObj
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+
 
 class LinkExternalUserFactory(BaseFactory):
     class Meta:
@@ -1337,6 +1364,10 @@ class FormFactory(BaseFactory):
         },
     ]
 
+    form_type = FormType.SF424
+    sgg_version = "1.0"
+    is_deprecated = False
+
     class Params:
         with_instruction = factory.Trait(
             form_instruction=factory.SubFactory(FormInstructionFactory),
@@ -1539,6 +1570,26 @@ class ApplicationUserFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    class Params:
+        # New traits for role assignment
+        as_owner = factory.Trait(
+            application_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationUserRoleFactory",
+                factory_related_name="application_user",
+                size=1,
+                role_id=APPLICATION_OWNER.role_id,
+            ),
+        )
+
+        as_contributor = factory.Trait(
+            application_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.ApplicationUserRoleFactory",
+                factory_related_name="application_user",
+                size=1,
+                role_id=APPLICATION_CONTRIBUTOR.role_id,
+            ),
+        )
 
 
 class ApplicationUserRoleFactory(BaseFactory):
@@ -2776,7 +2827,29 @@ class OrganizationUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
 
-    is_organization_owner = True
+    is_organization_owner = True  # Keep for now, will be removed later
+
+    class Params:
+        # New traits for role assignment
+        as_admin = factory.Trait(
+            is_organization_owner=True,
+            organization_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OrganizationUserRoleFactory",
+                factory_related_name="organization_user",
+                size=1,
+                role_id=ORG_ADMIN.role_id,
+            ),
+        )
+
+        as_member = factory.Trait(
+            is_organization_owner=False,
+            organization_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.OrganizationUserRoleFactory",
+                factory_related_name="organization_user",
+                size=1,
+                role_id=ORG_MEMBER.role_id,
+            ),
+        )
 
 
 class OrganizationUserRoleFactory(BaseFactory):

@@ -5,8 +5,6 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { redirect } from "next/navigation";
 import { Alert } from "@trussworks/react-uswds";
 
-import BetaAlert from "src/components/BetaAlert";
-
 export function generateMetadata() {
   const meta: Metadata = {
     title: `Form test for form React JSON Schema`,
@@ -18,7 +16,6 @@ export function generateMetadata() {
 function FormSuccess() {
   return (
     <>
-      <BetaAlert />
       <h1>Form save success</h1>
       <Alert
         heading="Successful form submission"

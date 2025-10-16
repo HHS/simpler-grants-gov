@@ -16,6 +16,7 @@ def test_form_update_success_new_form(client, api_auth_token, enable_factory_cre
         "form_ui_schema": [{"type": "field", "definition": "/properties/test_field"}],
         "form_instruction_id": None,
         "form_rule_schema": None,
+        "json_to_xml_schema": {"mapping": "test"},
     }
 
     resp = client.put(f"/alpha/forms/{form_id}", headers={"X-Auth": api_auth_token}, json=form_data)
@@ -31,6 +32,7 @@ def test_form_update_success_new_form(client, api_auth_token, enable_factory_cre
     assert form["form_version"] == "2.0"
     assert form["agency_code"] == "TEST"
     assert form["omb_number"] == "4040-0002"
+    assert form["json_to_xml_schema"] == {"mapping": "test"}
 
 
 def test_form_update_success_existing_form(client, api_auth_token, enable_factory_create):
@@ -52,6 +54,7 @@ def test_form_update_success_existing_form(client, api_auth_token, enable_factor
         "form_ui_schema": [{"type": "field", "definition": "/properties/updated_field"}],
         "form_instruction_id": None,
         "form_rule_schema": {"some": "rule"},
+        "json_to_xml_schema": {"updated": "mapping"},
     }
 
     resp = client.put(
@@ -69,6 +72,7 @@ def test_form_update_success_existing_form(client, api_auth_token, enable_factor
     assert form["form_version"] == "2.0"
     assert form["agency_code"] == "UPD"
     assert form["omb_number"] == "4040-0003"
+    assert form["json_to_xml_schema"] == {"updated": "mapping"}
 
 
 def test_form_update_with_form_instruction(client, api_auth_token, enable_factory_create):

@@ -13,7 +13,7 @@ export const MultipleAttachmentUploadList = ({
   handleRemove,
   uploadedFiles,
 }: Props) => {
-  const attachments = useApplicationAttachments();
+  const { attachments } = useApplicationAttachments();
   return (
     <ul className="usa-list usa-list--unstyled margin-top-2">
       {uploadedFiles.map((file, index) => {

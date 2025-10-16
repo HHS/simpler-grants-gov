@@ -2,6 +2,11 @@ name: Internal - Deliverable
 description: Describe an agile deliverable
 type: Deliverable
 body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** Please see [Deliverable Expectations](https://github.com/HHS/simpler-grants-gov/blob/main/.github/linters/documentation/ISSUE_BODY_LINTER.md) for information on required fields.
+
   - type: textarea
     id: press_release
     attributes:

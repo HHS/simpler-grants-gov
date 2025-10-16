@@ -10,6 +10,7 @@ from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
 from src.legacy_soap_api.legacy_soap_api_schemas import SimplerSoapAPI, SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    get_alternate_proxy_response,
     get_invalid_path_response,
     get_soap_error_response,
 )
@@ -60,7 +61,10 @@ def simpler_soap_api_route(
             auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
             operation_name=operation_name,
         )
-        soap_proxy_response = get_proxy_response(soap_request)
+        if alternate_proxy_response := get_alternate_proxy_response(soap_request):
+            soap_proxy_response = alternate_proxy_response
+        else:
+            soap_proxy_response = get_proxy_response(soap_request)
     except Exception:
         logger.exception(
             msg="Error getting soap proxy response",

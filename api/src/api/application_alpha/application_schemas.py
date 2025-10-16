@@ -1,5 +1,6 @@
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.form_alpha.form_schema import FormAlphaSchema
+from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
@@ -216,26 +217,6 @@ class ApplicationUserSchema(Schema):
     )
 
 
-class SamGovEntitySchema(Schema):
-    """Schema for SAM.gov entity information"""
-
-    uei = fields.String(
-        metadata={"description": "Unique Entity Identifier from SAM.gov", "example": "ABCDEFGHIJK1"}
-    )
-    legal_business_name = fields.String(
-        metadata={
-            "description": "Legal business name as registered in SAM.gov",
-            "example": "Example Research Corporation",
-        }
-    )
-    expiration_date = fields.Date(
-        metadata={
-            "description": "The expiration date of the SAM.gov registration",
-            "example": "2025-12-31",
-        }
-    )
-
-
 class OrganizationSchema(Schema):
     """Schema for organization information"""
 
@@ -246,7 +227,7 @@ class OrganizationSchema(Schema):
         }
     )
     sam_gov_entity = fields.Nested(
-        SamGovEntitySchema(),
+        SamGovEntityResponseSchema,
         allow_none=True,
         metadata={"description": "SAM.gov entity information if organization is registered"},
     )

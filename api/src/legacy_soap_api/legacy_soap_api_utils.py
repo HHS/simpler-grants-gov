@@ -1,13 +1,17 @@
+import io
 import json
 import logging
 import uuid
-from typing import Any, Callable
+from enum import StrEnum
+from typing import Any, Callable, Iterator, List
 
 import requests
 from defusedxml import minidom
+from lxml import etree
 
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPRequest, SOAPResponse
+from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
 
 logger = logging.getLogger(__name__)
 
@@ -17,28 +21,65 @@ BASE_SOAP_API_RESPONSE_HEADERS = {
 HIDDEN_VALUE = "hidden"
 
 
-def format_local_soap_response(response_data: bytes) -> bytes:
+class AlternateSoapOperation(StrEnum):
+    GET_APPLICATION_ZIP = "GetApplicationZipRequest"
+    GET_APPLICATION = "GetApplicationRequest"
+
+
+def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
     # This is a format string for formatting local responses from the mock
     # soap server since it does not support manipulating the response.
     # The grants.gov SOAP API currently includes this data.
-    response_id = str(uuid.uuid4())
+    # Note: /r/n is how Windows encodes a newline
+    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
+    # Mac just uses /n
+    # This is used to ensure the correct Content-Length
+    # see: https://en.wikipedia.org/wiki/Newline
+    response_id = boundary_id if boundary_id else str(uuid.uuid4())
     return (
-        f"""
---uuid:{response_id}
-Content-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"
-Content-Transfer-Encoding: binary
-Content-ID: <root.message@cxf.apache.org>{response_data.decode()}
---uuid:{response_id}--
-        """.replace(
-            '<?xml version="1.0" encoding="UTF-8"?>', ""
+        (
+            f"--uuid:{response_id}\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
+            f"--uuid:{response_id}--\r\n"
         )
+        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
         .strip()
         .encode("utf-8")
     )
 
 
+def get_soap_proxy_grant_application_not_found_response(
+    grants_gov_tracking_number: str, headers: dict, is_get_application_zip: bool = True
+) -> SOAPResponse:
+    data = (
+        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body><soap:Fault><faultcode>soap:Server</faultcode><faultstring>"
+        f"Failed to get application{' zip' if is_get_application_zip else ''}."
+        f"(Grant Application not found for tracking number:{grants_gov_tracking_number})"
+        "</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
+    boundary_id = str(uuid.uuid4())
+    response_data = format_local_soap_response(data, boundary_id=boundary_id)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        ),
+        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
+    }
+    return get_soap_response(response_data, 500, headers=response_headers)
+
+
 def get_soap_response(
-    data: bytes, status_code: int = 200, headers: dict | None = None
+    data: bytes | Iterator[bytes] | List[bytes], status_code: int = 200, headers: dict | None = None
 ) -> SOAPResponse:
     """Get SOAP response
 
@@ -97,16 +138,17 @@ def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
     GG S2S SOAP API.
     """
     chunk_size = 8192
-    data = b""
-    for chunk in response.iter_content(chunk_size=chunk_size):
-        data += chunk
 
     # We omit these headers to prevent issues from flask and wsgi from erroring chunked responses.
     response_headers = filter_headers(
         dict(response.headers), ["transfer-encoding", "keep-alive", "connection"]
     )
 
-    return get_soap_response(data, status_code=response.status_code, headers=response_headers)
+    return get_soap_response(
+        response.iter_content(chunk_size=chunk_size),
+        status_code=response.status_code,
+        headers=response_headers,
+    )
 
 
 def filter_headers(headers: dict, headers_to_omit: list | None = None) -> dict:
@@ -262,3 +304,32 @@ def log_local(msg: str, data: Any | None = None, formatter: Callable | None = No
 
 def _hide_value(value: Any, hide: bool) -> Any:
     return HIDDEN_VALUE if hide else value
+
+
+def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
+    xml_file = io.BytesIO(xml_bytes)
+    value = None
+    try:
+        for event, elem in etree.iterparse(xml_file, events=("end",)):
+            if elem.tag.endswith("GrantsGovTrackingNumber") and event == "end":
+                value = elem.text
+                elem.clear()
+    except etree.XMLSyntaxError:
+        return None
+    return value
+
+
+def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
+    xml_bytes = extract_soap_xml(soap_request.data)
+    if not xml_bytes:
+        return None
+    if soap_request.operation_name in AlternateSoapOperation:
+        tracking_number = get_gov_grants_tracking_number(xml_bytes)
+        is_zip = soap_request.operation_name == AlternateSoapOperation.GET_APPLICATION_ZIP
+        if tracking_number and (
+            tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
+        ):
+            return get_soap_proxy_grant_application_not_found_response(
+                tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
+            )
+    return None

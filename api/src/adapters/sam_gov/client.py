@@ -2,10 +2,16 @@
 
 import abc
 import logging
-from typing import Any
 from urllib.parse import urljoin
 
 import requests
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_fixed,
+    wait_random_exponential,
+)
 
 from src.adapters.sam_gov.config import SamGovConfig
 from src.adapters.sam_gov.models import SamExtractRequest, SamExtractResponse
@@ -116,7 +122,7 @@ class SamGovClient(BaseSamGovClient):
                 extra={"extract_file_name": extract_request.file_name},
             )
 
-            response = requests.get(url, params=params, headers=headers, stream=True, timeout=30)
+            response = _do_request(url, params, headers)
 
             if not response.ok:
                 error_message = (
@@ -149,66 +155,15 @@ class SamGovClient(BaseSamGovClient):
         except Exception as e:
             raise Exception(f"Error downloading extract: {str(e)}") from e
 
-    def _request(
-        self,
-        method: str,
-        endpoint: str,
-        params: dict[str, Any] | None = None,
-        data: dict[str, Any] | None = None,
-        stream: bool = False,
-        accept_content_type: str = "application/json",
-        **kwargs: Any,
-    ) -> requests.Response:
-        """Make a request to the SAM.gov API.
 
-        Args:
-            method: HTTP method to use.
-            endpoint: API endpoint to call.
-            params: Optional query parameters.
-            data: Optional request body data.
-            stream: Whether to stream the response.
-            accept_content_type: Content type to accept in the response.
-            **kwargs: Additional arguments to pass to requests.
-
-        Returns:
-            The HTTP response.
-
-        Raises:
-            requests.exceptions.RequestException: For various request errors.
-        """
-        # Validate that API key is provided
-        if not self.api_key:
-            raise ValueError("API key must be provided for SAM.gov API access")
-
-        # Validate that API URL is provided
-        if not self.api_url:
-            raise ValueError("API URL must be provided for SAM.gov API access")
-
-        # Use urljoin to handle URL path concatenation properly
-        url = urljoin(self.api_url, endpoint.lstrip("/"))
-
-        # Add API key to query parameters
-        if params is None:
-            params = {}
-
-        if "timeout" not in kwargs:
-            kwargs["timeout"] = 30  # Default timeout
-
-        # Get headers
-        headers = self._build_headers()
-
-        # Update Accept header if provided
-        headers["Accept"] = accept_content_type
-
-        try:
-            response = requests.request(
-                method, url, params=params, json=data, stream=stream, headers=headers, **kwargs
-            )
-
-            # Raise an exception for HTTP errors
-            response.raise_for_status()
-            return response
-
-        except requests.exceptions.RequestException:
-            logger.exception("Error when calling SAM.gov API")
-            raise
+@retry(
+    stop=stop_after_attempt(5),
+    # Wait at least 15 seconds between retries with some random exponential backoff jitter
+    wait=wait_fixed(15) + wait_random_exponential(multiplier=2, max=60),
+    # Only retry for timeouts
+    retry=retry_if_exception_type(requests.Timeout),
+    # Raise the actual error, not a retry wrapped error
+    reraise=True,
+)
+def _do_request(url: str, params: dict, headers: dict) -> requests.Response:
+    return requests.get(url, params=params, headers=headers, stream=True, timeout=30)

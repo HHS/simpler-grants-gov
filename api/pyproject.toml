@@ -42,8 +42,14 @@ python-pptx = "^1.0.2"
 openpyxl = "^3.1.5"
 defusedxml = "^0.7.1"
 xmltodict = "^0.15.0"
+lxml = "^5.3.0"
+xmlschema = "^3.4.0"
 docraptor = "^3.0.0"
 jsonpath-ng = "^1.7.0"
+prettytable = "^3.16.0"
+common-grants-sdk = "~0.3.2"
+PyYAML = "^6.0.3"
+pydantic-core = "2.41.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
@@ -61,7 +67,7 @@ types-pyyaml = "^6.0.12.11"
 setuptools = "^75.0.0"
 pydot = "3.0.4"
 sadisplay = "0.4.9"
-ruff = "^0.13.0"
+ruff = "^0.14.0"
 debugpy = "^1.8.1"
 freezegun = "^1.5.0"
 types-requests = "^2.31"
@@ -82,6 +88,7 @@ create-erds = "bin.create_erds:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
 setup-localstack = "bin.setup_localstack:main"
 dat-to-jsonschema = "src.form_schema.dat_to_jsonschema_cli:main"
+validate-simpler-endpoints = "tests.validate_legacy_soap_api.validate_soap_endpoints:validate_simpler_endpoints"
 
 [tool.black]
 line-length = 100
@@ -165,6 +172,8 @@ filterwarnings = [
 
 markers = [
   "audit: mark a test as a security audit log test, to be run isolated from other tests",
+  "xml_validation: mark a test as an XML generation/validation test, to be run isolated from other tests",
+  "sf424: mark a test as SF-424 form specific",
 ]
 
 [tool.coverage.run]

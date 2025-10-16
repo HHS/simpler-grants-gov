@@ -1,5 +1,6 @@
 """Tests for XML generation service."""
 
+import pytest
 from pydantic import ValidationError
 
 from src.services.xml_generation.constants import NO_VALUE, YES_VALUE
@@ -7,6 +8,7 @@ from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
 
+@pytest.mark.xml_validation
 class TestXMLGenerationService:
     """Test cases for XMLGenerationService."""
 
@@ -35,11 +37,18 @@ class TestXMLGenerationService:
         # Verify XML contains expected elements
         xml_data = response.xml_data
         assert "<SF424_4_0" in xml_data
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<OrganizationName>Test University</OrganizationName>" in xml_data
-        assert "<ProjectTitle>Research Project</ProjectTitle>" in xml_data
-        assert "<FederalEstimatedFunding>50000.00</FederalEstimatedFunding>" in xml_data
-        assert f"<CertificationAgree>{YES_VALUE}</CertificationAgree>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        )
+        assert "<SF424_4_0:ProjectTitle>Research Project</SF424_4_0:ProjectTitle>" in xml_data
+        assert (
+            "<SF424_4_0:FederalEstimatedFunding>50000.00</SF424_4_0:FederalEstimatedFunding>"
+            in xml_data
+        )
+        assert (
+            f"<SF424_4_0:CertificationAgree>{YES_VALUE}</SF424_4_0:CertificationAgree>" in xml_data
+        )
 
     def test_generate_xml_no_application_data(self):
         """Test XML generation when no application data is provided."""
@@ -81,7 +90,7 @@ class TestXMLGenerationService:
         # Verify response and namespace
         assert response.success is True
         xml_data = response.xml_data
-        assert 'xmlns="http://apply.grants.gov/forms/SF424_4_0-V4.0"' in xml_data
+        assert 'xmlns:SF424_4_0="http://apply.grants.gov/forms/SF424_4_0-V4.0"' in xml_data
 
     def test_generate_xml_handles_none_values(self):
         """Test XML generation properly handles None values."""
@@ -102,9 +111,12 @@ class TestXMLGenerationService:
         xml_data = response.xml_data
 
         # Should include non-None values
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
-        assert "<FederalEstimatedFunding>0.00</FederalEstimatedFunding>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
+        assert (
+            "<SF424_4_0:FederalEstimatedFunding>0.00</SF424_4_0:FederalEstimatedFunding>"
+            in xml_data
+        )
 
         # Should not include None values
         assert "OrganizationName" not in xml_data
@@ -128,9 +140,9 @@ class TestXMLGenerationService:
         xml_data = response.xml_data
 
         # Verify mapped fields are included
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<OrganizationName>Test Org</OrganizationName>" in xml_data
-        assert "<ProjectTitle>Test Project</ProjectTitle>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert "<SF424_4_0:OrganizationName>Test Org</SF424_4_0:OrganizationName>" in xml_data
+        assert "<SF424_4_0:ProjectTitle>Test Project</SF424_4_0:ProjectTitle>" in xml_data
 
         # Verify unmapped field is excluded
         assert "unmapped_field" not in xml_data
@@ -142,12 +154,12 @@ class TestXMLGenerationService:
             "submission_type": "Application",
             "organization_name": "Test University",
             "applicant_address": {
-                "address_line_1": "123 Main Street",
-                "address_line_2": "Suite 100",
+                "street1": "123 Main Street",
+                "street2": "Suite 100",
                 "city": "Washington",
                 "county": "District of Columbia",
-                "state_code": "DC",
-                "country_code": "US",
+                "state": "DC",
+                "country": "US",
                 "zip_code": "20001-1234",
             },
             "project_title": "Research Project",
@@ -164,15 +176,15 @@ class TestXMLGenerationService:
         xml_data = response.xml_data
 
         # Verify nested address structure is created correctly
-        assert "<Applicant>" in xml_data
-        assert "<Street1>123 Main Street</Street1>" in xml_data
-        assert "<Street2>Suite 100</Street2>" in xml_data
-        assert "<City>Washington</City>" in xml_data
-        assert "<County>District of Columbia</County>" in xml_data
-        assert "<State>DC</State>" in xml_data
-        assert "<Country>US</Country>" in xml_data
-        assert "<ZipPostalCode>20001-1234</ZipPostalCode>" in xml_data
-        assert "</Applicant>" in xml_data
+        assert "<SF424_4_0:Applicant>" in xml_data
+        assert "globLib:Street1" in xml_data and "123 Main Street" in xml_data
+        assert "globLib:Street2" in xml_data and "Suite 100" in xml_data
+        assert "globLib:City" in xml_data and "Washington" in xml_data
+        assert "globLib:County" in xml_data and "District of Columbia" in xml_data
+        assert "globLib:State" in xml_data and "DC" in xml_data
+        assert "globLib:Country" in xml_data and "US" in xml_data
+        assert "globLib:ZipPostalCode" in xml_data and "20001-1234" in xml_data
+        assert "</SF424_4_0:Applicant>" in xml_data
 
     def test_generate_xml_pretty_print_vs_condensed(self):
         """Test XML generation with pretty-print vs condensed formatting."""
@@ -201,15 +213,20 @@ class TestXMLGenerationService:
         condensed_xml = condensed_response.xml_data
 
         # Verify both contain the same content
-        assert "<SubmissionType>Application</SubmissionType>" in pretty_xml
-        assert "<SubmissionType>Application</SubmissionType>" in condensed_xml
-        assert "<OrganizationName>Test University</OrganizationName>" in pretty_xml
-        assert "<OrganizationName>Test University</OrganizationName>" in condensed_xml
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in pretty_xml
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in condensed_xml
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in pretty_xml
+        )
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>"
+            in condensed_xml
+        )
 
         # Verify formatting differences
         # Pretty-print should have indentation/newlines, condensed should not
-        assert "\n  <SubmissionType>" in pretty_xml  # Indented element
-        assert "\n  <SubmissionType>" not in condensed_xml  # No indentation
+        assert "\n  <SF424_4_0:SubmissionType>" in pretty_xml  # Indented element
+        assert "\n  <SF424_4_0:SubmissionType>" not in condensed_xml  # No indentation
 
         # Both should have same content but different formatting
         assert len(condensed_xml) < len(pretty_xml)  # Condensed should be shorter
@@ -235,13 +252,23 @@ class TestXMLGenerationService:
         xml_data = response.xml_data
 
         # Verify value transformations were applied
-        assert "<FederalEstimatedFunding>50000.00</FederalEstimatedFunding>" in xml_data
-        assert f"<DelinquentFederalDebt>{YES_VALUE}</DelinquentFederalDebt>" in xml_data
-        assert f"<CertificationAgree>{NO_VALUE}</CertificationAgree>" in xml_data
+        assert (
+            "<SF424_4_0:FederalEstimatedFunding>50000.00</SF424_4_0:FederalEstimatedFunding>"
+            in xml_data
+        )
+        assert (
+            f"<SF424_4_0:DelinquentFederalDebt>{YES_VALUE}</SF424_4_0:DelinquentFederalDebt>"
+            in xml_data
+        )
+        assert (
+            f"<SF424_4_0:CertificationAgree>{NO_VALUE}</SF424_4_0:CertificationAgree>" in xml_data
+        )
 
         # Verify non-transformed fields remain unchanged
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<OrganizationName>Test University</OrganizationName>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        )
 
     def test_generate_xml_with_none_values_excluded(self):
         """Test that None values are excluded from XML output (default behavior)."""
@@ -268,9 +295,14 @@ class TestXMLGenerationService:
         assert "<CertificationAgree>" not in xml_data
 
         # Verify non-None fields are included
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
-        assert "<OrganizationName>Test University</OrganizationName>" in xml_data
-        assert f"<DelinquentFederalDebt>{YES_VALUE}</DelinquentFederalDebt>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        )
+        assert (
+            f"<SF424_4_0:DelinquentFederalDebt>{YES_VALUE}</SF424_4_0:DelinquentFederalDebt>"
+            in xml_data
+        )
 
     def test_generate_xml_with_configurable_none_handling(self):
         """Test configurable None handling behaviors."""
@@ -293,12 +325,14 @@ class TestXMLGenerationService:
 
         # Verify different None handling behaviors
         assert (
-            "<DateReceived></DateReceived>" in xml_data
-            or "<DateReceived/>" in xml_data
-            or "<DateReceived />" in xml_data
+            "<SF424_4_0:DateReceived></SF424_4_0:DateReceived>" in xml_data
+            or "<SF424_4_0:DateReceived/>" in xml_data
+            or "<SF424_4_0:DateReceived />" in xml_data
         )  # include_null
-        assert f"<StateReview>{NO_VALUE}</StateReview>" in xml_data  # default_value
+        assert (
+            f"<SF424_4_0:StateReview>{NO_VALUE}</SF424_4_0:StateReview>" in xml_data
+        )  # default_value
         assert "OrganizationName" not in xml_data  # exclude (default)
 
         # Verify non-None fields are included
-        assert "<SubmissionType>Application</SubmissionType>" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data

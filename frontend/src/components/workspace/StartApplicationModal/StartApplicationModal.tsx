@@ -1,6 +1,6 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
-import { Organization } from "src/types/UserTypes";
+import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ export const StartApplicationModal = ({
   opportunityTitle: string;
   modalRef: RefObject<ModalRef | null>;
   applicantTypes: ApplicantTypes[];
-  organizations: Organization[];
+  organizations: UserOrganization[];
   token: string | null;
   loading: boolean;
   competitionId: string;

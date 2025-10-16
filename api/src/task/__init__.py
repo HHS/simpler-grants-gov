@@ -9,6 +9,8 @@ import src.task.sam_extracts.sam_extract_cli  # noqa: F401 E402 isort:skip
 import src.task.apply.create_application_submission_task  # noqa: F401 E402 isort:skip
 import src.task.generate_internal_token  # noqa: F401 E402 isort:skip
 import src.task.forms.update_form_task  # noqa: F401 E402 isort:skip
+import src.task.forms.list_forms_task  # noqa: F401 E402 isort:skip
 import src.task.opportunities.generate_opportunity_sql  # noqa: F401 E402 isort:skip
+import src.cli.xml_generation_cli  # noqa: F401 E402 isort:skip
 
 __all__ = ["task_blueprint"]

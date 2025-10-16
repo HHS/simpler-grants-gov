@@ -316,7 +316,7 @@ export const messages = {
       attachmentUnavailable: "Unavailable",
       conditionalForms: "Conditionally-Required Forms",
       conditionalFormsDescription:
-        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
+        "These forms may be required based on your situation. Review the <instructionsLink>opportunity instructions</instructionsLink> and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
       downloadInstructions: "Download instructions",
       form: "Form",
       instructions: "Instructions",
@@ -339,7 +339,7 @@ export const messages = {
       attachedDocument: "Attached document",
       attachments: "Attachments",
       attachmentsInstructions:
-        "If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+        "If the <instructionsLink>opportunity instructions</instructionsLink> require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
       action: "Action",
       cancelUpload: "Cancel upload",
       delete: "Delete",
@@ -370,7 +370,8 @@ export const messages = {
         "Correct the following errors before submitting your application.",
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
-      unsavedChangesWarning: "You have unsaved changes that will be lost.",
+      unsavedChangesWarning:
+        "You have unsaved changes or attachments that will be lost if you select OK.",
     },
   },
   Index: {
@@ -535,14 +536,14 @@ export const messages = {
       {
         description:
           "Make your first API request in minutes. Learn the basics of the Simpler.Grants.gov API.",
-        http: "https://github.com/HHS/simpler-grants-gov/tree/main/documentation",
+        http: "https://wiki.simpler.grants.gov/product/api",
         iconName: "code",
         link: "Get started",
         title: "Developer quickstart",
       },
       {
         description: "Learn more about integrating our API into your project.",
-        http: "https://api.simpler.grants.gov/docs#/Opportunity%20v1/post_v1_opportunities_search",
+        http: "https://api.simpler.grants.gov/docs#/",
         iconName: "local_library",
         link: "Read the docs",
         title: "API reference",
@@ -635,6 +636,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
+      account: "My account",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -1429,5 +1431,41 @@ export const messages = {
       "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
     technicalSupportMessage:
       "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
+  },
+  UserAccount: {
+    pageTitle: "User Account | Simpler.Grants.gov",
+    title: "User Account",
+    inputs: {
+      firstName: "First name",
+      middleName: "Middle name",
+      lastName: "Last name",
+      email: "Email",
+    },
+    save: "Save",
+    validationErrors: {
+      firstName: "First name is required",
+      lastName: "Last name is required",
+    },
+    fetchError: "Error fetching user data. Please try refreshing the page.",
+    pending: "Saving...",
+    errorHeading: "Error",
+    successHeading: "Account updated",
+  },
+  UserWorkspace: {
+    pageTitle: "User Workspace | Simpler.Grants.gov",
+    title: "User Workspace",
+    fetchError: "Error fetching user data. Please try refreshing the page.",
+    organizations: "Organizations",
+  },
+  OrganizationDetail: {
+    pageTitle: "Organization",
+    fetchError: "Unable to fetch organization details",
+    organizationDetailsHeader: "Organization details",
+    ebizPoc: "eBiz POC",
+    contact: "Contact",
+    uei: "UEI",
+    expiration: "Exp",
+    visitSam:
+      "Visit <link>sam.gov</link> to make changes to your organization’s details.",
   },
 };

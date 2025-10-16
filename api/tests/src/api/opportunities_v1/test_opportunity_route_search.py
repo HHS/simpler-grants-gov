@@ -3,6 +3,7 @@ import csv
 from datetime import date
 
 import pytest
+from dateutil.relativedelta import relativedelta
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
@@ -13,6 +14,7 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import Opportunity
 from src.pagination.pagination_models import SortDirection
+from src.util import datetime_util
 from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
@@ -23,6 +25,8 @@ from tests.src.db.models.factories import (
     OpportunityFactory,
     OpportunitySummaryFactory,
 )
+
+NOW = datetime_util.get_now_us_eastern_date()
 
 
 def validate_search_response(
@@ -47,7 +51,6 @@ def validate_search_response(
     for opp in opportunities:
         if "summary" in opp:
             assert "agency_phone_number" not in opp["summary"]
-
     assert (
         response_ids == expected_ids
     ), f"Actual opportunities:\n {'\n'.join([opp['opportunity_title'] for opp in opportunities])}"
@@ -154,8 +157,8 @@ NASA_SPACE_FELLOWSHIP = build_opp(
     applicant_types=[ApplicantType.OTHER],
     funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
     funding_categories=[FundingCategory.EDUCATION],
-    post_date=date(2020, 3, 1),
-    close_date=date(2027, 6, 1),
+    post_date=NOW + relativedelta(years=-5),
+    close_date=NOW + relativedelta(years=2),
     is_cost_sharing=True,
     expected_number_of_awards=3,
     award_floor=50_000,
@@ -175,7 +178,7 @@ NASA_INNOVATIONS = build_opp(
     applicant_types=[ApplicantType.OTHER],
     funding_instruments=[FundingInstrument.GRANT],
     funding_categories=[FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT],
-    post_date=date(2019, 3, 1),
+    post_date=NOW + relativedelta(months=-79),
     close_date=None,
     is_cost_sharing=False,
     expected_number_of_awards=1,
@@ -195,8 +198,8 @@ NASA_SUPERSONIC = build_opp(
     applicant_types=[ApplicantType.UNRESTRICTED],
     funding_instruments=[FundingInstrument.GRANT],
     funding_categories=[FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT],
-    post_date=date(2021, 3, 1),
-    close_date=date(2030, 6, 1),
+    post_date=NOW + relativedelta(years=-4),
+    close_date=NOW + relativedelta(years=5),
     is_cost_sharing=True,
     expected_number_of_awards=9,
     award_floor=10_000,
@@ -215,8 +218,8 @@ NASA_K12_DIVERSITY = build_opp(
     applicant_types=[ApplicantType.OTHER],
     funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
     funding_categories=[FundingCategory.EDUCATION],
-    post_date=date(2025, 3, 1),
-    close_date=date(2018, 6, 1),
+    post_date=NOW + relativedelta(months=-5),
+    close_date=NOW + relativedelta(years=-7),
     is_cost_sharing=False,
     expected_number_of_awards=None,
     award_floor=None,
@@ -241,8 +244,8 @@ LOC_TEACHING = build_opp(
     ],
     funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
     funding_categories=[FundingCategory.EDUCATION],
-    post_date=date(2031, 3, 1),
-    close_date=date(2010, 6, 1),
+    post_date=NOW + relativedelta(years=6),
+    close_date=NOW + relativedelta(years=-15),
     is_cost_sharing=True,
     expected_number_of_awards=100,
     award_floor=500,
@@ -264,7 +267,7 @@ LOC_HIGHER_EDUCATION = build_opp(
     ],
     funding_instruments=[FundingInstrument.GRANT],
     funding_categories=[FundingCategory.OTHER],
-    post_date=date(2026, 3, 1),
+    post_date=NOW + relativedelta(years=1),
     close_date=None,
     is_cost_sharing=False,
     expected_number_of_awards=1,
@@ -289,8 +292,8 @@ DOS_DIGITAL_LITERACY = build_opp(
     ],
     funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT],
     funding_categories=[FundingCategory.OTHER],
-    post_date=date(2028, 3, 1),
-    close_date=date(2023, 6, 1),
+    post_date=NOW + relativedelta(years=3),
+    close_date=NOW + relativedelta(years=-2),
     is_cost_sharing=True,
     expected_number_of_awards=2,
     award_floor=5,
@@ -313,8 +316,8 @@ DOC_SPACE_COAST = build_opp(
     ],
     funding_instruments=[FundingInstrument.COOPERATIVE_AGREEMENT, FundingInstrument.GRANT],
     funding_categories=[FundingCategory.OTHER, FundingCategory.REGIONAL_DEVELOPMENT],
-    post_date=date(2017, 3, 1),
-    close_date=date(2019, 6, 1),
+    post_date=NOW + relativedelta(years=-8),
+    close_date=NOW + relativedelta(years=-6),
     is_cost_sharing=False,
     expected_number_of_awards=1000,
     award_floor=1,
@@ -337,8 +340,8 @@ DOC_MANUFACTURING = build_opp(
         FundingCategory.ENERGY,
         FundingCategory.SCIENCE_TECHNOLOGY_AND_OTHER_RESEARCH_AND_DEVELOPMENT,
     ],
-    post_date=date(2013, 3, 1),
-    close_date=date(2035, 6, 1),
+    post_date=NOW + relativedelta(years=-12),
+    close_date=NOW + relativedelta(years=10),
     is_cost_sharing=True,
     expected_number_of_awards=25,
     award_floor=50_000_000,
@@ -357,8 +360,8 @@ DOC_TOP_LEVEL = build_opp(
     applicant_types=[ApplicantType.OTHER],
     funding_instruments=[FundingInstrument.GRANT],
     funding_categories=[FundingCategory.OTHER],
-    post_date=date(2024, 1, 1),
-    close_date=date(2025, 12, 31),
+    post_date=NOW + relativedelta(months=-21),
+    close_date=NOW + relativedelta(months=6),
     is_cost_sharing=False,
     expected_number_of_awards=5,
     award_floor=100_000,
@@ -927,7 +930,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
             # Post date
             (
                 get_search_request(
-                    post_date={"start_date": "1970-01-01", "end_date": "2050-01-01"}
+                    post_date={
+                        "start_date": (NOW + relativedelta(years=-55)).isoformat(),
+                        "end_date": (NOW + relativedelta(years=24)).isoformat(),
+                    }
                 ),
                 OPPORTUNITIES,
             ),
@@ -939,19 +945,28 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (
                 get_search_request(
-                    post_date={"start_date": "1999-01-01", "end_date": "2000-01-01"}
+                    post_date={
+                        "start_date": (NOW + relativedelta(years=-26)).isoformat(),
+                        "end_date": (NOW + relativedelta(years=-25)).isoformat(),
+                    }
                 ),
                 [],
             ),
             (
                 get_search_request(
-                    post_date={"start_date": "2015-01-01", "end_date": "2018-01-01"}
+                    post_date={
+                        "start_date": (NOW + relativedelta(years=-10)).isoformat(),
+                        "end_date": (NOW + relativedelta(years=-7)).isoformat(),
+                    }
                 ),
                 [DOC_SPACE_COAST],
             ),
             (
                 get_search_request(
-                    post_date={"start_date": "2019-06-01", "end_date": "2024-01-01"}
+                    post_date={
+                        "start_date": (NOW + relativedelta(years=-6)).isoformat(),
+                        "end_date": (NOW + relativedelta(years=-1)).isoformat(),
+                    }
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC, DOC_TOP_LEVEL],
             ),
@@ -961,12 +976,20 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, NASA_SUPERSONIC, DOC_TOP_LEVEL],
             ),
-            (get_search_request(post_date={"end_date": "2016-01-01"}), [DOC_MANUFACTURING]),
+            (
+                get_search_request(
+                    post_date={"end_date": (NOW + relativedelta(years=-9)).isoformat()}
+                ),
+                [DOC_MANUFACTURING],
+            ),
             (get_search_request(post_date={"end_date_relative": -3310}), [DOC_MANUFACTURING]),
             # Close date
             (
                 get_search_request(
-                    close_date={"start_date": "1970-01-01", "end_date": "2050-01-01"}
+                    close_date={
+                        "start_date": (NOW + relativedelta(years=-55)).isoformat(),
+                        "end_date": (NOW + relativedelta(years=25)).isoformat(),
+                    }
                 ),
                 [
                     NASA_SPACE_FELLOWSHIP,
@@ -995,7 +1018,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
-                get_search_request(close_date={"start_date": "2019-01-01"}),
+                get_search_request(
+                    close_date={"start_date": (NOW + relativedelta(years=-6)).isoformat()}
+                ),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_SUPERSONIC,
@@ -1006,7 +1031,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
-                get_search_request(close_date={"start_date_relative": -2314}),
+                get_search_request(close_date={"start_date_relative": -2514}),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_SUPERSONIC,
@@ -1017,16 +1042,21 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ],
             ),
             (
-                get_search_request(close_date={"end_date": "2019-01-01"}),
+                get_search_request(
+                    close_date={"end_date": (NOW + relativedelta(months=-81)).isoformat()}
+                ),
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
-                get_search_request(close_date={"end_date_relative": -2314}),
+                get_search_request(close_date={"end_date_relative": -2514}),
                 [NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
                 get_search_request(
-                    close_date={"start_date": "2015-01-01", "end_date": "2019-12-01"}
+                    close_date={
+                        "start_date": (NOW + relativedelta(years=-10)).isoformat(),
+                        "end_date": (NOW + relativedelta(years=-6)).isoformat(),
+                    }
                 ),
                 [NASA_K12_DIVERSITY, DOC_SPACE_COAST],
             ),

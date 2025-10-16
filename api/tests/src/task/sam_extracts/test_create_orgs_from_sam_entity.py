@@ -83,7 +83,7 @@ def test_run_task_multiple_different_email_addresses(enable_factory_create, db_s
 
     # Blank emails aren't picked up in the join logic
     assert entity_blank_email.organization is None
-    assert len(user_blank_email.user.organizations) == 0
+    assert len(user_blank_email.user.organization_users) == 0
 
     metrics = task.metrics
     assert metrics[task.Metrics.RECORDS_PROCESSED] == 3
@@ -131,20 +131,26 @@ def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session
     task = CreateOrgsFromSamEntityTask(db_session)
     task.run()
 
-    assert len(user_a.user.organizations) == 1
-    assert user_a.user.organizations[0].organization_id == entity_a.organization.organization_id
-    assert user_a.user.organizations[0].is_organization_owner is True
+    assert len(user_a.user.organization_users) == 1
+    assert (
+        user_a.user.organization_users[0].organization_id == entity_a.organization.organization_id
+    )
+    assert user_a.user.organization_users[0].is_organization_owner is True
     assert len(entity_a.organization.organization_users) == 3
 
     # TODO - other compares
-    assert len(user_b.user.organizations) == 1
-    assert user_b.user.organizations[0].organization_id == entity_b.organization.organization_id
-    assert user_b.user.organizations[0].is_organization_owner is True
+    assert len(user_b.user.organization_users) == 1
+    assert (
+        user_b.user.organization_users[0].organization_id == entity_b.organization.organization_id
+    )
+    assert user_b.user.organization_users[0].is_organization_owner is True
     assert len(entity_b.organization.organization_users) == 4
 
-    assert len(user_c.user.organizations) == 1
-    assert user_c.user.organizations[0].organization_id == entity_c.organization.organization_id
-    assert user_c.user.organizations[0].is_organization_owner is True
+    assert len(user_c.user.organization_users) == 1
+    assert (
+        user_c.user.organization_users[0].organization_id == entity_c.organization.organization_id
+    )
+    assert user_c.user.organization_users[0].is_organization_owner is True
     assert len(entity_c.organization.organization_users) == 2
 
     metrics = task.metrics

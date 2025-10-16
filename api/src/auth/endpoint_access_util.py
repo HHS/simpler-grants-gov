@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_roles_for_agency(user: User, agency: Agency) -> list[Role]:
-    for user_agency in user.user_agencies:
+    for user_agency in user.agency_users:
         if user_agency.agency_id == agency.agency_id:
             return user_agency.roles
 
@@ -19,7 +19,7 @@ def get_roles_for_agency(user: User, agency: Agency) -> list[Role]:
 
 
 def get_roles_for_org(user: User, organization: Organization) -> list[Role]:
-    for user_organization in user.organizations:
+    for user_organization in user.organization_users:
         if user_organization.organization_id == organization.organization_id:
             return user_organization.roles
 

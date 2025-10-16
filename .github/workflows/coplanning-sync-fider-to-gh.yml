@@ -3,7 +3,7 @@ name: "Co-planning: Sync Fider to GitHub"
 on:
   pull_request:
     paths:
-      - "linters/coplanning/**"
+      - ".github/linters/coplanning/**"
       - ".github/workflows/coplanning-sync-fider-to-gh.yml"
   workflow_dispatch: # for manual runs
   schedule:
@@ -41,7 +41,11 @@ jobs:
             --org "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --label "Coplanning Proposal" \
-            --issue-section Summary \
+            --issue-sections "Summary" \
+            --issue-sections "Problem Statement" \
+            --issue-sections "Proposed Solution" \
+            --issue-sections "Success Criteria" \
+            --issue-sections "Additional Context" \
             --platform fider \
             --sync-direction platform-to-github \
             --dry-run
@@ -53,6 +57,10 @@ jobs:
             --org "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --label "Coplanning Proposal" \
-            --issue-section Summary \
+            --issue-sections "Summary" \
+            --issue-sections "Problem Statement" \
+            --issue-sections "Proposed Solution" \
+            --issue-sections "Success Criteria" \
+            --issue-sections "Additional Context" \
             --platform fider \
             --sync-direction platform-to-github

@@ -110,6 +110,16 @@ class Email(validators.Email):
             raise ValidationError([self.EMAIL_ERROR]) from None
 
 
+class URL(validators.URL):
+    URL_ERROR = MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL.")
+
+    def __call__(self, value: str) -> str:
+        try:
+            return super().__call__(value)
+        except ValidationError:
+            raise ValidationError([self.URL_ERROR]) from None
+
+
 class OneOf(validators.OneOf):
     """
     Validator which succeeds if ``value`` is a member of ``choices``.

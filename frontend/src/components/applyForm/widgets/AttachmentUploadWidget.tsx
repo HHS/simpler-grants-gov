@@ -35,7 +35,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
 
   const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
-  const attachments = useApplicationAttachments();
+  const { attachments, setAttachmentsChanged } = useApplicationAttachments();
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
   const applicationId = useApplicationId();
@@ -78,6 +78,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
       setAttachmentId(null);
       onChange?.(undefined);
       deleteModalRef.current?.toggleModal();
+      setAttachmentsChanged(true);
     }
   }, [deleteState, onChange]);
 
@@ -95,7 +96,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     );
 
     setShowFile(!!newAttachmentId);
-  }, [value, attachments]);
+  }, [value, attachments, setAttachmentsChanged]);
 
   const handleChange = async (
     event: React.ChangeEvent<HTMLInputElement>,

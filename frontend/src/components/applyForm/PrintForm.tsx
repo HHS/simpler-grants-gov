@@ -12,14 +12,18 @@ export default function PrintForm({
   formSchema,
   savedFormData,
   uiSchema,
+  setAttachmentsChanged,
 }: {
   attachments: Attachment[];
   formSchema: RJSFSchema;
   savedFormData: object;
   uiSchema: UiSchema;
+  setAttachmentsChanged: (value: boolean) => void;
 }) {
   return (
-    <AttachmentsProvider value={attachments ?? []}>
+    <AttachmentsProvider
+      value={{ attachments: attachments ?? [], setAttachmentsChanged }}
+    >
       <FormFields
         errors={null}
         formData={savedFormData}

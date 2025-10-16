@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <agen:GetApplicationZipRequest>
+         <gran:GrantsGovTrackingNumber>GRANT00000008</gran:GrantsGovTrackingNumber>
+      </agen:GetApplicationZipRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

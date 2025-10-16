@@ -7,6 +7,7 @@ import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
@@ -34,6 +35,7 @@ const ApplicationContainer = ({
   const { user } = useUser();
   const token = user?.token || null;
   const t = useTranslations("Application");
+  const router = useRouter();
 
   const [validationErrors, setValidationErrors] = useState<
     FormValidationWarning[]
@@ -42,6 +44,14 @@ const ApplicationContainer = ({
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
+
+  // TODO: check this after mvp
+  // instructions were to use the first available path
+  // this may change
+  const instructionsDownloadPath = applicationDetails.competition
+    .competition_instructions.length
+    ? applicationDetails.competition.competition_instructions[0].download_path
+    : "";
 
   const handleSubmit = useCallback(() => {
     if (!token) {
@@ -57,6 +67,8 @@ const ApplicationContainer = ({
           setValidationErrors(data.errors);
         } else {
           setSuccess(true);
+          // Refresh server-side data to get updated application status from API
+          router.refresh();
         }
       })
       .catch((error) => {
@@ -66,7 +78,7 @@ const ApplicationContainer = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [applicationId, token]);
+  }, [applicationId, token, router]);
 
   return (
     <>
@@ -103,9 +115,14 @@ const ApplicationContainer = ({
       <InformationCard
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
-        applicationSubmitted={applicationStatus === "submitted" || success}
+        applicationSubmitted={
+          applicationStatus === "submitted" ||
+          applicationStatus === "accepted" ||
+          success
+        }
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
+        instructionsDownloadPath={instructionsDownloadPath}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
@@ -113,10 +130,12 @@ const ApplicationContainer = ({
         applicationId={applicationId}
         forms={forms}
         errors={validationErrors}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
       <AttachmentsCard
         applicationId={applicationId}
         attachments={attachments}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
     </>
   );

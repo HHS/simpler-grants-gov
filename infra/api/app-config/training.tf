@@ -48,6 +48,9 @@ module "training_config" {
     ENABLE_AUTH_ENDPOINT   = 1
     ENABLE_APPLY_ENDPOINTS = 1
     ENABLE_SOAP_API        = 1
+
+    SAM_GOV_BASE_URL = "https://api.sam.gov"
+
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
   }
