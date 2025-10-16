@@ -203,8 +203,9 @@ def create_application(
     )
     db_session.add(application_user)
 
-    # Assign the Application Owner role to the user
-    _assign_application_owner_role(db_session, application_user)
+    # Assign the Application Owner role to the user if application is not owned by organization
+    if not organization_id:
+        _assign_application_owner_role(db_session, application_user)
 
     # Initialize the competition forms for the application
     for competition_form in competition.competition_forms:

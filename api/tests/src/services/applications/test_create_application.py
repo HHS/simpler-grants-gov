@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 from apiflask.exceptions import HTTPError
 
+from src.constants.lookup_constants import Privilege
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.user_models import ApplicationUserRole
 from src.services.applications.create_application import (
@@ -15,6 +16,9 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     OrganizationFactory,
+    OrganizationUserFactory,
+    OrganizationUserRoleFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
@@ -124,8 +128,8 @@ def test_assign_application_owner_role_new_role(db_session, enable_factory_creat
     assert role_assignment.role_id == APPLICATION_OWNER.role_id
 
 
-def test_create_application_assigns_owner_role(db_session, enable_factory_create):
-    """Test that creating an application assigns the Application Owner role"""
+def test_create_application_assigns_owner_role_lone_application(db_session, enable_factory_create):
+    """Test that creating an application assigns the Application Owner role if lone application"""
     user = UserFactory.create()
     competition = CompetitionFactory.create()
 
@@ -159,3 +163,47 @@ def test_create_application_assigns_owner_role(db_session, enable_factory_create
 
     assert role_assignment is not None
     assert role_assignment.role_id == APPLICATION_OWNER.role_id
+
+
+def test_create_application_owned_by_org_assigns_owner_role(
+    db_session, enable_factory_create, user
+):
+    """Test that creating an application does not assign the Application Owner role if application is owned by org"""
+    competition = CompetitionFactory.create()
+    org = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    # Create application
+    application = create_application(
+        db_session=db_session,
+        competition_id=competition.competition_id,
+        user=user,
+        application_name="Test Application",
+        organization_id=org.organization_id,
+    )
+
+    # Verify ApplicationUser was created with no owner flag
+    application_user = (
+        db_session.query(application.application_users[0].__class__)
+        .filter_by(application_id=application.application_id, user_id=user.user_id)
+        .first()
+    )
+    import pdb
+
+    pdb.set_trace()
+    assert application_user is not None
+    assert application_user.is_application_owner is True
+
+    # Verify no Application Role assigned
+    role_assignment = (
+        db_session.query(ApplicationUserRole)
+        .filter_by(
+            application_user_id=application_user.application_user_id,
+        )
+        .first()
+    )
+
+    assert not role_assignment
