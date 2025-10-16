@@ -9,6 +9,7 @@ import { notFound, redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
+import { OrganizationRoster } from "src/components/organization/OrganizationRoster";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -74,6 +75,7 @@ async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
       <OrganizationInfo
         organizationDetails={organizationDetails.sam_gov_entity}
       />
+      <OrganizationRoster organizationId={id} />
     </GridContainer>
   );
 }
