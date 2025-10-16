@@ -278,47 +278,61 @@ def _build_organizations_and_users(
 
     # An application started against the competition with all forms
     _add_application(
-        competition_container.competition_with_all_forms, organization=org3, app_owner=many_app_user
+        competition=competition_container.competition_with_all_forms,
+        organization=org3,
+        app_owner=many_app_user,
+        application_name="All forms",
     )
 
     # An application for each competition that has a form
     for form, competition in competition_container.form_specific_competitions.values():
         _add_application(
-            competition,
+            competition=competition,
             organization=org2,
             app_owner=many_app_user,
             application_name=f"App for {form.short_form_name}",
         )
 
-    # Some individual applications
+    # Very long application names
     _add_application(
-        competition_container.get_comp_for_form(SF424a_v1_0),
+        competition=competition_container.get_comp_for_form(SF424a_v1_0),
         app_owner=many_app_user,
-        application_name="My really really really long application name that'll take up a lot of space",
+        application_name="My really really really long Individual application name that'll take up a lot of space",
     )
-    _add_application(competition_container.get_comp_for_form(SF424_v4_0), app_owner=many_app_user)
+    _add_application(
+        competition=competition_container.get_comp_for_form(SF424_v4_0),
+        organization=org3,
+        app_owner=many_app_user,
+        application_name="My quite long organization application name that'll take up almost as much space",
+    )
 
     # Applications in other statuses
     _add_application(
-        competition_container.get_comp_for_form(ProjectAbstractSummary_v2_0),
+        competition=competition_container.get_comp_for_form(ProjectAbstractSummary_v2_0),
         app_owner=many_app_user,
         application_status=ApplicationStatus.SUBMITTED,
+        application_name="Submitted individual app",
     )
     _add_application(
-        competition_container.get_comp_for_form(SF424_v4_0),
+        competition=competition_container.get_comp_for_form(SF424_v4_0),
+        organization=org2,
         app_owner=many_app_user,
         application_status=ApplicationStatus.SUBMITTED,
+        application_name="Submitted org app",
     )
 
     _add_application(
-        competition_container.competition_with_all_forms,
+        competition=competition_container.competition_with_all_forms,
         app_owner=many_app_user,
         application_status=ApplicationStatus.ACCEPTED,
+        application_name="Accepted individual app",
     )
     _add_application(
-        competition_container.get_comp_for_form(SF424_v4_0),
+        competition=competition_container.get_comp_for_form(SF424_v4_0),
+        organization=org2,
         app_owner=many_app_user,
         application_status=ApplicationStatus.ACCEPTED,
+        application_name="Accepted org app",
     )
 
     ##############################################################
@@ -402,22 +416,24 @@ def _add_saved_searches(user: User, db_session: db.Session, count: int = 2) -> N
 
 def _add_application(
     competition: Competition,
+    application_name: str,
     organization: Organization | None = None,
     app_owner: User | None = None,
     application_status: ApplicationStatus = ApplicationStatus.IN_PROGRESS,
-    application_name: str | None = None,
 ) -> Application:
     app_params: dict = {
         "competition": competition,
         "application_status": application_status,
+        "application_name": application_name,
     }
-    if application_name is not None:
-        app_params["application_name"] = application_name
     if organization is not None:
         app_params["organization"] = organization
+        app_type = "organization"
+    else:
+        app_type = "individual"
 
+    logger.info(f"Creating an {app_type} application '{application_name}'")
     application = factories.ApplicationFactory.create(**app_params)
-    print(application.application_id)
 
     # TODO - when auth gets adjusted for the apply endpoints, we'll
     # only want to add this if there is no org, but at the moment
