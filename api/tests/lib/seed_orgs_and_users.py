@@ -1,7 +1,6 @@
 import logging
 import uuid
 import zipfile
-from typing import Self
 
 from sqlalchemy import select
 
@@ -9,14 +8,14 @@ import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import ApplicationStatus, OpportunityStatus
 from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
-from src.db.models.competition_models import Application, ApplicationSubmission, Competition
+from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import OrganizationUserRole, Role, User
+from src.db.models.user_models import User
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
@@ -25,7 +24,7 @@ from src.services.applications.application_validation import (
     validate_application_form,
 )
 from src.util import file_util
-from tests.lib.seed_data_utils import CompetitionContainer
+from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -56,83 +55,6 @@ def setup_org(
     organization.sam_gov_entity.legal_business_name = legal_business_name
 
     return organization
-
-
-class UserBuilder:
-    """Builder class for setting up a user for local development"""
-
-    def __init__(self, user_id: uuid.UUID, db_session: db.Session, scenario_name: str) -> None:
-        self.user: User = db_session.merge(factories.UserFactory.build(user_id=user_id), load=True)
-        self.db_session = db_session
-        self.scenario_name = scenario_name
-
-        self.link_external_id = None
-        self.api_key_id = None
-
-    def with_oauth_login(self, external_user_id: str) -> Self:
-        """Add an oauth login record that you can use to login as a user
-
-        For example, if you passed in "my_example_user", you could
-        manually login to that user by typing "my_example_user" into
-        the Mock OAuth login page.
-        """
-        external_user = self.user.linked_login_gov_external_user
-        if external_user is None:
-            external_user = factories.LinkExternalUserFactory.build(user=self.user)
-
-        external_user.external_user_id = external_user_id
-        self.db_session.add(external_user)
-
-        self.link_external_id = external_user_id
-        return self
-
-    def with_api_key(self, key_id: str) -> Self:
-        # See if we previously setup this API key
-        user_api_key = None
-        for key in self.user.api_keys:
-            if key.key_id == key_id:
-                user_api_key = key
-                break
-
-        if user_api_key is None:
-            user_api_key = factories.UserApiKeyFactory.build(user=self.user)
-
-        user_api_key.key_id = key_id
-
-        self.db_session.add(user_api_key)
-
-        self.api_key_id = key_id
-        return self
-
-    def with_organization(self, organization: Organization, roles: list[Role]) -> Self:
-        # First see if this user is already a member of the organization provided
-        org_user = None
-        for organization_user in self.user.organization_users:
-            if organization_user.organization_id == organization.organization_id:
-                org_user = organization_user
-                break
-
-        if org_user is None:
-            org_user = factories.OrganizationUserFactory.build(
-                user=self.user, organization=organization
-            )
-            self.db_session.add(org_user)
-
-        organization_user_roles = []
-        for role in roles:
-            organization_user_roles.append(
-                OrganizationUserRole(organization_user=org_user, role_id=role.role_id)
-            )
-
-        org_user.organization_user_roles = organization_user_roles
-
-        return self
-
-    def build(self) -> User:
-        logger.info(
-            f"Updating {self.scenario_name}: '{self.link_external_id}' with X-API-Key: '{self.api_key_id}'"
-        )
-        return self.user
 
 
 #############################################################
@@ -276,64 +198,65 @@ def _build_organizations_and_users(
     # Apps for many_app_user
     ########################
 
-    # An application started against the competition with all forms
-    _add_application(
-        competition=competition_container.competition_with_all_forms,
-        organization=org3,
-        app_owner=many_app_user,
-        application_name="All forms",
-    )
-
-    # An application for each competition that has a form
-    for form, competition in competition_container.form_specific_competitions.values():
+    if competition_container is not None:
+        # An application started against the competition with all forms
         _add_application(
-            competition=competition,
-            organization=org2,
+            competition=competition_container.competition_with_all_forms,
+            organization=org3,
             app_owner=many_app_user,
-            application_name=f"App for {form.short_form_name}",
+            application_name="All forms",
         )
 
-    # Very long application names
-    _add_application(
-        competition=competition_container.get_comp_for_form(SF424a_v1_0),
-        app_owner=many_app_user,
-        application_name="My really really really long Individual application name that'll take up a lot of space",
-    )
-    _add_application(
-        competition=competition_container.get_comp_for_form(SF424_v4_0),
-        organization=org3,
-        app_owner=many_app_user,
-        application_name="My quite long organization application name that'll take up almost as much space",
-    )
+        # An application for each competition that has a form
+        for form, competition in competition_container.form_specific_competitions.values():
+            _add_application(
+                competition=competition,
+                organization=org2,
+                app_owner=many_app_user,
+                application_name=f"App for {form.short_form_name}",
+            )
 
-    # Applications in other statuses
-    _add_application(
-        competition=competition_container.get_comp_for_form(ProjectAbstractSummary_v2_0),
-        app_owner=many_app_user,
-        application_status=ApplicationStatus.SUBMITTED,
-        application_name="Submitted individual app",
-    )
-    _add_application(
-        competition=competition_container.get_comp_for_form(SF424_v4_0),
-        organization=org2,
-        app_owner=many_app_user,
-        application_status=ApplicationStatus.SUBMITTED,
-        application_name="Submitted org app",
-    )
+        # Very long application names
+        _add_application(
+            competition=competition_container.get_comp_for_form(SF424a_v1_0),
+            app_owner=many_app_user,
+            application_name="My really really really long Individual application name that'll take up a lot of space",
+        )
+        _add_application(
+            competition=competition_container.get_comp_for_form(SF424_v4_0),
+            organization=org3,
+            app_owner=many_app_user,
+            application_name="My quite long organization application name that'll take up almost as much space",
+        )
 
-    _add_application(
-        competition=competition_container.competition_with_all_forms,
-        app_owner=many_app_user,
-        application_status=ApplicationStatus.ACCEPTED,
-        application_name="Accepted individual app",
-    )
-    _add_application(
-        competition=competition_container.get_comp_for_form(SF424_v4_0),
-        organization=org2,
-        app_owner=many_app_user,
-        application_status=ApplicationStatus.ACCEPTED,
-        application_name="Accepted org app",
-    )
+        # Applications in other statuses
+        _add_application(
+            competition=competition_container.get_comp_for_form(ProjectAbstractSummary_v2_0),
+            app_owner=many_app_user,
+            application_status=ApplicationStatus.SUBMITTED,
+            application_name="Submitted individual app",
+        )
+        _add_application(
+            competition=competition_container.get_comp_for_form(SF424_v4_0),
+            organization=org2,
+            app_owner=many_app_user,
+            application_status=ApplicationStatus.SUBMITTED,
+            application_name="Submitted org app",
+        )
+
+        _add_application(
+            competition=competition_container.competition_with_all_forms,
+            app_owner=many_app_user,
+            application_status=ApplicationStatus.ACCEPTED,
+            application_name="Accepted individual app",
+        )
+        _add_application(
+            competition=competition_container.get_comp_for_form(SF424_v4_0),
+            organization=org2,
+            app_owner=many_app_user,
+            application_status=ApplicationStatus.ACCEPTED,
+            application_name="Accepted org app",
+        )
 
     ##############################################################
     # Log output

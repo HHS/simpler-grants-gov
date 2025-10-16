@@ -306,7 +306,5 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
     if seed_config.seed_users:
         _build_organizations_and_users(db_session, competition_container)
     if seed_config.seed_e2e:
-        # TODO - need to fix to work the same as the others
-        # _build_users_and_tokens(db_session)
-        pass
+        _build_users_and_tokens(db_session)
     db_session.commit()
