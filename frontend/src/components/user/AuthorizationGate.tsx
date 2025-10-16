@@ -5,7 +5,12 @@ import { parseErrorStatus } from "src/errors";
 import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
 import { getSession } from "src/services/auth/session";
 import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
+import {
+  AuthorizedData,
+  FetchedResource,
+  FetchedResourceMap,
+  ResourcePromiseDefinitions,
+} from "src/types/authTypes";
 import {
   UserPrivilegeDefinition,
   UserPrivilegeResult,
@@ -21,27 +26,6 @@ import {
 import { Alert } from "@trussworks/react-uswds";
 
 import { UnauthenticatedMessage } from "./UnauthenticatedMessage";
-
-type FetchedResource = {
-  data?: object;
-  statusCode: number;
-  error?: string;
-};
-
-type FetchedResourceMap = {
-  [key: string]: FetchedResource;
-};
-
-type AuthorizedData = {
-  fetchedResources: FetchedResourceMap;
-  requiredPermissions: {
-    [key: string]: UserPrivilegeResult;
-  };
-};
-
-type ResourcePromiseDefinitions = {
-  [resourceName: string]: Promise<unknown>;
-};
 
 const findFirstError = (
   fetchedResources: FetchedResourceMap[],
@@ -134,7 +118,7 @@ export async function AuthorizationGate({
   requiredPrivileges,
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
-  let userPrivileges = {};
+  let userPrivileges: UserPrivilegeResult[] = [];
   let allResources = {};
 
   const session = await getSession();
@@ -145,15 +129,15 @@ export async function AuthorizationGate({
 
   // check privileges
   if (requiredPrivileges) {
-    const userPrivilegeResults = await checkRequiredPrivileges(
+    userPrivileges = await checkRequiredPrivileges(
       session.token,
       session.user_id,
       requiredPrivileges,
     );
-    userPrivileges = userPrivilegeResults.reduce(
-      (all, privilegeResult) => ({ ...all, ...privilegeResult }),
-      {},
-    );
+    // userPrivileges = userPrivilegeResults.reduce(
+    //   (all, privilegeResult) => ({ ...all, ...privilegeResult }),
+    //   {},
+    // );
   }
 
   const mappedResourcePromises =
@@ -185,36 +169,34 @@ export async function AuthorizationGate({
     } catch (e) {
       return onError(e as Error);
     }
-
-    const authorizedData = {
-      fetchedResources: allResources,
-      requiredPermissions: userPrivileges,
-    };
-
-    // Allows for prop drilling of fetched resources into immediate child server components, as
-    // usage of the client side context provider won't be available to server components.
-    // Assumes any immediate children of the gate that want to accept fetchedResources via props
-    // have an optional `fetchedResources` prop in place that can accept the added data here
-    // Note: this does NOT work if the gate is used in a layout component - if you're going to prop
-    // drill make sure you do it from a page component or further down the render chain
-    const childrenWithResources = children
-      ? cloneElement(
-          children as ReactElement<
-            { authorizedData?: object },
-            string | JSXElementConstructor<unknown>
-          >,
-          { authorizedData },
-        )
-      : children;
-
-    // FetchedResourcesProvider allows any client component children of the gate to receive
-    // fetched resources via context.
-    return (
-      <FetchedResourcesProvider value={authorizedData}>
-        {childrenWithResources}
-      </FetchedResourcesProvider>
-    );
   }
-  // on authorized, render children
-  return children;
+
+  const authorizedData: AuthorizedData = {
+    fetchedResources: allResources,
+    confirmedPrivileges: userPrivileges,
+  };
+
+  // Allows for prop drilling of fetched resources into immediate child server components, as
+  // usage of the client side context provider won't be available to server components.
+  // Assumes any immediate children of the gate that want to accept fetchedResources via props
+  // have an optional `fetchedResources` prop in place that can accept the added data here
+  // Note: this does NOT work if the gate is used in a layout component - if you're going to prop
+  // drill make sure you do it from a page component or further down the render chain
+  const childrenWithResources = children
+    ? cloneElement(
+        children as ReactElement<
+          { authorizedData?: object },
+          string | JSXElementConstructor<unknown>
+        >,
+        { authorizedData },
+      )
+    : children;
+
+  // FetchedResourcesProvider allows any client component children of the gate to receive
+  // fetched resources via context.
+  return (
+    <FetchedResourcesProvider value={authorizedData}>
+      {childrenWithResources}
+    </FetchedResourcesProvider>
+  );
 }

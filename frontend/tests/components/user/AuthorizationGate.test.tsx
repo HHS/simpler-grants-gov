@@ -11,7 +11,7 @@ import { AuthorizationGate } from "src/components/user/AuthorizationGate";
 const mockGetSession = jest.fn();
 const mockOnUnauthorized = jest.fn();
 const mockOnUnauthenticated = jest.fn();
-const mockGetUserPrivileges = jest.fn();
+const mockCheckUserPrivilege = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => mockGetSession(),
@@ -23,7 +23,7 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
-  getUserPrivileges: () => mockGetUserPrivileges() as unknown,
+  checkUserPrivilege: () => mockCheckUserPrivilege() as unknown,
 }));
 
 describe("AuthorizationGate", () => {
@@ -88,15 +88,36 @@ describe("AuthorizationGate", () => {
     expect(mockOnError).toHaveBeenCalledTimes(1);
     expect(mockOnError).toHaveBeenCalledWith(fakeError);
   });
-  it.only("renders children when all resource promises return with 200s and passes down all fetched resources via provider as expected", async () => {
+  it("renders children when all resource promises return with 200s and passes down all fetched resources via provider as expected", async () => {
     const ProviderTester = () => {
       const resources = useFetchedResources();
-      return Object.entries(resources).map(([resourceKey, resourceValue]) => (
-        <>
-          <div>{resourceKey}</div>
-          <div>{resourceValue as string}</div>
-        </>
-      ));
+      return (
+        <div>
+          fetchedResources
+          {Object.entries(resources.fetchedResources).map(
+            ([resourceKey, resourceValue]) => (
+              <div key={resourceKey}>
+                <div>{resourceKey}</div>
+                <div>{resourceValue.data}</div>
+              </div>
+            ),
+          )}
+        </div>
+      );
+
+      // return Object.entries(resources).map(([dataType, dataValue]) => (
+      //   <div key={dataType}>
+      //     <div>{dataType}</div>
+      //     <div>
+      //       {Object.entries(dataValue).map(([resourceKey, resourceValue]) => (
+      //         <>
+      //           <div key={resourceKey}>{resourceKey}</div>
+      //           <div>{resourceValue.data || resourceValue.authorized}</div>
+      //         </>
+      //       ))}
+      //     </div>
+      //   </div>
+      // ));
     };
     const component = await AuthorizationGate({
       children: <ProviderTester />,
@@ -104,16 +125,38 @@ describe("AuthorizationGate", () => {
       resourcePromises: {
         firstResource: Promise.resolve("some resolved value"),
       },
+      // requiredPrivileges: [
+      //   {
+      //     resourceType: "application",
+      //     resourceId: "1",
+      //     privilege: "view_application",
+      //   },
+      // ],
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(screen.getByText("firstResource")).toBeInTheDocument();
     expect(screen.getByText("some resolved value")).toBeInTheDocument();
   });
-  it("renders children when all passed permissions are satisfied", async () => {
-    mockGetUserPrivileges.mockResolvedValue(fakeUserPrivilegesResponse);
+  it.only("renders children and passes down all fetched permission check results via provider as expected", async () => {
+    mockCheckUserPrivilege.mockResolvedValue([]);
+    const ProviderTester = () => {
+      const resources = useFetchedResources();
+      return (
+        <div>
+          requiredPermissions
+          {resources.confirmedPrivileges.map((permission) => (
+            <div key={`${permission.privilege}-${permission.resourceType}`}>
+              <div>
+                {permission.privilege} : {permission.authorized.toString()}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    };
     const component = await AuthorizationGate({
-      children: <div>HELLO</div>,
+      children: <ProviderTester />,
       onUnauthorized: mockOnUnauthorized,
       requiredPrivileges: [
         {
@@ -130,6 +173,7 @@ describe("AuthorizationGate", () => {
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
-    expect(screen.getByText("HELLO")).toBeInTheDocument();
+    expect(screen.getByText("modify_organization : true")).toBeInTheDocument();
+    expect(screen.getByText("read_application : true")).toBeInTheDocument();
   });
 });

@@ -1,13 +1,11 @@
 "use client";
 
+import { AuthorizedData } from "src/types/authTypes";
+
 import { createContext, PropsWithChildren, useContext } from "react";
 
-export interface FetchedResourcesContext {
-  [resourceName: string]: unknown;
-}
-
-const FetchedResourcesContext = createContext<FetchedResourcesContext>(
-  {} as FetchedResourcesContext,
+const FetchedResourcesContext = createContext<AuthorizedData>(
+  {} as AuthorizedData,
 );
 
 export const useFetchedResources = () => {
@@ -23,7 +21,7 @@ export const useFetchedResources = () => {
 export function FetchedResourcesProvider({
   value,
   children,
-}: PropsWithChildren<{ value: FetchedResourcesContext }>) {
+}: PropsWithChildren<{ value: AuthorizedData }>) {
   return (
     <FetchedResourcesContext.Provider value={value}>
       {children}
