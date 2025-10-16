@@ -11,10 +11,7 @@ class XMLGenerationRequest(BaseModel):
     application_data: dict[str, Any]
     form_name: str = "SF424_4_0"
     pretty_print: bool = True  # True for pretty-print, False for condensed
-    # Note: dict[str, Any] for Pydantic serialization, but service layer uses dict[str, AttachmentInfo]
-    attachment_mapping: dict[str, Any] | None = (
-        None  # Mapping of UUID strings to AttachmentInfo objects
-    )
+    attachment_mapping: dict[str, Any] | None = None
 
 
 class XMLGenerationResponse(BaseModel):
