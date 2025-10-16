@@ -203,7 +203,7 @@ def _build_competition_for_form(form: Form) -> Competition:
 
 def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title=f"Test Opportunity with ALL forms",
+        opportunity__opportunity_title="Test Opportunity with ALL forms",
         competition_forms=[],
         with_instruction=True,
     )
