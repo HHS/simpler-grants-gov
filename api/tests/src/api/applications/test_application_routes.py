@@ -1986,11 +1986,6 @@ def test_application_form_update_forbidden_not_in_progress(
     """Test form update fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
     _, application, token = create_user_in_app(
-        db_session,
-        privileges=[Privilege.SUBMIT_APPLICATION],
-        status=initial_status,
-    )
-    _, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION], status=initial_status
     )
 
