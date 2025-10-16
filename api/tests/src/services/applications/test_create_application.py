@@ -191,11 +191,8 @@ def test_create_application_owned_by_org_assigns_owner_role(
         .filter_by(application_id=application.application_id, user_id=user.user_id)
         .first()
     )
-    import pdb
-
-    pdb.set_trace()
     assert application_user is not None
-    assert application_user.is_application_owner is True
+    assert not application_user.is_application_owner
 
     # Verify no Application Role assigned
     role_assignment = (

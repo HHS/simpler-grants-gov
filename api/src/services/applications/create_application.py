@@ -33,7 +33,7 @@ def _assign_application_owner_role(
     db_session: db.Session, application_user: ApplicationUser
 ) -> None:
     """Assign the Application Owner role to an application user."""
-
+    application_user.is_application_owner = True
     app_user_role = ApplicationUserRole(
         application_user=application_user, role_id=APPLICATION_OWNER.role_id
     )
@@ -199,7 +199,8 @@ def create_application(
     db_session.add(application)
 
     application_user = ApplicationUser(
-        application=application, user=user, is_application_owner=True
+        application=application,
+        user=user,
     )
     db_session.add(application_user)
 
