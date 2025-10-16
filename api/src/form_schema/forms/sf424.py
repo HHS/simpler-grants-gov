@@ -732,6 +732,28 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/applicant/properties/province"},
             {"type": "field", "definition": "/properties/applicant/properties/country"},
             {"type": "field", "definition": "/properties/applicant/properties/zip_code"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "organizational_unit",
+        "label": "8e. Organizational Unit",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/department_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/division_name",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "contact_person",
+        "label": "8f. Name and contact information of person to be contacted on matters involving this application",
+        "children": [
             {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
             {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
             {"type": "field", "definition": "/properties/contact_person/properties/middle_name"},
