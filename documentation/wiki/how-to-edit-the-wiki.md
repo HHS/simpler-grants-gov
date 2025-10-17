@@ -13,7 +13,7 @@ Below is a list of administrators who can grant editor permissions, in order of 
 ### How to make edits
 
 1. Log in to GitBook: [https://app.gitbook.com/](https://app.gitbook.com/)
-2. In the top left corner, it should say **Simpler Grants**. If not, you're in the wrong workspace—click it to switch to the correct workspace. If you don't see the option, ask Michelle M. or anyone from A6 to give you 'reviewer' permissions.
+2. In the top left corner, it should say **Simpler Grants**. If not, you're in the wrong workspace—click it to switch to the correct workspace. If you don't see the option, ask Justin W. or anyone from A6 to give you 'reviewer' permissions.
 3. Go to `Public Wiki` , under the `Spaces` section of the left nav.
 4. Click `Edit` .
 5. Make your changes.
