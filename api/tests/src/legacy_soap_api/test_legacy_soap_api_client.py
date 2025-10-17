@@ -538,6 +538,8 @@ class TestSimplerSOAPGetApplicationZip:
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
+            # Directly changing the config value here will change it for other tests
+            # so for safety I use a MagicMock as the operation_config
             client.operation_config = MagicMock(**client.operation_config.__dict__)
             client.operation_config.is_mtom = False
             result = client.get_simpler_soap_response(mock_proxy_response)
