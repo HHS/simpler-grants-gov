@@ -366,7 +366,7 @@ class TestSimplerSOAPGetApplicationZip:
     ):
         file_path = f"s3://{mock_s3_bucket}/submission.txt"
         submission = ApplicationSubmissionFactory.create(file_location=file_path)
-        response = requests.get(submission.download_path)
+        response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '

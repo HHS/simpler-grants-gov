@@ -280,7 +280,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             )
         ).scalar()
         if application:
-            response = requests.get(application.download_path)
+            response = requests.get(application.download_path, timeout=10)
             if response.status_code != 200:
                 logger.info(
                     f"Unable to retrieve file legacy_tracking_number {legacy_tracking_number} from s3 file location.",
