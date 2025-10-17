@@ -614,20 +614,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
       tags:
       - CommonGrants Protocol
       summary: List opportunities
       description: Get a paginated list of opportunities, sorted by `lastModifiedAt`
         with most recent first.
-      security:
-      - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/profile:
     put:
       parameters:
@@ -786,12 +777,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
       tags:
       - CommonGrants Protocol
       summary: Search opportunities
@@ -801,9 +786,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OpportunitySearchRequest'
-      security:
-      - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/applications:
     post:
       parameters:
@@ -1204,12 +1186,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/OpportunityResponse'
           description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
         '404':
           content:
             application/json:
@@ -1220,9 +1196,6 @@ paths:
       - CommonGrants Protocol
       summary: View opportunity details
       description: View details about an opportunity
-      security:
-      - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
