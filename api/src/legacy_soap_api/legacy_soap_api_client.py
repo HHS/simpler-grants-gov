@@ -273,15 +273,27 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         legacy_tracking_number = self.get_soap_request_dict()["GrantsGovTrackingNumber"]
         if legacy_tracking_number.startswith("GRANT"):
             legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
-        legacy_tracking_number = int(legacy_tracking_number)
         application = self.db_session.execute(
             select(ApplicationSubmission).where(
-                ApplicationSubmission.legacy_tracking_number == legacy_tracking_number
+                ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number)
             )
         ).scalar()
+
+        def _gen_response_data(
+            mime_message: bytes, boundary: str, response: requests.Response
+        ) -> Iterator:
+            yield mime_message
+            for chunk in response.iter_content(chunk_size=4000):
+                yield chunk
+            yield b"\n" + boundary.encode("utf-8") + b"--"
+
         if application:
             response = requests.get(application.download_path, timeout=10)
-            if response.status_code != 200:
+            if response.status_code == 200:
+                return get_soap_response(
+                    data=_gen_response_data(mime_message, boundary, response), headers=update_headers
+                )
+            else:
                 logger.info(
                     f"Unable to retrieve file legacy_tracking_number {legacy_tracking_number} from s3 file location.",
                     extra={
@@ -299,15 +311,3 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
                 },
             )
             return proxy_response
-
-        def _gen_response_data(
-            mime_message: bytes, boundary: str, response: requests.Response
-        ) -> Iterator:
-            yield mime_message
-            for chunk in response.iter_content(chunk_size=4000):
-                yield chunk
-            yield b"\n" + boundary.encode("utf-8") + b"--"
-
-        return get_soap_response(
-            data=_gen_response_data(mime_message, boundary, response), headers=update_headers
-        )
