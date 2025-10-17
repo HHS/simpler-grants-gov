@@ -149,7 +149,7 @@ class SubmissionXMLGenerator:
         if not user:
             return "unknown"
 
-        if user.profile and user.profile.first_name and user.profile.last_name:
+        if user.profile:
             return f"{user.profile.first_name} {user.profile.last_name}"
 
         if user.email:
