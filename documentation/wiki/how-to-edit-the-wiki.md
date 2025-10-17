@@ -32,8 +32,8 @@ We created a protocol everyone should follow to ensure the wiki aligns with our 
 
 * Content owners do not need to request a review for their section.
 * A6 manages the GitBook and can update any content. Feel free to add them as additional reviewers, especially if you need a fast response or the primary content owner is out of office.
-* Structural changes, such as requests to add or delete pages or sections, always require CR approval from the Nava Content Strategist.
-* The Nava Content Strategist can help individuals with wiki and editing consultations.
+* Structural changes, such as requests to add or delete pages or sections, always require CR approval from the Nava Comms Strategist.
+* The Nava Comms Strategist can help individuals with wiki and editing consultations.
 * Suggestion: When requesting feedback on a change request, it can be helpful to send the reviewer a Slack message with the following information:
   * A link to (1) the change request and (2) the preview of published docs
   * A summary of the changes
