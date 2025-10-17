@@ -91,6 +91,9 @@ ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     FONTCONFIG_PATH="/etc/fonts" \
     FONTCONFIG_FILE="/etc/fonts/fonts.conf"
 
+# Ensure wget is available in runtime for ecs health checks
+RUN microdnf -y install wget && microdnf clean all
+
 # Initialize Graphviz plugin cache and related caches if tools are available
 RUN ([ -x /usr/bin/fc-cache ] && fc-cache -f || true) && \
     ([ -x /usr/bin/gdk-pixbuf-query-loaders ] && (gdk-pixbuf-query-loaders --update-cache || gdk-pixbuf-query-loaders > /usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache) || true) && \

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "main"
-      - "prasnava/6746-optimize-api-container"
     paths:
       - "api/**"
   workflow_dispatch:
