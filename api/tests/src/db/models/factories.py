@@ -1542,6 +1542,9 @@ class ApplicationSubmissionFactory(BaseFactory):
         file_contents = kwargs.pop("file_contents", "Application submission ZIP file contents")
         submission = super()._create(model_class, *args, **kwargs)
 
+        if file_contents == "SKIP":
+            return submission
+
         try:
             with file_util.open_stream(submission.file_location, "w") as my_file:
                 my_file.write(file_contents)
