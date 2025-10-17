@@ -291,7 +291,8 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             response = requests.get(application.download_path, timeout=10)
             if response.status_code == 200:
                 return get_soap_response(
-                    data=_gen_response_data(mime_message, boundary, response), headers=update_headers
+                    data=_gen_response_data(mime_message, boundary, response),
+                    headers=update_headers,
                 )
             else:
                 logger.info(
