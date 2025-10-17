@@ -25,9 +25,6 @@ from tests.src.db.models.factories import (
 @pytest.fixture
 def application_with_submission(enable_factory_create, db_session):
     """Create an application with submitted_at, submitted_by, and submission."""
-    opportunity = OpportunityFactory.create()
-    competition = CompetitionFactory.create(opportunity=opportunity)
-
     # Create user with profile
     user = UserFactory.create()
     UserProfileFactory.create(user=user, first_name="Michael", last_name="Chouinard")
@@ -36,7 +33,6 @@ def application_with_submission(enable_factory_create, db_session):
     # Create application with submission data
     submitted_time = datetime(2025, 9, 2, 16, 24, 28, 0, tzinfo=timezone.utc)
     application = ApplicationFactory.create(
-        competition=competition,
         submitted_at=submitted_time,
         submitted_by=user.user_id,
     )
