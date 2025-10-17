@@ -511,7 +511,7 @@ def test_application_form_update_success_update(
                     "value": None,
                 }
             ],
-            ApplicationFormStatus.NOT_STARTED,
+            ApplicationFormStatus.IN_PROGRESS,
         ),
         # Validation on age field
         (
@@ -1556,7 +1556,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
                     "value": None,
                 }
             ],
-            ApplicationFormStatus.NOT_STARTED,
+            ApplicationFormStatus.IN_PROGRESS,
         ),
         # Validation on age field
         (
