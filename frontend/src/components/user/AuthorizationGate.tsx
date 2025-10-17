@@ -50,16 +50,17 @@ type AuthorizationGateProps = {
     }
 );
 
-// unpack the fetched resource maps to get the first actual error
-const findFirstError = (
+// unpack the fetched resource maps to determine if any of calls
+// resulted in a 403
+const findUnauthorizedError = (
   fetchedResources: FetchedResourceMap[],
-): FetchedResource | undefined => {
-  const firstError = fetchedResources.find((resource) =>
+): boolean => {
+  const hasUnauthorizedError = fetchedResources.some((resource) =>
     Object.values(resource).some(
-      (resourceDefinition) => resourceDefinition.statusCode !== 200,
+      (resourceDefinition) => resourceDefinition.statusCode === 403,
     ),
   );
-  return firstError ? Object.values(firstError)[0] : undefined;
+  return hasUnauthorizedError;
 };
 
 // we need to expose status codes and possible errors as well as fetched data
@@ -96,6 +97,9 @@ const resolveAndFormatResources = (
 
 // calls the API to check all required privileges,
 // and formats results into a format to be used downstream
+// note that if a non-403 is returned, that error will be passed along
+// since we'll consider a non-403 as unauthorized, children should check for errors
+// first before checking "authorized"
 const checkRequiredPrivileges = async (
   token: string,
   userId: string,
@@ -111,7 +115,7 @@ const checkRequiredPrivileges = async (
           if (parseErrorStatus(e) === 403) {
             return { ...privilege, authorized: false };
           }
-          throw e;
+          return { ...privilege, authorized: false, error: e.message };
         });
     }),
   );
@@ -166,19 +170,17 @@ export async function AuthorizationGate({
         (all, resource) => ({ ...all, ...resource }),
         {},
       );
-      // Note: we will handle errors based on the order that their respective promise was passed in. If multiple promises throw errors
-      // any after the first error encountered will be swallowed, as we have not accounted for the ability to handle multiple errors.
-      // We can improve this later
-      const firstError = findFirstError(fetchedResources);
-      if (firstError) {
-        if (firstError.statusCode === 403 && onUnauthorized) {
-          return onUnauthorized(children, allResources);
-        }
-        if (firstError.statusCode !== 403) {
-          return onError(new Error(firstError.error));
-        }
+
+      // non-403 errors are not handled here, they will be passed to children to be handled closer to where
+      // the data would be used
+      const unauthorizedError = findUnauthorizedError(fetchedResources);
+      if (unauthorizedError && onUnauthorized) {
+        return onUnauthorized(children, allResources);
       }
     } catch (e) {
+      // note that any errors incurred in the normal process of fetching data
+      // will be caught and formatted for consumption downstream.
+      // this should only catch unexpected errors thrown outside the promises themselves
       return onError(e as Error);
     }
   }

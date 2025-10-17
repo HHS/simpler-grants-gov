@@ -14,6 +14,7 @@ export interface UserPrivilegeDefinition {
 
 export interface UserPrivilegeResult extends UserPrivilegeDefinition {
   authorized: boolean;
+  error?: string;
 }
 
 export type UserRole = {

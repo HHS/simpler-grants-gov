@@ -42,7 +42,7 @@ const PropTester = ({
     </>
   );
 };
-
+const mockOnError = jest.fn();
 const mockGetSession = jest.fn();
 const mockOnUnauthorized = jest.fn();
 const mockOnUnauthenticated = jest.fn();
@@ -111,13 +111,12 @@ describe("AuthorizationGate", () => {
       firstResource: { statusCode: 403, error: "fake unauthorized error" },
     });
   });
-  it("handles non auth related errors in any resource fetches", async () => {
+  it("does not handle non auth related errors in any resource fetches", async () => {
     const fakeError = new ApiRequestError(
       "fake application errors",
       "application error",
       500,
     );
-    const mockOnError = jest.fn();
     const component = await AuthorizationGate({
       children: <div>HELLO</div>,
       onUnauthorized: mockOnUnauthorized,
@@ -128,8 +127,8 @@ describe("AuthorizationGate", () => {
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
-    expect(mockOnError).toHaveBeenCalledTimes(1);
-    expect(mockOnError).toHaveBeenCalledWith(fakeError);
+    expect(mockOnError).not.toHaveBeenCalled();
+    expect(screen.getByText("HELLO")).toBeInTheDocument();
   });
   it("passes down all fetched resources via provider", async () => {
     const ProviderTester = () => {
@@ -159,6 +158,36 @@ describe("AuthorizationGate", () => {
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(screen.getByText("firstResource")).toBeInTheDocument();
     expect(screen.getByText("some resolved value")).toBeInTheDocument();
+  });
+  it("passes down non 403 errors for fetched resources via provider", async () => {
+    const ProviderTester = () => {
+      const resources = useAuthorizedData();
+      return (
+        <div>
+          fetchedResources
+          {Object.entries(resources.fetchedResources).map(
+            ([resourceKey, resourceValue]) => (
+              <div key={resourceKey}>
+                <div>{resourceKey}</div>
+                <div>{resourceValue.error}</div>
+              </div>
+            ),
+          )}
+        </div>
+      );
+    };
+    const component = await AuthorizationGate({
+      children: <ProviderTester />,
+      onUnauthorized: mockOnUnauthorized,
+      onError: mockOnError,
+      resourcePromises: {
+        firstResource: Promise.reject(new ApiRequestError("oh no", "", 500)),
+      },
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).not.toHaveBeenCalled();
+    expect(mockOnError).not.toHaveBeenCalled();
+    expect(screen.getByText("oh no")).toBeInTheDocument();
   });
   it("passes down all fetched permission check results via provider", async () => {
     mockCheckUserPrivilege.mockImplementation(
@@ -204,6 +233,40 @@ describe("AuthorizationGate", () => {
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
     expect(screen.getByText("modify_organization : true")).toBeInTheDocument();
     expect(screen.getByText("read_application : false")).toBeInTheDocument();
+  });
+  it("passes down non 403 errors in fetched permission check results", async () => {
+    mockCheckUserPrivilege.mockReturnValue(
+      Promise.reject(new Error("fake error")),
+    );
+    const ProviderTester = () => {
+      const resources = useAuthorizedData();
+      return (
+        <div>
+          requiredPermissions
+          {resources.confirmedPrivileges.map((permission) => (
+            <div key={`${permission.privilege}-${permission.resourceType}`}>
+              <div>{permission.error}</div>
+            </div>
+          ))}
+        </div>
+      );
+    };
+    const component = await AuthorizationGate({
+      children: <ProviderTester />,
+      onUnauthorized: mockOnUnauthorized,
+      onError: mockOnError,
+      requiredPrivileges: [
+        {
+          resourceId: "1",
+          resourceType: "organization",
+          privilege: "modify_organization",
+        },
+      ],
+    });
+    render(component as JSX.Element);
+    expect(mockOnUnauthorized).not.toHaveBeenCalled();
+    expect(mockOnError).not.toHaveBeenCalled();
+    expect(screen.getByText("fake error")).toBeInTheDocument();
   });
   it("passes fetched resources and privilege check results as prop to top level child", async () => {
     mockCheckUserPrivilege.mockImplementation(
