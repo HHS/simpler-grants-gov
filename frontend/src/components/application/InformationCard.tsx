@@ -22,10 +22,10 @@ export type ApplicationDetailsCardProps = ApplicationDetail &
 const OrganizationDetailsDisplay = ({
   samGovEntity,
 }: {
-  samGovEntity: SamGovEntity;
+  samGovEntity?: SamGovEntity;
 }) => {
   const t = useTranslations("Application.information");
-  const { legal_business_name, uei, expiration_date } = samGovEntity;
+  const { expiration_date, legal_business_name, uei } = samGovEntity ?? {};
 
   return (
     <>
@@ -52,7 +52,7 @@ const ApplicantDetails = ({
   samGovEntity,
 }: {
   hasOrganization: boolean;
-  samGovEntity: SamGovEntity;
+  samGovEntity?: SamGovEntity;
 }) => {
   const t = useTranslations("Application.information");
   if (hasOrganization) {
@@ -179,7 +179,7 @@ export const InformationCard = ({
           <dl>
             <ApplicantDetails
               hasOrganization={hasOrganization}
-              samGovEntity={applicationDetails.organization.sam_gov_entity}
+              samGovEntity={applicationDetails.organization?.sam_gov_entity}
             />
             {applicationDetails.competition.competition_instructions.length ? (
               <ApplicationInstructionsDownload />
