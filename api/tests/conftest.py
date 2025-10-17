@@ -21,13 +21,14 @@ from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
+from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
 from src.db.models.agency_models import Agency
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
-from src.db.models.user_models import AgencyUser
+from src.db.models.user_models import AgencyUser, UserApiKey
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
@@ -56,6 +57,17 @@ def user_api_key(enable_factory_create):
 @pytest.fixture
 def user_api_key_id(user_api_key):
     return user_api_key.key_id
+
+@pytest.fixture
+def internal_admin_user(enable_factory_create):
+    user = factories.UserFactory.create()
+    factories.InternalUserRoleFactory.create(user=user, role=NAVA_INTERNAL_ROLE)
+    return user
+
+@pytest.fixture
+def internal_admin_user_api_key(internal_admin_user) -> UserApiKey:
+    api_key = factories.UserApiKeyFactory.create(user=internal_admin_user)
+    return api_key
 
 
 @pytest.fixture(scope="session", autouse=True)

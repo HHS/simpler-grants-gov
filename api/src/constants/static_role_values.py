@@ -12,6 +12,9 @@ from src.db.models.user_models import LinkRolePrivilege, LinkRoleRoleType, Role
 def get_link_privileges(role_id: uuid.UUID, privilege: list[Privilege]) -> list[LinkRolePrivilege]:
     return [LinkRolePrivilege(role_id=role_id, privilege=priv) for priv in privilege]
 
+############################
+# Core Organization Roles
+############################
 
 ORG_ADMIN_ID = uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142")
 ORG_ADMIN = Role(
@@ -51,6 +54,11 @@ ORG_MEMBER = Role(
     ),
     link_role_types=[LinkRoleRoleType(role_id=ORG_MEMBER_ID, role_type=RoleType.ORGANIZATION)],
 )
+
+############################
+# Core Application Roles
+############################
+
 APPLICATION_OWNER_ID = uuid.UUID("f1e72876-ad13-4734-be5c-b43c8cef8d67")
 APPLICATION_OWNER = Role(
     role_id=APPLICATION_OWNER_ID,
@@ -89,4 +97,22 @@ APPLICATION_CONTRIBUTOR = Role(
     ],
 )
 
-CORE_ROLES = [ORG_ADMIN, ORG_MEMBER, APPLICATION_OWNER, APPLICATION_CONTRIBUTOR]
+############################
+# Core Agency Roles
+############################
+# None at the moment
+
+############################
+# Core Internal Roles
+############################
+
+NAVA_INTERNAL_ROLE_ID = uuid.UUID("57e8875f-c154-41be-a5f6-602f4c92d6e6")
+NAVA_INTERNAL_ROLE = Role(
+    role_id=NAVA_INTERNAL_ROLE_ID,
+    role_name="Nava Internal Admin Role",
+    is_core=True,
+    link_privileges=get_link_privileges(NAVA_INTERNAL_ROLE_ID, [Privilege.UPDATE_FORM]),
+    link_role_types=[LinkRoleRoleType(role_id=NAVA_INTERNAL_ROLE_ID, role_type=RoleType.INTERNAL)],
+)
+
+CORE_ROLES = [ORG_ADMIN, ORG_MEMBER, APPLICATION_OWNER, APPLICATION_CONTRIBUTOR, NAVA_INTERNAL_ROLE]
