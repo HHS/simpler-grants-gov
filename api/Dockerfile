@@ -92,7 +92,7 @@ ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     FONTCONFIG_FILE="/etc/fonts/fonts.conf"
 
 # Ensure wget is available in runtime for ecs health checks
-RUN microdnf -y install wget && microdnf clean all
+RUN microdnf -y install wget-1.21.3-1.amzn2023.0.4 && microdnf clean all
 
 # Initialize Graphviz plugin cache and related caches if tools are available
 RUN ([ -x /usr/bin/fc-cache ] && fc-cache -f || true) && \
