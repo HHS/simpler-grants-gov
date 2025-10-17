@@ -32,7 +32,9 @@ from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
 from src.services.applications.delete_application_attachment import delete_application_attachment
 from src.services.applications.get_application import get_application_with_warnings
-from src.services.applications.get_application_attachment import get_application_attachment
+from src.services.applications.get_application_attachment import (
+    get_application_attachment_with_auth,
+)
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
@@ -201,6 +203,8 @@ def application_form_get(
         user = None
 
     with db_session.begin():
+        if user:
+            db_session.add(multi_auth_user.user)
         application_form, warnings = get_application_form(
             db_session, application_id, app_form_id, user
         )
@@ -230,6 +234,7 @@ def application_get(
     user = token_session.user
 
     with db_session.begin():
+        db_session.add(token_session)
         application, warnings = get_application_with_warnings(db_session, application_id, user)
 
     # Return the application form data
@@ -308,7 +313,8 @@ def application_attachment_get(
     user = token_session.user
 
     with db_session.begin():
-        application_attachment = get_application_attachment(
+        db_session.add(token_session)
+        application_attachment = get_application_attachment_with_auth(
             db_session, application_id, application_attachment_id, user
         )
 
