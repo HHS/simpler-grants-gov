@@ -144,8 +144,6 @@ class SubmissionXMLGenerator:
 
         Returns first_name + last_name if available, otherwise email, or 'unknown' if no user.
         """
-        if not self.application.submitted_by:
-            return "unknown"
 
         user = self.application.submitted_by_user
         if not user:
