@@ -18,10 +18,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import (
-    SimplerSoapAPI,
-    SOAPOperationConfig,
-)
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.db_testing import cascade_delete_from_db_table
