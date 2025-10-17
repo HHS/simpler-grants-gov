@@ -18,7 +18,10 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -535,6 +538,7 @@ class TestSimplerSOAPGetApplicationZip:
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
+            client.operation_config = MagicMock(**client.operation_config.__dict__)
             client.operation_config.is_mtom = False
             result = client.get_simpler_soap_response(mock_proxy_response)
             assert isinstance(result.data, bytes)
