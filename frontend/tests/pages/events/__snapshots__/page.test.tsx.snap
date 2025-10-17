@@ -3,8 +3,7 @@
 exports[`Events renders Events page unchanged 1`] = `
 <div>
   <div
-    class="text-white bg-primary-darkest padding-top-4 tablet:padding-y-6"
-    data-testid="events-hero"
+    class="text-white bg-primary-darkest padding-top-2 tablet:padding-y-6"
   >
     <div
       class="grid-container"

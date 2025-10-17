@@ -1,5 +1,6 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.forms import shared_schema
 
@@ -188,14 +189,14 @@ FORM_JSON_SCHEMA = {
                 },
                 "title": {
                     "type": "string",
-                    "title": "Signature Title",
+                    "title": "Title",
                     "description": "Enter the title of the Certifying Official.",
                     "minLength": 1,
                     "maxLength": 45,
                 },
                 "telephone": {
                     "type": "string",
-                    "title": "Signature Telephone Number",
+                    "title": "Telephone No.",
                     "description": "Enter the telephone number of the certifying official.",
                     "minLength": 1,
                     "maxLength": 25,
@@ -352,20 +353,22 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Background",
-        "name": "Background",
-        "children": [
-            {"type": "field", "definition": "/properties/federal_action_type"},
-            {"type": "field", "definition": "/properties/federal_action_status"},
-            {"type": "field", "definition": "/properties/report_type"},
-        ],
+        "label": "1. Type of Federal Action",
+        "name": "Type of Federal Action",
+        "children": [{"type": "field", "definition": "/properties/federal_action_type"}],
     },
     {
         "type": "section",
-        "label": "2. For Material Change Only",
-        "name": "For Material Change Only",
+        "label": "2. Status of Federal Action",
+        "name": "Status of Federal Action",
+        "children": [{"type": "field", "definition": "/properties/federal_action_status"}],
+    },
+    {
+        "type": "section",
+        "label": "3. Report Type",
+        "name": "Report Type",
         "children": [
-            # Material Change
+            {"type": "field", "definition": "/properties/report_type"},
             {"type": "field", "definition": "/properties/material_change_year"},
             {"type": "field", "definition": "/properties/material_change_quarter"},
             {"type": "field", "definition": "/properties/last_report_date"},
@@ -373,10 +376,9 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "3. Name and Address of Reporting Entity",
+        "label": "4. Name and Address of Reporting Entity",
         "name": "Name and Address of Reporting Entity",
         "children": [
-            # Reporting Entity
             {"type": "field", "definition": "/properties/reporting_entity/properties/entity_type"},
             {"type": "field", "definition": "/properties/reporting_entity/properties/tier"},
             {
@@ -411,8 +413,8 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "4. If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
-        "name": "If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
+        "label": "5. If Reporting Entity in No. 4 is Subawardee, Enter Name and Address of Prime",
+        "name": "If Reporting Entity in No. 4 is Subawardee, Enter Name and Address of Prime",
         "children": [
             {
                 "type": "field",
@@ -446,23 +448,36 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "5. Details",
-        "name": "Details",
+        "label": "6. Federal Department/Agency",
+        "name": "Federal Department/Agency",
+        "children": [{"type": "field", "definition": "/properties/federal_agency_department"}],
+    },
+    {
+        "type": "section",
+        "label": "7. Federal Program Name/Description",
+        "name": "Federal Program Name/Description",
         "children": [
-            # Various fields in middle
-            {"type": "field", "definition": "/properties/federal_agency_department"},
             {"type": "field", "definition": "/properties/federal_program_name"},
             {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/federal_action_number"},
-            {"type": "field", "definition": "/properties/award_amount"},
         ],
     },
     {
         "type": "section",
-        "label": "6. Name and Address of Lobbying Registrant",
+        "label": "8. Federal Action Number",
+        "name": "Federal Action Number",
+        "children": [{"type": "field", "definition": "/properties/federal_action_number"}],
+    },
+    {
+        "type": "section",
+        "label": "9. Award Amount",
+        "name": "Award Amount",
+        "children": [{"type": "field", "definition": "/properties/award_amount"}],
+    },
+    {
+        "type": "section",
+        "label": "10a. Name and Address of Lobbying Registrant",
         "name": "Name and Address of Lobbying Registrant",
         "children": [
-            # Lobbying Registrant
             {
                 "type": "field",
                 "definition": "/properties/lobbying_registrant/properties/individual/properties/first_name",
@@ -507,10 +522,9 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "7. Individual Performing Services (including address if different from No. 6)",
-        "name": "Individual Performing Services (including address if different from No. 6)",
+        "label": "10b. Individual Performing Services",
+        "name": "Individual Performing Services",
         "children": [
-            # Individual performing services
             {
                 "type": "field",
                 "definition": "/properties/individual_performing_service/properties/individual/properties/first_name",
@@ -555,11 +569,15 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "8. Signature",
+        "label": "11. Signature",
         "name": "Signature",
+        "description": "Information requested through this form is authorized by title 31 U.S.C. section 1352. This disclosure of lobbying activities is a material representation of fact upon which reliance was placed by the tier above when the transaction was made or entered into. This disclosure is required pursuant to 31 U.S.C. 1352. This information will be reported to the Congress semi- annually and will be available for public inspection. Any person who fails to file the required disclosure shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure.",
         "children": [
-            # Signature block
             {"type": "null", "definition": "/properties/signature_block/properties/signature"},
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/prefix",
+            },
             {
                 "type": "field",
                 "definition": "/properties/signature_block/properties/name/properties/first_name",
@@ -574,11 +592,15 @@ FORM_UI_SCHEMA = [
             },
             {
                 "type": "field",
-                "definition": "/properties/signature_block/properties/name/properties/prefix",
+                "definition": "/properties/signature_block/properties/name/properties/suffix",
             },
             {
                 "type": "field",
-                "definition": "/properties/signature_block/properties/name/properties/suffix",
+                "definition": "/properties/signature_block/properties/title",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/telephone",
             },
             {"type": "null", "definition": "/properties/signature_block/properties/signed_date"},
         ],
@@ -608,5 +630,8 @@ SFLLL_v2_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("17646cbc-76ea-4acc-b9bf-2582defbf0dc"),
+    form_type=FormType.SFLLL,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

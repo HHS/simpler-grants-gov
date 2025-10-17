@@ -195,7 +195,7 @@ def validate_application_form(
                     message="is_included_in_submission must be set on all non-required forms",
                     type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
                     field="is_included_in_submission",
-                    value=None,
+                    value=application_form.application_form_id,
                 )
             )
 
@@ -212,24 +212,10 @@ def validate_application_form(
         )
         form_validation_errors.extend(json_validation_errors)
 
-    # If there are no issues, we consider the form complete
-    # Note: MISSING_INCLUDED_IN_SUBMISSION errors don't count as form completion issues since they're configuration errors
-    if (
-        len(
-            [
-                e
-                for e in form_validation_errors
-                if e.type != ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
-            ]
-        )
-        == 0
-    ):
+    # If the form has no validation issues, we'll mark it as complete
+    if len(form_validation_errors) == 0:
         application_form_status = ApplicationFormStatus.COMPLETE
-    # If the form has no answers, we assume it has not been started
-    elif len(application_form.application_response) == 0:
-        application_form_status = ApplicationFormStatus.NOT_STARTED
-    # If the form has been started, but has validation issues, assume it is in-progress
-    else:
+    else:  # Any validation issues we'll mark as in-progress
         application_form_status = ApplicationFormStatus.IN_PROGRESS
 
     application_form.application_form_status = application_form_status  # type: ignore[attr-defined]

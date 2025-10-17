@@ -1,4 +1,5 @@
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import RoleSchema
 
@@ -14,6 +15,24 @@ class SamGovEntityResponseSchema(Schema):
     )
     expiration_date = fields.Date(
         metadata={"description": "SAM.gov registration expiration date", "example": "2025-08-11"}
+    )
+    ebiz_poc_email = fields.String(
+        metadata={
+            "description": "Email address of the Electronic Business Point of Contact",
+            "example": "ebiz@example.com",
+        }
+    )
+    ebiz_poc_first_name = fields.String(
+        metadata={
+            "description": "First name of the Electronic Business Point of Contact",
+            "example": "John",
+        }
+    )
+    ebiz_poc_last_name = fields.String(
+        metadata={
+            "description": "Last name of the Electronic Business Point of Contact",
+            "example": "Smith",
+        }
     )
 
 
@@ -50,6 +69,12 @@ class OrganizationMemberSchema(Schema):
         fields.Nested(RoleSchema),
         metadata={"description": "User roles in this organization"},
     )
+    first_name = fields.String(
+        allow_none=True, metadata={"description": "User first name", "example": "John"}
+    )
+    last_name = fields.String(
+        allow_none=True, metadata={"description": "User last name", "example": "Smith"}
+    )
 
 
 class OrganizationGetResponseSchema(AbstractResponseSchema):
@@ -73,3 +98,21 @@ class OrganizationListRolesResponseSchema(AbstractResponseSchema):
     """Schema for POST /organizations/:organization_id/roles/list response"""
 
     data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationUpdateUserRolesRequestSchema(Schema):
+    role_ids = fields.List(fields.UUID(required=True), validate=Length(min=1))
+
+
+class OrganizationUpdateUserRolesResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /organizations/:organization_id/users/:user_id"""
+
+    data = fields.List(fields.Nested(RoleSchema), metadata={"description": "Role information"})
+
+
+class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/users/:user_id response"""
+
+    data = fields.Raw(
+        allow_none=True, metadata={"description": "No data returned on successful removal"}
+    )

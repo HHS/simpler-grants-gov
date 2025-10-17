@@ -339,7 +339,7 @@ export const messages = {
       attachedDocument: "Attached document",
       attachments: "Attachments",
       attachmentsInstructions:
-        "If the application instructions require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+        "If the <instructionsLink>opportunity instructions</instructionsLink> require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
       action: "Action",
       cancelUpload: "Cancel upload",
       delete: "Delete",
@@ -1455,5 +1455,28 @@ export const messages = {
     pageTitle: "User Workspace | Simpler.Grants.gov",
     title: "User Workspace",
     fetchError: "Error fetching user data. Please try refreshing the page.",
+    organizations: "Organizations",
+  },
+  OrganizationDetail: {
+    pageTitle: "Organization",
+    fetchError: "Unable to fetch organization details",
+    organizationDetailsHeader: "Organization details",
+    ebizPoc: "eBiz POC",
+    contact: "Contact",
+    uei: "UEI",
+    expiration: "Exp",
+    visitSam:
+      "Visit <link>sam.gov</link> to make changes to your organization’s details.",
+    rosterTable: {
+      title: "Organization roster",
+      explanation: "Your organization's active members are listed below.",
+      manageUsersExplanation:
+        "Manage Users to add or update roles and permissions.",
+      headings: {
+        email: "Email",
+        name: "Name",
+        roles: "Roles",
+      },
+    },
   },
 };

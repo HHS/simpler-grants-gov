@@ -30,17 +30,16 @@ export default function Subscribe({ params }: LocalizedPageProps) {
       <div className="text-white bg-primary-darkest padding-top-2 tablet:padding-y-6">
         <GridContainer>
           <Grid row gap>
-            <Grid
-              tablet={{ col: "fill" }}
-              className="tablet:margin-bottom-0 margin-bottom-4"
-            >
+            <Grid tablet={{ col: "fill" }}>
               <h1>{t("title")}</h1>
-              <div className="font-sans-md">
-                <p>{t("paragraph1")}</p>
-                <p>{t("paragraph2")}</p>
-              </div>
+              <p className="text-balance font-sans-md tablet:font-sans-lg margin-bottom-4 tablet:margin-bottom-0">
+                {t("paragraph1")}
+              </p>
+              <p className="text-balance font-sans-md tablet:font-sans-lg margin-bottom-4 tablet:margin-bottom-0">
+                {t("paragraph2")}
+              </p>
             </Grid>
-            <Grid tablet={{ col: "auto" }}>
+            <Grid tablet={{ col: 6 }} tabletLg={{ col: "auto" }}>
               <Grid className="display-flex flex-justify-center flex-align-center margin-x-neg-2 tablet:margin-x-0">
                 <Image
                   src="/img/statue-of-liberty-blue.png"

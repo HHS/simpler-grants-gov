@@ -1,7 +1,12 @@
 "use client";
 
-import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  SamGovEntity,
+  Status,
+} from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
@@ -13,6 +18,54 @@ type CompetitionDetails = { competition: Competition };
 
 export type ApplicationDetailsCardProps = ApplicationDetail &
   CompetitionDetails;
+
+const OrganizationDetailsDisplay = ({
+  samGovEntity,
+}: {
+  samGovEntity?: SamGovEntity;
+}) => {
+  const t = useTranslations("Application.information");
+  const { expiration_date, legal_business_name, uei } = samGovEntity ?? {};
+
+  return (
+    <>
+      <div className="margin-bottom-1">
+        <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
+        <dd>{legal_business_name ?? "-"}</dd>
+      </div>
+      <Grid row className="margin-bottom-1">
+        <div>
+          <dt className="margin-right-1 text-bold">{t("uei")}: </dt>
+          <dd>{uei ?? "-"}</dd>
+        </div>
+        <div className="margin-left-4">
+          <dt className="margin-right-1 text-bold">{t("renewal")}: </dt>
+          <dd>{expiration_date ?? "-"}</dd>
+        </div>
+      </Grid>
+    </>
+  );
+};
+
+const ApplicantDetails = ({
+  hasOrganization,
+  samGovEntity,
+}: {
+  hasOrganization: boolean;
+  samGovEntity?: SamGovEntity;
+}) => {
+  const t = useTranslations("Application.information");
+  if (hasOrganization) {
+    return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
+  }
+
+  return (
+    <div className="margin-bottom-1">
+      <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
+      <dd>{t("applicantTypeIndividual")}</dd>
+    </div>
+  );
+};
 
 export const InformationCard = ({
   applicationDetails,
@@ -32,37 +85,11 @@ export const InformationCard = ({
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
 
-  const ApplicantDetails = () => {
-    if (hasOrganization) {
-      const { legal_business_name, uei, expiration_date } =
-        applicationDetails.organization.sam_gov_entity;
-
-      return (
-        <>
-          <div className="margin-bottom-1">
-            <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-            <dd>{legal_business_name ?? "-"}</dd>
-          </div>
-          <Grid row className="margin-bottom-1">
-            <div>
-              <dt className="margin-right-1 text-bold">{t("uei")}: </dt>
-              <dd>{uei ?? "-"}</dd>
-            </div>
-            <div className="margin-left-4">
-              <dt className="margin-right-1 text-bold">{t("renewal")}: </dt>
-              <dd>{expiration_date ?? "-"}</dd>
-            </div>
-          </Grid>
-        </>
-      );
-    }
-
-    return (
-      <div className="margin-bottom-1">
-        <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-        <dd>{t("applicantTypeIndividual")}</dd>
-      </div>
+  const isCompetitionClosed = () => {
+    const isPastCloseDate = getConfiguredDayJs()().isAfter(
+      getConfiguredDayJs()(applicationDetails.competition.closing_date),
     );
+    return !applicationDetails.competition.is_open || isPastCloseDate;
   };
 
   const ApplicationInstructionsDownload = () => {
@@ -138,16 +165,22 @@ export const InformationCard = ({
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
-            <EditAppFilingName
-              applicationId={applicationDetails.application_id}
-              applicationName={applicationDetails.application_name}
-              opportunityName={opportunityName}
-            />
+            {applicationDetails.application_status !== Status.SUBMITTED &&
+              applicationDetails.application_status !== Status.ACCEPTED && (
+                <EditAppFilingName
+                  applicationId={applicationDetails.application_id}
+                  applicationName={applicationDetails.application_name}
+                  opportunityName={opportunityName}
+                />
+              )}
           </h3>
         </Grid>
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
           <dl>
-            <ApplicantDetails />
+            <ApplicantDetails
+              hasOrganization={hasOrganization}
+              samGovEntity={applicationDetails.organization?.sam_gov_entity}
+            />
             {applicationDetails.competition.competition_instructions.length ? (
               <ApplicationInstructionsDownload />
             ) : (
@@ -172,16 +205,14 @@ export const InformationCard = ({
                 (12:00am ET)
               </dd>
             </div>
-            {!applicationDetails.competition.is_open ? (
-              <SpecialInstructions />
-            ) : null}
+            {isCompetitionClosed() ? <SpecialInstructions /> : null}
             <div className="margin-bottom-1">
               <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
               <dd className="margin-right-1 text-bold text-orange">
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && (
+            {!applicationSubmitted && !isCompetitionClosed() && (
               <SubmitApplicationButton
                 buttonText={t("submit")}
                 submitHandler={applicationSubmitHandler}

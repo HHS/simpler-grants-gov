@@ -7,6 +7,7 @@ import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
@@ -34,6 +35,7 @@ const ApplicationContainer = ({
   const { user } = useUser();
   const token = user?.token || null;
   const t = useTranslations("Application");
+  const router = useRouter();
 
   const [validationErrors, setValidationErrors] = useState<
     FormValidationWarning[]
@@ -65,6 +67,8 @@ const ApplicationContainer = ({
           setValidationErrors(data.errors);
         } else {
           setSuccess(true);
+          // Refresh server-side data to get updated application status from API
+          router.refresh();
         }
       })
       .catch((error) => {
@@ -74,7 +78,7 @@ const ApplicationContainer = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [applicationId, token]);
+  }, [applicationId, token, router]);
 
   return (
     <>
@@ -111,7 +115,11 @@ const ApplicationContainer = ({
       <InformationCard
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
-        applicationSubmitted={applicationStatus === "submitted" || success}
+        applicationSubmitted={
+          applicationStatus === "submitted" ||
+          applicationStatus === "accepted" ||
+          success
+        }
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
         instructionsDownloadPath={instructionsDownloadPath}
@@ -127,6 +135,7 @@ const ApplicationContainer = ({
       <AttachmentsCard
         applicationId={applicationId}
         attachments={attachments}
+        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
     </>
   );

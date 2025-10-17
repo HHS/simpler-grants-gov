@@ -141,6 +141,16 @@ class FormFamily(StrEnum):
     SF_424_SHORT_ORGANIZATION = "sf-424-short-organization"
 
 
+class FormType(StrEnum):
+    SF424 = "SF424"
+    SF424A = "SF424A"
+    SF424B = "SF424B"
+    SFLLL = "SFLLL"
+    PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
+    BUDGET_NARRATIVE_ATTACHMENT = "BudgetNarrativeAttachment"
+    PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
+
+
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
@@ -193,7 +203,6 @@ class ApplicationStatus(StrEnum):
 
 
 class ApplicationFormStatus(StrEnum):
-    NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
 

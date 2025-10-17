@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,8 +10,8 @@ from src.legacy_soap_api.applicants.schemas import (
     GetOpportunityListResponse,
     OpportunityDetails,
 )
-from src.legacy_soap_api.legacy_soap_api_client import SimplerApplicantsS2SClient
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_client import BaseSOAPClient, SimplerApplicantsS2SClient
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -56,9 +57,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
         assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
         assert client.GetOpportunityListRequest() is not None
-        simpler_soap_response, use_simpler = client.get_simpler_soap_response(
-            mock_proxy_request_response
-        )
+        simpler_soap_response = client.get_simpler_soap_response(mock_proxy_request_response)
         assert isinstance(simpler_soap_response, SOAPResponse)
 
     @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_proxy_response")
@@ -234,9 +233,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
 
         # This is only testing the simpler soap response so we can leave proxy response empty.
         mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_response, use_simpler = simpler_soap_client.get_simpler_soap_response(
-            mock_proxy_response
-        )
+        simpler_response = simpler_soap_client.get_simpler_soap_response(mock_proxy_response)
 
         assert simpler_response.data == expected_simpler_soap_response_xml.encode()
         assert (
@@ -245,3 +242,102 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
                 simpler_soap_client.operation_config.response_operation_name
             )
         )
+
+
+class TestSimplerBaseSOAPClient:
+
+    def xml_streamer(self):
+        yield b"<soap:Envelope><Body><GetOpportunityListResponse><OpportunityDetails>"
+        yield (b"<ns5:OpeningDate>2025-07-20-04:00</ns5:OpeningDate>")
+        yield b"</OpportunityDetails></GetOpportunityListResponse></Body></soap:Envelope>"
+
+    def test_get_proxy_soap_response_dict_handles_data_that_is_generator(self, db_session):
+        soap_request = SOAPRequest(
+            data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.APPLICANTS,
+            operation_name="GetOpportunityListRequest",
+        )
+        client = BaseSOAPClient(soap_request, db_session)
+        proxy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
+        proxy_soap_response_dict = client.get_proxy_soap_response_dict(proxy_response)
+        expected = {
+            "Envelope": {
+                "Body": {
+                    "GetOpportunityListResponse": {
+                        "OpportunityDetails": [{"OpeningDate": "2025-07-20"}]
+                    }
+                }
+            }
+        }
+        assert proxy_soap_response_dict == expected
+
+    def test_get_simpler_soap_response_when_operation_is_get_opportunity_list_request_compares_responses(
+        self, db_session, caplog
+    ):
+        soap_request = SOAPRequest(
+            data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.APPLICANTS,
+            operation_name="GetOpportunityListRequest",
+        )
+        client = BaseSOAPClient(soap_request, db_session)
+        proxy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
+        with patch(
+            "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_soap_response_dict"
+        ) as mock_soap_response_dict:
+            caplog.set_level(logging.DEBUG)
+            mock_soap_response_dict.return_value = {}
+            with patch(
+                "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_proxy_soap_response_dict"
+            ) as mock_get_proxy_soap_response_dict:
+                client.get_simpler_soap_response(proxy_response)
+                assert len(caplog.records) == 1
+                assert caplog.records[0].message == "soap_api_diff complete"
+                mock_get_proxy_soap_response_dict.assert_called_once_with(proxy_response)
+
+    def test_get_simpler_soap_response_when_operation_is_not_get_opportunity_list_request_does_not_compare_responses(
+        self, db_session, caplog
+    ):
+        with patch(
+            "src.legacy_soap_api.legacy_soap_api_client.SOAPRequest.get_soap_request_operation_config"
+        ) as mock_config:
+            mock_config.return_value = SOAPOperationConfig(
+                request_operation_name="GetOpportunityListRequest",
+                response_operation_name="GetOpportunityListResponse",
+                force_list_attributes=("OpportunityDetails",),
+                key_indexes={"OpportunityDetails": "CompetitionID"},
+                compare_endpoints=False,
+                namespace_keymap={
+                    "GetOpportunityListResponse": "ns2",
+                },
+            )
+            soap_request = SOAPRequest(
+                data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+                full_path="x",
+                headers={},
+                method="POST",
+                api_name=SimplerSoapAPI.APPLICANTS,
+                operation_name="GetOpportunityListRequest",
+            )
+            client = BaseSOAPClient(soap_request, db_session)
+            with patch(
+                "src.legacy_soap_api.legacy_soap_api_client.build_xml_from_dict"
+            ) as mock_build_xml_from_dict:
+                mock_build_xml_from_dict.return_value = b""
+                proxy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
+                with patch(
+                    "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_soap_response_dict"
+                ) as mock_soap_response_dict:
+                    caplog.set_level(logging.DEBUG)
+                    mock_soap_response_dict.return_value = {}
+                    with patch(
+                        "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_proxy_soap_response_dict"
+                    ) as mock_get_proxy_soap_response_dict:
+                        mock_get_proxy_soap_response_dict.assert_not_called()
+                    client.get_simpler_soap_response(proxy_response)
+                    assert len(caplog.records) == 0

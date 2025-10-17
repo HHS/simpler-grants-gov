@@ -1,135 +1,106 @@
-# Use the official python3 image based on Debian 11 "Bullseye".
-# https://hub.docker.com/_/python
-
-# The build stage that will be used to deploy to the various environments
-# needs to be called `release` in order to integrate with the repo's
-# top-level Makefile
-FROM python:3.13-slim AS base
-# See /documentation/api/package-depedency-management.md#Upgrading Python
-# for details on upgrading your Python version
-
-# Install poetry, the package manager.
-# https://python-poetry.org
-RUN pip install --no-cache-dir poetry==2.1.3 --upgrade
-
-RUN apt-get update \
-    # Remove existing packages before installing their never versions
-    && apt-get remove --yes \
-        build-essential \
-        libpq-dev \
-        postgresql \
-        wget \
-    # Install security updates
-    # https://pythonspeed.com/articles/security-updates-in-docker/ \
-    # You can check currently installed package versions by running "make login" \
-    # to go into the Docker container, and then apt list --installed | grep <whatever>
-    && apt-get upgrade --yes \
-    && apt-get install --no-install-recommends --yes \
-        build-essential \
-        libpq-dev \
-        postgresql \
-        wget \
-        libgnutls30 \
-        linux-libc-dev \
-        libxslt1.1 \
-    # Reduce the image size by clear apt cached lists
-    # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-    && apt-get clean \
-    && rm -fr /var/lib/apt/lists/* \
-    && rm /etc/ssl/private/ssl-cert-snakeoil.key
+FROM ghcr.io/hhs/python-base-image:d25fed1@sha256:f5cc5da8ced732f92b47a0279213b0e3e83efed5f12b81d2ca8bc677505d5088 AS base
 
 ARG RUN_UID
 ARG RUN_USER
 
-# The following logic creates the RUN_USER home directory and the directory where
-# we will be storing the application in the image. This runs when the user is not root
+# Create user and directories
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
     [ "${RUN_USER}" = "root" ] || \
-    (useradd --create-home --create --user-group --home "/home/${RUN_USER}" --uid ${RUN_UID} "${RUN_USER}" \
-    && mkdir /api \
-    && chown -R ${RUN_UID} "/home/${RUN_USER}" /api)
+    ( \
+      "/usr/local/bin/python${PY_MM}" -c "import os; os.makedirs('/var/spool/mail', exist_ok=True); os.makedirs('/api', exist_ok=True); os.makedirs('/api/tmp', exist_ok=True)" && \
+      /usr/sbin/useradd --create-home --user-group --home "/home/${RUN_USER}" --uid "${RUN_UID}" "${RUN_USER}" && \
+      "/usr/local/bin/python${PY_MM}" -c "import os,pwd,stat; uid=int('${RUN_UID}'); user='${RUN_USER}'; gid=pwd.getpwnam(user).pw_gid; [os.path.exists(p) and os.chown(p, uid, gid) for p in (f'/home/{user}','/api','/api/tmp')]; os.chmod('/api/tmp', stat.S_IRWXU)" \
+    ) && \
+    "/usr/local/bin/python${PY_MM}" -c "import os,stat; [ (os.makedirs(d, exist_ok=True), os.chmod(d, (stat.S_IRWXU|stat.S_IRWXG|stat.S_IRWXO|stat.S_ISVTX))) for d in ('/tmp','/var/tmp','/usr/tmp') ]"
 
-#-----------
-# Dev image
-#-----------
+WORKDIR /api
 
+COPY pyproject.toml poetry.lock ./
+
+RUN "/usr/local/bin/python${PY_MM}" -c "import shutil; shutil.rmtree('/api/.venv', ignore_errors=True)"
+
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+ENV VIRTUALENV_ALWAYS_COPY=1
+
+RUN poetry install --no-root --only main
+
+COPY . /api
+
+# Build the application wheel and install it into the venv
+RUN poetry build --format wheel && poetry run pip install --no-cache-dir 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
+# Prune pip and build tools from the in-project venv to keep the final image clean
+RUN /api/.venv/bin/python -c "import site,shutil,glob,os; sp=(site.getsitepackages()[0] if hasattr(site,'getsitepackages') else site.getusersitepackages()); patterns=['pip*','setuptools*','wheel*','_distutils_hack']; [ (shutil.rmtree(p, ignore_errors=True) if os.path.isdir(p) else (os.remove(p) if os.path.exists(p) else None)) for pat in patterns for p in glob.glob(os.path.join(sp, pat)) ]; bindir=os.path.join(os.path.dirname(os.path.dirname(sp)),'bin'); [ os.remove(p) for p in glob.glob(os.path.join(bindir,'pip*')) if os.path.exists(p) ]; [ os.remove(p) for p in glob.glob(os.path.join(bindir,'easy_install*')) if os.path.exists(p) ]"
+
+#==============================================
+# Stage 3: Dev image
+#==============================================
 FROM base AS dev
 ARG RUN_USER
 
-# In between ARG RUN_USER and USER ${RUN_USER}, the user is still root
-# If there is anything that needs to be ran as root, this is the spot
+# Graphviz is already present in the base image; no extra COPYs needed for dev.
+# Rely on the base image for Graphviz binaries, plugins, fonts, and runtime libs.
+# (Removing redundant COPYs avoids duplicating OS libraries and reduces image size.)
 
-# Install graphviz which is used to generate ERD diagrams
-RUN apt-get update && apt-get install --no-install-recommends --yes graphviz \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Ensure Graphviz and related image/text renderers can discover their plugins and caches
+ENV GV_PLUGIN_PATH=/usr/lib64/graphviz \
+    GDK_PIXBUF_MODULE_FILE=/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache \
+    PANGO_LIBDIR=/usr/lib64 \
+    PANGO_SYSCONFDIR=/etc \
+    FONTCONFIG_PATH=/etc/fonts \
+    FONTCONFIG_FILE=/etc/fonts/fonts.conf \
+    TMPDIR="/tmp"
 
 USER ${RUN_USER}
 WORKDIR /api
 
+# In dev, prefer external venv to avoid mutating release venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false
+
 COPY pyproject.toml poetry.lock ./
-# Explicitly create a new virtualenv to avoid getting overridden by mounted .venv folders
+
+# Remove the base stage venv to avoid duplication in dev image (best effort)
+RUN rm -rf /api/.venv || true
+
+# Explicitly create a new virtualenv
 RUN poetry config virtualenvs.in-project false && poetry env use python
+
 # Install all dependencies including dev dependencies
 RUN poetry install --no-root --with dev
 
 COPY . /api
 
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
+CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
-# Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
-
-#---------
-# Release
-#---------
-
+#==============================================
+# Stage 5: Minimal release runtime
+#==============================================
 FROM base AS release
 ARG RUN_USER
 
-# Gunicorn requires this workaround to create writable temporary directory in
-# our readonly root file system. https://github.com/aws/containers-roadmap/issues/736
-RUN mkdir -p /tmp
-VOLUME ["/tmp"]
-
-# TODO(https://github.com/navapbc/template-application-flask/issues/23) Productionize the Docker image
-
+# Working directory and runtime environment
 WORKDIR /api
+ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
+    HOST=0.0.0.0 \
+    TMPDIR="/dev/shm" \
+    SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
+    SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem" \
+    GV_PLUGIN_PATH="/usr/lib64/graphviz" \
+    GDK_PIXBUF_MODULE_FILE="/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache" \
+    PANGO_LIBDIR="/usr/lib64" \
+    PANGO_SYSCONFDIR="/etc" \
+    FONTCONFIG_PATH="/etc/fonts" \
+    FONTCONFIG_FILE="/etc/fonts/fonts.conf"
 
-COPY . /api
+# Ensure wget is available in runtime for ecs health checks
+RUN microdnf -y install wget-1.21.3-1.amzn2023.0.4 && microdnf clean all
 
-# Remove any existing virtual environments that might exist. This
-# might happen if testing out building the release image from a local machine
-# that has a virtual environment within the project api folder.
-RUN rm -fr /api/.venv
+# Initialize Graphviz plugin cache and related caches if tools are available
+RUN ([ -x /usr/bin/fc-cache ] && fc-cache -f || true) && \
+    ([ -x /usr/bin/gdk-pixbuf-query-loaders ] && (gdk-pixbuf-query-loaders --update-cache || gdk-pixbuf-query-loaders > /usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache) || true) && \
+    ([ -x /usr/bin/pango-querymodules ] && pango-querymodules > /etc/pango/pango.modules || true) && \
+    (dot -c || true)
 
-# Set virtualenv location to be in project to be easy to find
-# This will create a virtualenv in /api/.venv/
-# See https://python-poetry.org/docs/configuration/#virtualenvsin-project
-# See https://python-poetry.org/docs/configuration/#using-environment-variables
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-
-# Install production runtime dependencies only
-RUN poetry install --no-root --only main
-
-# Build the application binary (python wheel) defined in pyproject.toml
-# Note that this will only copy over python files, and files stated in the
-# include section in pyproject.toml. Also note that if you change the name or
-# version section in pyproject.toml, you will need to change the dist/... to match
-# or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
-
-# Add project's virtual env to the PATH so we can directly run poetry scripts
-# defiend in pyproject.toml
-ENV PATH="/api/.venv/bin:$PATH"
-
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
-
+# Run as the non-root user created in base
 USER ${RUN_USER}
 
-# Run the application.
-CMD ["poetry", "run", "gunicorn", "src.app:create_app()"]
+CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]
