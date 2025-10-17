@@ -1,8 +1,3 @@
-"""Eventually schemas will actually reference each other
-but for now we'll define some constants here to keep other
-files slightly more readable.
-"""
-
 STATES = [
     "AL: Alabama",
     "AK: Alaska",
