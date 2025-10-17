@@ -85,29 +85,32 @@ class SubmissionXMLGenerator:
         return self._generate_xml_string(root, pretty_print)
 
     def generate_footer_xml(
-        self, pretty_print: bool = True, application_submission: ApplicationSubmission | None = None
+        self, application_submission: ApplicationSubmission, pretty_print: bool = True
     ) -> str:
         nsmap = {
             None: FOOTER_NAMESPACES["footer"],
             "ns1": FOOTER_NAMESPACES["glob"],
         }
 
+        received_datetime = self._get_received_datetime()
+        submitter_name = self._get_submitter_name()
+        tracking_number = self._format_tracking_number(
+            application_submission.legacy_tracking_number
+        )
+
         root = self._create_root_element_with_hash(
             f"{{{FOOTER_NAMESPACES['footer']}}}GrantSubmissionFooter",
             nsmap,
             FOOTER_NAMESPACES["glob"],
-            self._calculate_footer_hash_value(application_submission),
+            self._calculate_footer_hash_value(
+                received_datetime, submitter_name, application_submission.legacy_tracking_number
+            ),
         )
 
         footer_ns = FOOTER_NAMESPACES["footer"]
-        self._add_field(root, "ReceivedDateTime", self._get_received_datetime(), footer_ns)
-        self._add_field(root, "SubmitterName", self._get_submitter_name(), footer_ns)
-
-        if application_submission:
-            tracking_number = self._format_tracking_number(
-                application_submission.legacy_tracking_number
-            )
-            self._add_field(root, "Grants_govTrackingNumber", tracking_number, footer_ns)
+        self._add_field(root, "ReceivedDateTime", received_datetime, footer_ns)
+        self._add_field(root, "SubmitterName", submitter_name, footer_ns)
+        self._add_field(root, "Grants_govTrackingNumber", tracking_number, footer_ns)
 
         return self._generate_xml_string(root, pretty_print)
 
@@ -134,7 +137,7 @@ class SubmissionXMLGenerator:
             return None
         return date_value.isoformat()
 
-    def _get_received_datetime(self) -> str | None:
+    def _get_received_datetime(self) -> str:
         """Get the ReceivedDateTime from submitted_at or current time in ISO 8601 format."""
         timestamp = self.application.submitted_at if self.application.submitted_at else utcnow()
         return timestamp.isoformat(timespec="milliseconds")
@@ -166,16 +169,14 @@ class SubmissionXMLGenerator:
         return base64.b64encode(sha1_hash.digest()).decode("utf-8")
 
     def _calculate_footer_hash_value(
-        self, application_submission: ApplicationSubmission | None
-    ) -> str | None:
+        self, received_datetime: str, submitter_name: str, tracking_number: int
+    ) -> str:
         hash_data_parts = [
             str(self.application.application_id) if self.application.application_id else "",
-            self._get_received_datetime() or "",
-            self._get_submitter_name() or "",
+            received_datetime,
+            submitter_name,
+            str(tracking_number),
         ]
-
-        if application_submission:
-            hash_data_parts.append(str(application_submission.legacy_tracking_number))
 
         return self._calculate_sha1_hash(*hash_data_parts)
 
@@ -197,10 +198,10 @@ def generate_application_header_xml(application: Application, pretty_print: bool
 
 def generate_application_footer_xml(
     application: Application,
+    application_submission: ApplicationSubmission,
     pretty_print: bool = True,
-    application_submission: ApplicationSubmission | None = None,
 ) -> str:
     generator = SubmissionXMLGenerator(application)
     return generator.generate_footer_xml(
-        pretty_print=pretty_print, application_submission=application_submission
+        application_submission=application_submission, pretty_print=pretty_print
     )
