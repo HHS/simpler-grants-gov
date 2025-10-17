@@ -405,6 +405,7 @@ class TestSimplerSOAPGetApplicationZip:
             ).encode("utf-8")
             assert isinstance(result.data, Iterator)
             assert b"".join(list(result.data)) == expected
+            assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{BOUNDARY_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
                 "MIME-Version": "1.0",
@@ -435,13 +436,15 @@ class TestSimplerSOAPGetApplicationZip:
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         with patch("src.legacy_soap_api.legacy_soap_api_client.requests.get") as mock_request:
             mock_request.return_value.status_code = 500
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            client.get_simpler_soap_response(mock_proxy_response)
+            response = client.get_simpler_soap_response(mock_proxy_response)
             msg = f"Unable to retrieve file legacy_tracking_number {submission.legacy_tracking_number} from s3 file location."
             assert msg in caplog.messages
+            assert response.data == mock_proxy_response.data
+            assert response.status_code == mock_proxy_response.status_code
 
     def test_get_simpler_soap_response_logging_if_submission_not_found(
         self, db_session, enable_factory_create, caplog
@@ -471,10 +474,12 @@ class TestSimplerSOAPGetApplicationZip:
         with patch("src.legacy_soap_api.legacy_soap_api_client.requests.get") as mock_request:
             mock_request.return_value.status_code = 500
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            client.get_simpler_soap_response(mock_proxy_response)
+            response = client.get_simpler_soap_response(mock_proxy_response)
             grants_gov_tracking_number = GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
             msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
             assert msg in caplog.messages
+            assert response.data == mock_proxy_response.data
+            assert response.status_code == mock_proxy_response.status_code
 
     def test_get_simpler_soap_response_returns_proxy_response_if_proxy_response_status_code_is_not_500(
         self, db_session
