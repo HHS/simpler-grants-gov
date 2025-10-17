@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:c2ba32a AS base
+FROM tester AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -37,36 +37,9 @@ RUN /api/.venv/bin/python -c "import site,shutil,glob,os; sp=(site.getsitepackag
 FROM base AS dev
 ARG RUN_USER
 
-# Add Graphviz tools only for dev image
-COPY --from=base /usr/bin/dot /usr/bin/dot
-COPY --from=base /usr/bin/neato /usr/bin/neato
-COPY --from=base /usr/bin/fdp /usr/bin/fdp
-COPY --from=base /usr/bin/sfdp /usr/bin/sfdp
-COPY --from=base /usr/bin/twopi /usr/bin/twopi
-COPY --from=base /usr/bin/circo /usr/bin/circo
-# Graphviz libraries and plugins: copy recursively for simplicity in dev
-COPY --from=base /usr/lib64/graphviz /usr/lib64/graphviz
-# Also copy the full /usr/lib64 so all transitive deps (pango/cairo/etc.) are present in dev
-COPY --from=base /usr/lib64 /usr/lib64
-# Optional: copy Graphviz shared data (layouts, config), harmless if absent
-COPY --from=base /usr/share/graphviz /usr/share/graphviz
-
-# Pango / GDK-Pixbuf / Fontconfig runtime data & helpers required by Graphviz plugins (optional in dev)
-COPY --from=base /etc/fonts /etc/fonts
-COPY --from=base /usr/share/fonts /usr/share/fonts
-
-COPY --from=base /lib64 /lib64
-COPY --from=base /lib /lib
-COPY --from=base /etc/ld.so.cache /etc/ld.so.cache
-COPY --from=base /etc/ld.so.conf /etc/ld.so.conf
-COPY --from=base /etc/ld.so.conf.d /etc/ld.so.conf.d
-
-# Generate caches for fontconfig, gdk-pixbuf loaders, and pango modules, then init Graphviz plugins (all optional in dev)
-RUN "/usr/local/bin/python${PY_MM}" -c "import os; os.makedirs('/etc/pango', exist_ok=True); os.makedirs('/usr/lib64/gdk-pixbuf-2.0/2.10.0', exist_ok=True)" && \
-    ([ -x /usr/bin/fc-cache ] && fc-cache -f || true) && \
-    ([ -x /usr/bin/gdk-pixbuf-query-loaders ] && (gdk-pixbuf-query-loaders --update-cache || gdk-pixbuf-query-loaders > /usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache) || true) && \
-    ([ -x /usr/bin/pango-querymodules ] && pango-querymodules > /etc/pango/pango.modules || true) && \
-    (dot -c || true)
+# Graphviz is already present in the base image; no extra COPYs needed for dev.
+# Rely on the base image for Graphviz binaries, plugins, fonts, and runtime libs.
+# (Removing redundant COPYs avoids duplicating OS libraries and reduces image size.)
 
 # Ensure Graphviz and related image/text renderers can discover their plugins and caches
 ENV GV_PLUGIN_PATH=/usr/lib64/graphviz \
@@ -84,6 +57,9 @@ WORKDIR /api
 ENV POETRY_VIRTUALENVS_IN_PROJECT=false
 
 COPY pyproject.toml poetry.lock ./
+
+# Remove the base stage venv to avoid duplication in dev image (best effort)
+RUN rm -rf /api/.venv || true
 
 # Explicitly create a new virtualenv
 RUN poetry config virtualenvs.in-project false && poetry env use python

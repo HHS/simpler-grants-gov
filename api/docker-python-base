@@ -32,6 +32,8 @@ RUN set -euo pipefail; \
       fontconfig \
       gdk-pixbuf2 \
       pango \
+      rpm-build \
+      cpio \
       curl-8.11.1-4.amzn2023.0.1 \
     && yum update -y --allowerasing \
          libtiff \
@@ -128,84 +130,68 @@ RUN mkdir -p /runtime/graphviz-libs && \
         ldd "$so" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/graphviz-libs/ 2>/dev/null || true; \
     done
 
-FROM scratch
+# Download Graphviz RPMs and dependencies and extract into /runtime/rootfs
+RUN dnf -y install --downloadonly --downloaddir=/tmp/rpms \
+    graphviz-2.44.0-25.amzn2023.0.7 && \
+    dnf -y install --downloadonly --downloaddir=/tmp/rpms \
+    graphviz-gd \
+    expat \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    fontconfig \
+    gd \
+    cairo \
+    pango \
+    librsvg2 \
+    zlib \
+    glib2 \
+    libX11 \
+    libXext \
+    libSM \
+    libICE \
+    libXaw \
+    libXt \
+    libXmu \
+    libXpm \
+    libXrender \
+    libxcb \
+    pixman \
+    harfbuzz \
+    fribidi \
+    libxml2 \
+    xz-libs \
+    bzip2-libs \
+    pcre2 \
+    libselinux \
+    libmount \
+    libblkid \
+    libuuid \
+    libffi \
+    libXau \
+    libXdmcp && \
+    mkdir -p /runtime/rootfs && cd /runtime/rootfs && \
+    for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
+    rm -rf /tmp/rpms
 
-# Ensure /bin/sh exists for RUN in this stage
-COPY --from=builder /usr/bin/sh /bin/sh
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023-minimal
 
-# Copy Python runtime
+LABEL org.opencontainers.image.source=https://github.com/HHS/simpler-grants-gov
+
+# Copy Python runtime built in builder
 COPY --from=builder /usr/local /usr/local
 
-# Copy Python shared libraries (including dynamic loader)
-COPY --from=builder /runtime/python-libs /lib
-COPY --from=builder /runtime/python-libs /lib64
+# Copy extracted Graphviz and its runtime dependencies
+COPY --from=builder /runtime/rootfs/ /
 
-# Copy minimal required system binaries
-COPY --from=builder /usr/bin/sh /usr/bin/sh
-COPY --from=builder /usr/bin/bash /usr/bin/bash
-COPY --from=builder /usr/sbin/useradd /usr/sbin/useradd
-COPY --from=builder /usr/bin/ls /usr/bin/ls
-COPY --from=builder /usr/bin/cat /usr/bin/cat
-COPY --from=builder /usr/bin/curl /usr/bin/curl
-COPY --from=builder /usr/bin/wget /usr/bin/wget
-# Additional core utilities required by pip/distro
-COPY --from=builder /usr/bin/uname /usr/bin/uname
-COPY --from=builder /usr/bin/grep /usr/bin/grep
+# Ensure minimal runtime deps and initialize Graphviz plugin cache
+RUN microdnf install -y fontconfig shadow-utils graphviz && microdnf clean all && (dot -c || true)
 
-# Graphviz and related helper binaries (optional in runtime, used in dev)
-COPY --from=builder /usr/bin/dot /usr/bin/dot
-COPY --from=builder /usr/bin/neato /usr/bin/neato
-COPY --from=builder /usr/bin/fdp /usr/bin/fdp
-COPY --from=builder /usr/bin/sfdp /usr/bin/sfdp
-COPY --from=builder /usr/bin/twopi /usr/bin/twopi
-COPY --from=builder /usr/bin/circo /usr/bin/circo
-COPY --from=builder /usr/bin/fc-cache /usr/bin/fc-cache
-# Helper binaries to generate image/text rendering caches (may be absent on AL2023); skip copying if unavailable
-
-# Copy only the specific system libraries required by the selected binaries
-COPY --from=builder /runtime/system-libs /usr/lib64
-# Include Graphviz/Pango/Cairo/etc. libs discovered via ldd
-COPY --from=builder /runtime/graphviz-libs /usr/lib64
-COPY --from=builder /runtime/graphviz-libs /lib64
-# Explicitly include shared libraries needed by coreutils/grep and their deps
-COPY --from=builder /lib64/libselinux.so.1 /lib64/libselinux.so.1
-COPY --from=builder /usr/lib64/libselinux.so.1 /usr/lib64/libselinux.so.1
-COPY --from=builder /lib64/libpcre2-8.so.0 /lib64/libpcre2-8.so.0
-COPY --from=builder /usr/lib64/libpcre2-8.so.0 /usr/lib64/libpcre2-8.so.0
-# Provide dynamic linker cache/config so glibc can resolve libs in scratch stage
-COPY --from=builder /etc/ld.so.cache /etc/ld.so.cache
-COPY --from=builder /etc/ld.so.conf /etc/ld.so.conf
-COPY --from=builder /etc/ld.so.conf.d /etc/ld.so.conf.d
-
-# Graphviz plugins and shared data
-COPY --from=builder /usr/lib64/graphviz /usr/lib64/graphviz
-COPY --from=builder /usr/share/graphviz /usr/share/graphviz
-# GDK-Pixbuf loaders required by Graphviz PNG renderer
-COPY --from=builder /usr/lib64/gdk-pixbuf-2.0 /usr/lib64/gdk-pixbuf-2.0
-# Fonts and fontconfig
-COPY --from=builder /etc/fonts /etc/fonts
-COPY --from=builder /usr/share/fonts /usr/share/fonts
-
-# Copy essential system files
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-# Include shadow since we create users in this stage
-COPY --from=builder /etc/shadow /etc/shadow
-# Copy CA certificates bundle for TLS verification
-COPY --from=builder /etc/ssl/certs /etc/ssl/certs
-COPY --from=builder /etc/pki/ca-trust /etc/pki/ca-trust
-
-# Create necessary directories
-COPY --from=builder /tmp /tmp
-
-# Use bash as the shell for RUN in this stage to avoid /bin/sh resolution issues
-SHELL ["/usr/bin/bash", "-lc"]
-
-# Set environment for Python
+# Environment
 ENV PATH="/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    LD_LIBRARY_PATH="/lib:/lib64:/usr/lib64:/usr/local/lib" \
+    LD_LIBRARY_PATH="/usr/lib64:/lib64:/usr/local/lib" \
     SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
     SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem" \
     TMPDIR="/tmp"
