@@ -5349,7 +5349,6 @@ components:
         application_form_status:
           description: Status indicating how much of a form has been filled out
           enum:
-          - not_started
           - in_progress
           - complete
           type:
@@ -5545,7 +5544,6 @@ components:
         application_form_status:
           description: Status indicating how much of a form has been filled out
           enum:
-          - not_started
           - in_progress
           - complete
           type:
