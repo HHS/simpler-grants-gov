@@ -5,7 +5,11 @@ import {
   fetchUserWithMethod,
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
-import { UserDetail, UserPrivilegesResponse } from "src/types/userTypes";
+import {
+  UserDetailProfile,
+  UserDetailWithProfile,
+  UserPrivilegesResponse,
+} from "src/types/userTypes";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
@@ -15,7 +19,7 @@ export const postLogout = async (token: string) => {
 export const getUserDetails = async (
   token: string,
   userId: string,
-): Promise<UserDetail> => {
+): Promise<UserDetailWithProfile> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -23,7 +27,7 @@ export const getUserDetails = async (
     subPath: userId,
     additionalHeaders: ssgToken,
   });
-  const json = (await resp.json()) as { data: UserDetail };
+  const json = (await resp.json()) as { data: UserDetailWithProfile };
   return json.data;
 };
 
@@ -31,7 +35,7 @@ export const updateUserDetails = async (
   token: string,
   userId: string,
   updates: JSONRequestBody,
-): Promise<UserDetail> => {
+): Promise<UserDetailProfile> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
@@ -41,7 +45,7 @@ export const updateUserDetails = async (
     additionalHeaders: ssgToken,
     body: updates,
   });
-  const json = (await response.json()) as { data: UserDetail };
+  const json = (await response.json()) as { data: UserDetailProfile };
   return json.data;
 };
 
