@@ -8,7 +8,7 @@ locals {
     #  - End with BUCKET
     public-files = {
       env_var = "PUBLIC_FILES_BUCKET"
-      public  = true # Handle with care!!! this makes your bucket public
+      public  = false # Changed from true to false - CloudFront CDN provides public access instead
       # paths[index].env_var must:
       #  - Start with the same prefix as it's parent bucket, minus the "BUCKET" suffix
       #  - Include the name of the path in some way, doesn't have to be verbatim
