@@ -1,10 +1,13 @@
 import logging
 import uuid
-from typing import Any
+from typing import Any, Iterator
 
+import requests
 from pydantic import ValidationError
+from sqlalchemy import select
 
 import src.adapters.db as db
+from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
@@ -230,6 +233,8 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
+        if proxy_response.status_code != 500:
+            return proxy_response
         if not self.operation_config.is_mtom:
             return super().get_simpler_soap_response(proxy_response)
         # MTOM message is assembled here
@@ -264,4 +269,45 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             f"{simpler_response_xml}\n"
             f"{boundary}"
         ).encode("utf-8")
-        return get_soap_response(data=mime_message, headers=update_headers)
+
+        legacy_tracking_number = self.get_soap_request_dict()["GrantsGovTrackingNumber"]
+        if legacy_tracking_number.startswith("GRANT"):
+            legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+        legacy_tracking_number = int(legacy_tracking_number)
+        application = self.db_session.execute(
+            select(ApplicationSubmission).where(
+                ApplicationSubmission.legacy_tracking_number == legacy_tracking_number
+            )
+        ).scalar()
+        if application:
+            response = requests.get(application.download_path)
+            if response.status_code != 200:
+                logger.info(
+                    f"Unable to retrieve file legacy_tracking_number {legacy_tracking_number} from s3 file location.",
+                    extra={
+                        "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+                        "response_operation_name": self.operation_config.response_operation_name,
+                    },
+                )
+                return proxy_response
+        else:
+            logger.info(
+                f"Unable to find submission legacy_tracking_number {legacy_tracking_number}.",
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+                    "response_operation_name": self.operation_config.response_operation_name,
+                },
+            )
+            return proxy_response
+
+        def _gen_response_data(
+            mime_message: bytes, boundary: str, response: requests.Response
+        ) -> Iterator:
+            yield mime_message
+            for chunk in response.iter_content(chunk_size=4000):
+                yield chunk
+            yield b"\n" + boundary.encode("utf-8") + b"--"
+
+        return get_soap_response(
+            data=_gen_response_data(mime_message, boundary, response), headers=update_headers
+        )
