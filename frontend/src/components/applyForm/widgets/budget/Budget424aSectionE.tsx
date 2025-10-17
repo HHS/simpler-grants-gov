@@ -172,6 +172,7 @@ function Budget424aSectionE<
       <div className="display-flex flex-column">
         <HelperText hasHorizontalLine>{helper}</HelperText>
         <CurrencyInput
+          disabled
           id={idPath}
           rawErrors={getErrorMessagesForField(idPath)}
           value={totals ? totals[yearKey] : undefined}
