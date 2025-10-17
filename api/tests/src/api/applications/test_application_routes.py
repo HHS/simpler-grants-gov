@@ -1071,7 +1071,12 @@ def test_application_form_get_success(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application_form.application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -1111,18 +1116,18 @@ def test_application_form_get_application_not_found(
 
 
 def test_application_form_get_form_not_found(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
-    application = ApplicationFactory.create()
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
     non_existent_app_form_id = str(uuid.uuid4())
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{non_existent_app_form_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
@@ -1170,7 +1175,12 @@ def test_application_form_get_with_attachments(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application_form.application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -1217,7 +1227,10 @@ def test_application_get_success(client, enable_factory_create, db_session, user
     application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1271,9 +1284,12 @@ def test_application_get_success(client, enable_factory_create, db_session, user
 
 
 def test_application_get_with_attachments(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
-    application = ApplicationFactory.create()
+    # Associate user with application
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
     attachment1 = ApplicationAttachmentFactory.create(
         application=application, file_name="my_file_a.txt"
     )
@@ -1281,12 +1297,9 @@ def test_application_get_with_attachments(
         application=application, file_name="my_file_b.pdf"
     )
 
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -1340,7 +1353,10 @@ def test_application_get_success_with_validation_issues(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1435,7 +1451,10 @@ def test_application_get_success_with_rule_validation_issue(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1584,7 +1603,10 @@ def test_application_form_get_with_validation_warnings(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the GET request
     response = client.get(
@@ -1630,7 +1652,10 @@ def test_application_form_get_with_rule_validation_issue(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the GET request
     response = client.get(
@@ -1680,7 +1705,10 @@ def test_application_form_get_with_invalid_schema(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the GET request
     response = client.get(
@@ -2231,19 +2259,16 @@ def test_application_submit_forbidden_if_not_associated(
 
 
 def test_application_get_success_when_associated(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application get succeeds when user is associated with the application"""
-    application = ApplicationFactory.create(with_forms=True)
-
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(application=application, user=user),
-        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
-    )
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -2259,8 +2284,12 @@ def test_application_form_get_success_when_associated(
     application_form = ApplicationFormFactory.create(
         application_response={"name": "John Doe"},
     )
-
-    ApplicationUserFactory.create(application=application_form.application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -2359,9 +2388,11 @@ def test_application_get_includes_application_name_and_users(
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, application_name="Test Application Name"
     )
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2412,7 +2443,10 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2455,7 +2489,10 @@ def test_application_get_includes_organization_without_sam_gov_entity(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2486,7 +2523,10 @@ def test_application_get_without_organization(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2814,7 +2854,12 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
     )
 
     # Associate the application with a different user (not the test user)
-    ApplicationUserFactory.create(application=application_form.application, user=other_user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=other_user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Create the competition form relationship
     CompetitionFormFactory.create(
@@ -3669,7 +3714,12 @@ def test_application_form_get_with_submitted_application_status(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application_form.application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -3770,3 +3820,65 @@ def test_application_form_inclusion_update_403_access(
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
+
+
+def test_get_application_access_403(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_application_form_access_403(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_application_form_access_with_organization(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """Test that user can access the application if organization member"""
+    # Associate user with organization
+    _, org, token = create_user_in_org(
+        db_session, is_organization_owner=True, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    # Create application owned by org
+    application = ApplicationFactory.create(organization=org)
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
