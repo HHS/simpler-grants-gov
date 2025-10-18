@@ -1,12 +1,20 @@
 "use server";
 
 import { isEmpty } from "lodash";
-import { FetchedResourcesProvider } from "src/hooks/useFetchedResources";
+import { parseErrorStatus } from "src/errors";
+import { AuthorizedDataProvider } from "src/hooks/useAuthorizedData";
 import { getSession } from "src/services/auth/session";
-import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
-import { FrontendErrorDetails } from "src/types/apiResponseTypes";
-import { UserPrivilegeDefinition } from "src/types/userTypes";
-import { checkPrivileges } from "src/utils/authUtils";
+import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
+import {
+  AuthorizedData,
+  FetchedResource,
+  FetchedResourceMap,
+  ResourcePromiseDefinitions,
+} from "src/types/authTypes";
+import {
+  UserPrivilegeDefinition,
+  UserPrivilegeResult,
+} from "src/types/userTypes";
 
 import {
   cloneElement,
@@ -19,21 +27,107 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { UnauthenticatedMessage } from "./UnauthenticatedMessage";
 
+// requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
 type AuthorizationGateProps = {
-  onUnauthorized: (children: ReactNode) => ReactNode;
+  onUnauthorized?: (
+    children: ReactNode,
+    fetchedResources?: FetchedResourceMap,
+  ) => ReactNode;
   onUnauthenticated?: () => ReactNode;
   onError?: (e: Error) => ReactNode;
-  requiredPrivileges?: UserPrivilegeDefinition[];
-  resourcePromises?: { [resourceName: string]: Promise<unknown> };
+} & (
+  | {
+      requiredPrivileges: UserPrivilegeDefinition[];
+      resourcePromises?: ResourcePromiseDefinitions;
+    }
+  | {
+      resourcePromises: ResourcePromiseDefinitions;
+      requiredPrivileges?: UserPrivilegeDefinition[];
+    }
+  | {
+      resourcePromises: ResourcePromiseDefinitions;
+      requiredPrivileges: UserPrivilegeDefinition[];
+    }
+);
+
+// unpack the fetched resource maps to determine if any of calls
+// resulted in a 403
+const findUnauthorizedError = (
+  fetchedResources: FetchedResourceMap[],
+): boolean => {
+  const hasUnauthorizedError = fetchedResources.some((resource) =>
+    Object.values(resource).some(
+      (resourceDefinition) => resourceDefinition.statusCode === 403,
+    ),
+  );
+  return hasUnauthorizedError;
 };
 
-// will need to suspend any elements that are wrapped in this gate.
-// note that this supports gating on a single privilege or multiple privileges, where auth will
-// pass whenever any one of the required privileges is met (A OR B). This allows us to pass auth in the case
-// where a user has permissions to access an organization's application through application privileges
-// or organization privileges. In the future we can support (A AND B) situations (only pass auth if all
-// permissions are found) by, perhaps, allowing nested arrays of privilege definitions, or by accepting
-// a new "and/or" prop.
+// we need to expose status codes and possible errors as well as fetched data
+// so that components can use this full context down stream.
+// the promises generated here will be consumed in a Promise.all downstream.
+// for this to work, will need to make sure any resource promises throw errors
+// that include a status code in the cause...
+const resolveAndFormatResources = (
+  resourcePromises: ResourcePromiseDefinitions,
+): Promise<FetchedResourceMap>[] => {
+  const fetchResourcePromises = Object.entries(resourcePromises).map(
+    ([resourceName, resourcePromise]) => {
+      return resourcePromise
+        .then((resourceData) => {
+          return {
+            [resourceName]: {
+              data: resourceData,
+              statusCode: 200,
+            } as FetchedResource,
+          };
+        })
+        .catch((e: Error) => {
+          return {
+            [resourceName]: {
+              error: e.message,
+              statusCode: parseErrorStatus(e),
+            } as FetchedResource,
+          };
+        });
+    },
+  );
+  return fetchResourcePromises;
+};
+
+// calls the API to check all required privileges,
+// and formats results into a format to be used downstream
+// note that if a non-403 is returned, that error will be passed along
+// since we'll consider a non-403 as unauthorized, children should check for errors
+// first before checking "authorized"
+const checkRequiredPrivileges = async (
+  token: string,
+  userId: string,
+  privileges: UserPrivilegeDefinition[],
+): Promise<UserPrivilegeResult[]> => {
+  const privilegeCheckResults = await Promise.all(
+    privileges.map((privilege) => {
+      return checkUserPrivilege(token, userId, privilege)
+        .then(() => {
+          return { ...privilege, authorized: true };
+        })
+        .catch((e: Error) => {
+          if (parseErrorStatus(e) === 403) {
+            return { ...privilege, authorized: false };
+          }
+          return { ...privilege, authorized: false, error: e.message };
+        });
+    }),
+  );
+  return privilegeCheckResults;
+};
+
+/*
+  makes calls for required resources, if passed
+  checks for required permissions, if passed
+  optionally returns results of onUnauthorized function, if user is unauthorized based on calls to required resources
+  passes results from required resource and required permission calls via both props and context
+*/
 export async function AuthorizationGate({
   children,
   onUnauthorized,
@@ -44,6 +138,9 @@ export async function AuthorizationGate({
   requiredPrivileges,
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
+  let userPrivileges: UserPrivilegeResult[] = [];
+  let allResources = {};
+
   const session = await getSession();
 
   if (!session?.token) {
@@ -52,69 +149,68 @@ export async function AuthorizationGate({
 
   // check privileges
   if (requiredPrivileges) {
-    const userPrivileges = await getUserPrivileges(
+    userPrivileges = await checkRequiredPrivileges(
       session.token,
       session.user_id,
-    );
-    const privilegesSatisfied = checkPrivileges(
       requiredPrivileges,
-      userPrivileges,
     );
-    if (!privilegesSatisfied) {
-      return onUnauthorized(children);
-    }
   }
 
   const mappedResourcePromises =
     resourcePromises && !isEmpty(resourcePromises)
-      ? Object.entries(resourcePromises).map(
-          ([resourceName, resourcePromise]) =>
-            resourcePromise.then((resourceValue) => ({
-              [resourceName]: resourceValue,
-            })),
-        )
+      ? resolveAndFormatResources(resourcePromises)
       : undefined;
 
   // fetch resources and check for 403s
   if (mappedResourcePromises) {
     try {
-      // Note: there's a potential performance gain here if we make these fetches in parallel with the user privileges call
+      // Note: there's a potential performance gain here if we make these fetches in parallel with the user privileges calls
       const fetchedResources = await Promise.all(mappedResourcePromises);
-      const allResources = fetchedResources.reduce(
+      allResources = fetchedResources.reduce(
         (all, resource) => ({ ...all, ...resource }),
         {},
       );
-      // Allows for prop drilling of fetched resources into immediate child server components, as
-      // usage of the client side context provider won't be available to server components.
-      // Assumes any immediate children of the gate that want to accept fetchedResources via props
-      // have an optional `fetchedResources` prop in place that can accept the added data here
-      // Note: this does NOT work if the gate is used in a layout component - if you're going to prop
-      // drill make sure you do it from a page component or further down the render chain
-      const childrenWithResources = children
-        ? cloneElement(
-            children as ReactElement<
-              { fetchedResources?: object },
-              string | JSXElementConstructor<unknown>
-            >,
-            { fetchedResources: allResources },
-          )
-        : children;
 
-      // FetchedResourcesProvider allows any client component children of the gate to receive
-      // fetched resources via context.
-      return (
-        <FetchedResourcesProvider value={allResources}>
-          {childrenWithResources}
-        </FetchedResourcesProvider>
-      );
-    } catch (e) {
-      const error = e as Error;
-      if ((error.cause as FrontendErrorDetails).status === 403) {
-        return onUnauthorized(children);
+      // non-403 errors are not handled here, they will be passed to children to be handled closer to where
+      // the data would be used
+      const unauthorizedError = findUnauthorizedError(fetchedResources);
+      if (unauthorizedError && onUnauthorized) {
+        return onUnauthorized(children, allResources);
       }
-      return onError(error);
+    } catch (e) {
+      // note that any errors incurred in the normal process of fetching data
+      // will be caught and formatted for consumption downstream.
+      // this should only catch unexpected errors thrown outside the promises themselves
+      return onError(e as Error);
     }
   }
-  // on authorized, render children
-  return children;
+
+  const authorizedData: AuthorizedData = {
+    fetchedResources: allResources,
+    confirmedPrivileges: userPrivileges,
+  };
+
+  // Allows for prop drilling of fetched resources into immediate child server components, as
+  // usage of the client side context provider won't be available to server components.
+  // Assumes any immediate children of the gate that want to accept fetchedResources via props
+  // have an optional `fetchedResources` prop in place that can accept the added data here
+  // Note: this does NOT work if the gate is used in a layout component - if you're going to prop
+  // drill make sure you do it from a page component or further down the render chain
+  const childrenWithResources = children
+    ? cloneElement(
+        children as ReactElement<
+          { authorizedData?: object },
+          string | JSXElementConstructor<unknown>
+        >,
+        { authorizedData },
+      )
+    : children;
+
+  // AuthorizedDataProvider allows any client component children of the gate to receive
+  // fetched resources via context.
+  return (
+    <AuthorizedDataProvider value={authorizedData}>
+      {childrenWithResources}
+    </AuthorizedDataProvider>
+  );
 }
