@@ -6,9 +6,14 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
+import {
+  OrganizationRoster,
+  OrganizationRosterSkeleton,
+} from "src/components/organization/OrganizationRoster";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -74,6 +79,9 @@ async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
       <OrganizationInfo
         organizationDetails={organizationDetails.sam_gov_entity}
       />
+      <Suspense fallback={<OrganizationRosterSkeleton />}>
+        <OrganizationRoster organizationId={id} />
+      </Suspense>
     </GridContainer>
   );
 }

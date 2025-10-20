@@ -8,7 +8,8 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import SubmissionIssue
+from src.auth.endpoint_access_util import can_access
+from src.constants.lookup_constants import Privilege, SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
 from src.services.applications.get_application import get_application
@@ -21,6 +22,10 @@ def create_application_attachment(
 ) -> ApplicationAttachment:
     # Fetch the application - handles checking if application exists & user can access
     application = get_application(db_session, application_id, user)
+
+    # Check privileges
+    if not can_access(user, {Privilege.MODIFY_APPLICATION}, application):
+        raise_flask_error(403, "Forbidden")
 
     return upsert_application_attachment(
         db_session=db_session,
