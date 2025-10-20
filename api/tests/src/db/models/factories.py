@@ -2862,6 +2862,7 @@ class OrganizationUserRoleFactory(BaseFactory):
     role = factory.SubFactory(RoleFactory, is_org_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
 
+
 class OrganizationInvitationFactory(BaseFactory):
     class Meta:
         model = entity_models.OrganizationInvitation
@@ -2873,7 +2874,7 @@ class OrganizationInvitationFactory(BaseFactory):
     organization_user = factory.SubFactory(OrganizationUserFactory)
     inviter_user_id = factory.lazy_attribute(lambda o: o.organization_user.organization_user_id)
 
-    invitee_email =  factory.Faker("email")
+    invitee_email = factory.Faker("email")
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
 
     user = factory.SubFactory(UserFactory)
@@ -2881,17 +2882,12 @@ class OrganizationInvitationFactory(BaseFactory):
 
     class Params:
         response_date = factory.LazyAttribute(
-                lambda o: fake.date_time_between(start_date=o.created_at, end_date="+1m")
+            lambda o: fake.date_time_between(start_date=o.created_at, end_date="+1m")
         )
-        is_accepted = factory.Trait(
-            expires_at=response_date
-        )
-        is_rejected = factory.Trait(
-            rejected_at=response_date
-        )
-        is_expired = factory.Trait(
-            expired_at=response_date
-        )
+        is_accepted = factory.Trait(accepted_at=response_date)
+        is_rejected = factory.Trait(rejected_at=response_date)
+        is_expired = factory.Trait(expires_at=response_date)
+
 
 class LinkOrganizationInvitationToRoleFactory(BaseFactory):
     class Meta:
@@ -2900,8 +2896,11 @@ class LinkOrganizationInvitationToRoleFactory(BaseFactory):
     role = factory.SubFactory(RoleFactory)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
 
-    organization_invitation: factory.SubFactory(OrganizationInvitationFactory)
-    organization_invitation_id = factory.LazyAttribute(lambda o: o.organization_invitation.organization_invitation_id)
+    organization_invitation = factory.SubFactory(OrganizationInvitationFactory)
+    organization_invitation_id = factory.LazyAttribute(
+        lambda o: o.organization_invitation.organization_invitation_id
+    )
+
 
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
