@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from src.constants.lookup_constants import Privilege
+from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import AgencyUserFactory, AgencyUserRoleFactory, RoleFactory
 
