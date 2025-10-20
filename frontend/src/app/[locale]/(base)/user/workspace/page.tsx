@@ -5,7 +5,6 @@ import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsF
 import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
-import { UserDetailProfile, UserDetailWithProfile } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -58,7 +57,7 @@ async function UserWorkspace() {
     console.error("no user session, or user has no email address");
     return;
   }
-  let userDetails: UserDetailWithProfile = {};
+  let userDetails = {};
   let userOrganizations: Organization[] = [];
   const userDetailsPromise = getUserDetails(session.token, session.user_id);
   const userOrganizationsPromise = getUserOrganizations(

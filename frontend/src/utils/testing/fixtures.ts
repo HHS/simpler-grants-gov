@@ -650,3 +650,16 @@ export const fakeUserPrivilegesResponse = {
     },
   ],
 };
+
+export const fakeOrganizationInviteRecord = {
+  organization_invitation_id: "1",
+  organization_id: "2",
+  invitee_email: "not-a-real@email.org",
+  status: "pending",
+  roles: [
+    {
+      role_id: "5",
+      role_name: "role_5",
+    },
+  ],
+};

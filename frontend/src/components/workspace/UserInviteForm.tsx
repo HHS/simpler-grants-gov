@@ -35,7 +35,7 @@ export const RoleOptions = ({ roles }: { roles: UserRole[] }) => {
     </option>
   ));
   return [
-    <option key="default" value="default">
+    <option key="default" value="">
       {t("placeholder")}
     </option>,
   ].concat(roleOptions);

@@ -1,9 +1,7 @@
 import { Organization } from "src/types/applicationResponseTypes";
-import {
-  OrganizationInviteRecord,
-  OrganizationInviteResponse,
-} from "src/types/organizationTypes";
+import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import { UserDetail, UserRole } from "src/types/userTypes";
+import { fakeOrganizationInviteRecord } from "src/utils/testing/fixtures";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
@@ -68,7 +66,7 @@ export const getOrganizationRoles = async (
 };
 
 export const inviteUserToOrganization = async (
-  token: string,
+  _token: string,
   requestData: {
     organizationId: string;
     roleId: string;
@@ -76,17 +74,19 @@ export const inviteUserToOrganization = async (
   },
 ): Promise<OrganizationInviteRecord> => {
   const { organizationId, roleId, email } = requestData;
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-  const resp = await fetchOrganizationWithMethod("POST")({
-    subPath: `${organizationId}/invitations`,
-    additionalHeaders: ssgToken,
-    body: {
-      invitee_email: email,
-      role_ids: roleId,
-    },
-  });
-  const json = (await resp.json()) as { data: OrganizationInviteRecord };
-  return json.data;
+  console.log("!!! updating", organizationId, roleId, email);
+  return Promise.resolve(fakeOrganizationInviteRecord);
+  //   const ssgToken = {
+  //     "X-SGG-Token": token,
+  //   };
+  //   const resp = await fetchOrganizationWithMethod("POST")({
+  //     subPath: `${organizationId}/invitations`,
+  //     additionalHeaders: ssgToken,
+  //     body: {
+  //       invitee_email: email,
+  //       role_ids: roleId,
+  //     },
+  //   });
+  //   const json = (await resp.json()) as { data: OrganizationInviteRecord };
+  //   return json.data;
 };
