@@ -7,7 +7,7 @@ import {
 import { UserRole } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useMemo } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Button,
@@ -40,6 +40,7 @@ export const RoleOptions = ({ roles }: { roles: UserRole[] }) => {
     </option>,
   ].concat(roleOptions);
 };
+
 export function UserInviteButton({ success = false, disabled = false }) {
   const t = useTranslations("ManageUsers.inviteUser.button");
   if (success) {
@@ -62,25 +63,34 @@ export function UserInviteForm({
   // handle form action and state (server action)
   const t = useTranslations("ManageUsers.inviteUser");
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const inviteUser = useMemo(
     () => inviteUserActionForOrganization(organizationId),
     [organizationId],
   );
 
-  const [state, formAction, isPending] = useActionState(inviteUser, {
+  const [formState, formAction, isPending] = useActionState(inviteUser, {
     success: false,
   });
 
+  useEffect(() => {
+    if (formState.success) {
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    }
+  }, [formState.success]);
+
   return (
     <>
-      {state?.errorMessage && (
+      {formState?.errorMessage && (
         <Alert
           heading={t("errorHeading")}
           headingLevel="h2"
           type="warning"
           validation
         >
-          {state?.errorMessage}
+          {formState?.errorMessage}
         </Alert>
       )}
       <form action={formAction}>
@@ -91,15 +101,14 @@ export function UserInviteForm({
           </Label>
           <OrganizationInviteValidationError
             fieldName="email"
-            errors={state.validationErrors}
+            errors={formState.validationErrors}
           />
           <TextInput
             name="email"
             id="inviteUser-email"
             type="email"
             placeholder={t("inputs.email.placeholder")}
-            value={state.data?.invitee_email}
-            disabled={isPending}
+            disabled={isPending || showSuccess}
           />
           <Label htmlFor="email">
             {t("inputs.role.label")}
@@ -107,19 +116,22 @@ export function UserInviteForm({
           </Label>
           <OrganizationInviteValidationError
             fieldName="role"
-            errors={state.validationErrors}
+            errors={formState.validationErrors}
           />
           <Select
             name="role"
             id="inviteUser-role"
             // defaultValue={t("inputs.role.placeholder")}
-            disabled={isPending}
-            value={state.data?.roles[0].role_name}
+            disabled={isPending || showSuccess}
+            value={formState.data?.roles[0].role_name}
           >
             <RoleOptions roles={roles} />
           </Select>
         </FormGroup>
-        <UserInviteButton />
+        <UserInviteButton
+          disabled={isPending || showSuccess}
+          success={showSuccess}
+        />
       </form>
     </>
   );
