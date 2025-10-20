@@ -25,8 +25,8 @@ def application_with_submission(enable_factory_create, db_session):
     """Create an application with submitted_at, submitted_by, and submission."""
     # Create user with profile
     user = UserFactory.create()
-    UserProfileFactory.create(user=user, first_name="Michael", last_name="Chouinard")
-    LinkExternalUserFactory.create(user=user, email="michael@example.com")
+    UserProfileFactory.create(user=user, first_name="Example", last_name="User")
+    LinkExternalUserFactory.create(user=user, email="test@example.com")
 
     # Create application with submission data
     submitted_time = datetime(2025, 9, 2, 16, 24, 28, 0, tzinfo=timezone.utc)
@@ -81,7 +81,7 @@ class TestFooterGeneration:
         # Verify SubmitterName
         submitter_name_elem = root.find(f"{{{FOOTER_NAMESPACES['footer']}}}SubmitterName")
         assert submitter_name_elem is not None
-        assert submitter_name_elem.text == "Michael Chouinard"
+        assert submitter_name_elem.text == "Example User"
 
         # Verify Grants_govTrackingNumber
         tracking_number_elem = root.find(
