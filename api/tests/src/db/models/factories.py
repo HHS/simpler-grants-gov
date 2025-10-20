@@ -2862,6 +2862,46 @@ class OrganizationUserRoleFactory(BaseFactory):
     role = factory.SubFactory(RoleFactory, is_org_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
 
+class OrganizationInvitationFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationInvitation
+
+    organization_invitation_id: Generators.UuidObj
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    organization_user = factory.SubFactory(OrganizationUserFactory)
+    inviter_user_id = factory.lazy_attribute(lambda o: o.organization_user.organization_user_id)
+
+    invitee_email =  factory.Faker("email")
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+
+    user = factory.SubFactory(UserFactory)
+    responded_by_user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    class Params:
+        response_date = factory.LazyAttribute(
+                lambda o: fake.date_time_between(start_date=o.created_at, end_date="+1m")
+        )
+        is_accepted = factory.Trait(
+            expires_at=response_date
+        )
+        is_rejected = factory.Trait(
+            rejected_at=response_date
+        )
+        is_expired = factory.Trait(
+            expired_at=response_date
+        )
+
+class LinkOrganizationInvitationToRoleFactory(BaseFactory):
+    class Meta:
+        model = entity_models.LinkOrganizationInvitationToRole
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+    organization_invitation: factory.SubFactory(OrganizationInvitationFactory)
+    organization_invitation_id = factory.LazyAttribute(lambda o: o.organization_invitation.organization_invitation_id)
 
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
