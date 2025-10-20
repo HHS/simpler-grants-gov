@@ -1482,6 +1482,7 @@ export const messages = {
   ManageUsers: {
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
+      errorHeading: "Error",
       description:
         "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
       inputs: {

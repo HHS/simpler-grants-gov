@@ -2,7 +2,7 @@ import { getSession } from "src/services/auth/session";
 import { getOrganizationRoles } from "src/services/fetch/fetchers/organizationsFetcher";
 import { UserRole } from "src/types/userTypes";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { UserInviteForm } from "./UserInviteForm";
 
@@ -12,7 +12,7 @@ export async function UserOrganizationInvite({
   organizationId: string;
 }) {
   // fetch roles for organization (this will happen in page gate eventually)
-  const t = useTranslations("ManageUsers.inviteUser");
+  const t = await getTranslations("ManageUsers.inviteUser");
   const session = await getSession();
   if (!session?.token) {
     console.error("unable to display user invites, not logged in");

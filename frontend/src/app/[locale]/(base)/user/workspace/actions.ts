@@ -7,13 +7,15 @@ import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 
+export type OrganizationInviteValidationErrors = {
+  email?: string[];
+  role?: string[];
+};
+
 export type OrganizationInviteResponse = {
   data?: OrganizationInviteRecord;
   errorMessage?: string;
-  validationErrors?: {
-    email?: string[];
-    role?: string[];
-  };
+  validationErrors?: OrganizationInviteValidationErrors;
   success?: boolean;
 };
 
