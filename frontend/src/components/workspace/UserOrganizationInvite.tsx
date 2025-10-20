@@ -28,13 +28,13 @@ export async function UserOrganizationInvite({
     console.error("unable to fetch organization roles", e);
   }
   return (
-    <>
+    <div className="border-2px border-primary radius-md padding-x-2 padding-y-4">
       <h3>{t("heading")}</h3>
       <div>{t("description")}</div>
       <UserInviteForm
         organizationId={organizationId}
         roles={organizationRoles}
       />
-    </>
+    </div>
   );
 }

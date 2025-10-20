@@ -1497,7 +1497,7 @@ export const messages = {
       },
       button: {
         label: "Add to organization",
-        success: "User added!",
+        success: "User added to pending",
       },
       validationErrors: {
         email: "Email is required",
