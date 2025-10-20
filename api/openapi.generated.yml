@@ -770,6 +770,55 @@ paths:
       summary: Get the roles and privileges for the authenticated user
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/can_access:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCanAccessResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Check user access for a given resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCanAccessRequest'
+      security:
+      - ApiJwtAuth: []
   /common-grants/opportunities/search:
     post:
       parameters: []
@@ -4510,6 +4559,53 @@ components:
           type:
           - object
           $ref: '#/components/schemas/GetRolesAndPrivilegesResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserCanAccessRequest:
+      type: object
+      properties:
+        resource_id:
+          type: string
+          format: uuid
+          description: The internal ID of the resource
+          example: 123e4567-e89b-12d3-a456-426614174000
+        resource_type:
+          description: Type of the resource to check access
+          enum:
+          - agency
+          - application
+          - organization
+          type:
+          - string
+        privileges:
+          type: array
+          items:
+            description: List of privileges to verify for the specified resource.
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    UserCanAccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
