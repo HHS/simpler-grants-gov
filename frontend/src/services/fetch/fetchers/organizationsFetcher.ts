@@ -1,4 +1,8 @@
 import { Organization } from "src/types/applicationResponseTypes";
+import {
+  OrganizationInviteRecord,
+  OrganizationInviteResponse,
+} from "src/types/organizationTypes";
 import { UserDetail, UserRole } from "src/types/userTypes";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
@@ -60,5 +64,29 @@ export const getOrganizationRoles = async (
     additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: UserRole[] };
+  return json.data;
+};
+
+export const inviteUserToOrganization = async (
+  token: string,
+  requestData: {
+    organizationId: string;
+    roleId: string;
+    email: string;
+  },
+): Promise<OrganizationInviteRecord> => {
+  const { organizationId, roleId, email } = requestData;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const resp = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/invitations`,
+    additionalHeaders: ssgToken,
+    body: {
+      invitee_email: email,
+      role_ids: roleId,
+    },
+  });
+  const json = (await resp.json()) as { data: OrganizationInviteRecord };
   return json.data;
 };

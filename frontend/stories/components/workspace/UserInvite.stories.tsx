@@ -1,6 +1,6 @@
 import { Meta } from "@storybook/react";
 
-import { UserInvite } from "src/components/workspace/UserInvite";
+import { UserInvite } from "src/components/workspace/UserOrganizationInvite";
 
 const meta: Meta<typeof UserInvite> = {
   title: "Components/UserInvite",

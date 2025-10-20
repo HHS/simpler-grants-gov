@@ -6,15 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { UserInviteForm } from "./UserInviteForm";
 
-export const rolesToOptions = (roles: UserRole[]) => {
-  // return [<option key="a">hi</option>];
-  return roles.map((role) => (
-    <option key={role.role_id} value={role.role_id}>
-      {role.role_name}
-    </option>
-  ));
-};
-export async function UserInvite({
+export async function UserOrganizationInvite({
   organizationId,
 }: {
   organizationId: string;
@@ -26,13 +18,12 @@ export async function UserInvite({
     console.error("unable to display user invites, not logged in");
     return;
   }
-  let roleOptions: UserRole[] = [];
+  let organizationRoles: UserRole[] = [];
   try {
-    const organizationRoles = getOrganizationRoles(
+    organizationRoles = await getOrganizationRoles(
       session.token,
       organizationId,
     );
-    roleOptions = rolesToOptions(organizationRoles);
   } catch (e) {
     console.error("unable to fetch organization roles", e);
   }
@@ -40,7 +31,10 @@ export async function UserInvite({
     <>
       <h3>{t("heading")}</h3>
       <div>{t("description")}</div>
-      <UserInviteForm organizationId={organizationId} roles={roleOptions} />
+      <UserInviteForm
+        organizationId={organizationId}
+        roles={organizationRoles}
+      />
     </>
   );
 }
