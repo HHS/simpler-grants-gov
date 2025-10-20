@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { noop } from "lodash";
 import { fakeUserRole } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { UserInviteForm } from "./UserInviteForm";
+import { UserInviteForm } from "src/components/workspace/UserInviteForm";
 
 const mockUseActionState = jest.fn();
 
