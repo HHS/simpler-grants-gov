@@ -581,6 +581,12 @@ export const fakeUserWithProfile: UserDetailWithProfile = {
   },
 };
 
+export const fakeUserRole = {
+  role_id: "1",
+  role_name: "role_1",
+  privileges: ["read_organization", "modify_organization"],
+};
+
 export const fakeUserPrivilegesResponse = {
   user_id: "1",
   organization_users: [

@@ -5,7 +5,7 @@ export type OrganizationInviteRecord = {
   organization_id: string;
   invitee_email: string;
   status: string; // can be limited
-  roles: [RoleDefinition];
+  roles: RoleDefinition[];
   expires_at?: Date;
   created_at?: Date;
 };

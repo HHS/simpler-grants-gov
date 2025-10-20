@@ -71,7 +71,6 @@ export const inviteUserAction = async (
     );
     return { data: inviteUserResponse, success: true };
   } catch (e) {
-    // General try failure catch error
     const error = e as Error;
     console.error(
       `Error inviting user to org - ${error.message} ${error.cause?.toString() || ""}`,

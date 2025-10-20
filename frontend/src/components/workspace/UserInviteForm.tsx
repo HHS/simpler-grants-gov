@@ -13,7 +13,6 @@ import {
   Button,
   FormGroup,
   Grid,
-  GridContainer,
   Label,
   Select,
   TextInput,
@@ -26,6 +25,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 const OrganizationInviteValidationError =
   ConditionalFormActionError<OrganizationInviteValidationErrors>;
 
+// in order to pass the organizationId into the form action call
 export const inviteUserActionForOrganization =
   (organizationId: string) => (_prevState: unknown, formData: FormData) =>
     inviteUserAction(_prevState, formData, organizationId);
@@ -48,7 +48,7 @@ export function UserInviteButton({ success = false, disabled = false }) {
   const t = useTranslations("ManageUsers.inviteUser.button");
   if (success) {
     return (
-      <div className="margin-right-1 padding-y-1 padding-x-3 display-inline-flex flex-align-center">
+      <div className="margin-top-4 margin-right-1 padding-y-1 padding-x-3 display-inline-flex flex-align-center tablet:margin-top-0">
         <USWDSIcon
           className="usa-icon margin-right-05 margin-left-neg-05"
           name="check_circle_outline"
@@ -59,7 +59,11 @@ export function UserInviteButton({ success = false, disabled = false }) {
     );
   }
   return (
-    <Button disabled={disabled} type="submit">
+    <Button
+      disabled={disabled}
+      type="submit"
+      className="tablet:margin-top-0 margin-top-4"
+    >
       <USWDSIcon
         className="usa-icon margin-right-05 margin-left-neg-05"
         name="send"
@@ -112,44 +116,48 @@ export function UserInviteForm({
       )}
       <form action={formAction}>
         <Grid row gap="md">
-          <Grid col={4}>
-            <Label htmlFor="email">
-              {t("inputs.email.label")}
-              <RequiredFieldIndicator> *</RequiredFieldIndicator>
-            </Label>
-            <OrganizationInviteValidationError
-              fieldName="email"
-              errors={formState.validationErrors}
-            />
-            <TextInput
-              name="email"
-              id="inviteUser-email"
-              type="email"
-              placeholder={t("inputs.email.placeholder")}
-              disabled={isPending || showSuccess}
-            />
+          <Grid tablet={{ col: 4 }}>
+            <FormGroup error={!!formState.validationErrors?.email}>
+              <Label htmlFor="email">
+                {t("inputs.email.label")}
+                <RequiredFieldIndicator> *</RequiredFieldIndicator>
+              </Label>
+              <OrganizationInviteValidationError
+                fieldName="email"
+                errors={formState.validationErrors}
+              />
+              <TextInput
+                name="email"
+                id="inviteUser-email"
+                type="email"
+                placeholder={t("inputs.email.placeholder")}
+                disabled={isPending || showSuccess}
+              />
+            </FormGroup>
           </Grid>
-          <Grid col={4}>
-            <Label htmlFor="email">
-              {t("inputs.role.label")}
+          <Grid tablet={{ col: 4 }}>
+            <FormGroup error={!!formState.validationErrors?.role}>
+              <Label htmlFor="email">
+                {t("inputs.role.label")}
 
-              <RequiredFieldIndicator> *</RequiredFieldIndicator>
-            </Label>
-            <OrganizationInviteValidationError
-              fieldName="role"
-              errors={formState.validationErrors}
-            />
-            <Select
-              name="role"
-              id="inviteUser-role"
-              // defaultValue={t("inputs.role.placeholder")}
-              disabled={isPending || showSuccess}
-              value={formState.data?.roles[0].role_name}
-            >
-              <RoleOptions roles={roles} />
-            </Select>
+                <RequiredFieldIndicator> *</RequiredFieldIndicator>
+              </Label>
+              <OrganizationInviteValidationError
+                fieldName="role"
+                errors={formState.validationErrors}
+              />
+              <Select
+                name="role"
+                id="inviteUser-role"
+                // defaultValue={t("inputs.role.placeholder")}
+                disabled={isPending || showSuccess}
+                value={formState.data?.roles[0].role_name}
+              >
+                <RoleOptions roles={roles} />
+              </Select>
+            </FormGroup>
           </Grid>
-          <Grid col={4} className="flex-align-self-end">
+          <Grid tablet={{ col: 4 }} className="flex-align-self-end">
             <UserInviteButton
               disabled={isPending || showSuccess}
               success={showSuccess}

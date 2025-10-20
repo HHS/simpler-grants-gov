@@ -74,6 +74,7 @@ export const inviteUserToOrganization = async (
   },
 ): Promise<OrganizationInviteRecord> => {
   const { organizationId, roleId, email } = requestData;
+  // eslint-disable-next-line
   console.log("!!! updating", organizationId, roleId, email);
   return Promise.resolve(fakeOrganizationInviteRecord);
   //   const ssgToken = {
