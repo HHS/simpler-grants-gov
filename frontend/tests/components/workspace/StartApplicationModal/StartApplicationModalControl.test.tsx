@@ -1,6 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { fakeCompetition, fakeOrganization } from "src/utils/testing/fixtures";
+import {
+  fakeCompetition,
+  fakeUserOrganization,
+} from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
@@ -17,7 +20,7 @@ const mocks = {
     if (url.match("competitions")) {
       return Promise.resolve(fakeCompetition);
     }
-    return Promise.resolve([fakeOrganization]);
+    return Promise.resolve([fakeUserOrganization]);
   },
 };
 
