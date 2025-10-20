@@ -203,6 +203,27 @@ USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
 )
 
 
+###############################
+# API-only user for local development
+###############################
+API_USER = factories.UserFactory.build(
+    user_id=uuid.UUID("12345678-1234-5678-9abc-123456789abc")
+)
+
+LINK_API_USER = factories.LinkExternalUserFactory.build(
+    link_external_user_id=uuid.UUID("87654321-4321-8765-cba9-987654321cba"),
+    external_user_id="api_user",  # THIS IS WHAT WE USE TO LOGIN
+    user=API_USER,
+)
+
+API_KEY_FOR_API_USER = factories.UserApiKeyFactory.build(
+    api_key_id=uuid.UUID("abcdef12-3456-7890-abcd-ef1234567890"),
+    key_id="local-dev-api-key",  # This is the key_id that will be used for X-API-KEY header
+    key_name="Local Development API Key",
+    user=API_USER,
+)
+
+
 def _assign_organization_role(
     db_session: db.Session, organization_user: OrganizationUser, role: Role
 ) -> None:
@@ -303,14 +324,37 @@ def _build_organizations_and_users(db_session: db.Session) -> None:
     _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER1, ORG_ADMIN)
     _assign_organization_role(db_session, USER_MIXED_ORG_ROLES_ORG_USER2, ORG_MEMBER)
 
+    ###############################
+    # API-only user for local development
+    ###############################
+    logger.info(
+        f"Updating API-only user: '{LINK_API_USER.external_user_id}' with X-API-Key: '{API_KEY_FOR_API_USER.key_id}'"
+    )
+    db_session.merge(API_USER, load=True)
+    db_session.merge(LINK_API_USER, load=True)
+    db_session.merge(API_KEY_FOR_API_USER, load=True)
+
     # Log summary of all created user scenarios
     logger.info("=== USER SCENARIOS SUMMARY ===")
-    logger.info("Created 5 user scenarios with role-based access:")
+    logger.info("Created 6 user scenarios with role-based access:")
     logger.info("• no_org_user - Individual user (no organizations)")
     logger.info("• one_org_user - Organization admin (Sally's Soup Emporium)")
     logger.info("• two_org_user - Organization admin (both organizations)")
     logger.info("• org_member_user - Organization member (Sally's Soup Emporium)")
     logger.info("• mixed_roles_user - Admin of ORG1, Member of ORG2")
+    logger.info("• api_user - API-only user for local development testing")
+    logger.info("")
+    logger.info("=== API KEYS FOR LOCAL DEVELOPMENT ===")
+    logger.info("Use these X-API-KEY values for testing API calls:")
+    logger.info(f"• no_org_user: {API_KEY_USER_NO_ORGS.key_id}")
+    logger.info(f"• one_org_user: {API_KEY_USER_ONE_ORG.key_id}")
+    logger.info(f"• two_org_user: {API_KEY_USER_TWO_ORGS.key_id}")
+    logger.info(f"• org_member_user: {API_KEY_USER_ORG_MEMBER.key_id}")
+    logger.info(f"• mixed_roles_user: {API_KEY_USER_MIXED_ORG_ROLES.key_id}")
+    logger.info(f"• api_user: {API_KEY_FOR_API_USER.key_id}")
+    logger.info("")
+    logger.info("Example usage:")
+    logger.info("curl -H 'X-API-KEY: local-dev-api-key' http://localhost:8080/v1/opportunities")
 
 
 def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:
