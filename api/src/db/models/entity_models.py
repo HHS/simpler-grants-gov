@@ -7,14 +7,15 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import SamGovImportType, OrganizationInvitationStatus
+from src.constants.lookup_constants import OrganizationInvitationStatus, SamGovImportType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkSamGovImportType
 from src.util import datetime_util
+
 # Add conditional import for type checking to avoid circular imports
 if TYPE_CHECKING:
     from src.db.models.competition_models import Application
-    from src.db.models.user_models import OrganizationUser, User, Role
+    from src.db.models.user_models import OrganizationUser, Role, User
 
 
 class SamGovEntity(ApiSchemaTable, TimestampMixin):
@@ -91,14 +92,21 @@ class Organization(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )
 
+
 class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     __tablename__ = "organization_invitation"
 
-    organization_invitation_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    organization_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Organization.organization_id))
+    organization_invitation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id)
+    )
     organization: Mapped[Organization] = relationship(Organization)
 
-    inviter_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.organization_user.organization_user_id"))
+    inviter_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.organization_user.organization_user_id")
+    )
     organization_user: Mapped["OrganizationUser"] = relationship("OrganizationUser")
 
     invitee_email: Mapped[str]
@@ -113,6 +121,9 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     )
     responded_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
     user: Mapped["User"] = relationship("User")
+    linked_role: Mapped["LinkOrganizationInvitationToRole"] = relationship(
+        "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=False
+    )
 
     @property
     def status(self) -> OrganizationInvitationStatus:
@@ -133,9 +144,11 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     @property
     def is_pending(self) -> bool:
         return self.status == OrganizationInvitationStatus.PENDING
+
     @property
     def can_respond(self) -> bool:
         return self.is_pending and not self.is_expired
+
 
 class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_organization_invitation_to_role"
@@ -143,5 +156,7 @@ class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("api.role.role_id"), primary_key=True)
     role: Mapped["Role"] = relationship("Role", lazy="selectin")  # preload role
 
-    organization_invitation_id: Mapped[uuid.UUID] = mapped_column()
-    organization_invitation: Mapped[OrganizationInvitation]=relationship(OrganizationInvitation)
+    organization_invitation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("api.organization_invitation.organization_invitation_id"), primary_key=True
+    )
+    organization_invitation: Mapped[OrganizationInvitation] = relationship(OrganizationInvitation)
