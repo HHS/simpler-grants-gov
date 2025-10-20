@@ -20,6 +20,8 @@ from src.api.users.user_schemas import (
     UserApiKeyRenameResponseSchema,
     UserApplicationListRequestSchema,
     UserApplicationListResponseSchema,
+    UserCanAccessRequestSchema,
+    UserCanAccessResponseSchema,
     UserDeleteSavedOpportunityResponseSchema,
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
@@ -65,6 +67,7 @@ from src.services.users.login_gov_callback_handler import (
 from src.services.users.rename_api_key import rename_api_key
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
+from src.services.users.user_can_access import check_user_can_access
 
 logger = logging.getLogger(__name__)
 
@@ -627,7 +630,6 @@ def user_profile_update(
 @flask_db.with_db_session()
 def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     """Get the roles and privileges for the authenticated user"""
-    logger.info("POST /v1/users/:user_id/privileges")
     add_extra_data_to_current_request_logs(
         {
             "user_id": user_id,
@@ -645,3 +647,29 @@ def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> resp
         roles_and_privileges = get_roles_and_privileges(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=roles_and_privileges)
+
+
+@user_blueprint.post("/<uuid:user_id>/can_access")
+@user_blueprint.input(UserCanAccessRequestSchema, location="json")
+@user_blueprint.output(UserCanAccessResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_can_access(db_session: db.Session, user_id: UUID, json_data: dict) -> response.ApiResponse:
+    """Check user access for a given resource"""
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("POST /v1/users/:user_id/can_access")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        check_user_can_access(db_session, user_id, json_data)
+
+    return response.ApiResponse(message="Success")
