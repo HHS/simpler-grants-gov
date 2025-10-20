@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { fakeOrganization } from "src/utils/testing/fixtures";
+import { fakeUserOrganization } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { createRef } from "react";
@@ -41,7 +41,7 @@ describe("StartApplicationModal", () => {
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["organization"]}
-        organizations={[fakeOrganization]}
+        organizations={[fakeUserOrganization]}
         token={"a token"}
         loading={false}
       />,
@@ -82,7 +82,7 @@ describe("StartApplicationModal", () => {
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["organization"]}
-        organizations={[fakeOrganization]}
+        organizations={[fakeUserOrganization]}
         token={"a token"}
         loading={false}
       />,
@@ -179,7 +179,7 @@ describe("StartApplicationModal", () => {
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
         applicantTypes={["organization"]}
-        organizations={[fakeOrganization]}
+        organizations={[fakeUserOrganization]}
         token={"a token"}
         loading={false}
       />,
@@ -189,7 +189,7 @@ describe("StartApplicationModal", () => {
     const input = await screen.findByTestId("textInput");
     const select = await screen.findByTestId("Select");
     await userEvent.type(input, "new application");
-    await userEvent.selectOptions(select, fakeOrganization.organization_id);
+    await userEvent.selectOptions(select, fakeUserOrganization.organization_id);
 
     act(() => saveButton.click());
     expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
@@ -197,7 +197,7 @@ describe("StartApplicationModal", () => {
       body: JSON.stringify({
         applicationName: "new application",
         competitionId: "1",
-        organization: fakeOrganization.organization_id,
+        organization: fakeUserOrganization.organization_id,
       }),
     });
 
