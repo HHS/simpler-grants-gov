@@ -41,9 +41,7 @@ def get_application_zip_response(
     if application:
         try:
             filestream = file_util.open_stream(application.download_path, mode="rb")
-            print(f"{filestream=}")
             schema._mtom_file_stream = filestream
-            print(f"{schema._mtom_file_stream=}")
         except (ClientError, FileNotFoundError):
             logger.info(
                 f"Unable to retrieve file legacy_tracking_number {legacy_tracking_number} from s3 file location.",
