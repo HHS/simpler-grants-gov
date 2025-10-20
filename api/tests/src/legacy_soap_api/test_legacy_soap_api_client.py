@@ -5,8 +5,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from botocore.exceptions import ClientError
 
-from src.db.models.competition_models import ApplicationSubmission, Competition
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.legacy_soap_api.applicants.schemas import (
     CFDADetails,
@@ -356,16 +357,10 @@ class TestSimplerBaseSOAPClient:
 
 
 class TestSimplerSOAPGetApplicationZip:
-    @pytest.fixture(autouse=True)
-    def truncate_competitions(self, db_session):
-        # This will truncate the competitions and related data for each test within this test class.
-        cascade_delete_from_db_table(db_session, ApplicationSubmission)
-
     def test_get_simpler_soap_response_returns_mtom_xml(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
-        file_path = f"s3://{mock_s3_bucket}/submission.txt"
-        submission = ApplicationSubmissionFactory.create(file_location=file_path)
+        submission = ApplicationSubmissionFactory.create()
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
@@ -437,9 +432,12 @@ class TestSimplerSOAPGetApplicationZip:
             operation_name="GetApplicationZipRequest",
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
-        with patch("src.legacy_soap_api.legacy_soap_api_client.requests.get") as mock_request:
-            mock_request.return_value.status_code = 500
-            client = SimplerGrantorsS2SClient(soap_request, db_session)
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        with patch("src.util.file_util.smart_open.open") as mock_smart_open:
+            mock_smart_open.side_effect = ClientError(
+                {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
+                "GetObject",
+            )
             response = client.get_simpler_soap_response(mock_proxy_response)
             msg = f"Unable to retrieve file legacy_tracking_number {submission.legacy_tracking_number} from s3 file location."
             assert msg in caplog.messages
@@ -450,6 +448,7 @@ class TestSimplerSOAPGetApplicationZip:
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
+        FAKE_GRANTS_GOV_TRACKING_NUMBER = "GRANT89999999"
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -457,7 +456,7 @@ class TestSimplerSOAPGetApplicationZip:
             "<soapenv:Header/>"
             "<soapenv:Body>"
             "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{GRANTS_GOV_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>"
+            f"<gran:GrantsGovTrackingNumber>{FAKE_GRANTS_GOV_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>"
             "</agen:GetApplicationZipRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
@@ -471,15 +470,13 @@ class TestSimplerSOAPGetApplicationZip:
             operation_name="GetApplicationZipRequest",
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
-        with patch("src.legacy_soap_api.legacy_soap_api_client.requests.get") as mock_request:
-            mock_request.return_value.status_code = 500
-            client = SimplerGrantorsS2SClient(soap_request, db_session)
-            response = client.get_simpler_soap_response(mock_proxy_response)
-            grants_gov_tracking_number = GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
-            msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
-            assert msg in caplog.messages
-            assert response.data == mock_proxy_response.data
-            assert response.status_code == mock_proxy_response.status_code
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        response = client.get_simpler_soap_response(mock_proxy_response)
+        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
+        msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
+        assert msg in caplog.messages
+        assert response.data == mock_proxy_response.data
+        assert response.status_code == mock_proxy_response.status_code
 
     def test_get_simpler_soap_response_returns_proxy_response_if_proxy_response_status_code_is_not_500(
         self, db_session
@@ -510,7 +507,7 @@ class TestSimplerSOAPGetApplicationZip:
             assert result.data == mock_proxy_response.data
             assert result.status_code == mock_proxy_response.status_code
 
-    def test_get_simpler_soap_response_does_not_add_mtom_data_if_is_mtom_is_false_on_operation_config(
+    def test_get_simpler_soap_response_returns_proxy_response_if_is_mtom_is_false_on_operation_config(
         self, db_session
     ):
         request_xml_bytes = (
@@ -540,7 +537,5 @@ class TestSimplerSOAPGetApplicationZip:
             client.operation_config = MagicMock(**client.operation_config.__dict__)
             client.operation_config.is_mtom = False
             result = client.get_simpler_soap_response(mock_proxy_response)
-            assert isinstance(result.data, bytes)
-            assert result.data.startswith(
-                b'<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-            )
+            assert result.data == mock_proxy_response.data
+            assert result.status_code == mock_proxy_response.status_code

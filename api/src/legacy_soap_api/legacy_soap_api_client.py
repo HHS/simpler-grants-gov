@@ -1,13 +1,10 @@
 import logging
 import uuid
-from typing import Any, Iterator
+from typing import Any, BinaryIO, Iterator
 
-import requests
 from pydantic import ValidationError
-from sqlalchemy import select
 
 import src.adapters.db as db
-from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
@@ -236,7 +233,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         if proxy_response.status_code != 500:
             return proxy_response
         if not self.operation_config.is_mtom:
-            return super().get_simpler_soap_response(proxy_response)
+            return proxy_response
         # MTOM message is assembled here
         # 1. --uuid: {boundary_uuid}\n
         # 2. headers:
@@ -247,6 +244,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         # 4. --uuid: {boundary_uuid}
         # 5. the file bytes from the file being attached
         simpler_response_soap_dict = self.get_soap_response_dict()
+        mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
         )
@@ -270,45 +268,25 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             f"{boundary}"
         ).encode("utf-8")
 
-        legacy_tracking_number = self.get_soap_request_dict()["GrantsGovTrackingNumber"]
-        if legacy_tracking_number.startswith("GRANT"):
-            legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
-        application = self.db_session.execute(
-            select(ApplicationSubmission).where(
-                ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number)
-            )
-        ).scalar()
-
         def _gen_response_data(
-            mime_message: bytes, boundary: str, response: requests.Response
+            mime_message: bytes, boundary: str, mtom_file_stream: BinaryIO
         ) -> Iterator:
             yield mime_message
-            for chunk in response.iter_content(chunk_size=4000):
-                yield chunk
+            CHUNK_SIZE = 4000
+            try:
+                chunk = mtom_file_stream.read(CHUNK_SIZE)
+                while chunk:
+                    yield chunk
+                    chunk = mtom_file_stream.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+            finally:
+                mtom_file_stream.close()
             yield b"\n" + boundary.encode("utf-8") + b"--"
 
-        if application:
-            response = requests.get(application.download_path, timeout=10)
-            if response.status_code == 200:
-                return get_soap_response(
-                    data=_gen_response_data(mime_message, boundary, response),
-                    headers=update_headers,
-                )
-            else:
-                logger.info(
-                    f"Unable to retrieve file legacy_tracking_number {legacy_tracking_number} from s3 file location.",
-                    extra={
-                        "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
-                        "response_operation_name": self.operation_config.response_operation_name,
-                    },
-                )
-                return proxy_response
-        else:
-            logger.info(
-                f"Unable to find submission legacy_tracking_number {legacy_tracking_number}.",
-                extra={
-                    "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
-                    "response_operation_name": self.operation_config.response_operation_name,
-                },
+        if mtom_file_stream:
+            return get_soap_response(
+                data=_gen_response_data(mime_message, boundary, mtom_file_stream),
+                headers=update_headers,
             )
-            return proxy_response
+        return proxy_response
