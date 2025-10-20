@@ -131,10 +131,11 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
 
         if self.accepted_at is not None:
             return OrganizationInvitationStatus.ACCEPTED
-        if self.rejected_at is not None:
+        if self.rejected_at is not None:  # type: ignore[unreachable]
             return OrganizationInvitationStatus.REJECTED
         if now > self.expires_at:
             return OrganizationInvitationStatus.EXPIRED
+
         return OrganizationInvitationStatus.PENDING
 
     @property
