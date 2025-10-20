@@ -73,7 +73,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)[0]
+            result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
                 f"--uuid:{BOUNDARY_UUID}\n"
                 "Content-Type: application/xop+xml; cha"
@@ -131,7 +131,8 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             client.operation_config.is_mtom = False
-            result = client.get_simpler_soap_response(mock_proxy_response)[0]
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            assert isinstance(result.data, bytes)
             assert result.data.startswith(
                 b'<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
             )
