@@ -1453,9 +1453,14 @@ export const messages = {
   },
   UserWorkspace: {
     pageTitle: "User Workspace | Simpler.Grants.gov",
-    title: "User Workspace",
+    title: "<color>Welcome</color> to your workspace.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
-    organizations: "Organizations",
+    organizations: "Your organizations",
+    noOrganizations: {
+      title: "You're not a member of any organizations yet",
+      description:
+        "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
+    },
   },
   OrganizationDetail: {
     pageTitle: "Organization",

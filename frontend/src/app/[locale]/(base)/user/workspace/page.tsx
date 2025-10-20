@@ -26,6 +26,26 @@ export async function generateMetadata({
   return meta;
 }
 
+const OrganizationItem = ({ organization }: { organization: Organization }) => {
+  return (
+    <li>
+      <Link href={`/organization/${organization.organization_id}`}>
+        {organization.sam_gov_entity.legal_business_name}
+      </Link>
+    </li>
+  );
+};
+
+const NoOrganizations = () => {
+  const t = useTranslations("UserWorkspace.noOrganizations");
+  return (
+    <>
+      <h3>{t("title")}</h3>
+      <div>{t("description")}</div>
+    </>
+  );
+};
+
 const UserOrganizationsList = ({
   userOrganizations,
 }: {
@@ -35,15 +55,18 @@ const UserOrganizationsList = ({
   return (
     <>
       <h2>{t("organizations")}</h2>
-      <ul>
-        {userOrganizations.map((userOrganization) => (
-          <li key={userOrganization.organization_id}>
-            <Link href={`/organization/${userOrganization.organization_id}`}>
-              {userOrganization.sam_gov_entity.legal_business_name}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {!userOrganizations.length ? (
+        <NoOrganizations />
+      ) : (
+        <ul>
+          {userOrganizations.map((userOrganization) => (
+            <OrganizationItem
+              organization={userOrganization}
+              key={userOrganization.organization_id}
+            />
+          ))}
+        </ul>
+      )}
     </>
   );
 };
@@ -75,7 +98,13 @@ async function UserWorkspace() {
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>{t("title")}</h1>
+      <h1>
+        {t.rich("title", {
+          color: (chunks) => (
+            <span className="text-action-primary">{chunks}</span>
+          ),
+        })}
+      </h1>
       {userDetails && userOrganizations?.length ? (
         <>
           <UserOrganizationInvite
