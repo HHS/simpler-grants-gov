@@ -206,9 +206,7 @@ USER_MIXED_ORG_ROLES_ORG_USER2 = factories.OrganizationUserFactory.build(
 ###############################
 # API-only user for local development
 ###############################
-API_USER = factories.UserFactory.build(
-    user_id=uuid.UUID("12345678-1234-5678-9abc-123456789abc")
-)
+API_USER = factories.UserFactory.build(user_id=uuid.UUID("12345678-1234-5678-9abc-123456789abc"))
 
 LINK_API_USER = factories.LinkExternalUserFactory.build(
     link_external_user_id=uuid.UUID("87654321-4321-8765-cba9-987654321cba"),
