@@ -1,9 +1,11 @@
 from src.constants.lookup_constants import ApplicationStatus
 from src.services.users.get_user_applications import get_user_applications
 from tests.src.db.models.factories import (
+    AgencyFactory,
     ApplicationFactory,
     ApplicationUserFactory,
     CompetitionFactory,
+    OpportunityFactory,
     OrganizationFactory,
     SamGovEntityFactory,
     UserFactory,
@@ -105,11 +107,21 @@ def test_get_user_applications_preloads_relationships(enable_factory_create, db_
     """Test that the service properly preloads competition and organization relationships"""
     user = UserFactory.create()
 
+    # Create agency
+    agency = AgencyFactory.create(agency_code="TEST-123", agency_name="Test Agency Name")
+
+    # Create opportunity with agency
+    opportunity = OpportunityFactory.create(
+        opportunity_title="Test Opportunity", agency_code=agency.agency_code
+    )
+
     # Create organization with SAM.gov entity
     sam_gov_entity = SamGovEntityFactory.create()
     organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
 
-    competition = CompetitionFactory.create(competition_title="Test Competition")
+    competition = CompetitionFactory.create(
+        competition_title="Test Competition", opportunity=opportunity
+    )
     application = ApplicationFactory.create(
         competition=competition,
         organization=organization,
@@ -125,6 +137,13 @@ def test_get_user_applications_preloads_relationships(enable_factory_create, db_
 
     # Competition should be loaded
     assert app.competition.competition_title == "Test Competition"
+
+    # Opportunity should be loaded
+    assert app.competition.opportunity is not None
+    assert app.competition.opportunity.opportunity_title == "Test Opportunity"
+
+    # Agency should be loaded (via agency_record relationship)
+    assert app.competition.opportunity.agency_name == "Test Agency Name"
 
     # Organization and its SAM.gov entity should be loaded
     assert app.organization is not None

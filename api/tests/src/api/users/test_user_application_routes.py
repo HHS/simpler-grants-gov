@@ -1,9 +1,11 @@
 from src.api.users.user_schemas import UserApplicationListItemSchema
 from src.constants.lookup_constants import ApplicationStatus
 from tests.src.db.models.factories import (
+    AgencyFactory,
     ApplicationFactory,
     ApplicationUserFactory,
     CompetitionFactory,
+    OpportunityFactory,
     OrganizationFactory,
     SamGovEntityFactory,
     UserFactory,
@@ -14,8 +16,17 @@ def test_user_get_applications_success(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test successful retrieval of applications for a user"""
+    # Create an agency to have proper agency_name
+    agency = AgencyFactory.create(agency_code="TEST-AC", agency_name="Test Agency")
+
+    # Create an opportunity with the agency
+    opportunity = OpportunityFactory.create(
+        opportunity_title="Test Opportunity", agency_code=agency.agency_code
+    )
+
     # Create a competition
     competition = CompetitionFactory.create(
+        opportunity=opportunity,
         competition_title="Test Competition",
         opening_date=None,
         closing_date=None,
@@ -78,12 +89,24 @@ def test_user_get_applications_success(
     assert app1_data["competition"]["competition_title"] == "Test Competition"
     assert app1_data["competition"]["is_open"] is True
 
+    # Check opportunity data
+    assert app1_data["competition"]["opportunity"] is not None
+    assert app1_data["competition"]["opportunity"]["opportunity_id"] == str(
+        opportunity.opportunity_id
+    )
+    assert app1_data["competition"]["opportunity"]["opportunity_title"] == "Test Opportunity"
+    assert app1_data["competition"]["opportunity"]["agency_name"] == "Test Agency"
+
     # Verify second application (individual)
     app2_data = applications[1]
     assert app2_data["application_id"] == str(application2.application_id)
     assert app2_data["application_name"] == "My Second App"
     assert app2_data["application_status"] == ApplicationStatus.SUBMITTED.value
     assert app2_data["organization"] is None
+
+    # Second application should also have opportunity data
+    assert app2_data["competition"]["opportunity"] is not None
+    assert app2_data["competition"]["opportunity"]["opportunity_title"] == "Test Opportunity"
 
 
 def test_user_get_applications_empty_list(
@@ -215,6 +238,11 @@ def test_user_application_list_item_schema():
             "opening_date": None,
             "closing_date": None,
             "is_open": True,
+            "opportunity": {
+                "opportunity_id": "123e4567-e89b-12d3-a456-426614174002",
+                "opportunity_title": "Test Opportunity",
+                "agency_name": "Test Agency",
+            },
         },
     }
 
@@ -222,3 +250,5 @@ def test_user_application_list_item_schema():
     result = schema.load(test_data)
     assert result["application_name"] == "Test Application"
     assert result["competition"]["competition_title"] == "Test Competition"
+    assert result["competition"]["opportunity"]["opportunity_title"] == "Test Opportunity"
+    assert result["competition"]["opportunity"]["agency_name"] == "Test Agency"
