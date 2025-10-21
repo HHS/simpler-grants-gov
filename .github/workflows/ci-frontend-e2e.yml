@@ -43,6 +43,9 @@ jobs:
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
       - run: |
+          echo Before npm ci
+          df -h
+          docker image ls
           npm ci
           npx playwright install --with-deps
 
@@ -57,6 +60,8 @@ jobs:
           make init
           # Now run the seeding and populate commands
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
+          echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
@@ -80,7 +85,13 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
+          echo Before test:e2e
+          df -h
+          docker image ls
           npm run test:e2e
+          echo After test:e2e
+          df -h
+          docker image ls
 
       - name: Show API logs on failure
         if: failure()
