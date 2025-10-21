@@ -49,11 +49,11 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          echo Before build
+          echo df Before build
           df -h
           docker image ls
           make init db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
-          echo After build
+          echo df After build
           df -h
           docker image ls
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
@@ -81,11 +81,11 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          echo Before test:e2e
+          echo df Before test:e2e
           df -h
           docker image ls
           npm run test:e2e
-          echo After test:e2e
+          echo df After test:e2e
           df -h
           docker image ls
 
@@ -101,6 +101,12 @@ jobs:
           name: blob-report-shard-${{ matrix.shard }}
           path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
           retention-days: 1
+
+      - name: df on failure
+        if: failure()
+        run: |
+          echo df on failure
+          df -h
 
   create-report:
     name: Create Merged Test Report
