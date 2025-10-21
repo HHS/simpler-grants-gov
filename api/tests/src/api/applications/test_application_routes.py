@@ -2590,9 +2590,8 @@ def test_application_start_with_organization_success(
     assert str(application.organization_id) == organization_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
 
-    # Assert it does not assign application user role
-    assert len(application.application_users) == 1
-    assert not application.application_users[0].roles
+    # Assert it does create an application user
+    assert not application.application_users
 
 
 def test_application_start_with_organization_and_custom_name(
