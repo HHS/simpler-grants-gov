@@ -12,10 +12,12 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
-    UserFactory, ApplicationUserRoleFactory, RoleFactory,
+    RoleFactory,
+    UserFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -50,7 +52,10 @@ def test_submit_application_success(enable_factory_create, db_session):
 
     # Create a user and associate with the application
     user = UserFactory.create()
-    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     # Call the function and get the updated application
     with db_session.begin():
@@ -84,7 +89,10 @@ def test_submit_application_with_missing_required_form(enable_factory_create, db
 
     # Create a user and associate with the application
     user = UserFactory.create()
-    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         submit_application(db_session, application.application_id, user)
@@ -111,7 +119,10 @@ def test_submit_application_with_invalid_required_form(enable_factory_create, db
     )
 
     # Create a user and associate with the application
-    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         submit_application(db_session, application.application_id, user)
@@ -143,7 +154,10 @@ def test_submit_application_with_invalid_field(enable_factory_create, db_session
 
     # Create a user and associate with the application
     user = UserFactory.create()
-    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         submit_application(db_session, application.application_id, user)
