@@ -13,7 +13,7 @@ from src.services.applications.application_validation import (
     is_form_required,
     validate_application_form,
 )
-from src.services.applications.get_application import get_application
+from src.services.applications.get_application import get_application_with_auth
 
 
 def get_application_form(
@@ -28,7 +28,7 @@ def get_application_form(
     is_internal_user = user is None
 
     # Ensure the application exists and user has access (if not internal)
-    get_application(db_session, application_id, user, is_internal_user)
+    get_application_with_auth(db_session, application_id, user, is_internal_user)
 
     # Get the application form with eagerly loaded application and its attachments
     application_form = db_session.execute(

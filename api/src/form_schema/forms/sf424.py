@@ -1,6 +1,6 @@
 import uuid
 
-import src.form_schema.forms.shared_schema as shared_schema
+import src.form_schema.shared.shared_form_constants as shared_form_constants
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.services.xml_generation.constants import NO_VALUE
@@ -653,13 +653,13 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "State",
             "description": "US State or Territory Code",
-            "enum": shared_schema.STATES,
+            "enum": shared_form_constants.STATES,
         },
         "country_code": {
             "type": "string",
             "title": "Country",
             "description": "Country Code",
-            "enum": shared_schema.COUNTRIES,
+            "enum": shared_form_constants.COUNTRIES,
         },
     },
 }
@@ -732,6 +732,28 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/applicant/properties/province"},
             {"type": "field", "definition": "/properties/applicant/properties/country"},
             {"type": "field", "definition": "/properties/applicant/properties/zip_code"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "organizational_unit",
+        "label": "8e. Organizational Unit",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/department_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/division_name",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "contact_person",
+        "label": "8f. Name and contact information of person to be contacted on matters involving this application",
+        "children": [
             {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
             {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
             {"type": "field", "definition": "/properties/contact_person/properties/middle_name"},
@@ -873,6 +895,10 @@ FORM_UI_SCHEMA = [
         "children": [
             {
                 "type": "field",
+                "definition": "/properties/certification_agree",
+            },
+            {
+                "type": "field",
                 "definition": "/properties/authorized_representative/properties/prefix",
             },
             {
@@ -943,6 +969,24 @@ FORM_XML_TRANSFORM_RULES = {
             "exclude": "Default - exclude field entirely from XML (recommended)",
             "include_null": "Include empty XML element: <Field></Field>",
             "default_value": "Use configured default value when field is None",
+        },
+        "attachment_fields": {
+            "areas_affected": {
+                "xml_element": "AreasAffected",
+                "type": "single",
+            },
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "debt_explanation": {
+                "xml_element": "DebtExplanation",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
         },
     },
     # Core application information - direct field mappings
@@ -1050,6 +1094,13 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
+    # Attachment fields - pass through as-is for attachment transformer
+    "debt_explanation": {"xml_transform": {"target": "debt_explanation"}},
+    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
+    "additional_congressional_districts": {
+        "xml_transform": {"target": "additional_congressional_districts"}
+    },
+    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "certification_agree": {
         "xml_transform": {
             "target": "CertificationAgree",
@@ -1117,7 +1168,6 @@ SF424_v4_0 = Form(
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
-    # No form instructions at the moment.
     form_type=FormType.SF424,
     sgg_version="1.0",
     is_deprecated=False,

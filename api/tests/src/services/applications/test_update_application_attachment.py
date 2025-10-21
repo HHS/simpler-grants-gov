@@ -7,22 +7,27 @@ import pytest
 from werkzeug.datastructures import FileStorage
 
 import src.util.file_util as file_util
+from src.constants.lookup_constants import Privilege
 from src.services.applications.update_application_attachment import update_application_attachment
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
     UserFactory,
 )
 
 attachment_dir = Path(__file__).parent.parent.parent / "api" / "applications" / "attachments"
 
 
-def test_update_application_attachment_success(enable_factory_create, db_session, s3_config):
+def test_update_application_attachment_success(enable_factory_create, db_session, s3_config, user):
     """Test successful update of an application attachment."""
-    user = UserFactory.create()
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Create existing attachment
     existing_attachment = ApplicationAttachmentFactory.create(
@@ -55,11 +60,13 @@ def test_update_application_attachment_success(enable_factory_create, db_session
     assert updated_attachment.mime_type == "application/pdf"
 
 
-def test_update_application_attachment_not_found(enable_factory_create, db_session):
+def test_update_application_attachment_not_found(enable_factory_create, db_session, user):
     """Test update fails with non-existent attachment."""
-    user = UserFactory.create()
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     non_existent_attachment_id = uuid.uuid4()
 
@@ -84,9 +91,10 @@ def test_update_application_attachment_not_found(enable_factory_create, db_sessi
     )
 
 
-def test_update_application_attachment_application_not_found(enable_factory_create, db_session):
+def test_update_application_attachment_application_not_found(
+    enable_factory_create, db_session, user
+):
     """Test update fails when application doesn't exist."""
-    user = UserFactory.create()
     non_existent_application_id = uuid.uuid4()
     attachment_id = uuid.uuid4()
 
@@ -108,9 +116,8 @@ def test_update_application_attachment_application_not_found(enable_factory_crea
     assert f"Application with ID {non_existent_application_id} not found" in excinfo.value.message
 
 
-def test_update_application_attachment_unauthorized(enable_factory_create, db_session):
+def test_update_application_attachment_unauthorized(enable_factory_create, db_session, user):
     """Test update fails when user is not associated with the application."""
-    user = UserFactory.create()
     other_user = UserFactory.create()
     application = ApplicationFactory.create()
 
@@ -137,11 +144,16 @@ def test_update_application_attachment_unauthorized(enable_factory_create, db_se
     assert "Unauthorized" in excinfo.value.message
 
 
-def test_update_application_attachment_with_real_file(enable_factory_create, db_session, s3_config):
+def test_update_application_attachment_with_real_file(
+    enable_factory_create, db_session, s3_config, user
+):
     """Test update with a real file to verify file operations."""
     user = UserFactory.create()
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Create existing attachment with actual file
     existing_attachment = ApplicationAttachmentFactory.create(
@@ -179,11 +191,14 @@ def test_update_application_attachment_with_real_file(enable_factory_create, db_
         assert file_util.file_exists(old_file_location) is False
 
 
-def test_update_application_no_filename(enable_factory_create, db_session, s3_config):
+def test_update_application_no_filename(enable_factory_create, db_session, s3_config, user):
     """Test successful update of an application attachment."""
     user = UserFactory.create()
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Create existing attachment
     existing_attachment = ApplicationAttachmentFactory.create(

@@ -3,6 +3,7 @@ import uuid
 import pytest
 from apiflask.exceptions import HTTPError
 
+from src.constants.lookup_constants import FormType
 from src.services.form_alpha.update_form import update_form
 from tests.src.db.models.factories import FormFactory, FormInstructionFactory
 
@@ -169,3 +170,56 @@ def test_update_form_overwrite_instruction(enable_factory_create, db_session):
 
     assert form.form_instruction_id is None
     assert form.form_instruction is None
+
+
+def test_update_form_with_new_fields(enable_factory_create, db_session):
+    """Test updating a form with form_type, sgg_version, and is_deprecated"""
+    form_id = uuid.uuid4()
+    form_data = {
+        "form_name": "Test Form with New Fields",
+        "short_form_name": "test_form_new_fields",
+        "form_version": "1.0",
+        "agency_code": "TEST",
+        "omb_number": "4040-0001",
+        "form_json_schema": {"type": "object"},
+        "form_ui_schema": [{"type": "field"}],
+        "form_instruction_id": None,
+        "form_rule_schema": None,
+        "form_type": FormType.SF424,
+        "sgg_version": "1.0",
+        "is_deprecated": False,
+    }
+
+    with db_session.begin():
+        form = update_form(db_session, form_id, form_data)
+
+    assert form.form_id == form_id
+    assert form.form_type == FormType.SF424
+    assert form.sgg_version == "1.0"
+    assert form.is_deprecated is False
+
+
+def test_update_form_with_null_new_fields(enable_factory_create, db_session):
+    """Test updating a form with null values for new fields"""
+    form_id = uuid.uuid4()
+    form_data = {
+        "form_name": "Test Form",
+        "short_form_name": "test_form",
+        "form_version": "1.0",
+        "agency_code": "TEST",
+        "omb_number": None,
+        "form_json_schema": {"type": "object"},
+        "form_ui_schema": [],
+        "form_instruction_id": None,
+        "form_rule_schema": None,
+        "form_type": None,
+        "sgg_version": None,
+        "is_deprecated": None,
+    }
+
+    with db_session.begin():
+        form = update_form(db_session, form_id, form_data)
+
+    assert form.form_type is None
+    assert form.sgg_version is None
+    assert form.is_deprecated is None
