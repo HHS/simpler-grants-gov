@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 @common_grants_blueprint.get("/opportunities")
 @common_grants_blueprint.input(PaginatedQueryParamsSchema, location="query")
 @common_grants_blueprint.output(OpportunitiesListResponseSchema)
-@api_user_key_auth.login_required
+@common_grants_blueprint.auth_required(api_user_key_auth)
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
@@ -90,7 +90,7 @@ def list_opportunities(
 
 @common_grants_blueprint.get("/opportunities/<uuid:oppId>")
 @common_grants_blueprint.output(OpportunityResponseSchema)
-@api_user_key_auth.login_required
+@common_grants_blueprint.auth_required(api_user_key_auth)
 @common_grants_blueprint.doc(
     summary="View opportunity details",
     description="View details about an opportunity",
@@ -128,7 +128,7 @@ def get_opportunity(
 @common_grants_blueprint.post("/opportunities/search")
 @common_grants_blueprint.input(OpportunitySearchRequestSchema)
 @common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
-@api_user_key_auth.login_required
+@common_grants_blueprint.auth_required(api_user_key_auth)
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
