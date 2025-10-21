@@ -3,10 +3,12 @@ from src.services.users.get_user_applications import get_user_applications
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     OrganizationFactory,
+    RoleFactory,
     SamGovEntityFactory,
-    UserFactory, ApplicationUserRoleFactory, RoleFactory,
+    UserFactory,
 )
 
 
