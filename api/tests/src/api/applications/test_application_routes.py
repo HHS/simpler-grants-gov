@@ -1750,7 +1750,7 @@ def test_application_submit_success(
     application_id = str(application.application_id)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
@@ -1799,7 +1799,7 @@ def test_application_submit_logging_enhancement(
     application_id = str(application.application_id)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
 
     # Set log level to capture INFO messages
     caplog.set_level(logging.INFO)
@@ -1859,7 +1859,7 @@ def test_application_submit_validation_issues(
         application=application, competition_form=competition_form, application_response={"name": 5}
     )
 
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
@@ -1923,7 +1923,7 @@ def test_application_submit_rule_validation_issue(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
@@ -1975,7 +1975,7 @@ def test_application_submit_invalid_required_form(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
 
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application), role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]))
 
     # Setup an application form without any answers yet
     application_form = ApplicationFormFactory.create(
@@ -2043,19 +2043,18 @@ def test_application_form_update_forbidden_not_in_progress(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_submit_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user, user_auth_token, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test submission fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
+    user, application, token =create_user_in_app(db_session, privileges=[Privilege.SUBMIT_APPLICATION], status=initial_status)
     application_id = str(application.application_id)
 
-    # Associate user with application
     ApplicationUserFactory.create(user=user, application=application)
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response
@@ -2360,7 +2359,13 @@ def test_application_submit_success_when_associated(
     )
 
     # Create ApplicationUser association
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    application_id = str(application.application_id)
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
