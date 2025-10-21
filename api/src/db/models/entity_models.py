@@ -158,6 +158,3 @@ class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
         ForeignKey("api.organization_invitation.organization_invitation_id"), primary_key=True
     )
     organization_invitation: Mapped[OrganizationInvitation] = relationship(OrganizationInvitation)
-# cascade_delete_from_db_table(db_session, SamGovEntity)
-# from src.db.models.entity_models import SamGovEntity
-#from tests.lib.db_testing import cascade_delete_from_db_table
