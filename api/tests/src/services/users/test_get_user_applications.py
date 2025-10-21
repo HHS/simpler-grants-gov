@@ -1,18 +1,19 @@
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.services.users.get_user_applications import get_user_applications
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     OrganizationFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
 
 
-def test_get_user_applications_success(enable_factory_create, db_session):
+def test_get_user_applications_success(enable_factory_create, db_session, user):
     """Test successfully retrieving applications for a user"""
-    user = UserFactory.create()
     competition = CompetitionFactory.create(competition_title="Test Competition")
 
     # Create applications
@@ -28,8 +29,14 @@ def test_get_user_applications_success(enable_factory_create, db_session):
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1)
-    ApplicationUserFactory.create(user=user, application=application2)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application1),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application2),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Call the service
     applications = get_user_applications(db_session, user.user_id)
@@ -52,9 +59,8 @@ def test_get_user_applications_empty(enable_factory_create, db_session):
     assert len(applications) == 0
 
 
-def test_get_user_applications_with_organization(enable_factory_create, db_session):
+def test_get_user_applications_with_organization(enable_factory_create, db_session, user):
     """Test retrieving applications that have organizations"""
-    user = UserFactory.create()
 
     # Create organization with SAM.gov entity
     sam_gov_entity = SamGovEntityFactory.create(legal_business_name="Test Organization")
@@ -67,8 +73,10 @@ def test_get_user_applications_with_organization(enable_factory_create, db_sessi
         application_name="Org Application",
     )
 
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Call the service
     applications = get_user_applications(db_session, user.user_id)
 
@@ -90,8 +98,14 @@ def test_get_user_applications_multiple_users(enable_factory_create, db_session)
     application1 = ApplicationFactory.create(competition=competition, application_name="User 1 App")
     application2 = ApplicationFactory.create(competition=competition, application_name="User 2 App")
 
-    ApplicationUserFactory.create(user=user1, application=application1)
-    ApplicationUserFactory.create(user=user2, application=application2)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user1, application=application1),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user2, application=application2),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Call the service for user1
     applications = get_user_applications(db_session, user1.user_id)
@@ -115,8 +129,10 @@ def test_get_user_applications_preloads_relationships(enable_factory_create, db_
         organization=organization,
     )
 
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Call the service
     applications = get_user_applications(db_session, user.user_id)
 
