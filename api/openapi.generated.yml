@@ -3872,6 +3872,34 @@ components:
           - 'null'
           description: The JSON to XML schema mapping configuration for the form
           additionalProperties: {}
+        form_type:
+          description: The type of the form
+          example: !!python/object/apply:src.constants.lookup_constants.FormType
+          - SF424
+          enum:
+          - SF424
+          - SF424A
+          - SF424B
+          - SFLLL
+          - ProjectNarrativeAttachment
+          - BudgetNarrativeAttachment
+          - ProjectAbstractSummary
+          type:
+          - string
+          - 'null'
+          - 'null'
+        sgg_version:
+          type:
+          - string
+          - 'null'
+          description: The SGG version of the form
+          example: '1.0'
+        is_deprecated:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the form is deprecated
+          example: false
         created_at:
           type: string
           format: date-time
@@ -3991,6 +4019,34 @@ components:
           - 'null'
           description: The JSON to XML schema mapping configuration for the form
           additionalProperties: {}
+        form_type:
+          description: The type of the form
+          example: !!python/object/apply:src.constants.lookup_constants.FormType
+          - SF424
+          enum:
+          - SF424
+          - SF424A
+          - SF424B
+          - SFLLL
+          - ProjectNarrativeAttachment
+          - BudgetNarrativeAttachment
+          - ProjectAbstractSummary
+          type:
+          - string
+          - 'null'
+          - 'null'
+        sgg_version:
+          type:
+          - string
+          - 'null'
+          description: The SGG version of the form
+          example: '1.0'
+        is_deprecated:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the form is deprecated
+          example: false
       required:
       - agency_code
       - form_json_schema

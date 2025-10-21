@@ -1,5 +1,6 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from tests.src.db.models.factories import FormFactory, FormInstructionFactory
 
 
@@ -205,3 +206,72 @@ def test_form_update_invalid_json(client, api_auth_token, enable_factory_create)
 
     # The framework returns 422 for malformed request body, not 400
     assert resp.status_code == 422
+
+
+def test_form_update_with_new_fields(client, api_auth_token, enable_factory_create):
+    """Test updating a form with form_type, sgg_version, and is_deprecated fields"""
+    form_id = uuid.uuid4()
+
+    form_data = {
+        "form_name": "Test Form with New Fields",
+        "short_form_name": "test_form_new_fields",
+        "form_version": "1.0",
+        "agency_code": "TEST",
+        "omb_number": "4040-0001",
+        "form_json_schema": {"type": "object"},
+        "form_ui_schema": [{"type": "field"}],
+        "form_instruction_id": None,
+        "form_rule_schema": None,
+        "json_to_xml_schema": None,
+        "form_type": FormType.SF424.value,
+        "sgg_version": "1.0",
+        "is_deprecated": False,
+    }
+
+    resp = client.put(f"/alpha/forms/{form_id}", headers={"X-Auth": api_auth_token}, json=form_data)
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()
+    assert response_data["message"] == "Success"
+
+    form = response_data["data"]
+    assert form["form_id"] == str(form_id)
+    assert form["form_type"] == FormType.SF424.value
+    assert form["sgg_version"] == "1.0"
+    assert form["is_deprecated"] is False
+
+
+def test_form_update_existing_form_with_new_fields(client, api_auth_token, enable_factory_create):
+    """Test updating an existing form to add new fields"""
+    existing_form = FormFactory.create(form_type=None, sgg_version=None, is_deprecated=None)
+
+    form_data = {
+        "form_name": existing_form.form_name,
+        "short_form_name": existing_form.short_form_name,
+        "form_version": existing_form.form_version,
+        "agency_code": existing_form.agency_code,
+        "omb_number": existing_form.omb_number,
+        "form_json_schema": existing_form.form_json_schema,
+        "form_ui_schema": existing_form.form_ui_schema,
+        "form_instruction_id": None,
+        "form_rule_schema": None,
+        "json_to_xml_schema": None,
+        "form_type": FormType.SFLLL.value,
+        "sgg_version": "2.0",
+        "is_deprecated": True,
+    }
+
+    resp = client.put(
+        f"/alpha/forms/{existing_form.form_id}",
+        headers={"X-Auth": api_auth_token},
+        json=form_data,
+    )
+
+    assert resp.status_code == 200
+    response_data = resp.get_json()
+
+    form = response_data["data"]
+    assert form["form_id"] == str(existing_form.form_id)
+    assert form["form_type"] == FormType.SFLLL.value
+    assert form["sgg_version"] == "2.0"
+    assert form["is_deprecated"] is True
