@@ -80,11 +80,15 @@ def test_user_get_applications_success(
 
     # Associate user with applications
     ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application1, as_owner=True),
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application1, as_owner=True
+        ),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
     ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(user=user, application=application2, as_owner=True),
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application2, as_owner=True
+        ),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
 
