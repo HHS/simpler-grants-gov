@@ -85,11 +85,11 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          echo Before test:e2e
+          echo df Before test:e2e
           df -h
           docker image ls
           npm run test:e2e
-          echo After test:e2e
+          echo df After test:e2e
           df -h
           docker image ls
 
@@ -120,6 +120,12 @@ jobs:
           name: blob-report-shard-${{ matrix.shard }}
           path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
           retention-days: 1
+
+      - name: df on failure
+        if: failure()
+        run: |
+          echo df on failure
+          df -h
 
   create-report:
     name: Create Merged Test Report
