@@ -43,11 +43,15 @@ jobs:
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
       - run: |
-          echo Before npm ci
+          echo df Before npm ci
           df -h
           docker image ls
           npm ci
           npx playwright install --with-deps
+          docker rmi node:22 node:20 node:18
+          echo df after rmi
+          df -h
+          docker image ls
 
       - name: Start API Server for e2e tests
         run: |
