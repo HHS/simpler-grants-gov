@@ -1461,6 +1461,10 @@ export const messages = {
       description:
         "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
     },
+    organizationButtons: {
+      view: "View organization details",
+      manage: "Manage users",
+    },
   },
   OrganizationDetail: {
     pageTitle: "Organization",

@@ -2,15 +2,21 @@ import { Metadata } from "next";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
-import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
+import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
+import { UserPrivilegesResponse } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
+import {
+  Button,
+  ErrorMessage,
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
 
 import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 
@@ -26,12 +32,49 @@ export async function generateMetadata({
   return meta;
 }
 
-const OrganizationItem = ({ organization }: { organization: Organization }) => {
+// find the user's role within the passed organization
+const userRoleForOrganization = (
+  organization: Organization,
+  user: UserPrivilegesResponse,
+): string => {
+  const organizationPrivilegeSet = user.organization_users.find(
+    (role) =>
+      role.organization.organization_id === organization.organization_id,
+  );
+  if (!organizationPrivilegeSet) {
+    console.error("no user roles for organization");
+    return "";
+  }
+  return organizationPrivilegeSet.organization_user_roles.length > 1
+    ? organizationPrivilegeSet.organization_user_roles
+        .map((role) => role.role_name)
+        .join(", ")
+    : organizationPrivilegeSet.organization_user_roles[0].role_name;
+};
+
+const OrganizationItem = ({
+  organization,
+  role,
+}: {
+  organization: Organization;
+  role: string;
+}) => {
+  const t = useTranslations("UserWorkspace");
   return (
-    <li>
-      <Link href={`/organization/${organization.organization_id}`}>
-        {organization.sam_gov_entity.legal_business_name}
-      </Link>
+    <li className="border-base-lighter border-1px padding-2 margin-top-2">
+      <Grid row>
+        <Grid tablet={{ col: 6 }}>
+          <div className="font-sans-2xs text-base-dark">{role}</div>
+          <h3 className="margin-top-0">
+            {organization.sam_gov_entity.legal_business_name}
+          </h3>
+        </Grid>
+        <Grid tablet={{ col: 6 }} className="flex-align-self-end text-right">
+          <Link href={`/organization/${organization.organization_id}`}>
+            <Button type="button">{t("organizationButtons.view")}</Button>
+          </Link>
+        </Grid>
+      </Grid>
     </li>
   );
 };
@@ -39,38 +82,44 @@ const OrganizationItem = ({ organization }: { organization: Organization }) => {
 const NoOrganizations = () => {
   const t = useTranslations("UserWorkspace.noOrganizations");
   return (
-    <>
+    <li className="border-primary border-1px padding-2 margin-top-2">
       <h3>{t("title")}</h3>
       <div>{t("description")}</div>
-    </>
+    </li>
   );
 };
 
 const UserOrganizationsList = ({
   userOrganizations,
+  userRoles,
 }: {
   userOrganizations: Organization[];
+  userRoles: UserPrivilegesResponse;
 }) => {
   const t = useTranslations("UserWorkspace");
   return (
     <>
       <h2>{t("organizations")}</h2>
-      {!userOrganizations.length ? (
-        <NoOrganizations />
-      ) : (
-        <ul>
-          {userOrganizations.map((userOrganization) => (
-            <OrganizationItem
-              organization={userOrganization}
-              key={userOrganization.organization_id}
-            />
-          ))}
-        </ul>
-      )}
+      <ul className="usa-list--unstyled">
+        {!userOrganizations.length ? (
+          <NoOrganizations />
+        ) : (
+          <>
+            {userOrganizations.map((userOrganization) => (
+              <OrganizationItem
+                organization={userOrganization}
+                role={userRoleForOrganization(userOrganization, userRoles)}
+                key={userOrganization.organization_id}
+              />
+            ))}
+          </>
+        )}
+      </ul>
     </>
   );
 };
 
+// add breadcrumb
 async function UserWorkspace() {
   const t = await getTranslations("UserWorkspace");
 
@@ -80,16 +129,16 @@ async function UserWorkspace() {
     console.error("no user session, or user has no email address");
     return;
   }
-  let userDetails = {};
+  let userRoles;
   let userOrganizations: Organization[] = [];
-  const userDetailsPromise = getUserDetails(session.token, session.user_id);
+  const userRolesPromise = getUserPrivileges(session.token, session.user_id);
   const userOrganizationsPromise = getUserOrganizations(
     session.token,
     session.user_id,
   );
   try {
-    [userDetails, userOrganizations] = await Promise.all([
-      userDetailsPromise,
+    [userRoles, userOrganizations] = await Promise.all([
+      userRolesPromise,
       userOrganizationsPromise,
     ]);
   } catch (e) {
@@ -105,12 +154,15 @@ async function UserWorkspace() {
           ),
         })}
       </h1>
-      {userDetails && userOrganizations?.length ? (
+      {userRoles && userOrganizations ? (
         <>
           <UserOrganizationInvite
             organizationId={userOrganizations[0].organization_id}
           />
-          <UserOrganizationsList userOrganizations={userOrganizations} />
+          <UserOrganizationsList
+            userOrganizations={userOrganizations}
+            userRoles={userRoles}
+          />
         </>
       ) : (
         <ErrorMessage>{t("fetchError")}</ErrorMessage>
