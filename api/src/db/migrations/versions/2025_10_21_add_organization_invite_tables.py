@@ -1,8 +1,8 @@
 """add_organization_invite_tables
 
-Revision ID: 1637ea55d93a
+Revision ID: a94d46cc7217
 Revises: 4dede31a4056
-Create Date: 2025-10-21 19:15:46.052441
+Create Date: 2025-10-21 20:31:14.926122
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "1637ea55d93a"
+revision = "a94d46cc7217"
 down_revision = "4dede31a4056"
 branch_labels = None
 depends_on = None

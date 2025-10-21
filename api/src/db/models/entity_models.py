@@ -107,15 +107,9 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     inviter_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
     inviter_user: Mapped["User"] = relationship("User", foreign_keys=[inviter_user_id])
     invitee_email: Mapped[str]
-    accepted_at: Mapped[datetime] = mapped_column(
-        nullable=True,
-    )
-    rejected_at: Mapped[datetime] = mapped_column(
-        nullable=True,
-    )
-    expires_at: Mapped[datetime] = mapped_column(
-        nullable=True,
-    )
+    accepted_at: Mapped[datetime | None]
+    rejected_at: Mapped[datetime | None]
+    expires_at: Mapped[datetime | None]
     responded_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
     invitee_user: Mapped["User"] = relationship("User", foreign_keys=[responded_by_user_id])
     linked_role: Mapped["LinkOrganizationInvitationToRole"] = relationship(
@@ -124,19 +118,19 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
 
     @property
     def status(self) -> OrganizationInvitationStatus:
-        now = datetime_util.utcnow()
-
         if self.accepted_at is not None:
             return OrganizationInvitationStatus.ACCEPTED
-        if self.rejected_at is not None:  # type: ignore[unreachable]
+        if self.rejected_at is not None:
             return OrganizationInvitationStatus.REJECTED
-        if now > self.expires_at:
+        if self.is_expired:
             return OrganizationInvitationStatus.EXPIRED
 
         return OrganizationInvitationStatus.PENDING
 
     @property
     def is_expired(self) -> bool:
+        if self.expires_at is None:
+            return False
         return datetime_util.utcnow() > self.expires_at
 
     @property
@@ -152,9 +146,9 @@ class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_organization_invitation_to_role"
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("api.role.role_id"), primary_key=True)
-    role: Mapped["Role"] = relationship("Role", lazy="selectin")  # preload role
+    role: Mapped["Role"] = relationship("Role")
 
     organization_invitation_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("api.organization_invitation.organization_invitation_id"), primary_key=True
+        ForeignKey(OrganizationInvitation.organization_invitation_id), primary_key=True
     )
     organization_invitation: Mapped[OrganizationInvitation] = relationship(OrganizationInvitation)
