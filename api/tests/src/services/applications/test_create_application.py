@@ -90,8 +90,8 @@ def test_validate_organization_expiration_expires_today():
     _validate_organization_expiration(organization)
 
 
-def test_create_application_assigns_owner_role_lone_application(db_session, enable_factory_create):
-    """Test that creating an application assigns the Application Owner role if lone application"""
+def test_create_application_assigns_owner_role_individual_application(db_session, enable_factory_create):
+    """Test that creating an application assigns the Application Owner role if individual application"""
     user = UserFactory.create()
     competition = CompetitionFactory.create()
 
