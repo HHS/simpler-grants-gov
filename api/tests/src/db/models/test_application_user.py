@@ -13,9 +13,7 @@ class TestApplicationUser:
         user = UserFactory.create()
         application = ApplicationFactory.create()
 
-        application_user = ApplicationUserFactory.create(
-            user=user, application=application
-        )
+        application_user = ApplicationUserFactory.create(user=user, application=application)
 
         # Verify the dedicated primary key exists and is a UUID
         assert application_user.application_user_id is not None
@@ -48,12 +46,8 @@ class TestApplicationUser:
         user2 = UserFactory.create()
         application = ApplicationFactory.create()
 
-        app_user1 = ApplicationUserFactory.create(
-            user=user1, application=application
-        )
-        app_user2 = ApplicationUserFactory.create(
-            user=user2, application=application
-        )
+        app_user1 = ApplicationUserFactory.create(user=user1, application=application)
+        app_user2 = ApplicationUserFactory.create(user=user2, application=application)
 
         # Both should have different primary keys
         assert app_user1.application_user_id != app_user2.application_user_id
@@ -70,12 +64,8 @@ class TestApplicationUser:
         application1 = ApplicationFactory.create()
         application2 = ApplicationFactory.create()
 
-        app_user1 = ApplicationUserFactory.create(
-            user=user, application=application1
-        )
-        app_user2 = ApplicationUserFactory.create(
-            user=user, application=application2
-        )
+        app_user1 = ApplicationUserFactory.create(user=user, application=application1)
+        app_user2 = ApplicationUserFactory.create(user=user, application=application2)
 
         # Both should have different primary keys
         assert app_user1.application_user_id != app_user2.application_user_id

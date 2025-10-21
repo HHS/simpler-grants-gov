@@ -3,22 +3,16 @@ from datetime import timedelta
 import pytest
 from apiflask.exceptions import HTTPError
 
-from src.constants.lookup_constants import Privilege
 from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.user_models import ApplicationUserRole
 from src.services.applications.create_application import (
-    _assign_application_owner_role,
     _validate_organization_expiration,
     create_application,
 )
 from src.util.datetime_util import get_now_us_eastern_date
 from tests.src.db.models.factories import (
-    ApplicationUserFactory,
     CompetitionFactory,
     OrganizationFactory,
-    OrganizationUserFactory,
-    OrganizationUserRoleFactory,
-    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
@@ -95,6 +89,7 @@ def test_validate_organization_expiration_expires_today():
     # Should not raise any exception since expiring today is still valid
     _validate_organization_expiration(organization)
 
+
 def test_create_application_assigns_owner_role_lone_application(db_session, enable_factory_create):
     """Test that creating an application assigns the Application Owner role if lone application"""
     user = UserFactory.create()
@@ -129,4 +124,3 @@ def test_create_application_assigns_owner_role_lone_application(db_session, enab
 
     assert role_assignment is not None
     assert role_assignment.role_id == APPLICATION_OWNER.role_id
-
