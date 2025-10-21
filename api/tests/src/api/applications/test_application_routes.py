@@ -2198,7 +2198,7 @@ def test_application_get_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_get_forbidden_if_not_associated(
@@ -2215,7 +2215,7 @@ def test_application_form_get_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_update_forbidden_if_not_associated(
@@ -2235,7 +2235,7 @@ def test_application_form_update_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_submit_forbidden_if_not_associated(
@@ -2250,7 +2250,7 @@ def test_application_submit_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_get_success_when_associated(
@@ -2879,7 +2879,7 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
         headers={"X-SGG-Token": user_token},
     )
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
     # Internal JWT should succeed
     response = client.get(
