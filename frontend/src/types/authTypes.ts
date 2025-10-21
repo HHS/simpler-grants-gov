@@ -1,6 +1,8 @@
 import { JWTPayload } from "jose";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 
+import { UserPrivilegeResult } from "./userTypes";
+
 /**
  * Configure the UserProvider component.
  *
@@ -74,4 +76,23 @@ export type UserProviderState = {
   featureFlags: FeatureFlags;
   userFeatureFlags: FeatureFlags;
   defaultFeatureFlags: FeatureFlags;
+};
+
+export type FetchedResource = {
+  data?: unknown; // we can make this generic if we want
+  statusCode: number;
+  error?: string;
+};
+
+export type FetchedResourceMap = {
+  [key: string]: FetchedResource;
+};
+
+export type AuthorizedData = {
+  fetchedResources: FetchedResourceMap;
+  confirmedPrivileges: UserPrivilegeResult[];
+};
+
+export type ResourcePromiseDefinitions = {
+  [resourceName: string]: Promise<unknown>;
 };
