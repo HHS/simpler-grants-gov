@@ -40,13 +40,22 @@ jobs:
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
       - run: |
+          echo Before npm ci
+          df -h
+          docker image ls
           npm ci
           npx playwright install --with-deps
 
       - name: Start API Server for e2e tests
         run: |
           cd ../api
+          echo Before build
+          df -h
+          docker image ls
           make init db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          echo After build
+          df -h
+          docker image ls
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
           cd ../frontend
@@ -72,7 +81,13 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
+          echo Before test:e2e
+          df -h
+          docker image ls
           npm run test:e2e
+          echo After test:e2e
+          df -h
+          docker image ls
 
       - name: Verify Blob Report Directory
         run: |
