@@ -1,5 +1,6 @@
 "server only";
 
+import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchUserWithMethod,
@@ -8,6 +9,7 @@ import {
 import {
   UserDetailProfile,
   UserDetailWithProfile,
+  UserPrivilegeDefinition,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
 
@@ -49,6 +51,7 @@ export const updateUserDetails = async (
   return json.data;
 };
 
+// unused, but we may want it later
 export const getUserPrivileges = async (
   token: string,
   userId: string,
@@ -63,4 +66,25 @@ export const getUserPrivileges = async (
   const json = (await resp.json()) as { data: UserPrivilegesResponse };
 
   return json.data;
+};
+
+export const checkUserPrivilege = async (
+  _token: string,
+  _userId: string,
+  privilegeDefinition: UserPrivilegeDefinition,
+): Promise<unknown> => {
+  if (privilegeDefinition.resourceId === "1") {
+    return Promise.resolve([]);
+  }
+  return Promise.reject(new ApiRequestError("", "", 403));
+  // const ssgToken = {
+  //   "X-SGG-Token": token,
+  // };
+  // const resp = await fetchUserWithMethod("POST")({
+  //   subPath: `${userId}/privileges`,
+  //   additionalHeaders: ssgToken,
+  // });
+  // const json = (await resp.json()) as { data: UserPrivilegesResponse };
+
+  // return json.data;
 };

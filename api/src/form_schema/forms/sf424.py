@@ -895,6 +895,10 @@ FORM_UI_SCHEMA = [
         "children": [
             {
                 "type": "field",
+                "definition": "/properties/certification_agree",
+            },
+            {
+                "type": "field",
                 "definition": "/properties/authorized_representative/properties/prefix",
             },
             {
@@ -965,6 +969,24 @@ FORM_XML_TRANSFORM_RULES = {
             "exclude": "Default - exclude field entirely from XML (recommended)",
             "include_null": "Include empty XML element: <Field></Field>",
             "default_value": "Use configured default value when field is None",
+        },
+        "attachment_fields": {
+            "areas_affected": {
+                "xml_element": "AreasAffected",
+                "type": "single",
+            },
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "debt_explanation": {
+                "xml_element": "DebtExplanation",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
         },
     },
     # Core application information - direct field mappings
@@ -1072,6 +1094,13 @@ FORM_XML_TRANSFORM_RULES = {
             "value_transform": {"type": "boolean_to_yes_no"},
         }
     },
+    # Attachment fields - pass through as-is for attachment transformer
+    "debt_explanation": {"xml_transform": {"target": "debt_explanation"}},
+    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
+    "additional_congressional_districts": {
+        "xml_transform": {"target": "additional_congressional_districts"}
+    },
+    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
     "certification_agree": {
         "xml_transform": {
             "target": "CertificationAgree",
