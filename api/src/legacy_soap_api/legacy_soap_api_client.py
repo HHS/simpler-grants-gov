@@ -229,6 +229,22 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             ),
         )
 
+    def _gen_response_data(
+        self, mime_message: bytes, boundary: str, mtom_file_stream: BinaryIO
+    ) -> Iterator:
+        yield mime_message
+        CHUNK_SIZE = 4000
+        try:
+            chunk = mtom_file_stream.read(CHUNK_SIZE)
+            while chunk:
+                yield chunk
+                chunk = mtom_file_stream.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+        finally:
+            mtom_file_stream.close()
+        yield b"\n" + boundary.encode("utf-8") + b"--"
+
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
         if proxy_response.status_code != 500:
             return proxy_response
@@ -267,26 +283,9 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             f"{simpler_response_xml}\n"
             f"{boundary}"
         ).encode("utf-8")
-
-        def _gen_response_data(
-            mime_message: bytes, boundary: str, mtom_file_stream: BinaryIO
-        ) -> Iterator:
-            yield mime_message
-            CHUNK_SIZE = 4000
-            try:
-                chunk = mtom_file_stream.read(CHUNK_SIZE)
-                while chunk:
-                    yield chunk
-                    chunk = mtom_file_stream.read(CHUNK_SIZE)
-                    if not chunk:
-                        break
-            finally:
-                mtom_file_stream.close()
-            yield b"\n" + boundary.encode("utf-8") + b"--"
-
         if mtom_file_stream:
             return get_soap_response(
-                data=_gen_response_data(mime_message, boundary, mtom_file_stream),
+                data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
                 headers=update_headers,
             )
         return proxy_response
