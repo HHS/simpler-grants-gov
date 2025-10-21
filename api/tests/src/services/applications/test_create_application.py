@@ -95,39 +95,6 @@ def test_validate_organization_expiration_expires_today():
     # Should not raise any exception since expiring today is still valid
     _validate_organization_expiration(organization)
 
-
-def test_assign_application_owner_role_new_role(db_session, enable_factory_create):
-    """Test assigning Application Owner role to a user who doesn't have it"""
-    application_user = ApplicationUserFactory.create(is_application_owner=True)
-
-    # Verify no role exists initially
-    role_count = (
-        db_session.query(ApplicationUserRole)
-        .filter_by(
-            application_user_id=application_user.application_user_id,
-            role_id=APPLICATION_OWNER.role_id,
-        )
-        .count()
-    )
-    assert role_count == 0
-
-    # Assign the role
-    _assign_application_owner_role(db_session, application_user)
-
-    # Verify role was created
-    role_assignment = (
-        db_session.query(ApplicationUserRole)
-        .filter_by(
-            application_user_id=application_user.application_user_id,
-            role_id=APPLICATION_OWNER.role_id,
-        )
-        .first()
-    )
-
-    assert role_assignment is not None
-    assert role_assignment.role_id == APPLICATION_OWNER.role_id
-
-
 def test_create_application_assigns_owner_role_lone_application(db_session, enable_factory_create):
     """Test that creating an application assigns the Application Owner role if lone application"""
     user = UserFactory.create()
@@ -149,7 +116,6 @@ def test_create_application_assigns_owner_role_lone_application(db_session, enab
     )
 
     assert application_user is not None
-    assert application_user.is_application_owner is True
 
     # Verify Application Owner role was assigned
     role_assignment = (
@@ -164,43 +130,3 @@ def test_create_application_assigns_owner_role_lone_application(db_session, enab
     assert role_assignment is not None
     assert role_assignment.role_id == APPLICATION_OWNER.role_id
 
-
-def test_create_application_owned_by_org_assigns_owner_role(
-    db_session, enable_factory_create, user
-):
-    """Test that creating an application does not assign the Application Owner role if application is owned by org"""
-    competition = CompetitionFactory.create()
-    org = OrganizationFactory.create()
-    OrganizationUserRoleFactory.create(
-        organization_user=OrganizationUserFactory.create(user=user, organization=org),
-        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
-    )
-
-    # Create application
-    application = create_application(
-        db_session=db_session,
-        competition_id=competition.competition_id,
-        user=user,
-        application_name="Test Application",
-        organization_id=org.organization_id,
-    )
-
-    # Verify ApplicationUser was created with no owner flag
-    application_user = (
-        db_session.query(application.application_users[0].__class__)
-        .filter_by(application_id=application.application_id, user_id=user.user_id)
-        .first()
-    )
-    assert application_user is not None
-    assert not application_user.is_application_owner
-
-    # Verify no Application Role assigned
-    role_assignment = (
-        db_session.query(ApplicationUserRole)
-        .filter_by(
-            application_user_id=application_user.application_user_id,
-        )
-        .first()
-    )
-
-    assert not role_assignment

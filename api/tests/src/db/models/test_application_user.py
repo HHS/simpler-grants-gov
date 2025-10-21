@@ -14,7 +14,7 @@ class TestApplicationUser:
         application = ApplicationFactory.create()
 
         application_user = ApplicationUserFactory.create(
-            user=user, application=application, is_application_owner=True
+            user=user, application=application
         )
 
         # Verify the dedicated primary key exists and is a UUID
@@ -24,7 +24,6 @@ class TestApplicationUser:
         # Verify the foreign keys are set correctly
         assert application_user.application_id == application.application_id
         assert application_user.user_id == user.user_id
-        assert application_user.is_application_owner is True
 
         # Verify relationships work correctly
         assert application_user.application == application
@@ -50,10 +49,10 @@ class TestApplicationUser:
         application = ApplicationFactory.create()
 
         app_user1 = ApplicationUserFactory.create(
-            user=user1, application=application, is_application_owner=True
+            user=user1, application=application
         )
         app_user2 = ApplicationUserFactory.create(
-            user=user2, application=application, is_application_owner=False
+            user=user2, application=application
         )
 
         # Both should have different primary keys
@@ -72,10 +71,10 @@ class TestApplicationUser:
         application2 = ApplicationFactory.create()
 
         app_user1 = ApplicationUserFactory.create(
-            user=user, application=application1, is_application_owner=True
+            user=user, application=application1
         )
         app_user2 = ApplicationUserFactory.create(
-            user=user, application=application2, is_application_owner=False
+            user=user, application=application2
         )
 
         # Both should have different primary keys
@@ -115,7 +114,6 @@ class TestApplicationUser:
             "application_user_id",
             "application_id",
             "user_id",
-            "is_application_owner",
             "created_at",
             "updated_at",
         ]

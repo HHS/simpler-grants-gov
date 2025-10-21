@@ -41,8 +41,8 @@ def test_user_get_applications_success(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1, is_application_owner=True)
-    ApplicationUserFactory.create(user=user, application=application2, is_application_owner=True)
+    ApplicationUserFactory.create(user=user, application=application1)
+    ApplicationUserFactory.create(user=user, application=application2)
 
     # Make the request
     response = client.post(

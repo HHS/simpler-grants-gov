@@ -2116,7 +2116,6 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
-    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
