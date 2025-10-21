@@ -104,11 +104,8 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     )
     organization: Mapped[Organization] = relationship(Organization)
 
-    inviter_user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("api.organization_user.organization_user_id")
-    )
-    organization_user: Mapped["OrganizationUser"] = relationship("OrganizationUser")
-
+    inviter_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    inviter_user: Mapped["User"] = relationship("User", foreign_keys=[inviter_user_id])
     invitee_email: Mapped[str]
     accepted_at: Mapped[datetime] = mapped_column(
         nullable=True,
@@ -120,7 +117,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
         nullable=True,
     )
     responded_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
-    user: Mapped["User"] = relationship("User")
+    invitee_user: Mapped["User"] = relationship("User", foreign_keys=[responded_by_user_id])
     linked_role: Mapped["LinkOrganizationInvitationToRole"] = relationship(
         "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=False
     )
@@ -161,3 +158,6 @@ class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
         ForeignKey("api.organization_invitation.organization_invitation_id"), primary_key=True
     )
     organization_invitation: Mapped[OrganizationInvitation] = relationship(OrganizationInvitation)
+# cascade_delete_from_db_table(db_session, SamGovEntity)
+# from src.db.models.entity_models import SamGovEntity
+#from tests.lib.db_testing import cascade_delete_from_db_table

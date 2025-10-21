@@ -2870,15 +2870,14 @@ class OrganizationInvitationFactory(BaseFactory):
     organization_invitation_id: Generators.UuidObj
     organization = factory.SubFactory(OrganizationFactory)
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
-
-    organization_user = factory.SubFactory(OrganizationUserFactory)
-    inviter_user_id = factory.lazy_attribute(lambda o: o.organization_user.organization_user_id)
+    inviter_user = factory.SubFactory(UserFactory)
+    inviter_user_id = factory.lazy_attribute(lambda u: u.inviter_user.user_id)
 
     invitee_email = factory.Faker("email")
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
 
-    user = factory.SubFactory(UserFactory)
-    responded_by_user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    invitee_user = factory.SubFactory(UserFactory)
+    responded_by_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
 
     class Params:
         response_date = factory.LazyAttribute(
