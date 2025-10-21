@@ -121,7 +121,7 @@ locals {
     },
     API_GW_AUTH = {
       manage_method     = "manual"
-      secret_store_name = "/frontend/${var.environment}/X-API-KEY"
+      secret_store_name = "/${var.app_name}/${var.environment}/X-API-KEY"
     },
   }
 }
