@@ -8,7 +8,10 @@ from src.api.schemas import response_schema
 common_grants_blueprint = APIBlueprint(
     "common_grants",
     __name__,
-    tag="CommonGrants Protocol",
+    tag={
+        "name": "CommonGrants Protocol",
+        "description": "CommonGrants-compliant API routes for searching opportunities to promote interoperability across grant systems. Learn more by visiting CommonGrants.org",
+    },
     cli_group="common_grants",
     url_prefix="/common-grants",
 )
