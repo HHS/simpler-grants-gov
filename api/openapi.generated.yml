@@ -4885,6 +4885,26 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
+    UserApplicationOpportunity:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The opportunity ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into Conservation Techniques
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the opportunity
+          example: Department of Examples
     UserApplicationCompetition:
       type: object
       properties:
@@ -4914,6 +4934,11 @@ components:
         is_open:
           type: boolean
           description: Whether the competition is open and accepting applications
+        opportunity:
+          description: Opportunity information for this competition
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationOpportunity'
     UserApplicationListItem:
       type: object
       properties:
