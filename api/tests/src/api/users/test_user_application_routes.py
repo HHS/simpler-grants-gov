@@ -79,8 +79,8 @@ def test_user_get_applications_success(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1)
-    ApplicationUserFactory.create(user=user, application=application2)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application1), role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]))
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application2), role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]))
 
     # Make the request
     response = client.post(
@@ -207,8 +207,8 @@ def test_user_get_applications_multiple_competitions(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1)
-    ApplicationUserFactory.create(user=user, application=application2)
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application1), role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]))
+    ApplicationUserRoleFactory.create(application_user=ApplicationUserFactory.create(user=user, application=application2), role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]))
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
