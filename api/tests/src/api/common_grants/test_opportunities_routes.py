@@ -56,14 +56,14 @@ class TestListOpportunities:
     """Test /common-grants/opportunities endpoint."""
 
     def test_default_pagination(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test GET /common-grants/opportunities endpoint with default pagination."""
         # Create test opportunities
         OpportunityFactory.create_batch(15, is_draft=False)
 
         response = client.get(
-            "/common-grants/opportunities", headers={"X-API-Key": api_user_key_token}
+            "/common-grants/opportunities", headers={"X-API-Key": user_api_key_id}
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -99,7 +99,7 @@ class TestListOpportunities:
                 validate_opportunity_structure(opportunity)
 
     def test_pagination_specified(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test GET /common-grants/opportunities endpoint with custom pagination."""
         # Create test opportunities
@@ -107,7 +107,7 @@ class TestListOpportunities:
 
         response = client.get(
             "/common-grants/opportunities?page=2&pageSize=2",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -129,7 +129,7 @@ class TestListOpportunities:
             assert pagination_info["pageSize"] == 2
 
     def test_pagination_edge_cases(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test pagination edge cases."""
         # Create test opportunities
@@ -138,7 +138,7 @@ class TestListOpportunities:
         # Test page beyond available data
         response = client.get(
             "/common-grants/opportunities?page=1000&pageSize=10",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -156,7 +156,7 @@ class TestListOpportunities:
         # Test large page size
         response = client.get(
             "/common-grants/opportunities?page=1&pageSize=1000",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -170,7 +170,7 @@ class TestListOpportunities:
             assert data["paginationInfo"]["pageSize"] == 1000
 
     def test_excludes_drafts(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test that draft opportunities are excluded from results."""
         # Create published and draft opportunities
@@ -178,7 +178,7 @@ class TestListOpportunities:
         OpportunityFactory.create_batch(2, is_draft=True)
 
         response = client.get(
-            "/common-grants/opportunities", headers={"X-API-Key": api_user_key_token}
+            "/common-grants/opportunities", headers={"X-API-Key": user_api_key_id}
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -206,12 +206,12 @@ class TestGetOpportunityById:
     """Test /common-grants/opportunities/{id} endpoint."""
 
     def test_opportunity_not_found(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test GET /common-grants/opportunities/{id} endpoint when opportunity is not found."""
         response = client.get(
             f"/common-grants/opportunities/{uuid.uuid4()}",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code == 404
         data = response.get_json()
@@ -219,11 +219,11 @@ class TestGetOpportunityById:
         assert "Could not find Opportunity with ID" in data["message"]
 
     def test_opportunity_invalid_uuid(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test GET /common-grants/opportunities/{id} endpoint with invalid UUID."""
         response = client.get(
-            "/common-grants/opportunities/invalid-uuid", headers={"X-API-Key": api_user_key_token}
+            "/common-grants/opportunities/invalid-uuid", headers={"X-API-Key": user_api_key_id}
         )
         assert response.status_code == 404
         data = response.get_json()
@@ -231,7 +231,7 @@ class TestGetOpportunityById:
         assert "Not Found" in data["message"]
 
     def test_opportunity_success(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test GET /common-grants/opportunities/{id} endpoint with valid UUID."""
         # Create a test opportunity
@@ -239,7 +239,7 @@ class TestGetOpportunityById:
 
         response = client.get(
             f"/common-grants/opportunities/{opportunity.opportunity_id}",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -255,7 +255,7 @@ class TestGetOpportunityById:
         validate_opportunity_structure(data["data"])
 
     def test_draft_opportunity_not_found(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test that draft opportunities are not accessible."""
         # Create a draft opportunity
@@ -263,7 +263,7 @@ class TestGetOpportunityById:
 
         response = client.get(
             f"/common-grants/opportunities/{opportunity.opportunity_id}",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code == 404
         data = response.get_json()
@@ -280,13 +280,13 @@ class TestSearchOpportunities:
     """
 
     def test_search_endpoint_exists(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test that the search endpoint exists and is accessible."""
         # Test that the endpoint exists and is accessible
         response = client.post(
             "/common-grants/opportunities/search",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
             json={},
         )
         # Endpoint should exist and return a response (status depends on environment setup)
@@ -303,12 +303,12 @@ class TestSearchOpportunities:
             assert "sortInfo" in data
 
     def test_search_invalid_request(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test search with invalid request data."""
         response = client.post(
             "/common-grants/opportunities/search",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
             json={"invalid": "data"},
         )
         # Should return an error status (400/422 for validation errors, 500 for missing search index)
@@ -321,14 +321,14 @@ class TestResponseSchemaValidation:
     """Test that responses conform to the expected marshmallow schema format."""
 
     def test_list_opportunities_response_schema(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test that list opportunities response matches expected schema."""
         # Create test opportunity
         OpportunityFactory.create(is_draft=False)
 
         response = client.get(
-            "/common-grants/opportunities", headers={"X-API-Key": api_user_key_token}
+            "/common-grants/opportunities", headers={"X-API-Key": user_api_key_id}
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -348,7 +348,7 @@ class TestResponseSchemaValidation:
                 validate_opportunity_structure(item)
 
     def test_get_opportunity_response_schema(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test that get opportunity response matches expected schema."""
         # Create test opportunity
@@ -356,7 +356,7 @@ class TestResponseSchemaValidation:
 
         response = client.get(
             f"/common-grants/opportunities/{opportunity.opportunity_id}",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
         )
         assert response.status_code in [200, 500]  # 200 if search index exists, 500 if missing
         data = response.get_json()
@@ -371,7 +371,7 @@ class TestResponseSchemaValidation:
         validate_opportunity_structure(opportunity_data)
 
     def test_search_opportunities_response_schema(
-        self, client: FlaskClient, enable_factory_create, db_session, api_user_key_token
+        self, client: FlaskClient, enable_factory_create, db_session, user_api_key_id
     ):
         """Test that search opportunities endpoint exists and handles responses properly."""
         # Create test opportunity
@@ -379,7 +379,7 @@ class TestResponseSchemaValidation:
 
         response = client.post(
             "/common-grants/opportunities/search",
-            headers={"X-API-Key": api_user_key_token},
+            headers={"X-API-Key": user_api_key_id},
             json={},
         )
         # Endpoint should exist and return a response (status depends on environment setup)

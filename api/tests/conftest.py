@@ -410,12 +410,6 @@ def api_auth_token(monkeypatch, all_api_auth_tokens):
     return auth_token
 
 
-@pytest.fixture
-def api_user_key_token(user_api_key):
-    """Fixture providing a valid API user key for testing CG routes."""
-    return user_api_key.key_id
-
-
 ####################
 # AWS Mock Fixtures
 ####################
