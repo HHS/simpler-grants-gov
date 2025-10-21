@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Any
+from typing import Any, BinaryIO, Iterator
 
 from pydantic import ValidationError
 
@@ -229,9 +229,27 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             ),
         )
 
+    def _gen_response_data(
+        self, mime_message: bytes, boundary: str, mtom_file_stream: BinaryIO
+    ) -> Iterator:
+        yield mime_message
+        CHUNK_SIZE = 4000
+        try:
+            chunk = mtom_file_stream.read(CHUNK_SIZE)
+            while chunk:
+                yield chunk
+                chunk = mtom_file_stream.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+        finally:
+            mtom_file_stream.close()
+        yield b"\n" + boundary.encode("utf-8") + b"--"
+
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
+        if proxy_response.status_code != 500:
+            return proxy_response
         if not self.operation_config.is_mtom:
-            return super().get_simpler_soap_response(proxy_response)
+            return proxy_response
         # MTOM message is assembled here
         # 1. --uuid: {boundary_uuid}\n
         # 2. headers:
@@ -242,6 +260,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         # 4. --uuid: {boundary_uuid}
         # 5. the file bytes from the file being attached
         simpler_response_soap_dict = self.get_soap_response_dict()
+        mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
         )
@@ -264,4 +283,9 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             f"{simpler_response_xml}\n"
             f"{boundary}"
         ).encode("utf-8")
-        return get_soap_response(data=mime_message, headers=update_headers)
+        if mtom_file_stream:
+            return get_soap_response(
+                data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
+                headers=update_headers,
+            )
+        return proxy_response

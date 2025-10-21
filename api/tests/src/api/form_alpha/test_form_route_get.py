@@ -1,6 +1,7 @@
 import uuid
 from unittest import mock
 
+from src.constants.lookup_constants import FormType
 from tests.src.db.models.factories import FormFactory
 
 
@@ -90,3 +91,18 @@ def test_form_get_401_unauthorized(client, api_auth_token, enable_factory_create
         resp.get_json()["message"]
         == "The server could not verify that you are authorized to access the URL requested"
     )
+
+
+def test_form_get_with_new_fields_200(client, api_auth_token, enable_factory_create):
+    """Test getting a form with form_type, sgg_version, and is_deprecated fields"""
+    form = FormFactory.create(form_type=FormType.SF424, sgg_version="1.0", is_deprecated=False)
+
+    resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": api_auth_token})
+
+    assert resp.status_code == 200
+    response_form = resp.get_json()["data"]
+
+    assert response_form["form_id"] == str(form.form_id)
+    assert response_form["form_type"] == FormType.SF424.value
+    assert response_form["sgg_version"] == "1.0"
+    assert response_form["is_deprecated"] is False

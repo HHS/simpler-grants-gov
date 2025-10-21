@@ -41,6 +41,7 @@ class BaseFormTask(Task, ABC):
 
 def build_form_json(form: Form) -> dict:
     form_instruction_id = str(form.form_instruction_id) if form.form_instruction_id else None
+    form_type = form.form_type.value if form.form_type else None
     return {
         "agency_code": form.agency_code,
         "form_instruction_id": form_instruction_id,
@@ -53,6 +54,9 @@ def build_form_json(form: Form) -> dict:
         "legacy_form_id": form.legacy_form_id,
         "omb_number": form.omb_number,
         "short_form_name": form.short_form_name,
+        "form_type": form_type,
+        "sgg_version": form.sgg_version,
+        "is_deprecated": form.is_deprecated,
     }
 
 
