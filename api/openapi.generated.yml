@@ -5458,9 +5458,6 @@ components:
           type: string
           description: The email address of the user
           example: user@example.com
-        is_application_owner:
-          type: boolean
-          description: Whether this user is the owner/creator of the application
     Organization:
       type: object
       properties:
