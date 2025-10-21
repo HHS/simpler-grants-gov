@@ -2050,8 +2050,6 @@ def test_application_submit_forbidden_not_in_progress(
     user, application, token =create_user_in_app(db_session, privileges=[Privilege.SUBMIT_APPLICATION], status=initial_status)
     application_id = str(application.application_id)
 
-    ApplicationUserFactory.create(user=user, application=application)
-
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
         headers={"X-SGG-Token": token},
@@ -2365,8 +2363,6 @@ def test_application_submit_success_when_associated(
         ),
         role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
     )
-    application_id = str(application.application_id)
-
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
         headers={"X-SGG-Token": user_auth_token},
