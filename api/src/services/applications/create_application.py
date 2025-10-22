@@ -30,10 +30,14 @@ logger = logging.getLogger(__name__)
 
 
 def _assign_application_owner_role(
-    db_session: db.Session, application_user: ApplicationUser
+    db_session: db.Session, user: User, application: Application
 ) -> None:
     """Assign the Application Owner role to an application user."""
-
+    application_user = ApplicationUser(
+        application=application,
+        user=user,
+    )
+    db_session.add(application_user)
     app_user_role = ApplicationUserRole(
         application_user=application_user, role_id=APPLICATION_OWNER.role_id
     )
@@ -198,13 +202,9 @@ def create_application(
     )
     db_session.add(application)
 
-    application_user = ApplicationUser(
-        application=application, user=user, is_application_owner=True
-    )
-    db_session.add(application_user)
-
-    # Assign the Application Owner role to the user
-    _assign_application_owner_role(db_session, application_user)
+    # Assign the Application Owner role to the user if application is not owned by organization
+    if not organization_id:
+        _assign_application_owner_role(db_session, user, application)
 
     # Initialize the competition forms for the application
     for competition_form in competition.competition_forms:
