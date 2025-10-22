@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Alert, Table } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-import { USWDSIcon } from "../USWDSIcon";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 export const OrganizationRosterSkeleton = ({
   organizationId,
