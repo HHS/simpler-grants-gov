@@ -24,7 +24,6 @@ function makeRequest(
   return new NextRequest(webReq);
 }
 
-// Strictly-typed spies
 const getSessionMock = jest.fn<
   Promise<{ token: string; user_id: string } | null>,
   []
