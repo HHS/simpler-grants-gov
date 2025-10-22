@@ -3872,6 +3872,34 @@ components:
           - 'null'
           description: The JSON to XML schema mapping configuration for the form
           additionalProperties: {}
+        form_type:
+          description: The type of the form
+          example: !!python/object/apply:src.constants.lookup_constants.FormType
+          - SF424
+          enum:
+          - SF424
+          - SF424A
+          - SF424B
+          - SFLLL
+          - ProjectNarrativeAttachment
+          - BudgetNarrativeAttachment
+          - ProjectAbstractSummary
+          type:
+          - string
+          - 'null'
+          - 'null'
+        sgg_version:
+          type:
+          - string
+          - 'null'
+          description: The SGG version of the form
+          example: '1.0'
+        is_deprecated:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the form is deprecated
+          example: false
         created_at:
           type: string
           format: date-time
@@ -3991,6 +4019,34 @@ components:
           - 'null'
           description: The JSON to XML schema mapping configuration for the form
           additionalProperties: {}
+        form_type:
+          description: The type of the form
+          example: !!python/object/apply:src.constants.lookup_constants.FormType
+          - SF424
+          enum:
+          - SF424
+          - SF424A
+          - SF424B
+          - SFLLL
+          - ProjectNarrativeAttachment
+          - BudgetNarrativeAttachment
+          - ProjectAbstractSummary
+          type:
+          - string
+          - 'null'
+          - 'null'
+        sgg_version:
+          type:
+          - string
+          - 'null'
+          description: The SGG version of the form
+          example: '1.0'
+        is_deprecated:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the form is deprecated
+          example: false
       required:
       - agency_code
       - form_json_schema
@@ -4829,6 +4885,26 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
+    UserApplicationOpportunity:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The opportunity ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into Conservation Techniques
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the opportunity
+          example: Department of Examples
     UserApplicationCompetition:
       type: object
       properties:
@@ -4858,6 +4934,11 @@ components:
         is_open:
           type: boolean
           description: Whether the competition is open and accepting applications
+        opportunity:
+          description: Opportunity information for this competition
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationOpportunity'
     UserApplicationListItem:
       type: object
       properties:
@@ -5402,9 +5483,6 @@ components:
           type: string
           description: The email address of the user
           example: user@example.com
-        is_application_owner:
-          type: boolean
-          description: Whether this user is the owner/creator of the application
     Organization:
       type: object
       properties:
