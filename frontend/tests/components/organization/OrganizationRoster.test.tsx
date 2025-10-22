@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 import type { UserDetail } from "src/types/userTypes";
+
+import React from "react";
+
 import { OrganizationRoster } from "src/components/organization/OrganizationRoster";
 
 jest.mock("next-intl", () => ({
@@ -13,7 +15,10 @@ const getSessionMock = jest.fn<Promise<Session | null>, []>();
 type TFunction = (key: string) => string;
 const getTranslationsServerMock = jest.fn<Promise<TFunction>, [string]>();
 
-const getOrganizationUsersMock = jest.fn<Promise<UserDetail[]>, [string, string]>();
+const getOrganizationUsersMock = jest.fn<
+  Promise<UserDetail[]>,
+  [string, string]
+>();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: () => getSessionMock(),
@@ -35,7 +40,7 @@ describe("OrganizationRoster", () => {
         "headings.email": "Email",
         "headings.name": "Name",
         "headings.roles": "Roles",
-        "title": "Users",
+        title: "Users",
       };
       return dict[key] ?? key;
     });

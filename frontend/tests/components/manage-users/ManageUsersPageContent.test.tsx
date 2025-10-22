@@ -1,9 +1,11 @@
 /** @jest-environment jsdom */
 
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import type { Organization } from "src/types/applicationResponseTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
+
+import React from "react";
+
 import { ManageUsersPageContent } from "src/components/manage-users/ManageUsersPageContent";
 
 type Session = { token: string; user_id: string; email?: string };
@@ -12,9 +14,18 @@ const getSessionMock = jest.fn<Promise<Session | null>, []>();
 type TestFunction = (key: string) => string;
 const getTranslationsMock = jest.fn<Promise<TestFunction>, [string]>();
 
-const getOrganizationUsersMock = jest.fn<Promise<UserDetail[]>, [string, string]>();
-const getUserOrganizationsMock = jest.fn<Promise<Organization[]>, [string, string]>();
-const getOrganizationRolesMock = jest.fn<Promise<UserRole[]>, [string, string]>();
+const getOrganizationUsersMock = jest.fn<
+  Promise<UserDetail[]>,
+  [string, string]
+>();
+const getUserOrganizationsMock = jest.fn<
+  Promise<Organization[]>,
+  [string, string]
+>();
+const getOrganizationRolesMock = jest.fn<
+  Promise<UserRole[]>,
+  [string, string]
+>();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: () => getSessionMock(),
@@ -41,7 +52,11 @@ jest.mock("src/components/manage-users/ManageUsersTables", () => ({
     organizationId: string;
     activeUsers: UserDetail[];
   }) => (
-    <div data-testid="tables" data-org={organizationId} data-activecount={activeUsers.length} />
+    <div
+      data-testid="tables"
+      data-org={organizationId}
+      data-activecount={activeUsers.length}
+    />
   ),
 }));
 
@@ -56,16 +71,16 @@ jest.mock("src/components/manage-users/PageHeader", () => ({
 }));
 
 describe("ManageUsersPageContent", () => {
-beforeEach(() => {
-  getTranslationsMock.mockResolvedValue((key: string) => {
-    const translation: Record<string, string> = {
-      "errors.notLoggedInMessage": "not logged in",
-      "errors.fetchError": "fetch error",
-      "pageHeading": "Manage Users",
-    };
-    return translation[key] ?? key;
+  beforeEach(() => {
+    getTranslationsMock.mockResolvedValue((key: string) => {
+      const translation: Record<string, string> = {
+        "errors.notLoggedInMessage": "not logged in",
+        "errors.fetchError": "fetch error",
+        pageHeading: "Manage Users",
+      };
+      return translation[key] ?? key;
+    });
   });
-});
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -81,7 +96,11 @@ beforeEach(() => {
   });
 
   it("renders PageHeader with organization name and shows ManageUsersTables on success", async () => {
-    getSessionMock.mockResolvedValue({ token: "t", user_id: "user-123", email: "e" });
+    getSessionMock.mockResolvedValue({
+      token: "t",
+      user_id: "user-123",
+      email: "e",
+    });
 
     const orgs: Organization[] = [
       {
@@ -98,7 +117,6 @@ beforeEach(() => {
     ];
     getUserOrganizationsMock.mockResolvedValue(orgs);
 
-
     const users: UserDetail[] = [
       {
         user_id: "U1",
@@ -110,14 +128,18 @@ beforeEach(() => {
     ];
     getOrganizationUsersMock.mockResolvedValue(users);
 
-    const roles: UserRole[] = [{ role_id: "r1", role_name: "Admin", privileges: [] }];
+    const roles: UserRole[] = [
+      { role_id: "r1", role_name: "Admin", privileges: [] },
+    ];
     getOrganizationRolesMock.mockResolvedValue(roles);
 
     const jsx = await ManageUsersPageContent({ organizationId: "org-1" });
     render(jsx as React.ReactElement);
 
     // Header shows orgName::pageHeading (mocked PageHeader)
-    expect(screen.getByTestId("header")).toHaveTextContent("ACME Corp::Manage Users");
+    expect(screen.getByTestId("header")).toHaveTextContent(
+      "ACME Corp::Manage Users",
+    );
 
     // Tables rendered with correct org and active user count
     const tables = screen.getByTestId("tables");
