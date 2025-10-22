@@ -30,6 +30,8 @@ tags:
 - name: Form Alpha
 - name: Competition Alpha
 - name: CommonGrants Protocol
+  description: CommonGrants-compliant API routes for searching opportunities to promote
+    interoperability across grant systems. Learn more by visiting CommonGrants.org
 servers: .
 paths:
   /health:
@@ -627,7 +629,6 @@ paths:
         with most recent first.
       security:
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/profile:
     put:
       parameters:
@@ -803,7 +804,6 @@ paths:
               $ref: '#/components/schemas/OpportunitySearchRequest'
       security:
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/applications:
     post:
       parameters:
@@ -1222,7 +1222,6 @@ paths:
       description: View details about an opportunity
       security:
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
@@ -6332,12 +6331,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 
