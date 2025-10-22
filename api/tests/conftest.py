@@ -58,16 +58,20 @@ def user_api_key(enable_factory_create):
 def user_api_key_id(user_api_key):
     return user_api_key.key_id
 
+
 @pytest.fixture
 def internal_admin_user(enable_factory_create):
+    """An internal admin user for testing internal endpoints"""
     user = factories.UserFactory.create()
-    factories.InternalUserRoleFactory.create(user=user, role=NAVA_INTERNAL_ROLE)
+    factories.InternalUserRoleFactory.create(user=user, role_id=NAVA_INTERNAL_ROLE.role_id)
     return user
+
 
 @pytest.fixture
 def internal_admin_user_api_key(internal_admin_user) -> UserApiKey:
+    """An internal user with our X-API-Key auth"""
     api_key = factories.UserApiKeyFactory.create(user=internal_admin_user)
-    return api_key
+    return api_key.key_id
 
 
 @pytest.fixture(scope="session", autouse=True)

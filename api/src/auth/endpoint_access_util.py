@@ -85,6 +85,7 @@ def can_access(
 
     return False
 
+
 def verify_access(
     user: User,
     allowed_privileges: set[Privilege],
@@ -93,6 +94,7 @@ def verify_access(
     """Wrapper function that handles erroring if a user can't access a resource"""
     if not can_access(user, allowed_privileges, resource):
         raise_flask_error(403, "Forbidden")
+
 
 def get_log_info_for_resource(resource: Organization | Application | Agency | None) -> dict:
     log_info: dict[str, Any] = {}

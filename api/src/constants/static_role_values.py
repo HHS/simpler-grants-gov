@@ -12,6 +12,7 @@ from src.db.models.user_models import LinkRolePrivilege, LinkRoleRoleType, Role
 def get_link_privileges(role_id: uuid.UUID, privilege: list[Privilege]) -> list[LinkRolePrivilege]:
     return [LinkRolePrivilege(role_id=role_id, privilege=priv) for priv in privilege]
 
+
 ############################
 # Core Organization Roles
 ############################
