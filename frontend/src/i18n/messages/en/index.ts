@@ -1482,6 +1482,13 @@ export const messages = {
         description: "Keep track of oppportunities you're interested in.",
         linkText: "View saved opportunities",
       },
+    invitationReply: {
+      ctaTitle: "would like to add you to their team.",
+      description:
+        "Click Accept to join and gain access to your team, organization details and available applications.",
+      accept: "Accept",
+      reject: "Reject",
+      dismiss: "Dismiss",
     },
   },
   OrganizationDetail: {

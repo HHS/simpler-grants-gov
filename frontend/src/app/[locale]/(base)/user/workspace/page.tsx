@@ -8,12 +8,14 @@ import {
   getUserPrivileges,
 } from "src/services/fetch/fetchers/userFetcher";
 import { LocalizedPageProps } from "src/types/intl";
+import { OrganizationInvitation } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReply";
 import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";
@@ -41,7 +43,7 @@ async function UserWorkspace() {
   }
   let userRoles;
   let userOrganizations;
-  let userInvitations;
+  let userInvitations: OrganizationInvitation[] = [];
   const userRolesPromise = getUserPrivileges(session.token, session.user_id);
   const userOrganizationsPromise = getUserOrganizations(
     session.token,
@@ -79,7 +81,7 @@ async function UserWorkspace() {
         }
       />
       {userInvitations?.length && (
-        <AcceptOrganizationInvitation userInvitations={userInvitations} />
+        <OrganizationInvitationReplies userInvitations={userInvitations} />
       )}
       <WorkspaceLinksSection />
       {userRoles && userOrganizations ? (
