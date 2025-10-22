@@ -82,3 +82,16 @@ export interface UserProfileResponse {
   data?: UserDetailProfile;
   success?: boolean;
 }
+
+export type OrganizationInvitation = {
+  organization_invitation_id: string;
+  organization: {
+    organization_id: string;
+    organization_name: string;
+  };
+  status: string; // can enum later
+  created_at: string;
+  expires_at: string;
+  inviter: UserDetail;
+  roles: UserRole[];
+};

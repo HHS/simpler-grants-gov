@@ -87,3 +87,20 @@ export const checkUserPrivilege = async (
 
   // return json.data;
 };
+
+export const getUserInvitations = async (
+  _token: string,
+  _userId: string,
+): Promise<OrganizationInvitation[]> => {
+  return Promise.resolve(fakeOrganizationInvitation);
+  // const ssgToken = {
+  //   "X-SGG-Token": token,
+  // };
+  // const resp = await fetchUserWithMethod("POST")({
+  //   subPath: `${userId}/invitations/list`,
+  //   additionalHeaders: ssgToken,
+  // });
+  // const json = (await resp.json()) as { data: OrganizationInvitation[] };
+
+  // return json.data;
+};

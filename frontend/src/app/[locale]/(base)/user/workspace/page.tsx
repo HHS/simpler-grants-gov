@@ -3,8 +3,10 @@ import { WORKSPACE_CRUMBS } from "src/constants/breadcrumbs";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
-import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
-import { Organization } from "src/types/applicationResponseTypes";
+import {
+  getUserInvitations,
+  getUserPrivileges,
+} from "src/services/fetch/fetchers/userFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
@@ -38,16 +40,22 @@ async function UserWorkspace() {
     return;
   }
   let userRoles;
-  let userOrganizations: Organization[] = [];
+  let userOrganizations;
+  let userInvitations;
   const userRolesPromise = getUserPrivileges(session.token, session.user_id);
   const userOrganizationsPromise = getUserOrganizations(
     session.token,
     session.user_id,
   );
+  const userInvitationsPromise = getUserInvitations(
+    session.token,
+    session.user_id,
+  );
   try {
-    [userRoles, userOrganizations] = await Promise.all([
+    [userRoles, userOrganizations, userInvitations] = await Promise.all([
       userRolesPromise,
       userOrganizationsPromise,
+      userInvitationsPromise,
     ]);
   } catch (e) {
     console.error("Unable to fetch user details or organizations", e);
@@ -70,6 +78,9 @@ async function UserWorkspace() {
             : "1"
         }
       />
+      {userInvitations?.length && (
+        <AcceptOrganizationInvitation userInvitations={userInvitations} />
+      )}
       <WorkspaceLinksSection />
       {userRoles && userOrganizations ? (
         <UserOrganizationsList
