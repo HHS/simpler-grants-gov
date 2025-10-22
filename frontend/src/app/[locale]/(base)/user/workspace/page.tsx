@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { WORKSPACE_CRUMBS } from "src/constants/breadcrumbs";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
@@ -7,8 +8,13 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
+import {
+  Breadcrumb,
+  ErrorMessage,
+  GridContainer,
+} from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 
 import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
@@ -25,7 +31,6 @@ export async function generateMetadata({
   return meta;
 }
 
-// add breadcrumb
 async function UserWorkspace() {
   const t = await getTranslations("UserWorkspace");
 
@@ -53,7 +58,8 @@ async function UserWorkspace() {
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>
+      <Breadcrumbs breadcrumbList={WORKSPACE_CRUMBS} />
+      <h1 className="margin-top-2">
         {t.rich("title", {
           color: (chunks) => (
             <span className="text-primary-dark">{chunks}</span>

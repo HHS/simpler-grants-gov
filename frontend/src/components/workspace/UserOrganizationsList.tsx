@@ -52,7 +52,7 @@ export const UserOrganizationsList = ({
 }) => {
   const t = useTranslations("UserWorkspace");
   return (
-    <>
+    <div className="margin-top-4">
       <h2>{t("organizations")}</h2>
       <ul className="usa-list--unstyled">
         {!userOrganizations.length ? (
@@ -69,6 +69,6 @@ export const UserOrganizationsList = ({
           </>
         )}
       </ul>
-    </>
+    </div>
   );
 };
