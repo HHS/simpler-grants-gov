@@ -1,95 +1,97 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UserOrganizationsList matches snapshot with multiple organizations 1`] = `
-<div
-  class="margin-top-4"
->
-  <h2>
-    organizations
-  </h2>
-  <ul
-    class="usa-list--unstyled"
+<div>
+  <div
+    class="margin-top-4"
   >
-    <li
-      class="border-base-lighter border-1px padding-2 margin-top-2"
+    <h2>
+      organizations
+    </h2>
+    <ul
+      class="usa-list--unstyled"
     >
-      <div
-        class="grid-row"
-        data-testid="grid"
+      <li
+        class="border-base-lighter border-1px padding-2 margin-top-2"
       >
         <div
-          class="tablet:grid-col-6"
+          class="grid-row"
           data-testid="grid"
         >
           <div
-            class="font-sans-2xs text-base-dark"
+            class="tablet:grid-col-6"
+            data-testid="grid"
           >
-            Admin
-          </div>
-          <h3
-            class="margin-top-0"
-          >
-            Completely Legal Organization
-          </h3>
-        </div>
-        <div
-          class="tablet:grid-col-6 flex-align-self-end text-right"
-          data-testid="grid"
-        >
-          <a
-            href="/organization/great id"
-          >
-            <button
-              class="usa-button"
-              data-testid="button"
-              type="button"
+            <div
+              class="font-sans-2xs text-base-dark"
             >
-              organizationButtons.view
-            </button>
-          </a>
+              Admin
+            </div>
+            <h3
+              class="margin-top-0"
+            >
+              Completely Legal Organization
+            </h3>
+          </div>
+          <div
+            class="tablet:grid-col-6 flex-align-self-end text-right"
+            data-testid="grid"
+          >
+            <a
+              href="/organization/great id"
+            >
+              <button
+                class="usa-button"
+                data-testid="button"
+                type="button"
+              >
+                organizationButtons.view
+              </button>
+            </a>
+          </div>
         </div>
-      </div>
-    </li>
-    <li
-      class="border-base-lighter border-1px padding-2 margin-top-2"
-    >
-      <div
-        class="grid-row"
-        data-testid="grid"
+      </li>
+      <li
+        class="border-base-lighter border-1px padding-2 margin-top-2"
       >
         <div
-          class="tablet:grid-col-6"
+          class="grid-row"
           data-testid="grid"
         >
           <div
-            class="font-sans-2xs text-base-dark"
+            class="tablet:grid-col-6"
+            data-testid="grid"
           >
-            Admin
-          </div>
-          <h3
-            class="margin-top-0"
-          >
-            another fake org
-          </h3>
-        </div>
-        <div
-          class="tablet:grid-col-6 flex-align-self-end text-right"
-          data-testid="grid"
-        >
-          <a
-            href="/organization/another"
-          >
-            <button
-              class="usa-button"
-              data-testid="button"
-              type="button"
+            <div
+              class="font-sans-2xs text-base-dark"
             >
-              organizationButtons.view
-            </button>
-          </a>
+              Admin
+            </div>
+            <h3
+              class="margin-top-0"
+            >
+              another fake org
+            </h3>
+          </div>
+          <div
+            class="tablet:grid-col-6 flex-align-self-end text-right"
+            data-testid="grid"
+          >
+            <a
+              href="/organization/another"
+            >
+              <button
+                class="usa-button"
+                data-testid="button"
+                type="button"
+              >
+                organizationButtons.view
+              </button>
+            </a>
+          </div>
         </div>
-      </div>
-    </li>
-  </ul>
+      </li>
+    </ul>
+  </div>
 </div>
 `;
