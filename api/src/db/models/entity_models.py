@@ -109,7 +109,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     invitee_email: Mapped[str]
     accepted_at: Mapped[datetime | None]
     rejected_at: Mapped[datetime | None]
-    expires_at: Mapped[datetime | None]
+    expires_at: Mapped[datetime]
     responded_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
     invitee_user: Mapped["User"] = relationship("User", foreign_keys=[responded_by_user_id])
     linked_role: Mapped["LinkOrganizationInvitationToRole"] = relationship(
@@ -129,8 +129,6 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
 
     @property
     def is_expired(self) -> bool:
-        if self.expires_at is None:
-            return False
         return datetime_util.utcnow() > self.expires_at
 
     @property
