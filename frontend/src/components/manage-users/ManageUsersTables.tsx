@@ -83,11 +83,8 @@ export function ManageUsersTables({
     setIsSubmitting(true);
     setBusyUserId(pendingUserId);
     try {
-      const encodedOrgId = encodeURIComponent(organizationId);
-      const encodedUserId = encodeURIComponent(pendingUserId);
-
       await clientFetch(
-        `/api/user/organizations/${encodedOrgId}/users/${encodedUserId}`,
+        `/api/user/organizations/${organizationId}/users/${pendingUserId}`,
         {
           method: "PUT",
           body: JSON.stringify({ role_ids: [pendingNextRoleId] }),
