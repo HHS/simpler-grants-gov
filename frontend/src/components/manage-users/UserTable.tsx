@@ -4,6 +4,7 @@ import type { UserDetail, UserRole } from "src/types/userTypes";
 
 import React, { useMemo, useState } from "react";
 import { Table } from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
 
 export interface UsersTableProps {
   roles: UserRole[];
@@ -47,6 +48,7 @@ export function UsersTable({
   busyUserId,
   isSubmitting,
 }: UsersTableProps) {
+  const t = useTranslations("ManageUsers.usersTable")
   const [sortState, setSortState] = useState<{
     key: SortKey | null;
     direction: SortDirection;
@@ -120,7 +122,7 @@ export function UsersTable({
                 className="usa-button usa-button--unstyled display-flex flex-align-center font-sans-2xs text-bold text-no-underline text-gray-90"
                 onClick={() => handleSort("name")}
               >
-                <span className="margin-right-05">Name</span>
+                <span className="margin-right-05">{t("nameHeading")}</span>
                 <span aria-hidden>{renderSortArrow("name")}</span>
               </button>
             </th>
@@ -134,13 +136,13 @@ export function UsersTable({
                 className="usa-button usa-button--unstyled display-flex flex-align-center font-sans-2xs text-bold text-no-underline text-gray-90"
                 onClick={() => handleSort("email")}
               >
-                <span className="margin-right-05">Email</span>
+                <span className="margin-right-05">{t("emailHeading")}</span>
                 <span aria-hidden>{renderSortArrow("email")}</span>
               </button>
             </th>
             <th scope="col" className="bg-base-lightest padding-y-205">
               <span className="display-flex flex-align-center font-sans-2xs text-bold text-no-underline text-gray-90">
-                Role
+                {t("roleHeading")}
               </span>
             </th>
           </tr>
@@ -149,7 +151,7 @@ export function UsersTable({
         <tbody className="text-gray-90 font-sans-2xs">
           {sortedUsers.length === 0 ? (
             <tr>
-              <td colSpan={3}>No users found.</td>
+              <td colSpan={3}>{t("noUsersFound")}</td>
             </tr>
           ) : (
             sortedUsers.map((user) => (
@@ -159,7 +161,7 @@ export function UsersTable({
                 <td>
                   <fieldset className="usa-fieldset margin-0">
                     <legend className="usa-sr-only">
-                      Select role for {formatFullName(user)}
+                      {t("selectRoleFor")} {formatFullName(user)}
                     </legend>
                     <div className="display-flex flex-wrap grid-gap-2">
                       {roles.map((role) => {
