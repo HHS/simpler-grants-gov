@@ -2,11 +2,15 @@
 name: Update Database ERD Diagrams and OpenAPI Docs
 
 on:
-  pull_request:
-    paths:
-      - api/**
-      - Makefile
-      - .github/workflows/ci-openapi.yml
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        default: "main"
+        description: Tag or branch or SHA to deploy
 
 defaults:
   run:
