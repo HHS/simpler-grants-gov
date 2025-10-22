@@ -8,14 +8,11 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import {
-  Breadcrumb,
-  ErrorMessage,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";
 
 import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 
@@ -66,6 +63,7 @@ async function UserWorkspace() {
           ),
         })}
       </h1>
+      <WorkspaceLinksSection />
       {userRoles && userOrganizations ? (
         <>
           <UserOrganizationInvite

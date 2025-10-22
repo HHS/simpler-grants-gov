@@ -1465,6 +1465,24 @@ export const messages = {
       view: "View organization details",
       manage: "Manage users",
     },
+    linksSection: {
+      heading: "Your recent activity",
+      applications: {
+        heading: "Applications",
+        description: "You can now apply for select opportunities on Simpler.",
+        linkText: "View applications",
+      },
+      savedQueries: {
+        heading: "Saved queries",
+        description: "Return to your preferred search terms and filters.",
+        linkText: "View saved queries",
+      },
+      savedOpportunities: {
+        heading: "Saved opportunities",
+        description: "Keep track of oppportunities you're interested in.",
+        linkText: "View saved opportunities",
+      },
+    },
   },
   OrganizationDetail: {
     pageTitle: "Organization",
