@@ -1,4 +1,4 @@
-"server only";
+"server-only";
 
 import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
