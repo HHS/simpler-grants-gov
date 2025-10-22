@@ -4,15 +4,21 @@ import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 import { Alert, Table } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+import { USWDSIcon } from "../USWDSIcon";
 
-export const OrganizationRosterSkeleton = () => {
+export const OrganizationRosterSkeleton = ({
+  organizationId,
+}: {
+  organizationId: string;
+}) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
   return (
     <>
-      <OrganizationRosterInfo />
+      <OrganizationRosterInfo organizationId={organizationId} />
       <Table className="width-full overflow-wrap simpler-application-forms-table">
         <thead>
           <tr>
@@ -62,15 +68,26 @@ const OrganizationUserRow = ({
   );
 };
 
-const OrganizationRosterInfo = () => {
+const OrganizationRosterInfo = ({
+  organizationId,
+}: {
+  organizationId: string;
+}) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
   return (
-    <>
+    <div className="margin-y-5">
       <h3>{t("title")}</h3>
       <div>
-        {t("explanation")} {t("manageUsersExplanation")}
+        {t("explanation")} {t("manageUsersExplanation")}{" "}
+        <Link
+          href={`/user/organization/${organizationId}/manage-users`}
+          className="usa-button usa-button--secondary float-right"
+        >
+          <USWDSIcon name="people" />
+          Manage Users
+        </Link>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -103,7 +120,7 @@ export const OrganizationRoster = async ({
   if (organizationUsers?.length) {
     return (
       <>
-        <OrganizationRosterInfo />
+        <OrganizationRosterInfo organizationId={organizationId} />
         <Table className="width-full overflow-wrap simpler-application-forms-table">
           <thead>
             <tr>
