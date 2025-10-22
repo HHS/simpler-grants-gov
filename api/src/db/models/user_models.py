@@ -224,8 +224,6 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
     )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
 
-    is_application_owner: Mapped[bool | None]
-
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="application_users")
     application_user_roles: Mapped[list["ApplicationUserRole"]] = relationship(

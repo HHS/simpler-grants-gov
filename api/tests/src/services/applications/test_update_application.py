@@ -93,7 +93,7 @@ def test_update_application_unauthorized(enable_factory_create, db_session):
         update_application(db_session, application.application_id, updates, user)
 
     assert excinfo.value.status_code == 403
-    assert "Unauthorized" in excinfo.value.message
+    assert "Forbidden" in excinfo.value.message
 
     # Verify application name was not updated
     db_session.refresh(application)

@@ -2130,7 +2130,6 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
-    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
@@ -2213,7 +2212,7 @@ def test_application_get_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_get_forbidden_if_not_associated(
@@ -2230,7 +2229,7 @@ def test_application_form_get_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_update_forbidden_if_not_associated(
@@ -2250,7 +2249,7 @@ def test_application_form_update_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_submit_forbidden_if_not_associated(
@@ -2265,7 +2264,7 @@ def test_application_submit_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_get_success_when_associated(
@@ -2591,6 +2590,9 @@ def test_application_start_with_organization_success(
     assert str(application.organization_id) == organization_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
 
+    # Assert it does create an application user
+    assert not application.application_users
+
 
 def test_application_start_with_organization_and_custom_name(
     client,
@@ -2896,7 +2898,7 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
         headers={"X-SGG-Token": user_token},
     )
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
     # Internal JWT should succeed
     response = client.get(
