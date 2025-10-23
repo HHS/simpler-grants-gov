@@ -3,7 +3,7 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
-import { ManageUsersPageContent } from "src/components/manage-users/ManageUsersPageContent";
+import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
 export async function generateMetadata({
   params,

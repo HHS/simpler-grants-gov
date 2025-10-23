@@ -5,7 +5,8 @@ import { Organization } from "src/types/applicationResponseTypes";
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { PageHeader } from "src/components/manage-users/PageHeader";
+import { ManageUsersBreadcrumbs } from "src/components/manageUsers/ManageUsersBreadcrumbs";
+import { PageHeader } from "src/components/manageUsers/PageHeader";
 
 export async function ManageUsersPageContent({
   organizationId,
@@ -38,7 +39,11 @@ export async function ManageUsersPageContent({
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <PageHeader organizationName={name ?? ""} pageHeader={t("pageHeading")} />
+      <ManageUsersBreadcrumbs
+        organizationName={name}
+        organizationId={organizationId}
+      />
+      <PageHeader pageHeader={t("pageHeading")} />
     </GridContainer>
   );
 }
