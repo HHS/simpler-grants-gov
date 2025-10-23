@@ -5,6 +5,7 @@ from sqlalchemy import text
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege, RoleType
+from tests.lib.organization_test_utils import create_user_not_in_org
 from tests.src.db.models.factories import (
     LinkExternalUserFactory,
     LinkOrganizationInvitationToRoleFactory,
@@ -14,6 +15,30 @@ from tests.src.db.models.factories import (
     UserFactory,
     UserProfileFactory,
 )
+
+
+def create_user_with_email(email: str, first_name: str = None, last_name: str = None):
+    """Helper to create a user with login.gov external user and optional profile"""
+    user = UserFactory.create()
+    LinkExternalUserFactory.create(user=user, email=email)
+
+    if first_name or last_name:
+        UserProfileFactory.create(
+            user=user, first_name=first_name or "Test", last_name=last_name or "User"
+        )
+
+    return user
+
+
+def create_invitation_with_role(organization, inviter, invitee_email: str, role, **kwargs):
+    """Helper to create an invitation and link it to a role"""
+    invitation = OrganizationInvitationFactory.create(
+        organization=organization, inviter_user=inviter, invitee_email=invitee_email, **kwargs
+    )
+
+    LinkOrganizationInvitationToRoleFactory.create(organization_invitation=invitation, role=role)
+
+    return invitation
 
 
 class TestUserInvitationsList:
@@ -36,32 +61,13 @@ class TestUserInvitationsList:
         user_email = f"user-success-{uuid4()}@example.com"
         inviter_email = f"admin-success-{uuid4()}@org.com"
 
-        # Create user with login.gov external user
-        user = UserFactory.create()
-        external_user = LinkExternalUserFactory.create(user=user, email=user_email)
+        # Create users using helper methods
+        user = create_user_with_email(user_email, "Test", "User")
+        inviter = create_user_with_email(inviter_email, "John", "Doe")
 
-        # Create user profile for better test data
-        user_profile = UserProfileFactory.create(user=user, first_name="Test", last_name="User")
-
-        # Create inviter user with profile
-        inviter = UserFactory.create()
-        inviter_profile = UserProfileFactory.create(
-            user=inviter, first_name="John", last_name="Doe"
-        )
-        inviter_external = LinkExternalUserFactory.create(user=inviter, email=inviter_email)
-
-        # Create organization and invitation
+        # Create organization and invitation using helper
         organization = OrganizationFactory.create()
-        invitation = OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email=user_email,  # Match user's email
-        )
-
-        # Link role to invitation
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=invitation, role=org_role
-        )
+        invitation = create_invitation_with_role(organization, inviter, user_email, org_role)
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
@@ -98,16 +104,8 @@ class TestUserInvitationsList:
 
     def test_get_user_invitations_200_empty_list(self, client, db_session, enable_factory_create):
         """Test user with no invitations returns empty list"""
-        # Use unique email for this test
-        user_email = f"user-empty-{uuid4()}@example.com"
-
-        # Create user with login.gov external user
-        user = UserFactory.create()
-        external_user = LinkExternalUserFactory.create(user=user, email=user_email)
-
-        # Create JWT token
-        token, _ = create_jwt_for_user(user, db_session)
-        db_session.commit()
+        # Create user not in any organization (has login.gov external user)
+        user, token = create_user_not_in_org(db_session)
 
         # Make request
         resp = client.post(
@@ -130,36 +128,16 @@ class TestUserInvitationsList:
         user_email = f"user-multiple-{uuid4()}@example.com"
         inviter_email = f"admin-multiple-{uuid4()}@org.com"
 
-        # Create user with login.gov external user
-        user = UserFactory.create()
-        external_user = LinkExternalUserFactory.create(user=user, email=user_email)
+        # Create users using helper methods
+        user = create_user_with_email(user_email)
+        inviter = create_user_with_email(inviter_email)
 
-        # Create inviter user
-        inviter = UserFactory.create()
-        inviter_external = LinkExternalUserFactory.create(user=inviter, email=inviter_email)
-
-        # Create multiple organizations and invitations
+        # Create multiple organizations and invitations using helper
         org1 = OrganizationFactory.create()
         org2 = OrganizationFactory.create()
 
-        invitation1 = OrganizationInvitationFactory.create(
-            organization=org1,
-            inviter_user=inviter,
-            invitee_email=user_email,
-        )
-        invitation2 = OrganizationInvitationFactory.create(
-            organization=org2,
-            inviter_user=inviter,
-            invitee_email=user_email,
-        )
-
-        # Link roles to invitations
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=invitation1, role=org_role
-        )
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=invitation2, role=org_role
-        )
+        invitation1 = create_invitation_with_role(org1, inviter, user_email, org_role)
+        invitation2 = create_invitation_with_role(org2, inviter, user_email, org_role)
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
@@ -219,25 +197,14 @@ class TestUserInvitationsList:
         inviter_email = f"admin-mismatch-{uuid4()}@org.com"
         different_email = f"different-mismatch-{uuid4()}@example.com"
 
-        # Create user with login.gov external user
-        user = UserFactory.create()
-        external_user = LinkExternalUserFactory.create(user=user, email=user_email)
+        # Create users using helper methods
+        user = create_user_with_email(user_email)
+        inviter = create_user_with_email(inviter_email)
 
-        # Create inviter user
-        inviter = UserFactory.create()
-        inviter_external = LinkExternalUserFactory.create(user=inviter, email=inviter_email)
-
-        # Create invitation with different email
+        # Create invitation with different email using helper
         organization = OrganizationFactory.create()
-        invitation = OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email=different_email,  # Different email
-        )
-
-        # Link role to invitation
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=invitation, role=org_role
+        invitation = create_invitation_with_role(
+            organization, inviter, different_email, org_role  # Different email
         )
 
         # Create JWT token
@@ -259,17 +226,11 @@ class TestUserInvitationsList:
 
     def test_get_user_invitations_403_forbidden(self, client, db_session, enable_factory_create):
         """Test user trying to access another user's invitations"""
-        # Create two users
-        user1 = UserFactory.create()
-        user2 = UserFactory.create()
-        external_user1 = LinkExternalUserFactory.create(user=user1, email="user1@example.com")
-        external_user2 = LinkExternalUserFactory.create(user=user2, email="user2@example.com")
+        # Create two users not in any organization
+        user1, token = create_user_not_in_org(db_session)
+        user2, _ = create_user_not_in_org(db_session)
 
-        # Create JWT token for user1
-        token, _ = create_jwt_for_user(user1, db_session)
-        db_session.commit()
-
-        # Try to access user2's invitations
+        # Try to access user2's invitations with user1's token
         resp = client.post(
             f"/v1/users/{user2.user_id}/invitations/list",
             headers={"X-SGG-Token": token},
