@@ -1,11 +1,3 @@
-from src.legacy_soap_api.grantors.schemas.get_application_list_expanded_schemas import (
-    ExpandedApplicationFilter,
-    ExpandedApplicationInfo,
-    GetApplicationListExpandedRequest,
-    GetApplicationListExpandedResponse,
-    GetApplicationListExpandedResponseSOAPBody,
-    GetApplicationListExpandedResponseSOAPEnvelope,
-)
 from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
     FileDataHandler,
     GetApplicationZipRequest,
@@ -13,6 +5,14 @@ from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
     GetApplicationZipResponseSOAPBody,
     GetApplicationZipResponseSOAPEnvelope,
     XOPIncludeData,
+)
+from src.legacy_soap_api.grantors.schemas.get_submission_list_expanded_schemas import (
+    ExpandedApplicationFilter,
+    GetSubmissionListExpandedRequest,
+    GetSubmissionListExpandedResponse,
+    GetSubmissionListExpandedResponseSOAPBody,
+    GetSubmissionListExpandedResponseSOAPEnvelope,
+    SubmissionInfo,
 )
 
 __all__ = [
@@ -22,10 +22,10 @@ __all__ = [
     "FileDataHandler",
     "XOPIncludeData",
     "GetApplicationZipRequest",
-    "GetApplicationListExpandedRequest",
-    "GetApplicationListExpandedResponse",
-    "GetApplicationListExpandedResponseSOAPEnvelope",
+    "GetSubmissionListExpandedRequest",
+    "GetSubmissionListExpandedResponse",
+    "GetSubmissionListExpandedResponseSOAPEnvelope",
     "ExpandedApplicationFilter",
-    "GetApplicationListExpandedResponseSOAPBody",
-    "ExpandedApplicationInfo",
+    "GetSubmissionListExpandedResponseSOAPBody",
+    "SubmissionInfo",
 ]
