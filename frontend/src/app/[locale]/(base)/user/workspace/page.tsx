@@ -4,6 +4,7 @@ import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
+import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
@@ -11,10 +12,9 @@ import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";
-
-import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 
 export async function generateMetadata({
   params,
@@ -63,17 +63,19 @@ async function UserWorkspace() {
           ),
         })}
       </h1>
+      <UserOrganizationInvite
+        organizationId={
+          userOrganizations && userOrganizations[0]
+            ? userOrganizations[0].organization_id
+            : "1"
+        }
+      />
       <WorkspaceLinksSection />
       {userRoles && userOrganizations ? (
-        <>
-          <UserOrganizationInvite
-            organizationId={userOrganizations[0].organization_id}
-          />
-          <UserOrganizationsList
-            userOrganizations={userOrganizations}
-            userRoles={userRoles}
-          />
-        </>
+        <UserOrganizationsList
+          userOrganizations={userOrganizations}
+          userRoles={userRoles}
+        />
       ) : (
         <ErrorMessage>{t("fetchError")}</ErrorMessage>
       )}
