@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import select
 
@@ -10,7 +10,7 @@ from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
-from src.db.models.user_models import OrganizationUser, User
+from src.db.models.user_models import LinkExternalUser, OrganizationUser, Role, User
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.update_user_organization_roles import validate_roles
 from src.util import datetime_util
@@ -55,12 +55,13 @@ def check_user_already_member(
     Raises 422 error if user is already a member.
     """
     # Find user by email through their linked login.gov external user
+
     stmt = (
         select(OrganizationUser)
         .join(User, OrganizationUser.user_id == User.user_id)
-        .join("linked_login_gov_external_user")
+        .join(LinkExternalUser, User.user_id == LinkExternalUser.user_id)
         .where(OrganizationUser.organization_id == organization_id)
-        .where(User.linked_login_gov_external_user.has(email=invitee_email.lower()))
+        .where(LinkExternalUser.email.lower() == invitee_email.lower())
     )
 
     existing_member = db_session.execute(stmt).scalar_one_or_none()
@@ -112,29 +113,23 @@ def create_organization_invitation(
     # Calculate expiration date
     expires_at = datetime_util.utcnow() + timedelta(days=INVITATION_EXPIRY_DAYS)
 
-    # Create invitation record
+    # Query the roles to get their details for the response
+    roles_stmt = select(Role).where(Role.role_id.in_(role_ids))
+    roles = db_session.execute(roles_stmt).scalars().all()
+
+    # Create invitation record with explicit ID and created_at for response
     invitation = OrganizationInvitation(
+        organization_invitation_id=uuid4(),
         organization_id=organization_id,
         inviter_user_id=user.user_id,
         invitee_email=invitee_email,
         expires_at=expires_at,
-        responded_by_user_id=None,  # Will be set when invitation is accepted/rejected
+        created_at=datetime_util.utcnow(),
+        invitee_user_id=None,  # Will be set when invitation is accepted/rejected
+        linked_roles=[LinkOrganizationInvitationToRole(role_id=role_id) for role_id in role_ids],
     )
 
     db_session.add(invitation)
-    db_session.flush()  # Get the invitation ID
-
-    # Create role associations
-    for role_id in role_ids:
-        role_link = LinkOrganizationInvitationToRole(
-            organization_invitation_id=invitation.organization_invitation_id,
-            role_id=role_id,
-        )
-        db_session.add(role_link)
-
-    # Flush to ensure all relationships are loaded
-    db_session.flush()
-    db_session.refresh(invitation)
 
     # Format response data
     invitation_data = {
@@ -148,7 +143,7 @@ def create_organization_invitation(
                 "role_id": role.role_id,
                 "role_name": role.role_name,
             }
-            for role in invitation.roles
+            for role in roles
         ],
         "created_at": invitation.created_at,
     }
