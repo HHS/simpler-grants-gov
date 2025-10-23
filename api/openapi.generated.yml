@@ -5427,7 +5427,9 @@ components:
           description: Organization unique identifier
           example: 123e4567-e89b-12d3-a456-426614174000
         organization_name:
-          type: string
+          type:
+          - string
+          - 'null'
           description: Organization name
           example: Example Organization
     UserInvitationInviter:
