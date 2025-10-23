@@ -2,10 +2,14 @@ FROM ghcr.io/hhs/python-base-image:4322cc0@sha256:1b55400be929365421d4150638df39
 
 ARG RUN_UID
 ARG RUN_USER
-ARG PY_MM=3.13
+
+# Read Python version from the version file in the base image and set it as a build arg
+# This allows all stages to use the same version without repeating ARG PY_MM=3.13
+RUN cat /python-version.txt > /tmp/py_version.txt
 
 # Create user and directories using BusyBox applets (scratch-friendly)
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${RUN_UID:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
+    PY_MM=$(cat /tmp/py_version.txt) && \
     if [ "${RUN_USER}" != "root" ]; then \
       /bin/busybox grep -Eq "^${RUN_USER}:" /etc/group || /bin/busybox addgroup -g "${RUN_UID}" "${RUN_USER}"; \
       /bin/busybox grep -Eq "^${RUN_USER}:" /etc/passwd || /bin/busybox adduser -D -H -s /bin/sh -u "${RUN_UID}" -G "${RUN_USER}" "${RUN_USER}"; \
@@ -31,7 +35,8 @@ COPY newrelic.ini /api/newrelic.ini
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
-RUN /usr/local/bin/python${PY_MM} -m poetry build --format wheel && \
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    /usr/local/bin/python${PY_MM} -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     /bin/busybox mkdir -p "${SITE_BASE}/src" && \
@@ -50,7 +55,6 @@ RUN /usr/local/bin/python${PY_MM} -m poetry build --format wheel && \
 #==============================================
 FROM base AS dev
 ARG RUN_USER
-ARG PY_MM=3.13
 
 # Disable Python optimization to preserve docstrings required by jsonpath_ng
 # https://github.com/h2non/jsonpath-ng?tab=readme-ov-file#special-note-about-ply-and-docstrings
@@ -84,7 +88,6 @@ CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "
 #==============================================
 # hadolint ignore=DL3006
 FROM base AS release
-ARG PY_MM=3.13
 
 # Working directory already set in base stage
 # User already created in base stage
@@ -104,7 +107,8 @@ RUN /bin/busybox mkdir -p /usr/bin && \
 # - Remove Python bytecode cache files
 # - Remove pip cache
 # - Remove test files and docs from site-packages
-RUN /bin/busybox find /api/.venv -type d -name __pycache__ -exec /bin/busybox rm -rf {} + 2>/dev/null || true && \
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    /bin/busybox find /api/.venv -type d -name __pycache__ -exec /bin/busybox rm -rf {} + 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type f -name "*.pyc" -delete 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type d -name "tests" -exec /bin/busybox rm -rf {} + 2>/dev/null || true && \

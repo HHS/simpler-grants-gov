@@ -9,6 +9,9 @@ ARG ENABLE_UPX=0
 
 SHELL ["/bin/sh", "-eux", "-c"]
 
+# Create python-version.txt file to be used by downstream Dockerfiles
+RUN echo "${PY_MM}" > /python-version.txt
+
 RUN apk add --no-cache \
       build-base \
       wget \
@@ -116,6 +119,9 @@ RUN set -eux; \
 FROM scratch AS scratch-minimal
 ARG PY_MM=3.13
 LABEL org.opencontainers.image.source="https://github.com/HHS/simpler-grants-gov"
+
+# Copy python-version.txt for downstream Dockerfiles to use
+COPY --from=alpine-builder /python-version.txt /python-version.txt
 
 # Python runtime
 COPY --from=alpine-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
