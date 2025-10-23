@@ -1479,10 +1479,40 @@ export const messages = {
       },
     },
   },
-  ManageUsers: {
+ManageUsers: {
+    pageTitle: "Manage Users | Simpler.Grants.gov",
+    pageHeading: "Manage Users",
+    activeUsersHeading: "Active Users",
+    activeUsersTableDescription:
+      "Adjust permissions for active users so they have the right access for their role.",
+    grantsGovUsersHeading: "Grants.gov Users",
+    grantsGovUsersTableDescription:
+      "Manage users from your Grants.gov organization here in Simpler.",
+    pendingUsersHeading: "Pending Users",
+    pendingUsersTableDescription:
+      "Any users waiting to join your organization will appear below.",
+    errors: {
+      fetchError: "Failed to get Users",
+      notLoggedInMessage: "You are not logged in",
+    },
+    usersTable: {
+      admin: "Administrator",
+      emailHeading: "Email",
+      member: "Member",
+      nameHeading: "Name",
+      noUsersFound: "No users found.",
+      roleHeading: "Role",
+      selectRoleFor: "Select role for",
+    },
+    confirmationModal: {
+      header: "Confirm role change",
+      description: "Are you sure you want to change this user's role to",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      saving: "Saving...",
+    },
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
-      errorHeading: "Error",
       description:
         "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
       inputs: {
@@ -1497,11 +1527,7 @@ export const messages = {
       },
       button: {
         label: "Add to organization",
-        success: "User added to pending",
-      },
-      validationErrors: {
-        email: "Email is required",
-        role: "Role is required",
+        success: "User added!",
       },
     },
   },
