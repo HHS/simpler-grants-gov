@@ -39,23 +39,28 @@ class InvitationItemData(TypedDict):
     roles: list[InvitationRoleData]
 
 
-def _fetch_user_invitations(
-    db_session: db.Session, user_email: str
+def _fetch_user_invitations_by_user_id(
+    db_session: db.Session, user_id: UUID
 ) -> list[OrganizationInvitation]:
-    """Fetch all pending invitations for a user by their email with related data eagerly loaded."""
+    """Fetch all invitations for a user by joining with their external user email."""
     stmt = (
         select(OrganizationInvitation)
+        .join(LinkExternalUser, OrganizationInvitation.invitee_email == LinkExternalUser.email)
         .options(
             # Load organization data
             selectinload(OrganizationInvitation.organization),
             # Load inviter user data with profile
             selectinload(OrganizationInvitation.inviter_user).selectinload(User.profile),
+            # Load inviter user's external user data (for email)
+            selectinload(OrganizationInvitation.inviter_user).selectinload(
+                User.linked_login_gov_external_user
+            ),
             # Load roles through the link table
             selectinload(OrganizationInvitation.linked_roles).selectinload(
                 LinkOrganizationInvitationToRole.role
             ),
         )
-        .where(OrganizationInvitation.invitee_email == user_email)
+        .where(LinkExternalUser.user_id == user_id)
     )
 
     invitations = db_session.execute(stmt).scalars().all()
@@ -72,15 +77,12 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
     Returns:
         list[InvitationItemData]: List of invitation data with organization, inviter, and role information
     """
-    # First get the user's email from LinkExternalUser
-    stmt = select(LinkExternalUser.email).where(LinkExternalUser.user_id == user_id)
-    result = db_session.execute(stmt).scalar()
+    # Fetch invitations by joining with user's external email - single query!
+    invitations = _fetch_user_invitations_by_user_id(db_session, user_id)
 
-    if not result:
+    # Early exit: if no invitations found
+    if not invitations:
         return []
-
-    # Fetch invitations by email
-    invitations = _fetch_user_invitations(db_session, result)
 
     # Transform to API response format
     invitation_data: list[InvitationItemData] = []
@@ -92,12 +94,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
             "organization_name": f"Organization {invitation.organization.organization_id}",
         }
 
-        # Get inviter information - query for inviter's email separately
-        inviter_email_stmt = select(LinkExternalUser.email).where(
-            LinkExternalUser.user_id == invitation.inviter_user.user_id
-        )
-        inviter_email = db_session.execute(inviter_email_stmt).scalar()
-
+        # Get inviter information - now using eagerly loaded data (no additional query!)
         inviter_data: InvitationInviterData = {
             "user_id": str(invitation.inviter_user.user_id),
             "first_name": (
@@ -110,7 +107,11 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
                 if invitation.inviter_user.profile
                 else None
             ),
-            "email": inviter_email,
+            "email": (
+                invitation.inviter_user.linked_login_gov_external_user.email
+                if invitation.inviter_user.linked_login_gov_external_user
+                else None
+            ),
         }
 
         # Get roles information
