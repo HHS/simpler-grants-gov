@@ -6,11 +6,15 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Alert, Table } from "@trussworks/react-uswds";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
-export const OrganizationRosterSkeleton = ({ organizationId }: { organizationId: string }) => {
+export const OrganizationRosterSkeleton = ({
+  organizationId,
+}: {
+  organizationId: string;
+}) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
   return (
     <>
@@ -74,7 +78,8 @@ const OrganizationRosterInfo = ({
     <div className="margin-y-5">
       <h3>{t("title")}</h3>
       <div>
-        {t("explanation")} {t("manageUsersExplanation")}        <Link
+        {t("explanation")} {t("manageUsersExplanation")}{" "}
+        <Link
           href={`/user/organization/${organizationId}/manage-users`}
           className="usa-button usa-button--secondary float-right"
         >
