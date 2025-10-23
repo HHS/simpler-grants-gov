@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import aliased, selectinload
@@ -10,6 +9,7 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
+from src.util.datetime_util import adjust_timezone
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "SubmissionTitle": application.application_name,
         "PackageID": competition.legacy_package_id,
         "n2:ReceivedDateTime": (
-            application.submitted_at.astimezone(ZoneInfo("America/New_York"))
+            adjust_timezone(application.submitted_at, "America/New_York")
             if application.submitted_at
             else None
         ),
