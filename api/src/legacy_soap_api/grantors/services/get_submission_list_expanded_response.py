@@ -9,6 +9,7 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
+from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
 
 logger = logging.getLogger(__name__)
@@ -48,10 +49,12 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         application_list_obj.update(
             {
                 "DelinquentFederalDebt": (
-                    "Yes" if sam_gov_entity and sam_gov_entity.has_debt_subject_to_offset else "No"
+                    convert_bool_to_yes_no(
+                        sam_gov_entity is not None and sam_gov_entity.has_debt_subject_to_offset
+                    )
                 ),
                 "ActiveExclusions": (
-                    "Yes" if sam_gov_entity and sam_gov_entity.has_exclusion_status else "No"
+                    convert_bool_to_yes_no(sam_gov_entity is not None and sam_gov_entity.has_exclusion_status)
                 ),
                 "UEI": sam_gov_entity.uei if sam_gov_entity else None,
             }
