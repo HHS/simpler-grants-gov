@@ -59,7 +59,7 @@ done_dates AS
    FROM history_partition h
    INNER JOIN issue_data i ON i.issue_id = h.issue_id
    WHERE h.status = 'Done'
-   GROUP BY h.issue_id), -- calculate lead time for all DONE issues, showing NULL for undefined lead times
+   GROUP BY h.issue_id), -- calculate lead time for all DONE issues
 lead_time_calculation AS
   (SELECT i.issue_id,
           i.issue_title,
@@ -74,8 +74,9 @@ lead_time_calculation AS
           CASE
               WHEN ipd.in_progress_date IS NOT NULL
                    AND dd.done_date IS NOT NULL
-                   AND dd.done_date >= ipd.in_progress_date THEN dd.done_date - ipd.in_progress_date
-              ELSE NULL
+                   AND dd.done_date >= ipd.in_progress_date THEN GREATEST(1, dd.done_date - ipd.in_progress_date)
+              WHEN dd.done_date IS NOT NULL THEN 1
+              ELSE 1
           END AS lead_time_days
    FROM issue_state i
    LEFT JOIN in_progress_dates ipd ON i.issue_id = ipd.issue_id

@@ -54,21 +54,24 @@ done_dates AS
    FROM history_partition h
    INNER JOIN issue_data i ON i.issue_id = h.issue_id
    WHERE h.status = 'Done'
-   GROUP BY h.issue_id), -- calculate lead time for issues with valid In Progress to Done transitions
-valid_lead_times AS
+   GROUP BY h.issue_id), -- calculate lead time for all DONE issues, with minimum lead time of 1 day
+all_lead_times AS
   (SELECT i.issue_id,
-          dd.done_date - ipd.in_progress_date AS lead_time_days
+          CASE
+              WHEN ipd.in_progress_date IS NOT NULL
+                   AND dd.done_date IS NOT NULL
+                   AND dd.done_date >= ipd.in_progress_date THEN GREATEST(1, dd.done_date - ipd.in_progress_date)
+              WHEN dd.done_date IS NOT NULL THEN 1
+              ELSE 1
+          END AS lead_time_days
    FROM issue_state i
-   INNER JOIN in_progress_dates ipd ON i.issue_id = ipd.issue_id
-   INNER JOIN done_dates dd ON i.issue_id = dd.issue_id
-   WHERE i.status = 'Done'
-     AND ipd.in_progress_date IS NOT NULL
-     AND dd.done_date IS NOT NULL
-     AND dd.done_date >= ipd.in_progress_date), -- calculate average lead time
+   LEFT JOIN in_progress_dates ipd ON i.issue_id = ipd.issue_id
+   LEFT JOIN done_dates dd ON i.issue_id = dd.issue_id
+   WHERE i.status = 'Done'), -- calculate average lead time
 average_lead_time AS
   (SELECT AVG(lead_time_days) AS avg_lead_time_days,
           COUNT(*) AS issues_with_lead_time
-   FROM valid_lead_times)
+   FROM all_lead_times)
 SELECT ROUND(avg_lead_time_days, 1) AS average_lead_time_days,
        issues_with_lead_time
 FROM average_lead_time
