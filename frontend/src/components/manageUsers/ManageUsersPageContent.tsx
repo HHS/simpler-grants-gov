@@ -43,7 +43,7 @@ export async function ManageUsersPageContent({
         organizationName={name}
         organizationId={organizationId}
       />
-      <PageHeader pageHeader={t("pageHeading")} />
+      <PageHeader organizationName={name} pageHeader={t("pageHeading")} />
     </GridContainer>
   );
 }
