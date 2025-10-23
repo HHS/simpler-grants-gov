@@ -1,6 +1,5 @@
 import pytest
 
-from src.form_schema.forms.sf424a import SF424a_v1_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 
 
@@ -125,18 +124,18 @@ def full_valid_json_v1_0(full_valid_activity_line_item_v1_0):
     }
 
 
-def test_sf424a_v1_0_minimal_valid_json(minimal_valid_json_v1_0):
-    validation_issues = validate_json_schema_for_form(minimal_valid_json_v1_0, SF424a_v1_0)
+def test_sf424a_v1_0_minimal_valid_json(minimal_valid_json_v1_0, sf424a_v1_0):
+    validation_issues = validate_json_schema_for_form(minimal_valid_json_v1_0, sf424a_v1_0)
     assert len(validation_issues) == 0
 
 
-def test_sf424a_v1_0_full_valid_json(full_valid_json_v1_0):
-    validation_issues = validate_json_schema_for_form(full_valid_json_v1_0, SF424a_v1_0)
+def test_sf424a_v1_0_full_valid_json(full_valid_json_v1_0, sf424a_v1_0):
+    validation_issues = validate_json_schema_for_form(full_valid_json_v1_0, sf424a_v1_0)
     assert len(validation_issues) == 0
 
 
-def test_sf424a_v1_0_empty_json():
-    validation_issues = validate_json_schema_for_form({}, SF424a_v1_0)
+def test_sf424a_v1_0_empty_json(sf424a_v1_0):
+    validation_issues = validate_json_schema_for_form({}, sf424a_v1_0)
 
     EXPECTED_REQUIRED_FIELDS = [
         "$.activity_line_items",
@@ -149,10 +148,10 @@ def test_sf424a_v1_0_empty_json():
         assert validation_issue.field in EXPECTED_REQUIRED_FIELDS
 
 
-def test_sf424a_v1_0_empty_line_item(full_valid_json_v1_0):
+def test_sf424a_v1_0_empty_line_item(full_valid_json_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["activity_line_items"] = [{}]
-    validation_issues = validate_json_schema_for_form(data, SF424a_v1_0)
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
 
     EXPECTED_REQUIRED_FIELDS = ["$.activity_line_items[0].activity_title"]
 
@@ -162,20 +161,20 @@ def test_sf424a_v1_0_empty_line_item(full_valid_json_v1_0):
         assert validation_issue.field in EXPECTED_REQUIRED_FIELDS
 
 
-def test_sf424a_v1_0_no_line_items(full_valid_json_v1_0):
+def test_sf424a_v1_0_no_line_items(full_valid_json_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["activity_line_items"] = []
-    validation_issues = validate_json_schema_for_form(data, SF424a_v1_0)
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "minItems"
     assert validation_issues[0].message == "[] should be non-empty"
     assert validation_issues[0].field == "$.activity_line_items"
 
 
-def test_sf424a_v1_0_too_many_line_items(full_valid_json_v1_0, full_valid_activity_line_item_v1_0):
+def test_sf424a_v1_0_too_many_line_items(full_valid_json_v1_0, full_valid_activity_line_item_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["activity_line_items"] = [full_valid_activity_line_item_v1_0] * 5
-    validation_issues = validate_json_schema_for_form(data, SF424a_v1_0)
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
 
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "maxItems"
@@ -183,10 +182,10 @@ def test_sf424a_v1_0_too_many_line_items(full_valid_json_v1_0, full_valid_activi
     assert validation_issues[0].field == "$.activity_line_items"
 
 
-def test_sf424_confirmation_must_be_true(full_valid_json_v1_0):
+def test_sf424_confirmation_must_be_true(full_valid_json_v1_0, sf424a_v1_0):
     data = full_valid_json_v1_0
     data["confirmation"] = False
-    validation_issues = validate_json_schema_for_form(data, SF424a_v1_0)
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
 
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "enum"
@@ -194,7 +193,7 @@ def test_sf424_confirmation_must_be_true(full_valid_json_v1_0):
     assert validation_issues[0].message == "False is not one of [True]"
 
 
-def test_sf424_allowed_monetary_formats(full_valid_json_v1_0):
+def test_sf424_allowed_monetary_formats(full_valid_json_v1_0, sf424a_v1_0):
     """Test the regex for the monetary formats"""
     data = full_valid_json_v1_0
     # All of these are valid formats
@@ -213,11 +212,11 @@ def test_sf424_allowed_monetary_formats(full_valid_json_v1_0):
         "program_income_amount": "4243244.23",
     }
 
-    validation_issues = validate_json_schema_for_form(data, SF424a_v1_0)
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
     assert len(validation_issues) == 0
 
 
-def test_sf424_disallowed_monetary_formats(full_valid_json_v1_0):
+def test_sf424_disallowed_monetary_formats(full_valid_json_v1_0, sf424a_v1_0):
     """Test the regex for the monetary formats"""
     data = full_valid_json_v1_0
     # All of these are valid formats
@@ -236,7 +235,7 @@ def test_sf424_disallowed_monetary_formats(full_valid_json_v1_0):
         "program_income_amount": "4.x",
     }
 
-    validation_issues = validate_json_schema_for_form(data, SF424a_v1_0)
+    validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)
     assert len(validation_issues) == 12
     for validation_issue in validation_issues:
         assert validation_issue.type == "pattern"

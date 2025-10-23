@@ -1,8 +1,9 @@
 import logging
-from abc import ABC
+import abc
 
 import src.adapters.db as db
 from src.db.models.competition_models import Form
+from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.task.task import Task
 from src.util.env_config import PydanticBaseEnvConfig
 
@@ -21,10 +22,8 @@ class FormTaskConfig(PydanticBaseEnvConfig):
     non_local_api_auth_token: str | None = None
 
 
-class BaseFormTask(Task, ABC):
-    def __init__(self, db_session: db.Session):
-        super().__init__(db_session)
-
+class BaseFormTask(abc.ABC):
+    def __init__(self):
         self.config = FormTaskConfig()
         if self.config.non_local_api_auth_token is None:
             raise Exception(
@@ -38,14 +37,21 @@ class BaseFormTask(Task, ABC):
             "X-Auth": self.config.non_local_api_auth_token,
         }
 
+    def run(self):
+        self.run_task()
+
+    @abc.abstractmethod
+    def run_task(self):
+        pass
+
 
 def build_form_json(form: Form) -> dict:
     form_instruction_id = str(form.form_instruction_id) if form.form_instruction_id else None
-    form_type = form.form_type.value if form.form_type else None
+
     return {
         "agency_code": form.agency_code,
         "form_instruction_id": form_instruction_id,
-        "form_json_schema": form.form_json_schema,
+        "form_json_schema": resolve_jsonschema(form.form_json_schema),
         "form_name": form.form_name,
         "form_rule_schema": form.form_rule_schema,
         "form_ui_schema": form.form_ui_schema,
@@ -54,7 +60,7 @@ def build_form_json(form: Form) -> dict:
         "legacy_form_id": form.legacy_form_id,
         "omb_number": form.omb_number,
         "short_form_name": form.short_form_name,
-        "form_type": form_type,
+        "form_type": form.form_type,
         "sgg_version": form.sgg_version,
         "is_deprecated": form.is_deprecated,
     }

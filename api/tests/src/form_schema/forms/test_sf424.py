@@ -1,7 +1,6 @@
 import freezegun
 import pytest
 
-from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.services.applications.application_validation import (
     ApplicationAction,
@@ -10,9 +9,6 @@ from src.services.applications.application_validation import (
 from tests.lib.data_factories import setup_application_for_form_validation
 
 
-@pytest.fixture()
-def sf424_v4_0():
-    return SF424_v4_0
 
 
 @pytest.fixture
@@ -377,11 +373,11 @@ def test_sf424_v4_0_conditionally_required_fields(
         assert validation_issue.field in required_fields
 
 
-def test_sf424_v4_0_pre_population_with_all_non_null_values(enable_factory_create, valid_json_v4_0):
+def test_sf424_v4_0_pre_population_with_all_non_null_values(enable_factory_create, valid_json_v4_0, sf424_v4_0):
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
-        json_schema=SF424_v4_0.form_json_schema,
-        rule_schema=SF424_v4_0.form_rule_schema,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
         opportunity_number="ABC-123-XYZ",
         opportunity_title="My Example Opportunity",
         has_agency=True,
@@ -416,11 +412,11 @@ def test_sf424_v4_0_pre_population_with_all_non_null_values(enable_factory_creat
     assert "aor_signature" not in app_json
 
 
-def test_sf424_v4_0_pre_population_with_all_null_values(enable_factory_create, valid_json_v4_0):
+def test_sf424_v4_0_pre_population_with_all_null_values(enable_factory_create, valid_json_v4_0, sf424_v4_0):
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
-        json_schema=SF424_v4_0.form_json_schema,
-        rule_schema=SF424_v4_0.form_rule_schema,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
         opportunity_number=None,
         opportunity_title=None,
         has_agency=False,
@@ -450,11 +446,11 @@ def test_sf424_v4_0_pre_population_with_all_null_values(enable_factory_create, v
 
 
 @freezegun.freeze_time("2023-02-20 12:00:00", tz_offset=0)
-def test_sf424_post_population(enable_factory_create, valid_json_v4_0):
+def test_sf424_post_population(enable_factory_create, valid_json_v4_0, sf424_v4_0):
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
-        json_schema=SF424_v4_0.form_json_schema,
-        rule_schema=SF424_v4_0.form_rule_schema,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
         user_email="mynewmail@example.com",
     )
 

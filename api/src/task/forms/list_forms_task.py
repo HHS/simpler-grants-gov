@@ -9,6 +9,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.adapters.db import flask_db
 from src.db.models.competition_models import Form
+from src.form_schema.forms import get_active_forms
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
 from src.task.task_blueprint import task_blueprint
@@ -25,21 +26,18 @@ logger = logging.getLogger(__name__)
     "--environment", required=True, type=click.Choice(["local", "dev", "staging", "prod"])
 )
 @click.option("--verbose", default=False, is_flag=True, help="Show the full diff of forms")
-@flask_db.with_db_session()
 @ecs_background_task(task_name="list-forms")
-def list_forms(db_session: db.Session, environment: str, verbose: bool) -> None:
+def list_forms(environment: str, verbose: bool) -> None:
     # This script is only meant for running locally at this time
     error_if_not_local()
 
-    ListFormsTask(db_session, environment, verbose).run()
+    ListFormsTask(environment, verbose).run()
 
 
 class ListFormsTask(BaseFormTask):
 
-    def __init__(
-        self, db_session: db.Session, environment: str, verbose: bool, print_output: bool = True
-    ) -> None:
-        super().__init__(db_session)
+    def __init__(self, environment: str, verbose: bool, print_output: bool = True) -> None:
+        super().__init__()
         self.environment = environment
         self.verbose = verbose
         self.print_output = print_output
@@ -52,20 +50,13 @@ class ListFormsTask(BaseFormTask):
         self.output_table.field_names = ["Form Name", "Version", "Last Updated", "Changed Fields"]
 
     def run_task(self) -> None:
-        with self.db_session.begin():
-            forms = (
-                self.db_session.execute(select(Form).order_by(Form.form_name.asc())).scalars().all()
-            )
-            if len(forms) == 0:
-                raise Exception(
-                    "No forms found, have you run 'make db-seed-local' to initialize the forms?"
-                )
+        forms = get_active_forms()
 
-            for form in forms:
-                self.process_form(form)
+        for form in forms:
+            self.process_form(form)
 
-            if self.print_output:
-                self.print_outputs()
+        if self.print_output:
+            self.print_outputs()
 
     def process_form(self, form: Form) -> None:
         """Process a form, collecting information about whether it is up-to-date"""
