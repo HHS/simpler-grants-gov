@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from src.adapters import db
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
-from src.db.models.user_models import User
+from src.db.models.user_models import LinkExternalUser, User
 
 
 class InvitationOrganizationData(TypedDict):
@@ -72,13 +72,15 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
     Returns:
         list[InvitationItemData]: List of invitation data with organization, inviter, and role information
     """
-    # First get the user to access their email
-    user = db_session.get(User, user_id)
-    if not user or not user.email:
+    # First get the user's email from LinkExternalUser
+    stmt = select(LinkExternalUser.email).where(LinkExternalUser.user_id == user_id)
+    result = db_session.execute(stmt).scalar()
+
+    if not result:
         return []
 
     # Fetch invitations by email
-    invitations = _fetch_user_invitations(db_session, user.email)
+    invitations = _fetch_user_invitations(db_session, result)
 
     # Transform to API response format
     invitation_data: list[InvitationItemData] = []
@@ -90,9 +92,14 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
             "organization_name": f"Organization {invitation.organization.organization_id}",
         }
 
-        # Get inviter information
+        # Get inviter information - query for inviter's email separately
+        inviter_email_stmt = select(LinkExternalUser.email).where(
+            LinkExternalUser.user_id == invitation.inviter_user.user_id
+        )
+        inviter_email = db_session.execute(inviter_email_stmt).scalar()
+
         inviter_data: InvitationInviterData = {
-            "user_id": str(invitation.invitee_user_id),
+            "user_id": str(invitation.inviter_user.user_id),
             "first_name": (
                 invitation.inviter_user.profile.first_name
                 if invitation.inviter_user.profile
@@ -103,7 +110,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
                 if invitation.inviter_user.profile
                 else None
             ),
-            "email": invitation.inviter_user.email,
+            "email": inviter_email,
         }
 
         # Get roles information
