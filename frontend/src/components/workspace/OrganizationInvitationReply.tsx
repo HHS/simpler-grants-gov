@@ -1,12 +1,17 @@
+"use client";
+
 import { OrganizationInvitation } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
+import { useCallback, useState } from "react";
 import { Button, Grid } from "@trussworks/react-uswds";
 
 export const OrganizationInvitationReply = ({
   userInvitation,
+  onDismiss,
 }: {
   userInvitation: OrganizationInvitation;
+  onDismiss: () => void;
 }) => {
   const t = useTranslations("UserWorkspace.invitationReply");
   return (
@@ -19,13 +24,31 @@ export const OrganizationInvitationReply = ({
           <p>{t("description")}</p>
         </Grid>
         <Grid tablet={{ col: 4 }} className="text-right flex-align-self-center">
-          <Button className="margin-left-2" type="button">
+          <Button
+            onClick={() =>
+              respondToOrganizationInvitation(userInvitation, true)
+            }
+            className="margin-left-2"
+            type="button"
+          >
             {t("accept")}
           </Button>
-          <Button className="margin-left-2" type="button" secondary>
+          <Button
+            onClick={() =>
+              respondToOrganizationInvitation(userInvitation, false)
+            }
+            className="margin-left-2"
+            type="button"
+            secondary
+          >
             {t("reject")}
           </Button>
-          <Button className="margin-left-2" type="button" unstyled>
+          <Button
+            onClick={() => onDismiss()}
+            className="margin-left-2"
+            type="button"
+            unstyled
+          >
             {t("dismiss")}
           </Button>
         </Grid>
@@ -39,12 +62,26 @@ export const OrganizationInvitationReplies = ({
 }: {
   userInvitations: OrganizationInvitation[];
 }) => {
+  const [activeInvitations, setActiveInvitations] = useState(userInvitations);
+  const temporarilyDismissInvitationFor = useCallback(
+    (userOrganization: OrganizationInvitation) => () => {
+      return setActiveInvitations(
+        activeInvitations.filter(
+          (invitation) =>
+            invitation.organization_invitation_id !==
+            userOrganization.organization_invitation_id,
+        ),
+      );
+    },
+    [activeInvitations, setActiveInvitations],
+  );
   return (
     <ul className="usa-list--unstyled">
-      {userInvitations.map((userInvitation) => (
+      {activeInvitations.map((userInvitation) => (
         <OrganizationInvitationReply
           key={userInvitation.organization_invitation_id}
           userInvitation={userInvitation}
+          onDismiss={temporarilyDismissInvitationFor(userInvitation)}
         />
       ))}
     </ul>
