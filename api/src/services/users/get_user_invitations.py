@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
+from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
     Organization,
@@ -32,14 +33,14 @@ class InvitationInviterData:
 class InvitationRoleData:
     role_id: UUID
     role_name: str
-    privileges: list[str]
+    privileges: set[Privilege]
 
 
 @dataclass
 class InvitationItemData:
     organization_invitation_id: UUID
     organization: InvitationOrganizationData
-    status: str
+    status: OrganizationInvitationStatus
     created_at: date
     expires_at: date
     inviter: InvitationInviterData
@@ -94,7 +95,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
     for invitation in invitations:
         invitation_item = InvitationItemData(
             organization_invitation_id=invitation.organization_invitation_id,
-            status=invitation.status.value,
+            status=invitation.status,
             created_at=invitation.created_at,
             expires_at=invitation.expires_at,
             organization=InvitationOrganizationData(
@@ -115,7 +116,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
                 InvitationRoleData(
                     role_id=role.role_id,
                     role_name=role.role_name,
-                    privileges=list(role.privileges),
+                    privileges=role.privileges,
                 )
                 for role in invitation.roles
             ],
