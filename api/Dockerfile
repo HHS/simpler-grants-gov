@@ -1,11 +1,11 @@
-FROM ghcr.io/hhs/python-base-image:4322cc0@sha256:1b55400be929365421d4150638df39ee7345e4c70af713108e01edfd31c48b78 AS base
+FROM ghcr.io/hhs/python-base-image:1aca0fa@sha256:6dc1970c8ddf4007406764aa81dbaf01cb5b6d9899a110e6614acfe8c3703859 AS base
 
 ARG RUN_UID
 ARG RUN_USER
 
 # Read Python version from the version file in the base image and set it as a build arg
 # This allows all stages to use the same version without repeating ARG PY_MM=3.13
-RUN cat /python-version.txt > /tmp/py_version.txt
+RUN /bin/busybox mkdir -p /tmp && /bin/busybox cat /python-version.txt > /tmp/py_version.txt
 
 # Create user and directories using BusyBox applets (scratch-friendly)
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${RUN_UID:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
@@ -34,7 +34,7 @@ COPY newrelic.ini /api/newrelic.ini
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
-RUN PY_MM=$(cat /tmp/py_version.txt) && \
+RUN PY_MM=$(/bin/busybox cat /tmp/py_version.txt) && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
@@ -106,7 +106,7 @@ RUN /bin/busybox mkdir -p /usr/bin && \
 # - Remove Python bytecode cache files
 # - Remove pip cache
 # - Remove test files and docs from site-packages
-RUN PY_MM=$(cat /tmp/py_version.txt) && \
+RUN PY_MM=$(/bin/busybox cat /tmp/py_version.txt) && \
     /bin/busybox find /api/.venv -type d -name __pycache__ -exec /bin/busybox rm -rf {} + 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type f -name "*.pyc" -delete 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true && \
