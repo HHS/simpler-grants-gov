@@ -1,11 +1,11 @@
 import { getSession } from "src/services/auth/session";
-import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
+import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { ManageUsersBreadcrumbs } from "src/components/manageUsers/ManageUsersBreadcrumbs";
+import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
 
 export async function ManageUsersPageContent({
@@ -23,25 +23,36 @@ export async function ManageUsersPageContent({
       </GridContainer>
     );
   }
-  let userOrganizations: Organization[] | undefined;
+  let userOrganizations: Organization | undefined;
   try {
-    const [organizationsResult] = await Promise.all([
-      getUserOrganizations(session.token, session.user_id),
-    ]);
-    userOrganizations = organizationsResult;
+    userOrganizations = await getOrganizationDetails(
+      session.token,
+      organizationId,
+    );
   } catch (error) {
     console.error("Unable to fetch organization information", error);
   }
-  const organization = (userOrganizations ?? []).find(
-    (org) => org.organization_id === organizationId,
-  );
-  const name = organization?.sam_gov_entity?.legal_business_name;
+
+  const name = userOrganizations?.sam_gov_entity?.legal_business_name;
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <ManageUsersBreadcrumbs
-        organizationName={name}
-        organizationId={organizationId}
+      <Breadcrumbs
+        breadcrumbList={[
+          { title: "home", path: "/" },
+          {
+            title: "Workspace",
+            path: `/user/workspace`,
+          },
+          {
+            title: name ?? "Organization",
+            path: `/organization/${organizationId}`,
+          },
+          {
+            title: "Manage Users",
+            path: `/organization/${organizationId}/manage-users`,
+          },
+        ]}
       />
       <PageHeader organizationName={name} pageHeader={t("pageHeading")} />
     </GridContainer>
