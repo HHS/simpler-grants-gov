@@ -2,8 +2,13 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { use } from "react";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
+
+interface ManageUsersPageProps {
+  params: Promise<{ locale: string; id: string }>;
+}
 
 export async function generateMetadata({
   params,
@@ -19,17 +24,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
-  const { id: organizationId } = await params;
-  return <ManageUsersWithFlag organizationId={organizationId} />;
+function ManageUsersPage({ params }: ManageUsersPageProps) {
+  const { id: organizationId } = use(params);
+  return <ManageUsersPageContent organizationId={organizationId} />;
 }
 
-const ManageUsersWithFlag = withFeatureFlag<{ organizationId: string }, never>(
-  ManageUsersPageContent,
+export default withFeatureFlag<ManageUsersPageProps, never>(
+  ManageUsersPage,
   "userAdminOff",
   () => redirect("/maintenance"),
 );
