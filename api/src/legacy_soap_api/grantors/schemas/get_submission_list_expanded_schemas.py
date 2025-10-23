@@ -42,7 +42,7 @@ class ExpandedApplicationFilter(BaseModel):
 
     @field_validator("filter_value", mode="before")
     @classmethod
-    def convert_values_to_int_if_needed(cls, v: Any, info: Any) -> Any:
+    def convert_grants_gov_tracking_numbers_to_int(cls, v: Any, info: Any) -> Any:
         return [
             (
                 int(item.split("GRANT")[1])
@@ -103,7 +103,7 @@ class GetSubmissionListExpandedRequest(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def strip_explicit_none_values(cls, data: Any) -> dict[str, Any]:
+    def check_if_expanded_application_filter_is_empty(cls, data: Any) -> dict[str, Any]:
         if isinstance(data, dict):
             filter_alias = "ExpandedApplicationFilter"
             if filter_alias in data and data[filter_alias] is None:

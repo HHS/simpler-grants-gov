@@ -54,7 +54,9 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
                     )
                 ),
                 "ActiveExclusions": (
-                    convert_bool_to_yes_no(sam_gov_entity is not None and sam_gov_entity.has_exclusion_status)
+                    convert_bool_to_yes_no(
+                        sam_gov_entity is not None and sam_gov_entity.has_exclusion_status
+                    )
                 ),
                 "UEI": sam_gov_entity.uei if sam_gov_entity else None,
             }
