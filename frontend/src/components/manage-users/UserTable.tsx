@@ -2,9 +2,9 @@
 
 import type { UserDetail, UserRole } from "src/types/userTypes";
 
+import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import { Table } from "@trussworks/react-uswds";
-import { useTranslations } from "next-intl";
 
 export interface UsersTableProps {
   roles: UserRole[];
@@ -48,7 +48,7 @@ export function UsersTable({
   busyUserId,
   isSubmitting,
 }: UsersTableProps) {
-  const t = useTranslations("ManageUsers.usersTable")
+  const t = useTranslations("ManageUsers.usersTable");
   const [sortState, setSortState] = useState<{
     key: SortKey | null;
     direction: SortDirection;

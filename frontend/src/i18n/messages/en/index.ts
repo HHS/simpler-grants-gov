@@ -1502,7 +1502,7 @@ export const messages = {
       nameHeading: "Name",
       noUsersFound: "No users found.",
       roleHeading: "Role",
-      selectRoleFor: "Select role for"
+      selectRoleFor: "Select role for",
     },
     confirmationModal: {
       header: "Confirm role change",
