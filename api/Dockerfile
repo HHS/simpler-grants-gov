@@ -53,6 +53,7 @@ ARG RUN_USER
 ARG PY_MM=3.13
 
 # Disable Python optimization to preserve docstrings required by jsonpath_ng
+# https://github.com/h2non/jsonpath-ng?tab=readme-ov-file#special-note-about-ply-and-docstrings
 ENV PYTHONOPTIMIZE=0
 ENV TMPDIR="/tmp"
 
