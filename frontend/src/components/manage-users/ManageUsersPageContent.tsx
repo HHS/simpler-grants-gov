@@ -3,7 +3,6 @@ import {
   getUserOrganizations,
 } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
-import { UserDetail, UserRole } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
