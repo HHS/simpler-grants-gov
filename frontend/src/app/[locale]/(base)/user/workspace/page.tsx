@@ -1,16 +1,20 @@
 import { Metadata } from "next";
+import { WORKSPACE_CRUMBS } from "src/constants/breadcrumbs";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
-import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
+import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
 
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
+
+import Breadcrumbs from "src/components/Breadcrumbs";
+import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
+import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";
 
 export async function generateMetadata({
   params,
@@ -24,28 +28,6 @@ export async function generateMetadata({
   return meta;
 }
 
-const UserOrganizationsList = ({
-  userOrganizations,
-}: {
-  userOrganizations: Organization[];
-}) => {
-  const t = useTranslations("UserWorkspace");
-  return (
-    <>
-      <h2>{t("organizations")}</h2>
-      <ul>
-        {userOrganizations.map((userOrganization) => (
-          <li key={userOrganization.organization_id}>
-            <Link href={`/organization/${userOrganization.organization_id}`}>
-              {userOrganization.sam_gov_entity.legal_business_name}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-};
-
 async function UserWorkspace() {
   const t = await getTranslations("UserWorkspace");
 
@@ -55,27 +37,45 @@ async function UserWorkspace() {
     console.error("no user session, or user has no email address");
     return;
   }
-  let userDetails;
-  let userOrganizations;
-  const userDetailsPromise = getUserDetails(session.token, session.user_id);
+  let userRoles;
+  let userOrganizations: Organization[] = [];
+  const userRolesPromise = getUserPrivileges(session.token, session.user_id);
   const userOrganizationsPromise = getUserOrganizations(
     session.token,
     session.user_id,
   );
   try {
-    [userDetails, userOrganizations] = await Promise.all([
-      userDetailsPromise,
+    [userRoles, userOrganizations] = await Promise.all([
+      userRolesPromise,
       userOrganizationsPromise,
     ]);
   } catch (e) {
-    console.error("Unable to fetch user details", e);
+    console.error("Unable to fetch user details or organizations", e);
   }
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>{t("title")}</h1>
-      {userDetails && userOrganizations ? (
-        <UserOrganizationsList userOrganizations={userOrganizations} />
+      <Breadcrumbs breadcrumbList={WORKSPACE_CRUMBS} />
+      <h1 className="margin-top-2">
+        {t.rich("title", {
+          color: (chunks) => (
+            <span className="text-primary-dark">{chunks}</span>
+          ),
+        })}
+      </h1>
+      <UserOrganizationInvite
+        organizationId={
+          userOrganizations && userOrganizations[0]
+            ? userOrganizations[0].organization_id
+            : "1"
+        }
+      />
+      <WorkspaceLinksSection />
+      {userRoles && userOrganizations ? (
+        <UserOrganizationsList
+          userOrganizations={userOrganizations}
+          userRoles={userRoles}
+        />
       ) : (
         <ErrorMessage>{t("fetchError")}</ErrorMessage>
       )}
