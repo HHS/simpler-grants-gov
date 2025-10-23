@@ -1530,6 +1530,10 @@ export const messages = {
         label: "Add to organization",
         success: "User added!",
       },
+      validationErrors: {
+        email: "Email is required",
+        role: "Role is required",
+      },
     },
   },
 };
