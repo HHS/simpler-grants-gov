@@ -668,8 +668,8 @@ def user_can_access(db_session: db.Session, user_id: UUID, json_data: dict) -> r
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
         raise_flask_error(403, "Forbidden")
-
     with db_session.begin():
-        check_user_can_access(db_session, user_id, json_data)
+        db_session.add(user_token_session)
+        check_user_can_access(db_session, user_token_session.user, json_data)
 
     return response.ApiResponse(message="Success")

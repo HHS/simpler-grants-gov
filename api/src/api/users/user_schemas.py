@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from marshmallow import pre_dump
@@ -21,7 +21,7 @@ from src.db.models.user_models import (
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
-class ResourceSchema(Enum):
+class ResourceSchema(StrEnum):
     AGENCY = "agency"
     APPLICATION = "application"
     ORGANIZATION = "organization"
