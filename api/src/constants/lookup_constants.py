@@ -226,3 +226,10 @@ class RoleType(StrEnum):
     AGENCY = "agency"
     INTERNAL = "internal"
     APPLICATION = "application"
+
+
+class OrganizationInvitationStatus(StrEnum):
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+    PENDING = "pending"

@@ -135,7 +135,7 @@ def test_application_attachment_create_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 ##########################################
@@ -238,7 +238,7 @@ def test_application_attachment_get_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 ##########################################
@@ -417,7 +417,7 @@ def test_application_attachment_update_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 def test_application_attachment_update_deletes_old_file_different_name(
@@ -599,7 +599,7 @@ def test_application_attachment_delete_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 def test_application_attachment_update_403_access(
