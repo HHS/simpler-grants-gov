@@ -24,6 +24,8 @@ from src.api.users.user_schemas import (
     UserDeleteSavedSearchResponseSchema,
     UserGetResponseSchema,
     UserGetRolesAndPrivilegesResponseSchema,
+    UserInvitationListRequestSchema,
+    UserInvitationListResponseSchema,
     UserOrganizationsResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
@@ -57,6 +59,7 @@ from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
 from src.services.users.get_user_api_keys import get_user_api_keys
 from src.services.users.get_user_applications import get_user_applications
+from src.services.users.get_user_invitations import get_user_invitations
 from src.services.users.get_user_organizations import get_user_organizations
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
@@ -645,3 +648,36 @@ def user_get_roles_and_privileges(db_session: db.Session, user_id: UUID) -> resp
         roles_and_privileges = get_roles_and_privileges(db_session, user_id)
 
     return response.ApiResponse(message="Success", data=roles_and_privileges)
+
+
+@user_blueprint.post("/<uuid:user_id>/invitations/list")
+@user_blueprint.input(UserInvitationListRequestSchema, location="json")
+@user_blueprint.output(UserInvitationListResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_invitations(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Get all invitations for a user by matching their login.gov email"""
+    add_extra_data_to_current_request_logs({"user_id": user_id})
+    logger.info("POST /v1/users/:user_id/invitations/list")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        invitations = get_user_invitations(db_session, user_id)
+
+    logger.info(
+        "Retrieved invitations for user",
+        extra={
+            "user_id": user_id,
+            "invitation_count": len(invitations),
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=invitations)
