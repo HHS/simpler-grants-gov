@@ -1479,7 +1479,7 @@ export const messages = {
       },
     },
   },
-ManageUsers: {
+  ManageUsers: {
     pageTitle: "Manage Users | Simpler.Grants.gov",
     pageHeading: "Manage Users",
     activeUsersHeading: "Active Users",

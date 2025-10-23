@@ -1,7 +1,5 @@
 import { getSession } from "src/services/auth/session";
-import {
-  getUserOrganizations,
-} from "src/services/fetch/fetchers/organizationsFetcher";
+import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -20,9 +18,7 @@ export async function ManageUsersPageContent({
   if (!session?.token) {
     return (
       <GridContainer className="padding-top-2 tablet:padding-y-6">
-        <ErrorMessage>
-          {t("errors.notLoggedInMessage")}
-        </ErrorMessage>
+        <ErrorMessage>{t("errors.notLoggedInMessage")}</ErrorMessage>
       </GridContainer>
     );
   }
