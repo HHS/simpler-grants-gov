@@ -1472,6 +1472,7 @@ export const messages = {
       explanation: "Your organization's active members are listed below.",
       manageUsersExplanation:
         "Manage Users to add or update roles and permissions.",
+      manageUsersCTA: "Manage Users",
       headings: {
         email: "Email",
         name: "Name",
