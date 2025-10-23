@@ -267,37 +267,23 @@ class TestUserInvitationsList:
         user_email = f"user-statuses-{uuid4()}@example.com"
         inviter_email = f"admin-statuses-{uuid4()}@org.com"
 
-        # Create user with login.gov external user
-        user = UserFactory.create()
-        external_user = LinkExternalUserFactory.create(user=user, email=user_email)
-
-        # Create inviter user
-        inviter = UserFactory.create()
-        inviter_external = LinkExternalUserFactory.create(user=inviter, email=inviter_email)
+        # Create users using helper methods
+        user = create_user_with_email(user_email)
+        inviter = create_user_with_email(inviter_email)
 
         # Create organization
         organization = OrganizationFactory.create()
 
-        # Create invitations with different statuses
-        pending_invitation = OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email=user_email,
+        # Create invitations with different statuses using helper
+        pending_invitation = create_invitation_with_role(
+            organization, inviter, user_email, org_role
         )
-
-        accepted_invitation = OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email=user_email,
+        accepted_invitation = create_invitation_with_role(
+            organization,
+            inviter,
+            user_email,
+            org_role,
             accepted_at=db_session.execute(text("SELECT NOW()")).scalar(),
-        )
-
-        # Link roles to invitations
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=pending_invitation, role=org_role
-        )
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=accepted_invitation, role=org_role
         )
 
         # Create JWT token
@@ -330,30 +316,13 @@ class TestUserInvitationsList:
         user_email = f"user-structure-{uuid4()}@example.com"
         inviter_email = f"admin-structure-{uuid4()}@org.com"
 
-        # Create user with login.gov external user and profile
-        user = UserFactory.create()
-        external_user = LinkExternalUserFactory.create(user=user, email=user_email)
-        user_profile = UserProfileFactory.create(user=user)
+        # Create users using helper methods (with profiles for complete data)
+        user = create_user_with_email(user_email, "Test", "User")
+        inviter = create_user_with_email(inviter_email, "John", "Doe")
 
-        # Create inviter user with profile
-        inviter = UserFactory.create()
-        inviter_profile = UserProfileFactory.create(
-            user=inviter, first_name="John", last_name="Doe"
-        )
-        inviter_external = LinkExternalUserFactory.create(user=inviter, email=inviter_email)
-
-        # Create organization and invitation
+        # Create organization and invitation using helper
         organization = OrganizationFactory.create()
-        invitation = OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email=user_email,
-        )
-
-        # Link role to invitation
-        LinkOrganizationInvitationToRoleFactory.create(
-            organization_invitation=invitation, role=org_role
-        )
+        invitation = create_invitation_with_role(organization, inviter, user_email, org_role)
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
