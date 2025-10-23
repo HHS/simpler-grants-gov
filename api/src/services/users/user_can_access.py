@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import UUID
 
 from sqlalchemy import select
@@ -30,7 +31,7 @@ def _get_resource(
     if not resource:
         raise_flask_error(404, f"Resource ID {resource_id} of type {resource_type} not found")
 
-    return resource
+    return cast(Organization | Application | Agency, resource)
 
 
 def check_user_can_access(db_session: db.Session, user: User, json_data: dict) -> None:
