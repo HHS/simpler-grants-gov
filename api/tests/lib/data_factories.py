@@ -103,7 +103,7 @@ def setup_application_for_form_validation(
             )
 
     if user_email is not None:
-        app_user = ApplicationUserFactory.create(application=application, is_application_owner=True)
+        app_user = ApplicationUserFactory.create(application=application)
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
 
     return application_form

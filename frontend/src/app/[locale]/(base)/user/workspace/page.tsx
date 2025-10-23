@@ -12,6 +12,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
+import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
+
 export async function generateMetadata({
   params,
 }: LocalizedPageProps): Promise<Metadata> {
@@ -55,8 +57,8 @@ async function UserWorkspace() {
     console.error("no user session, or user has no email address");
     return;
   }
-  let userDetails;
-  let userOrganizations;
+  let userDetails = {};
+  let userOrganizations: Organization[] = [];
   const userDetailsPromise = getUserDetails(session.token, session.user_id);
   const userOrganizationsPromise = getUserOrganizations(
     session.token,
@@ -74,8 +76,13 @@ async function UserWorkspace() {
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
       <h1>{t("title")}</h1>
-      {userDetails && userOrganizations ? (
-        <UserOrganizationsList userOrganizations={userOrganizations} />
+      {userDetails && userOrganizations?.length ? (
+        <>
+          <UserOrganizationInvite
+            organizationId={userOrganizations[0].organization_id}
+          />
+          <UserOrganizationsList userOrganizations={userOrganizations} />
+        </>
       ) : (
         <ErrorMessage>{t("fetchError")}</ErrorMessage>
       )}

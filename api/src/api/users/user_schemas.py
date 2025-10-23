@@ -256,6 +256,26 @@ class UserApplicationListRequestSchema(Schema):
     pass
 
 
+class UserApplicationOpportunitySchema(Schema):
+    """Schema for opportunity information in application list"""
+
+    opportunity_id = fields.UUID(metadata={"description": "The opportunity ID"})
+    opportunity_title = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The title of the opportunity",
+            "example": "Research into Conservation Techniques",
+        },
+    )
+    agency_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The name of the agency who created the opportunity",
+            "example": "Department of Examples",
+        },
+    )
+
+
 class UserApplicationCompetitionSchema(Schema):
     """Schema for competition information in application list"""
 
@@ -280,6 +300,10 @@ class UserApplicationCompetitionSchema(Schema):
     )
     is_open = fields.Boolean(
         metadata={"description": "Whether the competition is open and accepting applications"}
+    )
+    opportunity = fields.Nested(
+        UserApplicationOpportunitySchema,
+        metadata={"description": "Opportunity information for this competition"},
     )
 
 

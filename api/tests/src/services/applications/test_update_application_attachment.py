@@ -141,7 +141,7 @@ def test_update_application_attachment_unauthorized(enable_factory_create, db_se
         )
 
     assert excinfo.value.status_code == 403
-    assert "Unauthorized" in excinfo.value.message
+    assert "Forbidden" in excinfo.value.message
 
 
 def test_update_application_attachment_with_real_file(
