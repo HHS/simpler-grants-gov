@@ -112,9 +112,14 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     expires_at: Mapped[datetime]
     responded_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
     invitee_user: Mapped["User"] = relationship("User", foreign_keys=[responded_by_user_id])
-    linked_role: Mapped["LinkOrganizationInvitationToRole"] = relationship(
-        "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=False
+    linked_roles: Mapped[list["LinkOrganizationInvitationToRole"]] = relationship(
+        "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=True
     )
+
+    @property
+    def roles(self) -> list["Role"]:
+        """Get the roles associated with this invitation"""
+        return [link.role for link in self.linked_roles]
 
     @property
     def status(self) -> OrganizationInvitationStatus:
