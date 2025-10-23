@@ -1,5 +1,6 @@
 import { Breadcrumb } from "src/components/Breadcrumbs";
 
+// individual breadcrumbs
 const HOME: Breadcrumb = { title: "Home", path: "/" };
 const SUBSCRIBE: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
 const SEARCH: Breadcrumb = {
@@ -18,12 +19,16 @@ const SAVED_OPPORTUNITIES: Breadcrumb = {
   title: "Saved opportunities",
   path: "/saved-opportunities/",
 };
-
 const SAVED_SEARCHES: Breadcrumb = {
   title: "Saved search queries",
   path: "/saved-search-queries/",
 };
+const WORKSPACE: Breadcrumb = {
+  title: "Workspace",
+  path: "/workspace",
+};
 
+// page breadcrumbs
 export const SUBSCRIBE_CONFIRMATION_CRUMBS: Breadcrumb[] = [
   HOME,
   SUBSCRIBE,
@@ -37,3 +42,4 @@ export const SAVED_OPPORTUNITIES_CRUMBS: Breadcrumb[] = [
   SAVED_OPPORTUNITIES,
 ];
 export const SAVED_SEARCHES_CRUMBS: Breadcrumb[] = [HOME, SAVED_SEARCHES];
+export const WORKSPACE_CRUMBS: Breadcrumb[] = [HOME, WORKSPACE];
