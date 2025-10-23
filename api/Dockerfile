@@ -9,7 +9,6 @@ RUN cat /python-version.txt > /tmp/py_version.txt
 
 # Create user and directories using BusyBox applets (scratch-friendly)
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${RUN_UID:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
-    PY_MM=$(cat /tmp/py_version.txt) && \
     if [ "${RUN_USER}" != "root" ]; then \
       /bin/busybox grep -Eq "^${RUN_USER}:" /etc/group || /bin/busybox addgroup -g "${RUN_UID}" "${RUN_USER}"; \
       /bin/busybox grep -Eq "^${RUN_USER}:" /etc/passwd || /bin/busybox adduser -D -H -s /bin/sh -u "${RUN_UID}" -G "${RUN_USER}" "${RUN_USER}"; \
@@ -36,7 +35,7 @@ COPY newrelic.ini /api/newrelic.ini
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN PY_MM=$(cat /tmp/py_version.txt) && \
-    /usr/local/bin/python${PY_MM} -m poetry build --format wheel && \
+    /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     /bin/busybox mkdir -p "${SITE_BASE}/src" && \
@@ -113,7 +112,7 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
     /bin/busybox find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type d -name "tests" -exec /bin/busybox rm -rf {} + 2>/dev/null || true && \
     /bin/busybox find /api/.venv -type d -name "test" -exec /bin/busybox rm -rf {} + 2>/dev/null || true && \
-    /bin/busybox rm -rf /api/.venv/lib/python${PY_MM}/site-packages/pip /api/.venv/lib/python${PY_MM}/site-packages/setuptools || true
+    /bin/busybox rm -rf /api/.venv/lib/python"${PY_MM}"/site-packages/pip /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
