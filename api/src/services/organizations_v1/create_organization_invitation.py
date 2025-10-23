@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import select
@@ -10,7 +9,7 @@ from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
-from src.db.models.user_models import LinkExternalUser, OrganizationUser, Role, User
+from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.update_user_organization_roles import validate_roles
 from src.util import datetime_util
@@ -32,7 +31,7 @@ def check_duplicate_invitation(
     stmt = (
         select(OrganizationInvitation)
         .where(OrganizationInvitation.organization_id == organization_id)
-        .where(OrganizationInvitation.invitee_email == invitee_email.lower())
+        .where(OrganizationInvitation.invitee_email == invitee_email)
     )
 
     existing_invitation = db_session.execute(stmt).scalar_one_or_none()
@@ -61,7 +60,7 @@ def check_user_already_member(
         .join(User, OrganizationUser.user_id == User.user_id)
         .join(LinkExternalUser, User.user_id == LinkExternalUser.user_id)
         .where(OrganizationUser.organization_id == organization_id)
-        .where(LinkExternalUser.email.lower() == invitee_email.lower())
+        .where(LinkExternalUser.email == invitee_email)
     )
 
     existing_member = db_session.execute(stmt).scalar_one_or_none()
@@ -74,7 +73,7 @@ def check_user_already_member(
 
 def create_organization_invitation(
     db_session: db.Session, user: User, organization_id: UUID, data: dict
-) -> dict[str, Any]:
+) -> OrganizationInvitation:
     """Create an organization invitation with the specified roles.
 
     Args:
@@ -84,7 +83,7 @@ def create_organization_invitation(
         data: Request data containing invitee_email and role_ids
 
     Returns:
-        dict: Formatted invitation data for response
+        OrganizationInvitation: The created invitation
 
     Raises:
         FlaskError: Various HTTP errors for validation failures
@@ -101,8 +100,8 @@ def create_organization_invitation(
     if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
         raise_flask_error(403, "Forbidden")
 
-    # Validate roles exist and are organization roles
-    validate_roles(db_session, role_ids)
+    # Validate roles exist and are organization roles - get roles back from validation
+    roles = validate_roles(db_session, role_ids)
 
     # Check for duplicate active invitations
     check_duplicate_invitation(db_session, organization_id, invitee_email)
@@ -113,10 +112,6 @@ def create_organization_invitation(
     # Calculate expiration date
     expires_at = datetime_util.utcnow() + timedelta(days=INVITATION_EXPIRY_DAYS)
 
-    # Query the roles to get their details for the response
-    roles_stmt = select(Role).where(Role.role_id.in_(role_ids))
-    roles = db_session.execute(roles_stmt).scalars().all()
-
     # Create invitation record with explicit ID and created_at for response
     invitation = OrganizationInvitation(
         organization_invitation_id=uuid4(),
@@ -126,27 +121,13 @@ def create_organization_invitation(
         expires_at=expires_at,
         created_at=datetime_util.utcnow(),
         invitee_user_id=None,  # Will be set when invitation is accepted/rejected
-        linked_roles=[LinkOrganizationInvitationToRole(role_id=role_id) for role_id in role_ids],
+        linked_roles=[
+            LinkOrganizationInvitationToRole(role_id=role_id, role=role)
+            for role_id, role in zip(role_ids, roles, strict=False)
+        ],
     )
 
     db_session.add(invitation)
 
-    # Format response data
-    invitation_data = {
-        "organization_invitation_id": invitation.organization_invitation_id,
-        "organization_id": invitation.organization_id,
-        "invitee_email": invitation.invitee_email,
-        "status": invitation.status.value,
-        "expires_at": invitation.expires_at,
-        "roles": [
-            {
-                "role_id": role.role_id,
-                "role_name": role.role_name,
-            }
-            for role in roles
-        ],
-        "created_at": invitation.created_at,
-    }
-
     logger.info("Successfully created organization invitation")
-    return invitation_data
+    return invitation

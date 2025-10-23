@@ -487,7 +487,7 @@ class TestCreateOrganizationInvitation:
         )
         assert invitation is not None
 
-        # Try to create another invitation with different case - should fail
+        # Try to create another invitation with different case - should fail due to case-insensitive duplicate check
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations",
             headers={"X-SGG-Token": token},
