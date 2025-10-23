@@ -1076,6 +1076,55 @@ paths:
       summary: Get organization information by ID
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/invitations/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInvitationListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Get all invitations for a user by matching their login.gov email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInvitationListRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}:
     get:
       parameters:
@@ -5362,6 +5411,134 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OrganizationData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserInvitationListRequest:
+      type: object
+      properties: {}
+    UserInvitationOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_name:
+          type: string
+          description: Organization name
+          example: Example Organization
+    UserInvitationInviter:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: Inviter user unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Inviter first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Inviter last name
+          example: Doe
+        email:
+          type:
+          - string
+          - 'null'
+          description: Inviter email
+          example: admin@org.com
+    UserInvitationRole:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+          example: Organization Member
+        privileges:
+          type: array
+          description: List of privileges for this role
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    UserInvitationItem:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Invitation unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/UserInvitationOrganization'
+        status:
+          type: string
+          description: Invitation status
+          example: pending
+        created_at:
+          type: string
+          format: date-time
+          description: When the invitation was created
+          example: '2024-01-08T10:30:00Z'
+        expires_at:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          example: '2024-01-15T10:30:00Z'
+        inviter:
+          description: Information about who sent the invitation
+          type:
+          - object
+          $ref: '#/components/schemas/UserInvitationInviter'
+        roles:
+          type: array
+          description: Roles that would be assigned if invitation is accepted
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserInvitationRole'
+    UserInvitationListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of user invitations
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserInvitationItem'
         status_code:
           type: integer
           description: The HTTP status code
