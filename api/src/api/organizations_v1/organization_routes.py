@@ -173,9 +173,7 @@ def organization_create_invitation(
     db_session: db.Session, organization_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     """Create an invitation for a new organization member"""
-    add_extra_data_to_current_request_logs(
-        {"organization_id": organization_id, "invitee_email": json_data.get("invitee_email")}
-    )
+    add_extra_data_to_current_request_logs({"organization_id": organization_id})
     logger.info("POST /v1/organizations/:organization_id/invitations")
 
     # Get authenticated user
