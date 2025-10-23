@@ -1,34 +1,42 @@
+from dataclasses import dataclass
 from datetime import date
-from typing import TypedDict
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
-from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
+from src.db.models.entity_models import (
+    LinkOrganizationInvitationToRole,
+    Organization,
+    OrganizationInvitation,
+)
 from src.db.models.user_models import LinkExternalUser, User
 
 
-class InvitationOrganizationData(TypedDict):
+@dataclass
+class InvitationOrganizationData:
     organization_id: UUID
-    organization_name: str
+    organization_name: str | None
 
 
-class InvitationInviterData(TypedDict):
+@dataclass
+class InvitationInviterData:
     user_id: UUID
     first_name: str | None
     last_name: str | None
     email: str | None
 
 
-class InvitationRoleData(TypedDict):
+@dataclass
+class InvitationRoleData:
     role_id: UUID
     role_name: str
     privileges: list[str]
 
 
-class InvitationItemData(TypedDict):
+@dataclass
+class InvitationItemData:
     organization_invitation_id: UUID
     organization: InvitationOrganizationData
     status: str
@@ -46,14 +54,12 @@ def _fetch_user_invitations_by_user_id(
         select(OrganizationInvitation)
         .join(LinkExternalUser, OrganizationInvitation.invitee_email == LinkExternalUser.email)
         .options(
-            # Load organization data
-            selectinload(OrganizationInvitation.organization),
+            # Load organization data with sam_entity for legal_business_name
+            selectinload(OrganizationInvitation.organization).selectinload(
+                Organization.sam_gov_entity
+            ),
             # Load inviter user data with profile
             selectinload(OrganizationInvitation.inviter_user).selectinload(User.profile),
-            # Load inviter user's external user data (for email)
-            selectinload(OrganizationInvitation.inviter_user).selectinload(
-                User.linked_login_gov_external_user
-            ),
             # Load roles through the link table
             selectinload(OrganizationInvitation.linked_roles).selectinload(
                 LinkOrganizationInvitationToRole.role
@@ -86,52 +92,34 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
     # Transform to API response format
     invitation_data: list[InvitationItemData] = []
     for invitation in invitations:
-        # Get organization name - for now we'll use the organization_id as name
-        # since Organization model doesn't have a name field in the current schema
-        organization_data: InvitationOrganizationData = {
-            "organization_id": invitation.organization.organization_id,
-            "organization_name": f"Organization {invitation.organization.organization_id}",
-        }
-
-        # Get inviter information - now using eagerly loaded data (no additional query!)
-        inviter_data: InvitationInviterData = {
-            "user_id": invitation.inviter_user.user_id,
-            "first_name": (
-                invitation.inviter_user.profile.first_name
-                if invitation.inviter_user.profile
-                else None
+        invitation_item = InvitationItemData(
+            organization_invitation_id=invitation.organization_invitation_id,
+            status=invitation.status.value,
+            created_at=invitation.created_at,
+            expires_at=invitation.expires_at,
+            organization=InvitationOrganizationData(
+                organization_id=invitation.organization.organization_id,
+                organization_name=(
+                    invitation.organization.sam_gov_entity.legal_business_name
+                    if invitation.organization.sam_gov_entity
+                    else None
+                ),
             ),
-            "last_name": (
-                invitation.inviter_user.profile.last_name
-                if invitation.inviter_user.profile
-                else None
+            inviter=InvitationInviterData(
+                user_id=invitation.inviter_user.user_id,
+                first_name=invitation.inviter_user.first_name,
+                last_name=invitation.inviter_user.last_name,
+                email=invitation.inviter_user.email,
             ),
-            "email": (
-                invitation.inviter_user.linked_login_gov_external_user.email
-                if invitation.inviter_user.linked_login_gov_external_user
-                else None
-            ),
-        }
-
-        # Get roles information
-        roles_data: list[InvitationRoleData] = [
-            {
-                "role_id": role.role_id,
-                "role_name": role.role_name,
-                "privileges": [priv.value for priv in role.privileges],
-            }
-            for role in invitation.roles
-        ]
-
-        invitation_item: InvitationItemData = {
-            "organization_invitation_id": invitation.organization_invitation_id,
-            "organization": organization_data,
-            "status": invitation.status.value,
-            "created_at": invitation.created_at,
-            "expires_at": invitation.expires_at,
-            "inviter": inviter_data,
-            "roles": roles_data,
-        }
+            roles=[
+                InvitationRoleData(
+                    role_id=role.role_id,
+                    role_name=role.role_name,
+                    privileges=list(role.privileges),
+                )
+                for role in invitation.roles
+            ],
+        )
 
         invitation_data.append(invitation_item)
 

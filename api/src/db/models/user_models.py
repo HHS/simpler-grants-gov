@@ -76,6 +76,16 @@ class User(ApiSchemaTable, TimestampMixin):
         return None
 
     @property
+    def first_name(self) -> str | None:
+        if self.profile is not None:
+            return self.profile.first_name
+
+    @property
+    def last_name(self) -> str | None:
+        if self.profile is not None:
+            return self.profile.last_name
+
+    @property
     def internal_roles(self) -> list["Role"]:
         return [iur.role for iur in self.internal_user_roles]
 

@@ -567,10 +567,11 @@ class UserInvitationOrganizationSchema(Schema):
         }
     )
     organization_name = fields.String(
+        allow_none=True,
         metadata={
             "description": "Organization name",
             "example": "Example Organization",
-        }
+        },
     )
 
 
