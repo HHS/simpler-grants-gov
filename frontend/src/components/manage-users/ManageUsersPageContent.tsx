@@ -21,7 +21,7 @@ export async function ManageUsersPageContent({
     return (
       <GridContainer className="padding-top-2 tablet:padding-y-6">
         <ErrorMessage>
-          {t("errors.notLoggedInMessage") ?? "not logged in"}
+          {t("errors.notLoggedInMessage")}
         </ErrorMessage>
       </GridContainer>
     );
@@ -33,7 +33,7 @@ export async function ManageUsersPageContent({
     ]);
     userOrganizations = organizationsResult;
   } catch (error) {
-    console.error("Unable to fetch organization users", error);
+    console.error("Unable to fetch organization information", error);
   }
   const organization = (userOrganizations ?? []).find(
     (org) => org.organization_id === organizationId,
