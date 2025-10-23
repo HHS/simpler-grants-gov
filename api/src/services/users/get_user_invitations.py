@@ -6,7 +6,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
-from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
 from src.db.models.user_models import LinkExternalUser, User
 
@@ -26,7 +25,7 @@ class InvitationInviterData(TypedDict):
 class InvitationRoleData(TypedDict):
     role_id: UUID
     role_name: str
-    privileges: list[Privilege]
+    privileges: list[str]
 
 
 class InvitationItemData(TypedDict):
@@ -90,13 +89,13 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
         # Get organization name - for now we'll use the organization_id as name
         # since Organization model doesn't have a name field in the current schema
         organization_data: InvitationOrganizationData = {
-            "organization_id": str(invitation.organization.organization_id),
+            "organization_id": invitation.organization.organization_id,
             "organization_name": f"Organization {invitation.organization.organization_id}",
         }
 
         # Get inviter information - now using eagerly loaded data (no additional query!)
         inviter_data: InvitationInviterData = {
-            "user_id": str(invitation.inviter_user.user_id),
+            "user_id": invitation.inviter_user.user_id,
             "first_name": (
                 invitation.inviter_user.profile.first_name
                 if invitation.inviter_user.profile
@@ -117,7 +116,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
         # Get roles information
         roles_data: list[InvitationRoleData] = [
             {
-                "role_id": str(role.role_id),
+                "role_id": role.role_id,
                 "role_name": role.role_name,
                 "privileges": [priv.value for priv in role.privileges],
             }
@@ -125,7 +124,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
         ]
 
         invitation_item: InvitationItemData = {
-            "organization_invitation_id": str(invitation.organization_invitation_id),
+            "organization_invitation_id": invitation.organization_invitation_id,
             "organization": organization_data,
             "status": invitation.status.value,
             "created_at": invitation.created_at,

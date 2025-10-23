@@ -1,7 +1,7 @@
+from datetime import datetime
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import text
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege, RoleType
@@ -203,7 +203,7 @@ class TestUserInvitationsList:
 
         # Create invitation with different email using helper
         organization = OrganizationFactory.create()
-        invitation = create_invitation_with_role(
+        create_invitation_with_role(
             organization, inviter, different_email, org_role  # Different email
         )
 
@@ -275,15 +275,9 @@ class TestUserInvitationsList:
         organization = OrganizationFactory.create()
 
         # Create invitations with different statuses using helper
-        pending_invitation = create_invitation_with_role(
-            organization, inviter, user_email, org_role
-        )
-        accepted_invitation = create_invitation_with_role(
-            organization,
-            inviter,
-            user_email,
-            org_role,
-            accepted_at=db_session.execute(text("SELECT NOW()")).scalar(),
+        create_invitation_with_role(organization, inviter, user_email, org_role)
+        create_invitation_with_role(
+            organization, inviter, user_email, org_role, accepted_at=datetime.now()
         )
 
         # Create JWT token
@@ -322,7 +316,7 @@ class TestUserInvitationsList:
 
         # Create organization and invitation using helper
         organization = OrganizationFactory.create()
-        invitation = create_invitation_with_role(organization, inviter, user_email, org_role)
+        create_invitation_with_role(organization, inviter, user_email, org_role)
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
