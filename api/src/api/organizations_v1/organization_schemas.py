@@ -1,7 +1,9 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
+from src.constants.lookup_constants import OrganizationInvitationStatus
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -115,4 +117,130 @@ class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):
 
     data = fields.Raw(
         allow_none=True, metadata={"description": "No data returned on successful removal"}
+    )
+
+
+# Organization Invitations List Schemas
+
+
+class OrganizationInvitationFilterSchema(Schema):
+    """Schema for filtering organization invitations by status"""
+
+    status = fields.Nested(
+        StrSearchSchemaBuilder("InvitationStatusFilterSchema")
+        .with_one_of(allowed_values=OrganizationInvitationStatus, example="pending")
+        .build(),
+        allow_none=True,
+        metadata={"description": "Filter invitations by status"},
+    )
+
+
+class OrganizationInvitationListRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/invitations/list request"""
+
+    filters = fields.Nested(
+        OrganizationInvitationFilterSchema,
+        allow_none=True,
+        metadata={"description": "Filters to apply to the invitation list"},
+    )
+
+
+class InviterDataSchema(Schema):
+    """Schema for inviter user information in invitation responses"""
+
+    user_id = fields.UUID(
+        metadata={
+            "description": "Inviter user unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    email = fields.String(
+        metadata={"description": "Inviter email address", "example": "admin@org.com"}
+    )
+    first_name = fields.String(
+        allow_none=True, metadata={"description": "Inviter first name", "example": "John"}
+    )
+    last_name = fields.String(
+        allow_none=True, metadata={"description": "Inviter last name", "example": "Doe"}
+    )
+
+
+class InviteeDataSchema(Schema):
+    """Schema for invitee user information in invitation responses"""
+
+    user_id = fields.UUID(
+        allow_none=True,
+        metadata={
+            "description": "Invitee user unique identifier (null if not registered)",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        },
+    )
+    email = fields.String(
+        allow_none=True,
+        metadata={"description": "Invitee email address", "example": "user@example.com"},
+    )
+    first_name = fields.String(
+        allow_none=True, metadata={"description": "Invitee first name", "example": "Jane"}
+    )
+    last_name = fields.String(
+        allow_none=True, metadata={"description": "Invitee last name", "example": "Smith"}
+    )
+
+
+class OrganizationInvitationDataSchema(Schema):
+    """Schema for individual organization invitation data"""
+
+    organization_invitation_id = fields.UUID(
+        metadata={
+            "description": "Invitation unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    invitee_email = fields.String(
+        metadata={"description": "Email address of the invitee", "example": "user@example.com"}
+    )
+    status = fields.String(
+        metadata={"description": "Current status of the invitation", "example": "pending"}
+    )
+    created_at = fields.DateTime(
+        metadata={
+            "description": "When the invitation was created",
+            "example": "2024-01-08T10:30:00Z",
+        }
+    )
+    expires_at = fields.DateTime(
+        metadata={"description": "When the invitation expires", "example": "2024-01-15T10:30:00Z"}
+    )
+    accepted_at = fields.DateTime(
+        allow_none=True,
+        metadata={
+            "description": "When the invitation was accepted",
+            "example": "2024-01-10T14:20:00Z",
+        },
+    )
+    rejected_at = fields.DateTime(
+        allow_none=True,
+        metadata={"description": "When the invitation was rejected", "example": None},
+    )
+    inviter = fields.Nested(
+        InviterDataSchema,
+        metadata={"description": "Information about the user who sent the invitation"},
+    )
+    invitee = fields.Nested(
+        InviteeDataSchema,
+        allow_none=True,
+        metadata={"description": "Information about the invited user (null if not registered)"},
+    )
+    roles = fields.List(
+        fields.Nested(RoleSchema),
+        metadata={"description": "Roles that will be assigned when invitation is accepted"},
+    )
+
+
+class OrganizationInvitationListResponseSchema(AbstractResponseSchema):
+    """Schema for POST /organizations/:organization_id/invitations/list response"""
+
+    data = fields.List(
+        fields.Nested(OrganizationInvitationDataSchema),
+        metadata={"description": "List of organization invitations"},
     )
