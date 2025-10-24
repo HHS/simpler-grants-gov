@@ -140,7 +140,7 @@ def test_sync_roles(schema_no_lookup, caplog):
     # Assert no changes when run again
     sync_lookup_values(schema_no_lookup)
 
-    assert caplog.text.count("No modified values for role") == 4
+    assert caplog.text.count("No modified values for role") == len(CORE_ROLES)
 
     # Save original static values
     original_org_member_privs = ORG_MEMBER.privileges[:]

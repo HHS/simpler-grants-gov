@@ -1,5 +1,7 @@
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserDetail, UserRole } from "src/types/userTypes";
+import { OrganizationInviteRecord } from "src/types/organizationTypes";
+import { fakeOrganizationInviteRecord } from "src/utils/testing/fixtures";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
@@ -76,4 +78,31 @@ export const updateOrganizationUserRoles = async (
   });
   const json = (await resp.json()) as { data: UserDetail };
   return json.data;
+}
+
+export const inviteUserToOrganization = async (
+  _token: string,
+  requestData: {
+    organizationId: string;
+    roleId: string;
+    email: string;
+  },
+): Promise<OrganizationInviteRecord> => {
+  const { organizationId, roleId, email } = requestData;
+  // eslint-disable-next-line
+  console.log("!!! updating", organizationId, roleId, email);
+  return Promise.resolve(fakeOrganizationInviteRecord);
+  //   const ssgToken = {
+  //     "X-SGG-Token": token,
+  //   };
+  //   const resp = await fetchOrganizationWithMethod("POST")({
+  //     subPath: `${organizationId}/invitations`,
+  //     additionalHeaders: ssgToken,
+  //     body: {
+  //       invitee_email: email,
+  //       role_ids: roleId,
+  //     },
+  //   });
+  //   const json = (await resp.json()) as { data: OrganizationInviteRecord };
+  //   return json.data;
 };

@@ -80,11 +80,11 @@ const OrganizationRosterInfo = ({
       <div>
         {t("explanation")} {t("manageUsersExplanation")}{" "}
         <Link
-          href={`/user/organization/${organizationId}/manage-users`}
+          href={`/organization/${organizationId}/manage-users`}
           className="usa-button usa-button--secondary float-right"
         >
           <USWDSIcon name="people" />
-          Manage Users
+          {t("manageUsersCTA")}
         </Link>
       </div>
     </div>

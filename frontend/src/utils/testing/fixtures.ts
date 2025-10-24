@@ -581,6 +581,12 @@ export const fakeUserWithProfile: UserDetailWithProfile = {
   },
 };
 
+export const fakeUserRole = {
+  role_id: "1",
+  role_name: "role_1",
+  privileges: ["read_organization", "modify_organization"],
+};
+
 export const fakeUserPrivilegesResponse = {
   user_id: "1",
   organization_users: [
@@ -647,6 +653,19 @@ export const fakeUserPrivilegesResponse = {
           privileges: ["excommunicate_agency"],
         },
       ],
+    },
+  ],
+};
+
+export const fakeOrganizationInviteRecord = {
+  organization_invitation_id: "1",
+  organization_id: "2",
+  invitee_email: "not-a-real@email.org",
+  status: "pending",
+  roles: [
+    {
+      role_id: "5",
+      role_name: "role_5",
     },
   ],
 };

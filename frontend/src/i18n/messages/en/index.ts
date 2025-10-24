@@ -1453,9 +1453,36 @@ export const messages = {
   },
   UserWorkspace: {
     pageTitle: "User Workspace | Simpler.Grants.gov",
-    title: "User Workspace",
+    title: "<color>Welcome</color> to your workspace.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
-    organizations: "Organizations",
+    organizations: "Your organizations",
+    noOrganizations: {
+      title: "You're not a member of any organizations yet",
+      description:
+        "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
+    },
+    organizationButtons: {
+      view: "View organization details",
+      manage: "Manage users",
+    },
+    linksSection: {
+      heading: "Your recent activity",
+      applications: {
+        heading: "Applications",
+        description: "You can now apply for select opportunities on Simpler.",
+        linkText: "View applications",
+      },
+      savedQueries: {
+        heading: "Saved queries",
+        description: "Return to your preferred search terms and filters.",
+        linkText: "View saved queries",
+      },
+      savedOpportunities: {
+        heading: "Saved opportunities",
+        description: "Keep track of oppportunities you're interested in.",
+        linkText: "View saved opportunities",
+      },
+    },
   },
   OrganizationDetail: {
     pageTitle: "Organization",
@@ -1472,6 +1499,7 @@ export const messages = {
       explanation: "Your organization's active members are listed below.",
       manageUsersExplanation:
         "Manage Users to add or update roles and permissions.",
+      manageUsersCTA: "Manage Users",
       headings: {
         email: "Email",
         name: "Name",
@@ -1513,6 +1541,7 @@ export const messages = {
     },
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
+      errorHeading: "Error",
       description:
         "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
       inputs: {
@@ -1528,6 +1557,10 @@ export const messages = {
       button: {
         label: "Add to organization",
         success: "User added!",
+      },
+      validationErrors: {
+        email: "Email is required",
+        role: "Role is required",
       },
     },
   },
