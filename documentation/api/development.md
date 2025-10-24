@@ -14,7 +14,11 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-Run `make init && make run-logs` to start the local containers. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
+These scripts depend on having `postgresql` installed in your environment as a pre-requisite. Install instructions for your particular operating system can be found on the [Postgres website](https://www.postgresql.org/download/)
+
+Run `make init && make run-logs` to start the local containers and watch logs. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
+
+If you would prefer not to watch logs, you can use `make init && make start`.
 
 This stands up the following services:
 
@@ -27,7 +31,7 @@ This stands up the following services:
 
 ### Seed data
 
-Run `make db-seed-local && make populate-search-opportunities` to create local data in the database and make it available in the API.
+Run `make setup-api-data` to create local data in the database, search index  and make it available in the API. This basically creates everything; if you want to be selective about what data you're seeding, see the Makefile for ways you can populate selective data.
 
 ### API Authentication
 
@@ -36,6 +40,14 @@ This API uses a very simple [ApiKey authentication approach](https://apiflask.co
 ### User Authentication
 
 Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running user authentication within the app.
+
+### Accessing the API through swagger docs
+
+To see the current API definiton, you can go to the local [swagger docs](http://localhost:8080/docs).
+
+Each endpoint specifies which auth token it needs behind the lock icon. The `ApiJwtAuth` token is printed as part of user creation in `make setup-api-data`, search for `create_jwt_for_user` to see the `auth.token_id` value. For the `ApiUserKeyAuth` token, search for `X-API-Key` for the different values for each role (hint: they typically are the user name + \_key, for instance `one_org_user` the key value is `one_org_user_key`). You can set these tokens per end point, or set them globally at the top on the lock icon labeled Authorize.
+
+For more on auth tokens, see [authentication.md](./authentication.md)
 
 #### Mock Oauth2 Server
 
