@@ -299,11 +299,11 @@ class OrganizationInvitationDataSchema(Schema):
         allow_none=True,
         metadata={"description": "When the invitation was rejected", "example": None},
     )
-    inviter = fields.Nested(
+    inviter_user = fields.Nested(
         InviterDataSchema,
         metadata={"description": "Information about the user who sent the invitation"},
     )
-    invitee = fields.Nested(
+    invitee_user = fields.Nested(
         InviteeDataSchema,
         allow_none=True,
         metadata={"description": "Information about the invited user (null if not registered)"},

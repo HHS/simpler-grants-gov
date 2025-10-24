@@ -14,10 +14,6 @@ from src.db.models.entity_models import (
     OrganizationInvitation,
 )
 from src.db.models.user_models import User
-from src.services.organizations_v1.organization_invitation_response_utils import (
-    OrganizationInvitationData,
-    transform_invitation_to_response,
-)
 
 
 def get_organization_and_verify_access(
@@ -65,11 +61,21 @@ def list_organization_invitations_with_filters(
         .options(
             # Use selectinload for users to avoid potential cartesian products
             # and to handle the nullable invitee_user more efficiently
-            selectinload(OrganizationInvitation.inviter_user).selectinload(User.profile),
-            selectinload(OrganizationInvitation.invitee_user).selectinload(User.profile),
+            selectinload(OrganizationInvitation.inviter_user).options(
+                selectinload(User.profile),
+                selectinload(User.linked_login_gov_external_user),
+            ),
+            selectinload(OrganizationInvitation.invitee_user).options(
+                selectinload(User.profile),
+                selectinload(User.linked_login_gov_external_user),
+            ),
             # Use selectinload for roles to avoid cartesian products with the many-to-many relationship
             selectinload(OrganizationInvitation.linked_roles).selectinload(
                 LinkOrganizationInvitationToRole.role
+            ),
+            # Load organization and its sam_gov_entity for user invitations
+            selectinload(OrganizationInvitation.organization).selectinload(
+                Organization.sam_gov_entity
             ),
         )
         .where(OrganizationInvitation.organization_id == organization_id)
@@ -118,4 +124,4 @@ def list_organization_invitations_and_verify_access(
     )
 
     # Transform to data classes for proper serialization
-    return [transform_invitation_to_response(invitation) for invitation in invitations]
+    return invitations

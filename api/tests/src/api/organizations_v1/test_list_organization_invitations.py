@@ -279,26 +279,26 @@ class TestOrganizationInvitationsList:
             "expires_at",
             "accepted_at",
             "rejected_at",
-            "inviter",
-            "invitee",
+            "inviter_user",
+            "invitee_user",
             "roles",
         ]
 
         for field in required_fields:
             assert field in invitation_data, f"Missing required field: {field}"
 
-        # Check inviter structure
-        assert "user_id" in invitation_data["inviter"]
-        assert "email" in invitation_data["inviter"]
-        assert "first_name" in invitation_data["inviter"]
-        assert "last_name" in invitation_data["inviter"]
+        # Check inviter_user structure
+        assert "user_id" in invitation_data["inviter_user"]
+        assert "email" in invitation_data["inviter_user"]
+        assert "first_name" in invitation_data["inviter_user"]
+        assert "last_name" in invitation_data["inviter_user"]
 
-        # Check invitee structure (can be null)
-        if invitation_data["invitee"] is not None:
-            assert "user_id" in invitation_data["invitee"]
-            assert "email" in invitation_data["invitee"]
-            assert "first_name" in invitation_data["invitee"]
-            assert "last_name" in invitation_data["invitee"]
+        # Check invitee_user structure (can be null)
+        if invitation_data["invitee_user"] is not None:
+            assert "user_id" in invitation_data["invitee_user"]
+            assert "email" in invitation_data["invitee_user"]
+            assert "first_name" in invitation_data["invitee_user"]
+            assert "last_name" in invitation_data["invitee_user"]
 
         # Check roles structure
         assert len(invitation_data["roles"]) > 0
