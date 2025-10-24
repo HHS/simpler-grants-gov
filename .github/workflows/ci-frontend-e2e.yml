@@ -57,8 +57,8 @@ jobs:
           make build
           # Initialize database and other services
           make init-db init-localstack init-mock-soap-services
-          # Start OpenSearch and wait for it to be fully ready
-          docker compose up --detach opensearch-node opensearch-dashboards
+          # Start OpenSearch and wait for it to be fully ready (skip dashboards to save memory)
+          docker compose up --detach opensearch-node
           echo "Waiting for OpenSearch to be ready..."
           for i in {1..30}; do
             if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
@@ -84,8 +84,8 @@ jobs:
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
           # Stop all containers to ensure clean state before starting with Gunicorn
           docker compose down
-          # Start all supporting services
-          docker compose up --detach grants-db opensearch-node opensearch-dashboards localstack mock-oauth2-server mock-applicants-soap-api
+          # Start all supporting services (skip opensearch-dashboards to save memory in CI)
+          docker compose up --detach grants-db opensearch-node localstack mock-oauth2-server mock-applicants-soap-api
           # Wait for services to be ready
           echo "Waiting for services to start..."
           sleep 15
