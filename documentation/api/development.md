@@ -14,7 +14,7 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-These scripts depend on having `postgresql` installed in your enviornment as a pre-requisite.
+These scripts depend on having `postgresql` installed in your environment as a pre-requisite. Install instructions for your particular operating system can be found on the [Postgres website](https://www.postgresql.org/download/)
 
 Run `make init && make run-logs` to start the local containers and watch logs. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
 
