@@ -133,6 +133,7 @@ jobs:
           echo df on failure
           df -h
           docker container logs grants-api
+          docker container logs api-opensearch-node
 
   create-report:
     name: Create Merged Test Report
