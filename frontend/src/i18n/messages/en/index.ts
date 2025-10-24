@@ -491,7 +491,8 @@ export const messages = {
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
     title: "You've been unsubscribed",
-    paragraph: "You'll no longer receive project updates from Simpler.Grants.gov.",
+    paragraph:
+      "You'll no longer receive project updates from Simpler.Grants.gov.",
     cta: "Change your mind?",
     buttonResub: "Re-subscribe",
   },

@@ -5,7 +5,7 @@ import { LocalizedPageProps } from "src/types/intl";
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";

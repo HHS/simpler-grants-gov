@@ -7,8 +7,8 @@ import Image from "next/image";
 import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
 import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
+import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

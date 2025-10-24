@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { use } from "react";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
@@ -34,10 +34,8 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
         <h1 className="margin-top-0">{t("title")}</h1>
         <p>{t("paragraph")}</p>
         <p>
-          {t("cta") + ' '}
-          <Link href="/newsletter">
-            {t("buttonResub")}
-          </Link>
+          {t("cta") + " "}
+          <Link href="/newsletter">{t("buttonResub")}</Link>
         </p>
       </GridContainer>
       <SendyDisclaimer />
