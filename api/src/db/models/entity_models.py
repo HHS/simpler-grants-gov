@@ -10,7 +10,7 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import OrganizationInvitationStatus, SamGovImportType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkSamGovImportType
-from src.util import datetime_util
+from src.util.datetime_util import utcnow
 
 # Add conditional import for type checking to avoid circular imports
 if TYPE_CHECKING:
@@ -136,7 +136,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
 
     @property
     def is_expired(self) -> bool:
-        return datetime_util.utcnow() > self.expires_at
+        return utcnow() > self.expires_at
 
     @property
     def is_pending(self) -> bool:

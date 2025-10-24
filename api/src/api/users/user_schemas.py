@@ -10,7 +10,12 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.constants.lookup_constants import ApplicationStatus, ExternalUserType, Privilege
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    ExternalUserType,
+    OrganizationInvitationStatus,
+    Privilege,
+)
 from src.db.models.user_models import (
     AgencyUserRole,
     ApplicationUserRole,
@@ -573,3 +578,27 @@ class UserCanAccessRequestSchema(Schema):
 
 class UserCanAccessResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class UserResponseOrgInvitationRequestSchema(Schema):
+    status = fields.Enum(
+        OrganizationInvitationStatus,
+        validate=validators.OneOf(
+            [
+                OrganizationInvitationStatus.ACCEPTED,
+                OrganizationInvitationStatus.REJECTED,
+            ]
+        ),
+        metadata={"description": "User response to invitation"},
+    )
+
+
+class UserResponseOrgInvitationResponseSchema(Schema):
+    organization_invitation_id = fields.UUID(metadata={"description": "Organization invitation ID"})
+    status = fields.Enum(
+        OrganizationInvitationStatus, metadata={"description": "User response to invitation"}
+    )
+    responded_at = fields.DateTime(metadata={"description": "Time User responded to invitation"})
+    organization_id = fields.UUID(metadata={"description": "The internal ID of the organization"})
+    organization_name = fields.String(metadata={"description": "The name of the organization"})
+    role_granted = fields.Nested(RoleSchema)
