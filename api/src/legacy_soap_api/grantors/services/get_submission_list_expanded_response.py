@@ -63,21 +63,24 @@ def get_submission_list_expanded_response(
     db_session: db.Session,
     get_submission_list_expanded_request: schemas.GetSubmissionListExpandedRequest,
 ) -> schemas.GetSubmissionListExpandedResponse:
-    stmt = select(ApplicationSubmission).options(
-        selectinload(ApplicationSubmission.application).options(
-            selectinload(Application.organization),
-            selectinload(Application.competition).options(
-                selectinload(Competition.opportunity),
-                selectinload(Competition.opportunity_assistance_listing),
-            ),
-        )
-    )
     stmt = (
-        stmt.join(ApplicationSubmission.application)
+        select(ApplicationSubmission)
+        .join(ApplicationSubmission.application)
+        # Joins for where clauses
         .join(Application.competition)
         .join(Opportunity, Competition.opportunity)
         .join(
             OpportunityAssistanceListing, Competition.opportunity_assistance_listing, isouter=True
+        )
+        # Prefetch values for better performance
+        .options(
+            selectinload(ApplicationSubmission.application).options(
+                selectinload(Application.organization),
+                selectinload(Application.competition).options(
+                    selectinload(Competition.opportunity),
+                    selectinload(Competition.opportunity_assistance_listing),
+                ),
+            )
         )
     )
     grants_gov_tracking_numbers = None
