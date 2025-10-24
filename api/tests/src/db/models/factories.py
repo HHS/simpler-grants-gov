@@ -2874,18 +2874,26 @@ class OrganizationInvitationFactory(BaseFactory):
     organization = factory.SubFactory(OrganizationFactory)
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     inviter_user = factory.SubFactory(UserFactory)
-    inviter_user_id = factory.LazyAttribute(lambda u: u.inviter_user.user_id)
+    inviter_user_id = factory.lazy_attribute(lambda u: u.inviter_user.user_id)
 
     invitee_email = factory.Faker("email")
-    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+7d")
-    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
-
+    created_at = factory.LazyFunction(
+        lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
+    )
     invitee_user = factory.SubFactory(UserFactory)
+
+    expires_at = factory.LazyAttribute(
+        lambda o: fake.date_time_between(
+            start_date=o.created_at, end_date="+1w", tzinfo=timezone.utc
+        )
+    )
     invitee_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
 
     class Params:
         response_date = factory.LazyAttribute(
-            lambda o: fake.date_time_between(start_date=o.created_at, end_date="+1m")
+            lambda o: fake.date_time_between(
+                start_date=o.created_at, end_date="+1m", tzinfo=timezone.utc
+            )
         )
         is_accepted = factory.Trait(accepted_at=response_date)
         is_rejected = factory.Trait(rejected_at=response_date)
