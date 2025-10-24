@@ -33,12 +33,7 @@ export default function SubscriptionConfirmation({
       <GridContainer>
         <Breadcrumbs breadcrumbList={SUBSCRIBE_CONFIRMATION_CRUMBS} />
         <h1 className="margin-top-0">{t("title")}</h1>
-        <p className="usa-intro">{t("intro")}</p>
-        <Grid row gap className="flex-align-start">
-          <Grid>
-            <p>{t("paragraph1")}</p>
-          </Grid>
-        </Grid>
+        <p>{t("paragraph1")}</p>
       </GridContainer>
       <SendyDisclaimer />
     </>

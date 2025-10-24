@@ -32,15 +32,13 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
       <GridContainer>
         <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
         <h1 className="margin-top-0">{t("title")}</h1>
-        <p className="usa-intro">{t("intro")}</p>
-        <Grid row gap className="flex-align-start">
-          <Grid>
-            <p>{t("paragraph")}</p>
-            <Link className="usa-button" href="/newsletter">
-              {t("buttonResub")}
-            </Link>
-          </Grid>
-        </Grid>
+        <p>{t("paragraph")}</p>
+        <p>
+          {t("cta") + ' '}
+          <Link href="/newsletter">
+            {t("buttonResub")}
+          </Link>
+        </p>
       </GridContainer>
       <SendyDisclaimer />
     </>

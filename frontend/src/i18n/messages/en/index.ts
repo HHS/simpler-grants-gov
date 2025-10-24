@@ -485,17 +485,14 @@ export const messages = {
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You're subscribed",
-    intro:
-      "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
+      "We'll keep you informed of our progress and every opportunity to get involved.",
   },
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
-    title: "You have unsubscribed",
-    intro:
-      "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    title: "You've been unsubscribed",
+    paragraph: "You'll no longer receive project updates from Simpler.Grants.gov.",
+    cta: "Change your mind?",
     buttonResub: "Re-subscribe",
   },
   SendyDisclaimer: {
