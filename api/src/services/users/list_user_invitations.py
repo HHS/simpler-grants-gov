@@ -12,7 +12,6 @@ from src.db.models.entity_models import (
 from src.db.models.user_models import LinkExternalUser, User
 from src.services.organizations_v1.organization_invitation_response_utils import (
     OrganizationInvitationData,
-    transform_invitation_to_response,
 )
 
 
@@ -28,8 +27,11 @@ def _fetch_user_invitations_by_user_id(
             selectinload(OrganizationInvitation.organization).selectinload(
                 Organization.sam_gov_entity
             ),
-            # Load inviter user data with profile
-            selectinload(OrganizationInvitation.inviter_user).selectinload(User.profile),
+            # Load inviter user data with profile and external user link
+            selectinload(OrganizationInvitation.inviter_user).options(
+                selectinload(User.profile),
+                selectinload(User.linked_login_gov_external_user),
+            ),
             # Load roles through the link table
             selectinload(OrganizationInvitation.linked_roles).selectinload(
                 LinkOrganizationInvitationToRole.role
@@ -62,4 +64,4 @@ def list_user_invitations(
         return []
 
     # Transform to API response format
-    return [transform_invitation_to_response(invitation) for invitation in invitations]
+    return invitations
