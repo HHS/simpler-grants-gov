@@ -17,7 +17,8 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 3 : 0,
   /* Limit workers in CI to reduce concurrent load on API server */
-  workers: process.env.CI ? parseInt(process.env.PLAYWRIGHT_WORKERS || "5") : 10,
+  /* Using 2 workers to avoid overwhelming API connection pool (5 workers × 4 threads = 20 max concurrent) */
+  workers: process.env.CI ? parseInt(process.env.PLAYWRIGHT_WORKERS || "2") : 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: process.env.CI ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
