@@ -9,8 +9,6 @@ from src.services.applications.application_validation import (
 from tests.lib.data_factories import setup_application_for_form_validation
 
 
-
-
 @pytest.fixture
 def valid_json_v4_0():
     return {
@@ -373,7 +371,9 @@ def test_sf424_v4_0_conditionally_required_fields(
         assert validation_issue.field in required_fields
 
 
-def test_sf424_v4_0_pre_population_with_all_non_null_values(enable_factory_create, valid_json_v4_0, sf424_v4_0):
+def test_sf424_v4_0_pre_population_with_all_non_null_values(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0
+):
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
         json_schema=sf424_v4_0.form_json_schema,
@@ -412,7 +412,9 @@ def test_sf424_v4_0_pre_population_with_all_non_null_values(enable_factory_creat
     assert "aor_signature" not in app_json
 
 
-def test_sf424_v4_0_pre_population_with_all_null_values(enable_factory_create, valid_json_v4_0, sf424_v4_0):
+def test_sf424_v4_0_pre_population_with_all_null_values(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0
+):
     application_form = setup_application_for_form_validation(
         valid_json_v4_0,
         json_schema=sf424_v4_0.form_json_schema,

@@ -171,7 +171,9 @@ def test_sf424a_v1_0_no_line_items(full_valid_json_v1_0, sf424a_v1_0):
     assert validation_issues[0].field == "$.activity_line_items"
 
 
-def test_sf424a_v1_0_too_many_line_items(full_valid_json_v1_0, full_valid_activity_line_item_v1_0, sf424a_v1_0):
+def test_sf424a_v1_0_too_many_line_items(
+    full_valid_json_v1_0, full_valid_activity_line_item_v1_0, sf424a_v1_0
+):
     data = full_valid_json_v1_0
     data["activity_line_items"] = [full_valid_activity_line_item_v1_0] * 5
     validation_issues = validate_json_schema_for_form(data, sf424a_v1_0)

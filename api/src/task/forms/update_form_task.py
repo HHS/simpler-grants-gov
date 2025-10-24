@@ -2,12 +2,8 @@ import logging
 
 import click
 import requests
-from sqlalchemy import select
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.db.models.competition_models import Form
-from src.form_schema.forms import get_active_forms
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
 from src.task.task_blueprint import task_blueprint
@@ -37,6 +33,7 @@ def update_form(
 class UpdateFormTask(BaseFormTask):
 
     def __init__(self, environment: str, form_id: str) -> None:
+        super().__init__()
         self.environment = environment
         self.form_id = form_id
 
@@ -44,7 +41,7 @@ class UpdateFormTask(BaseFormTask):
         logger.info("Processing form for update")
 
         # Figure out which form
-        active_forms = get_active_forms()
+        active_forms = self.get_forms()
         form: Form | None = None
         for active_form in active_forms:
             if str(active_form.form_id) == self.form_id:
@@ -52,9 +49,7 @@ class UpdateFormTask(BaseFormTask):
                 break
 
         if form is None:
-            raise Exception(
-                f"No form found with ID {self.form_id} - have you seeded your local DB?"
-            )
+            raise Exception(f"No form found with ID {self.form_id}")
 
         request = build_form_json(form)
         headers = self.build_headers()

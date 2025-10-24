@@ -9,7 +9,9 @@ def minimal_valid_project_narrative_v1_2():
     return {"attachments": ["00b9001b-6ca8-4c0c-9328-46f39e9ff14b"]}
 
 
-def test_project_narrative_v1_2_minimal_valid_json(minimal_valid_project_narrative_v1_2, project_narrative_attachment_v1_2):
+def test_project_narrative_v1_2_minimal_valid_json(
+    minimal_valid_project_narrative_v1_2, project_narrative_attachment_v1_2
+):
     validation_issues = validate_json_schema_for_form(
         minimal_valid_project_narrative_v1_2, project_narrative_attachment_v1_2
     )

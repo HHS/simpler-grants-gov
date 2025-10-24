@@ -4,12 +4,8 @@ import logging
 import click
 import requests
 from prettytable import PrettyTable
-from sqlalchemy import select
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.db.models.competition_models import Form
-from src.form_schema.forms import get_active_forms
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
 from src.task.task_blueprint import task_blueprint
@@ -50,7 +46,7 @@ class ListFormsTask(BaseFormTask):
         self.output_table.field_names = ["Form Name", "Version", "Last Updated", "Changed Fields"]
 
     def run_task(self) -> None:
-        forms = get_active_forms()
+        forms = self.get_forms()
 
         for form in forms:
             self.process_form(form)

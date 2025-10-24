@@ -1,10 +1,10 @@
-import logging
 import abc
+import logging
 
-import src.adapters.db as db
 from src.db.models.competition_models import Form
+from src.form_schema.forms import get_active_forms
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from src.task.task import Task
+from src.form_schema.jsonschema_validator import validate_json_schema
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class FormTaskConfig(PydanticBaseEnvConfig):
 
 
 class BaseFormTask(abc.ABC):
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = FormTaskConfig()
         if self.config.non_local_api_auth_token is None:
             raise Exception(
@@ -37,21 +37,30 @@ class BaseFormTask(abc.ABC):
             "X-Auth": self.config.non_local_api_auth_token,
         }
 
-    def run(self):
+    def get_forms(self) -> list[Form]:
+        """Utility function to get active forms in derived classes"""
+        return get_active_forms()
+
+    def run(self) -> None:
         self.run_task()
 
     @abc.abstractmethod
-    def run_task(self):
+    def run_task(self) -> None:
         pass
 
 
 def build_form_json(form: Form) -> dict:
     form_instruction_id = str(form.form_instruction_id) if form.form_instruction_id else None
 
+    resolved_jsonschema = resolve_jsonschema(form.form_json_schema)
+    # As a sanity test, we run our JSON schema validator logic, if this
+    # were invalid JSON schema this would error when called.
+    validate_json_schema({}, resolved_jsonschema)
+
     return {
         "agency_code": form.agency_code,
         "form_instruction_id": form_instruction_id,
-        "form_json_schema": resolve_jsonschema(form.form_json_schema),
+        "form_json_schema": resolved_jsonschema,
         "form_name": form.form_name,
         "form_rule_schema": form.form_rule_schema,
         "form_ui_schema": form.form_ui_schema,

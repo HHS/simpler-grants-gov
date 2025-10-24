@@ -12,6 +12,7 @@ from src.adapters.db import PostgresDBClient
 from src.db.models.competition_models import Competition, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms
+from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_data_utils import CompetitionContainer
@@ -121,10 +122,11 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
         ):
             # Note that we make these text files as generating valid PDFs is surprisingly complex.
             factories.FormInstructionFactory.create(
-                form_instruction_id=form.form_instruction_id, file_name=f"{form.short_form_name}.txt"
+                form_instruction_id=form.form_instruction_id,
+                file_name=f"{form.short_form_name}.txt",
             )
 
-        # TODO - we should make the forms have the resolved schema here
+        form.form_json_schema = resolve_jsonschema(form.form_json_schema)
         forms[form.short_form_name] = db_session.merge(form, load=True)
 
     return forms
@@ -151,11 +153,15 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["ProjectNarrativeAttachments_1_2"], is_required=True
+        competition=pilot_competition,
+        form=forms["ProjectNarrativeAttachments_1_2"],
+        is_required=True,
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["BudgetNarrativeAttachments_1_2"], is_required=True
+        competition=pilot_competition,
+        form=forms["BudgetNarrativeAttachments_1_2"],
+        is_required=True,
     )
 
     factories.CompetitionFormFactory.create(
