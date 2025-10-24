@@ -1,5 +1,6 @@
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence
 
 from sqlalchemy import select
@@ -74,10 +75,10 @@ class OrganizationInvitationData:
     organization_invitation_id: uuid.UUID
     invitee_email: str
     status: str
-    created_at: Any  # datetime
-    expires_at: Any  # datetime
-    accepted_at: Optional[Any]  # datetime
-    rejected_at: Optional[Any]  # datetime
+    created_at: datetime
+    expires_at: datetime
+    accepted_at: Optional[datetime]
+    rejected_at: Optional[datetime]
     inviter: InviterData
     invitee: Optional[InviteeData]
     roles: List[RoleData]
@@ -107,57 +108,38 @@ def parse_request_data(data: Dict[str, Any]) -> OrganizationInvitationListReques
 def transform_invitation_to_data(invitation: OrganizationInvitation) -> OrganizationInvitationData:
     """Transform OrganizationInvitation model to OrganizationInvitationData"""
 
-    # Transform inviter data
-    inviter_data = InviterData(
-        user_id=invitation.inviter_user.user_id,
-        email=invitation.inviter_user.email,
-        first_name=(
-            invitation.inviter_user.profile.first_name if invitation.inviter_user.profile else None
-        ),
-        last_name=(
-            invitation.inviter_user.profile.last_name if invitation.inviter_user.profile else None
-        ),
-    )
-
-    # Transform invitee data (may be None)
-    invitee_data = None
-    if invitation.invitee_user:
-        invitee_data = InviteeData(
-            user_id=invitation.invitee_user.user_id,
-            email=invitation.invitee_user.email,
-            first_name=(
-                invitation.invitee_user.profile.first_name
-                if invitation.invitee_user.profile
-                else None
-            ),
-            last_name=(
-                invitation.invitee_user.profile.last_name
-                if invitation.invitee_user.profile
-                else None
-            ),
-        )
-
-    # Transform roles data
-    roles_data = [
-        RoleData(
-            role_id=role.role_id,
-            role_name=role.role_name,
-            privileges=[str(privilege) for privilege in role.privileges],
-        )
-        for role in invitation.roles
-    ]
-
     return OrganizationInvitationData(
         organization_invitation_id=invitation.organization_invitation_id,
         invitee_email=invitation.invitee_email,
-        status=str(invitation.status),
+        status=invitation.status,
         created_at=invitation.created_at,
         expires_at=invitation.expires_at,
         accepted_at=invitation.accepted_at,
         rejected_at=invitation.rejected_at,
-        inviter=inviter_data,
-        invitee=invitee_data,
-        roles=roles_data,
+        inviter=InviterData(
+            user_id=invitation.inviter_user.user_id,
+            email=invitation.inviter_user.email,
+            first_name=invitation.inviter_user.first_name,
+            last_name=invitation.inviter_user.last_name,
+        ),
+        invitee=(
+            InviteeData(
+                user_id=invitation.invitee_user.user_id,
+                email=invitation.invitee_user.email,
+                first_name=invitation.invitee_user.first_name,
+                last_name=invitation.invitee_user.last_name,
+            )
+            if invitation.invitee_user
+            else None
+        ),
+        roles=[
+            RoleData(
+                role_id=role.role_id,
+                role_name=role.role_name,
+                privileges=[privilege for privilege in role.privileges],
+            )
+            for role in invitation.roles
+        ],
     )
 
 
