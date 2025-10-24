@@ -22,7 +22,7 @@ class TestOrganizationInvitationsList:
     ):
         """Test successful invitation listing without filters"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -80,7 +80,7 @@ class TestOrganizationInvitationsList:
     ):
         """Test successful invitation listing with status filtering"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -129,7 +129,7 @@ class TestOrganizationInvitationsList:
     ):
         """Test successful response with no invitations"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -147,7 +147,7 @@ class TestOrganizationInvitationsList:
     def test_list_invitations_401_no_token(self, client, db_session, enable_factory_create):
         """Test that accessing endpoint without auth token returns 401"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -214,7 +214,7 @@ class TestOrganizationInvitationsList:
     ):
         """Test that invalid status filter values return 400"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -231,7 +231,7 @@ class TestOrganizationInvitationsList:
     ):
         """Test that response includes all required fields per specification"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
@@ -309,15 +309,15 @@ class TestOrganizationInvitationsList:
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
         [
-            ([Privilege.VIEW_ORG_MEMBERSHIP], 200),
-            ([Privilege.MANAGE_ORG_MEMBERS], 403),  # Wrong privilege
+            ([Privilege.MANAGE_ORG_MEMBERS], 200),  # Correct privilege
+            ([Privilege.VIEW_ORG_MEMBERSHIP], 403),  # Wrong privilege
             ([], 403),  # No privileges
         ],
     )
     def test_list_invitations_privilege_requirements(
         self, privilege_set, expected_status, client, db_session, enable_factory_create
     ):
-        """Test that only users with VIEW_ORG_MEMBERSHIP privilege can access endpoint"""
+        """Test that only users with MANAGE_ORG_MEMBERS privilege can access endpoint"""
         user, organization, token = create_user_in_org(
             privileges=privilege_set,
             db_session=db_session,
@@ -336,7 +336,7 @@ class TestOrganizationInvitationsList:
     ):
         """Test that expired invitations are properly identified and can be filtered"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 

@@ -101,10 +101,10 @@ def transform_invitation_to_data(invitation: OrganizationInvitation) -> Organiza
     )
 
 
-def get_organization_and_verify_view_membership_access(
+def get_organization_and_verify_access(
     db_session: db.Session, user: User, organization_id: uuid.UUID
 ) -> Organization:
-    """Get organization by ID and verify user has VIEW_ORG_MEMBERSHIP access."""
+    """Get organization by ID and verify user has MANAGE_ORG_MEMBERS access."""
     # First get the organization
     stmt = select(Organization).where(Organization.organization_id == organization_id)
     organization = db_session.execute(stmt).scalar_one_or_none()
@@ -113,7 +113,7 @@ def get_organization_and_verify_view_membership_access(
         raise_flask_error(404, message=f"Could not find Organization with ID {organization_id}")
 
     # Check if user has required privilege for this organization
-    if not can_access(user, {Privilege.VIEW_ORG_MEMBERSHIP}, organization):
+    if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
         raise_flask_error(403, "Forbidden")
 
     return organization
@@ -183,8 +183,8 @@ def list_organization_invitations_and_verify_access(
         filters: Optional filters dict from request (already validated by schema)
     """
 
-    # First verify the user has access to view organization membership
-    get_organization_and_verify_view_membership_access(db_session, user, organization_id)
+    # First verify the user has access to manage organization members
+    get_organization_and_verify_access(db_session, user, organization_id)
 
     # Extract status filters if provided (already converted to enums by Marshmallow)
     status_filters = None
