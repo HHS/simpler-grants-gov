@@ -115,7 +115,7 @@ stop:
 
 check: format-check lint db-check-migrations test
 
-remake-backend: volume-recreate db-seed-local-all-data ## Completely recreate API services, load data into the DB and search index
+remake-backend: volume-recreate setup-api-data ## Completely recreate API services, load data into the DB and search index
 ##################################################
 # DB & migrations
 ##################################################
@@ -319,10 +319,7 @@ populate-search-agencies: ## Load agencies from the DB into the search index, ru
 run-generate-notifications: ## Send email notifications
 	$(FLASK_CMD) generate-notifications $(args)
 
-db-seed-local-all-data: ## Load all the data, especially useful for inital setup
-	$(PY_RUN_CMD) db-seed-local --cover_all_agencies=true
-	$(FLASK_CMD) load-search-data load-opportunity-data $(args)
-	$(FLASK_CMD) load-search-data load-agency-data $(args)
+setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 
 ##################################################
 # Miscellaneous Utilities

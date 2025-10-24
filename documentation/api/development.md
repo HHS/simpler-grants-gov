@@ -31,7 +31,7 @@ This stands up the following services:
 
 ### Seed data
 
-Run `make db-seed-local-all-data` to create local data in the database and make it available in the API. This basically creates everything; if you want to be selective about what data you're seeding, see the Makefile for ways you can populate selective data.
+Run `make setup-api-data` to create local data in the database, search index  and make it available in the API. This basically creates everything; if you want to be selective about what data you're seeding, see the Makefile for ways you can populate selective data.
 
 ### API Authentication
 
