@@ -8,6 +8,7 @@ import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -29,9 +30,9 @@ export default function SubscriptionConfirmation({
 
   return (
     <>
-      <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
+      <GridContainer>
         <Breadcrumbs breadcrumbList={SUBSCRIBE_CONFIRMATION_CRUMBS} />
-        <h1>{t("title")}</h1>
+        <h1 className="margin-top-0">{t("title")}</h1>
         <p className="usa-intro">{t("intro")}</p>
         <Grid row gap className="flex-align-start">
           <Grid>
@@ -39,9 +40,7 @@ export default function SubscriptionConfirmation({
           </Grid>
         </Grid>
       </GridContainer>
-      <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
-        <p className="font-sans-3xs text-base-dark">{t("disclaimer")}</p>
-      </GridContainer>
+      <SendyDisclaimer />
     </>
   );
 }

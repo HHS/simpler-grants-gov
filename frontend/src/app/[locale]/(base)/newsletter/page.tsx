@@ -8,6 +8,7 @@ import { use } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
+import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -56,7 +57,7 @@ export default function Subscribe({ params }: LocalizedPageProps) {
         </GridContainer>
       </div>
       <div>
-        <GridContainer className="padding-y-4 tablet-lg:padding-y-6">
+        <GridContainer className="margin-top-4 tablet-lg:margin-top-6">
           <Grid row gap className="flex-align-start">
             <Grid tabletLg={{ col: 3 }}>
               <h2>{t("formLabel")}</h2>
@@ -66,6 +67,7 @@ export default function Subscribe({ params }: LocalizedPageProps) {
             </Grid>
           </Grid>
         </GridContainer>
+        <SendyDisclaimer />
       </div>
     </>
   );
