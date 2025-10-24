@@ -21,6 +21,7 @@ bind = app_config.host + ':' + str(app_config.port)
 # We use 'os.sched_getaffinity(pid)' not 'os.cpu_count()' because it returns only allowable CPUs.
 # os.sched_getaffinity(pid): Return the set of CPUs the process with PID pid is restricted to.
 # os.cpu_count(): Return the number of CPUs in the system.
+# Allow WEB_CONCURRENCY env var to override the calculated workers (useful for e2e testing)
 
-workers = (len(os.sched_getaffinity(0)) * 2) + 1
+workers = int(os.environ.get("WEB_CONCURRENCY", (len(os.sched_getaffinity(0)) * 2) + 1))
 threads = 4
