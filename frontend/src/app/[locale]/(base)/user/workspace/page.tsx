@@ -15,7 +15,7 @@ import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
-import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReply";
+import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
 import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";

@@ -1489,6 +1489,12 @@ export const messages = {
       accept: "Accept",
       reject: "Reject",
       dismiss: "Dismiss",
+      accepted: {
+        ctaTitle: "Congrats, you've been added to ",
+        description:
+          "Join your team by collaborating on applications and searching for the right opportunities.",
+      },
+      apiError: "Unable to update user organization invitation.",
     },
   },
   OrganizationDetail: {
