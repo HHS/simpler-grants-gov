@@ -540,7 +540,8 @@ paths:
       tags:
       - Form Alpha
       summary: Form Get
-      security:
+      security: &id001
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
     put:
       parameters:
@@ -582,8 +583,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FormUpdateRequest'
-      security:
-      - ApiKeyAuth: []
+      security: *id001
   /common-grants/opportunities:
     get:
       parameters:
@@ -769,6 +769,55 @@ paths:
       tags:
       - User v1 - Internal Only
       summary: Get the roles and privileges for the authenticated user
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/can_access:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCanAccessResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Check user access for a given resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCanAccessRequest'
       security:
       - ApiJwtAuth: []
   /common-grants/opportunities/search:
@@ -1626,6 +1675,61 @@ paths:
       tags:
       - User v1 - Internal Only
       summary: Delete (deactivate) an API key for the authenticated user
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/invitations:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationCreateInvitationResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Create an invitation for a new organization member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreateInvitationRequest'
       security:
       - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
@@ -2517,7 +2621,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id001
+          type: &id002
           - object
           $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -2632,7 +2736,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -2823,7 +2927,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -3577,7 +3681,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id002
+          enum: &id003
           - discretionary
           - mandatory
           - continuation
@@ -3596,23 +3700,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id003
+            type: &id004
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id004
+          type: &id005
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id005
+          enum: &id006
           - forecasted
           - posted
           - closed
           - archived
-          type: &id006
+          type: &id007
           - string
         created_at:
           type: string
@@ -3685,7 +3789,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -3982,7 +4086,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id007
+            type: &id008
             - object
             $ref: '#/components/schemas/ValidationIssue'
     FormUpdateRequest:
@@ -4620,6 +4724,53 @@ components:
           type:
           - object
           $ref: '#/components/schemas/GetRolesAndPrivilegesResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserCanAccessRequest:
+      type: object
+      properties:
+        resource_id:
+          type: string
+          format: uuid
+          description: The internal ID of the resource
+          example: 123e4567-e89b-12d3-a456-426614174000
+        resource_type:
+          description: Type of the resource to check access
+          enum:
+          - agency
+          - application
+          - organization
+          type:
+          - string
+        privileges:
+          type: array
+          items:
+            description: List of privileges to verify for the specified resource.
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            type:
+            - string
+    UserCanAccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
@@ -5277,7 +5428,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id002
+          enum: *id003
           type:
           - string
           - 'null'
@@ -5291,17 +5442,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id003
+            type: *id004
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id004
+          type: *id005
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id005
-          type: *id006
+          enum: *id006
+          type: *id007
         created_at:
           type: string
           format: date-time
@@ -5627,7 +5778,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -6089,6 +6240,85 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OrganizationCreateInvitationRequest:
+      type: object
+      properties:
+        invitee_email:
+          type: string
+          description: Email address of the user to invite
+          example: user@example.com
+        role_ids:
+          type: array
+          minItems: 1
+          description: List of role IDs to assign to the invited user
+          example:
+          - 123e4567-e89b-12d3-a456-426614174000
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - invitee_email
+      - role_ids
+    OrganizationInvitationResponse:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Invitation unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        invitee_email:
+          type: string
+          description: Email address of the invited user
+          example: user@example.com
+        status:
+          type: string
+          description: Current status of the invitation
+          example: pending
+          enum:
+          - pending
+          - accepted
+          - rejected
+          - expired
+        expires_at:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          example: '2024-01-15T10:30:00Z'
+        roles:
+          type: array
+          description: Roles assigned to this invitation
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the invitation was created
+          example: '2024-01-08T10:30:00Z'
+    OrganizationCreateInvitationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: Created invitation information
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitationResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAttachmentCreateRequest:
       type: object
       properties:
@@ -6389,7 +6619,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -6447,7 +6677,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
