@@ -53,6 +53,17 @@ class ExpandedApplicationFilter(BaseModel):
         ]
 
 
+def update_consolidated(
+    consolidated: dict[str, list], filter_type: str, filter_value: str | list
+) -> dict[str, list]:
+    value = filter_value if isinstance(filter_value, list) else [filter_value]
+    filter_item = ExpandedApplicationFilter.model_validate(
+        {"FilterType": filter_type, "FilterValue": value}
+    )
+    consolidated[filter_item.filter_type].extend(filter_item.filter_value)
+    return consolidated
+
+
 class ConsolidatedFilter(BaseModel):
     filters: dict[str, list[str] | list[int]]
 
@@ -73,18 +84,12 @@ class ConsolidatedFilter(BaseModel):
         if len(type_list) == 1 and len(value_list) > 1:
             single_type = type_list[0]
             consolidated[single_type] = []
-            filter_item = ExpandedApplicationFilter.model_validate(
-                {"FilterType": single_type, "FilterValue": value_list}
-            )
-            consolidated[filter_item.filter_type].extend(filter_item.filter_value)
+            consolidated = update_consolidated(consolidated, single_type, value_list)
         elif len(type_list) == len(value_list):
             for f_type, f_value in zip(type_list, value_list, strict=True):
-                filter_item = ExpandedApplicationFilter.model_validate(
-                    {"FilterType": f_type, "FilterValue": [f_value]}
-                )
-                if filter_item.filter_type not in consolidated:
-                    consolidated[filter_item.filter_type] = []
-                consolidated[filter_item.filter_type].extend(filter_item.filter_value)
+                if f_type not in consolidated:
+                    consolidated[f_type] = []
+                consolidated = update_consolidated(consolidated, f_type, f_value)
         elif len(type_list) > len(value_list):
             raise SOAPInvalidEnvelope(
                 "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterValue}' is expected."
