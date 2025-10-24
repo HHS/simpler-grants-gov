@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Any
 
 from marshmallow import pre_dump
@@ -18,6 +19,12 @@ from src.db.models.user_models import (
     OrganizationUserRole,
 )
 from src.pagination.pagination_schema import generate_pagination_schema
+
+
+class ResourceSchema(StrEnum):
+    AGENCY = "agency"
+    APPLICATION = "application"
+    ORGANIZATION = "organization"
 
 
 class UserTokenHeaderSchema(Schema):
@@ -549,6 +556,23 @@ class GetRolesAndPrivilegesResponseSchema(Schema):
 
 class UserGetRolesAndPrivilegesResponseSchema(AbstractResponseSchema):
     data = fields.Nested(GetRolesAndPrivilegesResponseSchema)
+
+
+class UserCanAccessRequestSchema(Schema):
+    resource_id = fields.UUID(metadata={"description": "The internal ID of the resource"})
+    resource_type = fields.Enum(
+        ResourceSchema, metadata={"description": "Type of the resource to check access"}
+    )
+    privileges = fields.List(
+        fields.Enum(
+            Privilege,
+            metadata={"description": "List of privileges to verify for the specified resource."},
+        )
+    )
+
+
+class UserCanAccessResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
 
 
 class UserInvitationListRequestSchema(Schema):
