@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application
@@ -83,6 +84,16 @@ def can_access(
     )
 
     return False
+
+
+def verify_access(
+    user: User,
+    allowed_privileges: set[Privilege],
+    resource: Organization | Application | Agency | None,
+) -> None:
+    """Wrapper function that handles erroring if a user can't access a resource"""
+    if not can_access(user, allowed_privileges, resource):
+        raise_flask_error(403, "Forbidden")
 
 
 def get_log_info_for_resource(resource: Organization | Application | Agency | None) -> dict:
