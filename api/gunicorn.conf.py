@@ -30,3 +30,15 @@ else:
 
 workers = int(os.environ.get("WEB_CONCURRENCY", (len(os.sched_getaffinity(0)) * 2) + 1))
 threads = 4
+
+# Timeout for worker processes (default is 30s, increase for e2e tests with slow operations)
+# Workers are killed and restarted if they don't respond within this time
+timeout = int(os.environ.get("GUNICORN_TIMEOUT", 120))
+
+# Keep-Alive connection timeout (default is 2s)
+# How long to wait for requests on a Keep-Alive connection
+keepalive = int(os.environ.get("GUNICORN_KEEPALIVE", 5))
+
+# Graceful timeout for worker shutdown (default is 30s)
+# Allows workers to finish handling requests before being killed
+graceful_timeout = int(os.environ.get("GUNICORN_GRACEFUL_TIMEOUT", 120))

@@ -46,6 +46,30 @@ jobs:
           npm ci
           npx playwright install --with-deps
 
+      - name: Free up disk space for e2e tests
+        run: |
+          echo "=== Initial Disk Usage ==="
+          df -h
+          echo "=== Removing unnecessary packages to free up space ==="
+          # Remove large packages that aren't needed for our tests
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true
+          echo "=== Cleaning up Docker resources ==="
+          # Remove unused Docker data (images, containers, volumes, networks)
+          docker system prune -af --volumes || true
+          # Remove any dangling images
+          docker image prune -af || true
+          echo "=== After Cleanup Disk Usage ==="
+          df -h
+          # Check available space
+          AVAILABLE_GB=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
+          echo "Available disk space: ${AVAILABLE_GB}GB"
+          if [ "$AVAILABLE_GB" -lt 10 ]; then
+            echo "WARNING: Low disk space (${AVAILABLE_GB}GB available). This may cause OpenSearch issues."
+          fi
+
       - name: Start API Server for e2e tests
         run: |
           cd ../api
@@ -68,14 +92,20 @@ jobs:
             echo "Waiting for OpenSearch... ($i/30)"
             sleep 5
           done
-          # Clear any read-only blocks on OpenSearch
+          # Configure OpenSearch disk thresholds for CI environment (more aggressive than defaults)
+          # Increase thresholds since we don't care about data persistence in CI
           curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
           {
             "persistent": {
               "cluster.blocks.read_only": null,
-              "cluster.blocks.read_only_allow_delete": null
+              "cluster.blocks.read_only_allow_delete": null,
+              "cluster.routing.allocation.disk.threshold_enabled": true,
+              "cluster.routing.allocation.disk.watermark.low": "95%",
+              "cluster.routing.allocation.disk.watermark.high": "97%",
+              "cluster.routing.allocation.disk.watermark.flood_stage": "99%"
             }
           }'
+          # Clear any existing read-only blocks on indices
           curl -X PUT "localhost:9200/_all/_settings" -H 'Content-Type: application/json' -d'
           {
             "index.blocks.read_only_allow_delete": null
@@ -106,6 +136,22 @@ jobs:
           done
           # Additional buffer for all services
           sleep 5
+          # Reapply OpenSearch disk threshold settings after restart
+          curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+          {
+            "persistent": {
+              "cluster.blocks.read_only": null,
+              "cluster.blocks.read_only_allow_delete": null,
+              "cluster.routing.allocation.disk.threshold_enabled": true,
+              "cluster.routing.allocation.disk.watermark.low": "95%",
+              "cluster.routing.allocation.disk.watermark.high": "97%",
+              "cluster.routing.allocation.disk.watermark.flood_stage": "99%"
+            }
+          }'
+          curl -X PUT "localhost:9200/_all/_settings" -H 'Content-Type: application/json' -d'
+          {
+            "index.blocks.read_only_allow_delete": null
+          }'
           # Repopulate OpenSearch indices after restart to ensure data is accessible
           echo "Repopulating OpenSearch indices..."
           make populate-search-opportunities populate-search-agencies
@@ -115,7 +161,16 @@ jobs:
           # 5 workers × 4 threads = 20 potential connections, leaving 10 as buffer
           # Set HOST=0.0.0.0 to allow connections from frontend (frontend will use 127.0.0.1 for IPv4)
           # Set SEARCH_CONNECTION_POOL_SIZE=25 to handle concurrent requests (20 threads + buffer)
-          docker compose run -d --name grants-api --service-ports -e HOST=0.0.0.0 -e WEB_CONCURRENCY=5 -e SEARCH_CONNECTION_POOL_SIZE=25 grants-api poetry run gunicorn -c gunicorn.conf.py "src.app:create_app()"
+          # Set GUNICORN_TIMEOUT=120 to prevent worker kills during slow OpenSearch queries
+          # Set GUNICORN_KEEPALIVE=5 to maintain connections for better performance
+          docker compose run -d --name grants-api --service-ports \
+            -e HOST=0.0.0.0 \
+            -e WEB_CONCURRENCY=5 \
+            -e SEARCH_CONNECTION_POOL_SIZE=25 \
+            -e GUNICORN_TIMEOUT=120 \
+            -e GUNICORN_KEEPALIVE=5 \
+            -e GUNICORN_GRACEFUL_TIMEOUT=120 \
+            grants-api poetry run gunicorn -c gunicorn.conf.py "src.app:create_app()"
           # Debug: Check container status
           echo "=== Container Status ==="
           docker ps -a
@@ -124,7 +179,15 @@ jobs:
           echo "=== Waiting for API container to start ==="
           sleep 5
           echo "=== API Container Logs ==="
-          docker logs grants-api 2>&1 | tail -20 || echo "No logs yet"
+          docker logs grants-api 2>&1 | tail -30 || echo "No logs yet"
+          echo "=== Verifying Gunicorn Configuration ==="
+          docker logs grants-api 2>&1 | grep -E "timeout|workers|threads|Listening" || echo "Could not find Gunicorn config in logs"
+          # Verify API container is actually running
+          if ! docker ps | grep -q grants-api; then
+            echo "ERROR: grants-api container is not running!"
+            docker inspect grants-api
+            exit 1
+          fi
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
@@ -155,6 +218,14 @@ jobs:
         if: failure()
         run: |
           cd ../api
+          echo "=== Disk Usage ==="
+          df -h
+          echo "=== Docker Disk Usage ==="
+          docker system df -v || true
+          echo "=== OpenSearch Disk Watermark Status ==="
+          curl -s http://localhost:9200/_cluster/settings?include_defaults=true | grep -A 5 "watermark" || echo "Could not fetch watermark settings"
+          echo "=== OpenSearch Cluster Health ==="
+          curl -s http://localhost:9200/_cluster/health?pretty || echo "Could not fetch cluster health"
           echo "=== OpenSearch Container Status ==="
           docker inspect opensearch-node --format='{{.State.Status}} - OOMKilled: {{.State.OOMKilled}} - ExitCode: {{.State.ExitCode}}'
           echo "=== OpenSearch Container Logs (last 50 lines) ==="

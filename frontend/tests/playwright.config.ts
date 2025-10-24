@@ -16,13 +16,17 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 3 : 0,
-  workers: 10,
+  /* Limit workers in CI to reduce concurrent load on API server */
+  workers: process.env.CI ? parseInt(process.env.PLAYWRIGHT_WORKERS || "5") : 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: process.env.CI ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://127.0.0.1:3000",
+
+    /* Increase navigation timeout to handle slow SSR responses in CI */
+    navigationTimeout: 60000, // 60 seconds (default is 30s)
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
