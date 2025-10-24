@@ -15,7 +15,12 @@ from src.app_config import AppConfig
 
 app_config = AppConfig()
 
-bind = app_config.host + ':' + str(app_config.port)
+# Format bind address properly for IPv6 (requires square brackets)
+# IPv6 addresses like :: need to be wrapped as [::]:port
+if ':' in app_config.host and not app_config.host.startswith('['):
+    bind = f'[{app_config.host}]:{app_config.port}'
+else:
+    bind = f'{app_config.host}:{app_config.port}'
 # Calculates the number of usable cores and doubles it. Recommended number of workers per core is two.
 # https://docs.gunicorn.org/en/latest/design.html#how-many-workers
 # We use 'os.sched_getaffinity(pid)' not 'os.cpu_count()' because it returns only allowable CPUs.
