@@ -179,12 +179,6 @@ jobs:
           docker logs grants-api 2>&1 | tail -30 || echo "No logs yet"
           echo "=== Verifying Gunicorn Configuration ==="
           docker logs grants-api 2>&1 | grep -E "timeout|workers|threads|Listening" || echo "Could not find Gunicorn config in logs"
-          # Verify API container is actually running
-          if ! docker ps | grep -q grants-api; then
-            echo "ERROR: grants-api container is not running!"
-            docker inspect grants-api
-            exit 1
-          fi
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
