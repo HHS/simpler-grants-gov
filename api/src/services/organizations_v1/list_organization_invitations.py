@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -183,7 +183,7 @@ def list_organization_invitations_with_filters(
     db_session: db.Session,
     organization_id: uuid.UUID,
     filters: Optional[InvitationFilters] = None,
-) -> List[OrganizationInvitation]:
+) -> Sequence[OrganizationInvitation]:
     """
     List organization invitations with filtering.
 
