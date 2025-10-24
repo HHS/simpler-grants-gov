@@ -97,7 +97,7 @@ def list_organization_invitations_and_verify_access(
     user: User,
     organization_id: uuid.UUID,
     filters: dict | None = None,
-) -> list[OrganizationInvitationData]:
+) -> Sequence[OrganizationInvitation]:
     """
     List organization invitations with access control and filtering.
 

@@ -10,9 +10,6 @@ from src.db.models.entity_models import (
     OrganizationInvitation,
 )
 from src.db.models.user_models import LinkExternalUser, User
-from src.services.organizations_v1.organization_invitation_response_utils import (
-    OrganizationInvitationData,
-)
 
 
 def _fetch_user_invitations_by_user_id(
@@ -44,9 +41,7 @@ def _fetch_user_invitations_by_user_id(
     return list(invitations)
 
 
-def list_user_invitations(
-    db_session: db.Session, user_id: UUID
-) -> list[OrganizationInvitationData]:
+def list_user_invitations(db_session: db.Session, user_id: UUID) -> list[OrganizationInvitation]:
     """Get all invitations for a user by matching their login.gov email.
 
     Args:
