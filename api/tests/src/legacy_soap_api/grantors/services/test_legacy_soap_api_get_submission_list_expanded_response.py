@@ -42,7 +42,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         application.application_status = ApplicationStatus.ACCEPTED
         competition = application.competition
         competition.legacy_package_id = "PKG00118065"
-        competition.organization_assistance_listing = OpportunityAssistanceListingFactory(
+        competition.opportunity_assistance_listing = OpportunityAssistanceListingFactory(
             opportunity=competition.opportunity
         )
         db_session.commit()
@@ -471,8 +471,12 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>GRANT{submission.legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>CFDANumber</gran:FilterType>"
             f"<gran:FilterValue>{competition.opportunity_assistance_listing.assistance_listing_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>FundingOpportunityNumber</gran:FilterType>"
             f"<gran:FilterValue>{competition.opportunity.opportunity_number}</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
@@ -581,3 +585,59 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         stmt = select(func.count()).select_from(ApplicationSubmission)
         submission_count = db_session.scalar(stmt)
         assert submission_count == 3
+
+    def test_get_submission_list_expanded_response_handles_competition_with_no_opportunity_assistance_listing(
+        self, db_session, enable_factory_create
+    ):
+        submission = ApplicationSubmissionFactory.create()
+        application = submission.application
+        dt_naive = datetime(2025, 9, 9, 8, 15, 17)
+        dt_est_aware = TZ_EST.localize(dt_naive)
+        application.submitted_at = dt_est_aware
+        application.organization = OrganizationFactory()
+        sam_gov_entity = application.organization.sam_gov_entity
+        sam_gov_entity.has_debt_subject_to_offset = True
+        sam_gov_entity.has_exclusion_status = True
+        application.application_status = ApplicationStatus.ACCEPTED
+        competition = application.competition
+        competition.legacy_package_id = "PKG00118065"
+        competition.opportunity_assistance_listing = None
+        db_session.commit()
+        db_session.refresh(competition)
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
+            f"<gran:FilterValue>GRANT{submission.legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>CFDANumber</gran:FilterType>"
+            "<gran:FilterValue>XYZ-1234</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_request_schema
+        )
+        soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
+        expected = {
+            "Envelope": {
+                "Body": {
+                    "GetSubmissionListExpandedResponse": {
+                        "Success": True,
+                        "AvailableApplicationNumber": 0,
+                        "SubmissionInfo": [],
+                    }
+                }
+            }
+        }
+        assert soap_envelope_dict == expected

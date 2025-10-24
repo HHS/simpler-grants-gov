@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, Optional
 
@@ -53,9 +54,7 @@ class ExpandedApplicationFilter(BaseModel):
         ]
 
 
-def update_consolidated(
-    consolidated: dict[str, list], filter_type: str, filter_value: str | list
-) -> dict[str, list]:
+def update_consolidated(consolidated: dict, filter_type: str, filter_value: str | list) -> dict:
     value = filter_value if isinstance(filter_value, list) else [filter_value]
     filter_item = ExpandedApplicationFilter.model_validate(
         {"FilterType": filter_type, "FilterValue": value}
@@ -69,35 +68,30 @@ class ConsolidatedFilter(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def consolidate_filters(cls, data: dict[str, list[str] | str]) -> dict[str, dict[str, str]]:
-        if not data:
-            return {"filters": {}}
-        type_list = data.get("FilterType", [])
-        value_list = data.get("FilterValue", [])
-        if not isinstance(type_list, list):
-            type_list = [type_list]
-        if not isinstance(value_list, list):
-            value_list = [value_list]
-        if not type_list and not value_list:
-            return {"filters": {}}
-        consolidated: dict = {}
-        if len(type_list) == 1 and len(value_list) > 1:
-            single_type = type_list[0]
-            consolidated[single_type] = []
-            consolidated = update_consolidated(consolidated, single_type, value_list)
-        elif len(type_list) == len(value_list):
-            for f_type, f_value in zip(type_list, value_list, strict=True):
-                if f_type not in consolidated:
-                    consolidated[f_type] = []
-                consolidated = update_consolidated(consolidated, f_type, f_value)
-        elif len(type_list) > len(value_list):
-            raise SOAPInvalidEnvelope(
-                "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterValue}' is expected."
-            )
-        elif len(type_list) == 0 and len(value_list) > 0:
-            raise SOAPInvalidEnvelope(
-                "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterType}' is expected."
-            )
+    def consolidate_filters(
+        cls, data: dict[str, list[str] | str] | list
+    ) -> dict[str, dict[str, str]]:
+        if not isinstance(data, list):
+            data = [data]
+
+        # Consolidate the filter values here by type
+        consolidated: dict = defaultdict(list)
+        for item in data:
+            # Check for missing keys
+            for value in ["FilterType", "FilterValue"]:
+                if value not in item:
+                    raise SOAPInvalidEnvelope(
+                        (
+                            "The content of element 'ExpandedApplicationFilter' is not complete. One of "
+                            '\'{"http://apply.grants.gov/system/GrantsCommonElements-V1.0":'
+                            f"{value}}}' is expected."
+                        )
+                    )
+            else:
+                consolidated = update_consolidated(
+                    consolidated, item["FilterType"], item["FilterValue"]
+                )
+
         return {"filters": consolidated}
 
 

@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from sqlalchemy import select
-from sqlalchemy.orm import aliased, selectinload
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus
@@ -44,21 +44,16 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "ActiveExclusions": None,
         "UEI": None,
     }
-    if organization := application.organization:
+    organization = application.organization
+    if organization and organization.sam_gov_entity:
         sam_gov_entity = organization.sam_gov_entity
         application_list_obj.update(
             {
                 "DelinquentFederalDebt": (
-                    convert_bool_to_yes_no(
-                        sam_gov_entity is not None and sam_gov_entity.has_debt_subject_to_offset
-                    )
+                    convert_bool_to_yes_no(sam_gov_entity.has_debt_subject_to_offset)
                 ),
-                "ActiveExclusions": (
-                    convert_bool_to_yes_no(
-                        sam_gov_entity is not None and sam_gov_entity.has_exclusion_status
-                    )
-                ),
-                "UEI": sam_gov_entity.uei if sam_gov_entity else None,
+                "ActiveExclusions": (convert_bool_to_yes_no(sam_gov_entity.has_exclusion_status)),
+                "UEI": sam_gov_entity.uei,
             }
         )
     return application_list_obj
@@ -75,6 +70,14 @@ def get_submission_list_expanded_response(
                 selectinload(Competition.opportunity),
                 selectinload(Competition.opportunity_assistance_listing),
             ),
+        )
+    )
+    stmt = (
+        stmt.join(ApplicationSubmission.application)
+        .join(Application.competition)
+        .join(Opportunity, Competition.opportunity)
+        .join(
+            OpportunityAssistanceListing, Competition.opportunity_assistance_listing, isouter=True
         )
     )
     grants_gov_tracking_numbers = None
@@ -94,21 +97,9 @@ def get_submission_list_expanded_response(
             ApplicationSubmission.legacy_tracking_number.in_(grants_gov_tracking_numbers)
         )
     if cfda_numbers:
-        ListingAlias = aliased(OpportunityAssistanceListing)
-        stmt = (
-            stmt.join(ApplicationSubmission.application)
-            .join(Application.competition)
-            .join(ListingAlias, Competition.opportunity_assistance_listing)
-            .where(ListingAlias.assistance_listing_number.in_(cfda_numbers))
-        )
+        stmt = stmt.where(OpportunityAssistanceListing.assistance_listing_number.in_(cfda_numbers))
     if funding_opportunity_numbers:
-        OpportunityAlias = aliased(Opportunity)
-        stmt = (
-            stmt.join(ApplicationSubmission.application)
-            .join(Application.competition)
-            .join(OpportunityAlias, Competition.opportunity)
-            .where(OpportunityAlias.opportunity_number.in_(funding_opportunity_numbers))
-        )
+        stmt = stmt.where(Opportunity.opportunity_number.in_(funding_opportunity_numbers))
 
     info = []
     for submission in db_session.execute(stmt).scalars().all():
