@@ -1,5 +1,8 @@
 name: Frontend E2E Tests
 on:
+  push:
+    branches:
+      - "prasnava/debug-frontend-e2e-fixes"
   workflow_call:
   pull_request:
     paths:
@@ -46,9 +49,10 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make init
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
