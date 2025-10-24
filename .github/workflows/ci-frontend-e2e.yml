@@ -86,14 +86,38 @@ jobs:
           docker compose down
           # Start all supporting services (skip opensearch-dashboards to save memory in CI)
           docker compose up --detach grants-db opensearch-node localstack mock-oauth2-server mock-applicants-soap-api
-          # Wait for services to be ready
+          # Wait for services to be ready with proper health checks
           echo "Waiting for services to start..."
-          sleep 15
+          sleep 10
+          # Wait for database
+          until docker compose exec -T grants-db pg_isready -U app > /dev/null 2>&1; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+          echo "Database is ready"
+          # Wait for OpenSearch
+          for i in {1..60}; do
+            if curl -sf http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
+              echo "OpenSearch is ready"
+              break
+            fi
+            echo "Waiting for OpenSearch... ($i/60)"
+            sleep 3
+          done
+          # Additional buffer for all services
+          sleep 5
           # Start API with Gunicorn (production server) to handle concurrent e2e requests
           # Limit workers to avoid database connection pool exhaustion (DB has 30 max connections)
           # 5 workers × 4 threads = 20 potential connections, leaving 10 as buffer
           # Set HOST=0.0.0.0 to allow connections from outside the container
           HOST=0.0.0.0 WEB_CONCURRENCY=5 docker compose run -d --name grants-api --service-ports grants-api poetry run gunicorn -c gunicorn.conf.py "src.app:create_app()"
+          # Debug: Check container status
+          echo "=== Container Status ==="
+          docker ps -a
+          echo "=== Waiting for API container to start ==="
+          sleep 5
+          echo "=== API Container Logs ==="
+          docker logs grants-api 2>&1 | tail -20 || echo "No logs yet"
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
