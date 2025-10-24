@@ -2,7 +2,7 @@
 # SQL building for data load process.
 #
 
-from typing import Iterable
+from collections.abc import Iterable
 
 import sqlalchemy
 

@@ -39,8 +39,9 @@ Example:
         # db_client.get_connection() or db_client.get_session()
 """
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable, Concatenate, ParamSpec, TypeVar
+from typing import Concatenate, ParamSpec, TypeVar
 
 from flask import Flask, current_app
 

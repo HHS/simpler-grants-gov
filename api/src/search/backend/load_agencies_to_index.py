@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from enum import StrEnum
-from typing import Sequence
 
 from pydantic import Field
 from sqlalchemy import select

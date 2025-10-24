@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Sequence
+from collections.abc import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util

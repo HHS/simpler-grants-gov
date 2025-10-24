@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import Sequence
+from collections.abc import Sequence
 
 from src.util.dict_util import flatten_dict
 

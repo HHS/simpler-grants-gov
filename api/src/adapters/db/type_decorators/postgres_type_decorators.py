@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 
 from sqlalchemy import Integer
 from sqlalchemy.types import TypeDecorator
@@ -20,7 +20,7 @@ class LookupColumn(TypeDecorator):
 
     cache_ok = True
 
-    def __init__(self, lookup_table: Type[LookupTable], *args: Any, **kwargs: Any):
+    def __init__(self, lookup_table: type[LookupTable], *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.lookup_table = lookup_table
 

@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformFundingInstrument(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_funding_instrument(self, transform_oracle_data_task):
         return TransformFundingInstrument(transform_oracle_data_task)
 

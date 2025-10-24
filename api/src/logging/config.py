@@ -1,9 +1,10 @@
+import contextlib
 import logging
 import os
 import platform
 import pwd
 import sys
-from typing import Any, ContextManager, cast
+from typing import Any, cast
 
 from pydantic_settings import SettingsConfigDict
 
@@ -33,7 +34,7 @@ class LoggingConfig(PydanticBaseEnvConfig):
     level_overrides: str | None = None
 
 
-class LoggingContext(ContextManager[None]):
+class LoggingContext(contextlib.AbstractContextManager[None]):
     """
     A context manager for handling setting up the logging stream.
 

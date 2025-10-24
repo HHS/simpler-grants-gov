@@ -28,7 +28,7 @@ from tests.src.data_migration.transformation.conftest import (
 class TestTransformFullRunTask(BaseTestClass):
     # The above tests validated we could run the tests
 
-    @pytest.fixture()
+    @pytest.fixture
     def truncate_all_staging_tables(self, db_session):
         # Iterate over all the staging tables and truncate them to avoid
         # any collisions with prior test data. There are no foreign keys
@@ -36,7 +36,7 @@ class TestTransformFullRunTask(BaseTestClass):
         for table in staging.metadata.tables.values():
             db_session.query(table).delete()
 
-    @pytest.fixture()
+    @pytest.fixture
     def transform_oracle_data_task(
         self,
         db_session,

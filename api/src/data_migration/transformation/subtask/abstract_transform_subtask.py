@@ -1,7 +1,8 @@
 import abc
 import logging
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Any, Sequence, Tuple, Type, cast
+from typing import Any, cast
 
 from sqlalchemy import UnaryExpression, and_, select
 from sqlalchemy.orm import selectinload
@@ -109,16 +110,16 @@ class AbstractTransformSubTask(SubTask):
 
     def fetch(
         self,
-        source_model: Type[transform_constants.S],
-        destination_model: Type[transform_constants.D],
+        source_model: type[transform_constants.S],
+        destination_model: type[transform_constants.D],
         join_clause: Sequence,
-    ) -> list[Tuple[transform_constants.S, transform_constants.D | None]]:
+    ) -> list[tuple[transform_constants.S, transform_constants.D | None]]:
         # The real type is: Sequence[Row[Tuple[S, D | None]]]
         # but MyPy is weird about this and the Row+Tuple causes some
         # confusion in the parsing so it ends up assuming everything is Any
         # So just cast it to a simpler type that doesn't confuse anything
         return cast(
-            list[Tuple[transform_constants.S, transform_constants.D | None]],
+            list[tuple[transform_constants.S, transform_constants.D | None]],
             self.db_session.execute(
                 select(source_model, destination_model)
                 .join(destination_model, and_(*join_clause), isouter=True)
@@ -129,13 +130,13 @@ class AbstractTransformSubTask(SubTask):
 
     def fetch_with_opportunity(
         self,
-        source_model: Type[transform_constants.S],
-        destination_model: Type[transform_constants.D],
+        source_model: type[transform_constants.S],
+        destination_model: type[transform_constants.D],
         join_clause: Sequence,
         batch_size: int = 5000,
         limit: int | None = None,
         order_by: UnaryExpression | None = None,
-    ) -> list[Tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]]:
+    ) -> list[tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]]:
         # Similar to the above fetch function, but also grabs an opportunity record
         # Note that this requires your source_model to have an opportunity_id field defined.
 
@@ -158,20 +159,20 @@ class AbstractTransformSubTask(SubTask):
             select_query = select_query.limit(limit)
 
         return cast(
-            list[Tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]],
+            list[tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]],
             self.db_session.execute(select_query),
         )
 
     def fetch_with_opportunity_summary(
         self,
-        source_model: Type[transform_constants.S],
-        destination_model: Type[transform_constants.D],
+        source_model: type[transform_constants.S],
+        destination_model: type[transform_constants.D],
         join_clause: Sequence,
         is_forecast: bool,
         is_delete: bool,
         relationship_load_value: Any,
     ) -> list[
-        Tuple[transform_constants.S, transform_constants.D | None, OpportunitySummary | None]
+        tuple[transform_constants.S, transform_constants.D | None, OpportunitySummary | None]
     ]:
         # setup the join clause for getting the opportunity summary
         opportunity_summary_join_clause = [
@@ -181,7 +182,7 @@ class AbstractTransformSubTask(SubTask):
 
         return cast(
             list[
-                Tuple[
+                tuple[
                     transform_constants.S, transform_constants.D | None, OpportunitySummary | None
                 ]
             ],

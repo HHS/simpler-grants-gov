@@ -2,10 +2,11 @@ import itertools
 import logging
 import time
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import StrEnum
-from typing import IO, Sequence
+from typing import IO
 
 from sqlalchemy import select
 

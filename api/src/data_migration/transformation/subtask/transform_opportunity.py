@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, cast
+from typing import cast
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -29,7 +29,7 @@ class TransformOpportunity(AbstractTransformSubTask):
     def transform_records(self) -> None:
         # Fetch all opportunities that were modified
         # Alongside that, grab the existing opportunity record
-        opportunities: list[Tuple[Topportunity, Opportunity | None]] = self.fetch(
+        opportunities: list[tuple[Topportunity, Opportunity | None]] = self.fetch(
             Topportunity,
             Opportunity,
             [Topportunity.opportunity_id == Opportunity.legacy_opportunity_id],

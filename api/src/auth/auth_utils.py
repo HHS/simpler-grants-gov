@@ -1,6 +1,7 @@
 import functools
 import logging
-from typing import Any, Callable, ParamSpec
+from collections.abc import Callable
+from typing import Any, ParamSpec
 
 import flask
 from apiflask.exceptions import HTTPError

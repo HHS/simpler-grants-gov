@@ -9,25 +9,24 @@ See https://docs.python.org/3/library/logging.html#formatter-objects
 
 import json
 import logging
+from collections.abc import Callable
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Callable, Type, TypeVar
+from typing import Any
 from uuid import UUID
 
 import src.logging.decodelog as decodelog
 
-T = TypeVar("T")
-
 
 # identity returns an unmodified object
-def identity(obj: T) -> T:
+def identity[T](obj: T) -> T:
     return obj
 
 
 # Mapping of types to functions for conversion
 # when writing logs to JSON
-ENCODERS_BY_TYPE: dict[Type[Any], Callable[[Any], Any]] = {
+ENCODERS_BY_TYPE: dict[type[Any], Callable[[Any], Any]] = {
     # JSONEncoder handles these properly already:
     # https://docs.python.org/3/library/json.html#json.JSONEncoder
     str: identity,

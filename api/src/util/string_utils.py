@@ -1,8 +1,7 @@
 import uuid
-from typing import Optional
 
 
-def join_list(joining_list: Optional[list], join_txt: str = "\n") -> str:
+def join_list(joining_list: list | None, join_txt: str = "\n") -> str:
     """
     Utility to join a list.
 

@@ -1,6 +1,6 @@
 import logging
+from collections.abc import Sequence
 from datetime import timedelta
-from typing import Sequence, Tuple
 
 from pydantic import BaseModel, Field
 from sqlalchemy import asc, desc, select
@@ -36,7 +36,7 @@ class ExtractListParams(BaseModel):
 
 def get_extracts(
     db_session: db.Session, list_params: ExtractListParams
-) -> Tuple[Sequence[ExtractMetadata], PaginationInfo]:
+) -> tuple[Sequence[ExtractMetadata], PaginationInfo]:
     stmt = select(ExtractMetadata)
 
     # Apply sorting from pagination params

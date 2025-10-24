@@ -53,7 +53,7 @@ class TestCreateAnalyticsDbCsvsTask(BaseTestClass):
         opps.extend(OpportunityFactory.create_batch(size=1, no_current_summary=True))
         return opps
 
-    @pytest.fixture()
+    @pytest.fixture
     def task(self, db_session, mock_s3_bucket, test_api_schema):
         config = CreateAnalyticsDbCsvsConfig(
             API_ANALYTICS_DB_EXTRACTS_PATH=f"s3://{mock_s3_bucket}/table-extracts",

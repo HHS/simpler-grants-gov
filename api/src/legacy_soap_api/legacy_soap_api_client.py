@@ -1,6 +1,7 @@
 import logging
 import uuid
-from typing import Any, BinaryIO, Iterator
+from collections.abc import Iterator
+from typing import Any, BinaryIO
 
 from pydantic import ValidationError
 

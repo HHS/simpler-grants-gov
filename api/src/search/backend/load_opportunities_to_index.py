@@ -2,9 +2,9 @@ import itertools
 import logging
 import os
 import uuid
+from collections.abc import Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
-from typing import Iterator, Sequence
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field

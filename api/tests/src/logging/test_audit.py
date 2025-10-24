@@ -12,7 +12,8 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 

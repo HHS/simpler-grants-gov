@@ -1,7 +1,6 @@
 from enum import Enum, StrEnum
 from random import choice
 from string import ascii_uppercase
-from typing import Type
 
 from src.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
 from src.validation.validation_constants import ValidationErrorType
@@ -52,7 +51,7 @@ def get_random_string(length: int):
     return "".join(choice(ascii_uppercase) for i in range(length))
 
 
-def get_enum_error_msg(*enums: Type[Enum]):
+def get_enum_error_msg(*enums: type[Enum]):
     possible_values = []
     for enum in enums:
         possible_values.extend([e.value for e in enum])

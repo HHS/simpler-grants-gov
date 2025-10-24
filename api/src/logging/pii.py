@@ -30,7 +30,7 @@ Example:
 
 import logging
 import re
-from typing import Any, Optional
+from typing import Any
 
 
 def mask_pii(record: logging.LogRecord) -> bool:
@@ -80,7 +80,7 @@ ALLOW_NO_MASK = {
 }
 
 
-def _mask_pii_for_key(key: str, value: Optional[Any]) -> Optional[Any]:
+def _mask_pii_for_key(key: str, value: Any | None) -> Any | None:
     """
     Mask the given value if it has the pattern of a tax identifier
     unless its key is one of the allowed values to avoid masking
@@ -91,7 +91,7 @@ def _mask_pii_for_key(key: str, value: Optional[Any]) -> Optional[Any]:
     return _mask_pii(value)
 
 
-def _mask_pii(value: Optional[Any]) -> Optional[Any]:
+def _mask_pii(value: Any | None) -> Any | None:
     if TIN_RE.search(str(value)):
         return TIN_RE.sub("*********", str(value))
     return value

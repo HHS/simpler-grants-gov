@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from pydantic import Field
 
@@ -11,11 +10,11 @@ logger = logging.getLogger(__name__)
 
 class PostgresDBConfig(PydanticBaseEnvConfig):
     check_connection_on_init: bool = Field(True, alias="DB_CHECK_CONNECTION_ON_INIT")
-    aws_region: Optional[str] = Field(None, alias="AWS_REGION")
+    aws_region: str | None = Field(None, alias="AWS_REGION")
     host: str = Field(alias="DB_HOST")
     name: str = Field(alias="DB_NAME")
     username: str = Field(alias="DB_USER")
-    password: Optional[str] = Field(None, alias="DB_PASSWORD")
+    password: str | None = Field(None, alias="DB_PASSWORD")
     port: int = Field(5432, alias="DB_PORT")
     hide_sql_parameter_logs: bool = Field(True, alias="HIDE_SQL_PARAMETER_LOGS")
     ssl_mode: str = Field("require", alias="DB_SSL_MODE")

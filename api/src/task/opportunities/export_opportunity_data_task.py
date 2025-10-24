@@ -1,8 +1,8 @@
 import json
 import logging
 import os
+from collections.abc import Iterator, Sequence
 from enum import StrEnum
-from typing import Iterator, Sequence
 
 from pydantic import Field
 from sqlalchemy import exists, select

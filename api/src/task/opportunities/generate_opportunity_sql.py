@@ -27,9 +27,10 @@ import random
 import secrets
 import string
 import uuid
+from collections.abc import Callable
 from datetime import date, datetime
 from enum import StrEnum
-from typing import Any, Callable, Type, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 import click
 import requests
@@ -442,7 +443,7 @@ def str_format(value: str) -> str:
     return f"'{v}'"
 
 
-SQL_FORMATTERS: dict[Type[Any], Callable[[Any], str]] = {
+SQL_FORMATTERS: dict[type[Any], Callable[[Any], str]] = {
     # Each of these dictates how to format an incoming
     # type into a proper format when put into a SQL insert statement
     str: str_format,

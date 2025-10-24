@@ -54,7 +54,7 @@ class MockSamGovClient(BaseSamGovClient):
         # Load additional mock data from file if provided
         if mock_data_file and os.path.exists(mock_data_file):
             try:
-                with open(mock_data_file, "r") as f:
+                with open(mock_data_file) as f:
                     additional_data = json.load(f)
 
                 # Add custom extract definitions if available

@@ -25,7 +25,7 @@ from src.constants.lookup_constants import (
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
-OPPORTUNITY_STATUS_CONFIG = LookupConfig(
+OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [
         LookupStr(OpportunityStatus.FORECASTED, 1),
         LookupStr(OpportunityStatus.POSTED, 2),
@@ -34,7 +34,7 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
+OPPORTUNITY_CATEGORY_CONFIG: LookupConfig[OpportunityCategory] = LookupConfig(
     [
         LookupStr(OpportunityCategory.DISCRETIONARY, 1),
         LookupStr(OpportunityCategory.MANDATORY, 2),
@@ -44,7 +44,7 @@ OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
     ]
 )
 
-APPLICANT_TYPE_CONFIG = LookupConfig(
+APPLICANT_TYPE_CONFIG: LookupConfig[ApplicantType] = LookupConfig(
     [
         LookupStr(ApplicantType.STATE_GOVERNMENTS, 1),
         LookupStr(ApplicantType.COUNTY_GOVERNMENTS, 2),
@@ -67,7 +67,7 @@ APPLICANT_TYPE_CONFIG = LookupConfig(
 )
 
 
-FUNDING_CATEGORY_CONFIG = LookupConfig(
+FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
     [
         LookupStr(FundingCategory.RECOVERY_ACT, 1),
         LookupStr(FundingCategory.AGRICULTURE, 2),
@@ -98,7 +98,7 @@ FUNDING_CATEGORY_CONFIG = LookupConfig(
     ]
 )
 
-FUNDING_INSTRUMENT_CONFIG = LookupConfig(
+FUNDING_INSTRUMENT_CONFIG: LookupConfig[FundingInstrument] = LookupConfig(
     [
         LookupStr(FundingInstrument.COOPERATIVE_AGREEMENT, 1),
         LookupStr(FundingInstrument.GRANT, 2),
@@ -107,19 +107,21 @@ FUNDING_INSTRUMENT_CONFIG = LookupConfig(
     ]
 )
 
-AGENCY_DOWNLOAD_FILE_TYPE_CONFIG = LookupConfig(
+AGENCY_DOWNLOAD_FILE_TYPE_CONFIG: LookupConfig[AgencyDownloadFileType] = LookupConfig(
     [LookupStr(AgencyDownloadFileType.XML, 1), LookupStr(AgencyDownloadFileType.PDF, 2)]
 )
 
-AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG = LookupConfig(
-    [
-        LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
-        LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
-        LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
-    ]
+AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG: LookupConfig[AgencySubmissionNotificationSetting] = (
+    LookupConfig(
+        [
+            LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
+            LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
+            LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
+        ]
+    )
 )
 
-JOB_STATUS_CONFIG = LookupConfig(
+JOB_STATUS_CONFIG: LookupConfig[JobStatus] = LookupConfig(
     [
         LookupStr(JobStatus.STARTED, 1),
         LookupStr(JobStatus.COMPLETED, 2),
@@ -127,16 +129,18 @@ JOB_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-EXTERNAL_USER_TYPE_CONFIG = LookupConfig([LookupStr(ExternalUserType.LOGIN_GOV, 1)])
+EXTERNAL_USER_TYPE_CONFIG: LookupConfig[ExternalUserType] = LookupConfig(
+    [LookupStr(ExternalUserType.LOGIN_GOV, 1)]
+)
 
-EXTRACT_TYPE_CONFIG = LookupConfig(
+EXTRACT_TYPE_CONFIG: LookupConfig[ExtractType] = LookupConfig(
     [
         LookupStr(ExtractType.OPPORTUNITIES_JSON, 1),
         LookupStr(ExtractType.OPPORTUNITIES_CSV, 2),
     ]
 )
 
-FORM_FAMILY_CONFIG = LookupConfig(
+FORM_FAMILY_CONFIG: LookupConfig[FormFamily] = LookupConfig(
     [
         LookupStr(FormFamily.SF_424, 1),
         LookupStr(FormFamily.SF_424_INDIVIDUAL, 2),
@@ -146,7 +150,7 @@ FORM_FAMILY_CONFIG = LookupConfig(
     ]
 )
 
-FORM_TYPE_CONFIG = LookupConfig(
+FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
     [
         LookupStr(FormType.SF424, 1),
         LookupStr(FormType.SF424A, 2),
@@ -158,14 +162,14 @@ FORM_TYPE_CONFIG = LookupConfig(
     ]
 )
 
-COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
+COMPETITION_OPEN_TO_APPLICANT_CONFIG: LookupConfig[CompetitionOpenToApplicant] = LookupConfig(
     [
         LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
         LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
     ]
 )
 
-SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
+SAM_GOV_PROCESSING_STATUS_CONFIG: LookupConfig[SamGovProcessingStatus] = LookupConfig(
     [
         LookupStr(SamGovProcessingStatus.PENDING, 1),
         LookupStr(SamGovProcessingStatus.COMPLETED, 2),
@@ -174,14 +178,14 @@ SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-SAM_GOV_EXTRACT_TYPE_CONFIG = LookupConfig(
+SAM_GOV_EXTRACT_TYPE_CONFIG: LookupConfig[SamGovExtractType] = LookupConfig(
     [
         LookupStr(SamGovExtractType.MONTHLY, 1),
         LookupStr(SamGovExtractType.DAILY, 2),
     ]
 )
 
-SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
+SAM_GOV_IMPORT_TYPE_CONFIG: LookupConfig[SamGovImportType] = LookupConfig(
     [
         LookupStr(SamGovImportType.MONTHLY_EXTRACT, 1),
         LookupStr(SamGovImportType.DAILY_EXTRACT, 2),
@@ -189,7 +193,7 @@ SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
     ]
 )
 
-APPLICATION_STATUS_CONFIG = LookupConfig(
+APPLICATION_STATUS_CONFIG: LookupConfig[ApplicationStatus] = LookupConfig(
     [
         LookupStr(ApplicationStatus.IN_PROGRESS, 1),
         LookupStr(ApplicationStatus.SUBMITTED, 2),
@@ -197,7 +201,7 @@ APPLICATION_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-PRIVILEGE_CONFIG = LookupConfig(
+PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
     [
         LookupStr(Privilege.MANAGE_ORG_MEMBERS, 1),
         LookupStr(Privilege.MANAGE_ORG_ADMIN_MEMBERS, 2),
@@ -213,7 +217,7 @@ PRIVILEGE_CONFIG = LookupConfig(
     ]
 )
 
-ROLE_TYPE_CONFIG = LookupConfig(
+ROLE_TYPE_CONFIG: LookupConfig[RoleType] = LookupConfig(
     [
         LookupStr(RoleType.ORGANIZATION, 1),
         LookupStr(RoleType.AGENCY, 2),
@@ -222,7 +226,7 @@ ROLE_TYPE_CONFIG = LookupConfig(
     ]
 )
 
-APPLICATION_AUDIT_EVENT_CONFIG = LookupConfig(
+APPLICATION_AUDIT_EVENT_CONFIG: LookupConfig[ApplicationAuditEvent] = LookupConfig(
     [
         LookupStr(ApplicationAuditEvent.APPLICATION_CREATED, 1),
         LookupStr(ApplicationAuditEvent.APPLICATION_NAME_CHANGED, 2),

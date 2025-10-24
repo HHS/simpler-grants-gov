@@ -48,9 +48,9 @@ def create_user_in_org(
         org_kwargs = {}
         if sam_gov_entity is not None:
             org_kwargs["sam_gov_entity"] = sam_gov_entity
-        elif "with_sam_gov_entity" in kwargs and kwargs["with_sam_gov_entity"]:
+        elif kwargs.get("with_sam_gov_entity"):
             org_kwargs["sam_gov_entity"] = SamGovEntityFactory.create()
-        elif "without_sam_gov_entity" in kwargs and kwargs["without_sam_gov_entity"]:
+        elif kwargs.get("without_sam_gov_entity"):
             org_kwargs["sam_gov_entity"] = None
 
         organization = OrganizationFactory.create(**org_kwargs)

@@ -19,7 +19,7 @@ def saved_search(enable_factory_create, user, db_session):
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
     cascade_delete_from_db_table(db_session, UserTokenSession)
-    yield
+    return
 
 
 def test_user_delete_saved_search_unauthorized_user(

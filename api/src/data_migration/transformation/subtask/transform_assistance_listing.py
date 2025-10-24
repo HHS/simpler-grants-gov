@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 class TransformAssistanceListing(AbstractTransformSubTask):
     def transform_records(self) -> None:
         assistance_listings: list[
-            Tuple[TopportunityCfda, OpportunityAssistanceListing | None, Opportunity | None]
+            tuple[TopportunityCfda, OpportunityAssistanceListing | None, Opportunity | None]
         ] = self.fetch_with_opportunity(
             TopportunityCfda,
             OpportunityAssistanceListing,

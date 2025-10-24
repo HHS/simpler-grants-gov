@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -85,7 +85,7 @@ class TransformApplicantType(AbstractTransformSubTask):
     def process_link_applicant_types_group(
         self,
         records: Sequence[
-            Tuple[
+            tuple[
                 transform_constants.SourceApplicantType,
                 LinkOpportunitySummaryApplicantType | None,
                 OpportunitySummary | None,

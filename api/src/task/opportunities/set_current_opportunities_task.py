@@ -1,7 +1,7 @@
 import logging
 from datetime import date
 from enum import StrEnum
-from typing import Any, Tuple, cast
+from typing import Any, cast
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -144,7 +144,7 @@ class SetCurrentOpportunitiesTask(Task):
 
     def determine_current_and_status(
         self, opportunity: Opportunity
-    ) -> Tuple[OpportunitySummary | None, OpportunityStatus | None]:
+    ) -> tuple[OpportunitySummary | None, OpportunityStatus | None]:
         # Determine latest forecasted and non-forecasted opportunity summaries
         latest_forecasted_summary: OpportunitySummary | None = None
         latest_non_forecasted_summary: OpportunitySummary | None = None

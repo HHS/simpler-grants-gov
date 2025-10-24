@@ -75,7 +75,7 @@ class PaginationInfo:
         # accordingly. It's fine if the last page partially goes over 10k as
         # in our request building logic to OpenSearch we will make sure this page
         # fully fits within the 10k.
-        total_pages = int(math.ceil(total_records / pagination_params.page_size))
+        total_pages = int(math.ceil(total_records / pagination_params.page_size))  # noqa: RUF046
 
         return cls(
             page_offset=pagination_params.page_offset,

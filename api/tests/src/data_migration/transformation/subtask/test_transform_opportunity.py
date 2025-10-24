@@ -13,7 +13,7 @@ from tests.src.db.models.factories import OpportunityAttachmentFactory, Opportun
 
 
 class TestTransformOpportunity(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_opportunity(self, transform_oracle_data_task, truncate_staging_tables, s3_config):
         return TransformOpportunity(transform_oracle_data_task, s3_config)
 

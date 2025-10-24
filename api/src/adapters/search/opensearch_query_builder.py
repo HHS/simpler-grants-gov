@@ -113,7 +113,7 @@ class SearchQueryBuilder:
         self.page_number = page_number
         return self
 
-    def sort_by(self, sort_values: list[typing.Tuple[str, SortDirection]]) -> typing.Self:
+    def sort_by(self, sort_values: list[tuple[str, SortDirection]]) -> typing.Self:
         """
         List of tuples of field name + sort direction to sort by. If you wish to sort by the relevancy
         score provide a field name of "relevancy".

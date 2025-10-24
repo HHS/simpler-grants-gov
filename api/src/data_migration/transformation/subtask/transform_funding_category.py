@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -88,7 +88,7 @@ class TransformFundingCategory(AbstractTransformSubTask):
     def process_link_funding_categories_group(
         self,
         records: Sequence[
-            Tuple[
+            tuple[
                 transform_constants.SourceFundingCategory,
                 LinkOpportunitySummaryFundingCategory | None,
                 OpportunitySummary | None,

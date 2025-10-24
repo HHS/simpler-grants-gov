@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 from pydantic import BaseModel, Field
 
@@ -248,7 +248,7 @@ def _search_opportunities(
 
 def search_opportunities(
     search_client: search.SearchClient, raw_search_params: dict
-) -> Tuple[Sequence[dict], dict, PaginationInfo]:
+) -> tuple[Sequence[dict], dict, PaginationInfo]:
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
     response = _search_opportunities(search_client, search_params)

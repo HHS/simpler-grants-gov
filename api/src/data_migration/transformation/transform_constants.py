@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import TypeAlias, TypeVar
+from typing import TypeVar
 
 from src.db.models.base import ApiSchemaTable
 from src.db.models.staging.forecast import (
@@ -54,21 +54,21 @@ class Metrics(StrEnum):
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)
 
-SourceSummary: TypeAlias = Tforecast | Tsynopsis
+type SourceSummary = Tforecast | Tsynopsis
 
-SourceApplicantType: TypeAlias = (
+type SourceApplicantType = (
     TapplicanttypesForecast
     | TapplicanttypesForecastHist
     | TapplicanttypesSynopsis
     | TapplicanttypesSynopsisHist
 )
 
-SourceFundingCategory: TypeAlias = (
+type SourceFundingCategory = (
     TfundactcatForecast | TfundactcatForecastHist | TfundactcatSynopsis | TfundactcatSynopsisHist
 )
 
-SourceFundingInstrument: TypeAlias = (
+type SourceFundingInstrument = (
     TfundinstrForecastHist | TfundinstrForecast | TfundinstrSynopsisHist | TfundinstrSynopsis
 )
 
-SourceAny: TypeAlias = SourceApplicantType | SourceFundingCategory | SourceFundingInstrument
+type SourceAny = SourceApplicantType | SourceFundingCategory | SourceFundingInstrument

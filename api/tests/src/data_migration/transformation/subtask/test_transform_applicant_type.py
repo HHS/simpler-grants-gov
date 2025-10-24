@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformApplicantType(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_applicant_type(self, transform_oracle_data_task):
         return TransformApplicantType(transform_oracle_data_task)
 

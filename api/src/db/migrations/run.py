@@ -96,11 +96,9 @@ def have_all_migrations_run(db_engine: sqlalchemy.engine.Engine) -> None:
         # Otherwise, don't bother with this - most likely running in a testing environment.
         if current_heads != expected_heads:
             raise Exception(
-                (
-                    "The database schema is not in sync with the migrations."
-                    "Please verify that the migrations have been"
-                    f"run up to {expected_heads}; currently at {current_heads}"
-                )
+                "The database schema is not in sync with the migrations."
+                "Please verify that the migrations have been"
+                f"run up to {expected_heads}; currently at {current_heads}"
             )
 
         logger.info(

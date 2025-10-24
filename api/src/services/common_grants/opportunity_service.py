@@ -59,7 +59,7 @@ class CommonGrantsOpportunityService:
         v1_search_params = transform_search_request_from_cg(filters, sorting, pagination, "")
 
         # Get response data from v1 service
-        opportunity_data_v1, aggregations, pagination_data_v1 = search_opportunities(
+        opportunity_data_v1, _aggregations, pagination_data_v1 = search_opportunities(
             search_client, v1_search_params
         )
 
@@ -98,7 +98,7 @@ class CommonGrantsOpportunityService:
         )
 
         # Get response data from v1 service
-        opportunity_data_v1, aggregations, pagination_data_v1 = search_opportunities(
+        opportunity_data_v1, _aggregations, pagination_data_v1 = search_opportunities(
             search_client, v1_search_params
         )
 

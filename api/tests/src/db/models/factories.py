@@ -11,7 +11,6 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 import random
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
 
 import factory
 import factory.fuzzy
@@ -300,7 +299,7 @@ fake = faker.Faker()
 fake.add_provider(CustomProvider)
 factory.Faker.add_provider(CustomProvider)
 
-_db_session: Optional[db.Session] = None
+_db_session: db.Session | None = None
 
 
 def get_db_session() -> db.Session:

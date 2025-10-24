@@ -2,7 +2,8 @@
 
 import logging
 import re
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from .constants import CURRENCY_REGEX, NO_VALUE, YES_VALUE
 

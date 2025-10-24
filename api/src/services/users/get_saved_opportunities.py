@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -49,7 +49,7 @@ def add_sort_order(stmt: Select, sort_order: list) -> Select:
 
 def get_saved_opportunities(
     db_session: db.Session, user_id: UUID, raw_opportunity_params: dict
-) -> Tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
     logger.info(f"Getting saved opportunities for user {user_id}")
 
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)

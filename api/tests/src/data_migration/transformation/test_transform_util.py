@@ -86,7 +86,6 @@ def test_transform_update_create_timestamp(
         ("N", False),
         ("Yes", True),
         ("No", False),
-        ("Y", True),
         ("n", False),
         ("yes", True),
         ("no", False),

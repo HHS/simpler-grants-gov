@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 import src.adapters.db as db
 from src.constants.static_role_values import ORG_ADMIN

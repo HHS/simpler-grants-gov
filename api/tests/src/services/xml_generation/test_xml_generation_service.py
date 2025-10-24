@@ -65,15 +65,14 @@ class TestXMLGenerationService:
     def test_generate_xml_with_none_application_data(self):
         """Test XML generation when application data is None (validation error)."""
         # Pydantic should prevent None values for application_data
-        try:
+        with pytest.raises(ValidationError) as e:
             XMLGenerationRequest(
                 application_data=None, form_name="SF424_4_0"  # type: ignore[arg-type]
             )
-            raise AssertionError("Expected ValidationError for None application_data")
-        except ValidationError as e:
-            # Verify that Pydantic correctly validates the input
-            assert "dict_type" in str(e)
-            assert "application_data" in str(e)
+
+        # Verify that Pydantic correctly validates the input
+        assert "dict_type" in str(e)
+        assert "application_data" in str(e)
 
     def test_generate_xml_with_namespace(self):
         """Test XML generation includes proper namespace."""

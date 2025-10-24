@@ -31,7 +31,7 @@ class TestTransformCompetition(BaseTransformTestClass):
 
         db_session.commit()
 
-    @pytest.fixture()
+    @pytest.fixture
     def transform_competition(self, transform_oracle_data_task):
         return TransformCompetition(transform_oracle_data_task)
 

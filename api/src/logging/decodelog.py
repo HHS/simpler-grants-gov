@@ -12,7 +12,7 @@
 import datetime
 import json
 import sys
-from typing import Mapping, Optional
+from collections.abc import Mapping
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -35,7 +35,7 @@ def main() -> None:
             sys.stdout.write("\r\n")
 
 
-def process_line(line: str) -> Optional[str]:
+def process_line(line: str) -> str | None:
     """Process a line of the log and return the reformatted line."""
     line = line.rstrip()
     if line and line[0] == "{":
@@ -48,7 +48,7 @@ def process_line(line: str) -> Optional[str]:
     return line
 
 
-def decode_json_line(line: str) -> Optional[str]:
+def decode_json_line(line: str) -> str | None:
     """Decode a JSON log line and return the reformatted line."""
     try:
         data = json.loads(line)
@@ -79,14 +79,7 @@ def format_line(
     """Format log fields as a coloured string."""
     logger_name_color = color_for_name(logger_name)
     level_color = color_for_level(level)
-    return "{created}  {logger_name} {func_name:<28} {level} {message} {extra}".format(
-        created=format_datetime(created),
-        logger_name=colorize(logger_name.ljust(36), logger_name_color),
-        func_name=func_name,
-        level=colorize(level.ljust(8), level_color),
-        message=colorize(message.ljust(message_width), level_color),
-        extra=colorize(format_extra(extra), BLUE),
-    )
+    return f"{format_datetime(created)}  {colorize(logger_name.ljust(36), logger_name_color)} {func_name:<28} {colorize(level.ljust(8), level_color)} {colorize(message.ljust(message_width), level_color)} {colorize(format_extra(extra), BLUE)}"
 
 
 def colorize(text: str, color: str) -> str:

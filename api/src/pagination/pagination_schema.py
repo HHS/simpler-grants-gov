@@ -1,5 +1,3 @@
-from typing import Type
-
 from marshmallow import pre_load
 
 from src.api.schemas.extension import Schema, fields, validators
@@ -29,7 +27,7 @@ def generate_pagination_schema(
     order_by_fields: list[str],
     max_page_size: int = 5000,
     default_sort_order: list[dict] | None = None,
-) -> Type[Schema]:
+) -> type[Schema]:
     """
     Generate a schema that describes the pagination for a pagination endpoint.
 

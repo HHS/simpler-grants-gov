@@ -23,7 +23,6 @@ def test_join_list():
         ("abc123", False),
         ("1234", False),
         ("xyz", False),
-        ("abc123", False),
     ],
 )
 def test_is_valid_uuid(value, is_valid):

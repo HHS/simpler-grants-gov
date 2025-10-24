@@ -1,10 +1,10 @@
 import logging
 import uuid
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import StrEnum
-from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
