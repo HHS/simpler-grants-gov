@@ -136,6 +136,8 @@ jobs:
           docker container ls
           docker container logs grants-api
           docker container logs opensearch-node
+          make populate-search-opportunities
+          df -h
 
   create-report:
     name: Create Merged Test Report
