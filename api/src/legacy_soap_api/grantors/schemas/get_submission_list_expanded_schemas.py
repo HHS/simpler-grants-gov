@@ -87,10 +87,9 @@ class ConsolidatedFilter(BaseModel):
                             f"{value}}}' is expected."
                         )
                     )
-            else:
-                consolidated = update_consolidated(
-                    consolidated, item["FilterType"], item["FilterValue"]
-                )
+            consolidated = update_consolidated(
+                consolidated, item["FilterType"], item["FilterValue"]
+            )
 
         return {"filters": consolidated}
 
