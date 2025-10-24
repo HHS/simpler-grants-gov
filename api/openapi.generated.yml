@@ -1677,6 +1677,61 @@ paths:
       summary: Delete (deactivate) an API key for the authenticated user
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/invitations:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationCreateInvitationResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Create an invitation for a new organization member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreateInvitationRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
     post:
       parameters:
@@ -6126,6 +6181,85 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationCreateInvitationRequest:
+      type: object
+      properties:
+        invitee_email:
+          type: string
+          description: Email address of the user to invite
+          example: user@example.com
+        role_ids:
+          type: array
+          minItems: 1
+          description: List of role IDs to assign to the invited user
+          example:
+          - 123e4567-e89b-12d3-a456-426614174000
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - invitee_email
+      - role_ids
+    OrganizationInvitationResponse:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Invitation unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        invitee_email:
+          type: string
+          description: Email address of the invited user
+          example: user@example.com
+        status:
+          type: string
+          description: Current status of the invitation
+          example: pending
+          enum:
+          - pending
+          - accepted
+          - rejected
+          - expired
+        expires_at:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          example: '2024-01-15T10:30:00Z'
+        roles:
+          type: array
+          description: Roles assigned to this invitation
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the invitation was created
+          example: '2024-01-08T10:30:00Z'
+    OrganizationCreateInvitationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: Created invitation information
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitationResponse'
         status_code:
           type: integer
           description: The HTTP status code
