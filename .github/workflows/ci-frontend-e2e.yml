@@ -25,7 +25,7 @@ concurrency:
 jobs:
   e2e-tests:
     name: Run E2E Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-4core
 
     strategy:
       matrix:
@@ -79,7 +79,8 @@ jobs:
           # Initialize database and other services
           make init-db init-localstack init-mock-soap-services
           # Start OpenSearch and wait for it to be fully ready (skip dashboards to save memory)
-          docker compose up --detach opensearch-node
+          # Reduce heap to 384MB on standard 2-core runner to conserve memory for 4 browser projects
+          OPENSEARCH_JAVA_OPTS="-Xms384m -Xmx384m" docker compose up --detach opensearch-node
           echo "Waiting for OpenSearch to be ready..."
           for i in {1..30}; do
             if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
@@ -112,7 +113,8 @@ jobs:
           # Stop all containers to ensure clean state before starting with Gunicorn
           docker compose down
           # Start all supporting services (skip opensearch-dashboards to save memory in CI)
-          docker compose up --detach grants-db opensearch-node localstack mock-oauth2-server mock-applicants-soap-api
+          # Reduce OpenSearch heap to 384MB on restart
+          OPENSEARCH_JAVA_OPTS="-Xms384m -Xmx384m" docker compose up --detach grants-db opensearch-node localstack mock-oauth2-server mock-applicants-soap-api
           # Wait for services to be ready with proper health checks
           echo "Waiting for services to start..."
           sleep 10
@@ -154,16 +156,16 @@ jobs:
           make populate-search-opportunities populate-search-agencies
           echo "OpenSearch indices repopulated successfully"
           # Start API with Gunicorn (production server) to handle concurrent e2e requests
-          # Limit workers to avoid database connection pool exhaustion (DB has 30 max connections)
-          # 5 workers × 4 threads = 20 potential connections, leaving 10 as buffer
+          # Reduced to 3 workers on standard 2-core runner to conserve CPU/memory for 4 browser projects
+          # 3 workers × 4 threads = 12 potential connections, DB has 30 max connections (ample buffer)
           # Set HOST=0.0.0.0 to allow connections from frontend (frontend will use 127.0.0.1 for IPv4)
-          # Set SEARCH_CONNECTION_POOL_SIZE=25 to handle concurrent requests (20 threads + buffer)
+          # Set SEARCH_CONNECTION_POOL_SIZE=15 to match thread count (12 threads + buffer)
           # Set GUNICORN_TIMEOUT=120 to prevent worker kills during slow OpenSearch queries
           # Set GUNICORN_KEEPALIVE=5 to maintain connections for better performance
           docker compose run -d --name grants-api --service-ports \
             -e HOST=0.0.0.0 \
-            -e WEB_CONCURRENCY=5 \
-            -e SEARCH_CONNECTION_POOL_SIZE=25 \
+            -e WEB_CONCURRENCY=3 \
+            -e SEARCH_CONNECTION_POOL_SIZE=15 \
             -e GUNICORN_TIMEOUT=120 \
             -e GUNICORN_KEEPALIVE=5 \
             -e GUNICORN_GRACEFUL_TIMEOUT=120 \
