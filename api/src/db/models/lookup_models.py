@@ -4,6 +4,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationAuditEvent,
     ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
@@ -218,6 +219,23 @@ ROLE_TYPE_CONFIG = LookupConfig(
         LookupStr(RoleType.AGENCY, 2),
         LookupStr(RoleType.INTERNAL, 3),
         LookupStr(RoleType.APPLICATION, 4),
+    ]
+)
+
+APPLICATION_AUDIT_EVENT_CONFIG = LookupConfig(
+    [
+        LookupStr(ApplicationAuditEvent.APPLICATION_CREATED, 1),
+        LookupStr(ApplicationAuditEvent.APPLICATION_NAME_CHANGED, 2),
+        LookupStr(ApplicationAuditEvent.APPLICATION_SUBMITTED, 3),
+        LookupStr(ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED, 4),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_ADDED, 5),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_DELETED, 6),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_UPDATED, 7),
+        LookupStr(ApplicationAuditEvent.SUBMISSION_CREATED, 8),
+        LookupStr(ApplicationAuditEvent.USER_ADDED, 9),
+        LookupStr(ApplicationAuditEvent.USER_UPDATED, 10),
+        LookupStr(ApplicationAuditEvent.USER_REMOVED, 11),
+        LookupStr(ApplicationAuditEvent.FORM_UPDATED, 12),
     ]
 )
 
@@ -477,3 +495,17 @@ class LkRoleType(LookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> "LkRoleType":
         return LkRoleType(role_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(APPLICATION_AUDIT_EVENT_CONFIG)
+class LkApplicationAuditEvent(LookupTable, TimestampMixin):
+    __tablename__ = "lk_application_audit_event"
+
+    application_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkApplicationAuditEvent":
+        return LkApplicationAuditEvent(
+            application_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
