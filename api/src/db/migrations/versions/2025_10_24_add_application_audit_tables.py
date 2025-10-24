@@ -1,7 +1,7 @@
 """add_application_audit_tables
 
 Revision ID: a1b2c3d4e5f6
-Revises: e0feb8f532bc
+Revises: c286e166223b
 Create Date: 2025-10-23 18:00:00.000000
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "a1b2c3d4e5f6"
-down_revision = "e0feb8f532bc"
+down_revision = "c286e166223b"
 branch_labels = None
 depends_on = None
 
