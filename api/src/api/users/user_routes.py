@@ -739,6 +739,8 @@ def user_response_org_invitation(
 
     with db_session.begin():
         db_session.add(user_token_session)
-        org_invitation_response(db_session, user_token_session.user, invitation_id, json_data)
+        invitation_response = org_invitation_response(
+            db_session, user_token_session.user, invitation_id, json_data
+        )
 
-    return response.ApiResponse(message="Success")
+    return response.ApiResponse(message="Success", data=invitation_response)

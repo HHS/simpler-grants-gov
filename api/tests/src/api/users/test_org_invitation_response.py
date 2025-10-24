@@ -57,6 +57,11 @@ def test_org_invitation_response_accepted(
         role.role_id for role in inv.linked_roles
     ]
 
+    # Verify response data
+    data = resp.get_json()["data"]
+    assert data["status"] == OrganizationInvitationStatus.ACCEPTED
+    assert data["responded_at"] == res.accepted_at.isoformat()
+
 
 def test_org_invitation_response_rejected(
     client, db_session, user, user_auth_token, enable_factory_create
@@ -87,6 +92,11 @@ def test_org_invitation_response_rejected(
     assert res.invitee_user_id == user.user_id
     assert res.invitee_email == user.email
     assert not user.organization_users
+
+    # Verify response data
+    data = resp.get_json()["data"]
+    assert data["status"] == OrganizationInvitationStatus.REJECTED
+    assert data["responded_at"] == res.rejected_at.isoformat()
 
 
 def test_org_invitation_response_404_invitation(client, db_session, user, user_auth_token):
