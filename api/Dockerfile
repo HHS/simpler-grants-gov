@@ -4,7 +4,7 @@ ARG RUN_UID
 ARG RUN_USER
 
 # Read Python version from the version file in the base image and set it as a build arg
-# This allows all stages to use the same version without repeating ARG PY_MM=3.13
+# This allows all stages to use the same version without repeating ARG PY_MM (currently 3.12)
 RUN /bin/busybox mkdir -p /tmp && /bin/busybox cat /python-version.txt > /tmp/py_version.txt
 
 # Create user and directories using BusyBox applets (scratch-friendly)

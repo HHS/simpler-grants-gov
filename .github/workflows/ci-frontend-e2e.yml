@@ -52,15 +52,12 @@ jobs:
           df -h
           echo "=== Removing unnecessary packages to free up space ==="
           # Remove large packages that aren't needed for our tests
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /usr/local/share/boost || true
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true
-          echo "=== Cleaning up Docker resources ==="
-          # Remove unused Docker data (images, containers, volumes, networks)
-          docker system prune -af --volumes || true
-          # Remove any dangling images
-          docker image prune -af || true
+          # GitHub Actions runners come with many pre-installed tools we don't need
+          sudo rm -rf /usr/share/dotnet || true          # .NET SDK (~1-2GB)
+          sudo rm -rf /opt/ghc || true                   # Haskell compiler (~1-2GB)
+          sudo rm -rf /usr/local/share/boost || true     # Boost C++ libraries (~500MB)
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true    # Cached tool versions (~2-3GB)
+          # Note: No need to prune Docker - we have no layer caching, so nothing to prune
           echo "=== After Cleanup Disk Usage ==="
           df -h
           # Check available space

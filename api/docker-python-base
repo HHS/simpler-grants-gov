@@ -1,8 +1,9 @@
 
 FROM public.ecr.aws/docker/library/alpine:3.22.2 AS alpine-builder
 
-ARG PYTHON_VERSION=3.13.8
-ARG PY_MM=3.13
+# Using Python 3.12 instead of 3.13 to avoid segfaults with C extensions (opensearch-py, psycopg, lxml, pandas)
+ARG PYTHON_VERSION=3.12.8
+ARG PY_MM=3.12
 ARG POETRY_VERSION=2.2.1
 ARG PIP_VERSION=25.2
 ARG ENABLE_UPX=0
@@ -117,7 +118,7 @@ RUN set -eux; \
 
 # Scratch runtime minimal (optional experiment)
 FROM scratch AS scratch-minimal
-ARG PY_MM=3.13
+ARG PY_MM=3.12
 LABEL org.opencontainers.image.source="https://github.com/HHS/simpler-grants-gov"
 
 # Copy python-version.txt for downstream Dockerfiles to use
