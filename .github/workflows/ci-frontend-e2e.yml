@@ -49,10 +49,50 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init
+          # Create override.env with necessary e2e configuration before any operations
+          make setup-env-override-file
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          # Build containers
+          make build
+          # Initialize database and other services
+          make init-db init-localstack init-mock-soap-services
+          # Start OpenSearch and wait for it to be fully ready
+          docker compose up --detach opensearch-node opensearch-dashboards
+          echo "Waiting for OpenSearch to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
+              echo "OpenSearch is ready"
+              break
+            fi
+            echo "Waiting for OpenSearch... ($i/30)"
+            sleep 5
+          done
+          # Clear any read-only blocks on OpenSearch
+          curl -X PUT "localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+          {
+            "persistent": {
+              "cluster.blocks.read_only": null,
+              "cluster.blocks.read_only_allow_delete": null
+            }
+          }'
+          curl -X PUT "localhost:9200/_all/_settings" -H 'Content-Type: application/json' -d'
+          {
+            "index.blocks.read_only_allow_delete": null
+          }'
+          # Now seed data and populate search indices
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
+          # Stop all containers to ensure clean state before starting with Gunicorn
+          docker compose down
+          # Start all supporting services
+          docker compose up --detach grants-db opensearch-node opensearch-dashboards localstack mock-oauth2-server mock-applicants-soap-api
+          # Wait for services to be ready
+          echo "Waiting for services to start..."
+          sleep 15
+          # Start API with Gunicorn (production server) to handle concurrent e2e requests
+          # Limit workers to avoid database connection pool exhaustion (DB has 30 max connections)
+          # 5 workers × 4 threads = 20 potential connections, leaving 10 as buffer
+          WEB_CONCURRENCY=5 docker compose run -d --name grants-api --service-ports grants-api poetry run gunicorn -c gunicorn.conf.py "src.app:create_app()"
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
