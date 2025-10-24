@@ -1,5 +1,5 @@
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension.field_validators import Length
+from src.api.schemas.extension.field_validators import Email, Length
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import RoleSchema
 
@@ -115,4 +115,78 @@ class OrganizationRemoveUserResponseSchema(AbstractResponseSchema):
 
     data = fields.Raw(
         allow_none=True, metadata={"description": "No data returned on successful removal"}
+    )
+
+
+class OrganizationCreateInvitationRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/invitations request"""
+
+    invitee_email = fields.String(
+        required=True,
+        validate=Email(),
+        metadata={
+            "description": "Email address of the user to invite",
+            "example": "user@example.com",
+        },
+    )
+    role_ids = fields.List(
+        fields.UUID(required=True),
+        required=True,
+        validate=Length(min=1),
+        metadata={
+            "description": "List of role IDs to assign to the invited user",
+            "example": ["123e4567-e89b-12d3-a456-426614174000"],
+        },
+    )
+
+
+class OrganizationInvitationResponseSchema(Schema):
+    """Schema for organization invitation data in responses"""
+
+    organization_invitation_id = fields.UUID(
+        metadata={
+            "description": "Invitation unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    organization_id = fields.UUID(
+        metadata={
+            "description": "Organization unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    invitee_email = fields.String(
+        metadata={"description": "Email address of the invited user", "example": "user@example.com"}
+    )
+    status = fields.String(
+        metadata={
+            "description": "Current status of the invitation",
+            "example": "pending",
+            "enum": ["pending", "accepted", "rejected", "expired"],
+        }
+    )
+    expires_at = fields.DateTime(
+        metadata={
+            "description": "When the invitation expires",
+            "example": "2024-01-15T10:30:00Z",
+        }
+    )
+    roles = fields.List(
+        fields.Nested(RoleSchema),
+        metadata={"description": "Roles assigned to this invitation"},
+    )
+    created_at = fields.DateTime(
+        metadata={
+            "description": "When the invitation was created",
+            "example": "2024-01-08T10:30:00Z",
+        }
+    )
+
+
+class OrganizationCreateInvitationResponseSchema(AbstractResponseSchema):
+    """Schema for POST /organizations/:organization_id/invitations response"""
+
+    data = fields.Nested(
+        OrganizationInvitationResponseSchema,
+        metadata={"description": "Created invitation information"},
     )
