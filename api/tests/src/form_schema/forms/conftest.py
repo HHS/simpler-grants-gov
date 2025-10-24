@@ -17,9 +17,9 @@ from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 
 
 def setup_resolved_form(form: Form):
-    # TODO
+    """Setup a fully resolved form"""
+    # do a copy so we aren't modifying a global form object
     copied_form = copy.deepcopy(form)
-
     copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
 
     return copied_form
