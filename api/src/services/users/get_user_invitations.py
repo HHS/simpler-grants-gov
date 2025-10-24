@@ -83,7 +83,7 @@ def get_user_invitations(db_session: db.Session, user_id: UUID) -> list[Invitati
     Returns:
         list[InvitationItemData]: List of invitation data with organization, inviter, and role information
     """
-    # Fetch invitations by joining with user's external email - single query!
+    # Fetch invitations by joining with user's external email
     invitations = _fetch_user_invitations_by_user_id(db_session, user_id)
 
     # Early exit: if no invitations found
