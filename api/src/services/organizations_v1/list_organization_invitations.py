@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -9,7 +9,7 @@ from sqlalchemy.orm import selectinload
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
+from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
     Organization,
@@ -19,44 +19,23 @@ from src.db.models.user_models import User
 
 
 @dataclass
-class StatusFilter:
-    """Type-safe data class for status filter"""
-
-    one_of: List[OrganizationInvitationStatus]
-
-
-@dataclass
-class InvitationFilters:
-    """Type-safe data class for invitation filters"""
-
-    status: Optional[StatusFilter] = None
-
-
-@dataclass
-class OrganizationInvitationListRequest:
-    """Type-safe data class for organization invitation list request"""
-
-    filters: Optional[InvitationFilters] = None
-
-
-@dataclass
 class InviterData:
     """Data class for inviter user information"""
 
     user_id: uuid.UUID
-    email: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
+    email: str | None
+    first_name: str | None
+    last_name: str | None
 
 
 @dataclass
 class InviteeData:
     """Data class for invitee user information"""
 
-    user_id: Optional[uuid.UUID]
-    email: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
+    user_id: uuid.UUID | None
+    email: str | None
+    first_name: str | None
+    last_name: str | None
 
 
 @dataclass
@@ -65,7 +44,7 @@ class RoleData:
 
     role_id: uuid.UUID
     role_name: str
-    privileges: List[str]
+    privileges: list[str]
 
 
 @dataclass
@@ -77,32 +56,11 @@ class OrganizationInvitationData:
     status: str
     created_at: datetime
     expires_at: datetime
-    accepted_at: Optional[datetime]
-    rejected_at: Optional[datetime]
+    accepted_at: datetime | None
+    rejected_at: datetime | None
     inviter: InviterData
-    invitee: Optional[InviteeData]
-    roles: List[RoleData]
-
-
-def parse_request_data(data: Dict[str, Any]) -> OrganizationInvitationListRequest:
-    """Parse dictionary data into typed request object"""
-    filters_data = data.get("filters")
-    filters = None
-
-    if filters_data:
-        status_data = filters_data.get("status")
-        status_filter = None
-
-        if status_data and "one_of" in status_data:
-            # Convert string status values to enum values
-            status_values = [
-                OrganizationInvitationStatus(status) for status in status_data["one_of"]
-            ]
-            status_filter = StatusFilter(one_of=status_values)
-
-        filters = InvitationFilters(status=status_filter)
-
-    return OrganizationInvitationListRequest(filters=filters)
+    invitee: InviteeData | None
+    roles: list[RoleData]
 
 
 def transform_invitation_to_data(invitation: OrganizationInvitation) -> OrganizationInvitationData:
@@ -164,7 +122,7 @@ def get_organization_and_verify_view_membership_access(
 def list_organization_invitations_with_filters(
     db_session: db.Session,
     organization_id: uuid.UUID,
-    filters: Optional[InvitationFilters] = None,
+    status_filters: list[str] | None = None,
 ) -> Sequence[OrganizationInvitation]:
     """
     List organization invitations with filtering.
@@ -172,10 +130,15 @@ def list_organization_invitations_with_filters(
     Args:
         db_session: Database session
         organization_id: Organization ID to list invitations for
-        filters: Typed filters to apply
+        status_filters: Optional list of status strings to filter by
 
     Returns:
         List of OrganizationInvitation objects
+
+    Note:
+        Status filtering is done in Python since status is a computed property.
+        If pagination is needed in the future, this will need to be refactored
+        to implement status filtering in the database query.
     """
     # Build the base query with optimized eager loading using selectinload
     stmt = (
@@ -198,40 +161,41 @@ def list_organization_invitations_with_filters(
     all_invitations = db_session.execute(stmt).scalars().all()
 
     # Apply status filtering if provided
-    filtered_invitations = all_invitations
-    if filters and filters.status and filters.status.one_of:
-        status_filters = filters.status.one_of
-        filtered_invitations = [
-            invitation for invitation in all_invitations if invitation.status in status_filters
-        ]
+    if status_filters:
+        return [invitation for invitation in all_invitations if invitation.status in status_filters]
 
-    return filtered_invitations
+    return all_invitations
 
 
 def list_organization_invitations_and_verify_access(
     db_session: db.Session,
     user: User,
     organization_id: uuid.UUID,
-    request_data: Dict[str, Any],
-) -> List[OrganizationInvitationData]:
+    filters: dict | None = None,
+) -> list[OrganizationInvitationData]:
     """
     List organization invitations with access control and filtering.
 
     Args:
-        request_data: Raw request data dictionary from the route layer
+        db_session: Database session
+        user: User requesting the invitations
+        organization_id: Organization ID to list invitations for
+        filters: Optional filters dict from request (already validated by schema)
     """
 
     # First verify the user has access to view organization membership
     get_organization_and_verify_view_membership_access(db_session, user, organization_id)
 
-    # Parse the request data into typed objects for type safety
-    typed_request = parse_request_data(request_data)
+    # Extract status filters if provided (already converted to enums by Marshmallow)
+    status_filters = None
+    if filters and filters.get("status") and filters["status"].get("one_of"):
+        status_filters = filters["status"]["one_of"]
 
     # Get the raw invitations with filters
     invitations = list_organization_invitations_with_filters(
         db_session=db_session,
         organization_id=organization_id,
-        filters=typed_request.filters,
+        status_filters=status_filters,
     )
 
     # Transform to data classes for proper serialization

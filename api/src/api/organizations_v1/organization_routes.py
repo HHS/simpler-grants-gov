@@ -179,10 +179,6 @@ def organization_invitations_list(
     # Get authenticated user
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
-    # Parse the validated JSON data into a proper request object
-    schema = OrganizationInvitationListRequestSchema()
-    request_data = schema.load(json_data)
-
     with db_session.begin():
         # Add the user from the token session to our current session
         db_session.add(user_token_session)
@@ -192,7 +188,7 @@ def organization_invitations_list(
             db_session=db_session,
             user=user_token_session.user,
             organization_id=organization_id,
-            request_data=request_data,
+            filters=json_data.get("filters"),
         )
 
     return response.ApiResponse(message="Success", data=invitations)
