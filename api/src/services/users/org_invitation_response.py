@@ -33,6 +33,9 @@ def org_invitation_response(
                 Organization.sam_gov_entity
             )
         )
+        .options(
+            selectinload(OrganizationInvitation.linked_roles)
+        )
         .where(OrganizationInvitation.organization_invitation_id == invitation_id)
     ).scalar_one_or_none()
 
