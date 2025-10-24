@@ -388,7 +388,7 @@ def test_delete_parent_agency(db_session, enable_factory_create):
 
     # Trying to delete the parent will give a foreign key constraint error, we don't
     # have the relationships setup in a way that would support this right now
-    with pytest.raises(Exception, match="violates foreign key constraint"):
+    with pytest.raises(Exception, match="violates foreign key constraint"):  # noqa: PT012
         db_session.delete(parent_agency)
         db_session.commit()
         db_session.expunge_all()
