@@ -233,3 +233,18 @@ class OrganizationInvitationStatus(StrEnum):
     REJECTED = "rejected"
     EXPIRED = "expired"
     PENDING = "pending"
+
+
+class ApplicationAuditEvent(StrEnum):
+    APPLICATION_CREATED = "application_created"
+    APPLICATION_NAME_CHANGED = "application_name_changed"
+    APPLICATION_SUBMITTED = "application_submitted"
+    APPLICATION_SUBMIT_REJECTED = "application_submit_rejected"
+    ATTACHMENT_ADDED = "attachment_added"
+    ATTACHMENT_DELETED = "attachment_deleted"
+    ATTACHMENT_UPDATED = "attachment_updated"
+    SUBMISSION_CREATED = "submission_created"
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
+    FORM_UPDATED = "form_updated"
