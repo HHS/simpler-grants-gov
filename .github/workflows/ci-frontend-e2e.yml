@@ -57,6 +57,8 @@ jobs:
           sudo rm -rf /opt/ghc || true                   # Haskell compiler (~1-2GB)
           sudo rm -rf /usr/local/share/boost || true     # Boost C++ libraries (~500MB)
           sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true    # Cached tool versions (~2-3GB)
+          sudo docker image prune --all --force
+          sudo docker builder prune -a
           # Note: No need to prune Docker - we have no layer caching, so nothing to prune
           echo "=== After Cleanup Disk Usage ==="
           df -h
