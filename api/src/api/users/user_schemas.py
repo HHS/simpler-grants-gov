@@ -592,6 +592,7 @@ class UserInvitationOrganizationSchema(Schema):
     )
     organization_name = fields.String(
         allow_none=True,
+        attribute="sam_gov_entity.legal_business_name",
         metadata={
             "description": "Organization name",
             "example": "Example Organization",
@@ -599,8 +600,8 @@ class UserInvitationOrganizationSchema(Schema):
     )
 
 
-class UserInvitationInviterSchema(Schema):
-    """Schema for inviter information in invitation responses"""
+class UserInvitationInviterUserSchema(Schema):
+    """Schema for inviter user information in invitation responses"""
 
     user_id = fields.UUID(
         metadata={
@@ -663,8 +664,8 @@ class UserInvitationItemSchema(Schema):
     expires_at = fields.DateTime(
         metadata={"description": "When the invitation expires", "example": "2024-01-15T10:30:00Z"}
     )
-    inviter = fields.Nested(
-        UserInvitationInviterSchema,
+    inviter_user = fields.Nested(
+        UserInvitationInviterUserSchema,
         metadata={"description": "Information about who sent the invitation"},
     )
     roles = fields.List(

@@ -94,10 +94,10 @@ class TestUserInvitationsList:
             organization.organization_id
         )
         assert invitation_data["status"] == OrganizationInvitationStatus.PENDING.value
-        assert invitation_data["inviter"]["user_id"] == str(inviter.user_id)
-        assert invitation_data["inviter"]["first_name"] == "John"
-        assert invitation_data["inviter"]["last_name"] == "Doe"
-        assert invitation_data["inviter"]["email"] == inviter_email
+        assert invitation_data["inviter_user"]["user_id"] == str(inviter.user_id)
+        assert invitation_data["inviter_user"]["first_name"] == "John"
+        assert invitation_data["inviter_user"]["last_name"] == "Doe"
+        assert invitation_data["inviter_user"]["email"] == inviter_email
         assert len(invitation_data["roles"]) == 1
         assert invitation_data["roles"][0]["role_id"] == str(org_role.role_id)
         assert invitation_data["roles"][0]["role_name"] == org_role.role_name
@@ -344,7 +344,7 @@ class TestUserInvitationsList:
             "status",
             "created_at",
             "expires_at",
-            "inviter",
+            "inviter_user",
             "roles",
         ]
         for field in required_fields:
@@ -355,8 +355,8 @@ class TestUserInvitationsList:
         assert "organization_id" in org_data
         assert "organization_name" in org_data
 
-        # Verify inviter structure
-        inviter_data = invitation_data["inviter"]
+        # Verify inviter_user structure
+        inviter_data = invitation_data["inviter_user"]
         inviter_required_fields = ["user_id", "first_name", "last_name", "email"]
         for field in inviter_required_fields:
             assert field in inviter_data

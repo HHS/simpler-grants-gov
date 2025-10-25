@@ -9,6 +9,8 @@ from src.api.organizations_v1.organization_schemas import (
     OrganizationCreateInvitationRequestSchema,
     OrganizationCreateInvitationResponseSchema,
     OrganizationGetResponseSchema,
+    OrganizationInvitationListRequestSchema,
+    OrganizationInvitationListResponseSchema,
     OrganizationListRolesResponseSchema,
     OrganizationRemoveUserResponseSchema,
     OrganizationUpdateUserRolesRequestSchema,
@@ -22,6 +24,9 @@ from src.services.organizations_v1.create_organization_invitation import (
     create_organization_invitation,
 )
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.list_organization_invitations import (
+    list_organization_invitations_and_verify_access,
+)
 from src.services.organizations_v1.list_organization_roles import (
     get_organization_roles_and_verify_access,
 )
@@ -189,3 +194,34 @@ def organization_create_invitation(
         )
 
     return response.ApiResponse(message="Success", data=invitation_data)
+
+
+@organization_blueprint.post("/<uuid:organization_id>/invitations/list")
+@organization_blueprint.input(OrganizationInvitationListRequestSchema, location="json")
+@organization_blueprint.output(OrganizationInvitationListResponseSchema)
+@organization_blueprint.doc(responses=[200, 400, 401, 403, 404, 422])
+@organization_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def organization_invitations_list(
+    db_session: db.Session, organization_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """List organization invitations with filtering"""
+    add_extra_data_to_current_request_logs({"organization_id": organization_id})
+    logger.info("POST /v1/organizations/:organization_id/invitations/list")
+
+    # Get authenticated user
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    with db_session.begin():
+        # Add the user from the token session to our current session
+        db_session.add(user_token_session)
+
+        # Get organization invitations using service layer
+        invitations = list_organization_invitations_and_verify_access(
+            db_session=db_session,
+            user=user_token_session.user,
+            organization_id=organization_id,
+            filters=json_data.get("filters"),
+        )
+
+    return response.ApiResponse(message="Success", data=invitations)
