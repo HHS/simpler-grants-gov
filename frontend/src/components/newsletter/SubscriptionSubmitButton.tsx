@@ -19,7 +19,7 @@ export function SubscriptionSubmitButton() {
       type="submit"
       name="submit"
       id="submit"
-      className="margin-top-4 margin-bottom-1"
+      className="margin-top-4"
     >
       {t("form.button")}
     </Button>
