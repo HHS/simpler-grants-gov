@@ -35,12 +35,7 @@ export default defineConfig({
     screenshot: "on",
     video: "on-first-retry",
   },
-  shard: {
-    // Total number of shards
-    total: parseInt(process.env.TOTAL_SHARDS || "1"),
-    // Specifies which shard this job should execute
-    current: parseInt(process.env.CURRENT_SHARD || "1"),
-  },
+  // No shard config needed - sharding handled by GitHub Actions matrix (one browser per job)
   /* Configure projects for major browsers */
   projects: [
     {

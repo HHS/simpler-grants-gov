@@ -29,8 +29,8 @@ jobs:
 
     strategy:
       matrix:
-        shard: [1, 2, 3, 4]
-        total_shards: [4]
+        # Shard by browser instead of by test count to avoid sequential browser execution
+        browser: ["chromium", "firefox", "webkit", "Mobile Chrome"]
 
     steps:
       - uses: actions/checkout@v4
@@ -202,13 +202,12 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build -- --no-lint
 
-      - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
+      - name: Run e2e tests (${{ matrix.browser }})
         env:
           CI: true
-          TOTAL_SHARDS: ${{ matrix.total_shards }}
-          CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          npm run test:e2e
+          # Run tests for only this browser project (sharding by browser, not by test count)
+          npx playwright test --project="${{ matrix.browser }}"
 
       - name: Debug logs on failure
         if: failure()
@@ -240,7 +239,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: blob-report-shard-${{ matrix.shard }}
+          name: blob-report-${{ matrix.browser }}
           path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
           retention-days: 1
 
@@ -269,7 +268,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: frontend/all-blob-reports
-          pattern: blob-report-shard-*
+          pattern: blob-report-*
           merge-multiple: true
 
       - name: Verify Downloaded Artifacts
