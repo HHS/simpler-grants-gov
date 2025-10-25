@@ -14,7 +14,7 @@ def _required(
     required: typing.Any,
     instance: typing.Any,
     _: typing.Any,
-) -> typing.Generator[jsonschema.ValidationError]:
+) -> typing.Generator[jsonschema.ValidationError, None, None]:
     """Handle a required field in the JSON schema validation
 
     This is an almost exact copy of the base implementation,
@@ -34,7 +34,7 @@ def _required(
 
 def _maxItems(
     validator: jsonschema.Draft202012Validator, mI: typing.Any, instance: typing.Any, _: typing.Any
-) -> typing.Generator[jsonschema.ValidationError]:
+) -> typing.Generator[jsonschema.ValidationError, None, None]:
     """Handle a maxItems field validator in the JSON Schema validation
 
     This is identical to the maxItems validator, but we adjusted the message

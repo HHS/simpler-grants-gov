@@ -1,10 +1,10 @@
-FROM ghcr.io/hhs/python-base-image:1aca0fa@sha256:6dc1970c8ddf4007406764aa81dbaf01cb5b6d9899a110e6614acfe8c3703859 AS base
+FROM ghcr.io/hhs/python-base-image:8038aa0@sha256:c9ad071c55eabfda0db79a41da88cc2e531cc18ab146e68c98ee3c11866c937c AS base
 
 ARG RUN_UID
 ARG RUN_USER
 
 # Read Python version from the version file in the base image and set it as a build arg
-# This allows all stages to use the same version without repeating ARG PY_MM=3.13
+# This allows all stages to use the same version without repeating ARG PY_MM (currently 3.12)
 RUN /bin/busybox mkdir -p /tmp && /bin/busybox cat /python-version.txt > /tmp/py_version.txt
 
 # Create user and directories using BusyBox applets (scratch-friendly)

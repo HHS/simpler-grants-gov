@@ -8,7 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, "..", ".env.local") });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 75000,
+  // Increased timeout on standard 2-core runner where resources are constrained
+  timeout: process.env.CI ? 120000 : 75000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -16,7 +17,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 3 : 0,
-  workers: 10,
+  /* Limit workers in CI to reduce concurrent load on API server */
+  /* Using 2 workers for faster execution - prevents long-running degradation on 2-core runner */
+  workers: process.env.CI ? parseInt(process.env.PLAYWRIGHT_WORKERS || "2") : 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: process.env.CI ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -24,17 +27,15 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://127.0.0.1:3000",
 
+    /* Increase navigation timeout to handle slow SSR responses on resource-constrained CI runner */
+    navigationTimeout: process.env.CI ? 90000 : 60000, // 90s in CI, 60s locally
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "on",
     video: "on-first-retry",
   },
-  shard: {
-    // Total number of shards
-    total: parseInt(process.env.TOTAL_SHARDS || "1"),
-    // Specifies which shard this job should execute
-    current: parseInt(process.env.CURRENT_SHARD || "1"),
-  },
+  // No shard config needed - sharding handled by GitHub Actions matrix (one browser per job)
   /* Configure projects for major browsers */
   projects: [
     {

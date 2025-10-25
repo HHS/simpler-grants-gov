@@ -14,7 +14,8 @@ WAIT_TIME=0
 echo "Waiting for API server to become ready..."
 
 # Use curl to check the API server health endpoint
-until curl --output /dev/null --silent --head --fail http://localhost:8080/health;
+# Use 127.0.0.1 instead of localhost to force IPv4 (consistent with e2e test configuration)
+until curl --output /dev/null --silent --head --fail http://127.0.0.1:8080/health;
 do
   printf '.'
   sleep 5
