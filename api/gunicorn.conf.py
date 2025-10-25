@@ -42,3 +42,12 @@ keepalive = int(os.environ.get("GUNICORN_KEEPALIVE", 5))
 # Graceful timeout for worker shutdown (default is 30s)
 # Allows workers to finish handling requests before being killed
 graceful_timeout = int(os.environ.get("GUNICORN_GRACEFUL_TIMEOUT", 120))
+
+# Max requests per worker before recycling (default is 0 = disabled)
+# Prevents memory leaks by restarting workers after handling N requests
+# Use in CI to prevent long-running degradation during multi-browser e2e tests
+max_requests = int(os.environ.get("GUNICORN_MAX_REQUESTS", 0))
+
+# Randomize max_requests to avoid all workers restarting simultaneously
+# Adds 0 to N jitter to max_requests value
+max_requests_jitter = int(os.environ.get("GUNICORN_MAX_REQUESTS_JITTER", 0))

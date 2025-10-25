@@ -162,6 +162,7 @@ jobs:
           # Set SEARCH_CONNECTION_POOL_SIZE=15 to match thread count (12 threads + buffer)
           # Set GUNICORN_TIMEOUT=120 to prevent worker kills during slow OpenSearch queries
           # Set GUNICORN_KEEPALIVE=5 to maintain connections for better performance
+          # Set GUNICORN_MAX_REQUESTS to recycle workers and prevent memory buildup over long test runs
           docker compose run -d --name grants-api --service-ports \
             -e HOST=0.0.0.0 \
             -e WEB_CONCURRENCY=3 \
@@ -169,6 +170,8 @@ jobs:
             -e GUNICORN_TIMEOUT=120 \
             -e GUNICORN_KEEPALIVE=5 \
             -e GUNICORN_GRACEFUL_TIMEOUT=120 \
+            -e GUNICORN_MAX_REQUESTS=500 \
+            -e GUNICORN_MAX_REQUESTS_JITTER=50 \
             grants-api poetry run gunicorn -c gunicorn.conf.py "src.app:create_app()"
           # Debug: Check container status
           echo "=== Container Status ==="
