@@ -30,6 +30,10 @@ export interface HeadersDict {
 export function getDefaultHeaders(): HeadersDict {
   const headers: HeadersDict = {};
 
+  if (environment.API_GW_AUTH) {
+    headers["X-API-KEY"] = environment.API_GW_AUTH;
+  }
+
   if (environment.API_AUTH_TOKEN) {
     headers["X-AUTH"] = environment.API_AUTH_TOKEN;
   }

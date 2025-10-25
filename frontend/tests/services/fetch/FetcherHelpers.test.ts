@@ -85,3 +85,79 @@ describe("throwError", () => {
     });
   });
 });
+
+describe("getDefaultHeaders", () => {
+  let mockEnvironment: { [key: string]: string };
+
+  beforeEach(() => {
+    jest.resetModules();
+    mockEnvironment = {};
+
+    // Mock the environment module
+    jest.doMock("src/constants/environments", () => ({
+      environment: mockEnvironment,
+    }));
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("includes Content-Type header by default", async () => {
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = getDefaultHeaders();
+    expect(headers["Content-Type"]).toEqual("application/json");
+  });
+
+  it("includes X-AUTH header when API_AUTH_TOKEN is set", async () => {
+    mockEnvironment.API_AUTH_TOKEN = "test-auth-token";
+    mockEnvironment.API_GW_AUTH = "";
+
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = getDefaultHeaders();
+    expect(headers["X-AUTH"]).toEqual("test-auth-token");
+    expect(headers["Content-Type"]).toEqual("application/json");
+  });
+
+  it("includes X-API-KEY header when API_GW_AUTH is set", async () => {
+    mockEnvironment.API_AUTH_TOKEN = "";
+    mockEnvironment.API_GW_AUTH = "test-api-key";
+
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = getDefaultHeaders();
+    expect(headers["X-API-KEY"]).toEqual("test-api-key");
+    expect(headers["Content-Type"]).toEqual("application/json");
+  });
+
+  it("includes both X-AUTH and X-API-KEY headers when both tokens are set", async () => {
+    mockEnvironment.API_AUTH_TOKEN = "test-auth-token";
+    mockEnvironment.API_GW_AUTH = "test-api-key";
+
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = getDefaultHeaders();
+    expect(headers["X-AUTH"]).toEqual("test-auth-token");
+    expect(headers["X-API-KEY"]).toEqual("test-api-key");
+    expect(headers["Content-Type"]).toEqual("application/json");
+  });
+
+  it("does not include auth headers when tokens are not set", async () => {
+    mockEnvironment.API_AUTH_TOKEN = "";
+    mockEnvironment.API_GW_AUTH = "";
+
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = getDefaultHeaders();
+    expect(headers["X-AUTH"]).toBeUndefined();
+    expect(headers["X-API-KEY"]).toBeUndefined();
+    expect(headers["Content-Type"]).toEqual("application/json");
+  });
+});
