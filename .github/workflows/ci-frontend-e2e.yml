@@ -207,7 +207,7 @@ jobs:
           CI: true
         run: |
           # Run tests for only this browser project (sharding by browser, not by test count)
-          npx playwright test --project="${{ matrix.browser }}"
+          npx playwright test --config ./tests/playwright.config.ts --project="${{ matrix.browser }}"
 
       - name: Debug logs on failure
         if: failure()
