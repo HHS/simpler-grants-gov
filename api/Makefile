@@ -193,7 +193,6 @@ init-opensearch: start-opensearch ## Start the opensearch service locally
 
 start-opensearch:
 	docker compose up --detach opensearch-node
-	docker compose up --detach opensearch-dashboards
 	./bin/wait-for-local-opensearch.sh
 
 ##################################################
@@ -287,7 +286,7 @@ openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
 openapi-spec-common-grants:
-	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml 
+	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
 
 check-spec: openapi-spec-common-grants
 	cg check spec ./openapi-cg.generated.yml
@@ -395,4 +394,3 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
-

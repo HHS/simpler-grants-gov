@@ -118,6 +118,33 @@ def set_env_var_defaults(monkeypatch_session):
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
 
 
+@pytest.fixture
+def verify_no_warning_error_logs(caplog):
+    """Fixture that if included will verify no warning/error log occurred during the test
+
+    Note that if this fails it will report that the teardown of the test failed, not
+    the test itself which will be marked as passed.
+
+    Should roughly be the equivalent of doing the following in a test:
+
+        def test_something(caplog):
+            caplog.set_level(logging.WARNING)
+            # test stuff
+            assert len(caplog.messages) == 0
+
+     Modified from example at https://docs.pytest.org/en/stable/how-to/logging.html#caplog-fixture
+    """
+    yield  # Run the test - we only want to do stuff after
+    for when in ("setup", "call"):
+        messages = [
+            r.message
+            for r in caplog.get_records(when)
+            if r.levelno in (logging.WARNING, logging.ERROR)
+        ]
+        if messages:
+            pytest.fail(f"Warning/error messages encountered during test: {messages}")
+
+
 ####################
 # Test DB session
 ####################

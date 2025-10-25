@@ -189,6 +189,7 @@ function Budget424aSectionC<
       <div className="display-flex flex-column">
         <HelperText>Sum of row {rowIndex + 8}</HelperText>
         <CurrencyInput
+          disabled
           id={idPath}
           value={get(
             activityItems,
@@ -210,6 +211,7 @@ function Budget424aSectionC<
             : `Sum of column ${fieldKey === "applicant_amount" ? "B" : fieldKey === "state_amount" ? "C" : "D"}`}
         </HelperText>
         <CurrencyInput
+          disabled
           id={idPath}
           value={totals ? totals[fieldKey] : undefined}
           bordered
