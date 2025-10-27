@@ -13,6 +13,10 @@ def get_link_privileges(role_id: uuid.UUID, privilege: list[Privilege]) -> list[
     return [LinkRolePrivilege(role_id=role_id, privilege=priv) for priv in privilege]
 
 
+############################
+# Core Organization Roles
+############################
+
 ORG_ADMIN_ID = uuid.UUID("446bafb9-41ee-46ac-8584-889aedcd5142")
 ORG_ADMIN = Role(
     role_id=ORG_ADMIN_ID,
@@ -51,6 +55,11 @@ ORG_MEMBER = Role(
     ),
     link_role_types=[LinkRoleRoleType(role_id=ORG_MEMBER_ID, role_type=RoleType.ORGANIZATION)],
 )
+
+############################
+# Core Application Roles
+############################
+
 APPLICATION_OWNER_ID = uuid.UUID("f1e72876-ad13-4734-be5c-b43c8cef8d67")
 APPLICATION_OWNER = Role(
     role_id=APPLICATION_OWNER_ID,
@@ -89,4 +98,46 @@ APPLICATION_CONTRIBUTOR = Role(
     ],
 )
 
-CORE_ROLES = [ORG_ADMIN, ORG_MEMBER, APPLICATION_OWNER, APPLICATION_CONTRIBUTOR]
+############################
+# Core Agency Roles
+############################
+
+LEGACY_AGENCY_S2S_ROLE_ID = uuid.UUID("8e7b6c9d-a3f1-4b2e-9d8c-1e2f3a4b5c6d")
+LEGACY_AGENCY_S2S_ROLE = Role(
+    role_id=LEGACY_AGENCY_S2S_ROLE_ID,
+    role_name="Legacy Agency S2S Role",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        LEGACY_AGENCY_S2S_ROLE_ID,
+        [
+            Privilege.LEGACY_AGENCY_VIEWER,
+            Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
+            Privilege.LEGACY_AGENCY_ASSIGNER,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=LEGACY_AGENCY_S2S_ROLE_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
+############################
+# Core Internal Roles
+############################
+
+NAVA_INTERNAL_ROLE_ID = uuid.UUID("57e8875f-c154-41be-a5f6-602f4c92d6e6")
+NAVA_INTERNAL_ROLE = Role(
+    role_id=NAVA_INTERNAL_ROLE_ID,
+    role_name="Nava Internal Admin Role",
+    is_core=True,
+    link_privileges=get_link_privileges(NAVA_INTERNAL_ROLE_ID, [Privilege.UPDATE_FORM]),
+    link_role_types=[LinkRoleRoleType(role_id=NAVA_INTERNAL_ROLE_ID, role_type=RoleType.INTERNAL)],
+)
+
+CORE_ROLES = [
+    ORG_ADMIN,
+    ORG_MEMBER,
+    APPLICATION_OWNER,
+    APPLICATION_CONTRIBUTOR,
+    LEGACY_AGENCY_S2S_ROLE,
+    NAVA_INTERNAL_ROLE,
+]

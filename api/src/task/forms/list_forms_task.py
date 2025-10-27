@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
     help="List forms in an environment and whether they're up-to-date",
 )
 @click.option(
-    "--environment", required=True, type=click.Choice(["local", "dev", "staging", "prod"])
+    "--environment",
+    required=True,
+    type=click.Choice(["local", "dev", "staging", "training", "prod"]),
 )
 @click.option("--verbose", default=False, is_flag=True, help="Show the full diff of forms")
 @ecs_background_task(task_name="list-forms")

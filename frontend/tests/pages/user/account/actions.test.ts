@@ -21,7 +21,7 @@ describe("user profile form action", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
-  it("returns validation warning if first name is missing", async () => {
+  it("returns validation warning if last name is missing", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     const profileFormData = new FormData();
     profileFormData.append("firstName", "populated");
@@ -30,7 +30,7 @@ describe("user profile form action", () => {
       lastName: ["Expected string, received null"],
     });
   });
-  it("returns validation warning if last name is missing", async () => {
+  it("returns validation warning if first name is missing", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     const profileFormData = new FormData();
     profileFormData.append("lastName", "populated");

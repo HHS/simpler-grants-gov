@@ -10,12 +10,32 @@ local database to the specified environment.
 __IMPORTANT__ - These scripts work with forms as defined in
 the src.form_schemas.forms.__init__.get_active_forms function.
 
+# Auth
+Both of these scripts talk with our API endpoints in the specified environment
+and need an auth token to work. There are currently two different auth token approaches
+you can use:
+
+* `FORM_X_API_KEY_ID` - An API key attached to your user in the specified environment. The update-form task requires this user have the `update_form` privilege.
+* `NON_LOCAL_API_AUTH_TOKEN` (deprecated - will be removed soon) - the auth token for calling the environment - at the moment MUST be the same auth token the frontend uses (the first one configured in our API_AUTH_TOKEN env var)
+
+To setup your `FORM_X_API_KEY_ID`, do the following:
+* Go to the specified environment and generate an API key after logging in (eg. in staging, go to the [API Dashboard](https://staging.simpler.grants.gov/api-dashboard))
+* To gain the `update_form` privilege for your user, you can add the internal Nava role to your user by connecting to the database and running:
+
+```sql
+-- First Find your user ID using your login email
+SELECT user_id from api.link_external_user WHERE email = 'example@example.com';
+
+-- Give your user that role
+INSERT INTO api.internal_user_role(user_id, role_id) VALUES ('YOUR USER ID', '57e8875f-c154-41be-a5f6-602f4c92d6e6');
+```
+
 # List Form Task
 ## Running
 The script takes in the following parameters:
 * `--environment` - The environment you want to run in
 * `--verbose` - Whether to output how every field will change, can be very noisy if large fields like the JSON schema will change
-* (Environment Variable) `NON_LOCAL_API_AUTH_TOKEN` - the auth token for calling the environment - at the moment MUST be the same auth token the frontend uses (the first one configured in our API_AUTH_TOKEN env var).
+* Auth is managed via an environment variable, see above.
 
 ```sh
 make cmd args="task list-forms --environment=dev --verbose"
@@ -43,7 +63,7 @@ __IMPORTANT__ - As currently written, this script has a few caveats:
 The script takes in the following parameters:
 * `--environment` - The environment you want to run in
 * `--form-id` - The ID of the form you want to update - Grab the ID from our static definition of a form in our code, do not create a new ID
-* (Environment Variable) `NON_LOCAL_API_AUTH_TOKEN` - the auth token for calling the environment - at the moment MUST be the same auth token the frontend uses (the first one configured in our API_AUTH_TOKEN env var).
+* Auth is managed via an environment variable, see above.
 
 ```sh
 make cmd args="task update-form --environment=local --form-id=c3c5c7e9-0b24-41f8-8da3-98241fb341fe"

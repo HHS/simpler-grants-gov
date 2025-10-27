@@ -79,7 +79,7 @@ async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
       <OrganizationInfo
         organizationDetails={organizationDetails.sam_gov_entity}
       />
-      <Suspense fallback={<OrganizationRosterSkeleton />}>
+      <Suspense fallback={<OrganizationRosterSkeleton organizationId={id} />}>
         <OrganizationRoster organizationId={id} />
       </Suspense>
     </GridContainer>
