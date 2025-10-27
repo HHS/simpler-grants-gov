@@ -73,14 +73,13 @@ def org_invitation_response(
     invitation.invitee_user_id = user.user_id
     db_session.add(invitation)
     return {
-            "organization_invitation_id": invitation.organization_invitation_id,
-            "status": invitation.status,
-            "responded_at": invitation.responded_at,
-            "organization": {
-                "organization_id": invitation.organization_id,
-                "organization_name": invitation.organization.name
-            },
+        "organization_invitation_id": invitation.organization_invitation_id,
+        "status": invitation.status,
+        "responded_at": invitation.responded_at,
+        "organization": {
             "organization_id": invitation.organization_id,
-            "roles_granted": invitation.roles,
-        }
-
+            "organization_name": invitation.organization.name,
+        },
+        "organization_id": invitation.organization_id,
+        "roles_granted": invitation.roles,
+    }

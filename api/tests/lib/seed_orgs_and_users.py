@@ -258,6 +258,21 @@ def _build_organizations_and_users(
             application_name="Accepted org app",
         )
 
+    ###############################
+    # API-only user for local development
+    ###############################
+    (
+        UserBuilder(
+            uuid.UUID("12345678-1234-5678-9abc-123456789abc"),
+            db_session,
+            "API-only user for local development",
+        )
+        .with_api_key("local-dev-api-key")
+        .build()
+    )
+
+    user_scenarios.append("api_user - API-only user (no OAuth, API key only)")
+
     ##############################################################
     # Log output
     ##############################################################

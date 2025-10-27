@@ -4,9 +4,9 @@ import secrets
 import string
 import uuid
 import zipfile
+from collections.abc import Sequence
 from datetime import date
 from enum import StrEnum
-from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload

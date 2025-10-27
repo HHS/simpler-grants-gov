@@ -63,8 +63,8 @@ from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
 from src.services.users.get_user_api_keys import get_user_api_keys
 from src.services.users.get_user_applications import get_user_applications
-from src.services.users.get_user_invitations import get_user_invitations
 from src.services.users.get_user_organizations import get_user_organizations
+from src.services.users.list_user_invitations import list_user_invitations
 from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
@@ -701,7 +701,7 @@ def user_get_invitations(
         raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
-        invitations = get_user_invitations(db_session, user_id)
+        invitations = list_user_invitations(db_session, user_id)
 
     logger.info(
         "Retrieved invitations for user",

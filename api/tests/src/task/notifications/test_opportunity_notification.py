@@ -198,7 +198,7 @@ class TestOpportunityNotification:
     def user_with_email(self, db_session, user):
         return factories.LinkExternalUserFactory.create(user=user, email="test@example.com").user
 
-    @pytest.fixture()
+    @pytest.fixture
     def notification_task(self, db_session):
         self.notification_config = EmailNotificationConfig()
         self.notification_config.reset_emails_without_sending = False

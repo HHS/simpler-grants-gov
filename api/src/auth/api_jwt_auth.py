@@ -1,7 +1,6 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import Tuple
 
 import jwt
 from pydantic import Field
@@ -70,7 +69,7 @@ def get_config() -> ApiJwtConfig:
 
 def create_jwt_for_user(
     user: User, db_session: db.Session, config: ApiJwtConfig | None = None, email: str | None = None
-) -> Tuple[str, UserTokenSession]:
+) -> tuple[str, UserTokenSession]:
     if config is None:
         config = get_config()
 

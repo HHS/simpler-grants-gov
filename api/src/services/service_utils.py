@@ -1,5 +1,3 @@
-from typing import Type
-
 from pydantic import BaseModel
 from sqlalchemy import asc, desc
 from sqlalchemy.sql import Select
@@ -14,7 +12,7 @@ from src.search.search_models import (
 )
 
 
-def apply_sorting(stmt: Select, model: Type, sort_order: list) -> Select:
+def apply_sorting(stmt: Select, model: type, sort_order: list) -> Select:
     """
     Applies sorting to a SQLAlchemy select statement based on the provided sorting orders.
 

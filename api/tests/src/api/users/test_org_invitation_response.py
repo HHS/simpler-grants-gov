@@ -145,9 +145,7 @@ def test_org_invitation_response_422_status(
     """Test that responding to an invitation that is not pending or is expired
     returns a 422 error."""
     # Create an invitation with role
-    inv = OrganizationInvitationFactory.create(
-        invitee_email=user.email, is_accepted=True
-    )
+    inv = OrganizationInvitationFactory.create(invitee_email=user.email, is_accepted=True)
 
     resp = client.put(
         f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
@@ -165,9 +163,7 @@ def test_org_invitation_response_422_status(
 def test_org_invitation_response_invalid_status(client, db_session, user, user_auth_token):
     """Test that sending an invalid status in the request returns a 422 error."""
     # Create an invitation with role
-    inv = OrganizationInvitationFactory.create(
-        invitee_email=user.email, is_accepted=True
-    )
+    inv = OrganizationInvitationFactory.create(invitee_email=user.email, is_accepted=True)
 
     resp = client.put(
         f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
