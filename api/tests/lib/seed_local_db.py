@@ -253,7 +253,7 @@ def _build_user_organizations(db_session: db.Session) -> None:
     "-s",
     default=["ALL"],
     type=click.Choice(
-        ["ALL", "agencies", "opps", "forms", "users"],
+        ["ALL", "agencies", "opps", "forms", "users", "api"],
     ),
     multiple=True,
     help="Which steps of the process should be run",
