@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -81,11 +81,11 @@ class ConsolidatedFilter(BaseModel):
             for value in ["FilterType", "FilterValue"]:
                 if value not in item:
                     raise SOAPInvalidEnvelope(
-                        (
+
                             "The content of element 'ExpandedApplicationFilter' is not complete. One of "
                             '\'{"http://apply.grants.gov/system/GrantsCommonElements-V1.0":'
                             f"{value}}}' is expected."
-                        )
+
                     )
             consolidated = update_consolidated(
                 consolidated, item["FilterType"], item["FilterValue"]
@@ -95,7 +95,7 @@ class ConsolidatedFilter(BaseModel):
 
 
 class GetSubmissionListExpandedRequest(BaseModel):
-    expanded_application_filter: Optional[ConsolidatedFilter] = Field(
+    expanded_application_filter: ConsolidatedFilter | None = Field(
         alias="ExpandedApplicationFilter", default=None
     )
 

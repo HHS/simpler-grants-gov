@@ -266,6 +266,9 @@ lint-py: lint-ruff lint-mypy
 lint-ruff:
 	$(PY_RUN_CMD) ruff check src tests bin
 
+lint-ruff-fix:
+	$(PY_RUN_CMD) ruff check src tests bin --fix
+
 lint-mypy:
 	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 
@@ -287,7 +290,7 @@ openapi-spec: init-db ## Generate OpenAPI spec
 	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
 
 openapi-spec-common-grants:
-	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml 
+	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
 
 check-spec: openapi-spec-common-grants
 	cg check spec ./openapi-cg.generated.yml
@@ -395,4 +398,3 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
-
