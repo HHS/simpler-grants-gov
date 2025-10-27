@@ -31,14 +31,9 @@ issue_state AS
           h.issue_id,
           i.issue_title,
           i.issue_ghid,
-          concat('https://github.com/', i.issue_ghid) AS issue_url,
           h.status,
           h.points,
-          i.sprint_end_date,
-          CASE
-              WHEN h.points > 0 THEN '√'
-              ELSE NULL
-          END AS pointed
+          i.sprint_end_date
    FROM history_partition h
    INNER JOIN issue_data i ON i.issue_id = h.issue_id
    WHERE (i.sprint_end_date < CURRENT_DATE
@@ -59,18 +54,9 @@ done_dates AS
    FROM history_partition h
    INNER JOIN issue_data i ON i.issue_id = h.issue_id
    WHERE h.status = 'Done'
-   GROUP BY h.issue_id), -- calculate lead time for all DONE issues
-lead_time_calculation AS
+   GROUP BY h.issue_id), -- calculate lead time for all DONE issues, with minimum lead time of 1 day
+all_lead_times AS
   (SELECT i.issue_id,
-          i.issue_title,
-          i.issue_ghid,
-          i.issue_url,
-          i.points,
-          i.pointed,
-          i.status,
-          i.d_effective,
-          ipd.in_progress_date,
-          dd.done_date,
           CASE
               WHEN ipd.in_progress_date IS NOT NULL
                    AND dd.done_date IS NOT NULL
@@ -81,7 +67,11 @@ lead_time_calculation AS
    FROM issue_state i
    LEFT JOIN in_progress_dates ipd ON i.issue_id = ipd.issue_id
    LEFT JOIN done_dates dd ON i.issue_id = dd.issue_id
-   WHERE i.status = 'Done')
-SELECT *
-FROM lead_time_calculation
-ORDER BY issue_title
+   WHERE i.status = 'Done'), -- calculate average lead time
+average_lead_time AS
+  (SELECT AVG(lead_time_days) AS avg_lead_time_days,
+          COUNT(*) AS issues_with_lead_time
+   FROM all_lead_times)
+SELECT ROUND(avg_lead_time_days, 1) AS average_lead_time_days,
+       issues_with_lead_time
+FROM average_lead_time
