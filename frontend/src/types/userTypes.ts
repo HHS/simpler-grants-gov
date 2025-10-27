@@ -95,3 +95,5 @@ export type OrganizationInvitation = {
   inviter: UserDetail;
   roles: UserRole[];
 };
+
+export const completeStatuses = ["rejected", "accepted", "expired"];

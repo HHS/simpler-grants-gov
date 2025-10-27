@@ -16,7 +16,7 @@ const ReplyWidgetWrapper = ({ children }: PropsWithChildren) => {
   );
 };
 
-const InvitationRejectionConfirmation = ({
+export const InvitationRejectionConfirmation = ({
   onCancel,
   onConfirm,
 }: {
@@ -56,7 +56,7 @@ const InvitationRejectionConfirmation = ({
   );
 };
 
-const InvitationRejectedNotice = () => {
+export const InvitationRejectedNotice = () => {
   const t = useTranslations("UserWorkspace.invitationReply");
   return (
     <ReplyWidgetWrapper>
@@ -68,7 +68,7 @@ const InvitationRejectedNotice = () => {
   );
 };
 
-const InvitationAcceptedNotice = ({
+export const InvitationAcceptedNotice = ({
   organizationName,
 }: {
   organizationName: string;
@@ -84,7 +84,7 @@ const InvitationAcceptedNotice = ({
   );
 };
 
-const InvitationReplyForm = ({
+export const InvitationReplyForm = ({
   error,
   onErrorClick,
   organizationName,
