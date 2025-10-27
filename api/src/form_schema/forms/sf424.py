@@ -510,7 +510,7 @@ FORM_JSON_SCHEMA = {
             "title": "Date Signed",
             "description": "Completed by Grants.gov upon submission.",
         },
-    }
+    },
 }
 
 FORM_UI_SCHEMA = [

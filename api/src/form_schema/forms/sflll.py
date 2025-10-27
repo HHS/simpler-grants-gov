@@ -2,7 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.form_schema.shared import shared_form_constants, ADDRESS_SHARED_V1, COMMON_SHARED_V1
+from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
