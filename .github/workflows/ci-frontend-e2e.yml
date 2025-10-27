@@ -85,7 +85,7 @@ jobs:
         run: |
           npm run test:e2e
 
-      - name: Show API logs on failure
+      - name: Debug logging on failure
         if: failure()
         run: |
           cd ../api
@@ -97,6 +97,9 @@ jobs:
           echo ""
           echo "=== Container Status ==="
           docker ps -a
+          echo ""
+          echo "=== Disk free ==="
+          df -h
           echo ""
         shell: bash
 
@@ -112,20 +115,6 @@ jobs:
           name: blob-report-shard-${{ matrix.shard }}
           path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
           retention-days: 1
-
-      - name: Debug logging on failure
-        if: failure()
-        run: |
-          echo df on failure
-          df -h
-          echo docker images on failure
-          docker image ls
-          echo docker containers on failure
-          docker container ls
-          echo api logs on failure
-          docker container logs grants-api
-          echo opensearch logs on failure
-          docker container logs opensearch-node
 
   create-report:
     name: Create Merged Test Report
