@@ -41,7 +41,7 @@ exports[`Saved Opportunities page to match snapshot 1`] = `
               "key": null,
               "props": {
                 "children": "SavedOpportunities.heading",
-                "className": "tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0",
+                "className": "margin-top-0",
               },
               "type": "h1",
             },

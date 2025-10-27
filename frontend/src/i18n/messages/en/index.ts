@@ -1590,4 +1590,14 @@ export const messages = {
       },
     },
   },
+  Applications: {
+    pageTitle: "Applications",
+    metaDescription: "View your saved applications",
+    pageHeading: "Applications",
+    noApplicationsMessage: {
+      primary: "You have not started any applications yet.",
+      secondary:
+        "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+  },
 };
