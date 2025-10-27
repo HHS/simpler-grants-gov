@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 from pydantic import BaseModel, Field
 
@@ -102,7 +102,7 @@ def _search_agencies(
 
 def search_agencies(
     search_client: search.SearchClient, raw_search_params: dict
-) -> Tuple[Sequence[dict], PaginationInfo]:
+) -> tuple[Sequence[dict], PaginationInfo]:
     params = AgencySearchParams.model_validate(raw_search_params)
     response = _search_agencies(search_client, params)
     pagination_info = PaginationInfo.from_search_response(params.pagination, response)

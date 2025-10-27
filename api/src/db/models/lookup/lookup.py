@@ -1,13 +1,10 @@
 import dataclasses
 from abc import ABC, ABCMeta, abstractmethod
 from enum import IntEnum, StrEnum
-from typing import Generic, Optional, Tuple, Type, TypeVar
-
-T = TypeVar("T", StrEnum, IntEnum)
 
 
 @dataclasses.dataclass
-class Lookup(Generic[T], ABC, metaclass=ABCMeta):
+class Lookup[T: StrEnum | IntEnum](ABC, metaclass=ABCMeta):
     """
     A class which handles mapping a specific enum
     member to additional metadata.
@@ -36,19 +33,19 @@ class LookupInt(Lookup[IntEnum]):
         return self.lookup_enum.name
 
 
-class LookupConfig(Generic[T]):
+class LookupConfig[T: StrEnum | IntEnum]:
     """
     Configuration object for storing lookup mapping
     information. Helps with the conversion of our
     enums to lookup integers in the DB, and vice-versa.
     """
 
-    _enums: Tuple[Type[T], ...]
+    _enums: tuple[type[T], ...]
     _enum_to_lookup_map: dict[T, Lookup]
     _int_to_lookup_map: dict[int, Lookup]
 
     def __init__(self, lookups: list[Lookup]) -> None:
-        enum_types_seen: set[Type[T]] = set()
+        enum_types_seen: set[type[T]] = set()
         _enum_to_lookup_map: dict[T, Lookup] = {}
         _int_to_lookup_map: dict[int, Lookup] = {}
 
@@ -84,17 +81,17 @@ class LookupConfig(Generic[T]):
                 f"Lookup config must define a mapping for all enum values, the following were missing: {diff}"
             )
 
-        self._enums: Tuple[Type[T], ...] = tuple(enum_types_seen)
+        self._enums: tuple[type[T], ...] = tuple(enum_types_seen)
         self._enum_to_lookup_map: dict[T, Lookup] = _enum_to_lookup_map
         self._int_to_lookup_map: dict[int, Lookup] = _int_to_lookup_map
 
-    def get_enums(self) -> Tuple[Type[T], ...]:
+    def get_enums(self) -> tuple[type[T], ...]:
         return self._enums
 
     def get_lookups(self) -> list[Lookup]:
         return [lk for lk in self._enum_to_lookup_map.values()]
 
-    def get_int_for_enum(self, e: T) -> Optional[int]:
+    def get_int_for_enum(self, e: T) -> int | None:
         """
         Given an enum, get the lookup int for it in the DB
         """
@@ -104,13 +101,13 @@ class LookupConfig(Generic[T]):
 
         return lookup.lookup_val
 
-    def get_lookup_for_int(self, num: int) -> Optional[Lookup]:
+    def get_lookup_for_int(self, num: int) -> Lookup | None:
         """
         Given a lookup int, get the lookup for it
         """
         return self._int_to_lookup_map.get(num)
 
-    def get_enum_for_int(self, num: int) -> Optional[T]:
+    def get_enum_for_int(self, num: int) -> T | None:
         """
         Given a lookup int, get the enum for it (via the lookup object)
         """

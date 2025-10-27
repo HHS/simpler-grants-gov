@@ -68,7 +68,7 @@ def test_get_streamed_soap_response_success():
 
     assert isinstance(result, SOAPResponse)
     assert b"".join(result.data) == expected_data
-    assert result.status_code, 200
+    assert result.status_code == 200
     assert result.headers == expected_headers
 
 

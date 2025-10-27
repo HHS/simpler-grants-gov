@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformAssistanceListing(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_assistance_listing(self, transform_oracle_data_task):
         return TransformAssistanceListing(transform_oracle_data_task)
 

@@ -1,6 +1,7 @@
 import logging
+from collections.abc import Callable
 from decimal import Decimal, InvalidOperation
-from typing import Any, Callable
+from typing import Any
 
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_util import get_field_values, populate_nested_value

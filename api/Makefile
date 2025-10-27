@@ -265,6 +265,9 @@ lint-py: lint-ruff lint-mypy
 lint-ruff:
 	$(PY_RUN_CMD) ruff check src tests bin
 
+lint-ruff-fix:
+	$(PY_RUN_CMD) ruff check src tests bin --fix
+
 lint-mypy:
 	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 

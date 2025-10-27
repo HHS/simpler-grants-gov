@@ -10,7 +10,7 @@ from src.services.applications.application_validation import (
 from tests.lib.data_factories import setup_application_for_form_validation
 
 
-@pytest.fixture()
+@pytest.fixture
 def sf424_v4_0():
     return SF424_v4_0
 

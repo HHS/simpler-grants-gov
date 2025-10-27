@@ -23,7 +23,7 @@ from tests.src.db.models.factories import (
 TZ_EST = pytz.timezone("America/New_York")
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def transactional_session(db_session):
     cascade_delete_from_db_table(db_session, Opportunity)
 
