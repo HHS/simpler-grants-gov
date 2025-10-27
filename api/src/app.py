@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Any, Tuple
+from typing import Any
 
 from apiflask import APIFlask, exceptions
 from flask import Response
@@ -157,7 +157,7 @@ def configure_app(app: APIFlask) -> None:
     app.security_schemes = get_app_security_scheme()
 
     @app.error_processor
-    def error_processor(error: exceptions.HTTPError) -> Tuple[dict, int, Any]:
+    def error_processor(error: exceptions.HTTPError) -> tuple[dict, int, Any]:
         return restructure_error_response(error)
 
 

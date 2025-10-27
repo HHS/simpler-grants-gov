@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Generator, Iterable
+from collections.abc import Generator, Iterable
+from typing import Any
 
 import opensearchpy
 
@@ -250,7 +251,7 @@ class SearchClient:
         search_query: dict,
         include_scores: bool = True,
         duration: str = "10m",
-    ) -> Generator[SearchResponse, None, None]:
+    ) -> Generator[SearchResponse]:
         """
         Scroll (iterate) over a large result set a given search query.
 

@@ -219,6 +219,9 @@ class Privilege(StrEnum):
     UPDATE_FORM = "update_form"
     MANAGE_AGENCY_MEMBERS = "manage_agency_members"
     GET_SUBMITTED_APPLICATIONS = "get_submitted_applications"
+    LEGACY_AGENCY_VIEWER = "legacy_agency_viewer"
+    LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
+    LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
 
 
 class RoleType(StrEnum):
@@ -233,3 +236,18 @@ class OrganizationInvitationStatus(StrEnum):
     REJECTED = "rejected"
     EXPIRED = "expired"
     PENDING = "pending"
+
+
+class ApplicationAuditEvent(StrEnum):
+    APPLICATION_CREATED = "application_created"
+    APPLICATION_NAME_CHANGED = "application_name_changed"
+    APPLICATION_SUBMITTED = "application_submitted"
+    APPLICATION_SUBMIT_REJECTED = "application_submit_rejected"
+    ATTACHMENT_ADDED = "attachment_added"
+    ATTACHMENT_DELETED = "attachment_deleted"
+    ATTACHMENT_UPDATED = "attachment_updated"
+    SUBMISSION_CREATED = "submission_created"
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
+    FORM_UPDATED = "form_updated"

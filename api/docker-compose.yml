@@ -39,18 +39,19 @@ services:
     networks:
       - default
 
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2
-    container_name: opensearch-dashboards
-    ports:
-      - 5601:5601 # Map host port 5601 to container port 5601
-    expose:
-      - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
-    environment:
-      - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
-      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
-    networks:
-      - default
+  # opensearch-dashboards disabled to save resources in CI
+  # opensearch-dashboards:
+  #   image: opensearchproject/opensearch-dashboards:2
+  #   container_name: opensearch-dashboards
+  #   ports:
+  #     - 5601:5601 # Map host port 5601 to container port 5601
+  #   expose:
+  #     - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
+  #   environment:
+  #     - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
+  #     - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
+  #   networks:
+  #     - default
 
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"

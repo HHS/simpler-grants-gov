@@ -11,7 +11,6 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 import random
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
 
 import factory
 import factory.fuzzy
@@ -300,7 +299,7 @@ fake = faker.Faker()
 fake.add_provider(CustomProvider)
 factory.Faker.add_provider(CustomProvider)
 
-_db_session: Optional[db.Session] = None
+_db_session: db.Session | None = None
 
 
 def get_db_session() -> db.Session:
@@ -2870,17 +2869,18 @@ class OrganizationInvitationFactory(BaseFactory):
     class Meta:
         model = entity_models.OrganizationInvitation
 
-    organization_invitation_id: Generators.UuidObj
+    organization_invitation_id = Generators.UuidObj
     organization = factory.SubFactory(OrganizationFactory)
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     inviter_user = factory.SubFactory(UserFactory)
-    inviter_user_id = factory.lazy_attribute(lambda u: u.inviter_user.user_id)
+    inviter_user_id = factory.LazyAttribute(lambda u: u.inviter_user.user_id)
 
     invitee_email = factory.Faker("email")
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+7d")
     created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
 
     invitee_user = factory.SubFactory(UserFactory)
-    responded_by_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
+    invitee_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
 
     class Params:
         response_date = factory.LazyAttribute(

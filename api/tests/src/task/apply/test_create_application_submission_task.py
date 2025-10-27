@@ -32,7 +32,7 @@ def validate_manifest_contents(contents_of_manifest: str, expected_files: list[s
         assert expected_file in contents_of_manifest
 
 
-def validate_files_in_zip(zip_file_path, expected_file_mapping: dict[str, str | None | list[str]]):
+def validate_files_in_zip(zip_file_path, expected_file_mapping: dict[str, str | list[str] | None]):
     with file_util.open_stream(zip_file_path, "rb") as f:
         with zipfile.ZipFile(f) as submission_zip:
             # Make sure the files we expect are present

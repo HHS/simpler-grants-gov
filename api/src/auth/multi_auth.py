@@ -1,6 +1,7 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Sequence, cast
+from typing import Any, cast
 
 from flask_httpauth import MultiAuth
 
