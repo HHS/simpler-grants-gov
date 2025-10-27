@@ -258,19 +258,24 @@ def _build_organizations_and_users(
             application_name="Accepted org app",
         )
 
-    ##############################################################
-    # Log output
-    ##############################################################
-
     ###############################
     # API-only user for local development
     ###############################
-    logger.info(
-        f"Updating API-only user: '{LINK_API_USER.external_user_id}' with X-API-Key: '{API_KEY_FOR_API_USER.key_id}'"
+    (
+        UserBuilder(
+            uuid.UUID("12345678-1234-5678-9abc-123456789abc"),
+            db_session,
+            "API-only user for local development",
+        )
+        .with_api_key("local-dev-api-key")
+        .build()
     )
-    db_session.merge(API_USER, load=True)
-    db_session.merge(LINK_API_USER, load=True)
-    db_session.merge(API_KEY_FOR_API_USER, load=True)
+
+    user_scenarios.append("api_user - API-only user (no OAuth, API key only)")
+
+    ##############################################################
+    # Log output
+    ##############################################################
 
     # Log summary of all created user scenarios
     logger.info("=== USER SCENARIOS SUMMARY ===")

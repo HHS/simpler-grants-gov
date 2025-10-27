@@ -82,6 +82,14 @@ Each time you run the seed script, it will add a few more saved opportunities an
 * API Key: `mixed_roles_user_key`
 
 ---
+`many_app_user`
+* A user with many applications across multiple organizations and competitions
+* Has applications in various states (in progress, submitted, accepted)
+* Member of all three organizations as an admin
+* API Key: `many_app_user_key`
+* Perfect for testing application workflows and UI components
+
+---
 `api_user`
 * A dedicated API-only user for local development testing
 * API Key: `local-dev-api-key`
