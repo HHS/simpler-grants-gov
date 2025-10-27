@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { OrganizationInvitation } from "src/types/userTypes";
 import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
@@ -24,11 +23,6 @@ jest.mock("src/hooks/useClientFetch", () => ({
     clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
   }),
 }));
-
-const makeInvitation = (overrides: Partial<OrganizationInvitation>) => ({
-  ...fakeOrganizationInvitation,
-  ...overrides,
-});
 
 describe("OrganizationInvitationReply", () => {
   beforeEach(() => {
@@ -136,7 +130,7 @@ describe("OrganizationInvitationReply", () => {
 });
 
 describe("InvitationReplyForm", () => {
-  it("displays an error when passed", async () => {
+  it("displays an error when passed", () => {
     const mockOnErrorClick = jest.fn();
     render(
       <InvitationReplyForm

@@ -1,3 +1,5 @@
+"use client";
+
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { OrganizationInvitation } from "src/types/userTypes";
 

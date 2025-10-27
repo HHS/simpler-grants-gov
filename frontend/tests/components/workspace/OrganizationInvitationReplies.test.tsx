@@ -10,7 +10,7 @@ jest.mock("src/components/workspace/OrganizationInvitationReply", () => ({
   OrganizationInvitationReply: ({
     userInvitation,
   }: {
-    userInvitation: any;
+    userInvitation: OrganizationInvitation;
   }) => (
     <li data-testid={`invite-${userInvitation.organization_invitation_id}`}>
       {userInvitation.organization_invitation_id} - {userInvitation.status}
