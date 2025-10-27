@@ -1,5 +1,5 @@
 
-FROM testerss AS base
+FROM ghcr.io/hhs/python-base-image:8011bd5@sha256:28de84dad58fcedcc74c6b6d3cc5edf225d68e22fd1d9f30601f690656a5530c AS base
 
 ARG RUN_UID
 ARG RUN_USER
