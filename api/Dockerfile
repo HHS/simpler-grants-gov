@@ -11,7 +11,7 @@ RUN mkdir -p /tmp && cat /python-version.txt > /tmp/py_version.txt
 RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${RUN_UID:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
     if [ "${RUN_USER}" != "root" ]; then \
       grep -Eq "^${RUN_USER}:" /etc/group || groupadd -g "${RUN_UID}" "${RUN_USER}"; \
-      grep -Eq "^${RUN_USER}:" /etc/passwd || useradd -M -s /bin/bash -u "${RUN_UID}" -g "${RUN_USER}" "${RUN_USER}"; \
+      grep -Eq "^${RUN_USER}:" /etc/passwd || useradd -l -M -s /bin/bash -u "${RUN_UID}" -g "${RUN_USER}" "${RUN_USER}"; \
     fi && \
     mkdir -p "/home/${RUN_USER}" /api /api/tmp /var/spool/mail /tmp /var/tmp /usr/tmp && \
     chown -R "${RUN_UID}:${RUN_UID}" "/home/${RUN_USER}" /api /api/tmp && \
@@ -46,8 +46,9 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       echo "ERROR: newrelic.ini missing at ${SITE_BASE}/src/newrelic.ini" >&2; \
       ls -la "${SITE_BASE}/src" || true; \
       exit 1; \
-    fi && \
-    rm -rf /root/.cache "/home/${RUN_USER}/.cache" /tmp/* /var/tmp/* /api/dist /api/src || true
+    fi; \
+    (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
+    (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /api/dist /api/src || true)
 
 #==============================================
 # Stage 2: Dev image
@@ -90,18 +91,19 @@ FROM base AS release
 # Copy only the virtualenv and runtime config from base stage
 COPY --from=base /api/.venv /api/.venv
 COPY --from=base /api/newrelic.ini /api/newrelic.ini
+COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
 
 # Clean up to reduce image size:
 # - Remove Python bytecode cache files
 # - Remove pip cache
 # - Remove test files and docs from site-packages
 RUN PY_MM=$(cat /tmp/py_version.txt) && \
-    find /api/.venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \
-    find /api/.venv -type f -name "*.pyc" -delete 2>/dev/null || true && \
-    find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true && \
-    find /api/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true && \
-    find /api/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true && \
-    rm -rf /api/.venv/lib/python"${PY_MM}"/site-packages/pip /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools || true
+    (find /api/.venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true) && \
+    (find /api/.venv -type f -name "*.pyc" -delete 2>/dev/null || true) && \
+    (find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true) && \
+    (find /api/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true) && \
+    (find /api/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true) && \
+    (rm -rf /api/.venv/lib/python"${PY_MM}"/site-packages/pip /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools || true)
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
