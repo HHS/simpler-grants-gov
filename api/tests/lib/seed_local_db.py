@@ -274,7 +274,7 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_agencies="ALL" in steps or "agencies" in steps,
         seed_opportunities="ALL" in steps or "opps" in steps,
         seed_forms="ALL" in steps or "forms" in steps,
-        seed_users="ALL" in steps or "users" in steps or "api" in steps,
+        seed_users="ALL" in steps or "users" in steps,
         seed_e2e="ALL" in steps or "e2e" in steps,
     )
 
