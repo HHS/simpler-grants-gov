@@ -1542,6 +1542,9 @@ class ApplicationSubmissionFactory(BaseFactory):
         file_contents = kwargs.pop("file_contents", "Application submission ZIP file contents")
         submission = super()._create(model_class, *args, **kwargs)
 
+        if file_contents == "SKIP":
+            return submission
+
         try:
             with file_util.open_stream(submission.file_location, "w") as my_file:
                 my_file.write(file_contents)
@@ -2861,6 +2864,45 @@ class OrganizationUserRoleFactory(BaseFactory):
 
     role = factory.SubFactory(RoleFactory, is_org_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+
+class OrganizationInvitationFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationInvitation
+
+    organization_invitation_id = Generators.UuidObj
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+    inviter_user = factory.SubFactory(UserFactory)
+    inviter_user_id = factory.LazyAttribute(lambda u: u.inviter_user.user_id)
+
+    invitee_email = factory.Faker("email")
+    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+7d")
+    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
+
+    invitee_user = factory.SubFactory(UserFactory)
+    invitee_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
+
+    class Params:
+        response_date = factory.LazyAttribute(
+            lambda o: fake.date_time_between(start_date=o.created_at, end_date="+1m")
+        )
+        is_accepted = factory.Trait(accepted_at=response_date)
+        is_rejected = factory.Trait(rejected_at=response_date)
+        is_expired = factory.Trait(expires_at=response_date)
+
+
+class LinkOrganizationInvitationToRoleFactory(BaseFactory):
+    class Meta:
+        model = entity_models.LinkOrganizationInvitationToRole
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+    organization_invitation = factory.SubFactory(OrganizationInvitationFactory)
+    organization_invitation_id = factory.LazyAttribute(
+        lambda o: o.organization_invitation.organization_invitation_id
+    )
 
 
 class SuppressedEmailFactory(BaseFactory):

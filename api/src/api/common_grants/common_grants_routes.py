@@ -37,7 +37,7 @@ from src.api.common_grants.common_grants_schemas import (
     PaginatedQueryParams as PaginatedQueryParamsSchema,
 )
 from src.api.common_grants.common_grants_utils import with_cg_error_handler
-from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
+from src.auth.api_user_key_auth import api_user_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 from src.services.common_grants.transformation import build_filter_info
@@ -49,11 +49,10 @@ logger = logging.getLogger(__name__)
 @common_grants_blueprint.get("/opportunities")
 @common_grants_blueprint.input(PaginatedQueryParamsSchema, location="query")
 @common_grants_blueprint.output(OpportunitiesListResponseSchema)
-@api_key_multi_auth.login_required
+@common_grants_blueprint.auth_required(api_user_key_auth)
 @common_grants_blueprint.doc(
     summary="List opportunities",
     description="Get a paginated list of opportunities, sorted by `lastModifiedAt` with most recent first.",
-    security=api_key_multi_auth_security_schemes,
     responses=[HTTPStatus.OK],
 )
 @with_cg_error_handler()
@@ -91,11 +90,10 @@ def list_opportunities(
 
 @common_grants_blueprint.get("/opportunities/<uuid:oppId>")
 @common_grants_blueprint.output(OpportunityResponseSchema)
-@api_key_multi_auth.login_required
+@common_grants_blueprint.auth_required(api_user_key_auth)
 @common_grants_blueprint.doc(
     summary="View opportunity details",
     description="View details about an opportunity",
-    security=api_key_multi_auth_security_schemes,
     responses=[HTTPStatus.OK, HTTPStatus.NOT_FOUND],
 )
 @with_cg_error_handler()
@@ -130,11 +128,10 @@ def get_opportunity(
 @common_grants_blueprint.post("/opportunities/search")
 @common_grants_blueprint.input(OpportunitySearchRequestSchema)
 @common_grants_blueprint.output(OpportunitiesSearchResponseSchema)
-@api_key_multi_auth.login_required
+@common_grants_blueprint.auth_required(api_user_key_auth)
 @common_grants_blueprint.doc(
     summary="Search opportunities",
     description="Search for opportunities based on the provided filters",
-    security=api_key_multi_auth_security_schemes,
     responses=[HTTPStatus.OK],
 )
 @with_cg_error_handler()

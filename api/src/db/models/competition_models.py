@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
     ApplicationStatus,
     CompetitionOpenToApplicant,
     FormFamily,
@@ -17,6 +18,7 @@ from src.constants.lookup_constants import (
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
+    LkApplicationAuditEvent,
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
@@ -440,3 +442,45 @@ class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
         primary_key=True,
     )
+
+
+class ApplicationAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_audit"
+
+    application_audit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
+    )
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Application.application_id), nullable=False, index=True
+    )
+    application: Mapped[Application] = relationship(Application)
+
+    application_audit_event: Mapped[ApplicationAuditEvent] = mapped_column(
+        "application_audit_event_id",
+        LookupColumn(LkApplicationAuditEvent),
+        ForeignKey(LkApplicationAuditEvent.application_audit_event_id),
+        nullable=False,
+    )
+
+    target_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), index=True
+    )
+    target_user: Mapped["User | None"] = relationship("User", foreign_keys=[target_user_id])
+
+    target_application_form_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(ApplicationForm.application_form_id)
+    )
+    target_application_form: Mapped[ApplicationForm | None] = relationship(ApplicationForm)
+
+    target_attachment_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(ApplicationAttachment.application_attachment_id)
+    )
+    target_attachment: Mapped[ApplicationAttachment | None] = relationship(ApplicationAttachment)
+
+    audit_metadata: Mapped[dict | None] = mapped_column(JSONB)

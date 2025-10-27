@@ -20,6 +20,7 @@ describe("getNextRoutes", () => {
       "/(base)/newsletter",
       "/(base)/newsletter/unsubscribe",
       "/(base)/opportunity/1",
+      "/(base)/organization/1/manage-users",
       "/(base)/organization/1",
       "/(base)",
       "/(base)/roadmap",
