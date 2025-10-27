@@ -1,7 +1,6 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Tuple
 
 import jwt
 from sqlalchemy import select
@@ -28,7 +27,7 @@ def create_jwt_for_internal_token(
     expires_at: datetime,
     db_session: db.Session,
     config: ApiJwtConfig | None = None,
-) -> Tuple[str, ShortLivedInternalToken]:
+) -> tuple[str, ShortLivedInternalToken]:
     """
     Create a JWT token for internal use with a short-lived token record.
     """

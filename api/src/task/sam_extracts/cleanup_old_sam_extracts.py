@@ -1,9 +1,9 @@
 """Task to cleanup old SAM.gov extract files."""
 
 import logging
+from collections.abc import Sequence
 from datetime import date, timedelta
 from enum import StrEnum
-from typing import Sequence
 
 from sqlalchemy import select
 
