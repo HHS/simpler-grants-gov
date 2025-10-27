@@ -33,9 +33,7 @@ def org_invitation_response(
                 Organization.sam_gov_entity
             )
         )
-        .options(
-            selectinload(OrganizationInvitation.linked_roles)
-        )
+        .options(selectinload(OrganizationInvitation.linked_roles))
         .where(OrganizationInvitation.organization_invitation_id == invitation_id)
     ).scalar_one_or_none()
 
@@ -60,7 +58,7 @@ def org_invitation_response(
     status = json_data.get("status")
     now = utcnow()
     if status == OrganizationInvitationStatus.ACCEPTED:
-        # Create organization and assign role
+        # Create organization user and assign role
         org_user = OrganizationUser(
             organization_id=invitation.organization_id,
             user=user,
