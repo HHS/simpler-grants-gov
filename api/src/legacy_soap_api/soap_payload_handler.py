@@ -1,8 +1,9 @@
 import io
 import re
 from collections import defaultdict
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable
+from typing import Any
 
 import xmltodict
 from lxml import etree

@@ -455,12 +455,12 @@ def mock_s3(reset_aws_env_vars):
 def mock_s3_bucket_resource(mock_s3):
     bucket = mock_s3.Bucket("local-mock-public-bucket")
     bucket.create()
-    yield bucket
+    return bucket
 
 
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource):
-    yield mock_s3_bucket_resource.name
+    return mock_s3_bucket_resource.name
 
 
 @pytest.fixture
@@ -469,12 +469,12 @@ def other_mock_s3_bucket_resource(mock_s3):
     # and/or test behavior when moving files between buckets.
     bucket = mock_s3.Bucket("local-mock-draft-bucket")
     bucket.create()
-    yield bucket
+    return bucket
 
 
 @pytest.fixture
 def other_mock_s3_bucket(other_mock_s3_bucket_resource):
-    yield other_mock_s3_bucket_resource.name
+    return other_mock_s3_bucket_resource.name
 
 
 @pytest.fixture
@@ -582,7 +582,7 @@ def fixture_from_file():
 
     def _file_reader(file_path: str):
         full_file_path = path.join(FILE_FIXTURE_DIR, file_path.lstrip("/"))
-        with open(full_file_path, "r") as f:
+        with open(full_file_path) as f:
             return f.read()
 
     return _file_reader

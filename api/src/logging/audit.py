@@ -8,7 +8,8 @@
 import collections
 import logging
 import sys
-from typing import Any, Hashable, Sequence
+from collections.abc import Hashable, Sequence
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

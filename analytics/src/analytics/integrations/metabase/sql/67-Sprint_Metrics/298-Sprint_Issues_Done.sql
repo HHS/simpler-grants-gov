@@ -25,7 +25,7 @@ history_partition AS
   (SELECT *
    FROM gh_issue_history h
    INNER JOIN gh_project ON gh_project.id = h.project_id
-   WHERE {{project_ghid}}), -- get state of issue at end of sprint
+   WHERE {{project_ghid}}), -- get state of issue at end of sprint to identify DONE issues
 issue_state AS
   (SELECT h.d_effective,
           h.issue_id,
@@ -45,8 +45,43 @@ issue_state AS
           AND h.d_effective = i.sprint_end_date)
      OR (i.sprint_end_date >= CURRENT_DATE
          AND h.d_effective = CURRENT_DATE - 1)
-   ORDER BY h.issue_id)
+   ORDER BY h.issue_id), -- get first occurrence of "In Progress" status for each issue
+in_progress_dates AS
+  (SELECT h.issue_id,
+          MIN(h.d_effective) AS in_progress_date
+   FROM history_partition h
+   INNER JOIN issue_data i ON i.issue_id = h.issue_id
+   WHERE h.status = 'In Progress'
+   GROUP BY h.issue_id), -- get first occurrence of "Done" status for each issue
+done_dates AS
+  (SELECT h.issue_id,
+          MIN(h.d_effective) AS done_date
+   FROM history_partition h
+   INNER JOIN issue_data i ON i.issue_id = h.issue_id
+   WHERE h.status = 'Done'
+   GROUP BY h.issue_id), -- calculate lead time for all DONE issues
+lead_time_calculation AS
+  (SELECT i.issue_id,
+          i.issue_title,
+          i.issue_ghid,
+          i.issue_url,
+          i.points,
+          i.pointed,
+          i.status,
+          i.d_effective,
+          ipd.in_progress_date,
+          dd.done_date,
+          CASE
+              WHEN ipd.in_progress_date IS NOT NULL
+                   AND dd.done_date IS NOT NULL
+                   AND dd.done_date >= ipd.in_progress_date THEN GREATEST(1, dd.done_date - ipd.in_progress_date)
+              WHEN dd.done_date IS NOT NULL THEN 1
+              ELSE 1
+          END AS lead_time_days
+   FROM issue_state i
+   LEFT JOIN in_progress_dates ipd ON i.issue_id = ipd.issue_id
+   LEFT JOIN done_dates dd ON i.issue_id = dd.issue_id
+   WHERE i.status = 'Done')
 SELECT *
-FROM issue_state
-WHERE status = 'Done'
+FROM lead_time_calculation
 ORDER BY issue_title

@@ -44,7 +44,7 @@ def setup_opensearch_data(opportunity_index_alias, search_client):
     # Swap the search index alias
     search_client.swap_alias_index(index_name, opportunity_index_alias)
 
-    yield index_name
+    return index_name
 
 
 @pytest.fixture(autouse=True)
@@ -56,7 +56,7 @@ def clear_data(db_session):
     cascade_delete_from_db_table(db_session, SuppressedEmail)
 
 
-@pytest.fixture()
+@pytest.fixture
 def notification_task(db_session, search_client):
     notification_config = EmailNotificationConfig()
     notification_config.reset_emails_without_sending = False

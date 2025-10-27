@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import Tuple
 
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -398,7 +397,7 @@ def get_create_update_timestamps(
     source_created_date: datetime | None,
     source_last_upd_date: datetime | None,
     log_extra: dict | None = None,
-) -> Tuple[datetime, datetime]:
+) -> tuple[datetime, datetime]:
     created_timestamp = convert_est_timestamp_to_utc(source_created_date)
     updated_timestamp = convert_est_timestamp_to_utc(source_last_upd_date)
 

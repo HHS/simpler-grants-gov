@@ -1,7 +1,6 @@
 import logging
 import uuid
 from enum import StrEnum
-from typing import Type
 
 import pytest
 from sqlalchemy import inspect
@@ -35,7 +34,7 @@ def schema_no_lookup(monkeypatch) -> db.PostgresDBClient:
 
 
 def validate_lookup_synced_to_table(
-    db_session, table: Type[LookupTable], lookup_config: LookupConfig
+    db_session, table: type[LookupTable], lookup_config: LookupConfig
 ):
     db_lookup_values = db_session.query(table).all()
 
