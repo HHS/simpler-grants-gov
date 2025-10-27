@@ -1490,7 +1490,7 @@ export const messages = {
       reject: "Reject",
       dismiss: "Dismiss",
       accepted: {
-        ctaTitle: "Congrats, you've been added to ",
+        ctaTitle: "Congrats, you've been added to {orgName}!",
         description:
           "Join your team by collaborating on applications and searching for the right opportunities.",
       },

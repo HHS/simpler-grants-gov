@@ -70,41 +70,81 @@ const InvitationRejectedNotice = () => {
 
 const InvitationAcceptedNotice = ({
   organizationName,
-  onDismiss,
 }: {
   organizationName: string;
-  onDismiss: () => void;
 }) => {
   const t = useTranslations("UserWorkspace.invitationReply");
   return (
     <ReplyWidgetWrapper>
       <Grid tablet={{ col: 8 }}>
-        <h3>
-          {t("accepted.ctaTitle")} {organizationName}
-        </h3>
+        <h3>{t("accepted.ctaTitle", { orgName: organizationName })}</h3>
         <p>{t("accepted.description")}</p>
-      </Grid>
-      <Grid tablet={{ col: 4 }} className="text-right flex-align-self-center">
-        <Button
-          onClick={() => onDismiss()}
-          className="margin-left-2"
-          type="button"
-          unstyled
-        >
-          {t("dismiss")}
-        </Button>
       </Grid>
     </ReplyWidgetWrapper>
   );
 };
-export const OrganizationInvitationReply = ({
-  userInvitation,
-  onDismiss,
+
+const InvitationReplyForm = ({
+  error,
+  onErrorClick,
+  organizationName,
+  organizationInvitationId,
+  onAccept,
+  onReject,
 }: {
-  userInvitation: OrganizationInvitation;
-  onDismiss: () => void;
+  error?: Error;
+  onErrorClick: () => void;
+  organizationName: string;
+  organizationInvitationId: string;
+  onAccept: () => void;
+  onReject: () => void;
 }) => {
   const t = useTranslations("UserWorkspace.invitationReply");
+
+  return (
+    <>
+      {error && (
+        <SimplerAlert
+          alertClick={() => onErrorClick()}
+          buttonId={`organizationInviteApiError-${organizationInvitationId}`}
+          messageText={t("apiError")}
+          type="error"
+        />
+      )}
+      <ReplyWidgetWrapper>
+        <Grid tablet={{ col: 8 }}>
+          <h3>
+            {organizationName} {t("ctaTitle")}
+          </h3>
+          <p>{t("description")}</p>
+        </Grid>
+        <Grid tablet={{ col: 4 }} className="text-right flex-align-self-center">
+          <Button
+            onClick={() => onAccept()}
+            className="margin-left-2"
+            type="button"
+          >
+            {t("accept")}
+          </Button>
+          <Button
+            onClick={() => onReject()}
+            className="margin-left-2"
+            type="button"
+            secondary
+          >
+            {t("reject")}
+          </Button>
+        </Grid>
+      </ReplyWidgetWrapper>
+    </>
+  );
+};
+
+export const OrganizationInvitationReply = ({
+  userInvitation,
+}: {
+  userInvitation: OrganizationInvitation;
+}) => {
   const [apiError, setApiError] = useState<Error>();
   const [invitationStatus, setInvitationStatus] = useState<string>();
   const [confirmRejection, setConfirmRejection] = useState(false);
@@ -134,6 +174,7 @@ export const OrganizationInvitationReply = ({
     },
     [userInvitation.organization_invitation_id, clientFetch],
   );
+
   if (confirmRejection) {
     return (
       <InvitationRejectionConfirmation
@@ -146,56 +187,22 @@ export const OrganizationInvitationReply = ({
     return (
       <InvitationAcceptedNotice
         organizationName={userInvitation.organization.organization_name}
-        onDismiss={onDismiss}
       />
     );
   }
   if (invitationStatus === "rejected") {
     return <InvitationRejectedNotice />;
   }
+
+  // when invitation is "pending"
   return (
-    <>
-      {apiError && (
-        <SimplerAlert
-          alertClick={() => setApiError(undefined)}
-          buttonId={`organizationInviteApiError-${userInvitation.organization_invitation_id}`}
-          messageText={t("apiError")}
-          type="error"
-        />
-      )}
-      <ReplyWidgetWrapper>
-        <Grid tablet={{ col: 8 }}>
-          <h3>
-            {userInvitation.organization.organization_name} {t("ctaTitle")}
-          </h3>
-          <p>{t("description")}</p>
-        </Grid>
-        <Grid tablet={{ col: 4 }} className="text-right flex-align-self-center">
-          <Button
-            onClick={() => respondToOrganizationInvitation(true)}
-            className="margin-left-2"
-            type="button"
-          >
-            {t("accept")}
-          </Button>
-          <Button
-            onClick={() => setConfirmRejection(true)}
-            className="margin-left-2"
-            type="button"
-            secondary
-          >
-            {t("reject")}
-          </Button>
-          <Button
-            onClick={() => onDismiss()}
-            className="margin-left-2"
-            type="button"
-            unstyled
-          >
-            {t("dismiss")}
-          </Button>
-        </Grid>
-      </ReplyWidgetWrapper>
-    </>
+    <InvitationReplyForm
+      error={apiError}
+      onErrorClick={() => setApiError(undefined)}
+      organizationName={userInvitation.organization.organization_name}
+      organizationInvitationId={userInvitation.organization_invitation_id}
+      onAccept={() => respondToOrganizationInvitation(true)}
+      onReject={() => setConfirmRejection(true)}
+    />
   );
 };
