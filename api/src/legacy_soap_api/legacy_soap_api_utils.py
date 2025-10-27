@@ -334,3 +334,7 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
     return None
+
+
+def convert_bool_to_yes_no(value: bool | None) -> str:
+    return "Yes" if value else "No"
