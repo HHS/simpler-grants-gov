@@ -81,11 +81,9 @@ class ConsolidatedFilter(BaseModel):
             for value in ["FilterType", "FilterValue"]:
                 if value not in item:
                     raise SOAPInvalidEnvelope(
-
-                            "The content of element 'ExpandedApplicationFilter' is not complete. One of "
-                            '\'{"http://apply.grants.gov/system/GrantsCommonElements-V1.0":'
-                            f"{value}}}' is expected."
-
+                        "The content of element 'ExpandedApplicationFilter' is not complete. One of "
+                        '\'{"http://apply.grants.gov/system/GrantsCommonElements-V1.0":'
+                        f"{value}}}' is expected."
                     )
             consolidated = update_consolidated(
                 consolidated, item["FilterType"], item["FilterValue"]
