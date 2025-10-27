@@ -24,7 +24,7 @@ def test_org_invitation_response_accepted(
     """Test that an invitation can be successfully ACCEPTED by the correct user."""
 
     # Create an invitation
-    inv = OrganizationInvitationFactory.create(invitee_user=user, invitee_email=user.email)
+    inv = OrganizationInvitationFactory.create(invitee_email=user.email)
     # Create multiple roles to assign to user
     roles = RoleFactory.create_batch(3)
     for role in roles:
@@ -68,7 +68,7 @@ def test_org_invitation_response_rejected(
 ):
     """Test that an invitation can be successfully REJECTED by the correct user."""
     # Create an invitation with role
-    inv = OrganizationInvitationFactory.create(invitee_user=user, invitee_email=user.email)
+    inv = OrganizationInvitationFactory.create(invitee_email=user.email)
     LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv)
     assert inv.status == OrganizationInvitationStatus.PENDING
 
@@ -110,32 +110,11 @@ def test_org_invitation_response_404_invitation(client, db_session, user, user_a
     assert resp.get_json()["message"] == "Invitation not found"
 
 
-def test_org_invitation_response_403_user(client, db_session, user, user_auth_token):
-    """Test that a user who does not match the invitation's invitee_user_id
-    cannot respond to the invitation."""
-    # Create an invitation with role
-    inv = OrganizationInvitationFactory.create()
-    LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv)
-
-    assert inv.status == OrganizationInvitationStatus.PENDING
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
-        json={"status": OrganizationInvitationStatus.REJECTED},
-        headers={"X-SGG-Token": user_auth_token},
-    )
-
-    assert resp.status_code == 403
-    assert (
-        resp.get_json()["message"]
-        == "Forbidden, invitation user does not match user's ID on record"
-    )
-
-
 def test_org_invitation_response_403_email(client, db_session, user, user_auth_token):
     """Test that a user whose email does not match the invitation's invitee_email
     cannot respond to the invitation."""
     # Create an invitation with role
-    inv = OrganizationInvitationFactory.create(invitee_user=user)
+    inv = OrganizationInvitationFactory.create()
     LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv)
 
     assert inv.status == OrganizationInvitationStatus.PENDING
@@ -160,14 +139,14 @@ def test_org_invitation_response_403_email(client, db_session, user, user_auth_t
         OrganizationInvitationStatus.EXPIRED,
     ],
 )
-def test_org_invitation_response_400_status(
+def test_org_invitation_response_422_status(
     client, db_session, user, user_auth_token, current_status
 ):
     """Test that responding to an invitation that is not pending or is expired
-    returns a 400 error."""
+    returns a 422 error."""
     # Create an invitation with role
     inv = OrganizationInvitationFactory.create(
-        invitee_user=user, invitee_email=user.email, is_accepted=True
+        invitee_email=user.email, is_accepted=True
     )
 
     resp = client.put(
@@ -176,7 +155,7 @@ def test_org_invitation_response_400_status(
         headers={"X-SGG-Token": user_auth_token},
     )
 
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     assert (
         resp.get_json()["message"]
         == f"Invitation cannot be responded to; current status is {OrganizationInvitationStatus.ACCEPTED}"
@@ -187,7 +166,7 @@ def test_org_invitation_response_invalid_status(client, db_session, user, user_a
     """Test that sending an invalid status in the request returns a 422 error."""
     # Create an invitation with role
     inv = OrganizationInvitationFactory.create(
-        invitee_user=user, invitee_email=user.email, is_accepted=True
+        invitee_email=user.email, is_accepted=True
     )
 
     resp = client.put(

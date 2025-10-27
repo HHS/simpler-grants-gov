@@ -16,7 +16,6 @@ from src.constants.lookup_constants import (
     OrganizationInvitationStatus,
     Privilege,
 )
-from src.db.models.entity_models import OrganizationInvitation
 from src.db.models.user_models import (
     AgencyUserRole,
     ApplicationUserRole,
@@ -715,7 +714,9 @@ class OrganizationSchema(Schema):
             "example": "Legal business name of the corresponding Sam Gov Entity",
         },
     )
-
+class InvitationRoleSchema(Schema):
+    role_id = fields.UUID(metadata={"description": "Role unique identifier"})
+    role_name = fields.String(metadata={"description": "Role name"})
 
 class OrganizationInvitationSchema(Schema):
     organization_invitation_id = fields.UUID(metadata={"description": "Organization invitation ID"})
@@ -727,31 +728,8 @@ class OrganizationInvitationSchema(Schema):
         OrganizationSchema, metadata={"description": "Organization information"}
     )
     roles_granted = fields.List(
-        fields.Nested(RoleSchema), metadata={"description": "Roles granted"}
+        fields.Nested(InvitationRoleSchema), metadata={"description": "Roles granted"}
     )
-
-    @pre_dump
-    def invitation_response(self, invitation: OrganizationInvitation, **kwargs: Any) -> dict:
-        return {
-            "organization_invitation_id": invitation.organization_invitation_id,
-            "status": invitation.status,
-            "responded_at": (
-                invitation.accepted_at
-                if invitation.status == OrganizationInvitationStatus.ACCEPTED
-                else invitation.rejected_at
-            ),
-            "organization": {
-                "organization_id": invitation.organization_id,
-                "organization_name": (
-                    invitation.organization.sam_gov_entity.legal_business_name
-                    if invitation.organization.sam_gov_entity
-                    else None
-                ),
-            },
-            "organization_id": invitation.organization_id,
-            "role_granted": invitation.linked_roles,
-        }
-
 
 class UserResponseOrgInvitationResponseSchema(AbstractResponseSchema):
     data = fields.Nested(OrganizationInvitationSchema)

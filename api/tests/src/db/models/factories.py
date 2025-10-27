@@ -2880,14 +2880,12 @@ class OrganizationInvitationFactory(BaseFactory):
     created_at = factory.LazyFunction(
         lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
     )
-    invitee_user = factory.SubFactory(UserFactory)
 
     expires_at = factory.LazyAttribute(
         lambda o: fake.date_time_between(
             start_date=o.created_at, end_date="+1w", tzinfo=timezone.utc
         )
     )
-    invitee_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
 
     class Params:
         response_date = factory.LazyAttribute(

@@ -91,6 +91,11 @@ class Organization(ApiSchemaTable, TimestampMixin):
     applications: Mapped[list["Application"]] = relationship(
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )
+    @property
+    def name(self) -> str:
+        return ( self.sam_gov_entity.legal_business_name
+                    if self.sam_gov_entity
+                    else None)
 
 
 class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
@@ -115,7 +120,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     )
     invitee_user: Mapped["User | None"] = relationship("User", foreign_keys=[invitee_user_id])
     linked_roles: Mapped[list["LinkOrganizationInvitationToRole"]] = relationship(
-        "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=True
+        "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=True,
     )
 
     @property
@@ -145,7 +150,11 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     @property
     def can_respond(self) -> bool:
         return self.is_pending and not self.is_expired
-
+    @property
+    def responded_at(self) -> datetime:
+        return (self.accepted_at
+                if self.status == OrganizationInvitationStatus.ACCEPTED
+                else self.rejected_at)
 
 class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_organization_invitation_to_role"

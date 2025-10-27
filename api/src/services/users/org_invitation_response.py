@@ -13,7 +13,7 @@ from src.util.datetime_util import utcnow
 
 def org_invitation_response(
     db_session: db.Session, user: User, invitation_id: UUID, json_data: dict
-) -> OrganizationInvitation:
+) -> dict:
     """
         Handle a user's response to an organization invitation.
          This function allows a user to ACCEPT or REJECT an invitation to join an organization.
@@ -36,14 +36,9 @@ def org_invitation_response(
         .options(selectinload(OrganizationInvitation.linked_roles))
         .where(OrganizationInvitation.organization_invitation_id == invitation_id)
     ).scalar_one_or_none()
-
     # Validate invitation
     if not invitation:
         raise_flask_error(404, "Invitation not found")
-
-    # Verify response user is the same
-    if user.user_id != invitation.invitee_user_id:
-        raise_flask_error(403, "Forbidden, invitation user does not match user's ID on record")
 
     # Verify responder email
     if user.email != invitation.invitee_email:
@@ -52,7 +47,7 @@ def org_invitation_response(
     # Validate status status
     if invitation.status != OrganizationInvitationStatus.PENDING or invitation.is_expired:
         raise_flask_error(
-            400, f"Invitation cannot be responded to; current status is {invitation.status}"
+            422, f"Invitation cannot be responded to; current status is {invitation.status}"
         )
 
     status = json_data.get("status")
@@ -76,6 +71,16 @@ def org_invitation_response(
         invitation.rejected_at = now
 
     invitation.invitee_user_id = user.user_id
-
     db_session.add(invitation)
-    return invitation
+    return {
+            "organization_invitation_id": invitation.organization_invitation_id,
+            "status": invitation.status,
+            "responded_at": invitation.responded_at,
+            "organization": {
+                "organization_id": invitation.organization_id,
+                "organization_name": invitation.organization.name
+            },
+            "organization_id": invitation.organization_id,
+            "roles_granted": invitation.roles,
+        }
+
