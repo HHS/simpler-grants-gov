@@ -1494,6 +1494,19 @@ export const messages = {
         description:
           "Join your team by collaborating on applications and searching for the right opportunities.",
       },
+      rejected: {
+        ctaTitle: "The invitation has been rejected.",
+        description:
+          "If you change your mind, an organization admin can add you again.",
+      },
+      rejectConfirmation: {
+        ctaTitle:
+          "Are you sure you want to reject this organization's invitation?",
+        description:
+          "You'll need to be re-added by an organization admin if you change your mind later.",
+        confirm: "Reject invitation",
+        cancel: "Cancel",
+      },
       apiError: "Unable to update user organization invitation.",
     },
   },
