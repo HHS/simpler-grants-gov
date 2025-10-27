@@ -1,8 +1,8 @@
-"""add_tcertificate_table
+"""add_new_columns_to_tcertificate_table
 
-Revision ID: ee778ce20e6c
+Revision ID: 87f28b5e40d5
 Revises: a1b2c3d4e5f6
-Create Date: 2025-10-27 17:47:35.251513
+Create Date: 2025-10-27 19:58:35.552258
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "ee778ce20e6c"
+revision = "87f28b5e40d5"
 down_revision = "a1b2c3d4e5f6"
 branch_labels = None
 depends_on = None
@@ -29,6 +29,8 @@ def upgrade():
         sa.Column("agencyid", sa.Text(), nullable=True),
         sa.Column("requestorlname", sa.Text(), nullable=True),
         sa.Column("requestorfname", sa.Text(), nullable=True),
+        sa.Column("requestoremail", sa.Text(), nullable=True),
+        sa.Column("requestorphone", sa.Text(), nullable=True),
         sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("creator_id", sa.Text(), nullable=False),
         sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=True),
