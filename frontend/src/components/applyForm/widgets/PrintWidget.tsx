@@ -21,12 +21,14 @@ function PrintWidget<
     if (inputValue == null) return "";
     if (typeof inputValue === "string") return inputValue;
     if (typeof inputValue === "boolean") return String(inputValue);
-    if (typeof inputValue === "number" || typeof inputValue === "bigint") return String(inputValue);
-    if (Array.isArray(inputValue)) return inputValue.filter(v => v != null).join(", ");
+    if (typeof inputValue === "number" || typeof inputValue === "bigint")
+      return String(inputValue);
+    if (Array.isArray(inputValue))
+      return inputValue.filter((v) => v != null).join(", ");
 
-    console.warn("Unknown value type ", typeof inputValue)
-    return JSON.stringify(inputValue); 
-  }
+    console.warn("Unknown value type ", typeof inputValue);
+    return JSON.stringify(inputValue);
+  };
 
   return (
     <FormGroup className={formClassName} key={`form-group__text-input--${id}`}>

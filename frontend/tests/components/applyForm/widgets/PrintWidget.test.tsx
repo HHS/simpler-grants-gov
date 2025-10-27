@@ -27,8 +27,16 @@ describe("PrintWidget", () => {
     hideError: false,
   };
 
+  const warnSpy = jest
+    .spyOn(console, "warn")
+    .mockImplementation(() => undefined);
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    warnSpy.mockRestore();
   });
 
   it("renders with basic props", () => {
@@ -65,22 +73,18 @@ describe("PrintWidget", () => {
   });
 
   it("displays empty string when value is null or undefined", () => {
-    const propsWithNull = {
-      ...defaultProps,
-      value: null,
-    };
+    const propsWithNull = { ...defaultProps, value: null };
 
-    render(<PrintWidget {...propsWithNull} />);
+    const view = render(<PrintWidget {...propsWithNull} />);
+    expect(screen.getByTestId("test-field")).toHaveTextContent("");
 
-    const fieldElement = screen.getByTestId("test-field");
-    expect(fieldElement).toHaveTextContent("");
+    const propsWithUndefined = { ...defaultProps, value: undefined };
+    view.rerender(<PrintWidget {...propsWithUndefined} />);
+    expect(screen.getByTestId("test-field")).toHaveTextContent("");
   });
 
   it("shows required indicator when field is required", () => {
-    const props = {
-      ...defaultProps,
-      required: true,
-    };
+    const props = { ...defaultProps, required: true };
 
     render(<PrintWidget {...props} />);
 
@@ -93,10 +97,7 @@ describe("PrintWidget", () => {
   });
 
   it("does not show required indicator when field is not required", () => {
-    const props = {
-      ...defaultProps,
-      required: false,
-    };
+    const props = { ...defaultProps, required: false };
 
     render(<PrintWidget {...props} />);
 
@@ -104,10 +105,7 @@ describe("PrintWidget", () => {
   });
 
   it("does not display errors when rawErrors is empty", () => {
-    const props = {
-      ...defaultProps,
-      rawErrors: [],
-    };
+    const props = { ...defaultProps, rawErrors: [] };
 
     render(<PrintWidget {...props} />);
 
@@ -138,14 +136,29 @@ describe("PrintWidget", () => {
   });
 
   it("handles numeric values by converting to string", () => {
-    const props = {
-      ...defaultProps,
-      value: 12345,
-    };
+    const props = { ...defaultProps, value: 12345 };
 
     render(<PrintWidget {...props} />);
 
     expect(screen.getByText("12345")).toBeInTheDocument();
+  });
+
+  it("handles array values by joining defined items with ', '", () => {
+    const props = { ...defaultProps, value: ["A", null, "B", undefined, "C"] };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("A, B, C")).toBeInTheDocument();
+  });
+
+  it("handles object values by JSON-stringifying and console warns", () => {
+    const obj = { a: 1, b: "x" };
+    const props = { ...defaultProps, value: obj };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText(JSON.stringify(obj))).toBeInTheDocument();
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   it("renders with minimal props", () => {
