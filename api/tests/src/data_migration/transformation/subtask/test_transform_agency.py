@@ -27,7 +27,7 @@ from tests.src.db.models.factories import AgencyFactory
 
 
 class TestTransformAgencyHierarchy(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_agency_hierarchy(self, transform_oracle_data_task):
         return TransformAgencyHierarchy(transform_oracle_data_task)
 
@@ -95,7 +95,7 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
 
 
 class TestTransformAgency(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_agency(self, transform_oracle_data_task):
         return TransformAgency(transform_oracle_data_task)
 
@@ -384,7 +384,7 @@ class TestTransformAgency(BaseTransformTestClass):
 
 class TestValidateAgencyData(BaseTransformTestClass):
 
-    @pytest.fixture()
+    @pytest.fixture
     def validate_agency_data(self, transform_oracle_data_task, truncate_agencies):
         return ValidateAgencyData(transform_oracle_data_task)
 
