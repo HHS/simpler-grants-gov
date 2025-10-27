@@ -1,5 +1,7 @@
+from collections.abc import Callable
 from enum import StrEnum
-from typing import Any, Callable, Pattern, Type
+from re import Pattern
+from typing import Any
 
 from marshmallow import ValidationError, validates_schema
 
@@ -84,7 +86,7 @@ class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
     def with_one_of(
         self,
         *,
-        allowed_values: Type[StrEnum] | None = None,
+        allowed_values: type[StrEnum] | None = None,
         pattern: str | Pattern | None = None,
         example: str | None = None,
         minimum_length: int | None = None
