@@ -88,7 +88,6 @@ RUN strip --strip-unneeded /usr/local/bin/python${PY_MM} || true; \
 # Stage 2: Runtime base on Amazon Linux
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS python-base
-ARG PY_MM=3.12
 LABEL org.opencontainers.image.source="https://github.com/HHS/simpler-grants-gov"
 
 # Install runtime dependencies only
@@ -108,16 +107,26 @@ RUN dnf install -y \
       wget && \
     dnf clean all
 
-# Copy python-version.txt for downstream stages to use
+# Copy python-version.txt and read it to get the version
 COPY --from=amazonlinux-builder /python-version.txt /python-version.txt
+RUN mkdir -p /tmp && cat /python-version.txt > /tmp/py_version.txt
 
-# Copy Python runtime
-COPY --from=amazonlinux-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
+# Copy Python runtime using the version from the file
 COPY --from=amazonlinux-builder /usr/local/bin/python3 /usr/local/bin/python3
 COPY --from=amazonlinux-builder /usr/local/bin/python /usr/local/bin/python
 COPY --from=amazonlinux-builder /usr/local/bin/poetry /usr/local/bin/poetry
-COPY --from=amazonlinux-builder /usr/local/lib/python${PY_MM}/ /usr/local/lib/python${PY_MM}/
-COPY --from=amazonlinux-builder /usr/local/lib/libpython${PY_MM}.so* /usr/local/lib/
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    cp -a /usr/local/bin/python3 /usr/local/bin/python${PY_MM}
+
+# Copy Python libraries using the version from the file
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    mkdir -p /usr/local/lib/python${PY_MM}
+
+COPY --from=amazonlinux-builder /usr/local/lib/ /tmp/python-libs/
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    cp -a /tmp/python-libs/python${PY_MM}/ /usr/local/lib/python${PY_MM}/ && \
+    cp -a /tmp/python-libs/libpython${PY_MM}.so* /usr/local/lib/ && \
+    rm -rf /tmp/python-libs
 
 ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
     PYTHONUNBUFFERED=1 \
