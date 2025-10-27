@@ -57,16 +57,43 @@ We currently have the following users automatically created when running our see
 * A user without any organizations
 * Has several saved opportunities
 * Has several saved searches
+* API Key: `no_org_user_key`
 
 Each time you run the seed script, it will add a few more saved opportunities and searches.
 
 ---
 `one_org_user`
 * A user that is the owner of one organization
+* API Key: `one_org_user_key`
 
 ---
 `two_org_user`
 * A user that is the owner of two different organizations
+* API Key: `two_orgs_user_key`
+
+---
+`org_member_user`
+* A user that is a member (not admin) of one organization
+* API Key: `org_member_user_key`
+
+---
+`mixed_roles_user`
+* A user that is an admin of one organization and member of another
+* API Key: `mixed_roles_user_key`
+
+---
+`many_app_user`
+* A user with many applications across multiple organizations and competitions
+* Has applications in various states (in progress, submitted, accepted)
+* Member of all three organizations as an admin
+* API Key: `many_app_user_key`
+* Perfect for testing application workflows and UI components
+
+---
+`api_user`
+* A dedicated API-only user for local development testing
+* API Key: `local-dev-api-key`
+* Perfect for testing API endpoints without organization constraints
 
 ## How to use a pre-created user
 Our local mock OAuth server will pass whatever you put in the "login" screen
@@ -78,3 +105,28 @@ For example, if we pass in `no_org_user` then we'll be logged in as that user.
 If what you put into that box doesn't correspond to a user we have, our system
 will make a brand new user. Logging out and relogging in with that same text will
 log you back in as that user.
+
+## How to use API keys for local development
+
+Each user created by the seed script has an associated API key that can be used to make authenticated API calls. This is especially useful for testing the new API Gateway functionality.
+
+### Using API keys with curl
+
+```bash
+# Test with the dedicated API user
+curl -H "X-API-KEY: local-dev-api-key" http://localhost:8080/v1/opportunities
+
+# Test with a specific user's API key
+curl -H "X-API-KEY: no_org_user_key" http://localhost:8080/v1/opportunities
+```
+
+### Setting up frontend environment for API Gateway testing
+
+To test the frontend with the new API Gateway keys, you can set the `API_GW_AUTH` environment variable in your local frontend environment:
+
+```bash
+# In your frontend/.env.local file
+API_GW_AUTH=local-dev-api-key
+```
+
+This will cause the frontend to include the `X-API-KEY` header in all API requests, allowing you to test the new API Gateway authentication flow locally.
