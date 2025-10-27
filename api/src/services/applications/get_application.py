@@ -24,7 +24,6 @@ from src.services.applications.application_validation import (
     get_application_form_errors,
     is_form_required,
 )
-from src.services.applications.auth_utils import check_user_application_access
 
 logger = logging.getLogger(__name__)
 
@@ -87,11 +86,6 @@ def get_application(
     # NOTE: Trying to put this in an order_by in the relationship doesn't work as we can't sort on a joined value
     #       Haven't found a way to sort this when querying above that doesn't break the query
     application.application_forms.sort(key=lambda app_form: app_form.form.form_name)
-
-    # Check if the user has access to the application (skip for internal users or when user is None)
-    if not is_internal_user and user is not None:
-
-        check_user_application_access(application, user)
 
     # Add application metadata to logs
     add_application_metadata_to_logs(application)

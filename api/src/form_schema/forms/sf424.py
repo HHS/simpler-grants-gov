@@ -1,6 +1,6 @@
 import uuid
 
-import src.form_schema.forms.shared_schema as shared_schema
+import src.form_schema.shared.shared_form_constants as shared_form_constants
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.services.xml_generation.constants import NO_VALUE
@@ -653,13 +653,13 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "State",
             "description": "US State or Territory Code",
-            "enum": shared_schema.STATES,
+            "enum": shared_form_constants.STATES,
         },
         "country_code": {
             "type": "string",
             "title": "Country",
             "description": "Country Code",
-            "enum": shared_schema.COUNTRIES,
+            "enum": shared_form_constants.COUNTRIES,
         },
     },
 }
@@ -1168,7 +1168,6 @@ SF424_v4_0 = Form(
     form_rule_schema=FORM_RULE_SCHEMA,
     json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
-    # No form instructions at the moment.
     form_type=FormType.SF424,
     sgg_version="1.0",
     is_deprecated=False,

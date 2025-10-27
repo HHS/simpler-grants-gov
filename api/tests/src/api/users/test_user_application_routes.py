@@ -1,21 +1,70 @@
+import pytest
+
 from src.api.users.user_schemas import UserApplicationListItemSchema
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, Privilege
+from tests.lib.application_list_utils import create_user_in_app
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
+    AgencyFactory,
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
+    OpportunityFactory,
     OrganizationFactory,
+    OrganizationUserFactory,
+    OrganizationUserRoleFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
+
+
+@pytest.fixture
+def app_a():
+    return ApplicationFactory.create()
+
+
+@pytest.fixture
+def app_b():
+    return ApplicationFactory.create()
+
+
+@pytest.fixture
+def org_a():
+    return OrganizationFactory.create()
+
+
+@pytest.fixture
+def org_b():
+    return OrganizationFactory.create()
+
+
+@pytest.fixture
+def apps_owned_org_a(org_a):
+    return ApplicationFactory.create_batch(2, organization=org_a)
+
+
+@pytest.fixture
+def app_owned_org_b(org_b):
+    return ApplicationFactory.create(organization=org_b)
 
 
 def test_user_get_applications_success(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
     """Test successful retrieval of applications for a user"""
+    # Create an agency to have proper agency_name
+    agency = AgencyFactory.create(agency_code="TEST-AC", agency_name="Test Agency")
+
+    # Create an opportunity with the agency
+    opportunity = OpportunityFactory.create(
+        opportunity_title="Test Opportunity", agency_code=agency.agency_code
+    )
+
     # Create a competition
     competition = CompetitionFactory.create(
+        opportunity=opportunity,
         competition_title="Test Competition",
         opening_date=None,
         closing_date=None,
@@ -41,8 +90,18 @@ def test_user_get_applications_success(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1, is_application_owner=True)
-    ApplicationUserFactory.create(user=user, application=application2, is_application_owner=True)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application1, as_owner=True
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application2, as_owner=True
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the request
     response = client.post(
@@ -78,12 +137,24 @@ def test_user_get_applications_success(
     assert app1_data["competition"]["competition_title"] == "Test Competition"
     assert app1_data["competition"]["is_open"] is True
 
+    # Check opportunity data
+    assert app1_data["competition"]["opportunity"] is not None
+    assert app1_data["competition"]["opportunity"]["opportunity_id"] == str(
+        opportunity.opportunity_id
+    )
+    assert app1_data["competition"]["opportunity"]["opportunity_title"] == "Test Opportunity"
+    assert app1_data["competition"]["opportunity"]["agency_name"] == "Test Agency"
+
     # Verify second application (individual)
     app2_data = applications[1]
     assert app2_data["application_id"] == str(application2.application_id)
     assert app2_data["application_name"] == "My Second App"
     assert app2_data["application_status"] == ApplicationStatus.SUBMITTED.value
     assert app2_data["organization"] is None
+
+    # Second application should also have opportunity data
+    assert app2_data["competition"]["opportunity"] is not None
+    assert app2_data["competition"]["opportunity"]["opportunity_title"] == "Test Opportunity"
 
 
 def test_user_get_applications_empty_list(
@@ -169,8 +240,14 @@ def test_user_get_applications_multiple_competitions(
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1)
-    ApplicationUserFactory.create(user=user, application=application2)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application1),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application2),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
@@ -215,6 +292,11 @@ def test_user_application_list_item_schema():
             "opening_date": None,
             "closing_date": None,
             "is_open": True,
+            "opportunity": {
+                "opportunity_id": "123e4567-e89b-12d3-a456-426614174002",
+                "opportunity_title": "Test Opportunity",
+                "agency_name": "Test Agency",
+            },
         },
     }
 
@@ -222,3 +304,211 @@ def test_user_application_list_item_schema():
     result = schema.load(test_data)
     assert result["application_name"] == "Test Application"
     assert result["competition"]["competition_title"] == "Test Competition"
+    assert result["competition"]["opportunity"]["opportunity_title"] == "Test Opportunity"
+    assert result["competition"]["opportunity"]["agency_name"] == "Test Agency"
+
+
+@pytest.mark.parametrize(
+    "privileges,apps_count",
+    [
+        ([Privilege.VIEW_APPLICATION], 1),  # Correct Privilege
+        ([Privilege.LIST_APPLICATION], 0),  # Wrong Privilege
+        ([Privilege.VIEW_APPLICATION, Privilege.LIST_APPLICATION], 1),  # Mixed Privilege
+        (None, 0),  # No role
+    ],
+)
+def test_user_application_list_access(
+    client, enable_factory_create, db_session, privileges, app_a, apps_count
+):
+    """
+    Test that a user can only see applications they have VIEW_APPLICATION privilege for.
+    """
+    user, application, token = create_user_in_app(
+        db_session, application=app_a, privileges=privileges
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Validate the returned applications count
+    applications = response.json["data"]
+    assert len(applications) == apps_count
+    # If privileges included VIEW, returned application should be app_a
+    if apps_count > 0:
+        assert applications[0]["application_id"] == str(app_a.application_id)
+
+
+def test_user_application_list_access_multi_applications(
+    client, enable_factory_create, db_session, app_a, app_b
+):
+    """
+    Test that when a user has multiple applications,only those with VIEW_APPLICATION privilege are returned
+    """
+    # Create user with VIEW privilege on app_a
+    user, application, token = create_user_in_app(
+        db_session, application=app_a, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    # Give the same user LIST privilege on a different application (app_b)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_b),
+        role=RoleFactory.create(privileges=[Privilege.LIST_APPLICATION]),
+    )
+    # create an application-user link with no roles/privileges
+    ApplicationUserFactory.create(user=user)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # assert only application with correct privilege is returned
+    applications = response.json["data"]
+    assert len(applications) == 1
+    assert applications[0]["application_id"] == str(app_a.application_id)
+
+
+@pytest.mark.parametrize(
+    "privileges,apps_count",
+    [
+        ([Privilege.VIEW_APPLICATION], 1),  # Correct Privilege
+        ([Privilege.LIST_APPLICATION], 0),  # Wrong Privilege
+        ([Privilege.VIEW_APPLICATION, Privilege.LIST_APPLICATION], 1),  # Mixed Privilege
+        (None, 0),  # No role
+    ],
+)
+def test_user_application_list_access_org(
+    client, enable_factory_create, db_session, privileges, org_b, app_owned_org_b, apps_count
+):
+    """
+    Test that a user can only see applications they have VIEW_APPLICATION privilege for through their organization role.
+    """
+    user, organization, token = create_user_in_org(
+        db_session, organization=org_b, privileges=privileges
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Validate the returned applications count
+    applications = response.json["data"]
+    assert len(applications) == apps_count
+    # If privileges included VIEW, returned application should be app_a
+    if apps_count > 0:
+        assert applications[0]["application_id"] == str(app_owned_org_b.application_id)
+
+
+def test_user_application_list_access_multi_applications_orgs(
+    client, enable_factory_create, db_session, org_a, org_b, apps_owned_org_a, app_owned_org_b
+):
+    """
+    Test that when a user has multiple applications,only those with VIEW_APPLICATION privilege are returned
+    """
+    # Create user with VIEW privilege on org_a
+    user, organization, token = create_user_in_org(
+        db_session, organization=org_a, privileges=[Privilege.VIEW_APPLICATION]
+    )
+
+    # Give the same user LIST privilege on a different organization (org_b)
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_b),
+        role=RoleFactory.create(privileges=[Privilege.LIST_APPLICATION]),
+    )
+
+    # create an organization-user link with no roles/privileges
+    org_user = OrganizationUserFactory.create(user=user)
+    ApplicationFactory.create(organization=org_user.organization)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # assert only applications with correct privilege is returned
+    applications = response.json["data"]
+    assert len(applications) == 2
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in apps_owned_org_a
+    )
+
+
+def test_user_application_list_access_org_and_app_privilege_no_duplication(
+    client, enable_factory_create, db_session, app_owned_org_b, org_b, user
+):
+    """Test that if a user has both APP-LEVEL and ORG-LEVEL VIEW_APPLICATION privileges
+    for the same application (same org), the application is only returned once."""
+
+    user, organization, token = create_user_in_org(
+        db_session, organization=org_b, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_owned_org_b),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # return the application once
+    applications = response.json["data"]
+    assert len(applications) == 1
+    assert applications[0]["application_id"] == str(app_owned_org_b.application_id)
+
+
+def test_user_application_list_access_org_and_app_privilege(
+    client, enable_factory_create, db_session, org_a, org_b, app_owned_org_b, apps_owned_org_a, user
+):
+    """Test that if a user has:
+    - ORG-LEVEL VIEW privilege on Org A (covering multiple apps)
+    - APP-LEVEL VIEW privilege on a specific app in Org B"""
+
+    # Create user and give APP-LEVEL VIEW on app_org_b
+    user, _, token = create_user_in_app(
+        db_session, application=app_owned_org_b, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    # Give ORG-LEVEL VIEW on org_a
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={},
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    # Verify all apps are returned, no duplicates
+    applications = response.json["data"]
+    assert len(applications) == 3
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in apps_owned_org_a + [app_owned_org_b]
+    )
