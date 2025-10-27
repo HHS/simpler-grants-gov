@@ -55,10 +55,6 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
           make init
-          # Then append CI-specific configuration
-          # Set replica count to 0 for single-node cluster in CI
-          echo "LOAD_AGENCY_SEARCH_REPLICA_COUNT=0" >> override.env
-          echo "LOAD_OPP_SEARCH_REPLICA_COUNT=0" >> override.env
           # Now run the seeding and populate commands
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
