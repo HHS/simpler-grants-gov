@@ -10,6 +10,7 @@ import src.util.file_util as file_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.lib.application_test_utils import create_user_in_app
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
@@ -134,7 +135,7 @@ def test_application_attachment_create_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 ##########################################
@@ -142,20 +143,17 @@ def test_application_attachment_create_403_not_the_owner(
 ##########################################
 
 
-def test_application_attachment_get_200(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
-):
+def test_application_attachment_get_200(db_session, enable_factory_create, client, s3_config):
     file_contents = "this is text in my file"
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
     application_attachment = ApplicationAttachmentFactory.create(
         application=application, file_contents=file_contents
     )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -190,15 +188,18 @@ def test_application_attachment_get_404_application_not_found(
 
 
 def test_application_attachment_get_404_application_attachment_not_found(
-    db_session, enable_factory_create, client, user, user_auth_token
+    db_session,
+    enable_factory_create,
+    client,
+    user,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
+
     application_attachment_id = uuid.uuid4()
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
@@ -237,7 +238,7 @@ def test_application_attachment_get_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 ##########################################
@@ -309,7 +310,8 @@ def test_application_attachment_update_404_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserFactory.create(user=user, application=application)
+
     attachment_id = uuid.uuid4()
 
     response = client.put(
@@ -415,7 +417,7 @@ def test_application_attachment_update_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 def test_application_attachment_update_deletes_old_file_different_name(
@@ -553,7 +555,7 @@ def test_application_attachment_delete_404_application_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserFactory.create(user=user, application=application)
     application_attachment_id = uuid.uuid4()
 
     response = client.delete(
@@ -597,7 +599,7 @@ def test_application_attachment_delete_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 def test_application_attachment_update_403_access(
@@ -661,3 +663,44 @@ def test_application_attachment_create_403_access(
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_get_403_access(
+    db_session,
+    enable_factory_create,
+    client,
+):
+    user, application, token = create_user_in_app(db_session)
+
+    application_attachment = ApplicationAttachmentFactory.create(
+        application=application,
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_get_access_with_organization_role(
+    db_session,
+    enable_factory_create,
+    client,
+):
+    """Test that user can access the application if organization member"""
+    # Associate user with organization
+    _, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
+    # Create application owned by org
+    application = ApplicationFactory.create(organization=org)
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"

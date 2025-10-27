@@ -6,23 +6,24 @@ export interface UserOrganization extends Organization {
 
 export type GatedResourceTypes = "application" | "organization" | "agency";
 
-export type UserPrivilegeDefinition = {
+export interface UserPrivilegeDefinition {
   resourceId?: string;
   resourceType: GatedResourceTypes;
   privilege: string; // we can narrow this later
-};
+}
 
-export type UserPrivilegesDefinition = {
-  resourceId?: string;
-  privileges: string[]; // we can narrow this later
-};
+export interface UserPrivilegeResult extends UserPrivilegeDefinition {
+  authorized: boolean;
+  error?: string;
+}
 
-export type UserRole = {
+export interface RoleDefinition {
   role_id: string;
   role_name: string;
+}
+export interface UserRole extends RoleDefinition {
   privileges: string[];
-};
-
+}
 export type OrganizationPrivilegesResponse = {
   organization: {
     organization_id: string;
@@ -60,12 +61,12 @@ export interface UserDetailProfile {
   first_name: string;
   middle_name?: string;
   last_name: string;
+  roles?: UserRole[];
 }
 
 export interface UserDetail extends UserDetailProfile {
   user_id: string;
   email: string;
-  roles?: UserRole[];
 }
 
 export interface UserDetailWithProfile {

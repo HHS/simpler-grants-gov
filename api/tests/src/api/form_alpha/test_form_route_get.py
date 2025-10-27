@@ -1,10 +1,27 @@
 import uuid
 from unittest import mock
 
+from src.constants.lookup_constants import FormType
 from tests.src.db.models.factories import FormFactory
 
 
-def test_form_get_200(client, api_auth_token, enable_factory_create):
+def test_form_get_200(client, user_api_key_id, enable_factory_create):
+    form = FormFactory.create()
+
+    resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-API-Key": user_api_key_id})
+
+    assert resp.status_code == 200
+    response_form = resp.get_json()["data"]
+
+    assert response_form["form_id"] == str(form.form_id)
+    assert response_form["form_name"] == form.form_name
+    assert response_form["form_json_schema"] == form.form_json_schema
+    assert response_form["form_ui_schema"] == form.form_ui_schema
+    assert response_form["form_instruction"] is None
+    assert response_form["json_to_xml_schema"] == form.json_to_xml_schema
+
+
+def test_form_get_legacy_auth_200(client, api_auth_token, enable_factory_create):
     form = FormFactory.create()
 
     resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": api_auth_token})
@@ -20,7 +37,7 @@ def test_form_get_200(client, api_auth_token, enable_factory_create):
     assert response_form["json_to_xml_schema"] == form.json_to_xml_schema
 
 
-def test_form_get_with_instructions_200(client, api_auth_token, enable_factory_create):
+def test_form_get_with_instructions_200(client, user_api_key_id, enable_factory_create):
     # Create a form with instructions
     form = FormFactory.create(with_instruction=True)
 
@@ -31,7 +48,7 @@ def test_form_get_with_instructions_200(client, api_auth_token, enable_factory_c
         new_callable=mock.PropertyMock,
         return_value=presigned_url,
     ):
-        resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": api_auth_token})
+        resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-API-Key": user_api_key_id})
 
     assert resp.status_code == 200
     response_form = resp.get_json()["data"]
@@ -45,7 +62,7 @@ def test_form_get_with_instructions_200(client, api_auth_token, enable_factory_c
 
 
 def test_form_get_with_cdn_instructions_200(
-    client, api_auth_token, enable_factory_create, monkeypatch_session
+    client, user_api_key_id, enable_factory_create, monkeypatch_session
 ):
     # Set the CDN URL environment variable
     monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
@@ -60,7 +77,7 @@ def test_form_get_with_cdn_instructions_200(
         new_callable=mock.PropertyMock,
         return_value=cdn_url,
     ):
-        resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": api_auth_token})
+        resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-API-Key": user_api_key_id})
 
     assert resp.status_code == 200
     response_form = resp.get_json()["data"]
@@ -72,15 +89,24 @@ def test_form_get_with_cdn_instructions_200(
     assert response_form["form_instruction"]["download_path"].startswith("https://cdn.")
 
 
-def test_form_get_404_not_found(client, api_auth_token):
+def test_form_get_404_not_found(client, user_api_key_id):
     form_id = uuid.uuid4()
-    resp = client.get(f"/alpha/forms/{form_id}", headers={"X-Auth": api_auth_token})
+    resp = client.get(f"/alpha/forms/{form_id}", headers={"X-API-Key": user_api_key_id})
 
     assert resp.status_code == 404
     assert resp.get_json()["message"] == f"Could not find Form with ID {form_id}"
 
 
-def test_form_get_401_unauthorized(client, api_auth_token, enable_factory_create):
+def test_form_get_401_unauthorized(client, enable_factory_create):
+    form = FormFactory.create()
+
+    resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-API-Key": "some-other-token"})
+
+    assert resp.status_code == 401
+    assert resp.get_json()["message"] == "Invalid API key"
+
+
+def test_form_get_401_unauthorized_legacy(client, enable_factory_create):
     form = FormFactory.create()
 
     resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-Auth": "some-other-token"})
@@ -90,3 +116,18 @@ def test_form_get_401_unauthorized(client, api_auth_token, enable_factory_create
         resp.get_json()["message"]
         == "The server could not verify that you are authorized to access the URL requested"
     )
+
+
+def test_form_get_with_new_fields_200(client, user_api_key_id, enable_factory_create):
+    """Test getting a form with form_type, sgg_version, and is_deprecated fields"""
+    form = FormFactory.create(form_type=FormType.SF424, sgg_version="1.0", is_deprecated=False)
+
+    resp = client.get(f"/alpha/forms/{form.form_id}", headers={"X-API-Key": user_api_key_id})
+
+    assert resp.status_code == 200
+    response_form = resp.get_json()["data"]
+
+    assert response_form["form_id"] == str(form.form_id)
+    assert response_form["form_type"] == FormType.SF424.value
+    assert response_form["sgg_version"] == "1.0"
+    assert response_form["is_deprecated"] is False

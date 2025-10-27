@@ -65,7 +65,7 @@ class User(ApiSchemaTable, TimestampMixin):
     api_keys: Mapped[list["UserApiKey"]] = relationship(
         "UserApiKey", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
-    profile: Mapped["UserProfile"] = relationship(
+    profile: Mapped["UserProfile | None"] = relationship(
         "UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
@@ -73,6 +73,18 @@ class User(ApiSchemaTable, TimestampMixin):
     def email(self) -> str | None:
         if self.linked_login_gov_external_user is not None:
             return self.linked_login_gov_external_user.email
+        return None
+
+    @property
+    def first_name(self) -> str | None:
+        if self.profile is not None:
+            return self.profile.first_name
+        return None
+
+    @property
+    def last_name(self) -> str | None:
+        if self.profile is not None:
+            return self.profile.last_name
         return None
 
     @property
@@ -223,8 +235,6 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
         index=True,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
-
-    is_application_owner: Mapped[bool | None]
 
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="application_users")

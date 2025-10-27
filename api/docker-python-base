@@ -1,73 +1,54 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS builder
 
-LABEL org.opencontainers.image.source=https://github.com/HHS/simpler-grants-gov
+FROM public.ecr.aws/docker/library/alpine:3.22.2 AS alpine-builder
 
 ARG PYTHON_VERSION=3.13.8
 ARG PY_MM=3.13
 ARG POETRY_VERSION=2.2.1
 ARG PIP_VERSION=25.2
+ARG ENABLE_UPX=0
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-eux", "-c"]
 
-RUN set -euo pipefail; \
-    dnf -q -y makecache; \
-    yum install -y --allowerasing \
-      gcc-11.5.0-5.amzn2023.0.5 \
-      libstdc++-14.2.1-7.amzn2023.0.2 \
-      make-1:4.3-5.amzn2023.0.2 \
-      wget-1.21.3-1.amzn2023.0.4 \
-      tar-2:1.34-1.amzn2023.0.4 \
-      gzip-1.12-1.amzn2023.0.1 \
-      openssl-devel-1:3.2.2-1.amzn2023.0.2\
-      zlib-devel-1.2.11-33.amzn2023.0.5 \
-      libffi-devel-3.4.4-1.amzn2023.0.1 \
-      sqlite-devel-3.40.0-1.amzn2023.0.6 \
-      bzip2-devel-1.0.8-6.amzn2023.0.2 \
-      readline-devel-8.1-2.amzn2023.0.2 \
-      ncurses-devel-6.2-4.20200222.amzn2023.0.6 \
-      xz-devel-5.2.5-9.amzn2023.0.2 \
-      gdbm-devel-1:1.19-2.amzn2023.0.2 \
-      shadow-utils-2:4.9-12.amzn2023.0.4 \
-      graphviz-2.44.0-25.amzn2023.0.7 \
-      fontconfig \
-      gdk-pixbuf2 \
-      pango \
-      rpm-build \
-      cpio \
-      curl-8.11.1-4.amzn2023.0.1 \
-    && yum update -y --allowerasing \
-         libtiff \
-         libgs \
-         openssl-libs \
-         openssl-fips-provider-latest \
-         python3-pip-wheel \
-    && yum clean all && rm -rf /var/cache/yum
+# Create python-version.txt file to be used by downstream Dockerfiles
+RUN echo "${PY_MM}" > /python-version.txt
 
-# Download and build Python with optimizations
+RUN apk add --no-cache \
+      build-base \
+      wget \
+      tar \
+      xz \
+      bzip2-dev \
+      zlib-dev \
+      openssl-dev \
+      libffi-dev \
+      sqlite-dev \
+      readline-dev \
+      ncurses-dev \
+      xz-dev \
+      gdbm-dev \
+      linux-headers \
+      ca-certificates
+
 WORKDIR /tmp
 RUN wget -q https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && tar xzf Python-${PYTHON_VERSION}.tgz
 WORKDIR /tmp/Python-${PYTHON_VERSION}
 RUN ./configure \
         --prefix=/usr/local \
-        --enable-optimizations \
+        --with-lto \
         --enable-shared \
         --with-ensurepip=install \
         LDFLAGS="-Wl,-rpath=/usr/local/lib" && \
     make -j"$(nproc)" && \
     make install
 WORKDIR /tmp
-# Clean Python build artifacts, ensure pip version, create symlinks, and install Poetry in one layer
 RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
     python3 -m pip install --no-cache-dir --upgrade "pip==${PIP_VERSION}" && \
     ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
     ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
     pip3 install --no-cache-dir poetry==${POETRY_VERSION}
 
-# Provide lightweight shims for 'cat' and 'ls' so subprocess can always find them
-RUN printf '%s\n' '#!/usr/bin/bash' 'exec /usr/bin/cat "$@"' > /usr/local/bin/cat && chmod +x /usr/local/bin/cat && \
-    printf '%s\n' '#!/usr/bin/bash' 'exec /usr/bin/ls  "$@"' > /usr/local/bin/ls  && chmod +x /usr/local/bin/ls
 
-# Remove pip from runtime (keep Poetry, remove vulnerable pip)
+# Remove pip from runtime (keep Poetry)
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
     /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
@@ -75,123 +56,91 @@ RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/bin/easy_install* \
     /root/.cache
 
-# Strip binaries to reduce size
-RUN find /usr/local -type f -executable -exec strip --strip-all {} + 2>/dev/null || true && \
-    find /usr/local -name "*.so*" -exec strip --strip-all {} + 2>/dev/null || true
+# Prune stdlib
+RUN rm -rf \
+      /usr/local/lib/python${PY_MM}/test \
+      /usr/local/lib/python${PY_MM}/ensurepip \
+      /usr/local/lib/python${PY_MM}/idlelib \
+      /usr/local/lib/python${PY_MM}/tkinter \
+      /usr/local/lib/python${PY_MM}/turtledemo \
+      /usr/local/lib/python${PY_MM}/distutils \
+      /usr/local/lib/python${PY_MM}/lib2to3 \
+      /usr/local/lib/python${PY_MM}/venv
 
-# Collect required shared libraries for Python
-RUN mkdir -p /runtime/python-libs && \
-    ldd /usr/local/bin/python${PY_MM} | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/python-libs/ 2>/dev/null || true && \
-    for lib in /lib64/ld-*.so.* /lib/ld-*.so.*; do [ -f "$lib" ] && cp "$lib" /runtime/python-libs/; done 2>/dev/null || true
-# Also copy generic dynamic loader symlinks required by execve on common arches
-RUN for link in /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-aarch64.so.1; do \
-      [ -e "$link" ] && cp -P "$link" /runtime/python-libs/ || true; \
-    done
-
-# Also collect libraries required by Python extension modules (e.g., zlib, bz2, lzma, ssl, sqlite3)
-RUN shopt -s nullglob; for so in "/usr/local/lib/python${PY_MM}/lib-dynload/"*.so; do \
-      ldd "$so" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/python-libs/ 2>/dev/null || true; \
-    done
-# Explicitly include common GCC/C++ runtime libraries needed by native wheels (e.g., pydantic-core, numpy)
-RUN for lib in /lib64/libgcc_s.so.1 /usr/lib64/libgcc_s.so.1 /lib64/libstdc++.so.6 /usr/lib64/libstdc++.so.6; do \
-      [ -f "$lib" ] && cp "$lib" /runtime/python-libs/ || true; \
-    done
-# Explicitly include essential glibc runtime libraries commonly required by C extensions
-RUN for lib in /lib64/libpthread.so.0 /usr/lib64/libpthread.so.0 \
-               /lib64/libc.so.6 /usr/lib64/libc.so.6 \
-               /lib64/libm.so.6 /usr/lib64/libm.so.6 \
-               /lib64/libdl.so.2 /usr/lib64/libdl.so.2 \
-               /lib64/librt.so.1 /usr/lib64/librt.so.1 \
-               /lib64/libutil.so.1 /usr/lib64/libutil.so.1 \
-               /lib64/libnsl.so.1 /usr/lib64/libnsl.so.1 \
-               /lib64/libcrypt.so.1 /usr/lib64/libcrypt.so.1; do \
-      [ -f "$lib" ] && cp "$lib" /runtime/python-libs/ || true; \
-    done
-# Resolver and NSS libraries required by network clients (e.g., psycopg binary)
-RUN for lib in /lib64/libresolv.so.2 /usr/lib64/libresolv.so.2 \
-               /lib64/libnss_dns.so.2 /usr/lib64/libnss_dns.so.2 \
-               /lib64/libnss_files.so.2 /usr/lib64/libnss_files.so.2; do \
-      [ -f "$lib" ] && cp "$lib" /runtime/python-libs/ || true; \
-    done
+# Compile stdlib to optimized bytecode and drop sources
+RUN python3 -m compileall -f -o 1 /usr/local/lib/python${PY_MM}
 
 
-# Collect only the required libraries for minimal runtime binaries
-RUN mkdir -p /runtime/system-libs && \
-    for binary in /usr/bin/sh /usr/bin/bash /usr/sbin/useradd /usr/bin/ls /usr/bin/cat /usr/bin/curl /usr/bin/wget; do \
-        [ -f "$binary" ] && ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/system-libs/ 2>/dev/null || true; \
-    done
+# Strip Python binary and extension modules
+RUN strip --strip-unneeded /usr/local/bin/python${PY_MM} || true; \
+    for f in /usr/local/lib/libpython${PY_MM}.so*; do strip --strip-unneeded "$f" || true; done; \
+    find /usr/local/lib/python${PY_MM}/lib-dynload -type f -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
 
-# Collect Graphviz-related libraries required at runtime (binaries and plugins)
-RUN mkdir -p /runtime/graphviz-libs && \
-    for binary in /usr/bin/dot /usr/bin/neato /usr/bin/fdp /usr/bin/sfdp /usr/bin/twopi /usr/bin/circo /usr/bin/fc-cache /usr/bin/gdk-pixbuf-query-loaders /usr/bin/pango-querymodules; do \
-        [ -f "$binary" ] && ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/graphviz-libs/ 2>/dev/null || true; \
-    done && \
-    shopt -s nullglob; for so in /usr/lib64/graphviz/*.so; do \
-        ldd "$so" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$" | xargs -I '{}' cp '{}' /runtime/graphviz-libs/ 2>/dev/null || true; \
-    done
 
-# Download Graphviz RPMs and dependencies and extract into /runtime/rootfs
-RUN dnf -y install --downloadonly --downloaddir=/tmp/rpms \
-    graphviz-2.44.0-25.amzn2023.0.7 && \
-    dnf -y install --downloadonly --downloaddir=/tmp/rpms \
-    graphviz-gd \
-    expat \
-    libpng \
-    libjpeg-turbo \
-    freetype \
-    fontconfig \
-    gd \
-    cairo \
-    pango \
-    librsvg2 \
-    zlib \
-    glib2 \
-    libX11 \
-    libXext \
-    libSM \
-    libICE \
-    libXaw \
-    libXt \
-    libXmu \
-    libXpm \
-    libXrender \
-    libxcb \
-    pixman \
-    harfbuzz \
-    fribidi \
-    libxml2 \
-    xz-libs \
-    bzip2-libs \
-    pcre2 \
-    libselinux \
-    libmount \
-    libblkid \
-    libuuid \
-    libffi \
-    libXau \
-    libXdmcp && \
-    mkdir -p /runtime/rootfs && cd /runtime/rootfs && \
-    for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
-    rm -rf /tmp/rpms
+# Collect runtime shared libraries for scratch stage
+RUN set -eux; \
+    apk add --no-cache pax-utils; \
+    mkdir -p /runtime-root; \
+    libs="$(find /usr/local -type f -executable -not \( -name '*tkinter*' \) -exec scanelf --needed --nobanner --format '%n#p' '{}' ';' \
+      | tr ',' '\n' \
+      | sed 's/.*#//' \
+      | sort -u)"; \
+    for lib in $libs; do \
+      f="$(find /lib /usr/lib -name "$lib" -print -quit)"; \
+      [ -n "$f" ] || continue; \
+      d="/runtime-root$(dirname "$f")"; \
+      mkdir -p "$d"; \
+      cp -a "$f" "$d/"; \
+      if [ -L "$f" ]; then \
+        tf="$(readlink -f "$f")"; \
+        td="/runtime-root$(dirname "$tf")"; \
+        mkdir -p "$td"; \
+        cp -a "$tf" "$td/"; \
+      fi; \
+    done; \
+    # Always include dynamic linker and busybox shell for downstream RUN steps \
+    for p in /lib/ld-musl-*.so* /bin/busybox /bin/sh; do \
+      [ -e "$p" ] || continue; \
+      d="/runtime-root$(dirname "$p")"; mkdir -p "$d"; cp -a "$p" "$d/"; \
+    done; \
+    # CA bundle and time zone data \
+    mkdir -p /runtime-root/etc/ssl/certs; \
+    if [ -f /etc/ssl/certs/ca-certificates.crt ]; then cp -a /etc/ssl/certs/ca-certificates.crt /runtime-root/etc/ssl/certs/; fi; \
+    if [ -d /usr/share/zoneinfo ]; then mkdir -p /runtime-root/usr/share; cp -a /usr/share/zoneinfo /runtime-root/usr/share/; fi; \
+    # Ensure minimal passwd/group/shadow files exist for BusyBox utilities \
+    mkdir -p /runtime-root/etc /runtime-root/root; \
+    [ -f /runtime-root/etc/passwd ] || echo 'root:x:0:0:root:/root:/bin/sh' > /runtime-root/etc/passwd; \
+    [ -f /runtime-root/etc/group ] || echo 'root:x:0:' > /runtime-root/etc/group; \
+    [ -f /runtime-root/etc/shadow ] || echo 'root:!:::::::' > /runtime-root/etc/shadow; \
+    [ -f /runtime-root/etc/gshadow ] || echo 'root:!:::' > /runtime-root/etc/gshadow
 
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023-minimal
 
-LABEL org.opencontainers.image.source=https://github.com/HHS/simpler-grants-gov
+# Scratch runtime minimal (optional experiment)
+FROM scratch AS scratch-minimal
+ARG PY_MM=3.13
+LABEL org.opencontainers.image.source="https://github.com/HHS/simpler-grants-gov"
 
-# Copy Python runtime built in builder
-COPY --from=builder /usr/local /usr/local
+# Copy python-version.txt for downstream Dockerfiles to use
+COPY --from=alpine-builder /python-version.txt /python-version.txt
 
-# Copy extracted Graphviz and its runtime dependencies
-COPY --from=builder /runtime/rootfs/ /
+# Python runtime
+COPY --from=alpine-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
+COPY --from=alpine-builder /usr/local/bin/python3 /usr/local/bin/python3
+COPY --from=alpine-builder /usr/local/bin/python /usr/local/bin/python
+COPY --from=alpine-builder /usr/local/bin/poetry /usr/local/bin/poetry
+COPY --from=alpine-builder /usr/local/lib/python${PY_MM}/ /usr/local/lib/python${PY_MM}/
+COPY --from=alpine-builder /usr/local/lib/libpython${PY_MM}.so* /usr/local/lib/
 
-# Ensure minimal runtime deps and initialize Graphviz plugin cache
-RUN microdnf install -y fontconfig shadow-utils graphviz && microdnf clean all && (dot -c || true)
+# Copy collected runtime libraries and essentials (busybox /bin/sh, musl ld, CA bundle, tzdata)
+COPY --from=alpine-builder /runtime-root/ /
 
-# Environment
-ENV PATH="/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
+ENV PATH="/usr/local/bin:/usr/bin:/bin" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    LD_LIBRARY_PATH="/usr/lib64:/lib64:/usr/local/lib" \
-    SSL_CERT_FILE="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem" \
-    SSL_CERT_DIR="/etc/ssl/certs:/etc/pki/ca-trust/extracted/pem" \
+    LD_LIBRARY_PATH="/usr/local/lib:/lib:/usr/lib" \
+    SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+    SSL_CERT_DIR="/etc/ssl/certs" \
     TMPDIR="/tmp"
+
+# Ensure shell is available for downstream Dockerfiles
+SHELL ["/bin/sh", "-c"]

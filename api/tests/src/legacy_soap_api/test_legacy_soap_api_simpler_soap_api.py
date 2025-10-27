@@ -44,7 +44,7 @@ class TestSimplerSoapApi:
         self, monkeypatch, db_session
     ):
         soap_api_config.get_soap_config.cache_clear()
-        monkeypatch.setenv("USE_SIMPLER", False)
+        monkeypatch.setenv("USE_SIMPLER", "false")
         envelope = """
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
                <soapenv:Header/>
@@ -109,7 +109,7 @@ class TestSimplerSoapApi:
         self, monkeypatch, db_session
     ):
         soap_api_config.get_soap_config.cache_clear()
-        monkeypatch.setenv("USE_SIMPLER", False)
+        monkeypatch.setenv("USE_SIMPLER", "false")
         envelope = """
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
                <soapenv:Header/>
@@ -141,7 +141,7 @@ class TestSimplerSoapApi:
         self, monkeypatch, db_session
     ):
         soap_api_config.get_soap_config.cache_clear()
-        monkeypatch.setenv("USE_SIMPLER", True)
+        monkeypatch.setenv("USE_SIMPLER", "true")
         envelope = """
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
                 <soapenv:Header/>
@@ -173,7 +173,7 @@ class TestSimplerSoapApi:
         self, monkeypatch, db_session
     ):
         soap_api_config.get_soap_config.cache_clear()
-        monkeypatch.setenv("USE_SIMPLER", False)
+        monkeypatch.setenv("USE_SIMPLER", "false")
         envelope = """
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
                 <soapenv:Header/>
