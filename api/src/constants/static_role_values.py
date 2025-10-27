@@ -101,7 +101,24 @@ APPLICATION_CONTRIBUTOR = Role(
 ############################
 # Core Agency Roles
 ############################
-# None at the moment
+
+LEGACY_AGENCY_S2S_ROLE_ID = uuid.UUID("8e7b6c9d-a3f1-4b2e-9d8c-1e2f3a4b5c6d")
+LEGACY_AGENCY_S2S_ROLE = Role(
+    role_id=LEGACY_AGENCY_S2S_ROLE_ID,
+    role_name="Legacy Agency S2S Role",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        LEGACY_AGENCY_S2S_ROLE_ID,
+        [
+            Privilege.LEGACY_AGENCY_VIEWER,
+            Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
+            Privilege.LEGACY_AGENCY_ASSIGNER,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=LEGACY_AGENCY_S2S_ROLE_ID, role_type=RoleType.AGENCY)
+    ],
+)
 
 ############################
 # Core Internal Roles
@@ -116,4 +133,11 @@ NAVA_INTERNAL_ROLE = Role(
     link_role_types=[LinkRoleRoleType(role_id=NAVA_INTERNAL_ROLE_ID, role_type=RoleType.INTERNAL)],
 )
 
-CORE_ROLES = [ORG_ADMIN, ORG_MEMBER, APPLICATION_OWNER, APPLICATION_CONTRIBUTOR, NAVA_INTERNAL_ROLE]
+CORE_ROLES = [
+    ORG_ADMIN,
+    ORG_MEMBER,
+    APPLICATION_OWNER,
+    APPLICATION_CONTRIBUTOR,
+    LEGACY_AGENCY_S2S_ROLE,
+    NAVA_INTERNAL_ROLE,
+]
