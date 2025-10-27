@@ -1,8 +1,6 @@
 name: Frontend E2E Tests
 on:
-  push:
-    branches:
-      - "prasnava/debug-frontend-e2e-fixes"
+  workflow_dispatch:
   workflow_call:
   pull_request:
     paths:
@@ -17,10 +15,11 @@ env:
   NODE_VERSION: 22
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
+  NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   e2e-tests:
@@ -28,6 +27,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     strategy:
+      fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
         total_shards: [4]
@@ -49,9 +49,18 @@ jobs:
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
-          echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+          # Run init first to generate JWT keys in override.env
+          make init
+          # Then append CI-specific configuration
+          # Set replica count to 0 for single-node cluster in CI
+          echo "LOAD_AGENCY_SEARCH_REPLICA_COUNT=0" >> override.env
+          echo "LOAD_OPP_SEARCH_REPLICA_COUNT=0" >> override.env
+          # Now run the seeding and populate commands
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
@@ -65,8 +74,8 @@ jobs:
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
             cat ../api/e2e_token.tmp
           } >> .env.local
-          # Use the localhost url for tests
-          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://localhost:3000|' .env.local
+          # Use the 127.0.0.1 url for tests (IPv4 only)
+          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build -- --no-lint
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
@@ -76,6 +85,21 @@ jobs:
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
           npm run test:e2e
+
+      - name: Show API logs on failure
+        if: failure()
+        run: |
+          cd ../api
+          echo "=== API Container Logs ==="
+          docker logs grants-api || echo "Could not retrieve API logs"
+          echo ""
+          echo "=== OpenSearch Container Logs ==="
+          docker logs opensearch-node || echo "Could not retrieve OpenSearch logs"
+          echo ""
+          echo "=== Container Status ==="
+          docker ps -a
+          echo ""
+        shell: bash
 
       - name: Verify Blob Report Directory
         run: |
@@ -94,7 +118,7 @@ jobs:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
     needs: [e2e-tests]
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
       - name: Checkout code
