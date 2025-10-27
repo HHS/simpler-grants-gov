@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     strategy:
+      fail-fast: true
       matrix:
         shard: [1, 2, 3, 4]
         total_shards: [4]
