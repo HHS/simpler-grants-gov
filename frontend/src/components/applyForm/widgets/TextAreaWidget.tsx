@@ -83,7 +83,7 @@ function TextAreaWidget<
         autoFocus={autofocus}
         // update to let form validation happen on the updateOnInput
         aria-required={required}
-        disabled={disabled}
+        disabled={disabled || readonly}
         readOnly={readonly}
         onChange={updateOnInput ? handleChange : undefined}
         onBlur={updateOnInput ? handleBlur : undefined}

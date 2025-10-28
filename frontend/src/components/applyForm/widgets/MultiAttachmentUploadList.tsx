@@ -7,11 +7,13 @@ import { UploadedFile } from "src/components/applyForm/types";
 interface Props {
   handleRemove: (index: number) => void;
   uploadedFiles: UploadedFile[];
+  readonly?: boolean;
 }
 
 export const MultipleAttachmentUploadList = ({
   handleRemove,
   uploadedFiles,
+  readonly,
 }: Props) => {
   const { attachments } = useApplicationAttachments();
   return (
@@ -45,6 +47,7 @@ export const MultipleAttachmentUploadList = ({
             )}
             <button
               type="button"
+              disabled={readonly}
               className="usa-button usa-button--unstyled text-primary margin-left-2 display-inline-flex align-items-center"
               onClick={() => handleRemove(index)}
             >
