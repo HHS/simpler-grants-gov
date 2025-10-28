@@ -18,6 +18,9 @@ def local_users_get(db_session: db.Session) -> response.ApiResponse:
     logger.info("GET /local/local-users")
     # THIS ENDPOINT ONLY RUNS LOCALLY
     error_if_not_local()
+    # Just in case, add an error log. We have alerts
+    # if there are error logs.
+    logger.error("Running a LOCAL ONLY endpoint")
 
     with db_session.begin():
         users = get_local_users(db_session)
