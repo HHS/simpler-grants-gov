@@ -341,7 +341,14 @@ class TestCreateOrganizationInvitation:
         """Should return 422 when active invitation already exists for email"""
         # Create admin user in organization
         admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
-
+        # Create expired invitation
+        expired_invitation = OrganizationInvitationFactory.create(
+            organization=organization,
+            invitee_email="pending@example.com",
+        )
+        LinkOrganizationInvitationToRoleFactory.create(
+            organization_invitation=expired_invitation, role=member_role
+        )
         # Create pending invitation
         pending_invitation = OrganizationInvitationFactory.create(
             organization=organization,
