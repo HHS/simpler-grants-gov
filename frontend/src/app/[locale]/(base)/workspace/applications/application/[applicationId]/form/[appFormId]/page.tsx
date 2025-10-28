@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
 import NotFound from "src/app/[locale]/(base)/not-found";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import getFormData from "src/utils/getFormData";
-import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getSession } from "src/services/auth/session";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import getFormData from "src/utils/getFormData";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
@@ -55,14 +55,14 @@ async function FormPage({ params }: formPageProps) {
     userSession?.token,
   );
 
-    if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving application details for (${applicationId})`,
-        response,
-      );
-      return <TopLevelError />;
-    }
-    const { application_status } = response.data;
+  if (response.status_code !== 200) {
+    console.error(
+      `Error retrieving application details for (${applicationId})`,
+      response,
+    );
+    return <TopLevelError />;
+  }
+  const { application_status } = response.data;
 
   if (error || !data) {
     if (error === "UnauthorizedError") return redirect("/unauthenticated");

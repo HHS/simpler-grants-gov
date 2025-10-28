@@ -133,21 +133,22 @@ const ApplyForm = ({
     >
       <div className="display-flex flex-justify">
         <div>{required}</div>
-        {(applicationStatus !== 'submitted' && applicationStatus !== 'accepted') &&
-          <Button
-            data-testid="apply-form-save"
-            type="submit"
-            name="apply-form-button"
-            className="margin-top-0"
-            value="save"
-            onClick={() => {
-              setFormChanged(false);
-              setAttachmentsChanged(false);
-            }}
-          >
-            {pending ? "Saving..." : "Save"}
-          </Button>
-        }
+        {applicationStatus !== "submitted" &&
+          applicationStatus !== "accepted" && (
+            <Button
+              data-testid="apply-form-save"
+              type="submit"
+              name="apply-form-button"
+              className="margin-top-0"
+              value="save"
+              onClick={() => {
+                setFormChanged(false);
+                setAttachmentsChanged(false);
+              }}
+            >
+              {pending ? "Saving..." : "Save"}
+            </Button>
+          )}
       </div>
       <div className="usa-in-page-nav-container">
         <FormGroup className="order-2 width-full">
