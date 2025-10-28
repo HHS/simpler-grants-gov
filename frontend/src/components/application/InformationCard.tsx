@@ -198,14 +198,14 @@ export const InformationCard = ({
                 (11:59pm ET)
               </dd>
             </div>
-            {is_open ? <SpecialInstructions /> : null}
+            {!is_open ? <SpecialInstructions /> : null}
             <div className="margin-bottom-1">
               <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
               <dd className="margin-right-1 text-bold text-orange">
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && !is_open && (
+            {!applicationSubmitted && is_open && (
               <SubmitApplicationButton
                 buttonText={t("submit")}
                 submitHandler={applicationSubmitHandler}
