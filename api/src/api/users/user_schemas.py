@@ -714,7 +714,6 @@ class OrganizationSchema(Schema):
             "description": "Organization name",
             "example": "Legal business name of the corresponding Sam Gov Entity",
         },
-        attribute="name",
     )
 
 
