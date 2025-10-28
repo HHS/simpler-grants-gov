@@ -581,38 +581,3 @@ class TestCreateOrganizationInvitation:
         assert len(data["roles"]) == len(db_roles)
         assert data["roles"][0]["role_id"] == str(db_roles[0].role_id)
         assert data["roles"][0]["role_name"] == db_roles[0].role_name
-
-    #
-    # def test_create_invitation_when_previous_multiple_expired(self, client, db_session, enable_factory_create, admin_role, member_role):
-    #     """Should allow creating new invitation when multiple previous one is expired"""
-    #
-    #     # Create admin user in organization
-    #     admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
-    #
-    #     # Create multiple expired invitation
-    #     expired_invitation_1 = OrganizationInvitationFactory.create(
-    #         organization=organization,
-    #         invitee_email="expired@example.com",
-    #         is_expired=True,
-    #     )
-    #     LinkOrganizationInvitationToRoleFactory.create(
-    #         organization_invitation=expired_invitation_1, role=member_role
-    #     )
-    #     expired_invitation_2 = OrganizationInvitationFactory.create(
-    #         organization=organization,
-    #         invitee_email="expired@example.com",
-    #         is_expired=True,
-    #     )
-    #     LinkOrganizationInvitationToRoleFactory.create(
-    #         organization_invitation=expired_invitation_2, role=member_role
-    #     )
-    #
-    #     # Make request for same email
-    #     resp = client.post(
-    #         f"/v1/organizations/{organization.organization_id}/invitations",
-    #         headers={"X-SGG-Token": token},
-    #         json={
-    #             "invitee_email": "expired@example.com",
-    #             "role_ids": [str(member_role.role_id)],
-    #         },
-    #     )

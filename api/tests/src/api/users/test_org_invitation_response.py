@@ -32,8 +32,8 @@ def test_org_invitation_response_accepted(
 
     assert inv.status == OrganizationInvitationStatus.PENDING
 
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
         json={"status": OrganizationInvitationStatus.ACCEPTED},
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -72,8 +72,8 @@ def test_org_invitation_response_rejected(
     LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv)
     assert inv.status == OrganizationInvitationStatus.PENDING
 
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
         json={"status": OrganizationInvitationStatus.REJECTED},
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -101,8 +101,8 @@ def test_org_invitation_response_rejected(
 
 def test_org_invitation_response_404_invitation(client, db_session, user, user_auth_token):
     """Test that responding to a non-existent invitation returns a 404 error."""
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{uuid4()}",
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{uuid4()}/organizations",
         json={"status": OrganizationInvitationStatus.REJECTED},
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -118,8 +118,8 @@ def test_org_invitation_response_403_email(client, db_session, user, user_auth_t
     LinkOrganizationInvitationToRoleFactory.create(organization_invitation=inv)
 
     assert inv.status == OrganizationInvitationStatus.PENDING
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
         json={"status": OrganizationInvitationStatus.REJECTED},
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -147,8 +147,8 @@ def test_org_invitation_response_422_status(
     # Create an invitation with role
     inv = OrganizationInvitationFactory.create(invitee_email=user.email, is_accepted=True)
 
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
         json={"status": OrganizationInvitationStatus.REJECTED},
         headers={"X-SGG-Token": user_auth_token},
     )
@@ -165,8 +165,8 @@ def test_org_invitation_response_invalid_status(client, db_session, user, user_a
     # Create an invitation with role
     inv = OrganizationInvitationFactory.create(invitee_email=user.email, is_accepted=True)
 
-    resp = client.put(
-        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}",
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
         json={"status": OrganizationInvitationStatus.PENDING},
         headers={"X-SGG-Token": user_auth_token},
     )

@@ -714,7 +714,7 @@ def user_get_invitations(
     return response.ApiResponse(message="Success", data=invitations)
 
 
-@user_blueprint.put("/<uuid:user_id>/invitations/<uuid:invitation_id>")
+@user_blueprint.post("/<uuid:user_id>/invitations/<uuid:invitation_id>/organizations")
 @user_blueprint.input(UserResponseOrgInvitationRequestSchema)
 @user_blueprint.output(UserResponseOrgInvitationResponseSchema)
 @user_blueprint.doc(responses=[200, 401, 403, 404, 422])
@@ -729,7 +729,7 @@ def user_response_org_invitation(
             "invitation_id": invitation_id,
         }
     )
-    logger.info("POST /v1/users/:user_id/invitations/{invitation_id}")
+    logger.info("POST /v1/users/:user_id/invitations/{invitation_id}/organizations")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
 
