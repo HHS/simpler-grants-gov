@@ -171,3 +171,28 @@ def test_org_invitation_response_invalid_status(client, db_session, user, user_a
         headers={"X-SGG-Token": user_auth_token},
     )
     assert resp.status_code == 422
+
+
+def test_org_invitation_response_422_invitee_user_id(
+    client,
+    db_session,
+    user,
+    user_auth_token,
+):
+    """Test that if an ivitee_user_id has already been set it throws an error"""
+    # Create an invitation with role
+    inv = OrganizationInvitationFactory.create(
+        invitee_user_id=user.user_id, invitee_email=user.email, is_accepted=True
+    )
+
+    resp = client.post(
+        f"/v1/users/{user.user_id}/invitations/{inv.organization_invitation_id}/organizations",
+        json={"status": OrganizationInvitationStatus.REJECTED},
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert resp.status_code == 422
+    assert (
+        resp.get_json()["message"]
+        == f"Invitation cannot be responded to; current status is {OrganizationInvitationStatus.ACCEPTED}"
+    )

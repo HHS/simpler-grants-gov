@@ -40,6 +40,10 @@ def org_invitation_response(
     if not invitation:
         raise_flask_error(404, "Invitation not found")
 
+    # Validate invitee_user_id has not been set
+    if invitation.invitee_user_id is not None:
+        raise_flask_error(422, "Invitation has already been responded to")
+
     # Verify responder email
     if user.email != invitation.invitee_email:
         raise_flask_error(403, "Forbidden, invitation email does not match user's email on record")
