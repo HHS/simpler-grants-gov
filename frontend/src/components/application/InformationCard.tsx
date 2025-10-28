@@ -83,7 +83,7 @@ export const InformationCard = ({
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
-  const { is_open } = applicationDetails.competition
+  const { is_open } = applicationDetails.competition;
 
   const ApplicationInstructionsDownload = () => {
     return (
