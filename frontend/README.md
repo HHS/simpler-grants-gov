@@ -30,34 +30,6 @@
 
 ### Running the app locally
 
-For version 0.1.0, please install and use node <= v22.13.0.
-From the `/frontend` directory:
-
-1. Install dependencies
-   ```bash
-   npm ci
-   ```
-1. Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
-   ```bash
-   npx next telemetry disable
-   ```
-1. Create local environment file
-   ```bash
-   cp .env.development .env.local
-   ```
-1. Run the local development server
-   ```bash
-   npm run dev
-   ```
-1. Navigate to [localhost:3000](http://localhost:3000) to view the application
-
-### Other scripts
-
-- `npm run build` - Builds the production Next.js bundle
-- `npm start` - Runs the Next.js server, after building the production bundle
-
-## Testing and feature development
-
 See [development.md](../documentation/frontend/development.md) for full installation and development instructions.
 
 ## Technical information
