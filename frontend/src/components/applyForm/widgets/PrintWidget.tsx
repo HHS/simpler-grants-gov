@@ -18,7 +18,7 @@ function PrintWidget<
 }: UswdsWidgetProps<T, S, F>) {
   const { title } = schema as S;
   const toDisplay = (inputValue: unknown): string => {
-    if (inputValue == null) return "";
+    if (inputValue === null || inputValue === undefined) return "";
     if (typeof inputValue === "string") return inputValue;
     if (typeof inputValue === "boolean") return inputValue ? "Yes" : "No";
     if (typeof inputValue === "number" || typeof inputValue === "bigint")

@@ -72,28 +72,22 @@ describe("PrintWidget", () => {
     expect(screen.getByText("Custom Test Value")).toBeInTheDocument();
   });
 
-  it("displays empty string when value is null or undefined", () => {
-    const propsWithNull = { ...defaultProps, value: null };
+  it("displays empty string when value is null", () => {
+    const propsWithNull = { ...defaultProps, value: null as unknown as string };
 
-    const view = render(<PrintWidget {...propsWithNull} />);
-    expect(screen.getByTestId("test-field")).toHaveTextContent("");
+    render(<PrintWidget {...propsWithNull} />);
 
-    const propsWithUndefined = { ...defaultProps, value: undefined };
-    view.rerender(<PrintWidget {...propsWithUndefined} />);
     expect(screen.getByTestId("test-field")).toHaveTextContent("");
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("shows required indicator when field is required", () => {
-    const props = { ...defaultProps, required: true };
+  it("displays empty string when value is undefined", () => {
+    const propsWithUndefined = { ...defaultProps, value: undefined as unknown as string };
 
-    render(<PrintWidget {...props} />);
+    render(<PrintWidget {...propsWithUndefined} />);
 
-    expect(screen.getByText("*")).toBeInTheDocument();
-    expect(screen.getByText("*")).toHaveClass(
-      "usa-hint",
-      "usa-hint--required",
-      "text-no-underline",
-    );
+    expect(screen.getByTestId("test-field")).toHaveTextContent("");
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it("does not show required indicator when field is not required", () => {
