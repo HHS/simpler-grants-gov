@@ -46,7 +46,6 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   const { data, error } = await getFormData({ applicationId, appFormId });
-  let details = {} as ApplicationDetailsCardProps;
   const userSession = await getSession();
 
   if (!userSession || !userSession.token) {
@@ -64,7 +63,7 @@ async function FormPage({ params }: formPageProps) {
       );
       return <TopLevelError />;
     }
-    details = response.data;
+    const { application_status } = response.data;
 
   if (error || !data) {
     if (error === "UnauthorizedError") return redirect("/unauthenticated");
@@ -120,7 +119,7 @@ async function FormPage({ params }: formPageProps) {
           formId={formId}
           attachments={applicationAttachments}
           isBudgetForm={isBudgetForm}
-          applicationStatus={details.application_status}
+          applicationStatus={application_status}
         />
       </GridContainer>
     </>
