@@ -57,9 +57,8 @@ jobs:
           # Run init first to generate JWT keys in override.env
           make init
           # Now run the seeding and populate commands
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
