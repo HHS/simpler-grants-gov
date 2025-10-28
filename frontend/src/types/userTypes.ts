@@ -6,10 +6,23 @@ export interface UserOrganization extends Organization {
 
 export type GatedResourceTypes = "application" | "organization" | "agency";
 
+export type Privileges =
+  | "manage_org_members"
+  | "manage_org_admin_members"
+  | "view_org_membership"
+  | "start_application"
+  | "list_application"
+  | "view_application"
+  | "modify_application"
+  | "submit_application"
+  | "update_form"
+  | "manage_agency_members"
+  | "get_submitted_applications";
+
 export interface UserPrivilegeDefinition {
   resourceId?: string;
   resourceType: GatedResourceTypes;
-  privilege: string; // we can narrow this later
+  privilege: Privileges;
 }
 
 export interface UserPrivilegeResult extends UserPrivilegeDefinition {
@@ -22,7 +35,7 @@ export interface RoleDefinition {
   role_name: string;
 }
 export interface UserRole extends RoleDefinition {
-  privileges: string[];
+  privileges: Privileges[];
 }
 export type OrganizationPrivilegesResponse = {
   organization: {
