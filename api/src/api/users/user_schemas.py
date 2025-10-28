@@ -714,6 +714,7 @@ class OrganizationSchema(Schema):
             "description": "Organization name",
             "example": "Legal business name of the corresponding Sam Gov Entity",
         },
+        attribute="name",
     )
 
 
@@ -732,7 +733,9 @@ class OrganizationInvitationSchema(Schema):
         OrganizationSchema, metadata={"description": "Organization information"}
     )
     roles_granted = fields.List(
-        fields.Nested(InvitationRoleSchema), metadata={"description": "Roles granted"}
+        fields.Nested(InvitationRoleSchema),
+        metadata={"description": "Roles granted"},
+        attribute="roles",
     )
 
 

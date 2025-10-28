@@ -192,7 +192,4 @@ def test_org_invitation_response_422_invitee_user_id(
     )
 
     assert resp.status_code == 422
-    assert (
-        resp.get_json()["message"]
-        == f"Invitation cannot be responded to; current status is {OrganizationInvitationStatus.ACCEPTED}"
-    )
+    assert resp.get_json()["message"] == "Invitation has already been responded to"

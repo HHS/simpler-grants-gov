@@ -122,6 +122,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
         "LinkOrganizationInvitationToRole",
         back_populates="organization_invitation",
         uselist=True,
+        cascade="all, delete-orphan",
     )
 
     @property

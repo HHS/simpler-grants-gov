@@ -6,14 +6,18 @@ from sqlalchemy.orm import selectinload
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import OrganizationInvitationStatus
-from src.db.models.entity_models import Organization, OrganizationInvitation
+from src.db.models.entity_models import (
+    LinkOrganizationInvitationToRole,
+    Organization,
+    OrganizationInvitation,
+)
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
 from src.util.datetime_util import utcnow
 
 
 def org_invitation_response(
     db_session: db.Session, user: User, invitation_id: UUID, json_data: dict
-) -> dict:
+) -> OrganizationInvitation:
     """
         Handle a user's response to an organization invitation.
          This function allows a user to ACCEPT or REJECT an invitation to join an organization.
@@ -33,7 +37,11 @@ def org_invitation_response(
                 Organization.sam_gov_entity
             )
         )
-        .options(selectinload(OrganizationInvitation.linked_roles))
+        .options(
+            selectinload(OrganizationInvitation.linked_roles).selectinload(
+                LinkOrganizationInvitationToRole.role
+            )
+        )
         .where(OrganizationInvitation.organization_invitation_id == invitation_id)
     ).scalar_one_or_none()
     # Validate invitation
@@ -76,14 +84,4 @@ def org_invitation_response(
 
     invitation.invitee_user_id = user.user_id
     db_session.add(invitation)
-    return {
-        "organization_invitation_id": invitation.organization_invitation_id,
-        "status": invitation.status,
-        "responded_at": invitation.responded_at,
-        "organization": {
-            "organization_id": invitation.organization_id,
-            "organization_name": invitation.organization.name,
-        },
-        "organization_id": invitation.organization_id,
-        "roles_granted": invitation.roles,
-    }
+    return invitation
