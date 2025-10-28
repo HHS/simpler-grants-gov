@@ -45,3 +45,5 @@ class ValidationErrorType(StrEnum):
     UNKNOWN_APPLICATION_ATTACHMENT = "unknown_application_attachment"
 
     MISSING_INCLUDED_IN_SUBMISSION = "missing_included_in_submission"
+
+    ORGANIZATION_REQUIRED = "organization_required"
