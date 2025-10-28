@@ -5,7 +5,7 @@ import pytest
 from freezegun import freeze_time
 
 from src.api.response import ValidationErrorDetail
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
@@ -20,6 +20,7 @@ from tests.src.db.models.factories import (
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
+    OrganizationFactory,
 )
 
 VALID_FORM_A_RESPONSE = {"str_a": "text", "obj_a": {"int_a": 4}}
@@ -836,3 +837,252 @@ def test_validate_application_form_modify_no_post_population(enable_factory_crea
     assert application_form.application_response == original_response
     assert "signature_field" not in application_form.application_response
     assert "date_field" not in application_form.application_response
+
+
+# Tests for organization required validation
+def test_validate_application_organization_required_missing_get(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that GET endpoint returns a warning when organization is required but missing"""
+    # Set competition to only allow organization applications
+    competition.open_to_applicants = {CompetitionOpenToApplicant.ORGANIZATION}
+
+    # Create application without organization
+    application = ApplicationFactory.build(
+        competition=competition, organization_id=None, application_forms=[]
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
+
+    # Should have 1 validation error for missing organization
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == ValidationErrorType.ORGANIZATION_REQUIRED
+    assert validation_errors[0].message == "Application requires organization in order to submit"
+    assert validation_errors[0].value is None
+
+
+def test_validate_application_organization_required_present_get(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that GET endpoint passes when organization is required and present"""
+    # Set competition to only allow organization applications
+    competition.open_to_applicants = {CompetitionOpenToApplicant.ORGANIZATION}
+
+    # Create organization
+    organization = OrganizationFactory.build()
+
+    # Create application with organization
+    application = ApplicationFactory.build(
+        competition=competition,
+        organization_id=organization.organization_id,
+        organization=organization,
+        application_forms=[],
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.GET
+    )
+
+    # Should have no validation errors
+    assert len(validation_errors) == 0
+
+
+def test_validate_application_organization_required_missing_submit(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that SUBMIT endpoint returns error when organization is required but missing"""
+    # Set competition to only allow organization applications
+    competition.open_to_applicants = {CompetitionOpenToApplicant.ORGANIZATION}
+
+    # Create application without organization
+    application = ApplicationFactory.build(
+        competition=competition, organization_id=None, application_forms=[]
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.SUBMIT
+    )
+
+    # Should have 1 validation error for missing organization
+    assert len(validation_errors) == 1
+    assert validation_errors[0].type == ValidationErrorType.ORGANIZATION_REQUIRED
+    assert validation_errors[0].message == "Application requires organization in order to submit"
+    assert validation_errors[0].field == "organization_id"
+    assert validation_errors[0].value is None
+
+
+def test_validate_application_organization_required_present_submit(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that SUBMIT endpoint passes when organization is required and present"""
+    # Set competition to only allow organization applications
+    competition.open_to_applicants = {CompetitionOpenToApplicant.ORGANIZATION}
+
+    # Create organization
+    organization = OrganizationFactory.build()
+
+    # Create application with organization
+    application = ApplicationFactory.build(
+        competition=competition,
+        organization_id=organization.organization_id,
+        organization=organization,
+        application_forms=[],
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.SUBMIT
+    )
+
+    # Should have no validation errors
+    assert len(validation_errors) == 0
+
+
+def test_validate_application_organization_not_required_individual_allowed(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that validation passes when individual applications are allowed (no organization)"""
+    # Set competition to allow individual applications (with or without organization)
+    competition.open_to_applicants = {CompetitionOpenToApplicant.INDIVIDUAL}
+
+    # Create application without organization
+    application = ApplicationFactory.build(
+        competition=competition, organization_id=None, application_forms=[]
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.SUBMIT
+    )
+
+    # Should have no validation errors
+    assert len(validation_errors) == 0
+
+
+def test_validate_application_organization_both_allowed_no_org(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that validation passes when both individual and organization are allowed (no organization)"""
+    # Set competition to allow both individual and organization applications
+    competition.open_to_applicants = {
+        CompetitionOpenToApplicant.INDIVIDUAL,
+        CompetitionOpenToApplicant.ORGANIZATION,
+    }
+
+    # Create application without organization
+    application = ApplicationFactory.build(
+        competition=competition, organization_id=None, application_forms=[]
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.SUBMIT
+    )
+
+    # Should have no validation errors
+    assert len(validation_errors) == 0
+
+
+def test_validate_application_organization_both_allowed_with_org(
+    competition, competition_form_a, competition_form_b
+):
+    """Test that validation passes when both individual and organization are allowed (with organization)"""
+    # Set competition to allow both individual and organization applications
+    competition.open_to_applicants = {
+        CompetitionOpenToApplicant.INDIVIDUAL,
+        CompetitionOpenToApplicant.ORGANIZATION,
+    }
+
+    # Create organization
+    organization = OrganizationFactory.build()
+
+    # Create application with organization
+    application = ApplicationFactory.build(
+        competition=competition,
+        organization_id=organization.organization_id,
+        organization=organization,
+        application_forms=[],
+    )
+    application_form_a = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_a,
+        application_response=VALID_FORM_A_RESPONSE,
+    )
+    application_form_b = ApplicationFormFactory.build(
+        application=application,
+        competition_form=competition_form_b,
+        application_response=VALID_FORM_B_RESPONSE,
+    )
+    application.application_forms = [application_form_a, application_form_b]
+
+    validation_errors, error_detail = get_application_form_errors(
+        application, ApplicationAction.SUBMIT
+    )
+
+    # Should have no validation errors
+    assert len(validation_errors) == 0
