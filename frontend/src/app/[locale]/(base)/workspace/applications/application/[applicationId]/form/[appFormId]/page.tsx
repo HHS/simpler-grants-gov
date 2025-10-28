@@ -5,7 +5,6 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import getFormData from "src/utils/getFormData";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import { getSession } from "src/services/auth/session";
-import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
