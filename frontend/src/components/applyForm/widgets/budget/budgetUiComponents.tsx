@@ -63,6 +63,7 @@ export const CurrencyInput: React.FC<{
   bordered?: boolean;
   formClassName?: string;
   inputClassName?: string;
+  disabled?: boolean;
 }> = ({
   id,
   rawErrors,
@@ -70,8 +71,10 @@ export const CurrencyInput: React.FC<{
   bordered = false,
   formClassName = "margin-top-0 padding-top-05 simpler-currency-input-wrapper",
   inputClassName = "minw-10",
+  disabled,
 }) => (
   <TextWidget
+    disabled={disabled}
     schema={amountSchema}
     id={id}
     rawErrors={rawErrors}
