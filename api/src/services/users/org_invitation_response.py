@@ -44,7 +44,7 @@ def org_invitation_response(
     if user.email != invitation.invitee_email:
         raise_flask_error(403, "Forbidden, invitation email does not match user's email on record")
 
-    # Validate status status
+    # Validate status
     if invitation.status != OrganizationInvitationStatus.PENDING or invitation.is_expired:
         raise_flask_error(
             422, f"Invitation cannot be responded to; current status is {invitation.status}"

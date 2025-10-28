@@ -10,7 +10,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import factory
 import factory.fuzzy
@@ -2873,17 +2873,15 @@ class OrganizationInvitationFactory(BaseFactory):
     organization = factory.SubFactory(OrganizationFactory)
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     inviter_user = factory.SubFactory(UserFactory)
+
     inviter_user_id = factory.lazy_attribute(lambda u: u.inviter_user.user_id)
 
+    expires_at = factory.LazyAttribute(
+        lambda o: o.created_at + timedelta(weeks=1)
+    )
     invitee_email = factory.Faker("email")
     created_at = factory.LazyFunction(
         lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
-    )
-
-    expires_at = factory.LazyAttribute(
-        lambda o: fake.date_time_between(
-            start_date=o.created_at, end_date="+1w", tzinfo=timezone.utc
-        )
     )
 
     class Params:
@@ -2894,7 +2892,7 @@ class OrganizationInvitationFactory(BaseFactory):
         )
         is_accepted = factory.Trait(accepted_at=response_date)
         is_rejected = factory.Trait(rejected_at=response_date)
-        is_expired = factory.Trait(expires_at=response_date)
+        is_expired = factory.Trait(expires_at=factory.LazyFunction(lambda: datetime_util.utcnow() - timedelta(days=1)))
 
 
 class LinkOrganizationInvitationToRoleFactory(BaseFactory):
