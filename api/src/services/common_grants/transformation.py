@@ -2,7 +2,6 @@
 
 import logging
 from datetime import date, datetime, timezone
-from typing import List
 from urllib.parse import urlparse
 
 from common_grants_sdk.schemas.pydantic import (
@@ -413,7 +412,7 @@ def transform_search_request_from_cg(
 
 def transform_validation_error_from_cg(
     validation_error: ValidationError,
-) -> List[ValidationErrorDetail]:
+) -> list[ValidationErrorDetail]:
     """Transform a CG ValidationError to v1 format.
 
     Args:
@@ -422,7 +421,7 @@ def transform_validation_error_from_cg(
     Returns:
         List of v1 error objects
     """
-    validation_details: List[ValidationErrorDetail] = []
+    validation_details: list[ValidationErrorDetail] = []
 
     # Handle pydantic ValidationError
     # Pydantic structures errors as: [{'loc': ('field',), 'msg': 'message', 'type': 'error_type'}]

@@ -20,7 +20,7 @@ def csv_file_content():
     # Path to the csv file in the same directory
     csv_file_path = os.path.join(test_dir, "dat.csv")
 
-    with open(csv_file_path, "r", encoding="utf-8") as f:
+    with open(csv_file_path, encoding="utf-8") as f:
         return f.read()
 
 
