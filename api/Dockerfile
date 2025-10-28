@@ -38,6 +38,7 @@ COPY newrelic.ini /api/newrelic.ini
 RUN PY_MM=$(cat /tmp/py_version.txt) && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
+    /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     cp "/api/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
@@ -113,11 +114,7 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       /api/.venv/bin/pip* \
       /api/.venv/bin/easy_install* \
       /root/.local/share/virtualenv \
-      "/home/${RUN_USER}/.local/share/virtualenv" \
-      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv/seed/wheels/embed/pip-*.whl \
-      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv/seed/wheels/embed/setuptools-*.whl \
-      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv/seed/wheels/embed/wheel-*.whl \
-      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv || true
+      "/home/${RUN_USER}/.local/share/virtualenv" || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
