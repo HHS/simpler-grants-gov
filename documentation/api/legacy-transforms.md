@@ -96,6 +96,21 @@ from . import foreignbase
 class TExample(foreignbase.ForeignBase, TExampleMixin):
     __tablename__ = "texample"
 ```
+and update the staging __init__.py and the legacy/foreign __init__.py
+```
+from .import (
+    opportunity,
+    example,
+)
+
+metadata = staging_base.metadata
+
+__all__ = [
+    "metadata",
+    "opportunity",
+    "example",
+]
+```
 
 We don't need to perfectly match everything about the Oracle system, it's fine to do the following:
 * Different column types - see [Type Mapping](#type-mapping) for details
