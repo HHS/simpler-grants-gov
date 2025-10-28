@@ -147,10 +147,7 @@ describe("InformationCard - Submit button visibility", () => {
     };
 
     render(
-      <InformationCard
-        {...baseProps}
-        applicationDetails={openNotSubmitted}
-      />,
+      <InformationCard {...baseProps} applicationDetails={openNotSubmitted} />,
     );
 
     expect(screen.getByText("submit")).toBeInTheDocument();
@@ -162,12 +159,7 @@ describe("InformationCard - Submit button visibility", () => {
       competition: { ...mockApplicationDetails.competition, is_open: false },
     };
 
-    render(
-      <InformationCard
-        {...baseProps}
-        applicationDetails={closed}
-      />,
-    );
+    render(<InformationCard {...baseProps} applicationDetails={closed} />);
 
     expect(screen.queryByText("submit")).not.toBeInTheDocument();
   });
@@ -203,7 +195,7 @@ describe("InformationCard - Submit button visibility", () => {
       />,
     );
 
-    const btn = screen.getByText(/loading/i).closest("button");
-    expect(btn).toBeDisabled();
+    const button = screen.getByRole("button", { name: /loading/i });
+    expect(button).toBeDisabled();
   });
 });
