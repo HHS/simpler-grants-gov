@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from uuid import UUID, uuid4
 
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
