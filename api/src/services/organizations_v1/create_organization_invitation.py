@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from uuid import UUID, uuid4
 
-from sqlalchemy import select
+from sqlalchemy import desc, select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
@@ -32,10 +32,11 @@ def check_duplicate_invitation(
         select(OrganizationInvitation)
         .where(OrganizationInvitation.organization_id == organization_id)
         .where(OrganizationInvitation.invitee_email == invitee_email)
+        .order_by(desc(OrganizationInvitation.created_at))  # latest first
+        .limit(1)
     )
 
     existing_invitation = db_session.execute(stmt).scalar_one_or_none()
-
     if existing_invitation:
         if existing_invitation.status in (
             OrganizationInvitationStatus.PENDING,
@@ -89,7 +90,6 @@ def create_organization_invitation(
         FlaskError: Various HTTP errors for validation failures
     """
     logger.info("Creating organization invitation")
-
     invitee_email = data["invitee_email"].lower().strip()
     role_ids = set(data["role_ids"])
 
