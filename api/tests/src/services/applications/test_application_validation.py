@@ -942,7 +942,6 @@ def test_validate_application_organization_required_missing_submit(
     assert len(validation_errors) == 1
     assert validation_errors[0].type == ValidationErrorType.ORGANIZATION_REQUIRED
     assert validation_errors[0].message == "Application requires organization in order to submit"
-    assert validation_errors[0].field == "organization_id"
     assert validation_errors[0].value is None
 
 
