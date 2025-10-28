@@ -18,12 +18,20 @@ Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 npx next telemetry disable
 ```
 
+### Configuration
+
+Create a local enviornment file in the frontend directory to hold your frontend application overrides.  To allows you to make specializations to your local setup outside of GitHub.
+
+`touch .env.local`
+
+For more information about environments, take a look at [environments.md](./environments.md).
+
 ### Authentication
 
 Running authentication locally requires running the API and sharing the correct JWT keys.
 
 1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
-2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to `/frontend/.env.local` file which creates the necessary keys
+2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
 3. Restart the API (if necessary reseed the database, then `make start`) and frontend (`npm run dev`) for development
 
 ### 🏛️ "Built" version
