@@ -1,8 +1,8 @@
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from io import BytesIO
-from typing import Callable
 
 import pandas
 import pptx

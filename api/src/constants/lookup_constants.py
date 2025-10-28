@@ -219,6 +219,9 @@ class Privilege(StrEnum):
     UPDATE_FORM = "update_form"
     MANAGE_AGENCY_MEMBERS = "manage_agency_members"
     GET_SUBMITTED_APPLICATIONS = "get_submitted_applications"
+    LEGACY_AGENCY_VIEWER = "legacy_agency_viewer"
+    LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
+    LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
 
 
 class RoleType(StrEnum):

@@ -67,9 +67,9 @@ class Length(validators.Length):
         except KeyError as error:
             class_name = self.__class__.__name__
             message = (
-                "ValidationError raised by `{class_name}`, but error key `{key}` does "
+                f"ValidationError raised by `{class_name}`, but error key `{key}` does "
                 "not exist in the `error_messages` dictionary."
-            ).format(class_name=class_name, key=key)
+            )
             raise AssertionError(message) from error
 
         error_container.message = error_container.message.format(
