@@ -4,6 +4,7 @@
 
 from . import (
     attachment,
+    certificate,
     competition,
     forecast,
     foreignbase,
@@ -26,4 +27,5 @@ __all__ = [
     "user",
     "competition",
     "instructions",
+    "certificate",
 ]
