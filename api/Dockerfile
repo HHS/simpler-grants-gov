@@ -1,5 +1,5 @@
 
-FROM ghcr.io/hhs/python-base-image:2649e91@sha256:7430e1874f8efacf1eb67929f5bed4bf753b8be0ba8ed63e982f08528ecfe43d AS base
+FROM baseimage AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -113,7 +113,11 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       /api/.venv/bin/pip* \
       /api/.venv/bin/easy_install* \
       /root/.local/share/virtualenv \
-      "/home/${RUN_USER}/.local/share/virtualenv" || true
+      "/home/${RUN_USER}/.local/share/virtualenv" \
+      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv/seed/wheels/embed/pip-*.whl \
+      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv/seed/wheels/embed/setuptools-*.whl \
+      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv/seed/wheels/embed/wheel-*.whl \
+      /usr/local/lib/python"${PY_MM}"/site-packages/virtualenv || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
