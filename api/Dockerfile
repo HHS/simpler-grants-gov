@@ -1,5 +1,9 @@
 
+<<<<<<< Updated upstream
 FROM ghcr.io/hhs/python-base-image:2019ba3@sha256:d7fef347c430f78e4a8d088e07fbc289f0f61e01219081ebc87eba4c365e1fa9 AS base
+=======
+FROM baseimage AS base
+>>>>>>> Stashed changes
 
 ARG RUN_UID
 ARG RUN_USER
@@ -26,6 +30,7 @@ RUN rm -rf /api/.venv || true
 
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV VIRTUALENV_ALWAYS_COPY=1
+ENV VIRTUALENV_APP_DATA="/tmp"
 
 
 
@@ -110,7 +115,9 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       /api/.venv/lib/python"${PY_MM}"/site-packages/pip-*.dist-info \
       /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools-*.dist-info \
       /api/.venv/bin/pip* \
-      /api/.venv/bin/easy_install* || true
+      /api/.venv/bin/easy_install* \
+      /root/.local/share/virtualenv \
+      "/home/${RUN_USER}/.local/share/virtualenv" || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \

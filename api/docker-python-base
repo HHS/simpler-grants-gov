@@ -60,13 +60,21 @@ RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
 # Ensure virtualenv embeds patched pip (25.3) for offline venv creation
 RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
 
+# Remove embedded seed wheels
+RUN site_pkgs="$(python3 -c 'import site; print([p for p in site.getsitepackages() if "site-packages" in p][0])')" && \
+    rm -rf \
+      "$site_pkgs/virtualenv/seed/wheels/embed/pip-"*.whl \
+      "$site_pkgs/virtualenv/seed/wheels/embed/setuptools-"*.whl \
+      "$site_pkgs/virtualenv/seed/wheels/embed/wheel-"*.whl || true
+
 # Remove pip from runtime (keep Poetry)
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
     /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
     /usr/local/bin/pip* \
     /usr/local/bin/easy_install* \
-    /root/.cache
+    /root/.cache \
+    /root/.local/share/virtualenv || true
 
 # Prune stdlib
 RUN rm -rf \
