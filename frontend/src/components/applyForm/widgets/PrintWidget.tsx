@@ -24,7 +24,9 @@ function PrintWidget<
     if (typeof inputValue === "number" || typeof inputValue === "bigint")
       return String(inputValue);
     if (Array.isArray(inputValue))
-      return inputValue.filter((v) => v != null).join(", ");
+      return inputValue
+        .filter((v) => v !== null && v !== undefined)
+        .join(", ");
 
     console.warn("Unknown value type ", typeof inputValue);
     return JSON.stringify(inputValue);
