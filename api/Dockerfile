@@ -1,9 +1,5 @@
 
-<<<<<<< Updated upstream
-FROM ghcr.io/hhs/python-base-image:2019ba3@sha256:d7fef347c430f78e4a8d088e07fbc289f0f61e01219081ebc87eba4c365e1fa9 AS base
-=======
-FROM baseimage AS base
->>>>>>> Stashed changes
+FROM ghcr.io/hhs/python-base-image:2649e91@sha256:7430e1874f8efacf1eb67929f5bed4bf753b8be0ba8ed63e982f08528ecfe43d AS base
 
 ARG RUN_UID
 ARG RUN_USER
