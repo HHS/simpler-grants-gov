@@ -6,7 +6,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 ARG PYTHON_VERSION=3.13.9
 ARG PY_MM=3.13
 ARG POETRY_VERSION=2.2.1
-ARG PIP_VERSION=25.2
+ARG PIP_VERSION=25.3
 
 SHELL ["/bin/bash", "-eux", "-c"]
 
@@ -106,7 +106,10 @@ RUN dnf install -y \
       shadow-utils \
       findutils \
       wget && \
-    dnf clean all
+    dnf clean all && \
+    # Remove the system Python RPMs
+    (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \
+    rm -rf /var/cache/dnf /var/cache/yum || true
 
 # Copy python-version.txt for downstream stages to use
 COPY --from=amazonlinux-builder /python-version.txt /python-version.txt

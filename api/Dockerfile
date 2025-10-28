@@ -1,5 +1,5 @@
 
-FROM ghcr.io/hhs/python-base-image:8011bd5@sha256:28de84dad58fcedcc74c6b6d3cc5edf225d68e22fd1d9f30601f690656a5530c AS base
+FROM tester AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -103,7 +103,14 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
     (find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true) && \
     (find /api/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true) && \
     (find /api/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true) && \
-    (rm -rf /api/.venv/lib/python"${PY_MM}"/site-packages/pip /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools || true)
+    rm -rf \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/pip* \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools* \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/_distutils_hack \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/pip-*.dist-info \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools-*.dist-info \
+      /api/.venv/bin/pip* \
+      /api/.venv/bin/easy_install* || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
