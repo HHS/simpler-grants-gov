@@ -143,6 +143,22 @@ describe("PrintWidget", () => {
     expect(screen.getByText("12345")).toBeInTheDocument();
   });
 
+  it("renders 'Yes' for boolean true", () => {
+    const props = { ...defaultProps, value: true };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("Yes")).toBeInTheDocument();
+  });
+
+  it("renders 'No' for boolean false", () => {
+    const props = { ...defaultProps, value: false };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("No")).toBeInTheDocument();
+  });
+
   it("handles array values by joining defined items with ', '", () => {
     const props = { ...defaultProps, value: ["A", null, "B", undefined, "C"] };
 
