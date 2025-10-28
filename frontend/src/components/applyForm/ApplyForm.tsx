@@ -53,6 +53,7 @@ const ApplyForm = ({
   uiSchema,
   attachments,
   isBudgetForm = false,
+  applicationStatus,
 }: {
   applicationId: string;
   formId: string;
@@ -65,6 +66,7 @@ const ApplyForm = ({
     | null;
   attachments: Attachment[];
   isBudgetForm?: boolean;
+  applicationStatus?: string;
 }) => {
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
@@ -131,19 +133,21 @@ const ApplyForm = ({
     >
       <div className="display-flex flex-justify">
         <div>{required}</div>
-        <Button
-          data-testid="apply-form-save"
-          type="submit"
-          name="apply-form-button"
-          className="margin-top-0"
-          value="save"
-          onClick={() => {
-            setFormChanged(false);
-            setAttachmentsChanged(false);
-          }}
-        >
-          {pending ? "Saving..." : "Save"}
-        </Button>
+        {(applicationStatus !== 'submitted' && applicationStatus !== 'accepted') &&
+          <Button
+            data-testid="apply-form-save"
+            type="submit"
+            name="apply-form-button"
+            className="margin-top-0"
+            value="save"
+            onClick={() => {
+              setFormChanged(false);
+              setAttachmentsChanged(false);
+            }}
+          >
+            {pending ? "Saving..." : "Save"}
+          </Button>
+        }
       </div>
       <div className="usa-in-page-nav-container">
         <FormGroup className="order-2 width-full">

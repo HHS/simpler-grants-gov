@@ -3,6 +3,9 @@ import TopLevelError from "src/app/[locale]/(base)/error/page";
 import NotFound from "src/app/[locale]/(base)/not-found";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import getFormData from "src/utils/getFormData";
+import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import { getSession } from "src/services/auth/session";
+import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
 
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
@@ -43,6 +46,25 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   const { data, error } = await getFormData({ applicationId, appFormId });
+  let details = {} as ApplicationDetailsCardProps;
+  const userSession = await getSession();
+
+  if (!userSession || !userSession.token) {
+    return <TopLevelError />;
+  }
+  const response = await getApplicationDetails(
+    applicationId,
+    userSession?.token,
+  );
+
+    if (response.status_code !== 200) {
+      console.error(
+        `Error retrieving application details for (${applicationId})`,
+        response,
+      );
+      return <TopLevelError />;
+    }
+    details = response.data;
 
   if (error || !data) {
     if (error === "UnauthorizedError") return redirect("/unauthenticated");
@@ -98,6 +120,7 @@ async function FormPage({ params }: formPageProps) {
           formId={formId}
           attachments={applicationAttachments}
           isBudgetForm={isBudgetForm}
+          applicationStatus={details.application_status}
         />
       </GridContainer>
     </>
