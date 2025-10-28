@@ -68,22 +68,26 @@ export const getUserPrivileges = async (
 };
 
 export const checkUserPrivilege = async (
-  _token: string,
-  _userId: string,
+  token: string,
+  userId: string,
   privilegeDefinition: UserPrivilegeDefinition,
-): Promise<unknown> => {
-  if (privilegeDefinition.resourceId === "1") {
-    return Promise.resolve([]);
-  }
-  return Promise.reject(new ApiRequestError("", "", 403));
-  // const ssgToken = {
-  //   "X-SGG-Token": token,
-  // };
-  // const resp = await fetchUserWithMethod("POST")({
-  //   subPath: `${userId}/privileges`,
-  //   additionalHeaders: ssgToken,
-  // });
+): Promise<undefined> => {
+  // if (privilegeDefinition.resourceId === "1") {
+  //   return Promise.resolve([]);
+  // }
+  // return Promise.reject(new ApiRequestError("", "", 403));
+  const { privilege, resourceId, resourceType } = privilegeDefinition;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  await fetchUserWithMethod("POST")({
+    subPath: `${userId}/can_access`,
+    additionalHeaders: ssgToken,
+    body: {
+      resource_type: resourceType,
+      resource_id: resourceId,
+      privileges: [privilege],
+    },
+  });
   // const json = (await resp.json()) as { data: UserPrivilegesResponse };
-
-  // return json.data;
 };
