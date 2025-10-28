@@ -1,5 +1,5 @@
 
-FROM ghcr.io/hhs/python-base-image:8011bd5@sha256:28de84dad58fcedcc74c6b6d3cc5edf225d68e22fd1d9f30601f690656a5530c AS base
+FROM ghcr.io/hhs/python-base-image:72ba391@sha256:1e2d72700ecfbff3a65435a64ca321d65c7bb82128e91c5825d69997cb54c8cd AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -26,6 +26,7 @@ RUN rm -rf /api/.venv || true
 
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV VIRTUALENV_ALWAYS_COPY=1
+ENV VIRTUALENV_APP_DATA="/tmp"
 
 
 
@@ -37,6 +38,7 @@ COPY newrelic.ini /api/newrelic.ini
 RUN PY_MM=$(cat /tmp/py_version.txt) && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
+    /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     cp "/api/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
@@ -103,7 +105,16 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
     (find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true) && \
     (find /api/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true) && \
     (find /api/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true) && \
-    (rm -rf /api/.venv/lib/python"${PY_MM}"/site-packages/pip /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools || true)
+    rm -rf \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/pip* \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools* \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/_distutils_hack \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/pip-*.dist-info \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools-*.dist-info \
+      /api/.venv/bin/pip* \
+      /api/.venv/bin/easy_install* \
+      /root/.local/share/virtualenv \
+      "/home/${RUN_USER}/.local/share/virtualenv" || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \

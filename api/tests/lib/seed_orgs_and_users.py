@@ -143,7 +143,7 @@ def _build_organizations_and_users(
             uuid.UUID("0f4ae584-c310-472d-9d6c-57201b5f84cc"), db_session, "user with two orgs"
         )
         .with_oauth_login("two_org_user")
-        .with_api_key("two_orgs_user_key")
+        .with_api_key("two_org_user_key")
         .with_jwt_auth()
         .with_organization(org1, roles=[ORG_ADMIN])
         .with_organization(org2, roles=[ORG_ADMIN])
