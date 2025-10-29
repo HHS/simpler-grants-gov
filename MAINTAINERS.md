@@ -39,7 +39,6 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Billy Daly
 * Eric Valenzuela
 * David Dudas
-* Brian Lee
 
 ## Product and Program Management
 
@@ -49,5 +48,6 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Chris Kuryak
 * Eric Serrato
 * Glenn Grieves
+* Brian Lee
 
 
