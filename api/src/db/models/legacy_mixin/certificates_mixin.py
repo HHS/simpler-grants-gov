@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 
 @declarative_mixin
-class TcertificateMixin:
+class TcertificatesMixin:
     currentcertid: Mapped[str] = mapped_column(primary_key=True)
     previouscertid: Mapped[str | None]
     orgduns: Mapped[str | None]
