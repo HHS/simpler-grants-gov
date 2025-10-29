@@ -1,6 +1,5 @@
 "server only";
 
-import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchUserWithMethod,
@@ -72,10 +71,6 @@ export const checkUserPrivilege = async (
   userId: string,
   privilegeDefinition: UserPrivilegeDefinition,
 ): Promise<undefined> => {
-  // if (privilegeDefinition.resourceId === "1") {
-  //   return Promise.resolve([]);
-  // }
-  // return Promise.reject(new ApiRequestError("", "", 403));
   const { privilege, resourceId, resourceType } = privilegeDefinition;
   const ssgToken = {
     "X-SGG-Token": token,
@@ -89,5 +84,4 @@ export const checkUserPrivilege = async (
       privileges: [privilege],
     },
   });
-  // const json = (await resp.json()) as { data: UserPrivilegesResponse };
 };

@@ -43,7 +43,6 @@ export async function generateMetadata({
 }
 
 async function OrganizationDetailPage({ params }: OrganizationDetailPageProps) {
-  const t = await getTranslations("OrganizationDetail");
   const { id } = await params;
 
   const session = await getSession();

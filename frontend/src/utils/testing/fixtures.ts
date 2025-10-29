@@ -21,6 +21,8 @@ import {
   UserDetail,
   UserDetailWithProfile,
   UserOrganization,
+  UserPrivilegesResponse,
+  UserRole,
 } from "src/types/userTypes";
 
 export const mockOpportunity: BaseOpportunity = {
@@ -581,13 +583,13 @@ export const fakeUserWithProfile: UserDetailWithProfile = {
   },
 };
 
-export const fakeUserRole = {
+export const fakeUserRole: UserRole = {
   role_id: "1",
   role_name: "role_1",
-  privileges: ["read_organization", "modify_organization"],
+  privileges: ["view_application", "manage_org_members"],
 };
 
-export const fakeUserPrivilegesResponse = {
+export const fakeUserPrivilegesResponse: UserPrivilegesResponse = {
   user_id: "1",
   organization_users: [
     {
@@ -598,7 +600,7 @@ export const fakeUserPrivilegesResponse = {
         {
           role_id: "1",
           role_name: "role_1",
-          privileges: ["read_organization", "modify_organization"],
+          privileges: ["view_application", "manage_org_members"],
         },
       ],
     },
@@ -610,7 +612,7 @@ export const fakeUserPrivilegesResponse = {
         {
           role_id: "4",
           role_name: "role_4",
-          privileges: ["read_organization", "elucidate_organization"],
+          privileges: ["view_application", "get_submitted_applications"],
         },
       ],
     },
@@ -624,7 +626,7 @@ export const fakeUserPrivilegesResponse = {
         {
           role_id: "2",
           role_name: "role_2",
-          privileges: ["read_application"],
+          privileges: ["view_application"],
         },
       ],
     },
@@ -638,7 +640,7 @@ export const fakeUserPrivilegesResponse = {
         {
           role_id: "3",
           role_name: "role_3",
-          privileges: ["read_agency", "be_agency", "ingest_agency"],
+          privileges: ["manage_agency_members"],
         },
       ],
     },
@@ -650,7 +652,7 @@ export const fakeUserPrivilegesResponse = {
         {
           role_id: "5",
           role_name: "role_5",
-          privileges: ["excommunicate_agency"],
+          privileges: ["manage_agency_members"],
         },
       ],
     },
