@@ -126,6 +126,12 @@ def test_handle_field_population_pre_population_with_null_value(
             {"x": "10.01", "y": "-21.50"},
             "-11.49",
         ),
+        # Values will be quantized
+        (
+            {"rule": "sum_monetary", "fields": ["x", "y"]},
+            {"x": "123.010000", "y": "456.560000"},
+            "579.57",
+        ),
     ],
 )
 def test_handle_field_population_pre_population_sum_monetary(

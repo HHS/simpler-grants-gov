@@ -10,8 +10,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 
 import random
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import datetime, timedelta, timezone
 
 import factory
 import factory.fuzzy
@@ -300,7 +299,7 @@ fake = faker.Faker()
 fake.add_provider(CustomProvider)
 factory.Faker.add_provider(CustomProvider)
 
-_db_session: Optional[db.Session] = None
+_db_session: db.Session | None = None
 
 
 def get_db_session() -> db.Session:
@@ -2864,6 +2863,49 @@ class OrganizationUserRoleFactory(BaseFactory):
 
     role = factory.SubFactory(RoleFactory, is_org_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+
+class OrganizationInvitationFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationInvitation
+
+    organization_invitation_id = Generators.UuidObj
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+    inviter_user = factory.SubFactory(UserFactory)
+
+    inviter_user_id = factory.lazy_attribute(lambda u: u.inviter_user.user_id)
+
+    expires_at = factory.LazyAttribute(lambda o: o.created_at + timedelta(weeks=1))
+    invitee_email = factory.Faker("email")
+    created_at = factory.LazyFunction(
+        lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
+    )
+
+    class Params:
+        response_date = factory.LazyAttribute(
+            lambda o: fake.date_time_between(
+                start_date=o.created_at, end_date="+1m", tzinfo=timezone.utc
+            )
+        )
+        is_accepted = factory.Trait(accepted_at=response_date)
+        is_rejected = factory.Trait(rejected_at=response_date)
+        is_expired = factory.Trait(
+            expires_at=factory.LazyFunction(lambda: datetime_util.utcnow() - timedelta(days=1))
+        )
+
+
+class LinkOrganizationInvitationToRoleFactory(BaseFactory):
+    class Meta:
+        model = entity_models.LinkOrganizationInvitationToRole
+
+    role = factory.SubFactory(RoleFactory)
+    role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+    organization_invitation = factory.SubFactory(OrganizationInvitationFactory)
+    organization_invitation_id = factory.LazyAttribute(
+        lambda o: o.organization_invitation.organization_invitation_id
+    )
 
 
 class SuppressedEmailFactory(BaseFactory):

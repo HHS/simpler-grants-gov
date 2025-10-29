@@ -485,20 +485,18 @@ export const messages = {
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You're subscribed",
-    intro:
-      "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "We'll keep you informed of our progress and every opportunity to get involved.",
   },
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
-    title: "You have unsubscribed",
-    intro:
-      "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    title: "You've been unsubscribed",
+    paragraph:
+      "You'll no longer receive project updates from Simpler.Grants.gov.",
+    cta: "Change your mind?",
     buttonResub: "Re-subscribe",
+  },
+  SendyDisclaimer: {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -1453,9 +1451,36 @@ export const messages = {
   },
   UserWorkspace: {
     pageTitle: "User Workspace | Simpler.Grants.gov",
-    title: "User Workspace",
+    title: "<color>Welcome</color> to your workspace.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
-    organizations: "Organizations",
+    organizations: "Your organizations",
+    noOrganizations: {
+      title: "You're not a member of any organizations yet",
+      description:
+        "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
+    },
+    organizationButtons: {
+      view: "View organization details",
+      manage: "Manage users",
+    },
+    linksSection: {
+      heading: "Your recent activity",
+      applications: {
+        heading: "Applications",
+        description: "You can now apply for select opportunities on Simpler.",
+        linkText: "View applications",
+      },
+      savedQueries: {
+        heading: "Saved queries",
+        description: "Return to your preferred search terms and filters.",
+        linkText: "View saved queries",
+      },
+      savedOpportunities: {
+        heading: "Saved opportunities",
+        description: "Keep track of oppportunities you're interested in.",
+        linkText: "View saved opportunities",
+      },
+    },
   },
   OrganizationDetail: {
     pageTitle: "Organization",
@@ -1472,10 +1497,68 @@ export const messages = {
       explanation: "Your organization's active members are listed below.",
       manageUsersExplanation:
         "Manage Users to add or update roles and permissions.",
+      manageUsersCTA: "Manage Users",
       headings: {
         email: "Email",
         name: "Name",
         roles: "Roles",
+      },
+    },
+  },
+  ManageUsers: {
+    pageTitle: "Manage Users | Simpler.Grants.gov",
+    pageHeading: "Manage Users",
+    activeUsersHeading: "Active Users",
+    activeUsersTableDescription:
+      "Adjust permissions for active users so they have the right access for their role.",
+    grantsGovUsersHeading: "Grants.gov Users",
+    grantsGovUsersTableDescription:
+      "Manage users from your Grants.gov organization here in Simpler.",
+    pendingUsersHeading: "Pending Users",
+    pendingUsersTableDescription:
+      "Any users waiting to join your organization will appear below.",
+    errors: {
+      fetchError: "Failed to get Users",
+      notLoggedInMessage: "You are not logged in",
+    },
+    usersTable: {
+      admin: "Administrator",
+      emailHeading: "Email",
+      member: "Member",
+      nameHeading: "Name",
+      noUsersFound: "No users found.",
+      roleHeading: "Role",
+      selectRoleFor: "Select role for",
+    },
+    confirmationModal: {
+      header: "Confirm role change",
+      description: "Are you sure you want to change this user's role to",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      saving: "Saving...",
+    },
+    inviteUser: {
+      heading: "Add users to collaborate on opportunities.",
+      errorHeading: "Error",
+      description:
+        "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
+      inputs: {
+        email: {
+          label: "Email address",
+          placeholder: "Enter a valid email address",
+        },
+        role: {
+          label: "Role",
+          placeholder: "- Select a role -",
+        },
+      },
+      button: {
+        label: "Add to organization",
+        success: "User added to pending",
+      },
+      validationErrors: {
+        email: "Email is required",
+        role: "Role is required",
       },
     },
   },

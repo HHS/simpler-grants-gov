@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import select
@@ -14,8 +15,8 @@ from src.services.organizations_v1.organization_user_utils import validate_organ
 logger = logging.getLogger(__name__)
 
 
-def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> None:
-    """Validate provided roles"""
+def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> Sequence[Role]:
+    """Validate provided roles and return them"""
     # TODO: In the future, extend this query to check if the role is either:
     #         - a core role (shared across all orgs), OR
     #         - owned by the organization making the request
@@ -34,6 +35,8 @@ def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> None:
     if len(roles) != len(role_ids):
         missing = role_ids - {r.role_id for r in roles}
         raise_flask_error(404, message=f"Could not find the following role IDs: {missing}")
+
+    return roles
 
 
 def update_user_organization_roles(

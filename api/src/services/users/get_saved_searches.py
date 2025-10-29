@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ class SavedSearchListParams(BaseModel):
 
 def get_saved_searches(
     db_session: db.Session, user_id: UUID, raw_search_params: dict
-) -> Tuple[Sequence[UserSavedSearch], PaginationInfo]:
+) -> tuple[Sequence[UserSavedSearch], PaginationInfo]:
     """Get all saved searches for a user"""
 
     search_params = SavedSearchListParams.model_validate(raw_search_params)

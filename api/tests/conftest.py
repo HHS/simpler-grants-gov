@@ -21,13 +21,14 @@ from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.schema import Schemas
+from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
 from src.db.models.agency_models import Agency
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
-from src.db.models.user_models import AgencyUser
+from src.db.models.user_models import AgencyUser, UserApiKey
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
@@ -56,6 +57,21 @@ def user_api_key(enable_factory_create):
 @pytest.fixture
 def user_api_key_id(user_api_key):
     return user_api_key.key_id
+
+
+@pytest.fixture
+def internal_admin_user(enable_factory_create):
+    """An internal admin user for testing internal endpoints"""
+    user = factories.UserFactory.create()
+    factories.InternalUserRoleFactory.create(user=user, role_id=NAVA_INTERNAL_ROLE.role_id)
+    return user
+
+
+@pytest.fixture
+def internal_admin_user_api_key(internal_admin_user) -> UserApiKey:
+    """An internal user with our X-API-Key auth"""
+    api_key = factories.UserApiKeyFactory.create(user=internal_admin_user)
+    return api_key.key_id
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -100,6 +116,33 @@ def set_env_var_defaults(monkeypatch_session):
 
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
+
+
+@pytest.fixture
+def verify_no_warning_error_logs(caplog):
+    """Fixture that if included will verify no warning/error log occurred during the test
+
+    Note that if this fails it will report that the teardown of the test failed, not
+    the test itself which will be marked as passed.
+
+    Should roughly be the equivalent of doing the following in a test:
+
+        def test_something(caplog):
+            caplog.set_level(logging.WARNING)
+            # test stuff
+            assert len(caplog.messages) == 0
+
+     Modified from example at https://docs.pytest.org/en/stable/how-to/logging.html#caplog-fixture
+    """
+    yield  # Run the test - we only want to do stuff after
+    for when in ("setup", "call"):
+        messages = [
+            r.message
+            for r in caplog.get_records(when)
+            if r.levelno in (logging.WARNING, logging.ERROR)
+        ]
+        if messages:
+            pytest.fail(f"Warning/error messages encountered during test: {messages}")
 
 
 ####################
@@ -439,12 +482,12 @@ def mock_s3(reset_aws_env_vars):
 def mock_s3_bucket_resource(mock_s3):
     bucket = mock_s3.Bucket("local-mock-public-bucket")
     bucket.create()
-    yield bucket
+    return bucket
 
 
 @pytest.fixture
 def mock_s3_bucket(mock_s3_bucket_resource):
-    yield mock_s3_bucket_resource.name
+    return mock_s3_bucket_resource.name
 
 
 @pytest.fixture
@@ -453,12 +496,12 @@ def other_mock_s3_bucket_resource(mock_s3):
     # and/or test behavior when moving files between buckets.
     bucket = mock_s3.Bucket("local-mock-draft-bucket")
     bucket.create()
-    yield bucket
+    return bucket
 
 
 @pytest.fixture
 def other_mock_s3_bucket(other_mock_s3_bucket_resource):
-    yield other_mock_s3_bucket_resource.name
+    return other_mock_s3_bucket_resource.name
 
 
 @pytest.fixture
@@ -566,7 +609,7 @@ def fixture_from_file():
 
     def _file_reader(file_path: str):
         full_file_path = path.join(FILE_FIXTURE_DIR, file_path.lstrip("/"))
-        with open(full_file_path, "r") as f:
+        with open(full_file_path) as f:
             return f.read()
 
     return _file_reader

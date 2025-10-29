@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Type
 
 import src.adapters.db as db
 from src.adapters.db import PostgresDBClient
@@ -9,7 +8,7 @@ from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
 logger = logging.getLogger(__name__)
 
 
-def sync_lookup_values(db_client: Optional[PostgresDBClient] = None) -> None:
+def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
     """
     Sync lookup values to the DB, adding or updating any
     values that aren't already present.
@@ -34,7 +33,7 @@ def sync_lookup_values(db_client: Optional[PostgresDBClient] = None) -> None:
 
 
 def _sync_lookup_for_table(
-    table: Type[LookupTable], lookups: list[Lookup], db_session: db.Session
+    table: type[LookupTable], lookups: list[Lookup], db_session: db.Session
 ) -> None:
     log_extra: dict = {"table_name": table.get_table_name()}
     logger.info("Syncing lookup values for table %s", table.get_table_name())
