@@ -6,7 +6,6 @@ import {
   Status,
 } from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
-import { getConfiguredDayJs } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
@@ -84,13 +83,7 @@ export const InformationCard = ({
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
-
-  const isCompetitionClosed = () => {
-    const isPastCloseDate = getConfiguredDayJs()().isAfter(
-      getConfiguredDayJs()(applicationDetails.competition.closing_date),
-    );
-    return !applicationDetails.competition.is_open || isPastCloseDate;
-  };
+  const { is_open } = applicationDetails.competition;
 
   const ApplicationInstructionsDownload = () => {
     return (
@@ -202,17 +195,17 @@ export const InformationCard = ({
                 <span className="text-bold text-orange">
                   {applicationDetails.competition.closing_date}
                 </span>{" "}
-                (12:00am ET)
+                (11:59pm ET)
               </dd>
             </div>
-            {isCompetitionClosed() ? <SpecialInstructions /> : null}
+            {!is_open ? <SpecialInstructions /> : null}
             <div className="margin-bottom-1">
               <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
               <dd className="margin-right-1 text-bold text-orange">
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && !isCompetitionClosed() && (
+            {!applicationSubmitted && is_open && (
               <SubmitApplicationButton
                 buttonText={t("submit")}
                 submitHandler={applicationSubmitHandler}
