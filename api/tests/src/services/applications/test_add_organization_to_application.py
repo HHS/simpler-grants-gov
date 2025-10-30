@@ -224,7 +224,12 @@ def test_add_organization_application_not_in_progress(enable_factory_create, db_
         role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
     )
 
+    # Create organization and give user START_APPLICATION privilege so we can reach the in-progress check
     organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
 
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         add_organization_to_application(
