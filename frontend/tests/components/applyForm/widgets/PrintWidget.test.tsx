@@ -82,7 +82,10 @@ describe("PrintWidget", () => {
   });
 
   it("displays empty string when value is undefined", () => {
-    const propsWithUndefined = { ...defaultProps, value: undefined as unknown as string };
+    const propsWithUndefined = {
+      ...defaultProps,
+      value: undefined as unknown as string,
+    };
 
     render(<PrintWidget {...propsWithUndefined} />);
 
