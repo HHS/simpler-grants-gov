@@ -697,6 +697,7 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    unauthorizedExplanation: "This content is not available",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
@@ -1480,6 +1481,33 @@ export const messages = {
         description: "Keep track of oppportunities you're interested in.",
         linkText: "View saved opportunities",
       },
+    },
+    invitationReply: {
+      ctaTitle: "would like to add you to their team.",
+      description:
+        "Click Accept to join and gain access to your team, organization details and available applications.",
+      accept: "Accept",
+      reject: "Reject",
+      dismiss: "Dismiss",
+      accepted: {
+        ctaTitle: "Congrats, you've been added to {orgName}!",
+        description:
+          "Join your team by collaborating on applications and searching for the right opportunities.",
+      },
+      rejected: {
+        ctaTitle: "The invitation has been rejected.",
+        description:
+          "If you change your mind, an organization admin can add you again.",
+      },
+      rejectConfirmation: {
+        ctaTitle:
+          "Are you sure you want to reject this organization's invitation?",
+        description:
+          "You'll need to be re-added by an organization admin if you change your mind later.",
+        confirm: "Reject invitation",
+        cancel: "Cancel",
+      },
+      apiError: "Unable to update user organization invitation.",
     },
   },
   OrganizationDetail: {

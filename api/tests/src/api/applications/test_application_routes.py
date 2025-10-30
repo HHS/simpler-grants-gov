@@ -30,6 +30,8 @@ from tests.src.db.models.factories import (
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
+    OrganizationUserFactory,
+    OrganizationUserRoleFactory,
     RoleFactory,
     SamGovEntityFactory,
     UserFactory,
@@ -3893,3 +3895,164 @@ def test_get_application_form_access_with_organization(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+
+
+def test_add_organization_to_application_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successfully adding an organization to an application via route"""
+    # Create a competition that allows organization applications
+    competition = CompetitionFactory.create(
+        open_to_applicants={
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        }
+    )
+
+    # Create an application without an organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application (MODIFY_APPLICATION privilege)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    # Create organization and give user START_APPLICATION privilege
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    # Make the PUT request
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == str(application.application_id)
+
+    # Verify the organization was added in the database
+    db_session.refresh(application)
+    assert application.organization_id == organization.organization_id
+
+
+def test_add_organization_to_application_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when application doesn't exist"""
+    organization = OrganizationFactory.create()
+    non_existent_application_id = uuid.uuid4()
+
+    response = client.put(
+        f"/alpha/applications/{non_existent_application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert "Application not found" in response.json["message"]
+
+
+def test_add_organization_organization_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when organization doesn't exist"""
+    competition = CompetitionFactory.create()
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    non_existent_organization_id = uuid.uuid4()
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{non_existent_organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        f"Could not find Organization with ID {non_existent_organization_id}"
+        in response.json["message"]
+    )
+
+
+def test_add_organization_no_modify_application_privilege(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when user doesn't have MODIFY_APPLICATION privilege"""
+    competition = CompetitionFactory.create()
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application but without MODIFY_APPLICATION privilege
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert "Forbidden" in response.json["message"]
+
+
+def test_add_organization_no_start_application_privilege(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when user doesn't have START_APPLICATION privilege"""
+    competition = CompetitionFactory.create(
+        open_to_applicants={CompetitionOpenToApplicant.ORGANIZATION}
+    )
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application with MODIFY_APPLICATION privilege
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    # Create organization but user doesn't have START_APPLICATION privilege
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP]),
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert "Forbidden" in response.json["message"]
