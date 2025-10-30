@@ -99,7 +99,8 @@ def add_organization_to_application(
     # Delete all application user records
     # We do this because we need to reset the application to the state it would be in
     # if an organization started a brand new application. Individual user associations
-    # are not relevant when an application is associated with an organization.
+    # need to be cleared so that the user who started the application doesn't have
+    # more privileges than they would have had they created it in the organization to begin with.
     for app_user in application.application_users:
         db_session.delete(app_user)
 
