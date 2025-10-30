@@ -58,9 +58,6 @@ def add_organization_to_application(
         )
         raise_flask_error(403, "Forbidden")
 
-    # Validate application is in progress
-    validate_application_in_progress(application, ApplicationAction.MODIFY)
-
     # Check user has START_APPLICATION privilege for the organization
     if not can_access(user, {Privilege.START_APPLICATION}, organization):
         logger.info(
@@ -71,6 +68,10 @@ def add_organization_to_application(
             },
         )
         raise_flask_error(403, "Forbidden")
+
+
+    # Validate application is in progress
+    validate_application_in_progress(application, ApplicationAction.MODIFY)
 
     # Validate application doesn't already have an organization
     if application.organization_id is not None:
