@@ -256,18 +256,24 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
 
 
 class UserApplicationFilterSchema(Schema):
-    application_status = fields.List(fields.Enum(
-        ApplicationStatus,
-        metadata={"description": "Status of the application"},
-    ))
-    organization_id = fields.List(fields.UUID(metadata={"description": "The internal ID of the organization"}))
-    competition_id = fields.List(fields.UUID(metadata={"description": "The internal ID of the competition"}))
+    application_status = fields.List(
+        fields.Enum(
+            ApplicationStatus,
+            metadata={"description": "Status of the application"},
+        )
+    )
+    organization_id = fields.List(
+        fields.UUID(metadata={"description": "The internal ID of the organization"})
+    )
+    competition_id = fields.List(
+        fields.UUID(metadata={"description": "The internal ID of the competition"})
+    )
 
 
 class UserApplicationListRequestSchema(Schema):
     """Schema for application list request - currently empty but provided for future filtering"""
 
-    filters = fields.Nested(UserApplicationFilterSchema())
+    filters = fields.Nested(UserApplicationFilterSchema(), allow_none=True)
 
     pagination = fields.Nested(
         generate_pagination_schema(

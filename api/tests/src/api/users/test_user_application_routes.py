@@ -1,7 +1,7 @@
 import pytest
 
 from src.api.users.user_schemas import UserApplicationListItemSchema
-from src.constants.lookup_constants import ApplicationStatus, OpportunityStatus, Privilege
+from src.constants.lookup_constants import ApplicationStatus, Privilege
 from tests.lib.application_list_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
@@ -577,6 +577,8 @@ def test_user_application_list_access_org_and_app_privilege(
 def test_user_application_list_sorting_default(
     client, enable_factory_create, db_session, app_owned_org_b, app_a
 ):
+    """Test that applications for a user are returned sorted by the default field (updated_at)
+    when no filters or sorting options are applied."""
     # Create user and give APP-LEVEL VIEW on app_org_b
     user, _, token = create_user_in_app(
         db_session, application=app_owned_org_b, privileges=[Privilege.VIEW_APPLICATION]
@@ -612,6 +614,10 @@ def test_user_application_list_sorting_default(
 def test_user_application_list_filter_status(
     client, enable_factory_create, db_session, app_a, app_b
 ):
+    """
+    Test that filtering by a single application status returns only applications
+    matching that status.
+    """
     user, application, token = create_user_in_app(
         db_session,
         privileges=[Privilege.VIEW_APPLICATION],
@@ -643,24 +649,242 @@ def test_user_application_list_filter_status(
 
     assert applications[0]["application_id"] == str(application.application_id)
 
-def test_user_application_list_filter_statu_422(
-    client, enable_factory_create, db_session, app_a, app_b
-):
-    pass
 
 def test_user_application_list_filter_status_multi(
     client, enable_factory_create, db_session, app_a, app_b
 ):
-    pass
+    """
+    Test that filtering by multiple application statuses returns all applications
+    matching any of the specified statuses.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.VIEW_APPLICATION],
+        status=ApplicationStatus.SUBMITTED,
+    )
+    # Create additional applications for user
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=ApplicationFactory(application_status=ApplicationStatus.ACCEPTED)
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_b),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {
+                "application_status": [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+            },
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
 
-def test_user_application_list_org(client, enable_factory_create, db_session, org):
-    pass
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
 
-def test_user_application_list_org_multi(client, enable_factory_create, db_session, org):
-    pass
+    applications = response.json["data"]
+    assert len(applications) == 2
 
-def test_user_application_list_competition(client, enable_factory_create, db_session, org):
-    pass
+    assert [app["application_id"] for app in applications] == [
+        str(app.application_id) for app in [application, app_a]
+    ]
 
-def test_user_application_list_multi(client, enable_factory_create, db_session, org):
-    pass
+
+def test_user_application_list_filter_org(
+    client, enable_factory_create, db_session, apps_owned_org_a, org_a, app_owned_org_b
+):
+    """
+    Test that filtering applications by a single organization returns all
+    applications for that organization.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    # Create additional applications for user
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {"organization_id": [org_a.organization_id]},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 2
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in apps_owned_org_a
+    )
+
+
+def test_user_application_list_org_multi(
+    client, enable_factory_create, db_session, apps_owned_org_a, app_owned_org_b, org_a, org_b
+):
+    """
+    Test that filtering applications by multiple organizations returns all
+    applications belonging to any of the specified organizations.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    # Create additional applications for user
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {"organization_id": [org_a.organization_id, org_b.organization_id]},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 3
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in [*apps_owned_org_a, app_owned_org_b]
+    )
+
+
+def test_user_application_list_filter_competition(
+    client, enable_factory_create, db_session, apps_owned_org_a, org_a, app_owned_org_b, org_b
+):
+    """
+    Test that filtering applications by competition ID returns only applications
+    for that competition.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    # Create additional applications for user
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {"competition_id": [apps_owned_org_a[0].competition_id]},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 1
+    assert applications[0]["application_id"] == str(apps_owned_org_a[0].application_id)
+
+
+@pytest.mark.parametrize(
+    "filters, expected_count",
+    [
+        # Filter by competition_id + application_status
+        (
+            lambda apps_a, org_b: {
+                "competition_id": [apps_a[0].competition_id],
+                "application_status": [ApplicationStatus.SUBMITTED],
+            },
+            0,
+        ),
+        # Filter by organization_id + application_status
+        (
+            lambda apps_a, org_b: {
+                "organization_id": [org_b.organization_id],
+                "application_status": [ApplicationStatus.IN_PROGRESS],
+            },
+            1,
+        ),
+        (
+            lambda apps_a, org_b: {
+                "organization_id": [org_b.organization_id],
+                "application_status": [ApplicationStatus.SUBMITTED],
+            },
+            0,
+        ),
+    ],
+)
+def test_user_application_list_multi_filter(
+    client,
+    enable_factory_create,
+    db_session,
+    apps_owned_org_a,
+    app_owned_org_b,
+    org_a,
+    org_b,
+    filters,
+    expected_count,
+):
+    """
+    Test user application listing with different filter combinations.
+    """
+
+    # create user with multiple applications
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    # Build the filter JSON dynamically
+    filter_payload = filters(apps_owned_org_a, org_b)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": filter_payload,
+            "pagination": {"page_offset": 1, "page_size": 25},
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    # Assertions
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == expected_count

@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import or_, select, and_
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -27,13 +27,14 @@ logger = logging.getLogger(__name__)
 
 class ApplicationFilters(BaseModel):
     application_status: list[ApplicationStatus] | None = None
-    organization_id:list[ UUID] | None = None
-    competition_id:list[ UUID ] | None = None
+    organization_id: list[UUID] | None = None
+    competition_id: list[UUID] | None = None
 
 
 class ListApplicationParams(BaseModel):
     filters: ApplicationFilters | None = None
     pagination: PaginationParams
+
 
 def build_filter_clauses(filters: ApplicationFilters) -> list:
     clauses = []
@@ -46,6 +47,7 @@ def build_filter_clauses(filters: ApplicationFilters) -> list:
         clauses.append(Application.competition_id.in_(filters.competition_id))
 
     return clauses
+
 
 def get_user_applications(
     db_session: db.Session, user_id: UUID, raw_params: dict
@@ -104,7 +106,7 @@ def get_user_applications(
     # Filter
     filters = list_params.filters
     if filters:
-        filter_clauses = build_filter_clauses(list_params.filters)
+        filter_clauses = build_filter_clauses(filters)
         if filter_clauses:
             stmt = stmt.where(and_(*filter_clauses))
 
