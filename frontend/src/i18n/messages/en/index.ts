@@ -697,6 +697,7 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    unauthorizedExplanation: "This content is not available",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
