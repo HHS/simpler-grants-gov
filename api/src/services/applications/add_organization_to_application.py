@@ -44,6 +44,9 @@ def add_organization_to_application(
         logger.info("Application not found")
         raise_flask_error(404, "Application not found")
 
+    # Get the organization (raises 404 if not found)
+    organization = get_organization(db_session, organization_id)
+
     # Check user has MODIFY_APPLICATION privilege for the application
     if not can_access(user, {Privilege.MODIFY_APPLICATION}, application):
         logger.info(
@@ -58,20 +61,6 @@ def add_organization_to_application(
     # Validate application is in progress
     validate_application_in_progress(application, ApplicationAction.MODIFY)
 
-    # Validate application doesn't already have an organization
-    if application.organization_id is not None:
-        logger.info(
-            "Application already has an organization",
-            extra={
-                "application_id": application_id,
-                "existing_organization_id": application.organization_id,
-            },
-        )
-        raise_flask_error(422, "Application already has an organization")
-
-    # Get the organization
-    organization = get_organization(db_session, organization_id)
-
     # Check user has START_APPLICATION privilege for the organization
     if not can_access(user, {Privilege.START_APPLICATION}, organization):
         logger.info(
@@ -82,6 +71,17 @@ def add_organization_to_application(
             },
         )
         raise_flask_error(403, "Forbidden")
+
+    # Validate application doesn't already have an organization
+    if application.organization_id is not None:
+        logger.info(
+            "Application already has an organization",
+            extra={
+                "application_id": application_id,
+                "existing_organization_id": application.organization_id,
+            },
+        )
+        raise_flask_error(422, "Application already has an organization")
 
     # Validate competition allows organization applications
     allowed_applicant_types = application.competition.open_to_applicants
@@ -97,6 +97,9 @@ def add_organization_to_application(
         raise_flask_error(422, "This competition only accepts individual applications")
 
     # Delete all application user records
+    # We do this because we need to reset the application to the state it would be in
+    # if an organization started a brand new application. Individual user associations
+    # are not relevant when an application is associated with an organization.
     for app_user in application.application_users:
         db_session.delete(app_user)
 
