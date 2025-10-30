@@ -18,6 +18,7 @@ import {
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
 import {
+  OrganizationInvitation,
   UserDetail,
   UserDetailWithProfile,
   UserOrganization,
@@ -668,6 +669,30 @@ export const fakeOrganizationInviteRecord = {
     {
       role_id: "5",
       role_name: "role_5",
+    },
+  ],
+};
+
+export const fakeOrganizationInvitation: OrganizationInvitation = {
+  organization_invitation_id: "uuid",
+  organization: {
+    organization_id: "uuid",
+    organization_name: "Example Organization",
+  },
+  status: "pending",
+  created_at: "2024-0108T13:00Z",
+  expires_at: "2024-0115T13:00Z",
+  inviter: {
+    first_name: "John",
+    last_name: "Doe",
+    email: "admin@org.com",
+    user_id: "1",
+  },
+  roles: [
+    {
+      role_id: "uuid",
+      role_name: "Organization Member",
+      privileges: ["view_org_membership", "start_application"],
     },
   ],
 };
