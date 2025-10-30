@@ -173,7 +173,7 @@ describe("ApplyForm", () => {
     expect(selectField).not.toBeRequired();
     expect(screen.getAllByRole("option").length).toBe(2);
     expect(screen.getByText("test select option")).toBeInTheDocument();
-    expect(selectField).not.toHaveAttribute('disabled');
+    expect(selectField).toBeEnabled();
 
     const button = screen.getByTestId("apply-form-save");
     expect(button).toBeInTheDocument();
@@ -192,8 +192,8 @@ describe("ApplyForm", () => {
         applicationStatus="submitted"
       />,
     );
-    let button = screen.findByTestId("apply-form-save");
-    expect(JSON.stringify(button)).toEqual('{}');
+    const button = screen.queryByTestId("apply-form-save");
+    expect(button).not.toBeInTheDocument();
     const nameField = screen.getByTestId("name");
     expect(nameField).toHaveAttribute('readonly');
 
@@ -201,7 +201,7 @@ describe("ApplyForm", () => {
     expect(dobField).toHaveAttribute('readonly');
     
     const selectField = screen.getByTestId("Select");
-    expect(selectField).toHaveAttribute('disabled');
+    expect(selectField).toBeDisabled();
   });
 
   it("calls handleFormAction action on save", () => {

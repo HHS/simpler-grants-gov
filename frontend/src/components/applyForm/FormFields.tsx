@@ -83,7 +83,7 @@ export const FormFields = ({
 
             const field = renderWidget({
               type: widgetConfig.type,
-              props: { ...widgetConfig.props, formContext, readonly },
+              props: { ...widgetConfig.props, formContext, readonly, disabled: readonly },
               definition: node.definition,
             });
 
@@ -122,7 +122,7 @@ export const FormFields = ({
 
               return renderWidget({
                 type: widgetConfig.type,
-                props: { ...widgetConfig.props, formContext, readonly },
+                props: { ...widgetConfig.props, formContext, readonly, disabled:readonly },
                 definition: node.definition,
               });
             }
