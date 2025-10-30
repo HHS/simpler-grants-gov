@@ -37,40 +37,60 @@ export const FormFields = ({
     const requiredFieldPaths = getRequiredProperties(schema);
 
     const buildFormTree = (
-      uiSchema:
-        | UiSchema
-        | {
-            children: UiSchema;
-            label: string;
-            name: string;
-            description?: string;
-          },
+      uiSchema: UiSchema,
       parent: { label: string; name: string; description?: string } | null,
     ) => {
-      if (
-        !Array.isArray(uiSchema) &&
-        typeof uiSchema === "object" &&
-        "children" in uiSchema
-      ) {
-        // if handling a single section object, build the tree for the section children
-        buildFormTree(uiSchema.children, {
-          label: uiSchema.label,
-          name: uiSchema.name,
-          description: uiSchema.description,
-        });
-      } else if (Array.isArray(uiSchema)) {
-        // if handling an array of sections or children
-        uiSchema.forEach((node) => {
+      if (!Array.isArray(uiSchema)) {
+        throw new Error("ui schema element is not an array");
+      }
+      uiSchema.forEach((node) => {
+        if ("children" in node) {
+          buildFormTree(node.children as unknown as UiSchema, {
+            label: node.label,
+            name: node.name,
+            description: node.description,
+          });
+        } else if (!parent && ("definition" in node || "schema" in node)) {
+          const requiredField = isFieldRequired(
+            (node.definition || node.schema.title || "") as string,
+            requiredFieldPaths,
+          );
+          const widgetConfig = getFieldConfig({
+            uiFieldObject: node,
+            formSchema: schema,
+            errors: errors ?? null,
+            formData,
+            requiredField,
+          });
+
+          const field = renderWidget({
+            type: widgetConfig.type,
+            props: { ...widgetConfig.props, formContext },
+            definition: node.definition,
+          });
+
+          if (field) {
+            acc = [
+              ...acc,
+              <React.Fragment key={node.name}>{field}</React.Fragment>,
+            ];
+          }
+        }
+      });
+
+      if (parent) {
+        // if handling children within a section
+        const childAcc: JSX.Element[] = [];
+        const keys: number[] = [];
+        const row = uiSchema.map((node) => {
           if ("children" in node) {
-            // if handling a section with an array of children, build the tree for the children within the section
-            buildFormTree(node.children as unknown as UiSchema, {
-              label: node.label,
-              name: node.name,
-              description: node.description,
+            acc.forEach((item, key) => {
+              if (item && item.key === `${node.name}-wrapper`) {
+                keys.push(key);
+              }
             });
-          } else if (!parent && ("definition" in node || "schema" in node)) {
-            // if handling a single field outside of a section ???
-            // is this actually something we need to support?
+            return null;
+          } else {
             const requiredField = isFieldRequired(
               (node.definition || node.schema.title || "") as string,
               requiredFieldPaths,
@@ -83,7 +103,7 @@ export const FormFields = ({
               requiredField,
             });
 
-            const field = renderWidget({
+            return renderWidget({
               type: widgetConfig.type,
               props: {
                 ...widgetConfig.props,
@@ -92,79 +112,33 @@ export const FormFields = ({
               },
               definition: node.definition,
             });
-
-            if (field) {
-              acc = [
-                ...acc,
-                <React.Fragment key={node.name}>{field}</React.Fragment>,
-              ];
-            }
           }
         });
 
-        if (parent) {
-          // if handling children within a section
-          const childAcc: JSX.Element[] = [];
-          const keys: number[] = [];
-          const row = uiSchema.map((node) => {
-            if ("children" in node) {
-              acc.forEach((item, key) => {
-                if (item && item.key === `${node.name}-wrapper`) {
-                  keys.push(key);
-                }
-              });
-              return null;
-            } else {
-              const requiredField = isFieldRequired(
-                (node.definition || node.schema.title || "") as string,
-                requiredFieldPaths,
-              );
-              const widgetConfig = getFieldConfig({
-                uiFieldObject: node,
-                formSchema: schema,
-                errors: errors ?? null,
-                formData,
-                requiredField,
-              });
-
-              return renderWidget({
-                type: widgetConfig.type,
-                props: {
-                  ...widgetConfig.props,
-                  formContext,
-                  isFormLocked,
-                },
-                definition: node.definition,
-              });
-            }
+        if (keys.length) {
+          keys.forEach((key) => {
+            childAcc.push(acc[key]);
+            delete acc[key];
           });
-
-          if (keys.length) {
-            keys.forEach((key) => {
-              childAcc.push(acc[key]);
-              // eslint-disable-next-line @typescript-eslint/no-array-delete
-              delete acc[key];
-            });
-            acc = [
-              ...acc,
-              wrapSection({
-                label: parent.label,
-                fieldName: parent.name,
-                description: parent.description,
-                tree: <>{childAcc}</>,
-              }),
-            ];
-          } else {
-            acc = [
-              ...acc,
-              wrapSection({
-                label: parent.label,
-                fieldName: parent.name,
-                tree: <>{row}</>,
-                description: parent.description,
-              }),
-            ];
-          }
+          acc = [
+            ...acc,
+            wrapSection({
+              label: parent.label,
+              fieldName: parent.name,
+              description: parent.description,
+              tree: <>{childAcc}</>,
+            }),
+          ];
+        } else {
+          acc = [
+            ...acc,
+            wrapSection({
+              label: parent.label,
+              fieldName: parent.name,
+              tree: <>{row}</>,
+              description: parent.description,
+            }),
+          ];
         }
       }
     };
