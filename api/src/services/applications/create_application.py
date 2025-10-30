@@ -101,6 +101,9 @@ def _validate_organization_expiration(organization: Organization) -> None:
 def _validate_applicant_type(competition: Competition, organization_id: UUID | None) -> None:
     """
     Validate that the applicant type (individual or organization) is allowed for this competition.
+
+    Note: Individuals are allowed to start applications even for org-only competitions,
+    as they can add an organization later.
     """
     # Determine if applying as an organization or individual
     is_applying_as_organization = organization_id is not None
@@ -118,17 +121,6 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
             raise_flask_error(
                 422,
                 "This competition does not allow organization applications",
-            )
-    else:
-        # Check if individual applications are allowed
-        if CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types:
-            logger.info(
-                "Competition does not allow individual applications",
-                extra={"submission_issue": SubmissionIssue.COMPETITION_NO_INDIVIDUAL_APPLICATIONS},
-            )
-            raise_flask_error(
-                422,
-                "This competition does not allow individual applications",
             )
 
 
@@ -178,9 +170,6 @@ def create_application(
         # Check privileges
         if not can_access(user, {Privilege.START_APPLICATION}, organization):
             raise_flask_error(403, "Forbidden")
-
-        # Validate organization status
-        _validate_organization_expiration(organization)
 
     # Verify the competition is open
     validate_competition_open(competition, ApplicationAction.START)

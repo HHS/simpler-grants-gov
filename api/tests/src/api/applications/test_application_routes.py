@@ -2977,10 +2977,13 @@ def test_application_start_organization_not_allowed(
     assert len(applications_count) == 0
 
 
-def test_application_start_individual_not_allowed(
+def test_application_start_individual_on_org_only_competition_allowed(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test application creation fails when applying as individual but competition only allows organizations"""
+    """Test application creation succeeds when applying as individual even when competition only allows organizations
+
+    Individuals can start applications for org-only competitions and add an organization later.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -3001,16 +3004,19 @@ def test_application_start_individual_not_allowed(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
-    assert response.status_code == 422
-    assert "This competition does not allow individual applications" in response.json["message"]
+    # Should succeed - individuals can start applications and add organization later
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert application.organization_id is None
 
 
 def test_application_start_organization_allowed(
@@ -3200,7 +3206,10 @@ def test_application_start_organization_no_sam_gov_entity(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization has no SAM.gov entity record"""
+    """Test application creation succeeds even when organization has no SAM.gov entity record
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -3222,19 +3231,19 @@ def test_application_start_organization_no_sam_gov_entity(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    assert (
-        "This organization has no SAM.gov entity record and cannot be used for applications"
-        in response.json["message"]
-    )
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_start_organization_expired_entity(
@@ -3242,7 +3251,10 @@ def test_application_start_organization_expired_entity(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization's SAM.gov entity has expired"""
+    """Test application creation succeeds even when organization's SAM.gov entity has expired
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
     past_expiration_date = today - timedelta(days=30)  # Expired 30 days ago
@@ -3270,17 +3282,19 @@ def test_application_start_organization_expired_entity(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    expected_message = f"This organization's SAM.gov registration expired on {past_expiration_date.strftime('%B %d, %Y')} and cannot be used for applications"
-    assert expected_message in response.json["message"]
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_start_organization_inactive_entity(
@@ -3288,7 +3302,10 @@ def test_application_start_organization_inactive_entity(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization's SAM.gov entity is inactive"""
+    """Test application creation succeeds even when organization's SAM.gov entity is inactive
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
     future_expiration_date = today + timedelta(days=365)  # Valid expiration date
@@ -3315,19 +3332,19 @@ def test_application_start_organization_inactive_entity(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    assert (
-        "This organization is inactive in SAM.gov and cannot be used for applications"
-        in response.json["message"]
-    )
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_start_organization_valid_entity_success(
@@ -3458,7 +3475,10 @@ def test_application_start_organization_entity_expiring_yesterday(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization's SAM.gov entity expired yesterday"""
+    """Test application creation succeeds even when organization's SAM.gov entity expired yesterday
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
     yesterday = today - timedelta(days=1)
@@ -3483,17 +3503,19 @@ def test_application_start_organization_entity_expiring_yesterday(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    expected_message = f"This organization's SAM.gov registration expired on {yesterday.strftime('%B %d, %Y')} and cannot be used for applications"
-    assert expected_message in response.json["message"]
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_form_inclusion_update_application_form_not_found(
