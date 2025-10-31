@@ -2930,19 +2930,29 @@ class ExcludedOpportunityReviewFactory(BaseFactory):
     last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
 
-class LegacyCertificateFactory(BaseFactory):
+class BaseLegacyCertificateFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    legacy_certificate_id = Generators.UuidObj
+    cert_id = factory.Faker("random_int", min=1000, max=10000000)
+    serial_number = factory.Faker("random_int", min=1000, max=10000000)
+    expiration_date = factory.Faker("future_date", end_date="+2y")
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    user = factory.SubFactory(UserFactory)
+
+
+class LegacyAgencyCertificateFactory(BaseLegacyCertificateFactory):
     class Meta:
         model = user_models.LegacyCertificate
 
-    legacy_certificate_id = Generators.UuidObj
-    cert_id = factory.Sequence(lambda n: n)
-    serial_number = factory.Sequence(lambda n: n)
-    expiration_date = factory.Faker("future_date", end_date="+2y")
-
-    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-
     agency_id = factory.LazyAttribute(lambda a: a.agency.agency_id)
     agency = factory.SubFactory(AgencyFactory)
+
+
+class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
+    class Meta:
+        model = user_models.LegacyCertificate
 
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     organization = factory.SubFactory(OrganizationFactory)

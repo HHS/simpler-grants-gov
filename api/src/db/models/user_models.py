@@ -461,17 +461,14 @@ class LegacyCertificate(ApiSchemaTable, TimestampMixin):
     legacy_certificate_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
-    cert_id: Mapped[str] = mapped_column(index=True, nullable=False)
-    serial_number: Mapped[str] = mapped_column(index=True, nullable=False)
-    expiration_date: Mapped[date] = mapped_column(index=True, nullable=False)
-
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), nullable=False)
+    cert_id: Mapped[str] = mapped_column(index=True)
+    serial_number: Mapped[str] = mapped_column(index=True)
+    expiration_date: Mapped[date] = mapped_column(index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
     user: Mapped[User] = relationship(User)
-
-    agency_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(Agency.agency_id))
-    agency: Mapped[Agency] = relationship(Agency)
-
-    organization_id: Mapped[uuid.UUID] = mapped_column(
+    agency_id: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey(Agency.agency_id))
+    agency: Mapped[Agency | None] = relationship(Agency)
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(Organization.organization_id)
     )
-    organization: Mapped[Organization] = relationship(Organization)
+    organization: Mapped[Organization | None] = relationship(Organization)

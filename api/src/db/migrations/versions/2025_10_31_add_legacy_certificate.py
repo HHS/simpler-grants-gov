@@ -1,8 +1,8 @@
 """add_legacy_certificate
 
-Revision ID: 5165bc1a5eaf
+Revision ID: 75c42327a370
 Revises: 43622a46494e
-Create Date: 2025-10-31 17:32:42.512496
+Create Date: 2025-10-31 21:12:36.885680
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "5165bc1a5eaf"
+revision = "75c42327a370"
 down_revision = "43622a46494e"
 branch_labels = None
 depends_on = None
@@ -25,8 +25,8 @@ def upgrade():
         sa.Column("serial_number", sa.Text(), nullable=False),
         sa.Column("expiration_date", sa.Date(), nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=False),
-        sa.Column("agency_id", sa.UUID(), nullable=False),
-        sa.Column("organization_id", sa.UUID(), nullable=False),
+        sa.Column("agency_id", sa.UUID(), nullable=True),
+        sa.Column("organization_id", sa.UUID(), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
