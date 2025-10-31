@@ -50,7 +50,7 @@ export const FormFields = ({
     parent: { label: string; name: string; description?: string } | null,
   ) => {
     if (!Array.isArray(uiSchema)) {
-      throw new Error("ui schema element is not an array");
+      throw new Error("top level UI Schema element must be an array");
     }
     // generate fields for all schema elements that are not children of a section
     uiSchema.forEach((node) => {
@@ -89,7 +89,6 @@ export const FormFields = ({
             <React.Fragment key={node.name}>{field}</React.Fragment>,
           ];
         }
-      } else {
       }
     });
 
