@@ -21,6 +21,11 @@ class FeatureFlagConfig(PydanticBaseEnvConfig):
         False, alias=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_env_var_name()
     )
 
+    # ENABLE_XML_GENERATION
+    enable_xml_generation: bool = Field(
+        False, alias=FeatureFlag.ENABLE_XML_GENERATION.get_env_var_name()
+    )
+
 
 # Global, loaded once at startup by calling initialize
 """
