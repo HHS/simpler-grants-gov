@@ -246,7 +246,7 @@ def user_get_applications(
         raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
-        applications = get_user_applications(db_session, user_id)
+        applications, pagination = get_user_applications(db_session, user_id, json_data)
 
     logger.info(
         "Retrieved applications for user",
@@ -256,7 +256,7 @@ def user_get_applications(
         },
     )
 
-    return response.ApiResponse(message="Success", data=applications)
+    return response.ApiResponse(message="Success", data=applications, pagination_info=pagination)
 
 
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities")
