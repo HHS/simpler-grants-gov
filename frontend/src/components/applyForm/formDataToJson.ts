@@ -49,7 +49,10 @@ const getFieldType = (
   formSchema: RJSFSchema,
   parentKey?: string,
 ): string => {
-  // this assumes that all elements of an array will have the same type
+  // for fields that represent array items in the form schema, we need to reference
+  // the "items" property of the field's schema definition. The form data key will
+  // include an index into the array - switching that out for "items" will allow us to
+  // point to the correct place in the form schema.
   // needed to handle activity line items in the budget form
   const keyWithArrayNotationStripped = currentKey.replace(
     /\[\d+\]/g,
