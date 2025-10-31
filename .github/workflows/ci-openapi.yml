@@ -120,7 +120,7 @@ jobs:
                -H "Accept: application/vnd.github+json" \
                "$API" \
                -d "$(jq -n \
-                     --arg title "Update Database ERD Diagrams and OpenAPI Docs" \
+                     --arg title "Automated Update to Database ERD Diagrams and OpenAPI Docs" \
                      --arg head "$BRANCH" \
                      --arg base "main" \
                      --arg body "Automated update of ERD diagrams and OpenAPI specs." \
