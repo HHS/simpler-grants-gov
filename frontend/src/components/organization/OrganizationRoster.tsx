@@ -4,11 +4,10 @@ import { UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { Alert, Table } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
 
 export const OrganizationRosterSkeleton = ({
   organizationId,
@@ -65,29 +64,6 @@ const OrganizationUserRow = ({
       <td>{fullName}</td>
       <td>{roleNames}</td>
     </tr>
-  );
-};
-
-const OrganizationRosterInfo = ({
-  organizationId,
-}: {
-  organizationId: string;
-}) => {
-  const t = useTranslations("OrganizationDetail.rosterTable");
-  return (
-    <div className="margin-y-5">
-      <h3>{t("title")}</h3>
-      <div>
-        {t("explanation")} {t("manageUsersExplanation")}{" "}
-        <Link
-          href={`/organization/${organizationId}/manage-users`}
-          className="usa-button usa-button--secondary float-right"
-        >
-          <USWDSIcon name="people" />
-          {t("manageUsersCTA")}
-        </Link>
-      </div>
-    </div>
   );
 };
 

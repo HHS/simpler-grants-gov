@@ -1,16 +1,7 @@
 import pytest
 
-from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
-
-
-def validate_required(data: dict, expected_required_fields: list[str]):
-    validation_issues = validate_json_schema_for_form(data, ProjectAbstractSummary_v2_0)
-
-    assert len(validation_issues) == len(expected_required_fields)
-    for validation_issue in validation_issues:
-        assert validation_issue.type == "required"
-        assert validation_issue.field in expected_required_fields
+from tests.src.form_schema.forms.conftest import validate_required
 
 
 @pytest.fixture
@@ -34,21 +25,21 @@ def full_valid_summary_v2_0() -> dict:
     }
 
 
-def test_summary_v2_0_minimal_valid_json(minimal_valid_summary_v2_0):
+def test_summary_v2_0_minimal_valid_json(minimal_valid_summary_v2_0, project_abstract_summary_v2_0):
     validation_issues = validate_json_schema_for_form(
-        minimal_valid_summary_v2_0, ProjectAbstractSummary_v2_0
+        minimal_valid_summary_v2_0, project_abstract_summary_v2_0
     )
     assert len(validation_issues) == 0
 
 
-def test_summary_v2_0_full_valid_json(full_valid_summary_v2_0):
+def test_summary_v2_0_full_valid_json(full_valid_summary_v2_0, project_abstract_summary_v2_0):
     validation_issues = validate_json_schema_for_form(
-        full_valid_summary_v2_0, ProjectAbstractSummary_v2_0
+        full_valid_summary_v2_0, project_abstract_summary_v2_0
     )
     assert len(validation_issues) == 0
 
 
-def test_summary_v2_0_empty_json():
+def test_summary_v2_0_empty_json(project_abstract_summary_v2_0):
     EXPECTED_REQUIRED_FIELDS = [
         "$.funding_opportunity_number",
         "$.applicant_name",
@@ -56,10 +47,10 @@ def test_summary_v2_0_empty_json():
         "$.project_abstract",
     ]
 
-    validate_required({}, EXPECTED_REQUIRED_FIELDS)
+    validate_required({}, EXPECTED_REQUIRED_FIELDS, project_abstract_summary_v2_0)
 
 
-def test_summary_v2_0_min_length():
+def test_summary_v2_0_min_length(project_abstract_summary_v2_0):
     data = {
         "funding_opportunity_number": "",
         "assistance_listing_number": "",
@@ -67,7 +58,7 @@ def test_summary_v2_0_min_length():
         "project_title": "",
         "project_abstract": "",
     }
-    validation_issues = validate_json_schema_for_form(data, ProjectAbstractSummary_v2_0)
+    validation_issues = validate_json_schema_for_form(data, project_abstract_summary_v2_0)
 
     EXPECTED_ERROR_FIELDS = [
         "$.funding_opportunity_number",
@@ -83,7 +74,7 @@ def test_summary_v2_0_min_length():
         assert validation_issue.field in EXPECTED_ERROR_FIELDS
 
 
-def test_summary_v2_0_max_length():
+def test_summary_v2_0_max_length(project_abstract_summary_v2_0):
     data = {
         "funding_opportunity_number": "a" * 41,
         "assistance_listing_number": "b" * 16,
@@ -91,7 +82,7 @@ def test_summary_v2_0_max_length():
         "project_title": "d" * 251,
         "project_abstract": "e" * 4001,
     }
-    validation_issues = validate_json_schema_for_form(data, ProjectAbstractSummary_v2_0)
+    validation_issues = validate_json_schema_for_form(data, project_abstract_summary_v2_0)
 
     EXPECTED_ERROR_FIELDS = [
         "$.funding_opportunity_number",

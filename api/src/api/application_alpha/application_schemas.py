@@ -367,3 +367,7 @@ class ApplicationFormInclusionUpdateRequestSchema(Schema):
 
 class ApplicationFormInclusionUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
+
+
+class ApplicationAddOrganizationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationUpdateResponseDataSchema())

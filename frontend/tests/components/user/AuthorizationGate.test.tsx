@@ -220,19 +220,19 @@ describe("AuthorizationGate", () => {
         {
           resourceId: "1",
           resourceType: "organization",
-          privilege: "modify_organization",
+          privilege: "manage_org_members",
         },
         {
           resourceId: "2",
           resourceType: "application",
-          privilege: "read_application",
+          privilege: "view_application",
         },
       ],
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
-    expect(screen.getByText("modify_organization : true")).toBeInTheDocument();
-    expect(screen.getByText("read_application : false")).toBeInTheDocument();
+    expect(screen.getByText("manage_org_members : true")).toBeInTheDocument();
+    expect(screen.getByText("view_application : false")).toBeInTheDocument();
   });
   it("passes down non 403 errors in fetched permission check results", async () => {
     mockCheckUserPrivilege.mockReturnValue(
@@ -259,7 +259,7 @@ describe("AuthorizationGate", () => {
         {
           resourceId: "1",
           resourceType: "organization",
-          privilege: "modify_organization",
+          privilege: "manage_org_members",
         },
       ],
     });
@@ -284,18 +284,18 @@ describe("AuthorizationGate", () => {
         {
           resourceId: "1",
           resourceType: "organization",
-          privilege: "modify_organization",
+          privilege: "manage_org_members",
         },
         {
           resourceId: "2",
           resourceType: "application",
-          privilege: "read_application",
+          privilege: "view_application",
         },
       ],
     });
     render(component as JSX.Element);
     expect(mockOnUnauthorized).not.toHaveBeenCalled();
-    expect(screen.getByText("modify_organization : true")).toBeInTheDocument();
-    expect(screen.getByText("read_application : false")).toBeInTheDocument();
+    expect(screen.getByText("manage_org_members : true")).toBeInTheDocument();
+    expect(screen.getByText("view_application : false")).toBeInTheDocument();
   });
 });

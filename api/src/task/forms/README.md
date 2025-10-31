@@ -7,12 +7,8 @@ The `update_form_task.py` script in this folder can be used
 to update a form in any environment copying the form from your
 local database to the specified environment.
 
-__IMPORTANT__ - Because these scripts pull data from your local database,
-it is recommended that you completely remake and reload forms into your database
-locally before running it by doing:
-```shell
-make volume-recreate db-seed-local
-```
+__IMPORTANT__ - These scripts work with forms as defined in
+the src.form_schemas.forms.__init__.get_active_forms function.
 
 # Auth
 Both of these scripts talk with our API endpoints in the specified environment

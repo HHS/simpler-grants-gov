@@ -12,13 +12,8 @@ import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.db.models.competition_models import Competition, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms.budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
-from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
-from src.form_schema.forms.project_narrative_attachment import ProjectNarrativeAttachment_v1_2
-from src.form_schema.forms.sf424 import SF424_v4_0
-from src.form_schema.forms.sf424a import SF424a_v1_0
-from src.form_schema.forms.sf424b import SF424b_v1_1
-from src.form_schema.forms.sflll import SFLLL_v2_0
+from src.form_schema.forms import get_active_forms
+from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_data_utils import CompetitionContainer
@@ -108,26 +103,16 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
     """Load all of our forms into the DB"""
     logger.info("Rebuilding forms")
 
-    forms_raw = {
-        "sf424": SF424_v4_0,
-        "sf424a": SF424a_v1_0,
-        "project_abstract_summary": ProjectAbstractSummary_v2_0,
-        "project_narrative_attachment": ProjectNarrativeAttachment_v1_2,
-        "budget_narrative_attachment": BudgetNarrativeAttachment_v1_2,
-        "sf424b": SF424b_v1_1,
-        "sflll": SFLLL_v2_0,
-    }
+    active_forms = get_active_forms()
+    forms = {}
 
     # For each form we need to sync the form record into
     # the database. If the form has form instructions
     # we'll create that if it doesn't already exist.
-    forms = {}
-
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
     )
-    for form_name, form in forms_raw.items():
-
+    for form in active_forms:
         # We can't use our merge approach here because
         # we want the factory to create a file on s3
         # and that requires we run create and not build
@@ -138,10 +123,12 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
         ):
             # Note that we make these text files as generating valid PDFs is surprisingly complex.
             factories.FormInstructionFactory.create(
-                form_instruction_id=form.form_instruction_id, file_name=f"{form_name}.txt"
+                form_instruction_id=form.form_instruction_id,
+                file_name=f"{form.short_form_name}.txt",
             )
 
-        forms[form_name] = db_session.merge(form, load=True)
+        form.form_json_schema = resolve_jsonschema(form.form_json_schema)
+        forms[form.short_form_name] = db_session.merge(form, load=True)
 
     return forms
 
@@ -155,31 +142,35 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sf424"], is_required=True
+        competition=pilot_competition, form=forms["SF424_4_0"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sf424a"], is_required=True
+        competition=pilot_competition, form=forms["SF424A"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["project_abstract_summary"], is_required=True
+        competition=pilot_competition, form=forms["Project_AbstractSummary_2_0"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["project_narrative_attachment"], is_required=True
+        competition=pilot_competition,
+        form=forms["ProjectNarrativeAttachments_1_2"],
+        is_required=True,
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["budget_narrative_attachment"], is_required=True
+        competition=pilot_competition,
+        form=forms["BudgetNarrativeAttachments_1_2"],
+        is_required=True,
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sf424b"], is_required=True
+        competition=pilot_competition, form=forms["SF424B"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sflll"], is_required=False
+        competition=pilot_competition, form=forms["SFLLL_2_0"], is_required=False
     )
 
     logger.info(
