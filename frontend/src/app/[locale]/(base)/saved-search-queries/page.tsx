@@ -66,9 +66,7 @@ export default async function SavedSearchQueries({
     return (
       <>
         <GridContainer>
-          <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-            {t("heading")}
-          </h1>
+          <h1 className="margin-top-0">{t("heading")}</h1>
         </GridContainer>
         <ServerErrorAlert callToAction={t("error")} />
       </>
@@ -92,9 +90,7 @@ export default async function SavedSearchQueries({
     <>
       <GridContainer>
         <Breadcrumbs breadcrumbList={SAVED_SEARCHES_CRUMBS} />
-        <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-          {t("heading")}
-        </h1>
+        <h1 className="margin-top-0">{t("heading")}</h1>
       </GridContainer>
       <div className="padding-y-5">
         {savedSearches.length > 0 ? (
