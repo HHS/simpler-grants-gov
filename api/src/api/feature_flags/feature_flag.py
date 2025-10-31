@@ -19,10 +19,6 @@ class FeatureFlag(StrEnum):
     # EnvVar: ENABLE_OPPORTUNITY_LOG_MSG
     ENABLE_OPPORTUNITY_LOG_MSG = "enable_opportunity_log_msg"
 
-    # Header: FF-Enable-Xml-Generation
-    # EnvVar: ENABLE_XML_GENERATION
-    ENABLE_XML_GENERATION = "enable_xml_generation"
-
     def get_header_name(self) -> str:
         value = "-".join([v.capitalize() for v in self.value.lower().split("_")])
 
