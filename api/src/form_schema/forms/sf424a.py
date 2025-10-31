@@ -2,7 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.services.xml_generation.constants import CURRENCY_REGEX
+from src.form_schema.shared import COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -124,42 +124,29 @@ FORM_JSON_SCHEMA = {
         },
     },
     "$defs": {
-        "budget_monetary_amount": {
-            # Represents a monetary amount. We use a string instead of number
-            # to avoid any floating point rounding issues.
-            "type": "string",
-            # Pattern here effectively says:
-            # * An optional negative sign
-            # * Any number of digits
-            # * An optional decimal point
-            # * Then exactly 2 digits - if there was a decimal
-            "pattern": CURRENCY_REGEX,
-            # Limit the max amount based on the length (11-digits, allows up to 99 billion)
-            "maxLength": 14,
-        },
         "budget_summary": {
             # Represents a row from Section A
             "type": "object",
             "properties": {
                 "federal_estimated_unobligated_amount": {
                     # Column C
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "non_federal_estimated_unobligated_amount": {
                     # Column D
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "federal_new_or_revised_amount": {
                     # Column E
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "non_federal_new_or_revised_amount": {
                     # Column F
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "total_amount": {
                     # Column G
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
             },
         },
@@ -171,51 +158,51 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "personnel_amount": {
                     # Row A
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "fringe_benefits_amount": {
                     # Row B
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "travel_amount": {
                     # Row C
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "equipment_amount": {
                     # Row D
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "supplies_amount": {
                     # Row E
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "contractual_amount": {
                     # Row F
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "construction_amount": {
                     # Row G
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "other_amount": {
                     # Row H
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "total_direct_charge_amount": {
                     # Row I
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "total_indirect_charge_amount": {
                     # Row J
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "total_amount": {
                     # Row K
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "program_income_amount": {
                     # Line 7
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
             },
         },
@@ -227,19 +214,19 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "applicant_amount": {
                     # Column B
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "state_amount": {
                     # Column C
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "other_amount": {
                     # Column D
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "total_amount": {
                     # Column E
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
             },
         },
@@ -251,19 +238,19 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "first_year_amount": {
                     # Column B
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "second_year_amount": {
                     # Column C
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "third_year_amount": {
                     # Column D
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "fourth_year_amount": {
                     # Column E
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
             },
         },
@@ -275,23 +262,23 @@ FORM_JSON_SCHEMA = {
             "properties": {
                 "first_quarter_amount": {
                     # Column 1st Quarter
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "second_quarter_amount": {
                     # Column 2nd Quarter
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "third_quarter_amount": {
                     # Column 3rd Quarter
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "fourth_quarter_amount": {
                     # Column 4th Quarter
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
                 "total_amount": {
                     # Column Total for 1st Year
-                    "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
             },
         },
