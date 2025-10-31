@@ -24,7 +24,6 @@ from src.services.applications.application_validation import (
     validate_application_form,
     validate_competition_open,
 )
-from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
@@ -49,53 +48,6 @@ def _assign_application_owner_role(
             "user_id": application_user.user_id,
         },
     )
-
-
-def _validate_organization_expiration(organization: Organization) -> None:
-    """
-    Validate that the organization's SAM.gov entity record is not expired.
-
-    Args:
-        organization: Organization to validate
-
-    Raises:
-        Flask error with 422 status if organization is expired or has no SAM.gov entity record
-    """
-    # Check if organization has no sam.gov entity record
-    if not organization.sam_gov_entity:
-        logger.info(
-            "Organization has no SAM.gov entity record",
-            extra={"submission_issue": SubmissionIssue.ORG_NO_SAM_GOV_ENTITY},
-        )
-        raise_flask_error(
-            422,
-            "This organization has no SAM.gov entity record and cannot be used for applications",
-        )
-
-    sam_gov_entity = organization.sam_gov_entity
-    current_date = get_now_us_eastern_date()
-
-    # Check if organization is marked as inactive
-    if sam_gov_entity.is_inactive is True:
-        logger.info(
-            "Organization is inactive in SAM.gov",
-            extra={"submission_issue": SubmissionIssue.ORG_INACTIVE_IN_SAM_GOV},
-        )
-        raise_flask_error(
-            422,
-            "This organization is inactive in SAM.gov and cannot be used for applications",
-        )
-
-    # Check if organization's registration has expired
-    if sam_gov_entity.expiration_date < current_date:
-        logger.info(
-            "Organization SAM.gov registration has expired",
-            extra={"submission_issue": SubmissionIssue.ORG_SAM_GOV_EXPIRED},
-        )
-        raise_flask_error(
-            422,
-            f"This organization's SAM.gov registration expired on {sam_gov_entity.expiration_date.strftime('%B %d, %Y')} and cannot be used for applications",
-        )
 
 
 def _validate_applicant_type(competition: Competition, organization_id: UUID | None) -> None:
