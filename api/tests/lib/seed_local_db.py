@@ -154,11 +154,11 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
         competition=pilot_competition, form=forms["Project_AbstractSummary_2_0"], is_required=True
     )
 
-    # factories.CompetitionFormFactory.create(
-    #    competition=pilot_competition,
-    #    form=forms["ProjectNarrativeAttachments_1_2"],
-    #    is_required=True,
-    # )
+    factories.CompetitionFormFactory.create(
+        competition=pilot_competition,
+        form=forms["ProjectNarrativeAttachments_1_2"],
+        is_required=True,
+    )
 
     factories.CompetitionFormFactory.create(
         competition=pilot_competition,
@@ -271,8 +271,8 @@ def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> C
     static_all_form_competition = _build_static_competition_with_all_forms(
         db_session,
         forms,
-        uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
-        uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
+        static_opportunity_id=uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
+        static_competition_id=uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
     )
     all_form_competition = _build_competition_with_all_forms(forms)
     competition_container = CompetitionContainer(
