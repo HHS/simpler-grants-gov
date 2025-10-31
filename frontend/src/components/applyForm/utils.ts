@@ -94,6 +94,7 @@ const formatValidationWarning = (
   return validationWarningOverrides(message, fieldName, title);
 };
 
+// formats warning messages for more helpful display
 const validationWarningOverrides = (
   message: string,
   fieldName: string,
@@ -439,12 +440,21 @@ export const getFieldConfig = ({
   let value = "" as string | number | object | undefined;
   let rawErrors: string[] | FormattedFormValidationWarning[] = [];
 
-  if (fieldType === "multiField" && definition && Array.isArray(definition)) {
-    fieldName = uiFieldObject.name ? uiFieldObject.name : "";
-    if (!fieldName) {
-      console.error("name misssing from multiField definition");
-      throw new Error("Could not build field");
+  if (fieldType === "multiField") {
+    if (!uiFieldObject.name) {
+      console.error("name missing from multiField schema");
+      throw new Error("Could not build multifield field due to missing name");
     }
+    if (!definition || !Array.isArray(definition)) {
+      console.error(
+        "no multiField definition, or multifield definition not an array",
+        definition,
+      );
+      throw new Error(
+        "Could not build multifield field due to missing or malformed definition",
+      );
+    }
+    fieldName = uiFieldObject.name;
     fieldSchema = definition
       .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
       .reduce((acc, schema) => ({ ...acc, ...schema }), {});
