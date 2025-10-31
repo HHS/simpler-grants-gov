@@ -222,7 +222,7 @@ def _build_organizations_and_users(
             competition=competition_container.static_competition_with_all_forms,
             app_owner=many_app_user,
             application_name="Static All-form App",
-            static_application_id=uuid.UUID("892a6aa8-92b1-46c2-a26b-21a6aaab825d")
+            static_application_id=uuid.UUID("892a6aa8-92b1-46c2-a26b-21a6aaab825d"),
         )
 
         # An application started against the competition with all forms
@@ -402,7 +402,9 @@ def _add_application(
         app_type = "individual"
 
     if static_application_id is not None:
-        existing_static_app = db_session.execute(select(Application).where(Application.application_id == static_application_id)).scalar_one_or_none()
+        existing_static_app = db_session.execute(
+            select(Application).where(Application.application_id == static_application_id)
+        ).scalar_one_or_none()
 
         # If the app already exists, we only
         # want to make sure all the forms are present.
@@ -410,13 +412,14 @@ def _add_application(
         # it won't magically update that zip as that'd be really complex
         # to fix the ZIP and this function already has enough going on
         if existing_static_app:
-            logger.info(f"Static application {static_application_id} already exists, no need to recreate.")
+            logger.info(
+                f"Static application {static_application_id} already exists, no need to recreate."
+            )
             handle_static_application_forms(existing_static_app, competition)
             return existing_static_app
 
         # App doesn't exist
         app_params["application_id"] = static_application_id
-
 
     logger.info(f"Creating an {app_type} application '{application_name}'")
     application = factories.ApplicationFactory.create(**app_params)
@@ -479,14 +482,19 @@ def _add_application(
 
     return application
 
+
 def handle_static_application_forms(application: Application, competition: Competition):
-    existing_comp_forms_on_app = [app_form.competition_form_id for app_form in application.application_forms]
+    existing_comp_forms_on_app = [
+        app_form.competition_form_id for app_form in application.application_forms
+    ]
 
     for competition_form in competition.competition_forms:
         if competition_form.competition_form_id in existing_comp_forms_on_app:
             continue
 
-        logger.info(f"Adding new form {competition_form.form.form_name} to static application {application.application_id}")
+        logger.info(
+            f"Adding new form {competition_form.form.form_name} to static application {application.application_id}"
+        )
         application_form = factories.ApplicationFormFactory.create(
             application=application, competition_form=competition_form, application_response={}
         )

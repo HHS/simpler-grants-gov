@@ -1,6 +1,7 @@
 import dataclasses
 import logging
 import uuid
+from datetime import timedelta
 
 import click
 from sqlalchemy import select
@@ -153,11 +154,11 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
         competition=pilot_competition, form=forms["Project_AbstractSummary_2_0"], is_required=True
     )
 
-    factories.CompetitionFormFactory.create(
-        competition=pilot_competition,
-        form=forms["ProjectNarrativeAttachments_1_2"],
-        is_required=True,
-    )
+    # factories.CompetitionFormFactory.create(
+    #    competition=pilot_competition,
+    #    form=forms["ProjectNarrativeAttachments_1_2"],
+    #    is_required=True,
+    # )
 
     factories.CompetitionFormFactory.create(
         competition=pilot_competition,
@@ -193,36 +194,63 @@ def _build_competition_for_form(form: Form) -> Competition:
     return competition
 
 
-def _build_competition_with_all_forms(db_session: db.Session, forms: list[Form], static_competition_id: uuid.UUID | None = None) -> Competition:
-    competition_params = {}
-    competition: Competition | None = None
-    forms_to_add = forms
+def _build_static_competition_with_all_forms(
+    db_session: db.Session,
+    forms: list[Form],
+    static_opportunity_id: uuid.UUID,
+    static_competition_id: uuid.UUID,
+) -> Competition:
+    competition = db_session.execute(
+        select(Competition).where(Competition.competition_id == static_competition_id)
+    ).scalar_one_or_none()
 
-    if static_competition_id:
-        competition = db_session.execute(select(Competition).where(Competition.competition_id == static_competition_id)).scalar_one_or_none()
-
-        if competition is not None:
-            forms_to_add = []
-            forms_on_competition = [f.form_id for f in competition.competition_forms]
-            for form in forms:
-                if form.form_id not in forms_on_competition:
-                    forms_to_add.append(form)
-
-        competition_params["competition_id"] = static_competition_id
-        competition_params["opportunity__opportunity_title"] = "Static opportunity with ALL forms"
-
+    # If the static competition doesn't yet exist, create it.
+    if competition is None:
+        competition = factories.CompetitionFactory.create(
+            competition_id=static_competition_id,
+            opportunity__opportunity_id=static_opportunity_id,
+            opportunity__opportunity_title="STATIC Opportunity with ALL forms",
+            competition_forms=[],
+            with_instruction=True,
+            # Set the close date way in the future
+            closing_date=datetime_util.get_now_us_eastern_date() + timedelta(days=365),
+        )
+        forms_to_add = forms
     else:
-        competition_params["opportunity__opportunity_title"] = "Opportunity with ALL forms"
+        # If the static competition already exists
+        # we want whatever forms might have been
+        # created since the competition was setup initially
+        forms_to_add = []
 
+        existing_form_ids = [c.form_id for c in competition.competition_forms]
 
-
-    competition = factories.CompetitionFactory.create(
-        competition_forms=[],
-        with_instruction=True,
-        **competition_params,
-    )
+        for form in forms:
+            if form.form_id not in existing_form_ids:
+                forms_to_add.append(form)
 
     for form in forms_to_add:
+        logger.info(f"Adding form {form.form_name} to static competition")
+        factories.CompetitionFormFactory.create(
+            competition=competition, form=form, is_required=False
+        )
+
+    logger.info(
+        f"Created/updated a static competition with ALL forms' - http://localhost:3000/opportunity/{competition.opportunity_id}"
+    )
+    # Refresh the competition so any forms we just added
+    # get added to the object
+    db_session.refresh(competition)
+    return competition
+
+
+def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
+    competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="Test Opportunity with ALL forms",
+        competition_forms=[],
+        with_instruction=True,
+    )
+
+    for form in forms:
         factories.CompetitionFormFactory.create(
             competition=competition, form=form, is_required=False
         )
@@ -240,9 +268,17 @@ def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> C
 
     forms = list(forms_map.values())
 
-    static_all_form_competition = _build_competition_with_all_forms(db_session, forms, uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"))
-    all_form_competition = _build_competition_with_all_forms(db_session,forms)
-    competition_container = CompetitionContainer(static_competition_with_all_forms=static_all_form_competition, competition_with_all_forms=all_form_competition)
+    static_all_form_competition = _build_static_competition_with_all_forms(
+        db_session,
+        forms,
+        uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
+        uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
+    )
+    all_form_competition = _build_competition_with_all_forms(forms)
+    competition_container = CompetitionContainer(
+        static_competition_with_all_forms=static_all_form_competition,
+        competition_with_all_forms=all_form_competition,
+    )
 
     for form in forms:
         competition = _build_competition_for_form(form)
