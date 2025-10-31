@@ -25,12 +25,14 @@ export const FormFields = ({
   schema,
   uiSchema,
   formContext,
+  readonly,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
   formContext?: RootBudgetFormContext;
+  readonly?: boolean;
 }) => {
   try {
     let acc: JSX.Element[] = [];
@@ -81,7 +83,12 @@ export const FormFields = ({
 
             const field = renderWidget({
               type: widgetConfig.type,
-              props: { ...widgetConfig.props, formContext },
+              props: {
+                ...widgetConfig.props,
+                formContext,
+                readonly,
+                disabled: readonly,
+              },
               definition: node.definition,
             });
 
@@ -120,7 +127,12 @@ export const FormFields = ({
 
               return renderWidget({
                 type: widgetConfig.type,
-                props: { ...widgetConfig.props, formContext },
+                props: {
+                  ...widgetConfig.props,
+                  formContext,
+                  readonly,
+                  disabled: readonly,
+                },
                 definition: node.definition,
               });
             }

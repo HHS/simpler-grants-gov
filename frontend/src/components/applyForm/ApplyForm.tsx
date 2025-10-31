@@ -53,6 +53,7 @@ const ApplyForm = ({
   uiSchema,
   attachments,
   isBudgetForm = false,
+  applicationStatus,
 }: {
   applicationId: string;
   formId: string;
@@ -65,10 +66,13 @@ const ApplyForm = ({
     | null;
   attachments: Attachment[];
   isBudgetForm?: boolean;
+  applicationStatus?: string;
 }) => {
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
+  const readonly =
+    applicationStatus === "submitted" || applicationStatus === "accepted";
   const required = translate.rich("required", {
     abr: (content) => (
       <abbr
@@ -100,7 +104,10 @@ const ApplyForm = ({
 
   const { error, saved } = formState;
 
-  const formObject = savedFormData || new FormData();
+  const formObject = useMemo(
+    () => savedFormData || new FormData(),
+    [savedFormData],
+  );
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   const formContextValue = useMemo<ApplyFormFormContext>(
     () => ({
@@ -131,19 +138,21 @@ const ApplyForm = ({
     >
       <div className="display-flex flex-justify">
         <div>{required}</div>
-        <Button
-          data-testid="apply-form-save"
-          type="submit"
-          name="apply-form-button"
-          className="margin-top-0"
-          value="save"
-          onClick={() => {
-            setFormChanged(false);
-            setAttachmentsChanged(false);
-          }}
-        >
-          {pending ? "Saving..." : "Save"}
-        </Button>
+        {!readonly && (
+          <Button
+            data-testid="apply-form-save"
+            type="submit"
+            name="apply-form-button"
+            className="margin-top-0"
+            value="save"
+            onClick={() => {
+              setFormChanged(false);
+              setAttachmentsChanged(false);
+            }}
+          >
+            {pending ? "Saving..." : "Save"}
+          </Button>
+        )}
       </div>
       <div className="usa-in-page-nav-container">
         <FormGroup className="order-2 width-full">
@@ -163,6 +172,7 @@ const ApplyForm = ({
               schema={formSchema}
               uiSchema={uiSchema}
               formContext={formContextValue}
+              readonly={readonly}
             />
           </AttachmentsProvider>
         </FormGroup>

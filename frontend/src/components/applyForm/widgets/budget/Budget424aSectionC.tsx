@@ -125,6 +125,7 @@ function Budget424aSectionC<
   value,
   rawErrors,
   formContext,
+  disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined
@@ -174,6 +175,7 @@ function Budget424aSectionC<
     return (
       <CurrencyInput
         id={idPath}
+        disabled={disabled}
         rawErrors={getErrorMessagesForField(idPath)}
         value={get(
           activityItems,
