@@ -651,22 +651,21 @@ def test_user_application_list_filter_status(
 
 
 def test_user_application_list_filter_status_multi(
-    client, enable_factory_create, db_session, app_a, app_b
+    client, enable_factory_create, db_session, app_b
 ):
     """
     Test that filtering by multiple application statuses returns all applications
     matching any of the specified statuses.
     """
-    user, application, token = create_user_in_app(
+    user, app_submitted, token = create_user_in_app(
         db_session,
         privileges=[Privilege.VIEW_APPLICATION],
         status=ApplicationStatus.SUBMITTED,
     )
+    app_accepted = ApplicationFactory(application_status=ApplicationStatus.ACCEPTED)
     # Create additional applications for user
     ApplicationUserRoleFactory(
-        application_user=ApplicationUserFactory.create(
-            user=user, application=ApplicationFactory(application_status=ApplicationStatus.ACCEPTED)
-        ),
+        application_user=ApplicationUserFactory.create(user=user, application=app_accepted),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
     ApplicationUserRoleFactory(
@@ -694,7 +693,7 @@ def test_user_application_list_filter_status_multi(
     assert len(applications) == 2
 
     assert [app["application_id"] for app in applications] == [
-        str(app.application_id) for app in [application, app_a]
+        str(app.application_id) for app in [app_accepted, app_submitted]
     ]
 
 
