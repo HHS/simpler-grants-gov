@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class CompetitionContainer:
+    static_competition_with_all_forms: Competition
     competition_with_all_forms: Competition
 
     form_specific_competitions: dict[uuid.UUID, tuple[Form, Competition]] = dataclasses.field(

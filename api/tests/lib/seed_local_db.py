@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import uuid
 
 import click
 from sqlalchemy import select
@@ -201,13 +202,36 @@ def _build_competition_for_form(form: Form) -> Competition:
     return competition
 
 
-def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
+def _build_competition_with_all_forms(db_session: db.Session, forms: list[Form], static_competition_id: uuid.UUID | None = None) -> Competition:
+    competition_params = {}
+    competition: Competition | None = None
+    forms_to_add = forms
+
+    if static_competition_id:
+        competition = db_session.execute(select(Competition).where(Competition.competition_id == static_competition_id)).scalar_one_or_none()
+
+        if competition is not None:
+            forms_to_add = []
+            forms_on_competition = [f.form_id for f in competition.competition_forms]
+            for form in forms:
+                if form.form_id not in forms_on_competition:
+                    forms_to_add.append(form)
+
+        competition_params["competition_id"] = static_competition_id
+        competition_params["opportunity__opportunity_title"] = "Static opportunity with ALL forms"
+
+    else:
+        competition_params["opportunity__opportunity_title"] = "Opportunity with ALL forms"
+
+
+
     competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="Test Opportunity with ALL forms",
         competition_forms=[],
         with_instruction=True,
+        **competition_params,
     )
-    for form in forms:
+
+    for form in forms_to_add:
         factories.CompetitionFormFactory.create(
             competition=competition, form=form, is_required=False
         )
@@ -219,14 +243,17 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
-def _build_competitions(forms_map: dict[str, Form]) -> CompetitionContainer:
+def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
     logger.info("Creating competitions")
     _build_pilot_competition(forms_map)
 
-    all_form_competition = _build_competition_with_all_forms(list(forms_map.values()))
-    competition_container = CompetitionContainer(competition_with_all_forms=all_form_competition)
+    forms = list(forms_map.values())
 
-    for form in forms_map.values():
+    static_all_form_competition = _build_competition_with_all_forms(db_session, forms, uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"))
+    all_form_competition = _build_competition_with_all_forms(db_session,forms)
+    competition_container = CompetitionContainer(static_competition_with_all_forms=static_all_form_competition, competition_with_all_forms=all_form_competition)
+
+    for form in forms:
         competition = _build_competition_for_form(form)
         competition_container.add_form_competition(form, competition)
 
@@ -302,7 +329,7 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         _build_agencies(db_session)
     if seed_config.seed_forms:
         forms_map = _build_forms(db_session)
-        competition_container = _build_competitions(forms_map)
+        competition_container = _build_competitions(db_session, forms_map)
     if seed_config.seed_users:
         _build_organizations_and_users(db_session, competition_container)
     if seed_config.seed_e2e:
