@@ -21,6 +21,9 @@ RUN groupadd -g ${RUN_UID} ${RUN_USER} && \
     mkdir -p /home/${RUN_USER} /api && \
     chown -R ${RUN_UID}:${RUN_UID} /home/${RUN_USER} /api
 
+# Ensure /usr/bin is in the PATH for graphviz executables
+ENV PATH="/usr/bin:${PATH}"
+
 WORKDIR /api
 USER ${RUN_USER}
 
