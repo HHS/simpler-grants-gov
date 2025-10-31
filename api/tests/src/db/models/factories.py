@@ -2928,3 +2928,21 @@ class ExcludedOpportunityReviewFactory(BaseFactory):
     omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
     omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
     last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+
+
+class LegacyCertificateFactory(BaseFactory):
+    class Meta:
+        model = user_models.LegacyCertificate
+
+    legacy_certificate_id = Generators.UuidObj
+    cert_id = factory.Sequence(lambda n: n)
+    serial_number = factory.Sequence(lambda n: n)
+    expiration_date = factory.Faker("future_date", end_date="+2y")
+
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    agency_id = factory.LazyAttribute(lambda a: a.agency.agency_id)
+    agency = factory.SubFactory(AgencyFactory)
+
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+    organization = factory.SubFactory(OrganizationFactory)
