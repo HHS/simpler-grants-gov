@@ -6,7 +6,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 ARG PYTHON_VERSION=3.13.9
 ARG PY_MM=3.13
 ARG POETRY_VERSION=2.2.1
-ARG PIP_VERSION=25.2
+ARG PIP_VERSION=25.3
 
 SHELL ["/bin/bash", "-eux", "-c"]
 
@@ -57,13 +57,18 @@ RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
     ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
     pip3 install --no-cache-dir poetry==${POETRY_VERSION}
 
+# Ensure virtualenv embeds patched pip (25.3) for offline venv creation
+RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
+
+
 # Remove pip from runtime (keep Poetry)
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
     /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
     /usr/local/bin/pip* \
     /usr/local/bin/easy_install* \
-    /root/.cache
+    /root/.cache \
+    /root/.local/share/virtualenv || true
 
 # Prune stdlib
 RUN rm -rf \
@@ -106,7 +111,10 @@ RUN dnf install -y \
       shadow-utils \
       findutils \
       wget && \
-    dnf clean all
+    dnf clean all && \
+    # Remove the system Python RPMs
+    (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \
+    rm -rf /var/cache/dnf /var/cache/yum || true
 
 # Copy python-version.txt for downstream stages to use
 COPY --from=amazonlinux-builder /python-version.txt /python-version.txt

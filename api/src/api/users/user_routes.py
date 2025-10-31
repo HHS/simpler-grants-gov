@@ -29,6 +29,8 @@ from src.api.users.user_schemas import (
     UserInvitationListRequestSchema,
     UserInvitationListResponseSchema,
     UserOrganizationsResponseSchema,
+    UserResponseOrgInvitationRequestSchema,
+    UserResponseOrgInvitationResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
     UserSavedSearchesRequestSchema,
@@ -67,6 +69,7 @@ from src.services.users.login_gov_callback_handler import (
     handle_login_gov_callback_request,
     handle_login_gov_token,
 )
+from src.services.users.org_invitation_response import org_invitation_response
 from src.services.users.rename_api_key import rename_api_key
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
@@ -709,3 +712,35 @@ def user_get_invitations(
     )
 
     return response.ApiResponse(message="Success", data=invitations)
+
+
+@user_blueprint.post("/<uuid:user_id>/invitations/<uuid:invitation_id>/organizations")
+@user_blueprint.input(UserResponseOrgInvitationRequestSchema)
+@user_blueprint.output(UserResponseOrgInvitationResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_response_org_invitation(
+    db_session: db.Session, user_id: UUID, invitation_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+            "invitation_id": invitation_id,
+        }
+    )
+    logger.info("POST /v1/users/:user_id/invitations/:invitation_id/organizations")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user_token_session)
+        invitation_response = org_invitation_response(
+            db_session, user_token_session.user, invitation_id, json_data
+        )
+
+    return response.ApiResponse(message="Success", data=invitation_response)

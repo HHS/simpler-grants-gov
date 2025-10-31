@@ -110,6 +110,7 @@ def _build_organizations_and_users(
         )
         .with_oauth_login("no_org_user")
         .with_api_key("no_org_user_key")
+        .with_jwt_auth()
         .build()
     )
 
@@ -127,6 +128,7 @@ def _build_organizations_and_users(
         )
         .with_oauth_login("one_org_user")
         .with_api_key("one_org_user_key")
+        .with_jwt_auth()
         .with_organization(org1, roles=[ORG_ADMIN])
         .build()
     )
@@ -136,13 +138,17 @@ def _build_organizations_and_users(
     ###############################
     # User with two organizations
     ###############################
-    UserBuilder(
-        uuid.UUID("0f4ae584-c310-472d-9d6c-57201b5f84cc"), db_session, "user with two orgs"
-    ).with_oauth_login("two_org_user").with_api_key("two_orgs_user_key").with_organization(
-        org1, roles=[ORG_ADMIN]
-    ).with_organization(
-        org2, roles=[ORG_ADMIN]
-    ).build()
+    (
+        UserBuilder(
+            uuid.UUID("0f4ae584-c310-472d-9d6c-57201b5f84cc"), db_session, "user with two orgs"
+        )
+        .with_oauth_login("two_org_user")
+        .with_api_key("two_org_user_key")
+        .with_jwt_auth()
+        .with_organization(org1, roles=[ORG_ADMIN])
+        .with_organization(org2, roles=[ORG_ADMIN])
+        .build()
+    )
 
     user_scenarios.append("two_org_user - Organization admin (both organizations)")
 
@@ -150,11 +156,16 @@ def _build_organizations_and_users(
     # User as organization member (not admin)
     ###############################
 
-    UserBuilder(
-        uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"), db_session, "user as org member"
-    ).with_oauth_login("org_member_user").with_api_key("org_member_user_key").with_organization(
-        org1, roles=[ORG_MEMBER]
-    ).build()
+    (
+        UserBuilder(
+            uuid.UUID("b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"), db_session, "user as org member"
+        )
+        .with_oauth_login("org_member_user")
+        .with_api_key("org_member_user_key")
+        .with_jwt_auth()
+        .with_organization(org1, roles=[ORG_MEMBER])
+        .build()
+    )
 
     user_scenarios.append("org_member_user - Organization member (Sally's Soup Emporium)")
 
@@ -162,15 +173,19 @@ def _build_organizations_and_users(
     # User with mixed organization roles
     ###############################
 
-    UserBuilder(
-        uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"),
-        db_session,
-        "user with mixed org roles",
-    ).with_oauth_login("mixed_roles_user").with_api_key("mixed_roles_user_key").with_organization(
-        org1, roles=[ORG_ADMIN]
-    ).with_organization(
-        org2, roles=[ORG_MEMBER]
-    ).build()
+    (
+        UserBuilder(
+            uuid.UUID("f5a6b7c8-d9e0-4f1a-2b3c-4d5e6f7a8b9c"),
+            db_session,
+            "user with mixed org roles",
+        )
+        .with_oauth_login("mixed_roles_user")
+        .with_api_key("mixed_roles_user_key")
+        .with_jwt_auth()
+        .with_organization(org1, roles=[ORG_ADMIN])
+        .with_organization(org2, roles=[ORG_MEMBER])
+        .build()
+    )
 
     user_scenarios.append("mixed_roles_user - Admin of ORG1, Member of ORG2")
 
@@ -186,6 +201,7 @@ def _build_organizations_and_users(
         )
         .with_oauth_login("many_app_user")
         .with_api_key("many_app_user_key")
+        .with_jwt_auth()
         .with_organization(org1, roles=[ORG_ADMIN])
         .with_organization(org2, roles=[ORG_ADMIN])
         .with_organization(org3, roles=[ORG_ADMIN])

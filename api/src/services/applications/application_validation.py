@@ -3,7 +3,12 @@ from enum import StrEnum
 
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus, SubmissionIssue
+from src.constants.lookup_constants import (
+    ApplicationFormStatus,
+    ApplicationStatus,
+    CompetitionOpenToApplicant,
+    SubmissionIssue,
+)
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
@@ -88,6 +93,30 @@ def get_missing_app_form_errors(application: Application) -> list[ValidationErro
     return missing_form_errors
 
 
+def get_organization_required_errors(application: Application) -> list[ValidationErrorDetail]:
+    """Check if application requires an organization but doesn't have one"""
+    organization_errors: list[ValidationErrorDetail] = []
+
+    # Check if competition only allows organization applications (not individual)
+    allowed_applicant_types = application.competition.open_to_applicants
+    requires_organization = (
+        CompetitionOpenToApplicant.ORGANIZATION in allowed_applicant_types
+        and CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types
+    )
+
+    # If organization is required but application doesn't have one, add error
+    if requires_organization and application.organization_id is None:
+        organization_errors.append(
+            ValidationErrorDetail(
+                message="Application requires organization in order to submit",
+                type=ValidationErrorType.ORGANIZATION_REQUIRED,
+                value=None,
+            )
+        )
+
+    return organization_errors
+
+
 def is_form_required(application_form: ApplicationForm) -> bool:
     """Get whether a form is required"""
     # This is very simple at the moment, but in the future this might
@@ -111,6 +140,9 @@ def get_application_form_errors(
     # This acts as a guardrail and lets us find any other issues by
     # just iterating over the application forms below
     form_errors.extend(get_missing_app_form_errors(application))
+
+    # Check if application requires an organization but doesn't have one
+    form_errors.extend(get_organization_required_errors(application))
 
     # For each application form, verify it passes all validation rules
     for application_form in application.application_forms:

@@ -485,20 +485,18 @@ export const messages = {
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You're subscribed",
-    intro:
-      "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "We'll keep you informed of our progress and every opportunity to get involved.",
   },
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
-    title: "You have unsubscribed",
-    intro:
-      "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    title: "You've been unsubscribed",
+    paragraph:
+      "You'll no longer receive project updates from Simpler.Grants.gov.",
+    cta: "Change your mind?",
     buttonResub: "Re-subscribe",
+  },
+  SendyDisclaimer: {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -699,6 +697,7 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    unauthorizedExplanation: "This content is not available",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
@@ -1482,6 +1481,33 @@ export const messages = {
         description: "Keep track of oppportunities you're interested in.",
         linkText: "View saved opportunities",
       },
+    },
+    invitationReply: {
+      ctaTitle: "would like to add you to their team.",
+      description:
+        "Click Accept to join and gain access to your team, organization details and available applications.",
+      accept: "Accept",
+      reject: "Reject",
+      dismiss: "Dismiss",
+      accepted: {
+        ctaTitle: "Congrats, you've been added to {orgName}!",
+        description:
+          "Join your team by collaborating on applications and searching for the right opportunities.",
+      },
+      rejected: {
+        ctaTitle: "The invitation has been rejected.",
+        description:
+          "If you change your mind, an organization admin can add you again.",
+      },
+      rejectConfirmation: {
+        ctaTitle:
+          "Are you sure you want to reject this organization's invitation?",
+        description:
+          "You'll need to be re-added by an organization admin if you change your mind later.",
+        confirm: "Reject invitation",
+        cancel: "Cancel",
+      },
+      apiError: "Unable to update user organization invitation.",
     },
   },
   OrganizationDetail: {
