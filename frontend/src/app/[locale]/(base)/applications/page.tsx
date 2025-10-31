@@ -22,16 +22,14 @@ export default function Applications({ params }: LocalizedPageProps) {
   const t = useTranslations("Applications");
 
   return (
-    <>
-      <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">{t("pageTitle")}</h1>
-        <div className="margin-bottom-15">
-          <div className="font-sans-xl text-bold margin-bottom-3">
-            {t("noApplicationsMessage.primary")}
-          </div>
-          <div>{t("noApplicationsMessage.secondary")}</div>
+    <GridContainer>
+      <h1 className="margin-top-9 margin-bottom-7">{t("pageTitle")}</h1>
+      <div className="margin-bottom-15">
+        <div className="font-sans-xl text-bold margin-bottom-3">
+          {t("noApplicationsMessage.primary")}
         </div>
-      </GridContainer>
-    </>
+        <div>{t("noApplicationsMessage.secondary")}</div>
+      </div>
+    </GridContainer>
   );
 }
