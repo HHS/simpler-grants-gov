@@ -4078,3 +4078,114 @@ def test_add_organization_no_start_application_privilege(
 
     assert response.status_code == 403
     assert "Forbidden" in response.json["message"]
+
+
+def test_application_get_shows_expired_org_warning(
+    client, enable_factory_create, db_session
+):
+    """Test that GET application shows warning when organization has expired SAM.gov entity"""
+    today = get_now_us_eastern_date()
+    past_expiration_date = today - timedelta(days=30)
+
+    # Create organization with expired sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=past_expiration_date, is_inactive=False
+    )
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.START_APPLICATION, Privilege.VIEW_APPLICATION],
+        sam_gov_entity=sam_gov_entity,
+    )
+
+    competition = CompetitionFactory.create()
+    
+    # Start an application with the expired org
+    application = ApplicationFactory.create(
+        competition=competition,
+        organization=organization,
+    )
+    
+    # Associate user with application
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    # GET the application
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    # Check for warnings about expired org
+    assert "warnings" in response.json
+    warnings = response.json["warnings"]
+    
+    # Verify there's a warning about the expired SAM.gov registration
+    expired_warning_found = any(
+        "SAM.gov registration expired" in str(warning.get("message", ""))
+        for warning in warnings
+    )
+    assert expired_warning_found, "Expected warning about expired SAM.gov registration not found"
+
+
+def test_application_submit_fails_with_expired_org(
+    client, enable_factory_create, db_session
+):
+    """Test that SUBMIT application fails with 422 when organization has expired SAM.gov entity"""
+    today = get_now_us_eastern_date()
+    past_expiration_date = today - timedelta(days=30)
+
+    # Create organization with expired sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=past_expiration_date, is_inactive=False
+    )
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.START_APPLICATION, Privilege.SUBMIT_APPLICATION],
+        sam_gov_entity=sam_gov_entity,
+    )
+
+    # Create a simple competition with a form
+    competition = CompetitionFactory.create()
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(
+        competition=competition, 
+        form=form, 
+        is_required=True
+    )
+    
+    # Create application with the expired org
+    application = ApplicationFactory.create(
+        competition=competition,
+        organization=organization,
+        application_status=ApplicationStatus.IN_PROGRESS,
+    )
+    
+    # Associate user with application
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    
+    # Add a valid form response
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+
+    # Try to submit the application
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/submit",
+        headers={"X-SGG-Token": token},
+    )
+
+    # Should fail with 422
+    assert response.status_code == 422
+    
+    # Check that the error mentions the expired SAM.gov registration
+    response_text = str(response.json)
+    assert "SAM.gov registration expired" in response_text, \
+        "Expected error about expired SAM.gov registration not found in response"
