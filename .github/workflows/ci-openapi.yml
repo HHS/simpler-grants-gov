@@ -20,20 +20,7 @@ jobs:
         with:
           fetch-depth: 0  # fetch full history so we can create branches properly
 
-      - name: Build Docker images
-        run: make build
-
-      - name: Start database
-        run: make start-db
-
-      - name: Create ERD diagram
-        run: make create-erds
-
-      - name: Update OpenAPI spec
-        run: make openapi-spec
-
-      - name: Commit & push changes
-        id: commit
+      - name: Setup branch
         working-directory: .
         run: |
           git config user.name "nava-platform-bot"
@@ -53,6 +40,23 @@ jobs:
             echo "Remote branch does not exist, creating from main"
             git checkout -b "$BRANCH" origin/main
           fi
+
+      - name: Build Docker images
+        run: make build
+
+      - name: Start database
+        run: make start-db
+
+      - name: Create ERD diagram
+        run: make create-erds
+
+      - name: Update OpenAPI spec
+        run: make openapi-spec
+
+      - name: Commit & push changes
+        id: commit
+        working-directory: .
+        run: |
 
           # Show file status before adding
           echo "Files before git add:"
