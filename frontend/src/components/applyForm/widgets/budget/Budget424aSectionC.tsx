@@ -125,7 +125,7 @@ function Budget424aSectionC<
   value,
   rawErrors,
   formContext,
-  disabled
+  disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined

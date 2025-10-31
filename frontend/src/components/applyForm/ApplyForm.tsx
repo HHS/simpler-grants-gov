@@ -104,7 +104,10 @@ const ApplyForm = ({
 
   const { error, saved } = formState;
 
-  const formObject = useMemo(() => savedFormData || new FormData(), [savedFormData]);
+  const formObject = useMemo(
+    () => savedFormData || new FormData(),
+    [savedFormData],
+  );
   const navFields = useMemo(() => getFieldsForNav(uiSchema), [uiSchema]);
   const formContextValue = useMemo<ApplyFormFormContext>(
     () => ({
