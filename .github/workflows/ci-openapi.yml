@@ -59,9 +59,16 @@ jobs:
           # Check if branch exists remotely and use it, otherwise create from main
           if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
             echo "Remote branch exists, checking it out"
-            git checkout -b "$BRANCH" "origin/$BRANCH"
+            # Reset any local changes that might conflict with checkout
+            # (Artifacts are safe in /tmp/sgg-artifacts and will be restored after checkout)
+            git reset --hard HEAD || true
+            git clean -fd || true
+            # Force checkout/create the branch (creates if doesn't exist locally, resets if it does)
+            git checkout -B "$BRANCH" "origin/$BRANCH"
           else
             echo "Remote branch does not exist, creating from main"
+            git reset --hard HEAD || true
+            git clean -fd || true
             git checkout -b "$BRANCH" origin/main
           fi
 
@@ -104,7 +111,7 @@ jobs:
           git diff --cached --stat
 
           git commit -m "Update ERD Diagrams and OpenAPI Specs"
-          git push --set-upstream origin "$BRANCH"
+          git push --force --set-upstream origin "$BRANCH"
           echo "changed=true" >> "$GITHUB_OUTPUT"
           echo "Changes committed and pushed successfully"
 
