@@ -8,7 +8,8 @@ Create Date: 2025-11-03 17:27:41.684235
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.sql import text
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.sql import bindparam, text
 
 # revision identifiers, used by Alembic.
 revision = "f16301319485"
@@ -57,16 +58,20 @@ def upgrade():
         "30bbfd53-f34a-401c-b3b7-a2712e32e072",
         "aa59a18f-86e9-47b2-a80e-8c2a4ddc9287",
     ]
-    internal_user_list = ", ".join(f"'{uuid}'" for uuid in INTERNAL_USER_UUIDS)
-    op.execute(
+    conn = op.get_bind()
+    conn.execute(
         text(
-            f"""
+            """
             UPDATE api.user
             SET user_type_id = CASE
-                WHEN user_id in ({internal_user_list}) THEN {INTERNAL_FRONTEND_TYPE_ID}
-                ELSE {STANDARD_TYPE_ID}
+                WHEN user_id = ANY(:internal_user_list) THEN :internal_frontend_type_id
+                ELSE :standard_type_id
             END;
             """
+        ).bindparams(
+            bindparam("internal_user_list", value=INTERNAL_USER_UUIDS, type_=ARRAY(UUID)),
+            bindparam("internal_frontend_type_id", INTERNAL_FRONTEND_TYPE_ID),
+            bindparam("standard_type_id", STANDARD_TYPE_ID),
         )
     )
     # ### end Alembic commands ###
