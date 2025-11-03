@@ -88,6 +88,7 @@ jobs:
         id: commit
         working-directory: .
         run: |
+          BRANCH="nava-platform-bot/update-erd-and-openapi-docs"
 
           # Show file status before adding
           echo "Files before git add:"
