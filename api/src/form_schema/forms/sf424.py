@@ -230,11 +230,9 @@ FORM_JSON_SCHEMA = {
             "description": "Enter information about the contact person.",
         },
         "contact_person_title": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
             "title": "Title",
             "description": "Enter the position title.",
-            "minLength": 1,
-            "maxLength": 45,
         },
         "organization_affiliation": {
             "type": "string",
@@ -498,17 +496,12 @@ FORM_JSON_SCHEMA = {
             "description": "Enter a valid email Address.",
         },
         "aor_signature": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
             "title": "AOR Signature",
-            "description": "Completed by Grants.gov upon submission.",
-            "minLength": 1,
-            "maxLength": 144,
         },
         "date_signed": {
-            "type": "string",
-            "format": "date",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
             "title": "Date Signed",
-            "description": "Completed by Grants.gov upon submission.",
         },
     },
 }

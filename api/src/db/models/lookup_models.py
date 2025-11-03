@@ -159,6 +159,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.PROJECT_NARRATIVE_ATTACHMENT, 5),
         LookupStr(FormType.BUDGET_NARRATIVE_ATTACHMENT, 6),
         LookupStr(FormType.PROJECT_ABSTRACT_SUMMARY, 7),
+        LookupStr(FormType.CD511, 8),
     ]
 )
 

@@ -178,34 +178,23 @@ FORM_JSON_SCHEMA = {
             "required": ["name"],
             "properties": {
                 "signature": {
-                    "type": "string",
-                    "title": "Signature",
-                    "description": "Completed by Grants.gov upon submission.",
-                    "minLength": 1,
-                    "maxLength": 144,
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
                 },
                 "name": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "title": {
-                    "type": "string",
-                    "title": "Title",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
                     "description": "Enter the title of the Certifying Official.",
-                    "minLength": 1,
-                    "maxLength": 45,
                 },
                 "telephone": {
-                    "type": "string",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
                     "title": "Telephone No.",
                     "description": "Enter the telephone number of the certifying official.",
-                    "minLength": 1,
-                    "maxLength": 25,
                 },
                 "signed_date": {
-                    "type": "string",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
                     "title": "Signature Date",
-                    "description": "Completed by Grants.gov upon submission.",
-                    "format": "date",
                 },
             },
         },

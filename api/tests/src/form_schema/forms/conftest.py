@@ -5,6 +5,7 @@ import pytest
 from src.db.models.competition_models import Form
 from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
+    CD511_v1_1,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     SF424_v4_0,
@@ -32,6 +33,24 @@ def validate_required(data: dict, expected_required_fields: list[str], form: For
     for validation_issue in validation_issues:
         assert validation_issue.type == "required"
         assert validation_issue.field in expected_required_fields
+
+
+def validate_min_length(data, expected_fields_to_error: list[str], form: Form):
+    validation_issues = validate_json_schema_for_form(data, form)
+
+    assert len(validation_issues) == len(expected_fields_to_error)
+    for validation_issue in validation_issues:
+        assert validation_issue.type == "minLength"
+        assert validation_issue.field in expected_fields_to_error
+
+
+def validate_max_length(data, expected_fields_to_error: list[str], form: Form):
+    validation_issues = validate_json_schema_for_form(data, form)
+
+    assert len(validation_issues) == len(expected_fields_to_error)
+    for validation_issue in validation_issues:
+        assert validation_issue.type == "maxLength"
+        assert validation_issue.field in expected_fields_to_error
 
 
 @pytest.fixture(scope="session")
@@ -67,3 +86,8 @@ def project_narrative_attachment_v1_2():
 @pytest.fixture(scope="session")
 def budget_narrative_attachment_v1_2():
     return setup_resolved_form(BudgetNarrativeAttachment_v1_2)
+
+
+@pytest.fixture(scope="session")
+def cd511_v1_1():
+    return setup_resolved_form(CD511_v1_1)
