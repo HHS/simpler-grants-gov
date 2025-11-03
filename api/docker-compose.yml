@@ -139,6 +139,26 @@ services:
     networks:
       - default
 
+  openapi-tools:
+    profiles:
+      - openapi-tools
+    build:
+      context: .
+      dockerfile: docker-python-openapi
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-api}
+    working_dir: /api
+    volumes:
+      - .:/api
+    env_file:
+      - path: ./local.env
+        required: true
+      - path: ./override.env
+        required: false
+    networks:
+      - default
+
 volumes:
   grantsdbdata:
   opensearch-data:
