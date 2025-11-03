@@ -52,6 +52,7 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+    UserType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
@@ -896,6 +897,7 @@ class UserFactory(BaseFactory):
         model = user_models.User
 
     user_id = Generators.UuidObj
+    user_type_id = factory.LazyFunction(lambda: UserType.STANDARD)
 
     class Params:
         with_profile = factory.Trait(
