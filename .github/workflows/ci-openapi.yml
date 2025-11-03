@@ -20,6 +20,30 @@ jobs:
         with:
           fetch-depth: 0  # fetch full history so we can create branches properly
 
+      # Generate artifacts on the triggering ref BEFORE switching branches
+      - name: Build Docker images
+        run: make build
+
+      - name: Start database
+        run: make start-db
+
+      - name: Create ERD diagram
+        run: make create-erds
+
+      - name: Update OpenAPI spec
+        run: make openapi-spec
+
+      - name: Stash generated artifacts
+        working-directory: .
+        run: |
+          mkdir -p /tmp/sgg-artifacts
+          cp -v api/openapi.generated.yml /tmp/sgg-artifacts/ || true
+          # Copy ERD PNGs if they exist
+          if ls documentation/api/database/erds/*.png >/dev/null 2>&1; then
+            cp -v documentation/api/database/erds/*.png /tmp/sgg-artifacts/
+          fi
+
+      # Now create/switch to the bot branch based on main for a clean PR
       - name: Setup branch
         working-directory: .
         run: |
@@ -41,17 +65,17 @@ jobs:
             git checkout -b "$BRANCH" origin/main
           fi
 
-      - name: Build Docker images
-        run: make build
-
-      - name: Start database
-        run: make start-db
-
-      - name: Create ERD diagram
-        run: make create-erds
-
-      - name: Update OpenAPI spec
-        run: make openapi-spec
+      - name: Restore artifacts
+        working-directory: .
+        run: |
+          # Restore generated files from temp stash
+          if [ -f /tmp/sgg-artifacts/openapi.generated.yml ]; then
+            cp -v /tmp/sgg-artifacts/openapi.generated.yml api/
+          fi
+          if ls /tmp/sgg-artifacts/*.png >/dev/null 2>&1; then
+            mkdir -p documentation/api/database/erds
+            cp -v /tmp/sgg-artifacts/*.png documentation/api/database/erds/
+          fi
 
       - name: Commit & push changes
         id: commit
