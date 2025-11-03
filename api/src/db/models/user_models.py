@@ -72,7 +72,7 @@ class User(ApiSchemaTable, TimestampMixin):
         "user_type_id",
         LookupColumn(LkUserType),
         ForeignKey(LkUserType.user_type_id),
-        default=UserType.STANDARD,
+        default=1,
     )
 
     @property
