@@ -1170,6 +1170,8 @@ def test_application_form_get_with_attachments(
     attachment2 = ApplicationAttachmentFactory.create(
         application=application_form.application, file_name="my_file_b.pdf"
     )
+    # Add a deleted attachment that won't get picked up
+    ApplicationAttachmentFactory.create(application=application_form.application, is_deleted=True)
 
     CompetitionFormFactory.create(
         competition=application_form.application.competition,
@@ -1298,6 +1300,8 @@ def test_application_get_with_attachments(
     attachment2 = ApplicationAttachmentFactory.create(
         application=application, file_name="my_file_b.pdf"
     )
+    # Add a deleted attachment that won't get picked up
+    ApplicationAttachmentFactory.create(application=application, is_deleted=True)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1441,10 +1445,18 @@ def test_application_get_success_with_rule_validation_issue(
 
     # Create an application with two app forms, one partially filled out, one not started
     application = ApplicationFactory.create(competition=competition)
+
+    # This attachment is deleted, so validation won't see it
+    deleted_attachment = ApplicationAttachmentFactory.create(
+        application=application, is_deleted=True
+    )
+
     application_form_a = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form_a,
-        application_response={"attachment_field": "b6b58969-499c-438c-b6ca-19c416b198f9"},
+        application_response={
+            "attachment_field": str(deleted_attachment.application_attachment_id)
+        },
     )
     application_form_b = ApplicationFormFactory.create(
         application=application,
@@ -1484,7 +1496,7 @@ def test_application_get_success_with_rule_validation_issue(
             "field": "$.attachment_field",
             "message": "Field references application_attachment_id not on the application",
             "type": "unknown_application_attachment",
-            "value": "b6b58969-499c-438c-b6ca-19c416b198f9",
+            "value": str(deleted_attachment.application_attachment_id),
         }
     ]
 
