@@ -341,20 +341,18 @@ class CreateApplicationSubmissionTask(Task):
 
     def process_xml_generation(self, submission: SubmissionContainer) -> None:
         """Generate GrantApplication.xml and add to zip if feature flag enabled"""
-        if not self.app_submission_config.enable_xml_generation:
-            logger.info(
-                "Skipping XML generation - feature flag disabled",
-                extra={
-                    "application_id": submission.application.application_id,
-                    "competition_id": submission.application.competition_id,
-                },
-            )
-            return
-
         log_extra = {
             "application_id": submission.application.application_id,
             "competition_id": submission.application.competition_id,
         }
+        if not self.app_submission_config.enable_xml_generation:
+            logger.info(
+                "Skipping XML generation - feature flag disabled",
+                extra=log_extra,
+            )
+            return
+
+
 
         logger.info("Generating XML for application submission", extra=log_extra)
 
