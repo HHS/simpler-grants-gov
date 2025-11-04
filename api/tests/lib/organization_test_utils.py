@@ -58,9 +58,7 @@ def create_user_in_org(
         role = RoleFactory.create(privileges=privileges, is_org_role=True)
 
     # Create organization-user relationship
-    org_user = OrganizationUserFactory.create(
-        user=user, organization=organization
-    )
+    org_user = OrganizationUserFactory.create(user=user, organization=organization)
 
     # Assign role to organization-user if either a role or privileges were provided
     if privileges or role:

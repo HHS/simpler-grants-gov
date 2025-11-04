@@ -265,8 +265,6 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    is_organization_owner: Mapped[bool]
-
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Organization.organization_id), index=True
     )

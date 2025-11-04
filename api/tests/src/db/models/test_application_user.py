@@ -67,10 +67,12 @@ class TestApplicationUser:
         app_user1 = ApplicationUserFactory.create(user=user, application=application1)
         app_user2 = ApplicationUserFactory.create(user=user, application=application2)
         app_user1 = ApplicationUserFactory.create(
-            user=user, application=application1,
+            user=user,
+            application=application1,
         )
         app_user2 = ApplicationUserFactory.create(
-            user=user, application=application2,
+            user=user,
+            application=application2,
         )
 
         # Both should have different primary keys

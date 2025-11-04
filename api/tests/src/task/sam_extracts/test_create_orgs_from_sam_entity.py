@@ -90,28 +90,42 @@ def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session
     user_a = LinkExternalUserFactory.create(email="entity_a@mail.com")
     entity_a = SamGovEntityFactory.create(ebiz_poc_email=user_a.email, has_organization=True)
     OrganizationUserFactory.create(
-        organization=entity_a.organization, user=user_a.user,
+        organization=entity_a.organization,
+        user=user_a.user,
     )
     # Also has other random users with other emails that won't be affected/picked up
-    OrganizationUserFactory.create(organization=entity_a.organization, )
-    OrganizationUserFactory.create(organization=entity_a.organization, )
+    OrganizationUserFactory.create(
+        organization=entity_a.organization,
+    )
+    OrganizationUserFactory.create(
+        organization=entity_a.organization,
+    )
 
     ### User already exists, but is not an owner
     user_b = LinkExternalUserFactory.create(email="entity_b@mail.com")
     entity_b = SamGovEntityFactory.create(ebiz_poc_email=user_b.email, has_organization=True)
     OrganizationUserFactory.create(
-        organization=entity_b.organization, user=user_b.user,
+        organization=entity_b.organization,
+        user=user_b.user,
     )
     # Other random users in org will be unaffected
-    OrganizationUserFactory.create(organization=entity_b.organization, )
-    OrganizationUserFactory.create(organization=entity_b.organization, )
-    OrganizationUserFactory.create(organization=entity_b.organization,)
+    OrganizationUserFactory.create(
+        organization=entity_b.organization,
+    )
+    OrganizationUserFactory.create(
+        organization=entity_b.organization,
+    )
+    OrganizationUserFactory.create(
+        organization=entity_b.organization,
+    )
 
     ### Org exists, but user is not a member/owner
     user_c = LinkExternalUserFactory.create(email="entity_c@mail.com")
     entity_c = SamGovEntityFactory.create(ebiz_poc_email=user_c.email, has_organization=True)
     # Other random users in org will be unaffected
-    OrganizationUserFactory.create(organization=entity_c.organization, )
+    OrganizationUserFactory.create(
+        organization=entity_c.organization,
+    )
 
     # Various other users/entities that won't get picked up
     SamGovEntityFactory.create(ebiz_poc_email="random_email123@mail.com")

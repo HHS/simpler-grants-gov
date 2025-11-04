@@ -41,8 +41,14 @@ class TestUserOrganizationsGet:
         org_2 = OrganizationFactory.create(sam_gov_entity=sam_gov_entity_2)
 
         # Create organization-user relationships
-        OrganizationUserFactory.create(user=user, organization=org_1,)
-        OrganizationUserFactory.create(user=user, organization=org_2,)
+        OrganizationUserFactory.create(
+            user=user,
+            organization=org_1,
+        )
+        OrganizationUserFactory.create(
+            user=user,
+            organization=org_2,
+        )
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
@@ -92,7 +98,10 @@ class TestUserOrganizationsGet:
         org = OrganizationFactory.create(sam_gov_entity=None)
 
         # Create organization-user relationship
-        OrganizationUserFactory.create(user=user, organization=org, )
+        OrganizationUserFactory.create(
+            user=user,
+            organization=org,
+        )
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
@@ -197,10 +206,12 @@ class TestUserOrganizationsGet:
 
         # Create organization-user relationships
         OrganizationUserFactory.create(
-            user=user, organization=org_with_sam,
+            user=user,
+            organization=org_with_sam,
         )
         OrganizationUserFactory.create(
-            user=user, organization=org_without_sam,
+            user=user,
+            organization=org_without_sam,
         )
 
         # Create JWT token

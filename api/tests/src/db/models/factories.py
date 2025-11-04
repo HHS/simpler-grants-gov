@@ -2829,8 +2829,6 @@ class OrganizationUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
 
-    is_organization_owner = True  # Keep for now, will be removed later
-
     class Params:
         # New traits for role assignment
         as_admin = factory.Trait(

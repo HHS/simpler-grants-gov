@@ -158,7 +158,8 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
     user = UserFactory.create()
     LinkExternalUserFactory.create(user=user, email="ebiz_update@example.com")
     org_user = OrganizationUserFactory.create(
-        organization=organization, user=user,
+        organization=organization,
+        user=user,
     )
     db_session.flush()
 

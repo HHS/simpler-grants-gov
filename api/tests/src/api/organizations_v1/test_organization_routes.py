@@ -58,7 +58,6 @@ class TestOrganizationGet:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            
             without_sam_gov_entity=True,
         )
 
@@ -209,7 +208,6 @@ class TestOrganizationGet:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-
         )
 
         # Make request
@@ -231,7 +229,6 @@ class TestOrganizationGet:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            
         )
 
         # Make request
