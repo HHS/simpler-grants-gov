@@ -73,7 +73,7 @@ function Budget424aSectionF<
   formContext,
   onChange,
   disabled,
-  readonly,
+  readOnly,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined
@@ -160,7 +160,7 @@ function Budget424aSectionF<
             inputClassName="width-full minw-30"
             value={directChargesValue}
             disabled={disabled}
-            readonly={readonly}
+            readOnly={readOnly}
           />
         )}
       </div>
@@ -175,7 +175,7 @@ function Budget424aSectionF<
             inputClassName="width-full minw-30"
             value={indirectChargesValue}
             disabled={disabled}
-            readonly={readonly}
+            readOnly={readOnly}
           />
         )}
       </div>
@@ -190,7 +190,7 @@ function Budget424aSectionF<
             inputClassName="width-full minw-30"
             value={remarksValue}
             disabled={disabled}
-            readonly={readonly}
+            readOnly={readOnly}
           />
         )}
       </div>
@@ -203,7 +203,7 @@ function Budget424aSectionF<
             rawErrors={getErrorMessagesForField("confirmation")}
             value={confirmationValue}
             disabled={disabled}
-            readonly={readonly}
+            readOnly={readOnly}
             onChange={(nextValue: unknown) => {
               const next =
                 nextValue === true || nextValue === "true"

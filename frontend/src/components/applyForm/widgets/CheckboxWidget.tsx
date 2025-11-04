@@ -20,7 +20,7 @@ function CheckboxWidget<
   options,
   value,
   required,
-  readonly,
+  readOnly,
   schema,
   autofocus = false,
   rawErrors = [],
@@ -88,7 +88,7 @@ function CheckboxWidget<
         value="true"
         defaultChecked={Boolean(value)}
         required={required}
-        disabled={disabled || readonly}
+        disabled={disabled || readOnly}
         autoFocus={autofocus}
         onChange={handleChange}
         onBlur={handleBlur}

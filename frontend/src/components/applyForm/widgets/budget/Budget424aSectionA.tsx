@@ -109,7 +109,7 @@ function Budget424aSectionA<
   value,
   rawErrors,
   formContext,
-  readonly,
+  readOnly,
   disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
@@ -257,7 +257,7 @@ function Budget424aSectionA<
                       inputClassName="minw-10"
                       value={getItemVal(row, "activity_title")}
                       disabled={disabled}
-                      readonly={readonly}
+                      readOnly={readOnly}
                     />
                   </div>
                 </div>
@@ -277,7 +277,7 @@ function Budget424aSectionA<
                       inputClassName="minw-10"
                       value={getItemVal(row, "assistance_listing_number")}
                       disabled={disabled}
-                      readonly={readonly}
+                      readOnly={readOnly}
                     />
                   </div>
                 </div>

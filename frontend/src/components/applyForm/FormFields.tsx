@@ -25,14 +25,14 @@ export const FormFields = ({
   schema,
   uiSchema,
   formContext,
-  readonly,
+  readOnly,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
   formContext?: RootBudgetFormContext;
-  readonly?: boolean;
+  readOnly?: boolean;
 }) => {
   try {
     let acc: JSX.Element[] = [];
@@ -86,8 +86,8 @@ export const FormFields = ({
               props: {
                 ...widgetConfig.props,
                 formContext,
-                readonly,
-                disabled: readonly,
+                readOnly,
+                disabled: readOnly,
               },
               definition: node.definition,
             });
@@ -130,8 +130,8 @@ export const FormFields = ({
                 props: {
                   ...widgetConfig.props,
                   formContext,
-                  readonly,
-                  disabled: readonly,
+                  readOnly,
+                  disabled: readOnly,
                 },
                 definition: node.definition,
               });

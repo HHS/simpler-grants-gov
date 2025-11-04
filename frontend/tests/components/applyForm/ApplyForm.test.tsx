@@ -148,7 +148,7 @@ describe("ApplyForm", () => {
     expect(nameField).toHaveAttribute("maxLength", "60");
     expect(nameField).toHaveAttribute("name", "name");
     expect(nameField).toHaveValue("myself");
-    expect(nameField).not.toHaveAttribute("readonly");
+    expect(nameField).not.toHaveAttribute("readOnly");
 
     const dobLabel = screen.getByText("Date of birth");
     expect(dobLabel).toBeInTheDocument();
@@ -158,7 +158,7 @@ describe("ApplyForm", () => {
     expect(dobField).toBeInTheDocument();
     expect(dobField).not.toBeRequired();
     expect(dobField).toHaveAttribute("type", "date");
-    expect(dobField).not.toHaveAttribute("readonly");
+    expect(dobField).not.toHaveAttribute("readOnly");
 
     const nav = screen.getByTestId("InPageNavigation");
     expect(nav).toHaveTextContent("navTitle");
@@ -195,10 +195,10 @@ describe("ApplyForm", () => {
     const button = screen.queryByTestId("apply-form-save");
     expect(button).not.toBeInTheDocument();
     const nameField = screen.getByTestId("name");
-    expect(nameField).toHaveAttribute("readonly");
+    expect(nameField).toHaveAttribute("readOnly");
 
     const dobField = screen.getByTestId("dob");
-    expect(dobField).toHaveAttribute("readonly");
+    expect(dobField).toHaveAttribute("readOnly");
 
     const selectField = screen.getByTestId("Select");
     expect(selectField).toBeDisabled();
