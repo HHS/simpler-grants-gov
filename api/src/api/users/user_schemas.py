@@ -1,4 +1,3 @@
-import uuid
 from enum import StrEnum
 from typing import Any
 
@@ -265,12 +264,12 @@ class UserApplicationFilterSchema(Schema):
     )
     organization_id = fields.Nested(
         UuidSearchSchemaBuilder("UserApplicationApplicationOrganizationIDFilterSchema")
-        .with_one_of(example=uuid.UUID("123e4567-e89b-12d3-a456-426614174000"))
+        .with_one_of()
         .build()
     )
     competition_id = fields.Nested(
         UuidSearchSchemaBuilder("UserApplicationApplicationCompetitionIDFilterSchema")
-        .with_one_of(example=uuid.UUID("123e4567-e89b-12d3-a456-426614174000"))
+        .with_one_of()
         .build()
     )
 

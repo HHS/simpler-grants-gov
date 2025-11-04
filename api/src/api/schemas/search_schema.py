@@ -1,4 +1,3 @@
-import uuid
 from collections.abc import Callable
 from enum import StrEnum
 from re import Pattern
@@ -370,17 +369,13 @@ class UuidSearchSchemaBuilder(BaseSearchSchemaBuilder):
         class UserApplicationFilterSchema(Schema):
             example_uuid_field = fields.Nested(
                 UuidSearchSchemaBuilder("ExampleUuidFieldSchema")
-                .with_one_of(example=uuid.UUID('123e4567-e89b-12d3-a456-426614174000'))
+                .with_one_of()
                 .build()
             )
     """
 
     def with_one_of(
         self,
-        example: uuid.UUID | None = None,
     ) -> "UuidSearchSchemaBuilder":
-        metadata = {}
-        if example is not None:
-            metadata["example"] = example
         self.schema_fields["one_of"] = fields.List(fields.UUID(), allow_none=True)
         return self
