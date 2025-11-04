@@ -1,7 +1,7 @@
 """add soft delete to app attachment
 
 Revision ID: cdfb9202130e
-Revises: 43622a46494e
+Revises: 75c42327a370
 Create Date: 2025-11-03 15:11:30.558599
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "cdfb9202130e"
-down_revision = "43622a46494e"
+down_revision = "75c42327a370"
 branch_labels = None
 depends_on = None
 
