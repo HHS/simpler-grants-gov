@@ -115,7 +115,6 @@ def get_user_applications(
     filter_clauses = build_filter_clauses(list_params.filters)
     if filter_clauses:
         stmt = stmt.where(and_(*filter_clauses))
-    # import pdb; pdb.set_trace()
     # Sort
     stmt = apply_sorting(stmt, Application, list_params.pagination.sort_order)
     # Paginate
