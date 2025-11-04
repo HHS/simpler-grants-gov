@@ -69,8 +69,6 @@ from src.util import file_util
 # Needed for generating Opportunity Json Blob for OpportunityVersion
 SCHEMA = OpportunityVersionSchema()
 
-STANDARD_USER_TYPE_ID = 1
-
 
 def sometimes_none(factory_value, none_chance: float = 0.5):
     return factory.Maybe(
