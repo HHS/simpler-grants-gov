@@ -66,14 +66,6 @@ class TestApplicationUser:
 
         app_user1 = ApplicationUserFactory.create(user=user, application=application1)
         app_user2 = ApplicationUserFactory.create(user=user, application=application2)
-        app_user1 = ApplicationUserFactory.create(
-            user=user,
-            application=application1,
-        )
-        app_user2 = ApplicationUserFactory.create(
-            user=user,
-            application=application2,
-        )
 
         # Both should have different primary keys
         assert app_user1.application_user_id != app_user2.application_user_id
