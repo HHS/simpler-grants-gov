@@ -22,9 +22,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
     return (
       <>
         <div className="grid-container">
-          <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-            {t("heading")}
-          </h1>
+          <h1 className="margin-top-0">{t("heading")}</h1>
         </div>
         <ServerErrorAlert callToAction={t("errorLoadingKeys")} />
       </>
