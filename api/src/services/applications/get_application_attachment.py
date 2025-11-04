@@ -23,6 +23,8 @@ def _get_application_attachment_by_application(
         select(ApplicationAttachment).where(
             ApplicationAttachment.application_id == application.application_id,
             ApplicationAttachment.application_attachment_id == application_attachment_id,
+            # Deleted attachments will be hidden
+            ApplicationAttachment.is_deleted.isnot(True),
         )
     ).scalar_one_or_none()
 

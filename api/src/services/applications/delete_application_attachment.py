@@ -32,5 +32,9 @@ def delete_application_attachment(
     logger.info("Deleting application attachment from s3")
     file_util.delete_file(application_attachment.file_location)
 
-    # Delete the attachment from the DB
-    db_session.delete(application_attachment)
+    # Mark the attachment as deleted
+    # We keep the record in the DB for auditing purposes
+    # But still remove the actual file
+    application_attachment.is_deleted = True
+    # Remove the s3 path to make clear it's gone.
+    application_attachment.file_location = "DELETED"
