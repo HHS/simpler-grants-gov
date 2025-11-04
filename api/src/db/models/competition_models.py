@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -294,7 +294,23 @@ class Application(ApiSchemaTable, TimestampMixin):
     application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
         "ApplicationAttachment",
         uselist=True,
+        primaryjoin=lambda: and_(
+            Application.application_id == ApplicationAttachment.application_id,
+            ApplicationAttachment.is_deleted.isnot(True),
+        ),
+        # This version of the application attachment relationship is view-only
+        # For the one that can be used to modify, use the _all_application_attachments below.
+        viewonly=True,
+    )
+
+    # Relationship that gets all application attachments INCLUDING DELETED
+    # We likely don't want to use this in most cases, preferring the above
+    # one which has only non-deleted ones.
+    _all_application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
         back_populates="application",
+        # This mostly exists so that if the app gets deleted, all attachments do as well.
         cascade="all, delete-orphan",
     )
 
@@ -371,6 +387,9 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
     mime_type: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    # Soft delete flag
+    is_deleted: Mapped[bool | None] = mapped_column(index=True, default=False)
 
     @property
     def download_path(self) -> str:

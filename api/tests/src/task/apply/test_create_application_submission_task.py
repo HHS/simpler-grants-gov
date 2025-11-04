@@ -118,6 +118,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             file_name="dupe_filename.txt",
             file_contents="contents of second dupe_filename.txt",
         )
+        # Add an application attachment that is deleted and won't be picked up
+        ApplicationAttachmentFactory.create(
+            application=application_with_attachments, file_name="deleted_file.txt", is_deleted=True
+        )
 
         # These apps won't get picked up at all because of their status
         not_picked_up_app1 = ApplicationFactory.create(
