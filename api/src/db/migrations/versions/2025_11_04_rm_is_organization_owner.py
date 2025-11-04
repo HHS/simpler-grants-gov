@@ -1,8 +1,8 @@
 """rm_is_organization_owner
 
-Revision ID: 5f688dda8d5f
-Revises: 75c42327a370
-Create Date: 2025-11-04 17:56:48.783246
+Revision ID: 878613347a9c
+Revises: cdfb9202130e
+Create Date: 2025-11-04 19:15:08.801058
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "5f688dda8d5f"
-down_revision = "75c42327a370"
+revision = "878613347a9c"
+down_revision = "cdfb9202130e"
 branch_labels = None
 depends_on = None
 
