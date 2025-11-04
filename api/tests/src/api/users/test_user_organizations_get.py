@@ -41,8 +41,8 @@ class TestUserOrganizationsGet:
         org_2 = OrganizationFactory.create(sam_gov_entity=sam_gov_entity_2)
 
         # Create organization-user relationships
-        OrganizationUserFactory.create(user=user, organization=org_1, is_organization_owner=True)
-        OrganizationUserFactory.create(user=user, organization=org_2, is_organization_owner=False)
+        OrganizationUserFactory.create(user=user, organization=org_1,)
+        OrganizationUserFactory.create(user=user, organization=org_2,)
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
@@ -63,7 +63,6 @@ class TestUserOrganizationsGet:
         # Check first organization (org_1 - user is owner: True)
         org_data_1 = organizations[0]
         assert org_data_1["organization_id"] == str(org_1.organization_id)
-        assert org_data_1["is_organization_owner"] is True
         assert org_data_1["sam_gov_entity"]["uei"] == sam_gov_entity_1.uei
         assert org_data_1["sam_gov_entity"]["legal_business_name"] == "Test Organization LLC"
         assert org_data_1["sam_gov_entity"]["expiration_date"] == "2025-12-31"
@@ -74,7 +73,6 @@ class TestUserOrganizationsGet:
         # Check second organization (org_2 - user is owner: False)
         org_data_2 = organizations[1]
         assert org_data_2["organization_id"] == str(org_2.organization_id)
-        assert org_data_2["is_organization_owner"] is False
         assert org_data_2["sam_gov_entity"]["uei"] == sam_gov_entity_2.uei
         assert org_data_2["sam_gov_entity"]["legal_business_name"] == "Another Test Org Inc"
         assert org_data_2["sam_gov_entity"]["expiration_date"] == "2026-06-30"
@@ -94,7 +92,7 @@ class TestUserOrganizationsGet:
         org = OrganizationFactory.create(sam_gov_entity=None)
 
         # Create organization-user relationship
-        OrganizationUserFactory.create(user=user, organization=org, is_organization_owner=True)
+        OrganizationUserFactory.create(user=user, organization=org, )
 
         # Create JWT token
         token, _ = create_jwt_for_user(user, db_session)
@@ -111,7 +109,6 @@ class TestUserOrganizationsGet:
 
         org_data = data["data"][0]
         assert org_data["organization_id"] == str(org.organization_id)
-        assert org_data["is_organization_owner"] is True
         assert org_data["sam_gov_entity"] is None
 
     def test_get_user_organizations_200_empty_list(self, enable_factory_create, client, db_session):
@@ -200,10 +197,10 @@ class TestUserOrganizationsGet:
 
         # Create organization-user relationships
         OrganizationUserFactory.create(
-            user=user, organization=org_with_sam, is_organization_owner=True
+            user=user, organization=org_with_sam,
         )
         OrganizationUserFactory.create(
-            user=user, organization=org_without_sam, is_organization_owner=False
+            user=user, organization=org_without_sam,
         )
 
         # Create JWT token
@@ -232,7 +229,6 @@ class TestUserOrganizationsGet:
         # Check organization with SAM.gov entity
         assert org_with_sam_data is not None
         assert org_with_sam_data["organization_id"] == str(org_with_sam.organization_id)
-        assert org_with_sam_data["is_organization_owner"] is True
         assert org_with_sam_data["sam_gov_entity"]["uei"] == "MIXED123456789"
         assert org_with_sam_data["sam_gov_entity"]["legal_business_name"] == "Mixed Test Org"
         assert org_with_sam_data["sam_gov_entity"]["expiration_date"] == "2025-03-15"
@@ -243,5 +239,4 @@ class TestUserOrganizationsGet:
         # Check organization without SAM.gov entity
         assert org_without_sam_data is not None
         assert org_without_sam_data["organization_id"] == str(org_without_sam.organization_id)
-        assert org_without_sam_data["is_organization_owner"] is False
         assert org_without_sam_data["sam_gov_entity"] is None

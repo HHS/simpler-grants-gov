@@ -2116,7 +2116,6 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
-    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
@@ -3859,7 +3858,7 @@ def test_get_application_form_access_with_organization(
     """Test that user can access the application if organization member"""
     # Associate user with organization
     _, org, token = create_user_in_org(
-        db_session, is_organization_owner=True, privileges=[Privilege.VIEW_APPLICATION]
+        db_session, privileges=[Privilege.VIEW_APPLICATION]
     )
     # Create application owned by org
     application = ApplicationFactory.create(organization=org)

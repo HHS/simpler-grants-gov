@@ -94,7 +94,7 @@ def test_validate_organization_expiration_expires_today():
 
 def test_assign_application_owner_role_new_role(db_session, enable_factory_create):
     """Test assigning Application Owner role to a user who doesn't have it"""
-    application_user = ApplicationUserFactory.create(is_application_owner=True)
+    application_user = ApplicationUserFactory.create()
 
     # Verify no role exists initially
     role_count = (
@@ -145,7 +145,6 @@ def test_create_application_assigns_owner_role(db_session, enable_factory_create
     )
 
     assert application_user is not None
-    assert application_user.is_application_owner is True
 
     # Verify Application Owner role was assigned
     role_assignment = (

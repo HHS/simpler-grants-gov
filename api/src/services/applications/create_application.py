@@ -199,7 +199,7 @@ def create_application(
     db_session.add(application)
 
     application_user = ApplicationUser(
-        application=application, user=user, is_application_owner=True
+        application=application, user=user,
     )
     db_session.add(application_user)
 
