@@ -106,7 +106,12 @@ def test_user_get_applications_success(
     # Make the request
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": user_auth_token},
     )
 
@@ -166,7 +171,12 @@ def test_user_get_applications_empty_list(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": user_auth_token},
     )
 
@@ -179,7 +189,12 @@ def test_user_get_applications_empty_for_authenticated_user(
     """Test when authenticated user has no applications"""
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": user_auth_token},
     )
 
@@ -196,7 +211,12 @@ def test_user_get_applications_forbidden_different_user(
 
     response = client.post(
         f"/v1/users/{other_user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": user_auth_token},
     )
 
@@ -208,7 +228,12 @@ def test_user_get_applications_unauthorized(client, enable_factory_create, db_se
     """Test unauthorized when no auth token provided"""
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": "invalid-token"},
     )
 
@@ -251,7 +276,12 @@ def test_user_get_applications_multiple_competitions(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": user_auth_token},
     )
 
@@ -329,7 +359,12 @@ def test_user_application_list_access(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": token},
     )
 
@@ -364,7 +399,12 @@ def test_user_application_list_access_multi_applications(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": token},
     )
 
@@ -398,7 +438,12 @@ def test_user_application_list_access_org(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": token},
     )
 
@@ -436,7 +481,12 @@ def test_user_application_list_access_multi_applications_orgs(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": token},
     )
 
@@ -467,7 +517,12 @@ def test_user_application_list_access_org_and_app_privilege_no_duplication(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": token},
     )
 
@@ -499,7 +554,12 @@ def test_user_application_list_access_org_and_app_privilege(
 
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
-        json={},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
         headers={"X-SGG-Token": token},
     )
 
@@ -512,3 +572,323 @@ def test_user_application_list_access_org_and_app_privilege(
     assert set(app["application_id"] for app in applications) == set(
         str(app.application_id) for app in apps_owned_org_a + [app_owned_org_b]
     )
+
+
+def test_user_application_list_sorting_default(
+    client, enable_factory_create, db_session, app_owned_org_b, app_a
+):
+    """Test that applications for a user are returned sorted by the default field (updated_at)
+    when no filters or sorting options are applied."""
+    # Create user and give APP-LEVEL VIEW on app_org_b
+    user, _, token = create_user_in_app(
+        db_session, application=app_owned_org_b, privileges=[Privilege.VIEW_APPLICATION]
+    )
+    # Create additional application for user
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    # assert applications sorted by the default updated_at value
+    assert len(applications) == 2
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in [app_owned_org_b, app_a]
+    )
+
+
+def test_user_application_list_filter_status(
+    client, enable_factory_create, db_session, app_a, app_b
+):
+    """
+    Test that filtering by a single application status returns only applications
+    matching that status.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.VIEW_APPLICATION],
+        status=ApplicationStatus.SUBMITTED,
+    )
+    # Create additional application for user
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_b),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {"application_status": {"one_of": [ApplicationStatus.SUBMITTED]}},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 1
+
+    assert applications[0]["application_id"] == str(application.application_id)
+
+
+def test_user_application_list_filter_status_multi(
+    client, enable_factory_create, db_session, app_b
+):
+    """
+    Test that filtering by multiple application statuses returns all applications
+    matching any of the specified statuses.
+    """
+    user, app_submitted, token = create_user_in_app(
+        db_session,
+        privileges=[Privilege.VIEW_APPLICATION],
+        status=ApplicationStatus.SUBMITTED,
+    )
+    app_accepted = ApplicationFactory(application_status=ApplicationStatus.ACCEPTED)
+    # Create additional applications for user
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_accepted),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=app_b),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {
+                "application_status": {
+                    "one_of": [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+                }
+            },
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 2
+
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in [app_accepted, app_submitted]
+    )
+
+
+def test_user_application_list_filter_org(
+    client, enable_factory_create, db_session, apps_owned_org_a, org_a, app_owned_org_b
+):
+    """
+    Test that filtering applications by a single organization returns all
+    applications for that organization.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    # Create additional applications for user
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {"organization_id": {"one_of": [org_a.organization_id]}},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 2
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in apps_owned_org_a
+    )
+
+
+def test_user_application_list_org_multi(
+    client, enable_factory_create, db_session, apps_owned_org_a, app_owned_org_b, org_a, org_b
+):
+    """
+    Test that filtering applications by multiple organizations returns all
+    applications belonging to any of the specified organizations.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    # Create additional applications for user
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {
+                "organization_id": {"one_of": [org_a.organization_id, org_b.organization_id]}
+            },
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 3
+    assert set(app["application_id"] for app in applications) == set(
+        str(app.application_id) for app in [*apps_owned_org_a, app_owned_org_b]
+    )
+
+
+def test_user_application_list_filter_competition(
+    client, enable_factory_create, db_session, apps_owned_org_a, org_a, app_owned_org_b, org_b
+):
+    """
+    Test that filtering applications by competition ID returns only applications
+    for that competition.
+    """
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    # Create additional applications for user
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": {"competition_id": {"one_of": [apps_owned_org_a[0].competition_id]}},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == 1
+    assert applications[0]["application_id"] == str(apps_owned_org_a[0].application_id)
+
+
+@pytest.mark.parametrize(
+    "filters, expected_count",
+    [
+        # Filter by competition_id + application_status
+        (
+            lambda apps_a, org_b: {
+                "competition_id": {"one_of": [apps_a[0].competition_id]},
+                "application_status": {"one_of": [ApplicationStatus.SUBMITTED]},
+            },
+            0,
+        ),
+        # Filter by organization_id + application_status
+        (
+            lambda apps_a, org_b: {
+                "organization_id": {"one_of": [org_b.organization_id]},
+                "application_status": {"one_of": [ApplicationStatus.IN_PROGRESS]},
+            },
+            1,
+        ),
+        (
+            lambda apps_a, org_b: {
+                "organization_id": {"one_of": [org_b.organization_id]},
+                "application_status": {"one_of": [ApplicationStatus.SUBMITTED]},
+            },
+            0,
+        ),
+    ],
+)
+def test_user_application_list_multi_filter(
+    client,
+    enable_factory_create,
+    db_session,
+    apps_owned_org_a,
+    app_owned_org_b,
+    org_a,
+    org_b,
+    filters,
+    expected_count,
+):
+    """
+    Test user application listing with different filter combinations.
+    """
+
+    # create user with multiple applications
+    user, application, token = create_user_in_app(
+        db_session,
+        application=app_owned_org_b,
+        privileges=[Privilege.VIEW_APPLICATION],
+    )
+    OrganizationUserRoleFactory(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org_a),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    # Build the filter JSON dynamically
+    filter_payload = filters(apps_owned_org_a, org_b)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/applications",
+        json={
+            "filters": filter_payload,
+            "pagination": {"page_offset": 1, "page_size": 25},
+        },
+        headers={"X-SGG-Token": token},
+    )
+
+    # Assertions
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+    applications = response.json["data"]
+    assert len(applications) == expected_count

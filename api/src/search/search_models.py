@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -21,3 +22,7 @@ class DateSearchFilter(BaseModel):
     end_date: date | None = None
     start_date_relative: int | None = None
     end_date_relative: int | None = None
+
+
+class UuidSearchFilter(BaseModel):
+    one_of: list[UUID] | None = None
