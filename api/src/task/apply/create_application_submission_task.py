@@ -19,6 +19,7 @@ from src.services.applications.application_validation import is_form_required
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
+from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -39,9 +40,11 @@ class SubmissionContainer:
 
     application: Application
     submission_zip: zipfile.ZipFile
+    application_submission: ApplicationSubmission
 
     form_pdf_metadata: list[FileMetadata] = field(default_factory=list)
     attachment_metadata: list[FileMetadata] = field(default_factory=list)
+    xml_metadata: FileMetadata | None = None
 
     file_names_in_zip: set[str] = field(default_factory=set)
 
@@ -224,26 +227,35 @@ class CreateApplicationSubmissionTask(Task):
 
         submission_id = uuid.uuid4()
         s3_path = build_s3_application_submission_path(self.s3_config, application, submission_id)
-        with file_util.open_stream(s3_path, "wb") as outfile:
-            with zipfile.ZipFile(outfile, "w") as submission_zip:
 
-                submission_container = SubmissionContainer(application, submission_zip)
-
-                self.process_application_forms(submission_container)
-                self.process_application_attachments(submission_container)
-                self.create_manifest_file(submission_container)
-
-        # Get the size of the zip from s3
-        zip_length = file_util.get_file_length_bytes(s3_path)
-
-        # Create the submission record in the DB and mark the app as accepted
+        # Create the submission record now so we can get the tracking number. We'll update the size later.
         application_submission = ApplicationSubmission(
             application_submission_id=submission_id,
             application=application,
             file_location=s3_path,
-            file_size_bytes=zip_length,
+            file_size_bytes=0,  # Placeholder, will update after zip is created
         )
         self.db_session.add(application_submission)
+        # Flush so we can get the tracking number
+        self.db_session.flush()
+
+        with file_util.open_stream(s3_path, "wb") as outfile:
+            with zipfile.ZipFile(outfile, "w") as submission_zip:
+
+                submission_container = SubmissionContainer(
+                    application, submission_zip, application_submission
+                )
+
+                self.process_application_forms(submission_container)
+                self.process_application_attachments(submission_container)
+                self.process_xml_generation(submission_container)
+                self.create_manifest_file(submission_container)
+
+        # Get the size of the zip from s3 and update the submission record
+        zip_length = file_util.get_file_length_bytes(s3_path)
+        application_submission.file_size_bytes = zip_length
+
+        # Mark the app as accepted
         application.application_status = ApplicationStatus.ACCEPTED
 
     def process_application_forms(self, submission: SubmissionContainer) -> None:
@@ -325,6 +337,50 @@ class CreateApplicationSubmissionTask(Task):
                 file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
                 submission.attachment_metadata.append(FileMetadata(file_name_in_zip, file_size))
 
+    def process_xml_generation(self, submission: SubmissionContainer) -> None:
+        """Generate GrantApplication.xml and add to zip if feature flag enabled"""
+        if not self.app_submission_config.enable_xml_generation:
+            logger.info(
+                "Skipping XML generation - feature flag disabled",
+                extra={
+                    "application_id": submission.application.application_id,
+                    "competition_id": submission.application.competition_id,
+                },
+            )
+            return
+
+        log_extra = {
+            "application_id": submission.application.application_id,
+            "competition_id": submission.application.competition_id,
+        }
+
+        logger.info("Generating XML for application submission", extra=log_extra)
+
+        xml_assembler = SubmissionXMLAssembler(
+            submission.application, submission.application_submission
+        )
+
+        xml_content = xml_assembler.generate_complete_submission_xml(pretty_print=True)
+
+        if not xml_content:
+            logger.warning(
+                "XML generation returned empty content - skipping",
+                extra=log_extra,
+            )
+            return
+
+        file_name_in_zip = submission.get_file_name_in_zip("GrantApplication.xml")
+        with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
+            file_in_zip.write(xml_content.encode("utf-8"))
+
+        file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
+        submission.xml_metadata = FileMetadata(file_name_in_zip, file_size)
+
+        logger.info(
+            "Successfully added XML to application submission zip",
+            extra=log_extra | {"xml_size_bytes": file_size},
+        )
+
     def create_manifest_file(self, submission: SubmissionContainer) -> None:
         """Add a manifest file to the zip"""
         log_extra = {
@@ -387,6 +443,9 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
         Attachments included in ZIP (total #)
         1. my-attachment.txt (size X)
         2. another-attachment.docx (size X)
+
+        XML Files included in ZIP (total #)
+        1. GrantApplication.xml (size X)
     """
     sections = []
 
@@ -414,6 +473,15 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
             )
 
         sections.append("\n".join(attachment_lines))
+
+    # Process the XML file
+    if submission.xml_metadata is not None:
+        xml_lines = ["XML Files included in ZIP (total 1)"]
+        xml_lines.append(
+            f"1. {submission.xml_metadata.file_name} (size {submission.xml_metadata.file_size_in_bytes} bytes)"
+        )
+
+        sections.append("\n".join(xml_lines))
 
     # Return any sections populated
     return "\n\n".join(sections)
