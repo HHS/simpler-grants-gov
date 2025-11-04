@@ -3,6 +3,7 @@
 import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { clientTokenExpirationInterval } from "src/constants/auth";
+import { environment } from "src/constants/environments";
 
 import { cookies } from "next/headers";
 
@@ -10,8 +11,17 @@ export const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 
 // returns a new date 15 minutes from time of function call
-export const newExpirationDate = () =>
-  new Date(Date.now() + clientTokenExpirationInterval);
+export const newExpirationDate = () => {
+  if (
+    environment.AUTH_EXPIRATION_TIME !== "0" &&
+    environment.ENVIRONMENT === "dev"
+  ) {
+    return new Date(
+      Date.now() + parseInt(environment.AUTH_EXPIRATION_TIME, 10),
+    );
+  }
+  return new Date(Date.now() + clientTokenExpirationInterval);
+};
 
 // extracts payload object from jwt string using passed encrytion key and algo
 export const decrypt = async (
