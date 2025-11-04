@@ -1,8 +1,8 @@
 """add_lk_user_type_to_user
 
-Revision ID: fc0530a8eada
+Revision ID: 20eb0b848e1d
 Revises: 9f919a9e045e
-Create Date: 2025-11-04 15:45:31.060073
+Create Date: 2025-11-04 18:43:34.137899
 
 """
 
@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.sql import bindparam
 
 # revision identifiers, used by Alembic.
-revision = "fc0530a8eada"
+revision = "20eb0b848e1d"
 down_revision = "9f919a9e045e"
 branch_labels = None
 depends_on = None
