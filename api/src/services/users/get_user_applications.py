@@ -20,15 +20,16 @@ from src.db.models.user_models import (
 )
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.search.search_models import StrSearchFilter, UuidSearchFilter
 from src.services.service_utils import apply_sorting
 
 logger = logging.getLogger(__name__)
 
 
 class ApplicationFilters(BaseModel):
-    application_status: list[ApplicationStatus] | None = None
-    organization_id: list[UUID] | None = None
-    competition_id: list[UUID] | None = None
+    application_status: StrSearchFilter | None = None
+    organization_id: UuidSearchFilter | None = None
+    competition_id: UuidSearchFilter | None = None
 
 
 class ListApplicationParams(BaseModel):
@@ -36,15 +37,22 @@ class ListApplicationParams(BaseModel):
     pagination: PaginationParams
 
 
-def build_filter_clauses(filters: ApplicationFilters) -> list:
+def build_filter_clauses(filters: ApplicationFilters | None) -> list:
+    if not filters:
+        return []
+
     clauses = []
 
-    if filters.application_status:
-        clauses.append(Application.application_status.in_(filters.application_status))
-    if filters.organization_id:
-        clauses.append(Application.organization_id.in_(filters.organization_id))
-    if filters.competition_id:
-        clauses.append(Application.competition_id.in_(filters.competition_id))
+    if filters.application_status and filters.application_status.one_of:
+        # Convert each string to ApplicationStatus enum
+        status_enums = [
+            ApplicationStatus(status_str) for status_str in filters.application_status.one_of
+        ]
+        clauses.append(Application.application_status.in_(status_enums))
+    if filters.organization_id and filters.organization_id.one_of:
+        clauses.append(Application.organization_id.in_(filters.organization_id.one_of))
+    if filters.competition_id and filters.competition_id.one_of:
+        clauses.append(Application.competition_id.in_(filters.competition_id.one_of))
 
     return clauses
 
@@ -104,15 +112,12 @@ def get_user_applications(
         )
     )
     # Filter
-    filters = list_params.filters
-    if filters:
-        filter_clauses = build_filter_clauses(filters)
-        if filter_clauses:
-            stmt = stmt.where(and_(*filter_clauses))
+    filter_clauses = build_filter_clauses(list_params.filters)
+    if filter_clauses:
+        stmt = stmt.where(and_(*filter_clauses))
 
     # Sort
     stmt = apply_sorting(stmt, Application, list_params.pagination.sort_order)
-
     # Paginate
     paginator: Paginator[Application] = Paginator(
         Application, stmt, db_session, page_size=list_params.pagination.page_size

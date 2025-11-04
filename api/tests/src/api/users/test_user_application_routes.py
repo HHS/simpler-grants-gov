@@ -632,7 +632,7 @@ def test_user_application_list_filter_status(
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
         json={
-            "filters": {"application_status": [ApplicationStatus.SUBMITTED]},
+            "filters": {"application_status": {"one_of": [ApplicationStatus.SUBMITTED]}},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
@@ -672,11 +672,14 @@ def test_user_application_list_filter_status_multi(
         application_user=ApplicationUserFactory.create(user=user, application=app_b),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
+
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
         json={
             "filters": {
-                "application_status": [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+                "application_status": {
+                    "one_of": [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
+                }
             },
             "pagination": {
                 "page_offset": 1,
@@ -718,7 +721,7 @@ def test_user_application_list_filter_org(
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
         json={
-            "filters": {"organization_id": [org_a.organization_id]},
+            "filters": {"organization_id": {"one_of": [org_a.organization_id]}},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
@@ -758,7 +761,9 @@ def test_user_application_list_org_multi(
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
         json={
-            "filters": {"organization_id": [org_a.organization_id, org_b.organization_id]},
+            "filters": {
+                "organization_id": {"one_of": [org_a.organization_id, org_b.organization_id]}
+            },
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
@@ -798,7 +803,7 @@ def test_user_application_list_filter_competition(
     response = client.post(
         f"/v1/users/{user.user_id}/applications",
         json={
-            "filters": {"competition_id": [apps_owned_org_a[0].competition_id]},
+            "filters": {"competition_id": {"one_of": [apps_owned_org_a[0].competition_id]}},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
