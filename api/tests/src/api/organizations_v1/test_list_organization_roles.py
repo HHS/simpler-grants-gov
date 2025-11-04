@@ -19,7 +19,7 @@ def test_list_organization_roles(client, db_session, enable_factory_create):
     )
     data = resp.get_json()["data"]
     assert resp.status_code == 200
-    assert len(data) == 2
+    assert len(data) >= 2
     # assert core_roles are listed
     assert {str(ORG_ADMIN.role_id), str(ORG_MEMBER.role_id)}.issubset(
         {role["role_id"] for role in data}

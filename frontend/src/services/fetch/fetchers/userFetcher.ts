@@ -1,17 +1,18 @@
 "server only";
 
-import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchUserWithMethod,
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import {
+  OrganizationInvitation,
   UserDetailProfile,
   UserDetailWithProfile,
   UserPrivilegeDefinition,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
+import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
@@ -51,7 +52,6 @@ export const updateUserDetails = async (
   return json.data;
 };
 
-// unused, but we may want it later
 export const getUserPrivileges = async (
   token: string,
   userId: string,
@@ -69,22 +69,38 @@ export const getUserPrivileges = async (
 };
 
 export const checkUserPrivilege = async (
+  token: string,
+  userId: string,
+  privilegeDefinition: UserPrivilegeDefinition,
+): Promise<undefined> => {
+  const { privilege, resourceId, resourceType } = privilegeDefinition;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  await fetchUserWithMethod("POST")({
+    subPath: `${userId}/can_access`,
+    additionalHeaders: ssgToken,
+    body: {
+      resource_type: resourceType,
+      resource_id: resourceId,
+      privileges: [privilege],
+    },
+  });
+};
+
+export const getUserInvitations = async (
   _token: string,
   _userId: string,
-  privilegeDefinition: UserPrivilegeDefinition,
-): Promise<unknown> => {
-  if (privilegeDefinition.resourceId === "1") {
-    return Promise.resolve([]);
-  }
-  return Promise.reject(new ApiRequestError("", "", 403));
+): Promise<OrganizationInvitation[]> => {
+  return Promise.resolve([fakeOrganizationInvitation]);
   // const ssgToken = {
   //   "X-SGG-Token": token,
   // };
   // const resp = await fetchUserWithMethod("POST")({
-  //   subPath: `${userId}/privileges`,
+  //   subPath: `${userId}/invitations/list`,
   //   additionalHeaders: ssgToken,
   // });
-  // const json = (await resp.json()) as { data: UserPrivilegesResponse };
+  // const json = (await resp.json()) as { data: OrganizationInvitation[] };
 
   // return json.data;
 };

@@ -82,7 +82,7 @@ class SOAPOperationConfig:
 
     # This value holds all namespace mappings per soap api. Grantors and Applicants APIs
     # will have different namespace configurations.
-    namespaces: dict[None | str, str] = field(default_factory=dict)
+    namespaces: dict[str | None, str] = field(default_factory=dict)
 
     # Configuration for XML namespace mapping to generate XML from SOAP XML dicts.
     # This will only be needed for the simpler SOAP data processing. The values for this property
@@ -162,7 +162,7 @@ SOAP_API_NAMESPACES: dict[SimplerSoapAPI, dict[str | None, str]] = {
 }
 
 
-@lru_cache()
+@lru_cache
 def get_soap_operation_config(
     simpler_api: SimplerSoapAPI, request_operation_name: str
 ) -> SOAPOperationConfig | None:

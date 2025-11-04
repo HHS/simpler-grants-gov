@@ -1,7 +1,6 @@
 import logging
 import uuid
 from enum import StrEnum
-from typing import Type
 
 import pytest
 from sqlalchemy import inspect
@@ -35,7 +34,7 @@ def schema_no_lookup(monkeypatch) -> db.PostgresDBClient:
 
 
 def validate_lookup_synced_to_table(
-    db_session, table: Type[LookupTable], lookup_config: LookupConfig
+    db_session, table: type[LookupTable], lookup_config: LookupConfig
 ):
     db_lookup_values = db_session.query(table).all()
 
@@ -140,7 +139,7 @@ def test_sync_roles(schema_no_lookup, caplog):
     # Assert no changes when run again
     sync_lookup_values(schema_no_lookup)
 
-    assert caplog.text.count("No modified values for role") == 4
+    assert caplog.text.count("No modified values for role") == len(CORE_ROLES)
 
     # Save original static values
     original_org_member_privs = ORG_MEMBER.privileges[:]

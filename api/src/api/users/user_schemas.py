@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Any
 
 from marshmallow import pre_dump
@@ -9,7 +10,12 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.constants.lookup_constants import ApplicationStatus, ExternalUserType, Privilege
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    ExternalUserType,
+    OrganizationInvitationStatus,
+    Privilege,
+)
 from src.db.models.user_models import (
     AgencyUserRole,
     ApplicationUserRole,
@@ -18,6 +24,12 @@ from src.db.models.user_models import (
     OrganizationUserRole,
 )
 from src.pagination.pagination_schema import generate_pagination_schema
+
+
+class ResourceSchema(StrEnum):
+    AGENCY = "agency"
+    APPLICATION = "application"
+    ORGANIZATION = "organization"
 
 
 class UserTokenHeaderSchema(Schema):
@@ -243,6 +255,26 @@ class UserApplicationListRequestSchema(Schema):
     pass
 
 
+class UserApplicationOpportunitySchema(Schema):
+    """Schema for opportunity information in application list"""
+
+    opportunity_id = fields.UUID(metadata={"description": "The opportunity ID"})
+    opportunity_title = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The title of the opportunity",
+            "example": "Research into Conservation Techniques",
+        },
+    )
+    agency_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The name of the agency who created the opportunity",
+            "example": "Department of Examples",
+        },
+    )
+
+
 class UserApplicationCompetitionSchema(Schema):
     """Schema for competition information in application list"""
 
@@ -267,6 +299,10 @@ class UserApplicationCompetitionSchema(Schema):
     )
     is_open = fields.Boolean(
         metadata={"description": "Whether the competition is open and accepting applications"}
+    )
+    opportunity = fields.Nested(
+        UserApplicationOpportunitySchema,
+        metadata={"description": "Opportunity information for this competition"},
     )
 
 
@@ -519,3 +555,182 @@ class GetRolesAndPrivilegesResponseSchema(Schema):
 
 class UserGetRolesAndPrivilegesResponseSchema(AbstractResponseSchema):
     data = fields.Nested(GetRolesAndPrivilegesResponseSchema)
+
+
+class UserCanAccessRequestSchema(Schema):
+    resource_id = fields.UUID(metadata={"description": "The internal ID of the resource"})
+    resource_type = fields.Enum(
+        ResourceSchema, metadata={"description": "Type of the resource to check access"}
+    )
+    privileges = fields.List(
+        fields.Enum(
+            Privilege,
+            metadata={"description": "List of privileges to verify for the specified resource."},
+        )
+    )
+
+
+class UserCanAccessResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class UserInvitationListRequestSchema(Schema):
+    """Schema for user invitation list request - currently empty but provided for future filtering"""
+
+    pass
+
+
+class UserInvitationOrganizationSchema(Schema):
+    """Schema for organization information in invitation responses"""
+
+    organization_id = fields.UUID(
+        metadata={
+            "description": "Organization unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    organization_name = fields.String(
+        allow_none=True,
+        attribute="sam_gov_entity.legal_business_name",
+        metadata={
+            "description": "Organization name",
+            "example": "Example Organization",
+        },
+    )
+
+
+class UserInvitationInviterUserSchema(Schema):
+    """Schema for inviter user information in invitation responses"""
+
+    user_id = fields.UUID(
+        metadata={
+            "description": "Inviter user unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    first_name = fields.String(
+        allow_none=True,
+        metadata={"description": "Inviter first name", "example": "John"},
+    )
+    last_name = fields.String(
+        allow_none=True,
+        metadata={"description": "Inviter last name", "example": "Doe"},
+    )
+    email = fields.String(
+        allow_none=True,
+        metadata={"description": "Inviter email", "example": "admin@org.com"},
+    )
+
+
+class UserInvitationRoleSchema(Schema):
+    """Schema for role information in invitation responses"""
+
+    role_id = fields.UUID(
+        metadata={
+            "description": "Role unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    role_name = fields.String(
+        metadata={"description": "Role name", "example": "Organization Member"}
+    )
+    privileges = fields.List(
+        fields.Enum(Privilege),
+        metadata={"description": "List of privileges for this role"},
+    )
+
+
+class UserInvitationItemSchema(Schema):
+    """Schema for individual invitation item in the list"""
+
+    organization_invitation_id = fields.UUID(
+        metadata={
+            "description": "Invitation unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    organization = fields.Nested(
+        UserInvitationOrganizationSchema,
+        metadata={"description": "Organization information"},
+    )
+    status = fields.String(metadata={"description": "Invitation status", "example": "pending"})
+    created_at = fields.DateTime(
+        metadata={
+            "description": "When the invitation was created",
+            "example": "2024-01-08T10:30:00Z",
+        }
+    )
+    expires_at = fields.DateTime(
+        metadata={"description": "When the invitation expires", "example": "2024-01-15T10:30:00Z"}
+    )
+    inviter_user = fields.Nested(
+        UserInvitationInviterUserSchema,
+        metadata={"description": "Information about who sent the invitation"},
+    )
+    roles = fields.List(
+        fields.Nested(UserInvitationRoleSchema),
+        metadata={"description": "Roles that would be assigned if invitation is accepted"},
+    )
+
+
+class UserInvitationListResponseSchema(AbstractResponseSchema):
+    """Schema for POST /users/:user_id/invitations/list response"""
+
+    data = fields.List(
+        fields.Nested(UserInvitationItemSchema),
+        metadata={"description": "List of user invitations"},
+    )
+
+
+class UserResponseOrgInvitationRequestSchema(Schema):
+    status = fields.Enum(
+        OrganizationInvitationStatus,
+        validate=validators.OneOf(
+            [
+                OrganizationInvitationStatus.ACCEPTED,
+                OrganizationInvitationStatus.REJECTED,
+            ]
+        ),
+        metadata={"description": "User response to invitation"},
+    )
+
+
+class OrganizationSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the organization",
+            "example": "456e7890-e12c-34f5-b678-901234567890",
+        }
+    )
+    organization_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Organization name",
+            "example": "Legal business name of the corresponding Sam Gov Entity",
+        },
+    )
+
+
+class InvitationRoleSchema(Schema):
+    role_id = fields.UUID(metadata={"description": "Role unique identifier"})
+    role_name = fields.String(metadata={"description": "Role name"})
+
+
+class OrganizationInvitationSchema(Schema):
+    organization_invitation_id = fields.UUID(metadata={"description": "Organization invitation ID"})
+    status = fields.Enum(
+        OrganizationInvitationStatus, metadata={"description": "User response to invitation"}
+    )
+    responded_at = fields.DateTime(metadata={"description": "Time User responded to invitation"})
+    organization = fields.Nested(
+        OrganizationSchema, metadata={"description": "Organization information"}
+    )
+    roles_granted = fields.List(
+        fields.Nested(InvitationRoleSchema),
+        metadata={"description": "Roles granted"},
+        attribute="roles",
+    )
+
+
+class UserResponseOrgInvitationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(OrganizationInvitationSchema)
