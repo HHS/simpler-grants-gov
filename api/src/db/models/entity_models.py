@@ -10,7 +10,7 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import OrganizationInvitationStatus, SamGovImportType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkSamGovImportType
-from src.util import datetime_util
+from src.util.datetime_util import utcnow
 
 # Add conditional import for type checking to avoid circular imports
 if TYPE_CHECKING:
@@ -92,6 +92,10 @@ class Organization(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )
 
+    @property
+    def organization_name(self) -> str | None:
+        return self.sam_gov_entity.legal_business_name if self.sam_gov_entity else None
+
 
 class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     __tablename__ = "organization_invitation"
@@ -115,7 +119,10 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     )
     invitee_user: Mapped["User | None"] = relationship("User", foreign_keys=[invitee_user_id])
     linked_roles: Mapped[list["LinkOrganizationInvitationToRole"]] = relationship(
-        "LinkOrganizationInvitationToRole", back_populates="organization_invitation", uselist=True
+        "LinkOrganizationInvitationToRole",
+        back_populates="organization_invitation",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -136,7 +143,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
 
     @property
     def is_expired(self) -> bool:
-        return datetime_util.utcnow() > self.expires_at
+        return utcnow() > self.expires_at
 
     @property
     def is_pending(self) -> bool:
@@ -145,6 +152,14 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     @property
     def can_respond(self) -> bool:
         return self.is_pending and not self.is_expired
+
+    @property
+    def responded_at(self) -> datetime | None:
+        if self.status == OrganizationInvitationStatus.ACCEPTED:
+            return self.accepted_at
+        if self.status == OrganizationInvitationStatus.REJECTED:
+            return self.rejected_at
+        return None
 
 
 class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):

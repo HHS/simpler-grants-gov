@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import apiflask
 import pytest
@@ -9,10 +9,12 @@ from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToA
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
+    get_organization_expiration_errors,
     validate_application_form,
     validate_application_in_progress,
     validate_competition_open,
 )
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,
@@ -21,6 +23,7 @@ from tests.src.db.models.factories import (
     CompetitionFormFactory,
     FormFactory,
     OrganizationFactory,
+    SamGovEntityFactory,
 )
 
 VALID_FORM_A_RESPONSE = {"str_a": "text", "obj_a": {"int_a": 4}}
@@ -1085,3 +1088,84 @@ def test_validate_application_organization_both_allowed_with_org(
 
     # Should have no validation errors
     assert len(validation_errors) == 0
+
+
+def test_get_organization_expiration_errors_no_sam_gov_entity():
+    """Test validation returns error when organization has no SAM.gov entity"""
+    organization = OrganizationFactory.build(sam_gov_entity=None)
+
+    errors = get_organization_expiration_errors(organization)
+
+    assert len(errors) == 1
+    assert errors[0].type == ValidationErrorType.ORGANIZATION_NO_SAM_GOV_ENTITY
+    assert (
+        "This organization has no SAM.gov entity record and cannot be used for applications"
+        in errors[0].message
+    )
+
+
+def test_get_organization_expiration_errors_inactive_entity():
+    """Test validation returns error when SAM.gov entity is inactive"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=365)
+
+    sam_gov_entity = SamGovEntityFactory.build(expiration_date=future_date, is_inactive=True)
+    organization = OrganizationFactory.build(sam_gov_entity=sam_gov_entity)
+
+    errors = get_organization_expiration_errors(organization)
+
+    assert len(errors) == 1
+    assert errors[0].type == ValidationErrorType.ORGANIZATION_INACTIVE_IN_SAM_GOV
+    assert (
+        "This organization is inactive in SAM.gov and cannot be used for applications"
+        in errors[0].message
+    )
+
+
+def test_get_organization_expiration_errors_expired_entity():
+    """Test validation returns error when SAM.gov entity has expired"""
+    today = get_now_us_eastern_date()
+    past_date = today - timedelta(days=30)
+
+    sam_gov_entity = SamGovEntityFactory.build(expiration_date=past_date, is_inactive=False)
+    organization = OrganizationFactory.build(sam_gov_entity=sam_gov_entity)
+
+    errors = get_organization_expiration_errors(organization)
+
+    assert len(errors) == 1
+    assert errors[0].type == ValidationErrorType.ORGANIZATION_SAM_GOV_EXPIRED
+    expected_message = f"This organization's SAM.gov registration expired on {past_date.strftime('%B %d, %Y')} and cannot be used for applications"
+    assert expected_message in errors[0].message
+
+
+def test_get_organization_expiration_errors_valid_entity():
+    """Test validation passes when SAM.gov entity is valid"""
+    today = get_now_us_eastern_date()
+    future_date = today + timedelta(days=365)
+
+    sam_gov_entity = SamGovEntityFactory.build(expiration_date=future_date, is_inactive=False)
+    organization = OrganizationFactory.build(sam_gov_entity=sam_gov_entity)
+
+    errors = get_organization_expiration_errors(organization)
+
+    assert len(errors) == 0
+
+
+def test_get_organization_expiration_errors_expires_today():
+    """Test validation passes when SAM.gov entity expires today (not yet expired)"""
+    today = get_now_us_eastern_date()
+
+    sam_gov_entity = SamGovEntityFactory.build(expiration_date=today, is_inactive=False)
+    organization = OrganizationFactory.build(sam_gov_entity=sam_gov_entity)
+
+    errors = get_organization_expiration_errors(organization)
+
+    # Should not have any errors since expiring today is still valid
+    assert len(errors) == 0
+
+
+def test_get_organization_expiration_errors_no_organization():
+    """Test validation passes when no organization is provided"""
+    errors = get_organization_expiration_errors(None)
+
+    assert len(errors) == 0

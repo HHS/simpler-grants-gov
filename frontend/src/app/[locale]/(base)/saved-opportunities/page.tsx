@@ -77,9 +77,7 @@ export default async function SavedOpportunities({
     <>
       <GridContainer>
         <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
-        <h1 className="tablet-lg:font-sans-xl desktop-lg:font-sans-2xl margin-top-0">
-          {t("SavedOpportunities.heading")}
-        </h1>
+        <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
       <div className="grid-container padding-y-5 display-flex">
         {resolvedOpportunities.length > 0 ? (

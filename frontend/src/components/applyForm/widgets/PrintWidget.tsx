@@ -17,6 +17,18 @@ function PrintWidget<
   inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
   const { title } = schema as S;
+  const toDisplay = (inputValue: unknown): string => {
+    if (inputValue === null || inputValue === undefined) return "";
+    if (typeof inputValue === "string") return inputValue;
+    if (typeof inputValue === "boolean") return inputValue ? "Yes" : "No";
+    if (typeof inputValue === "number" || typeof inputValue === "bigint")
+      return String(inputValue);
+    if (Array.isArray(inputValue))
+      return inputValue.filter((v) => v !== null && v !== undefined).join(", ");
+
+    console.warn("Unknown value type ", typeof inputValue);
+    return JSON.stringify(inputValue);
+  };
 
   return (
     <FormGroup className={formClassName} key={`form-group__text-input--${id}`}>
@@ -29,7 +41,7 @@ function PrintWidget<
         )}
       </div>
       <div data-testid={id} className={inputClassName} id={id} key={id}>
-        {(value as string) ?? ""}
+        {toDisplay(value)}
       </div>
     </FormGroup>
   );

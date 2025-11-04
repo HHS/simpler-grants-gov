@@ -3,20 +3,20 @@
 
 * @mdragon # project lead
 
-/documentation/  @acouch @andycochran @btabaska @chouinar @doug-s-nava @joshtonava @mdragon @myduong-navapbc @widal001 @prasnava @jakobpederson @ErinPattisonNava @glenblosser-nava @brianlee-nava # everyone
+/documentation/  @andycochran @btabaska @chouinar @doug-s-nava @joshtonava @mdragon @myduong-navapbc @widal001 @prasnava @jakobpederson @ErinPattisonNava @glenblosser-nava # everyone
 
-/analytics/               @acouch @widal001
-/documentation/analytics/ @acouch @widal001
+/analytics/               @widal001
+/documentation/analytics/ @widal001
 
 /api/               @chouinar @mdragon @joshtonava @jakobpederson
 /documentation/api/ @chouinar @mdragon @joshtonava @jakobpederson
 
-/frontend/               @acouch @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @glenblosser-nava
-/documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava
+/frontend/               @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @glenblosser-nava
+/documentation/frontend/ @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava
 
-/infra/                    @acouch @mdragon @joshtonava @chouinar @prasnava
-/infra/nofos/              @acouch @mdragon @pcraig3 @joshtonava @chouinar @prasnava
-/documentation/infra/      @acouch @mdragon @joshtonava @chouinar @prasnava
-/.github/                  @acouch @mdragon @joshtonava @chouinar @prasnava
-/.github/workflows/*nofos* @acouch @mdragon @pcraig3 @joshtonava @chouinar @prasnava
-/bin/                      @acouch @mdragon @joshtonava @chouinar @prasnava
+/infra/                    @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
+/infra/nofos/              @mdragon @pcraig3 @joshtonava @chouinar @prasnava 
+/documentation/infra/      @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
+/.github/                  @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
+/.github/workflows/*nofos* @mdragon @pcraig3 @joshtonava @chouinar @prasnava
+/bin/                      @mdragon @joshtonava @chouinar @prasnava @sean-navapbc

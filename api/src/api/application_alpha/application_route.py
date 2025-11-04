@@ -6,6 +6,7 @@ from src.adapters.db import flask_db
 from src.api import response
 from src.api.application_alpha.application_blueprint import application_blueprint
 from src.api.application_alpha.application_schemas import (
+    ApplicationAddOrganizationResponseSchema,
     ApplicationAttachmentCreateRequestSchema,
     ApplicationAttachmentCreateResponseSchema,
     ApplicationAttachmentDeleteResponseSchema,
@@ -28,6 +29,9 @@ from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.services.applications.add_organization_to_application import (
+    add_organization_to_application,
+)
 from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
 from src.services.applications.delete_application_attachment import delete_application_attachment
@@ -99,6 +103,38 @@ def application_update(
         db_session.add(token_session)
         # Call the service to update the application
         application = update_application(db_session, application_id, updates, user)
+
+    return response.ApiResponse(
+        message="Success", data={"application_id": application.application_id}
+    )
+
+
+@application_blueprint.put(
+    "/applications/<uuid:application_id>/organizations/<uuid:organization_id>"
+)
+@application_blueprint.output(ApplicationAddOrganizationResponseSchema)
+@application_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_add_organization(
+    db_session: db.Session, application_id: UUID, organization_id: UUID
+) -> response.ApiResponse:
+    """Add an organization to an application"""
+    add_extra_data_to_current_request_logs(
+        {"application_id": application_id, "organization_id": organization_id}
+    )
+    logger.info("PUT /alpha/applications/:application_id/organizations/:organization_id")
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        db_session.add(token_session)
+        # Call the service to add organization to the application
+        application = add_organization_to_application(
+            db_session, application_id, organization_id, user
+        )
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
