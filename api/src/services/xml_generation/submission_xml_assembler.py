@@ -41,7 +41,7 @@ class SubmissionXMLAssembler:
 
         for app_form in self.application.application_forms:
             form_name = app_form.form.short_form_name
-            if self.is_form_xml_supported(form_name):
+            if app_form.form.json_to_xml_schema is not None:
                 supported_forms.append((app_form, form_name))
             else:
                 logger.info(
