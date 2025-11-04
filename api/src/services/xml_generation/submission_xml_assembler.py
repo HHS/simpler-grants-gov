@@ -98,6 +98,14 @@ class SubmissionXMLAssembler:
                 )
                 continue
 
+        # Check if we actually generated any form XML
+        if not form_xml_elements:
+            logger.warning(
+                "No forms successfully generated XML - cannot create submission XML",
+                extra={"application_id": self.application.application_id},
+            )
+            return None
+
         # Generate footer XML
         footer_xml_str = generate_application_footer_xml(
             self.application, self.application_submission, pretty_print=False

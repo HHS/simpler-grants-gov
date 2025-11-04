@@ -275,6 +275,86 @@ class TestSubmissionXMLAssembler:
         result = assembler.generate_complete_submission_xml()
         assert result is None
 
+    def test_generate_complete_submission_xml_all_forms_fail(
+        self, sample_application, sample_application_submission, monkeypatch
+    ):
+        """Test that XML generation returns None when all forms fail to generate."""
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        # Mock _generate_form_xml to always raise an exception
+        def raise_exception(*args, **kwargs):
+            raise Exception("XML generation failed")
+
+        monkeypatch.setattr(assembler, "_generate_form_xml", raise_exception)
+
+        # Should return None when all forms fail to generate
+        result = assembler.generate_complete_submission_xml()
+        assert result is None
+
+    def test_generate_complete_submission_xml_with_only_unsupported_forms(
+        self, enable_factory_create, db_session
+    ):
+        """Test that XML generation returns None when only unsupported forms are present with XML generation enabled."""
+        # Create application infrastructure
+        agency = AgencyFactory.create()
+        opportunity = OpportunityFactory.create(
+            opportunity_number="TEST-OPP-002",
+            opportunity_title="Test Opportunity 2",
+            agency_code=agency.agency_code,
+        )
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="12.346"
+        )
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id="TEST-COMP-002",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+        )
+
+        # Create an UNSUPPORTED form (SF-424A doesn't have XML transform config)
+        unsupported_form = FormFactory.create(
+            form_name="Budget Information - Non-Construction Programs",
+            short_form_name="SF424A_1_1",
+            form_version="1.1",
+        )
+
+        application = ApplicationFactory.create(
+            competition=competition, application_name="Test Application with Unsupported Form"
+        )
+
+        # Create competition form linking to unsupported form
+        competition_form = CompetitionFormFactory.create(
+            competition=competition, form=unsupported_form
+        )
+
+        # Create application form with sample data
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "budget_total": "100000.00",
+                "federal_funding": "75000.00",
+            },
+        )
+
+        # Create application submission
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application,
+            legacy_tracking_number=87654321,
+        )
+
+        # XML generation is "enabled" (this would be a feature flag in the task)
+        # but the form doesn't support XML transformation
+        assembler = SubmissionXMLAssembler(application, application_submission)
+
+        # Generate XML - should return None since no forms support XML
+        result = assembler.generate_complete_submission_xml()
+
+        # Verify NO XML is generated since the form isn't supported
+        assert result is None
+
     def test_generate_complete_submission_xml_compact_format(
         self, sample_application, sample_application_submission
     ):
