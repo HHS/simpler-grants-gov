@@ -1,3 +1,4 @@
+import uuid
 from enum import StrEnum
 from typing import Any
 
@@ -10,6 +11,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -256,17 +258,20 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
 
 
 class UserApplicationFilterSchema(Schema):
-    application_status = fields.List(
-        fields.Enum(
-            ApplicationStatus,
-            metadata={"description": "Status of the application"},
-        )
+    application_status = fields.Nested(
+        StrSearchSchemaBuilder("UserApplicationApplicationStatusFiilterSchema")
+        .with_one_of(allowed_values=ApplicationStatus)
+        .build()
     )
-    organization_id = fields.List(
-        fields.UUID(metadata={"description": "The internal ID of the organization"})
+    organization_id = fields.Nested(
+        UuidSearchSchemaBuilder("UserApplicationApplicationOrganizationIDFilterSchema")
+        .with_one_of(example=uuid.UUID("123e4567-e89b-12d3-a456-426614174000"))
+        .build()
     )
-    competition_id = fields.List(
-        fields.UUID(metadata={"description": "The internal ID of the competition"})
+    competition_id = fields.Nested(
+        UuidSearchSchemaBuilder("UserApplicationApplicationCompetitionIDFilterSchema")
+        .with_one_of(example=uuid.UUID("123e4567-e89b-12d3-a456-426614174000"))
+        .build()
     )
 
 
