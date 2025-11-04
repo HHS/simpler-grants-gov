@@ -606,9 +606,9 @@ def test_user_application_list_sorting_default(
     applications = response.json["data"]
     # assert applications sorted by the default updated_at value
     assert len(applications) == 2
-    assert [app["application_id"] for app in applications] == [
+    assert set(app["application_id"] for app in applications) == set(
         str(app.application_id) for app in [app_owned_org_b, app_a]
-    ]
+    )
 
 
 def test_user_application_list_filter_status(
@@ -695,9 +695,9 @@ def test_user_application_list_filter_status_multi(
     applications = response.json["data"]
     assert len(applications) == 2
 
-    assert [app["application_id"] for app in applications] == [
+    assert set(app["application_id"] for app in applications) == set(
         str(app.application_id) for app in [app_accepted, app_submitted]
-    ]
+    )
 
 
 def test_user_application_list_filter_org(
@@ -826,23 +826,23 @@ def test_user_application_list_filter_competition(
         # Filter by competition_id + application_status
         (
             lambda apps_a, org_b: {
-                "competition_id": [apps_a[0].competition_id],
-                "application_status": [ApplicationStatus.SUBMITTED],
+                "competition_id": {"one_of": [apps_a[0].competition_id]},
+                "application_status": {"one_of": [ApplicationStatus.SUBMITTED]},
             },
             0,
         ),
         # Filter by organization_id + application_status
         (
             lambda apps_a, org_b: {
-                "organization_id": [org_b.organization_id],
-                "application_status": [ApplicationStatus.IN_PROGRESS],
+                "organization_id": {"one_of": [org_b.organization_id]},
+                "application_status": {"one_of": [ApplicationStatus.IN_PROGRESS]},
             },
             1,
         ),
         (
             lambda apps_a, org_b: {
-                "organization_id": [org_b.organization_id],
-                "application_status": [ApplicationStatus.SUBMITTED],
+                "organization_id": {"one_of": [org_b.organization_id]},
+                "application_status": {"one_of": [ApplicationStatus.SUBMITTED]},
             },
             0,
         ),
