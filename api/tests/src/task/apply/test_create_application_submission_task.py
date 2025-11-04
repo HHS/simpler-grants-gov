@@ -32,7 +32,7 @@ def validate_manifest_contents(contents_of_manifest: str, expected_files: list[s
         assert expected_file in contents_of_manifest
 
 
-def validate_files_in_zip(zip_file_path, expected_file_mapping: dict[str, str | None | list[str]]):
+def validate_files_in_zip(zip_file_path, expected_file_mapping: dict[str, str | list[str] | None]):
     with file_util.open_stream(zip_file_path, "rb") as f:
         with zipfile.ZipFile(f) as submission_zip:
             # Make sure the files we expect are present
@@ -117,6 +117,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             application=application_with_attachments,
             file_name="dupe_filename.txt",
             file_contents="contents of second dupe_filename.txt",
+        )
+        # Add an application attachment that is deleted and won't be picked up
+        ApplicationAttachmentFactory.create(
+            application=application_with_attachments, file_name="deleted_file.txt", is_deleted=True
         )
 
         # These apps won't get picked up at all because of their status

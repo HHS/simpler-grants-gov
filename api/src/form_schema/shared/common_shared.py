@@ -67,6 +67,26 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "minLength": 1,
         "maxLength": 25,
     },
+    "contact_person_title": {
+        "type": "string",
+        "title": "Title",
+        "description": "Enter the position title.",
+        "minLength": 1,
+        "maxLength": 45,
+    },
+    "signature": {
+        "type": "string",
+        "title": "Signature",
+        "description": "Completed by Grants.gov upon submission.",
+        "minLength": 1,
+        "maxLength": 144,
+    },
+    "submitted_date": {
+        "type": "string",
+        "format": "date",
+        "title": "Submitted Date",
+        "description": "Completed by Grants.gov upon submission.",
+    },
 }
 
 

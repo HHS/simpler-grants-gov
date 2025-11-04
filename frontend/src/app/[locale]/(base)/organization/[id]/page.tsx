@@ -6,14 +6,10 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
-import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
-import {
-  OrganizationRoster,
-  OrganizationRosterSkeleton,
-} from "src/components/organization/OrganizationRoster";
+import { OrganizationDetail } from "src/components/organization/OrganizationDetail";
+import { AuthorizationGate } from "src/components/user/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 type OrganizationDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -46,48 +42,32 @@ export async function generateMetadata({
   };
 }
 
-async function OrganizationDetail({ params }: OrganizationDetailPageProps) {
-  const t = await getTranslations("OrganizationDetail");
+async function OrganizationDetailPage({ params }: OrganizationDetailPageProps) {
   const { id } = await params;
 
   const session = await getSession();
-  if (!session?.token) {
-    return (
-      <GridContainer className="padding-top-2 tablet:padding-y-6">
-        <div>not logged in</div>
-      </GridContainer>
-    );
-  }
-  let organizationDetails;
-  try {
-    organizationDetails = await getOrganizationDetails(session.token, id);
-  } catch (e) {
-    console.error("Unable to fetch user details", e);
-  }
-
-  if (!organizationDetails) {
-    return (
-      <GridContainer className="padding-top-2 tablet:padding-y-6">
-        <ErrorMessage>{t("fetchError")}</ErrorMessage>
-      </GridContainer>
-    );
-  }
 
   return (
-    <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>{organizationDetails.sam_gov_entity.legal_business_name}</h1>
-      <OrganizationInfo
-        organizationDetails={organizationDetails.sam_gov_entity}
-      />
-      <Suspense fallback={<OrganizationRosterSkeleton />}>
-        <OrganizationRoster organizationId={id} />
-      </Suspense>
-    </GridContainer>
+    <AuthorizationGate
+      resourcePromises={{
+        organizationDetails: getOrganizationDetails(session?.token || "", id),
+      }}
+      requiredPrivileges={[
+        {
+          resourceId: id,
+          resourceType: "organization",
+          privilege: "manage_org_members",
+        },
+      ]}
+      onUnauthorized={() => <UnauthorizedMessage />}
+    >
+      <OrganizationDetail organizationId={id} />
+    </AuthorizationGate>
   );
 }
 
 export default withFeatureFlag<OrganizationDetailPageProps, never>(
-  OrganizationDetail,
+  OrganizationDetailPage,
   "userAdminOff",
   () => redirect("/maintenance"),
 );

@@ -1,5 +1,5 @@
 import math
-from typing import Generic, Sequence, Type, TypeVar
+from collections.abc import Sequence
 
 from sqlalchemy import Select, func, inspect
 
@@ -9,10 +9,7 @@ from src.db.models.base import Base
 DEFAULT_PAGE_SIZE = 25
 
 
-T = TypeVar("T", bound=Base)
-
-
-class Paginator(Generic[T]):
+class Paginator[T: Base]:
     """
     DB select statement paginator that helps with setting up queries
     that you want to paginate into chunks.
@@ -39,7 +36,7 @@ class Paginator(Generic[T]):
     """
 
     def __init__(
-        self, table_model: Type[Base], stmt: Select, db_session: db.Session, page_size: int = 25
+        self, table_model: type[Base], stmt: Select, db_session: db.Session, page_size: int = 25
     ):
         self.table_model = table_model
         self.stmt = stmt
@@ -51,7 +48,7 @@ class Paginator(Generic[T]):
         self.page_size = page_size
 
         self.total_records = _get_record_count(self.table_model, self.db_session, self.stmt)
-        self.total_pages = int(math.ceil(self.total_records / self.page_size))
+        self.total_pages = int(math.ceil(self.total_records / self.page_size))  # noqa: RUF046
 
     def page_at(self, page_offset: int) -> Sequence[T]:
         """
@@ -70,7 +67,7 @@ class Paginator(Generic[T]):
         )
 
 
-def _get_record_count(table_model: Type[Base], db_session: db.Session, stmt: Select) -> int:
+def _get_record_count(table_model: type[Base], db_session: db.Session, stmt: Select) -> int:
     # Simplify the query to instead be select count(DISTINCT(<primary key>)) from <whatever the query was>
     # and remove the order_by as we won't care for this query and it would just make it slower.
 

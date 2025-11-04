@@ -8,7 +8,31 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 ### 🏗️ Development version
 
+For version 0.1.0, please install and use node <= v22.13.0.
+
 Run `npm install && npm run dev` to install and start the application.
+
+Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
+
+```bash
+npx next telemetry disable
+```
+
+### Configuration
+
+Create a local enviornment file in the frontend directory to hold your frontend application overrides.  To allows you to make specializations to your local setup outside of GitHub.
+
+`touch .env.local`
+
+For more information about environments, take a look at [environments.md](./environments.md).
+
+### Authentication
+
+Running authentication locally requires running the API and sharing the correct JWT keys.
+
+1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
+2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
+3. Restart the API (if necessary reseed the database, then `make start`) and frontend (`npm run dev`) for development
 
 ### 🏛️ "Built" version
 
@@ -193,15 +217,6 @@ The `API_URL` environment variable can be set to connect to prod (`https://api.s
 To start a local development version of the API, run `make remake-backend` in the `/api` folder.
 
 See [documentation/api/development.md](../api/development.md) for more details.
-
-### Authentication
-
-Running authentication locally requires running the API, directing the API redirect to the frontend, and sharing the correct JWT keys.
-
-1. Run `make setup-env-override-file` to create the `override.env` file in the `/api` folder
-2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to `/frontend/.env.local` file which creates the necessary keys
-3. Add `LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback` to the `api/override.env` so the API redirects to the correct callback route
-4. Start the API (`make make db-seed-local && make populate-search-opportunities && make start`) and frontend (`npm run dev`) for development
 
 #### Login flow
 

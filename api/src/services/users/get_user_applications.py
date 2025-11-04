@@ -6,8 +6,9 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.constants.lookup_constants import Privilege
-from src.db.models.competition_models import Application
+from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     ApplicationUser,
     ApplicationUserRole,
@@ -62,7 +63,9 @@ def get_user_applications(db_session: db.Session, user_id: UUID) -> list[Applica
         )
         .options(
             # Load the competition data
-            selectinload(Application.competition),
+            selectinload(Application.competition)
+            .selectinload(Competition.opportunity)
+            .selectinload(Opportunity.agency_record),
             # Load organization and its sam_gov_entity
             selectinload(Application.organization).selectinload(Organization.sam_gov_entity),
         )

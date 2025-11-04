@@ -126,12 +126,12 @@ def test_create_api_key_max_retries_exceeded(enable_factory_create, db_session: 
 
     with patch("src.services.users.create_api_key.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id  # Always return the same colliding key
+        json_data = {"key_name": "Failed Key"}
 
         with pytest.raises(
             KeyGenerationError,
             match=f"Unable to generate unique API key after {MAX_KEY_GENERATION_RETRIES} attempts",
         ):
-            json_data = {"key_name": "Failed Key"}
             create_api_key(
                 db_session=db_session,
                 user_id=user.user_id,
@@ -176,10 +176,10 @@ def test_create_api_key_logging_max_retries(enable_factory_create, db_session: d
 
     with patch("src.services.users.create_api_key.generate_api_key_id") as mock_generate:
         mock_generate.return_value = existing_key_id
+        json_data = {"key_name": "Failed Key"}
 
         with caplog.at_level("ERROR"):
             with pytest.raises(KeyGenerationError):
-                json_data = {"key_name": "Failed Key"}
                 create_api_key(
                     db_session=db_session,
                     user_id=user.user_id,

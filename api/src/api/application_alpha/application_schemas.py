@@ -212,9 +212,6 @@ class ApplicationUserSchema(Schema):
     email = fields.String(
         metadata={"description": "The email address of the user", "example": "user@example.com"}
     )
-    is_application_owner = fields.Boolean(
-        metadata={"description": "Whether this user is the owner/creator of the application"}
-    )
 
 
 class OrganizationSchema(Schema):
@@ -370,3 +367,7 @@ class ApplicationFormInclusionUpdateRequestSchema(Schema):
 
 class ApplicationFormInclusionUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
+
+
+class ApplicationAddOrganizationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationUpdateResponseDataSchema())

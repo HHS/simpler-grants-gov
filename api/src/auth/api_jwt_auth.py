@@ -1,7 +1,6 @@
 import logging
 import uuid
-from datetime import timedelta
-from typing import Tuple
+from datetime import datetime, timedelta
 
 import jwt
 from pydantic import Field
@@ -70,32 +69,22 @@ def get_config() -> ApiJwtConfig:
 
 def create_jwt_for_user(
     user: User, db_session: db.Session, config: ApiJwtConfig | None = None, email: str | None = None
-) -> Tuple[str, UserTokenSession]:
+) -> tuple[str, UserTokenSession]:
     if config is None:
         config = get_config()
-
-    # Generate a random ID
-    token_id = uuid.uuid4()
 
     # Always do all time checks in UTC for consistency
     current_time = datetime_util.utcnow()
     expiration_time = current_time + timedelta(minutes=config.token_expiration_minutes)
 
     # Create the session in the DB
-    user_token_session = UserTokenSession(user=user, token_id=token_id, expires_at=expiration_time)
+    user_token_session = UserTokenSession(
+        user=user, token_id=uuid.uuid4(), expires_at=expiration_time
+    )
     db_session.add(user_token_session)
-
-    # Create the JWT with information we'll want to receive back
-    payload = {
-        "sub": str(token_id),
-        # iat -> issued at
-        "iat": current_time,
-        "aud": config.audience,
-        "iss": config.issuer,
-        "email": email,
-        "user_id": str(user.user_id),
-        "session_duration_minutes": config.token_expiration_minutes,
-    }
+    jwt_str = generate_jwt(
+        user_token_session, current_time=current_time, email=email, config=config
+    )
 
     logger.info(
         "Created JWT token",
@@ -104,8 +93,31 @@ def create_jwt_for_user(
             "auth.token_id": str(user_token_session.token_id),
         },
     )
+    return jwt_str, user_token_session
 
-    return jwt.encode(payload, config.private_key, algorithm="RS256"), user_token_session
+
+def generate_jwt(
+    user_token_session: UserTokenSession,
+    current_time: datetime,
+    email: str | None = None,
+    config: ApiJwtConfig | None = None,
+) -> str:
+    """Create the JWT payload and make it into a JWT"""
+    if config is None:
+        config = get_config()
+
+    payload = {
+        "sub": str(user_token_session.token_id),
+        # iat -> issued at
+        "iat": current_time,
+        "aud": config.audience,
+        "iss": config.issuer,
+        "email": email,
+        "user_id": str(user_token_session.user.user_id),
+        "session_duration_minutes": config.token_expiration_minutes,
+    }
+
+    return jwt.encode(payload, config.private_key, algorithm="RS256")
 
 
 def parse_jwt_for_user(

@@ -1,6 +1,7 @@
 import logging
 import uuid
-from typing import Any, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Any
 
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, and_, exists, select
@@ -62,7 +63,7 @@ def _construct_active_inner_query(
 
 def get_agencies(
     db_session: db.Session, list_params: AgencyListParams
-) -> Tuple[Sequence[Agency], PaginationInfo]:
+) -> tuple[Sequence[Agency], PaginationInfo]:
 
     stmt = (
         select(Agency).options(joinedload(Agency.top_level_agency), joinedload("*"))
