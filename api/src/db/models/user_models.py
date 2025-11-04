@@ -13,7 +13,7 @@ from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType
+from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
 
@@ -67,6 +67,10 @@ class User(ApiSchemaTable, TimestampMixin):
     )
     profile: Mapped["UserProfile | None"] = relationship(
         "UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    user_type_id: Mapped[int | None] = mapped_column(
+        ForeignKey(LkUserType.user_type_id),
+        default=1,
     )
 
     @property
