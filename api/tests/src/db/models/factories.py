@@ -898,7 +898,7 @@ class UserFactory(BaseFactory):
         model = user_models.User
 
     user_id = Generators.UuidObj
-    user_type = factory.LazyFunction(lambda: UserType.STANDARD)
+    user_type = UserType.STANDARD
 
     class Params:
         with_profile = factory.Trait(
