@@ -88,7 +88,8 @@ function CheckboxWidget<
         value="true"
         defaultChecked={Boolean(value)}
         required={required}
-        disabled={disabled || readOnly}
+        disabled={disabled}
+        readOnly={readOnly}
         autoFocus={autofocus}
         onChange={handleChange}
         onBlur={handleBlur}

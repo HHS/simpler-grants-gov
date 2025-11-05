@@ -181,7 +181,7 @@ const MultipleAttachmentUploadWidget = ({
         id={id}
         name={id}
         ref={fileInputRef}
-        disabled={disabled || readOnly}
+        disabled={disabled}
         type="file"
         multiple
         className="usa-file-input__input"

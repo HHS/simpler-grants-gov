@@ -71,7 +71,7 @@ const ApplyForm = ({
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
-  const readOnly =
+  const isFormLocked =
     applicationStatus === "submitted" || applicationStatus === "accepted";
   const required = translate.rich("required", {
     abr: (content) => (
@@ -138,7 +138,7 @@ const ApplyForm = ({
     >
       <div className="display-flex flex-justify">
         <div>{required}</div>
-        {!readOnly && (
+        {!isFormLocked && (
           <Button
             data-testid="apply-form-save"
             type="submit"
@@ -172,7 +172,7 @@ const ApplyForm = ({
               schema={formSchema}
               uiSchema={uiSchema}
               formContext={formContextValue}
-              readOnly={readOnly}
+              isFormLocked={isFormLocked}
             />
           </AttachmentsProvider>
         </FormGroup>

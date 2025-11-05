@@ -123,7 +123,7 @@ function TextWidget<
         autoFocus={autofocus}
         name={id}
         aria-required={required}
-        disabled={disabled || readOnly}
+        disabled={disabled}
         readOnly={readOnly}
         placeholder={placeholder ?? undefined}
         list={examples ? examplesId<T>(id) : undefined}

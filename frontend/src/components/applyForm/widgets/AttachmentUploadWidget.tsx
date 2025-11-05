@@ -143,7 +143,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
           id={id}
           name={id}
           required={required}
-          disabled={disabled || readOnly}
+          disabled={disabled}
           readOnly={readOnly}
           ref={fileInputRef}
           onChange={(e) => {
@@ -161,7 +161,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
           <Button
             type="button"
             unstyled
-            disabled={disabled || readOnly}
+            disabled={disabled}
             onClick={handleDeleteClick}
             className="margin-left-1"
           >

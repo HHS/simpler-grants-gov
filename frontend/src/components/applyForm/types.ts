@@ -125,6 +125,7 @@ export interface UswdsWidgetProps<
   required?: boolean;
   disabled?: boolean;
   readOnly?: boolean;
+  isFormLocked?: boolean;
   hideError?: boolean;
   autofocus?: boolean;
   placeholder?: string;
