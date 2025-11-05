@@ -159,9 +159,22 @@ services:
     networks:
       - default
 
+  payload-db:
+    image: postgres:15-alpine
+    container_name: payload-db
+    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
+    env_file: ./local.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - payloaddbdata:/var/lib/postgresql/data
+    networks:
+      - default
+
 volumes:
   grantsdbdata:
   opensearch-data:
+  payloaddbdata:
 
 networks:
   grants_backend:
