@@ -9,6 +9,7 @@ from sqlalchemy import update
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import Application
 from src.services.pdf_generation.config import PdfGenerationConfig
+from src.services.xml_generation.config import FORM_XML_TRANSFORM_RULES
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
     CreateApplicationSubmissionTask,
@@ -197,7 +198,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             with_forms=True, application_status=ApplicationStatus.SUBMITTED
         )
 
-        def erroring_function(self, submission):
+        def erroring_function(submission):
             raise Exception("It errors")
 
         monkeypatch.setattr(
@@ -206,12 +207,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
         create_submission_task.run_task()
 
-        # App was not updated - still submitted status
+        # App was not updated
         db_session.refresh(application)
         assert application.application_status == ApplicationStatus.SUBMITTED
-        # ApplicationSubmission was created but with size 0 (not finalized)
-        assert len(application.application_submissions) == 1
-        assert application.application_submissions[0].file_size_bytes == 0
+        assert len(application.application_submissions) == 0
 
         metrics = create_submission_task.metrics
         assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 1
@@ -349,6 +348,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             form_name="Application for Federal Assistance (SF-424)",
             short_form_name="SF424_4_0",
             form_version="4.0",
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
         )
         application = ApplicationFactory.create(
             competition=competition,
@@ -438,7 +438,7 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                 # Verify manifest includes XML
                 with submission_zip.open("manifest.txt") as manifest_file:
                     manifest_content = manifest_file.read().decode()
-                    assert "XML Files included in ZIP" in manifest_content
+                    assert "Grant Application XML file" in manifest_content
                     assert "GrantApplication.xml" in manifest_content
 
     def test_xml_generation_unsupported_form(self, db_session, enable_factory_create, s3_config):
@@ -502,20 +502,35 @@ def test_get_file_name_in_zip():
 
 
 def test_create_manifest_text_empty():
+    # Create a mock submission with just the fields we need
+    from collections import namedtuple
+
+    MockSubmission = namedtuple("MockSubmission", ["legacy_tracking_number"])
+    mock_submission = MockSubmission(legacy_tracking_number=12345678)
+
     container = SubmissionContainer(
         ApplicationFactory.build(),
         zipfile.ZipFile(BytesIO(), mode="w"),
-        ApplicationSubmissionFactory.build(),
+        mock_submission,
     )
     text = create_manifest_text(container)
-    assert text == f"Manifest for Grant Application {container.application.application_id}"
+    expected_text = """Manifest for Grant Application # GRANT12345678
+
+Attachments Included in Zip File (total 0):"""
+    assert text == expected_text
 
 
 def test_create_manifest_text_full():
+    # Create a mock submission with just the fields we need
+    from collections import namedtuple
+
+    MockSubmission = namedtuple("MockSubmission", ["legacy_tracking_number"])
+    mock_submission = MockSubmission(legacy_tracking_number=87654321)
+
     container = SubmissionContainer(
         ApplicationFactory.build(),
         zipfile.ZipFile(BytesIO(), mode="w"),
-        ApplicationSubmissionFactory.build(),
+        mock_submission,
     )
     container.form_pdf_metadata.append(FileMetadata("form-A.pdf", 123))
     container.form_pdf_metadata.append(FileMetadata("form-B.pdf", 222))
@@ -527,36 +542,44 @@ def test_create_manifest_text_full():
     container.attachment_metadata.append(FileMetadata("something_else.pdf", 777))
 
     text = create_manifest_text(container)
-    expected_text = f"""Manifest for Grant Application {container.application.application_id}
+    expected_text = """Manifest for Grant Application # GRANT87654321
 
-Forms included in ZIP (total 3)
-1. Form form-A.pdf (size 123 bytes)
-2. Form form-B.pdf (size 222 bytes)
-3. Form form-XYZ.pdf (size 100 bytes)
+Forms Included in Zip File(total 3):
+ 1. Form form-A.pdf (size 123 bytes)
+ 2. Form form-B.pdf (size 222 bytes)
+ 3. Form form-XYZ.pdf (size 100 bytes)
 
-Attachments included in ZIP (total 4)
-1. my-attachment.txt (size 500 bytes)
-2. research-plan.docx (size 1001 bytes)
-3. magic.pptx (size 456 bytes)
-4. something_else.pdf (size 777 bytes)"""
+Attachments Included in Zip File (total 4):
+ 1. my-attachment.txt (size 500 bytes)
+ 2. research-plan.docx (size 1001 bytes)
+ 3. magic.pptx (size 456 bytes)
+ 4. something_else.pdf (size 777 bytes)"""
     assert text == expected_text
 
 
 def test_create_manifest_text_with_xml():
+    # Create a mock submission with just the fields we need
+    from collections import namedtuple
+
+    MockSubmission = namedtuple("MockSubmission", ["legacy_tracking_number"])
+    mock_submission = MockSubmission(legacy_tracking_number=11223344)
+
     container = SubmissionContainer(
         ApplicationFactory.build(),
         zipfile.ZipFile(BytesIO(), mode="w"),
-        ApplicationSubmissionFactory.build(),
+        mock_submission,
     )
     container.form_pdf_metadata.append(FileMetadata("form-A.pdf", 123))
     container.xml_metadata = FileMetadata("GrantApplication.xml", 5000)
 
     text = create_manifest_text(container)
-    expected_text = f"""Manifest for Grant Application {container.application.application_id}
+    expected_text = """Manifest for Grant Application # GRANT11223344
 
-Forms included in ZIP (total 1)
-1. Form form-A.pdf (size 123 bytes)
+Grant Application XML file (total 1):
+ 1. GrantApplication.xml. (size 5000 bytes)
 
-XML Files included in ZIP (total 1)
-1. GrantApplication.xml (size 5000 bytes)"""
+Forms Included in Zip File(total 1):
+ 1. Form form-A.pdf (size 123 bytes)
+
+Attachments Included in Zip File (total 0):"""
     assert text == expected_text

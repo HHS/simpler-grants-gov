@@ -231,9 +231,9 @@ class CreateApplicationSubmissionTask(Task):
         s3_path = build_s3_application_submission_path(self.s3_config, application, submission_id)
 
         # Get the tracking number from the sequence before creating the record
-        tracking_number = self.db_session.execute(
+        tracking_number = self.db_session.scalar(
             ApplicationSubmission.legacy_tracking_number_seq
-        ).scalar()
+        )
 
         # Create a temporary submission object for XML generation (not yet persisted)
         temp_submission = ApplicationSubmission(
