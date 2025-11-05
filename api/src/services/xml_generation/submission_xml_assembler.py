@@ -25,7 +25,7 @@ class SubmissionXMLAssembler:
         self.application_submission = application_submission
         self.xml_service = XMLGenerationService()
 
-    def get_supported_forms(self) -> list[tuple[Any, str]]:
+    def get_supported_forms(self) -> list[ApplicationForm]:
         """Get list of application forms that are supported for XML generation.
 
         Returns:
