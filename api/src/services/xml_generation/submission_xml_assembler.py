@@ -42,6 +42,7 @@ class SubmissionXMLAssembler:
                     f"Skipping form {form_name} for XML generation - no transform config",
                     extra={
                         "application_id": self.application.application_id,
+                        "form_id": app_form.form.form_id,
                         "form_name": form_name,
                     },
                 )
