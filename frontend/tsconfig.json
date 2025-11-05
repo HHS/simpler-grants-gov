@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    // "declaration": false,
+    // "declarationMap": false,
     "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
@@ -9,7 +11,7 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -23,7 +25,8 @@
     "paths": {
       "@next/third-parties/google": [
         "./node_modules/@next/third-parties/dist/google"
-      ]
+      ],
+      "@payload-config": ["./src/payload.config.ts"]
     },
     "plugins": [
       {

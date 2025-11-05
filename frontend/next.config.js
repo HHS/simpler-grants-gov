@@ -1,8 +1,16 @@
-// @ts-check
+// const { withPayload } = require("@payloadcms/next/withPayload");
+// const withNextIntl = require("next-intl/plugin")();
+// const sassOptions = require("./scripts/sassOptions");
+// const nrExternals = require("@newrelic/next/load-externals");
 
-const withNextIntl = require("next-intl/plugin")();
-const sassOptions = require("./scripts/sassOptions");
-const nrExternals = require("@newrelic/next/load-externals");
+import nrExternals from "@newrelic/next/load-externals.js";
+import { withPayload } from "@payloadcms/next/withPayload";
+
+import withNextIntlFn from "next-intl/plugin";
+
+import sassOptions from "./scripts/sassOptions.js";
+
+const withNextIntl = withNextIntlFn();
 
 /**
  * Configure the base path for the app. Useful if you're deploying to a subdirectory (like GitHub Pages).
@@ -205,4 +213,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withNextIntl(nextConfig);
+export default withPayload(withNextIntl(nextConfig));

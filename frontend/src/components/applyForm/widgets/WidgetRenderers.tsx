@@ -54,5 +54,8 @@ export const renderWidget = ({
   // key prop can't be spread due to React internal rules
   const key = props.key as string;
   const spreadProps = omit(props, "key") as UswdsWidgetProps;
+  if (props.readOnly) {
+    props.disabled = true;
+  }
   return <Widget key={key} {...spreadProps} />;
 };
