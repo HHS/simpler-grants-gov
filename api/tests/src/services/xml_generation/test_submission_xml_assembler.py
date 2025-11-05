@@ -6,6 +6,7 @@ import pytest
 from lxml import etree as lxml_etree
 
 import src.adapters.db as db
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -46,11 +47,12 @@ class TestSubmissionXMLAssembler:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        # Create SF424 form
+        # Create SF424 form with XML transform config
         sf424_form = FormFactory.create(
             form_name="Application for Federal Assistance (SF-424)",
             short_form_name="SF424_4_0",
             form_version="4.0",
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
         )
 
         application = ApplicationFactory.create(
@@ -84,21 +86,6 @@ class TestSubmissionXMLAssembler:
             application=sample_application,
             legacy_tracking_number=12345678,
         )
-
-    def test_is_form_xml_supported_sf424(self, sample_application, sample_application_submission):
-        """Test that SF424_4_0 is recognized as supported."""
-        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
-
-        assert assembler.is_form_xml_supported("SF424_4_0") is True
-
-    def test_is_form_xml_supported_unsupported_form(
-        self, sample_application, sample_application_submission
-    ):
-        """Test that unsupported forms return False."""
-        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
-
-        assert assembler.is_form_xml_supported("SF424A_1_0") is False
-        assert assembler.is_form_xml_supported("UNKNOWN_FORM") is False
 
     def test_get_supported_forms_single_supported(
         self, sample_application, sample_application_submission

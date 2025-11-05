@@ -6,7 +6,6 @@ from typing import Any
 from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationSubmission
-from src.services.xml_generation.config import load_xml_transform_config
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -25,11 +24,6 @@ class SubmissionXMLAssembler:
         self.application = application
         self.application_submission = application_submission
         self.xml_service = XMLGenerationService()
-
-    def is_form_xml_supported(self, form_name: str) -> bool:
-        """Check if a specific form has XML transformation rules configured."""
-        config = load_xml_transform_config(form_name)
-        return bool(config)
 
     def get_supported_forms(self) -> list[tuple[Any, str]]:
         """Get list of application forms that are supported for XML generation.
@@ -135,7 +129,7 @@ class SubmissionXMLAssembler:
 
         request = XMLGenerationRequest(
             application_data=app_form.application_response,
-            form_name=form_name,
+            transform_config=app_form.form.json_to_xml_schema,
             pretty_print=False,
             attachment_mapping=attachment_mapping,
         )
@@ -204,6 +198,7 @@ class SubmissionXMLAssembler:
             parser = lxml_etree.XMLParser(remove_blank_text=True)
             root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
             return root
-        except Exception as e:
-            logger.error(f"Failed to parse XML string: {e}")
-            raise ValueError(f"Invalid XML string: {e}") from e
+        except Exception:
+            # Don't log exception details as they may contain PII from the XML
+            logger.error("Failed to parse XML string")
+            raise ValueError("Invalid XML string - parsing failed") from None

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -83,7 +84,7 @@ def generate_xml_command(
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            form_name=form,
+            transform_config=FORM_XML_TRANSFORM_RULES,
             pretty_print=not compact,
         )
 

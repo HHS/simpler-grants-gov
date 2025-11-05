@@ -1,5 +1,6 @@
 """Integration tests for conditional transformations (simplified for one-to-many only)."""
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -18,7 +19,7 @@ class TestConditionalIntegration:
         }
 
         request = XMLGenerationRequest(
-            form_name="SF424_4_0",
+            transform_config=FORM_XML_TRANSFORM_RULES,
             application_data=application_data,
             pretty_print=True,
         )
@@ -44,7 +45,7 @@ class TestConditionalIntegration:
         }
 
         request = XMLGenerationRequest(
-            form_name="SF424_4_0",
+            transform_config=FORM_XML_TRANSFORM_RULES,
             application_data=application_data,
             pretty_print=True,
         )
@@ -66,7 +67,7 @@ class TestConditionalIntegration:
         }
 
         request = XMLGenerationRequest(
-            form_name="SF424_4_0",
+            transform_config=FORM_XML_TRANSFORM_RULES,
             application_data=application_data,
             pretty_print=True,
         )

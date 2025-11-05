@@ -230,22 +230,25 @@ class CreateApplicationSubmissionTask(Task):
         submission_id = uuid.uuid4()
         s3_path = build_s3_application_submission_path(self.s3_config, application, submission_id)
 
-        # Create the submission record now so we can get the tracking number. We'll update the size later.
-        application_submission = ApplicationSubmission(
+        # Get the tracking number from the sequence before creating the record
+        tracking_number = self.db_session.execute(
+            ApplicationSubmission.legacy_tracking_number_seq
+        ).scalar()
+
+        # Create a temporary submission object for XML generation (not yet persisted)
+        temp_submission = ApplicationSubmission(
             application_submission_id=submission_id,
             application=application,
             file_location=s3_path,
-            file_size_bytes=0,  # Placeholder, will update after zip is created
+            file_size_bytes=0,
+            legacy_tracking_number=tracking_number,
         )
-        self.db_session.add(application_submission)
-        # Flush so we can get the tracking number
-        self.db_session.flush()
 
         with file_util.open_stream(s3_path, "wb") as outfile:
             with zipfile.ZipFile(outfile, "w") as submission_zip:
 
                 submission_container = SubmissionContainer(
-                    application, submission_zip, application_submission
+                    application, submission_zip, temp_submission
                 )
 
                 self.process_application_forms(submission_container)
@@ -253,9 +256,18 @@ class CreateApplicationSubmissionTask(Task):
                 self.process_xml_generation(submission_container)
                 self.create_manifest_file(submission_container)
 
-        # Get the size of the zip from s3 and update the submission record
+        # Get the size of the zip from s3
         zip_length = file_util.get_file_length_bytes(s3_path)
-        application_submission.file_size_bytes = zip_length
+
+        # Now create the final submission record with all correct data
+        application_submission = ApplicationSubmission(
+            application_submission_id=submission_id,
+            application=application,
+            file_location=s3_path,
+            file_size_bytes=zip_length,
+            legacy_tracking_number=tracking_number,
+        )
+        self.db_session.add(application_submission)
 
         # Mark the app as accepted
         application.application_status = ApplicationStatus.ACCEPTED
@@ -352,8 +364,6 @@ class CreateApplicationSubmissionTask(Task):
             )
             return
 
-
-
         logger.info("Generating XML for application submission", extra=log_extra)
 
         xml_assembler = SubmissionXMLAssembler(
@@ -434,54 +444,50 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
 
     This file is formatted like:
 
-        Manifest for Grant Application {application_id}
+        Manifest for Grant Application # GRANT00838603
 
-        Forms include in ZIP (total #)
-        1. Form FormXYZ.pdf (size X)
-        2. Form FormABC.pdf (size X)
+        Grant Application XML file (total 1):
+         1. GrantApplication.xml. (size 13390 bytes)
 
-        Attachments included in ZIP (total #)
-        1. my-attachment.txt (size X)
-        2. another-attachment.docx (size X)
+        Forms Included in Zip File(total 2):
+         1. Form SFLLL_2_0-V2.0.pdf (size 20927 bytes)
+         2. Form SF424_Short_3_0-V3.0.pdf (size 21985 bytes)
 
-        XML Files included in ZIP (total #)
-        1. GrantApplication.xml (size X)
+        Attachments Included in Zip File (total 0):
     """
     sections = []
 
-    # Add a header
-    sections.append(f"Manifest for Grant Application {submission.application.application_id}")
+    # Add a header with tracking number
+    tracking_num = f"GRANT{submission.application_submission.legacy_tracking_number:08d}"
+    sections.append(f"Manifest for Grant Application # {tracking_num}")
+
+    # Process the XML file first (to match grants.gov format)
+    if submission.xml_metadata is not None:
+        xml_lines = ["Grant Application XML file (total 1):"]
+        xml_lines.append(
+            f" 1. {submission.xml_metadata.file_name}. (size {submission.xml_metadata.file_size_in_bytes} bytes)"
+        )
+        sections.append("\n".join(xml_lines))
 
     # Process the forms
     if len(submission.form_pdf_metadata) > 0:
-        form_lines = [f"Forms included in ZIP (total {len(submission.form_pdf_metadata)})"]
+        form_lines = [f"Forms Included in Zip File(total {len(submission.form_pdf_metadata)}):"]
         for i, app_form in enumerate(submission.form_pdf_metadata, start=1):
             form_lines.append(
-                f"{i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)"
+                f" {i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)"
             )
-
         sections.append("\n".join(form_lines))
 
     # Process the attachments
+    attachment_lines = [
+        f"Attachments Included in Zip File (total {len(submission.attachment_metadata)}):"
+    ]
     if len(submission.attachment_metadata) > 0:
-        attachment_lines = [
-            f"Attachments included in ZIP (total {len(submission.attachment_metadata)})"
-        ]
         for i, app_attachment in enumerate(submission.attachment_metadata, start=1):
             attachment_lines.append(
-                f"{i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)"
+                f" {i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)"
             )
+    sections.append("\n".join(attachment_lines))
 
-        sections.append("\n".join(attachment_lines))
-
-    # Process the XML file
-    if submission.xml_metadata is not None:
-        xml_lines = ["XML Files included in ZIP (total 1)"]
-        xml_lines.append(
-            f"1. {submission.xml_metadata.file_name} (size {submission.xml_metadata.file_size_in_bytes} bytes)"
-        )
-
-        sections.append("\n".join(xml_lines))
-
-    # Return any sections populated
+    # Return all sections
     return "\n\n".join(sections)
