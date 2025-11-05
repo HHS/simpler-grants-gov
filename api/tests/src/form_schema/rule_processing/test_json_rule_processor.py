@@ -85,6 +85,9 @@ def test_process_rule_schema_flat(enable_factory_create):
             "d97253ea-d512-4aa8-b3dc-bf75834e1e90",
             "b27b22d0-0dfe-4e85-a509-045e6a447824",
         ],
+        # Add a deleted attachment, it won't be seen by the validator
+        # so will be seen as missing
+        deleted_attachment_ids=["1d532d43-ac3f-4b28-bdaa-b5afa04640c1"],
         has_organization=True,
         uei="UEI12345",
         has_assistance_listing_number=True,
