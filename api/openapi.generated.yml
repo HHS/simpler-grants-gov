@@ -4254,6 +4254,7 @@ components:
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
           - ProjectAbstractSummary
+          - CD511
           type:
           - string
           - 'null'
@@ -4401,6 +4402,7 @@ components:
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
           - ProjectAbstractSummary
+          - CD511
           type:
           - string
           - 'null'
@@ -5258,9 +5260,119 @@ components:
       - paginationInfo
       - sortInfo
       - status
+    UserApplicationApplicationStatusFiilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - in_progress
+            - submitted
+            - accepted
+            type:
+            - string
+    UserApplicationApplicationOrganizationIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationApplicationCompetitionIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationFilter:
+      type: object
+      properties:
+        application_status:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationStatusFiilter'
+        organization_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationOrganizationIDFilter'
+        competition_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationCompetitionIDFilter'
+    SortOrderUserApplicationPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - updated_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserApplicationPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: updated_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderUserApplicationPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
     UserApplicationListRequest:
       type: object
-      properties: {}
+      properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserApplicationFilter'
+          - type: 'null'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationPagination'
+      required:
+      - pagination
     SamGovEntityResponse:
       type: object
       properties:
