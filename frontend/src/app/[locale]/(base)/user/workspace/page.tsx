@@ -16,7 +16,6 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
-import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";
 
@@ -73,13 +72,6 @@ async function UserWorkspace() {
           ),
         })}
       </h1>
-      <UserOrganizationInvite
-        organizationId={
-          userOrganizations && userOrganizations[0]
-            ? userOrganizations[0].organization_id
-            : "1"
-        }
-      />
       {userInvitations?.length && (
         <OrganizationInvitationReplies userInvitations={userInvitations} />
       )}

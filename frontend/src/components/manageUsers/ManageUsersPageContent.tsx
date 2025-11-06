@@ -1,6 +1,7 @@
 import { getSession } from "src/services/auth/session";
 import {
   getOrganizationDetails,
+  getOrganizationPendingInvitations,
   getOrganizationRoles,
   getOrganizationUsers,
 } from "src/services/fetch/fetchers/organizationsFetcher";
@@ -13,6 +14,7 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
 import { ManageUsersClient } from "./ManageUsersClient";
+import { UserOrganizationInvite } from "../workspace/UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
   organizationId,
@@ -30,15 +32,17 @@ export async function ManageUsersPageContent({
     );
   }
 
-  const [usersResult, orgsResult, rolesResult] = await Promise.allSettled([
+  const [usersResult, orgsResult, rolesResult, pendingUsersResult] = await Promise.allSettled([
     getOrganizationUsers(session.token, organizationId),
     getOrganizationDetails(session.token, organizationId),
     getOrganizationRoles(session.token, organizationId),
+    getOrganizationPendingInvitations(session.token, organizationId)
   ]);
 
   let users: UserDetail[] = [];
   let userOrganization: Organization | undefined;
   let roles: UserRole[] = [];
+  let pendingUsers: UserDetail[] = []
 
   if (usersResult.status === "fulfilled") {
     users = usersResult.value;
@@ -58,7 +62,16 @@ export async function ManageUsersPageContent({
     console.error("Unable to fetch organization roles", rolesResult.reason);
   }
 
+  if (pendingUsersResult.status === "fulfilled") {
+    pendingUsers = pendingUsersResult.value;
+  } else {
+    console.error("Unable to fetch organization roles", pendingUsersResult.reason);
+  }
+
   const organizationName = userOrganization?.sam_gov_entity.legal_business_name;
+
+  console.log(users)
+  console.log(pendingUsers)
 
   return (
     <GridContainer className="tablet:padding-y-6">
@@ -83,12 +96,15 @@ export async function ManageUsersPageContent({
         organizationName={organizationName ?? undefined}
         pageHeader={t("pageHeading")}
       />
+      <UserOrganizationInvite
+        organizationId={organizationId}
+      />
       <ManageUsersClient
         organizationId={organizationId}
         roles={roles}
         activeUsers={users}
         legacySystemUsers={[]}
-        pendingUsers={[]}
+        pendingUsers={pendingUsers}
       />
     </GridContainer>
   );
