@@ -5408,10 +5408,6 @@ components:
           type: string
           description: The internal ID of the organization
           example: 123e4567-e89b-12d3-a456-426614174000
-        is_organization_owner:
-          type: boolean
-          description: Whether the user is an owner of this organization
-          example: true
         sam_gov_entity:
           description: SAM.gov entity information for the organization
           type:
