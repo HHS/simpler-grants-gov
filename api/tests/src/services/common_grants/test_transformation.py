@@ -18,7 +18,7 @@ from common_grants_sdk.schemas.pydantic import (
     StringArrayFilter,
 )
 
-from src.constants.lookup_constants import OpportunityStatus
+from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
     build_filter_info,
     build_money_range_filter,
@@ -658,3 +658,119 @@ class TestTransformation:
 
         # Check that filters are not present when empty
         assert "filters" not in result
+
+    def test_url_validation_error_logging(self, caplog):
+        """Test that URL validation errors are logged correctly."""
+        import logging
+
+        # Set up logging to capture info level logs
+        caplog.set_level(logging.INFO)
+
+        # Test with an invalid URL that should trigger the logging
+        invalid_url = "https://example.com/path/{invalid-chars}"
+
+        result = validate_url(invalid_url)
+
+        # Verify the URL was rejected
+        assert result is None
+
+        # Verify the log was captured
+        assert any(
+            record.levelname == "INFO"
+            and "URL validation failed for:" in record.message
+            and invalid_url in record.message
+            for record in caplog.records
+        )
+
+        # Verify the extra data is present in the log record
+        log_record = next(
+            (record for record in caplog.records if "URL validation failed for:" in record.message),
+            None,
+        )
+        assert log_record is not None
+        assert hasattr(log_record, "event")
+        assert log_record.event == CommonGrantsEvent.URL_VALIDATION_ERROR
+        assert hasattr(log_record, "url")
+        assert log_record.url == invalid_url
+
+    def test_transformation_failure_logging(self, caplog):
+        """Test that transformation failures are logged correctly."""
+        import logging
+
+        # Set up logging to capture warning level logs
+        caplog.set_level(logging.WARNING)
+
+        # Test with invalid data that should cause transformation to fail
+        invalid_opp_data = {
+            "opportunity_id": "not-a-uuid",  # Invalid UUID format will cause failure
+            "invalid_field": "invalid_value",
+        }
+
+        result = transform_search_result_to_cg(invalid_opp_data)
+
+        # Verify the transformation failed
+        assert result is None
+
+        # Verify the log was captured
+        assert any(
+            record.levelname == "WARNING"
+            and "Failed to transform search result to CommonGrants format:" in record.message
+            for record in caplog.records
+        )
+
+        # Verify the extra data is present in the log record
+        log_record = next(
+            (
+                record
+                for record in caplog.records
+                if "Failed to transform search result to CommonGrants format:" in record.message
+            ),
+            None,
+        )
+        assert log_record is not None
+        assert hasattr(log_record, "event")
+        assert log_record.event == CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR
+        assert hasattr(log_record, "opportunity_id")
+        assert log_record.opportunity_id == "not-a-uuid"
+
+    def test_transformation_with_invalid_url_logs_but_succeeds(self, caplog):
+        """Test that transformation with invalid URL logs error but still succeeds."""
+        import logging
+
+        # Set up logging to capture info level logs
+        caplog.set_level(logging.INFO)
+
+        # Create opportunity data with an invalid URL
+        invalid_url = "https://example.com/path/{invalid}"
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "estimated_total_program_funding": 1000000,
+                "award_ceiling": 500000,
+                "award_floor": 10000,
+                "additional_info_url": invalid_url,
+            },
+        }
+
+        # Transform the opportunity
+        result = transform_search_result_to_cg(opp_data)
+
+        # Verify transformation succeeded
+        assert result is not None
+        assert result.title == "Test Opportunity"
+        assert result.source is None  # URL should be None due to validation failure
+
+        # Verify URL validation error was logged
+        assert any(
+            record.levelname == "INFO"
+            and "URL validation failed for:" in record.message
+            and invalid_url in record.message
+            for record in caplog.records
+        )
