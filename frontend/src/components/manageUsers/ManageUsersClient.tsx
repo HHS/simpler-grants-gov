@@ -19,7 +19,7 @@ import { ConfirmRoleChangeModal } from "./ConfirmRoleChangeModal";
 import { LegacySystemUsers } from "./LegacySystemUsers";
 import { PendingUsers } from "./PendingUsers";
 
-type Bucket = "active" | "grants" | "pending";
+type Bucket = "active" | "legacy" | "pending";
 
 export interface ManageUsersClientProps {
   organizationId: string;
@@ -48,11 +48,11 @@ export function ManageUsersClient({
   //   include the full user object (only updated roles, etc.)
   const [rows, setRows] = useState<{
     active: UserDetail[];
-    grants: UserDetail[];
+    legacy: UserDetail[];
     pending: UserDetail[];
   }>({
     active: activeUsers,
-    grants: legacySystemUsers,
+    legacy: legacySystemUsers,
     pending: pendingUsers,
   });
 
@@ -66,7 +66,7 @@ export function ManageUsersClient({
   useEffect(() => {
     setRows({
       active: activeUsers,
-      grants: legacySystemUsers,
+      legacy: legacySystemUsers,
       pending: pendingUsers,
     });
   }, [activeUsers, legacySystemUsers, pendingUsers]);
@@ -189,7 +189,7 @@ export function ManageUsersClient({
         <LegacySystemUsers
           tableDescription={t("legacySystemUsersHeading")}
           tableTitle={t("legacySystemUsersTableDescription")}
-          users={rows.grants}
+          users={rows.legacy}
         />
 
         <PendingUsers
