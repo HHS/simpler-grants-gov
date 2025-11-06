@@ -91,3 +91,55 @@ export const inviteUserToOrganization = async (
   //   const json = (await resp.json()) as { data: OrganizationInviteRecord };
   //   return json.data;
 };
+
+// Get Pending (Invited) Users List
+export const getOrganizationPendingInvitations = async (
+  token: string,
+  organizationId: string,
+): Promise<UserDetail[]> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/invitations/list`,
+    additionalHeaders: ssgToken,
+    body: {
+      filters: {
+        status: {
+          one_of: ["pending"],
+        },
+      },
+    },
+  });
+
+  const json = (await response.json()) as { data: UserDetail[] };
+  return json.data;
+};
+
+export const updateOrganizationUserRoles = async (
+  token: string,
+  organizationId: string,
+  userId: string,
+  roleIds: string[],
+): Promise<UserDetail> => {
+  const resp = await fetchOrganizationWithMethod("PUT")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": token },
+    body: { role_ids: roleIds },
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const deleteOrganizationUser = async (
+  token: string,
+  organizationId: string,
+  userId: string,
+): Promise<UserDetail> => {
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": token },
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};

@@ -1,12 +1,18 @@
 import { getSession } from "src/services/auth/session";
-import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
+import {
+  getOrganizationDetails,
+  getOrganizationRoles,
+  getOrganizationUsers,
+} from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
+import { UserDetail, UserRole } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
+import { ManageUsersClient } from "./ManageUsersClient";
 
 export async function ManageUsersPageContent({
   organizationId,
@@ -23,17 +29,36 @@ export async function ManageUsersPageContent({
       </GridContainer>
     );
   }
-  let userOrganizations: Organization | undefined;
-  try {
-    userOrganizations = await getOrganizationDetails(
-      session.token,
-      organizationId,
-    );
-  } catch (error) {
-    console.error("Unable to fetch organization information", error);
+
+  const [usersResult, orgsResult, rolesResult] = await Promise.allSettled([
+    getOrganizationUsers(session.token, organizationId),
+    getOrganizationDetails(session.token, organizationId),
+    getOrganizationRoles(session.token, organizationId),
+  ]);
+
+  let users: UserDetail[] = [];
+  let userOrganization: Organization | undefined;
+  let roles: UserRole[] = [];
+
+  if (usersResult.status === "fulfilled") {
+    users = usersResult.value;
+  } else {
+    console.error("Unable to fetch organization users", usersResult.reason);
   }
 
-  const name = userOrganizations?.sam_gov_entity?.legal_business_name;
+  if (orgsResult.status === "fulfilled") {
+    userOrganization = orgsResult.value;
+  } else {
+    console.error("Unable to fetch user organizations", orgsResult.reason);
+  }
+
+  if (rolesResult.status === "fulfilled") {
+    roles = rolesResult.value;
+  } else {
+    console.error("Unable to fetch organization roles", rolesResult.reason);
+  }
+
+  const organizationName = userOrganization?.sam_gov_entity.legal_business_name;
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
@@ -54,7 +79,17 @@ export async function ManageUsersPageContent({
           },
         ]}
       />
-      <PageHeader organizationName={name} pageHeader={t("pageHeading")} />
+      <PageHeader
+        organizationName={organizationName ?? undefined}
+        pageHeader={t("pageHeading")}
+      />
+      <ManageUsersClient
+        organizationId={organizationId}
+        roles={roles}
+        activeUsers={users}
+        legacySystemUsers={[]}
+        pendingUsers={[]}
+      />
     </GridContainer>
   );
 }

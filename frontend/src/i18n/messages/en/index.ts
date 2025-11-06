@@ -1539,15 +1539,18 @@ export const messages = {
     activeUsersHeading: "Active Users",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
-    grantsGovUsersHeading: "Grants.gov Users",
-    grantsGovUsersTableDescription:
+    legacySystemUsersHeading: "Grants.gov Users",
+    legacySystemUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
     pendingUsersHeading: "Pending Users",
     pendingUsersTableDescription:
       "Any users waiting to join your organization will appear below.",
     errors: {
+      activeUsersFetchError: "Failed to get list of active users",
       fetchError: "Failed to get Users",
+      legacyUsersFetchError: "Failed to get list of grants.gov users",
       notLoggedInMessage: "You are not logged in",
+      pendingUsersFetchError: "Failed to get list of pending users",
     },
     usersTable: {
       admin: "Administrator",
