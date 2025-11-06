@@ -1,7 +1,11 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
-import type { UserDetail, UserRole } from "src/types/userTypes";
+import type {
+  OrganizationPendingInvitation,
+  UserDetail,
+  UserRole,
+} from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import React, {
@@ -26,7 +30,7 @@ export interface ManageUsersClientProps {
   roles: UserRole[];
   activeUsers: UserDetail[];
   legacySystemUsers: UserDetail[];
-  pendingUsers: UserDetail[];
+  pendingUsers: OrganizationPendingInvitation[];
 }
 
 function getRoleId(role: UserRole): string {
@@ -49,7 +53,7 @@ export function ManageUsersClient({
   const [rows, setRows] = useState<{
     active: UserDetail[];
     legacy: UserDetail[];
-    pending: UserDetail[];
+    pending: OrganizationPendingInvitation[];
   }>({
     active: activeUsers,
     legacy: legacySystemUsers,
@@ -129,7 +133,7 @@ export function ManageUsersClient({
           return {
             ...prev,
             [pendingBucket]: bucketRows.map((user) =>
-              user.user_id === pendingUserId
+              (user as UserDetail).user_id === pendingUserId
                 ? {
                     ...user,
                     roles: updatedRoles,

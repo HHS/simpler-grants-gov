@@ -59,7 +59,7 @@ export const inviteUserAction = async (
 
   const requestData = {
     email: formData.get("email") as string,
-    roleId: formData.get("role") as string,
+    roleIds: [formData.get("role") as string],
     organizationId,
   };
 

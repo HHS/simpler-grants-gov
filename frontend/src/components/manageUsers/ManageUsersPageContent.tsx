@@ -6,15 +6,19 @@ import {
   getOrganizationUsers,
 } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
-import { UserDetail, UserRole } from "src/types/userTypes";
+import {
+  OrganizationPendingInvitation,
+  UserDetail,
+  UserRole,
+} from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
-import { ManageUsersClient } from "./ManageUsersClient";
 import { UserOrganizationInvite } from "../workspace/UserOrganizationInvite";
+import { ManageUsersClient } from "./ManageUsersClient";
 
 export async function ManageUsersPageContent({
   organizationId,
@@ -32,17 +36,18 @@ export async function ManageUsersPageContent({
     );
   }
 
-  const [usersResult, orgsResult, rolesResult, pendingUsersResult] = await Promise.allSettled([
-    getOrganizationUsers(session.token, organizationId),
-    getOrganizationDetails(session.token, organizationId),
-    getOrganizationRoles(session.token, organizationId),
-    getOrganizationPendingInvitations(session.token, organizationId)
-  ]);
+  const [usersResult, orgsResult, rolesResult, pendingUsersResult] =
+    await Promise.allSettled([
+      getOrganizationUsers(session.token, organizationId),
+      getOrganizationDetails(session.token, organizationId),
+      getOrganizationRoles(session.token, organizationId),
+      getOrganizationPendingInvitations(session.token, organizationId),
+    ]);
 
   let users: UserDetail[] = [];
   let userOrganization: Organization | undefined;
   let roles: UserRole[] = [];
-  let pendingUsers: UserDetail[] = []
+  let pendingUsers: OrganizationPendingInvitation[] = [];
 
   if (usersResult.status === "fulfilled") {
     users = usersResult.value;
@@ -65,13 +70,16 @@ export async function ManageUsersPageContent({
   if (pendingUsersResult.status === "fulfilled") {
     pendingUsers = pendingUsersResult.value;
   } else {
-    console.error("Unable to fetch organization roles", pendingUsersResult.reason);
+    console.error(
+      "Unable to fetch organization roles",
+      pendingUsersResult.reason,
+    );
   }
 
   const organizationName = userOrganization?.sam_gov_entity.legal_business_name;
 
-  console.log(users)
-  console.log(pendingUsers)
+  console.log(users);
+  console.log(pendingUsers);
 
   return (
     <GridContainer className="tablet:padding-y-6">
@@ -96,9 +104,7 @@ export async function ManageUsersPageContent({
         organizationName={organizationName ?? undefined}
         pageHeader={t("pageHeading")}
       />
-      <UserOrganizationInvite
-        organizationId={organizationId}
-      />
+      <UserOrganizationInvite organizationId={organizationId} />
       <ManageUsersClient
         organizationId={organizationId}
         roles={roles}

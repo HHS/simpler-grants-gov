@@ -1,6 +1,6 @@
 "use client";
 
-import type { UserDetail } from "src/types/userTypes";
+import type { OrganizationPendingInvitation, UserDetail } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import React from "react";
@@ -9,13 +9,11 @@ import { Table } from "@trussworks/react-uswds";
 export interface UsersTableProps {
   tableDescription: string;
   tableTitle: string;
-  users: UserDetail[];
+  users: OrganizationPendingInvitation[];
 }
 
-function formatFullName(user: UserDetail): string {
-  const middleName = user.middle_name ? ` ${user.middle_name}` : "";
-  const lastName = user.last_name ? ` ${user.last_name}` : "";
-  return `${user.first_name}${middleName}${lastName}`.trim();
+function formatFullName(user: OrganizationPendingInvitation): string {
+  return `${user.invitee_user ? user.invitee_user.first_name + " " + user.invitee_user.last_name : "-"}`.trim();
 }
 
 export function PendingUsers({
@@ -54,9 +52,9 @@ export function PendingUsers({
             </tr>
           ) : (
             users.map((user) => (
-              <tr key={user.user_id}>
+              <tr key={user.organization_invitation_id}>
                 <td>{formatFullName(user)}</td>
-                <td>{user.email}</td>
+                <td>{user.invitee_email}</td>
                 <td>{user.roles ? user.roles[0].role_name : "-"}</td>
               </tr>
             ))

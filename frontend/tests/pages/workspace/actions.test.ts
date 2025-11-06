@@ -58,7 +58,7 @@ describe("user profile form action", () => {
     const result = await inviteUserAction(null, inviteFormData, "1");
     expect(result.data).toEqual({
       email: "an email",
-      roleId: "smith",
+      roleIds: ["smith"],
       organizationId: "1",
     });
   });
