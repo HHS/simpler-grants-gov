@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 
 from src.auth.endpoint_access_util import (
@@ -8,7 +10,7 @@ from src.auth.endpoint_access_util import (
     get_roles_for_resource,
 )
 from src.constants.lookup_constants import Privilege
-from tests.conftest import BaseTestClass
+from tests.conftest import BaseTestClass, db_session
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,

@@ -37,7 +37,12 @@ def update_application(
     # Get application (this will check if it exists and if user has access)
     application = get_application(db_session, application_id, user)
     # Check privileges
-    check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application, application_id)
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MODIFY_APPLICATION},
+        application,
+    )
 
     # Don't let a user update an existing application
     validate_application_in_progress(application, ApplicationAction.MODIFY)

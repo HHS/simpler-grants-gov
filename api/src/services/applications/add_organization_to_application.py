@@ -49,7 +49,10 @@ def add_organization_to_application(
 
     # Check user has START_APPLICATION privilege for the organization
     check_user_access(
-        db_session, user, {Privilege.START_APPLICATION}, organization, organization_id
+        db_session,
+        user,
+        {Privilege.START_APPLICATION},
+        organization,
     )
 
     # Validate application is in progress

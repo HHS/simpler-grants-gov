@@ -76,7 +76,10 @@ def remove_user_from_organization(
 
     # Check if requesting user has permission to manage org members
     check_user_access(
-        db_session, user, {Privilege.MANAGE_ORG_MEMBERS}, organization, organization_id
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
     )
 
     # Validate target user is a member of the organization

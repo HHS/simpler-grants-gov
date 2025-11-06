@@ -29,7 +29,10 @@ def get_organization_and_verify_access(
 
     # Check if user has required privilege for this organization
     check_user_access(
-        db_session, user, {Privilege.MANAGE_ORG_MEMBERS}, organization, organization_id
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
     )
 
     return organization

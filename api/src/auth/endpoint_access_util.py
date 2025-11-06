@@ -123,17 +123,9 @@ def check_user_access(
     user: User,
     allowed_privileges: set[Privilege],
     resource: Organization | Application | Agency | None,
-    resource_id: UUID,
 ) -> None:
+    """Wrapper function to pre loads all roles and privileges for the given user in a single query,
+    then checks access using the in-memory data."""
     get_roles_and_privileges(db_session, user.user_id)
     if not can_access(user, allowed_privileges, resource):
-        logger.info(
-            "Access denied: insufficient privileges",
-            extra={
-                "user_id": user.user_id,
-                "required_privileges": [p.value for p in allowed_privileges],
-                "resource": resource.get_table_name(),
-                "resource_id": resource_id,
-            },
-        )
         raise_flask_error(403, "Forbidden")

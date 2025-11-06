@@ -98,7 +98,10 @@ def create_organization_invitation(
 
     # Check if user has permission to manage org members
     check_user_access(
-        db_session, user, {Privilege.MANAGE_ORG_MEMBERS}, organization, organization_id
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
     )
 
     # Validate roles exist and are organization roles - get roles back from validation

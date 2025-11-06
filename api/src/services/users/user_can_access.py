@@ -37,5 +37,8 @@ def _get_resource(
 def check_user_can_access(db_session: db.Session, user: User, json_data: dict) -> None:
     resource = _get_resource(db_session, json_data["resource_type"], json_data["resource_id"])
     check_user_access(
-        db_session, user, set(json_data["privileges"]), resource, json_data["resource_id"]
+        db_session,
+        user,
+        set(json_data["privileges"]),
+        resource,
     )

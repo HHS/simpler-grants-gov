@@ -62,7 +62,12 @@ def update_application_form(
     application = get_application(db_session, application_id, user)
 
     # Check privileges
-    check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application, application_id)
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MODIFY_APPLICATION},
+        application,
+    )
 
     # Validate the application is in progress and can be modified
     validate_application_in_progress(application, ApplicationAction.MODIFY)

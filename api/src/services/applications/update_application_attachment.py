@@ -31,7 +31,6 @@ def update_application_attachment(
         user,
         {Privilege.MODIFY_APPLICATION},
         application_attachment.application,
-        application_id,
     )
 
     # Store the old file location before updating

@@ -59,7 +59,10 @@ def get_organization_and_verify_access(
 
     # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
     check_user_access(
-        db_session, user, {Privilege.VIEW_ORG_MEMBERSHIP}, organization, organization_id
+        db_session,
+        user,
+        {Privilege.VIEW_ORG_MEMBERSHIP},
+        organization,
     )
 
     return organization

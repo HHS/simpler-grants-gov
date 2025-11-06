@@ -134,7 +134,10 @@ def get_application_with_auth(
     # Check privileges
     if user:
         check_user_access(
-            db_session, user, {Privilege.MODIFY_APPLICATION}, application, application_id
+            db_session,
+            user,
+            {Privilege.MODIFY_APPLICATION},
+            application,
         )
 
     return application

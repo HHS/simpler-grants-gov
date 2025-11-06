@@ -29,7 +29,12 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     application = get_application(db_session, application_id, user)
 
     # Check privileges
-    check_user_access(db_session, user, {Privilege.SUBMIT_APPLICATION}, application, application_id)
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.SUBMIT_APPLICATION},
+        application,
+    )
 
     # Run validations
     validate_application_in_progress(application, ApplicationAction.SUBMIT)

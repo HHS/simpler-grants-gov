@@ -121,7 +121,10 @@ def create_application(
 
         # Check privileges
         check_user_access(
-            db_session, user, {Privilege.START_APPLICATION}, organization, organization_id
+            db_session,
+            user,
+            {Privilege.START_APPLICATION},
+            organization,
         )
 
     # Verify the competition is open

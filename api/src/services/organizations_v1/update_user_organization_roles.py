@@ -48,7 +48,10 @@ def update_user_organization_roles(
     organization = get_organization(db_session, organization_id)
     # Permission checks
     check_user_access(
-        db_session, user, {Privilege.MANAGE_ORG_MEMBERS}, organization, organization_id
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
     )
 
     # Validate target user exists

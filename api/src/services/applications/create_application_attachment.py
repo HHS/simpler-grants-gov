@@ -24,7 +24,7 @@ def create_application_attachment(
     application = get_application(db_session, application_id, user)
 
     # Check privileges
-    check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application, application_id)
+    check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application)
 
     return upsert_application_attachment(
         db_session=db_session,
