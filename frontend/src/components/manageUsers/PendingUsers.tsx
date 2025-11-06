@@ -2,7 +2,6 @@
 
 import type {
   OrganizationPendingInvitation,
-  UserDetail,
 } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -15,8 +14,10 @@ export interface UsersTableProps {
   users: OrganizationPendingInvitation[];
 }
 
-function formatFullName(user: OrganizationPendingInvitation): string {
-  return `${user.invitee_user ? user.invitee_user.first_name + " " + user.invitee_user.last_name : "-"}`.trim();
+function formatUserName(user?: { first_name?: string | null; last_name?: string | null } | null): string {
+  if (!user) return "-";
+  const name = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
+  return name || "-";
 }
 
 export function PendingUsers({
@@ -56,7 +57,7 @@ export function PendingUsers({
           ) : (
             users.map((user) => (
               <tr key={user.organization_invitation_id}>
-                <td>{formatFullName(user)}</td>
+                <td>{formatUserName(user.invitee_user)}</td>
                 <td>{user.invitee_email}</td>
                 <td>{user.roles ? user.roles[0].role_name : "-"}</td>
               </tr>

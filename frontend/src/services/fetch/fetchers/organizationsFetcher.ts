@@ -5,7 +5,6 @@ import {
   UserDetail,
   UserRole,
 } from "src/types/userTypes";
-import { fakeOrganizationInviteRecord } from "src/utils/testing/fixtures";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 

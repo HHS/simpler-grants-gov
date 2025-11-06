@@ -3,7 +3,7 @@ import {
   getOrganizationDetails,
   getOrganizationPendingInvitations,
   getOrganizationRoles,
-  getOrganizationUsers,
+  getOrganizationUsers
 } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
 import {
@@ -17,8 +17,8 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
-import { UserOrganizationInvite } from "../workspace/UserOrganizationInvite";
 import { ManageUsersClient } from "./ManageUsersClient";
+import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
   organizationId,
@@ -77,9 +77,6 @@ export async function ManageUsersPageContent({
   }
 
   const organizationName = userOrganization?.sam_gov_entity.legal_business_name;
-
-  console.log(users);
-  console.log(pendingUsers);
 
   return (
     <GridContainer className="tablet:padding-y-6">
