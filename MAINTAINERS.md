@@ -19,6 +19,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Prasanthreddy Arikatla
 * Jakob Pederson
 * Erin Pattison
+* Hao Wang
 
 ## Content and Design
 
