@@ -235,8 +235,8 @@ class CreateApplicationSubmissionTask(Task):
         # Get the tracking number from the sequence before creating the record
         tracking_number = self.db_session.scalar(ApplicationSubmission.legacy_tracking_number_seq)
 
-        # Create a temporary submission object for XML generation (not yet persisted)
-        temp_submission = ApplicationSubmission(
+        # Create the submission object (file size will be updated after zip creation)
+        application_submission = ApplicationSubmission(
             application_submission_id=submission_id,
             application=application,
             file_location=s3_path,
@@ -248,7 +248,7 @@ class CreateApplicationSubmissionTask(Task):
             with zipfile.ZipFile(outfile, "w") as submission_zip:
 
                 submission_container = SubmissionContainer(
-                    application, submission_zip, temp_submission
+                    application, submission_zip, application_submission
                 )
 
                 self.process_application_forms(submission_container)
@@ -256,17 +256,8 @@ class CreateApplicationSubmissionTask(Task):
                 self.process_xml_generation(submission_container)
                 self.create_manifest_file(submission_container)
 
-        # Get the size of the zip from s3
-        zip_length = file_util.get_file_length_bytes(s3_path)
-
-        # Now create the final submission record with all correct data
-        application_submission = ApplicationSubmission(
-            application_submission_id=submission_id,
-            application=application,
-            file_location=s3_path,
-            file_size_bytes=zip_length,
-            legacy_tracking_number=tracking_number,
-        )
+        # Update the file size now that the zip is complete
+        application_submission.file_size_bytes = file_util.get_file_length_bytes(s3_path)
         self.db_session.add(application_submission)
 
         # Mark the app as accepted
@@ -382,7 +373,7 @@ class CreateApplicationSubmissionTask(Task):
             submission.application, submission.application_submission, attachment_mapping
         )
 
-        xml_content = xml_assembler.generate_complete_submission_xml(pretty_print=True)
+        xml_content = xml_assembler.generate_complete_submission_xml()
 
         if not xml_content:
             logger.warning(
