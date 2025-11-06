@@ -3,8 +3,15 @@ import uuid
 import apiflask.exceptions
 import pytest
 
+from src.constants.lookup_constants import Privilege
 from src.services.applications.update_application import update_application
-from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory, UserFactory
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 
 def test_update_application_success(enable_factory_create, db_session):
@@ -12,7 +19,10 @@ def test_update_application_success(enable_factory_create, db_session):
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     updates = {"application_name": "Updated Name"}
 
@@ -35,8 +45,10 @@ def test_update_application_empty_name(enable_factory_create, db_session):
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     updates = {"application_name": ""}
 
     # Call the function and get the updated application
@@ -81,7 +93,7 @@ def test_update_application_unauthorized(enable_factory_create, db_session):
         update_application(db_session, application.application_id, updates, user)
 
     assert excinfo.value.status_code == 403
-    assert "Unauthorized" in excinfo.value.message
+    assert "Forbidden" in excinfo.value.message
 
     # Verify application name was not updated
     db_session.refresh(application)
@@ -93,8 +105,10 @@ def test_update_application_multiple_fields_future(enable_factory_create, db_ses
     user = UserFactory.create()
     application = ApplicationFactory.create(application_name="Original Name")
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
     # Currently, only application_name is supported, but the function is designed
     # to be extended to handle more fields in the future
     updates = {

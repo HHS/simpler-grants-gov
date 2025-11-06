@@ -3,8 +3,9 @@ import logging
 import os
 import time
 import uuid
+from collections.abc import Callable, Generator
 from functools import wraps
-from typing import Callable, Generator, ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar
 
 import newrelic.agent
 import requests
@@ -62,7 +63,7 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
 
 
 @contextlib.contextmanager
-def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
+def _ecs_background_task_impl(task_name: str) -> Generator[None]:
     # The actual implementation, see the docs on the
     # decorator method above for details on usage
     start = time.perf_counter()

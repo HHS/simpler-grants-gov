@@ -8,31 +8,31 @@ FROM python:3.13-slim AS base
 
 # Install poetry, the package manager.
 # https://python-poetry.org
-RUN pip install --no-cache-dir poetry==1.8.2 --upgrade
 
-RUN apt-get update \
-  # Remove existing packages before installing their never versions
-  && apt-get remove --yes \
+RUN python -m pip install --no-cache-dir --upgrade "pip==25.3"
+RUN python -m pip install --no-cache-dir --upgrade "poetry==1.8.2"
+
+RUN apt-get update && \
+    apt-get remove --yes \
     build-essential \
     libc-dev \
     libpq-dev \
     postgresql \
-    wget \
-  # Install security updates
-  # https://pythonspeed.com/articles/security-updates-in-docker/
-  && apt-get upgrade --yes \
-  && apt-get install --no-install-recommends --yes \
+    wget  \
+    && apt-get upgrade --yes  \
+    && apt-get install --no-install-recommends --yes \
     build-essential \
     libc-dev \
     libpq-dev \
     postgresql \
     wget \
     libgnutls30 \
-  # Reduce the image size by clear apt cached lists
-  # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-  && apt-get clean \
-  && rm -fr /var/lib/apt/lists/* \
-  && rm /etc/ssl/private/ssl-cert-snakeoil.key
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /etc/ssl/private/ssl-cert-snakeoil.key
+RUN rm -rf /root/.cache/pip || true
+# Ensure no stale pip 25.2 dist-info remains from base image
+RUN rm -rf /usr/local/lib/python3.13/site-packages/pip-25.2.dist-info || true
 
 ARG RUN_UID
 ARG RUN_USER
@@ -98,6 +98,9 @@ RUN rm -fr /analytics/.venv
 # See https://python-poetry.org/docs/configuration/#using-environment-variables
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
+# Create virtualenv and upgrade pip inside it to 25.3 before installing deps
+RUN poetry env use python && poetry run pip install --no-cache-dir --upgrade "pip==25.3"
+
 # Install production runtime dependencies only
 RUN poetry install --no-root --only main
 
@@ -105,7 +108,10 @@ RUN poetry install --no-root --only main
 # Note that this will only copy over python files, and files stated in the
 # include section in pyproject.toml.
 RUN poetry build --format wheel && \
-  poetry run pip install --no-cache-dir dist/*.whl
+  poetry run pip install --no-cache-dir dist/*.whl && \
+  poetry run python -m pip install --no-cache-dir --upgrade "pip==25.3" && \
+  find /analytics/.venv -type d -name 'pip-25.2.dist-info' -prune -exec rm -rf {} + && \
+  rm -rf /root/.local/share/virtualenv /root/.cache/pip /usr/local/share/python-wheels || true
 
 # Add project's virtual env to the PATH so we can directly run poetry scripts
 # defiend in pyproject.toml

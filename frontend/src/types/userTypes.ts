@@ -6,23 +6,37 @@ export interface UserOrganization extends Organization {
 
 export type GatedResourceTypes = "application" | "organization" | "agency";
 
-export type UserPrivilegeDefinition = {
+export type Privileges =
+  | "manage_org_members"
+  | "manage_org_admin_members"
+  | "view_org_membership"
+  | "start_application"
+  | "list_application"
+  | "view_application"
+  | "modify_application"
+  | "submit_application"
+  | "update_form"
+  | "manage_agency_members"
+  | "get_submitted_applications";
+
+export interface UserPrivilegeDefinition {
   resourceId?: string;
   resourceType: GatedResourceTypes;
-  privilege: string; // we can narrow this later
-};
+  privilege: Privileges;
+}
 
-export type UserPrivilegesDefinition = {
-  resourceId?: string;
-  privileges: string[]; // we can narrow this later
-};
+export interface UserPrivilegeResult extends UserPrivilegeDefinition {
+  authorized: boolean;
+  error?: string;
+}
 
-export type UserRole = {
+export interface RoleDefinition {
   role_id: string;
   role_name: string;
-  privileges: string[];
-};
-
+}
+export interface UserRole extends RoleDefinition {
+  privileges: Privileges[];
+}
 export type OrganizationPrivilegesResponse = {
   organization: {
     organization_id: string;
@@ -60,17 +74,39 @@ export interface UserDetailProfile {
   first_name: string;
   middle_name?: string;
   last_name: string;
+  roles?: UserRole[];
 }
 
-export interface UserDetail {
+export interface UserDetail extends UserDetailProfile {
   user_id: string;
   email: string;
-  profile: UserDetailProfile | null;
+}
+
+export interface UserDetailWithProfile {
+  user_id: string;
+  email: string;
+  external_user_type: string;
+  profile: UserDetailProfile;
 }
 
 export interface UserProfileResponse {
   validationErrors?: UserProfileValidationErrors;
   errorMessage?: string;
-  data?: UserDetail;
+  data?: UserDetailProfile;
   success?: boolean;
 }
+
+export type OrganizationInvitation = {
+  organization_invitation_id: string;
+  organization: {
+    organization_id: string;
+    organization_name: string;
+  };
+  status: string; // can enum later
+  created_at: string;
+  expires_at: string;
+  inviter: UserDetail;
+  roles: UserRole[];
+};
+
+export const completeStatuses = ["rejected", "accepted", "expired"];

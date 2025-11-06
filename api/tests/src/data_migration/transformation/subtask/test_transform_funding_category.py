@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformFundingCategory(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_funding_category(self, transform_oracle_data_task):
         return TransformFundingCategory(transform_oracle_data_task)
 
@@ -169,7 +169,7 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-    @pytest.mark.parametrize("is_forecast", [True, False, True, False])
+    @pytest.mark.parametrize("is_forecast", [True, False])
     def test_process_funding_category_but_current_missing(
         self,
         db_session,

@@ -49,6 +49,7 @@ jsonpath-ng = "^1.7.0"
 prettytable = "^3.16.0"
 common-grants-sdk = "~0.3.2"
 PyYAML = "^6.0.3"
+jsonref = "^1.1.0"
 pydantic-core = "2.41.4"
 
 [tool.poetry.group.dev.dependencies]
@@ -111,17 +112,78 @@ target-version = "py313"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules
-select = ["B", "C", "E", "F", "W", "B9"]
+select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT"]
 ignore = [
-  # too many leading '#' for block comment, we can format our comments however we want
-  "E266",
-  # Ignore line-too-long errors, assume the formatter handles that appropriately
-  "E501",
-  # Ignore rules regarding unecessary list / generator usage which complains about [e for e in MyEnum] #
-  "C4",
-  # Ignore rule that flags functions with many branches - sometimes we just have a lot of
-  # business rules that make sense to aggregate in one place.
-  "C901",
+    # too many leading '#' for block comment, we can format our comments however we want
+    "E266",
+    # Ignore line-too-long errors, assume the formatter handles that appropriately
+    "E501",
+    # Ignore rules regarding unecessary list / generator usage which complains about [e for e in MyEnum] #
+    "C4",
+    # Ignore rule that flags functions with many branches - sometimes we just have a lot of
+    # business rules that make sense to aggregate in one place.
+    "C901",
+    # Ruff suggests not doing .encode("utf-8") and leaving utf-8 (the default out),
+    # but nothing wrong with being explicit and clear
+    "UP012",
+    # Ruff suggests using datetime.UTC over datetime.timezone.utc - but other timezones
+    # would need to be specified the latter way, seems odd to intentionally be inconsistent
+    "UP017",
+    # Ruff suggests using f-strings over .format - this one is a good recommendation
+    # we just have a few too many to refactor at this time.
+    "UP031",
+    # Ruff doesn't like array concatenation like [1, 2, 3] + [4, 5, 6], but it's intuitive where used.
+    "RUF005",
+    # Ruff doesn't like str() in f-strings, but instead
+    # recommends conversion flags (eg. f"{a!r}") which is less well known
+    "RUF010",
+    # Ruff thinks our SQLAlchemy models and factories have ClassVars
+    # but those classes don't use those variables in the problematic way it wants to avoid
+    "RUF012",
+    # Ruff wants __all__ sorted, not against it, but we'd want our
+    # formatter to handle that first to avoid it being tedious work
+    "RUF022",
+    # Ruff doesn't like when you use variables with _ prefixes in functions
+    # saying to avoid shadowing other params to do my_var_, but while
+    # that follows PEP8 formatting, it's not generally what I've seen
+    "RUF052",
+]
+
+# These are characters we are allowing to be confusing
+# for RUF001 which recommends not using certain characters
+# that look like each other.
+# https://docs.astral.sh/ruff/rules/ambiguous-unicode-character-string/#ambiguous-unicode-character-string-ruf001
+allowed-confusables = [
+    # endash (not a regular dash) - we need this in our email formatting
+    "–",
+    # right quotation mark (not a simple "'") - used in email formatting
+    "’"
+]
+
+[tool.ruff.lint.per-file-ignores]
+# These are rules that are excluded from just our unit tests
+# but still run for the rest of our code.
+"tests/*" = [
+    # Ruff suggests changing how iterables are merged, but it complicates test setup
+    "RUF005",
+    # Ruff wants to avoid "arg: int = None" - we shouldn't do this
+    # but our tests are only partially typed
+    "RUF013",
+    # Ruff suggests making any match statement in pytest.raises
+    # a proper regex pattern, but we just use it for finding strings in most cases
+    "RUF043",
+    # Ruff doesn't like "x, y = get_tuple()" and not using one of the values
+    # but the value might be used by a developer doing debugging
+    "RUF059",
+    # Ruff recommends the first parameter of a parametrized test be a tuple
+    # We have a lot of tests that don't do that, can circle back to this later
+    "PT006",
+    # Ruff recommends having pytest.raises() be a specific error
+    # but sometimes we just want to verify an error was raised at all
+    "PT011",
+    # Ruff recommends not doing "assert x == 1 and y == 2" in tests
+    # but the few places we do this are kept simple and help better organize complex scenarios
+    "PT018"
 ]
 
 

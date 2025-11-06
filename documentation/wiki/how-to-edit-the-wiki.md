@@ -6,14 +6,14 @@ The Simpler.Grants.gov public wiki is a collaborative resource. Any internal tea
 
 Below is a list of administrators who can grant editor permissions, in order of who you should reach out to first:
 
-* Michelle Min (Nava)
+* Justin Weiss (Nava)
 * Billy Daly or Sarah Knopp (A6)
 * Margaret Spring (Nava)
 
 ### How to make edits
 
 1. Log in to GitBook: [https://app.gitbook.com/](https://app.gitbook.com/)
-2. In the top left corner, it should say **Simpler Grants**. If not, you're in the wrong workspace—click it to switch to the correct workspace. If you don't see the option, ask Michelle M. or anyone from A6 to give you 'reviewer' permissions.
+2. In the top left corner, it should say **Simpler Grants**. If not, you're in the wrong workspace—click it to switch to the correct workspace. If you don't see the option, ask Justin W. or anyone from A6 to give you 'reviewer' permissions.
 3. Go to `Public Wiki` , under the `Spaces` section of the left nav.
 4. Click `Edit` .
 5. Make your changes.
@@ -28,12 +28,12 @@ We created a protocol everyone should follow to ensure the wiki aligns with our 
 
 * **Before merging changes, you must request a review from at least one content owner.** GitBook will email you when the content owner has approved the CR. At that point, you can merge the changes. Use the following table to identify the correct content owner to tag in your request:
 
-<table><thead><tr><th width="218.8125">Type of content</th><th width="245.98046875">Content owners / CR approvers</th><th>Content owners by name (Last reviewed 07-2025)</th></tr></thead><tbody><tr><td><strong>Welcome</strong> page</td><td>Nava Content Strategist</td><td>Michelle M.</td></tr><tr><td><strong>Get involved</strong> section</td><td>Nava Open Source Evangelist<br>Nava Content Strategist</td><td>Brandon T.<br>Michelle M.</td></tr><tr><td><strong>Product</strong> section</td><td>Nava Product Manager</td><td>Max K.<br>Chris W.<br>Eric S. (SimplerFind)<br>Chris K. (SimplerApply)</td></tr><tr><td><strong>Design &#x26; Research</strong> section</td><td>Nava Design Lead<br>Nava Content Strategist</td><td>Andy C.<br>Michelle M.</td></tr><tr><td><strong>References</strong> section</td><td>Nava Content Strategist</td><td>Michelle M.</td></tr></tbody></table>
+<table><thead><tr><th width="218.8125">Type of content</th><th width="245.98046875">Content owners / CR approvers</th><th>Content owners by name (Last reviewed 07-2025)</th></tr></thead><tbody><tr><td><strong>Welcome</strong> page</td><td>Nava Comms Strategist</td><td>Justin W.</td></tr><tr><td><strong>Get involved</strong> section</td><td>Nava Open Source Evangelist<br>Nava Comms Strategist</td><td>Brandon T.<br>Justin W.</td></tr><tr><td><strong>Product</strong> section</td><td>Nava Product Manager</td><td>Max K.<br>Chris W.<br>Eric S. (SimplerFind)<br>Chris K. (SimplerApply)</td></tr><tr><td><strong>Design &#x26; Research</strong> section</td><td>Nava Design Lead</td><td>Andy C.</td></tr><tr><td><strong>References</strong> section</td><td>Nava Comms Strategist</td><td>Justin W.</td></tr></tbody></table>
 
 * Content owners do not need to request a review for their section.
 * A6 manages the GitBook and can update any content. Feel free to add them as additional reviewers, especially if you need a fast response or the primary content owner is out of office.
-* Structural changes, such as requests to add or delete pages or sections, always require CR approval from the Nava Content Strategist.
-* The Nava Content Strategist can help individuals with wiki and editing consultations.
+* Structural changes, such as requests to add or delete pages or sections, always require CR approval from the Nava Comms Strategist.
+* The Nava Comms Strategist can help individuals with wiki and editing consultations.
 * Suggestion: When requesting feedback on a change request, it can be helpful to send the reviewer a Slack message with the following information:
   * A link to (1) the change request and (2) the preview of published docs
   * A summary of the changes

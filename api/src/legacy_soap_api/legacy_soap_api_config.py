@@ -22,6 +22,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_auth_content: str | None = Field(None, alias="SOAP_AUTH_CONTENT")
     soap_auth_map: dict = Field(default_factory=dict)
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
+    use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
 
     @property
     def gg_url(self) -> str:
@@ -69,6 +70,7 @@ class SOAPOperationConfig:
     response_operation_name: str
     compare_endpoints: bool = False
     is_mtom: bool = False
+    always_call_simpler: bool = False
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -80,7 +82,7 @@ class SOAPOperationConfig:
 
     # This value holds all namespace mappings per soap api. Grantors and Applicants APIs
     # will have different namespace configurations.
-    namespaces: dict[None | str, str] = field(default_factory=dict)
+    namespaces: dict[str | None, str] = field(default_factory=dict)
 
     # Configuration for XML namespace mapping to generate XML from SOAP XML dicts.
     # This will only be needed for the simpler SOAP data processing. The values for this property
@@ -98,6 +100,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             force_list_attributes=("OpportunityDetails",),
             key_indexes={"OpportunityDetails": "CompetitionID"},
             compare_endpoints=True,
+            always_call_simpler=True,
             namespace_keymap={
                 "GetOpportunityListResponse": "ns2",
                 "OpportunityDetails": "ns5",
@@ -159,7 +162,7 @@ SOAP_API_NAMESPACES: dict[SimplerSoapAPI, dict[str | None, str]] = {
 }
 
 
-@lru_cache()
+@lru_cache
 def get_soap_operation_config(
     simpler_api: SimplerSoapAPI, request_operation_name: str
 ) -> SOAPOperationConfig | None:

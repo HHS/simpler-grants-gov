@@ -2,7 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.form_schema.forms import shared_schema
+from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -143,7 +143,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 120,
         },
         "award_amount": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Award Amount",
             "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
         },
@@ -153,10 +153,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
                 },
             },
         },
@@ -166,10 +166,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
                 },
             },
         },
@@ -178,128 +178,28 @@ FORM_JSON_SCHEMA = {
             "required": ["name"],
             "properties": {
                 "signature": {
-                    "type": "string",
-                    "title": "Signature",
-                    "description": "Completed by Grants.gov upon submission.",
-                    "minLength": 1,
-                    "maxLength": 144,
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
                 },
                 "name": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "title": {
-                    "type": "string",
-                    "title": "Title",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
                     "description": "Enter the title of the Certifying Official.",
-                    "minLength": 1,
-                    "maxLength": 45,
                 },
                 "telephone": {
-                    "type": "string",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
                     "title": "Telephone No.",
                     "description": "Enter the telephone number of the certifying official.",
-                    "minLength": 1,
-                    "maxLength": 25,
                 },
                 "signed_date": {
-                    "type": "string",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
                     "title": "Signature Date",
-                    "description": "Completed by Grants.gov upon submission.",
-                    "format": "date",
                 },
             },
         },
     },
     "$defs": {
-        "person_name": {
-            # Note this is the same as the person_name from the SF424 but has no title
-            "type": "object",
-            "required": [
-                "first_name",
-                "last_name",
-            ],
-            "properties": {
-                "prefix": {
-                    "type": "string",
-                    "title": "Prefix",
-                    "minLength": 1,
-                    "maxLength": 10,
-                },
-                "first_name": {
-                    "type": "string",
-                    "title": "First Name",
-                    "description": "Enter the First Name.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "middle_name": {
-                    "type": "string",
-                    "title": "Middle Name",
-                    "description": "Enter the Middle Name.",
-                    "minLength": 1,
-                    "maxLength": 25,
-                },
-                "last_name": {
-                    "type": "string",
-                    "title": "Last Name",
-                    "description": "Enter the Last Name.",
-                    "minLength": 1,
-                    "maxLength": 60,
-                },
-                "suffix": {
-                    "type": "string",
-                    "title": "Suffix",
-                    "description": "Enter the suffix (e.g., Jr. Sr., PhD), if appropriate",
-                    "minLength": 1,
-                    "maxLength": 10,
-                },
-            },
-        },
-        "simple_address": {
-            # This address differs from the SF424 as it doesn't contain country, county or province
-            "type": "object",
-            "title": "Address",
-            "description": "Enter an address.",
-            "required": [
-                "street1",
-                "city",
-            ],
-            "properties": {
-                "street1": {
-                    "type": "string",
-                    "title": "Street 1",
-                    "description": "Enter the first line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "street2": {
-                    "type": "string",
-                    "title": "Street 2",
-                    "description": "Enter the second line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "city": {
-                    "type": "string",
-                    "title": "City",
-                    "description": "Enter the city.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "state": {
-                    "allOf": [{"$ref": "#/$defs/state_code"}],
-                    "title": "State",
-                    "description": "Enter the state.",
-                },
-                "zip_code": {
-                    "type": "string",
-                    "title": "Zip / Postal Code",
-                    "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
-                    "minLength": 1,
-                    "maxLength": 30,
-                },
-            },
-        },
         "reporting_entity_awardee": {
             "type": "object",
             "required": ["organization_name", "address"],
@@ -311,7 +211,7 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 60,
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
                 },
                 "congressional_district": {
                     "type": "string",
@@ -321,31 +221,6 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 6,
                 },
             },
-        },
-        "budget_monetary_amount": {
-            # Represents a monetary amount. We use a string instead of number
-            # to avoid any floating point rounding issues.
-            "type": "string",
-            # Pattern here effectively says:
-            # * An optional negative sign
-            # * Any number of digits
-            # * An optional decimal point
-            # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^(-)?\d*([.]\d{2})?$",
-            # Limit the max amount based on the length (11-digits, allows up to 99 billion)
-            "maxLength": 14,
-        },
-        "state_code": {
-            "type": "string",
-            "title": "state",
-            "description": "US state or Territory Code",
-            "enum": shared_schema.STATES,
-        },
-        "country_code": {
-            "type": "string",
-            "title": "country",
-            "description": "country Code",
-            "enum": shared_schema.COUNTRIES,
         },
     },
 }

@@ -7,7 +7,7 @@ exports[`OragnizationInfo matches snapshot 1`] = `
     data-testid="grid"
   >
     <div
-      class="tablet:grid-col-3"
+      class="tablet:grid-col-4"
       data-testid="grid"
     >
       <span
@@ -23,7 +23,7 @@ exports[`OragnizationInfo matches snapshot 1`] = `
       </span>
     </div>
     <div
-      class="tablet:grid-col-3"
+      class="tablet:grid-col-4"
       data-testid="grid"
     >
       <span
@@ -37,7 +37,7 @@ exports[`OragnizationInfo matches snapshot 1`] = `
       </span>
     </div>
     <div
-      class="tablet:grid-col-3"
+      class="tablet:grid-col-2"
       data-testid="grid"
     >
       <span
@@ -51,7 +51,7 @@ exports[`OragnizationInfo matches snapshot 1`] = `
       </span>
     </div>
     <div
-      class="tablet:grid-col-3"
+      class="tablet:grid-col-2"
       data-testid="grid"
     >
       <span

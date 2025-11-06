@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, Optional, Tuple, cast
+from typing import Any, cast
 
 import apiflask
 import flask
@@ -41,7 +41,7 @@ class ApiResponse:
     """Base response model for all API responses."""
 
     message: str
-    data: Optional[Any] = None
+    data: Any | None = None
     warnings: list[ValidationErrorDetail] = dataclasses.field(default_factory=list)
     errors: list[ValidationErrorDetail] = dataclasses.field(default_factory=list)
     status_code: int = 200
@@ -91,7 +91,7 @@ def process_marshmallow_issues(marshmallow_issues: dict) -> list[ValidationError
     return validation_errors
 
 
-def restructure_error_response(error: apiflask.exceptions.HTTPError) -> Tuple[dict, int, Any]:
+def restructure_error_response(error: apiflask.exceptions.HTTPError) -> tuple[dict, int, Any]:
     # Note that body needs to have the same schema as the ErrorResponseSchema we defined
     # in app.api.route.schemas.response_schema.py
     body = {
