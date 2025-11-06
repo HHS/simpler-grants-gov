@@ -42,14 +42,11 @@ def test_run_task_multiple_entities_and_users_same_email(enable_factory_create, 
     for entity in [entity_a, entity_b, entity_c]:
         assert entity.organization is not None
         assert {org_user.user_id for org_user in entity.organization.organization_users} == user_ids
-        for org_user in entity.organization.organization_users:
-            assert org_user.is_organization_owner
 
     metrics = task.metrics
     assert metrics[task.Metrics.RECORDS_PROCESSED] == 9
     assert metrics[task.Metrics.NEW_ORGANIZATION_CREATED_COUNT] == 3
     assert metrics[task.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT] == 9
-    assert metrics[task.Metrics.NEW_ORGANIZATION_OWNER_COUNT] == 9
 
 
 def test_run_task_multiple_different_email_addresses(enable_factory_create, db_session):
@@ -69,17 +66,14 @@ def test_run_task_multiple_different_email_addresses(enable_factory_create, db_s
     assert entity_a.organization is not None
     assert len(entity_a.organization.organization_users) == 1
     assert entity_a.organization.organization_users[0].user_id == user_a.user_id
-    assert entity_a.organization.organization_users[0].is_organization_owner is True
 
     assert entity_b.organization is not None
     assert len(entity_b.organization.organization_users) == 1
     assert entity_b.organization.organization_users[0].user_id == user_b.user_id
-    assert entity_b.organization.organization_users[0].is_organization_owner is True
 
     assert entity_c.organization is not None
     assert len(entity_c.organization.organization_users) == 1
     assert entity_c.organization.organization_users[0].user_id == user_c.user_id
-    assert entity_c.organization.organization_users[0].is_organization_owner is True
 
     # Blank emails aren't picked up in the join logic
     assert entity_blank_email.organization is None
@@ -89,7 +83,6 @@ def test_run_task_multiple_different_email_addresses(enable_factory_create, db_s
     assert metrics[task.Metrics.RECORDS_PROCESSED] == 3
     assert metrics[task.Metrics.NEW_ORGANIZATION_CREATED_COUNT] == 3
     assert metrics[task.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT] == 3
-    assert metrics[task.Metrics.NEW_ORGANIZATION_OWNER_COUNT] == 3
 
 
 def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session):
@@ -97,28 +90,42 @@ def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session
     user_a = LinkExternalUserFactory.create(email="entity_a@mail.com")
     entity_a = SamGovEntityFactory.create(ebiz_poc_email=user_a.email, has_organization=True)
     OrganizationUserFactory.create(
-        organization=entity_a.organization, user=user_a.user, is_organization_owner=True
+        organization=entity_a.organization,
+        user=user_a.user,
     )
     # Also has other random users with other emails that won't be affected/picked up
-    OrganizationUserFactory.create(organization=entity_a.organization, is_organization_owner=False)
-    OrganizationUserFactory.create(organization=entity_a.organization, is_organization_owner=True)
+    OrganizationUserFactory.create(
+        organization=entity_a.organization,
+    )
+    OrganizationUserFactory.create(
+        organization=entity_a.organization,
+    )
 
     ### User already exists, but is not an owner
     user_b = LinkExternalUserFactory.create(email="entity_b@mail.com")
     entity_b = SamGovEntityFactory.create(ebiz_poc_email=user_b.email, has_organization=True)
     OrganizationUserFactory.create(
-        organization=entity_b.organization, user=user_b.user, is_organization_owner=False
+        organization=entity_b.organization,
+        user=user_b.user,
     )
     # Other random users in org will be unaffected
-    OrganizationUserFactory.create(organization=entity_b.organization, is_organization_owner=False)
-    OrganizationUserFactory.create(organization=entity_b.organization, is_organization_owner=True)
-    OrganizationUserFactory.create(organization=entity_b.organization, is_organization_owner=True)
+    OrganizationUserFactory.create(
+        organization=entity_b.organization,
+    )
+    OrganizationUserFactory.create(
+        organization=entity_b.organization,
+    )
+    OrganizationUserFactory.create(
+        organization=entity_b.organization,
+    )
 
     ### Org exists, but user is not a member/owner
     user_c = LinkExternalUserFactory.create(email="entity_c@mail.com")
     entity_c = SamGovEntityFactory.create(ebiz_poc_email=user_c.email, has_organization=True)
     # Other random users in org will be unaffected
-    OrganizationUserFactory.create(organization=entity_c.organization, is_organization_owner=True)
+    OrganizationUserFactory.create(
+        organization=entity_c.organization,
+    )
 
     # Various other users/entities that won't get picked up
     SamGovEntityFactory.create(ebiz_poc_email="random_email123@mail.com")
@@ -135,7 +142,6 @@ def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session
     assert (
         user_a.user.organization_users[0].organization_id == entity_a.organization.organization_id
     )
-    assert user_a.user.organization_users[0].is_organization_owner is True
     assert len(entity_a.organization.organization_users) == 3
 
     # TODO - other compares
@@ -143,18 +149,15 @@ def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session
     assert (
         user_b.user.organization_users[0].organization_id == entity_b.organization.organization_id
     )
-    assert user_b.user.organization_users[0].is_organization_owner is True
     assert len(entity_b.organization.organization_users) == 4
 
     assert len(user_c.user.organization_users) == 1
     assert (
         user_c.user.organization_users[0].organization_id == entity_c.organization.organization_id
     )
-    assert user_c.user.organization_users[0].is_organization_owner is True
     assert len(entity_c.organization.organization_users) == 2
 
     metrics = task.metrics
     assert metrics[task.Metrics.RECORDS_PROCESSED] == 3
     assert metrics[task.Metrics.NEW_ORGANIZATION_CREATED_COUNT] == 0
     assert metrics[task.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT] == 1
-    assert metrics[task.Metrics.NEW_ORGANIZATION_OWNER_COUNT] == 2

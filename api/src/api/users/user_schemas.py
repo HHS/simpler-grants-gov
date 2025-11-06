@@ -236,12 +236,6 @@ class UserOrganizationSchema(Schema):
             "example": "123e4567-e89b-12d3-a456-426614174000",
         }
     )
-    is_organization_owner = fields.Boolean(
-        metadata={
-            "description": "Whether the user is an owner of this organization",
-            "example": True,
-        }
-    )
     sam_gov_entity = fields.Nested(
         SamGovEntityResponseSchema,
         allow_none=True,
