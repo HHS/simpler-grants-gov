@@ -2829,12 +2829,9 @@ class OrganizationUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
 
-    is_organization_owner = True  # Keep for now, will be removed later
-
     class Params:
         # New traits for role assignment
         as_admin = factory.Trait(
-            is_organization_owner=True,
             organization_user_roles=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.OrganizationUserRoleFactory",
                 factory_related_name="organization_user",
@@ -2844,7 +2841,6 @@ class OrganizationUserFactory(BaseFactory):
         )
 
         as_member = factory.Trait(
-            is_organization_owner=False,
             organization_user_roles=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.OrganizationUserRoleFactory",
                 factory_related_name="organization_user",
