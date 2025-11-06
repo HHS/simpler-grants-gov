@@ -82,11 +82,19 @@ jobs:
           if ! git rebase origin/main; then
             git checkout --theirs . 2>/dev/null || true
             git add . || true
-            # Restore our generated files 
-            [ -f /tmp/sgg-artifacts/openapi.generated.yml ] && cp -v /tmp/sgg-artifacts/openapi.generated.yml api/openapi.generated.yml && git add api/openapi.generated.yml || true
-            [ -d /tmp/sgg-artifacts ] && for png in /tmp/sgg-artifacts/*.png; do
-              [ -f "$png" ] && cp -v "$png" "documentation/api/database/erds/$(basename "$png")" && git add "documentation/api/database/erds/$(basename "$png")" || true
-            done
+            # Restore our generated files
+            if [ -f /tmp/sgg-artifacts/openapi.generated.yml ]; then
+              cp -v /tmp/sgg-artifacts/openapi.generated.yml api/openapi.generated.yml
+              git add api/openapi.generated.yml || true
+            fi
+            if [ -d /tmp/sgg-artifacts ]; then
+              for png in /tmp/sgg-artifacts/*.png; do
+                if [ -f "$png" ]; then
+                  cp -v "$png" "documentation/api/database/erds/$(basename "$png")"
+                  git add "documentation/api/database/erds/$(basename "$png")" || true
+                fi
+              done
+            fi
             git rebase --continue
           fi
 
