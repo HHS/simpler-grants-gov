@@ -12,7 +12,7 @@ import React, {
   useState,
   type RefObject,
 } from "react";
-import { GridContainer, ModalRef } from "@trussworks/react-uswds";
+import { ModalRef } from "@trussworks/react-uswds";
 
 import { ActiveUsers } from "./ActiveUsers";
 import { ConfirmRoleChangeModal } from "./ConfirmRoleChangeModal";
