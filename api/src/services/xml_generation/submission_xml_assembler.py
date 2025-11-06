@@ -5,14 +5,13 @@ from typing import Any
 
 from lxml import etree as lxml_etree
 
-from src.db.models.competition_models import Application, ApplicationSubmission
+from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
 )
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
-from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping_from_list
 
 logger = logging.getLogger(__name__)
 
@@ -20,23 +19,29 @@ logger = logging.getLogger(__name__)
 class SubmissionXMLAssembler:
     """Assembles complete GrantApplication.xml with header, forms, and footer."""
 
-    def __init__(self, application: Application, application_submission: ApplicationSubmission):
+    def __init__(
+        self,
+        application: Application,
+        application_submission: ApplicationSubmission,
+        attachment_mapping: dict[str, Any] | None = None,
+    ):
         self.application = application
         self.application_submission = application_submission
         self.xml_service = XMLGenerationService()
+        self.attachment_mapping = attachment_mapping
 
     def get_supported_forms(self) -> list[ApplicationForm]:
         """Get list of application forms that are supported for XML generation.
 
         Returns:
-            List of tuples (application_form, form_name) for supported forms only
+            List of ApplicationForm objects for supported forms only
         """
         supported_forms = []
 
         for app_form in self.application.application_forms:
             form_name = app_form.form.short_form_name
             if app_form.form.json_to_xml_schema is not None:
-                supported_forms.append((app_form, form_name))
+                supported_forms.append(app_form)
             else:
                 logger.info(
                     f"Skipping form {form_name} for XML generation - no transform config",
@@ -71,7 +76,8 @@ class SubmissionXMLAssembler:
 
         # Generate form XMLs
         form_xml_elements = []
-        for app_form, form_name in supported_forms:
+        for app_form in supported_forms:
+            form_name = app_form.form.short_form_name
             logger.info(
                 f"Generating XML for form {form_name}",
                 extra={
@@ -81,7 +87,7 @@ class SubmissionXMLAssembler:
             )
 
             try:
-                form_xml = self._generate_form_xml(app_form, form_name)
+                form_xml = self._generate_form_xml(app_form)
                 form_xml_elements.append(form_xml)
             except Exception:
                 logger.exception(
@@ -121,12 +127,10 @@ class SubmissionXMLAssembler:
 
         return complete_xml
 
-    def _generate_form_xml(self, app_form: Any, form_name: str) -> str:
+    def _generate_form_xml(self, app_form: Any) -> str:
         """Generate XML for a single application form."""
-        # Build attachment mapping for this form's attachments
-        attachment_mapping = create_attachment_mapping_from_list(
-            self.application.application_attachments
-        )
+        form_name = app_form.form.short_form_name
+        attachment_mapping = self.attachment_mapping
 
         request = XMLGenerationRequest(
             application_data=app_form.application_response,

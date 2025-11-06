@@ -96,8 +96,7 @@ class TestSubmissionXMLAssembler:
         supported_forms = assembler.get_supported_forms()
 
         assert len(supported_forms) == 1
-        app_form, form_name = supported_forms[0]
-        assert form_name == "SF424_4_0"
+        app_form = supported_forms[0]
         assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_mixed_support(
@@ -125,8 +124,8 @@ class TestSubmissionXMLAssembler:
 
         # Should only return SF424_4_0, not SF424A_1_0
         assert len(supported_forms) == 1
-        app_form, form_name = supported_forms[0]
-        assert form_name == "SF424_4_0"
+        app_form = supported_forms[0]
+        assert app_form.form.short_form_name == "SF424_4_0"
 
     def test_get_supported_forms_none_supported(
         self, sample_application, sample_application_submission, enable_factory_create, db_session
@@ -440,7 +439,7 @@ class TestSubmissionXMLAssembler:
 
         # Should raise error because empty data is invalid
         with pytest.raises(Exception) as exc_info:
-            assembler._generate_form_xml(empty_form, "SF424_4_0")
+            assembler._generate_form_xml(empty_form)
 
         assert "XML generation failed" in str(exc_info.value)
 

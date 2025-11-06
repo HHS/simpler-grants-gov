@@ -20,6 +20,7 @@ from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
+from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping_from_list
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -47,6 +48,7 @@ class SubmissionContainer:
     xml_metadata: FileMetadata | None = None
 
     file_names_in_zip: set[str] = field(default_factory=set)
+    attachment_filename_overrides: dict[str, str] = field(default_factory=dict)
 
     def get_file_name_in_zip(self, file_name: str) -> str:
         if file_name not in self.file_names_in_zip:
@@ -343,6 +345,12 @@ class CreateApplicationSubmissionTask(Task):
                 # Copy the contents of the file to the ZIP, renaming the file if it has
                 # the same filename as something already in the ZIP
                 file_name_in_zip = submission.get_file_name_in_zip(application_attachment.file_name)
+
+                # Track filename overrides if the file was renamed
+                if file_name_in_zip != application_attachment.file_name:
+                    attachment_id_str = str(application_attachment.application_attachment_id)
+                    submission.attachment_filename_overrides[attachment_id_str] = file_name_in_zip
+
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
                     file_in_zip.write(attachment_file.read())
 
@@ -364,8 +372,14 @@ class CreateApplicationSubmissionTask(Task):
 
         logger.info("Generating XML for application submission", extra=log_extra)
 
+        # Create attachment mapping once for all forms
+        attachment_mapping = create_attachment_mapping_from_list(
+            submission.application.application_attachments,
+            filename_overrides=submission.attachment_filename_overrides,
+        )
+
         xml_assembler = SubmissionXMLAssembler(
-            submission.application, submission.application_submission
+            submission.application, submission.application_submission, attachment_mapping
         )
 
         xml_content = xml_assembler.generate_complete_submission_xml(pretty_print=True)
