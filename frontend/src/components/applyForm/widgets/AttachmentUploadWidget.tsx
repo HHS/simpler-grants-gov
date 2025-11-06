@@ -80,7 +80,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
       deleteModalRef.current?.toggleModal();
       setAttachmentsChanged(true);
     }
-  }, [deleteState, onChange]);
+  }, [deleteState, onChange, setAttachmentsChanged]);
 
   useEffect(() => {
     const newAttachmentId = typeof value === "string" ? value : null;
