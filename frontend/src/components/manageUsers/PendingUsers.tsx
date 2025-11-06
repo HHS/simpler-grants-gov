@@ -1,6 +1,9 @@
 "use client";
 
-import type { OrganizationPendingInvitation, UserDetail } from "src/types/userTypes";
+import type {
+  OrganizationPendingInvitation,
+  UserDetail,
+} from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import React from "react";
