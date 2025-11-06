@@ -27,6 +27,8 @@ When running Next in a non-dockerized situation, variables are also pulled direc
 
 Since the .env.development file is tracked in git, any sensitive environment variables used for local development or testing - for example to connect to a non-dev API instance - **SHOULD NOT** be entered into this file, even temporarily. Instead, pass any necessary env vars directly from the command line or look into something like [direnv](https://direnv.net/).
 
+The `AUTH_EXPIRATION_TIME` environment variable will allow you to control the time your login token will remain valid. The value in .env.development is 1 year, but you can set a different value as needed in .env.local.
+
 ## Test (and testing)
 
 Unit testing by Jest is always done in the "test" environment by default. See [Jest's docs](https://jestjs.io/docs/environment-variables#node_env). As a result, all Jest runs will reference the .env.test or .env.local (which is used in CI).
