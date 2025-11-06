@@ -22,7 +22,7 @@ from common_grants_sdk.schemas.pydantic import (
 from pydantic import Field, HttpUrl, TypeAdapter, ValidationError
 
 from src.api.response import ValidationErrorDetail
-from src.constants.lookup_constants import OpportunityStatus
+from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.validation.validation_constants import ValidationErrorType
 
@@ -164,6 +164,13 @@ def validate_url(value: str | None) -> str | None:
     try:
         return str(url_adapter.validate_python(value))
     except ValidationError:
+        logger.info(
+            f"URL validation failed for: {value}",
+            extra={
+                "event": CommonGrantsEvent.URL_VALIDATION_ERROR,
+                "url": value,
+            },
+        )
         return None
 
 
@@ -286,7 +293,13 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             lastModifiedAt=opp_data.get("updated_at") or datetime.now(timezone.utc),
         )
     except Exception as e:
-        logger.exception(f"Failed to transform search result to CommonGrants format: {e}")
+        logger.warning(
+            f"Failed to transform search result to CommonGrants format: {e}",
+            extra={
+                "event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
+                "opportunity_id": opportunity_id,
+            },
+        )
         return None
 
 
