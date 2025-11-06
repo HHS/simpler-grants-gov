@@ -175,7 +175,7 @@ export function ManageUsersClient({
 
   return (
     <>
-      <GridContainer className="padding-top-2 tablet:padding-y-6">
+      <>
         <ActiveUsers
           roles={roles}
           tableDescription={t("activeUsersTableDescription")}
@@ -197,7 +197,7 @@ export function ManageUsersClient({
           tableTitle={t("pendingUsersTableDescription")}
           users={rows.pending}
         />
-      </GridContainer>
+      </>
 
       <ConfirmRoleChangeModal
         modalRef={modalRef}
