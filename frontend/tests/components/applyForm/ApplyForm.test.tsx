@@ -134,6 +134,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -224,6 +225,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -262,6 +264,7 @@ describe("ApplyForm", () => {
         savedFormData={{}}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const alert = screen.getByTestId("alert");
@@ -287,6 +290,7 @@ describe("ApplyForm", () => {
         formId="test"
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -313,6 +317,7 @@ describe("ApplyForm", () => {
         formId="test"
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -352,6 +357,7 @@ describe("ApplyForm", () => {
           },
         ]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const button = screen.getByTestId("apply-form-save");
@@ -395,6 +401,7 @@ describe("ApplyForm", () => {
           },
         ]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const button = screen.getByTestId("apply-form-save");
@@ -432,6 +439,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const button = screen.getByTestId("apply-form-save");
