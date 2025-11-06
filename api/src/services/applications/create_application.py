@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import (
     ApplicationStatus,
     CompetitionOpenToApplicant,
@@ -120,8 +120,9 @@ def create_application(
             raise_flask_error(404, "Organization not found")
 
         # Check privileges
-        if not can_access(user, {Privilege.START_APPLICATION}, organization):
-            raise_flask_error(403, "Forbidden")
+        check_user_access(
+            db_session, user, {Privilege.START_APPLICATION}, organization, organization_id
+        )
 
     # Verify the competition is open
     validate_competition_open(competition, ApplicationAction.START)

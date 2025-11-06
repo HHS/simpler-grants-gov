@@ -3,8 +3,7 @@ from typing import Any
 from uuid import UUID
 
 import src.adapters.db as db
-from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
@@ -38,8 +37,7 @@ def update_application(
     # Get application (this will check if it exists and if user has access)
     application = get_application(db_session, application_id, user)
     # Check privileges
-    if not can_access(user, {Privilege.MODIFY_APPLICATION}, application):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application, application_id)
 
     # Don't let a user update an existing application
     validate_application_in_progress(application, ApplicationAction.MODIFY)

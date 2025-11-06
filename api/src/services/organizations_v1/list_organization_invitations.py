@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
@@ -28,8 +28,9 @@ def get_organization_and_verify_access(
         raise_flask_error(404, message=f"Could not find Organization with ID {organization_id}")
 
     # Check if user has required privilege for this organization
-    if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session, user, {Privilege.MANAGE_ORG_MEMBERS}, organization, organization_id
+    )
 
     return organization
 
