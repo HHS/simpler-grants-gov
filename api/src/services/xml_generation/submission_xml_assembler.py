@@ -54,7 +54,7 @@ class SubmissionXMLAssembler:
 
         return supported_forms
 
-    def generate_complete_submission_xml(self, pretty_print: bool = True) -> str | None:
+    def generate_complete_submission_xml(self, pretty_print: bool = False) -> str | None:
         """Generate complete GrantApplication.xml with header, forms, and footer."""
         logger.info(
             "Generating complete submission XML",
@@ -72,7 +72,9 @@ class SubmissionXMLAssembler:
             return None
 
         # Generate header XML
-        header_xml_str = generate_application_header_xml(self.application, pretty_print=False)
+        header_xml_str = generate_application_header_xml(
+            self.application, pretty_print=pretty_print
+        )
 
         # Generate form XMLs
         form_xml_elements = []
@@ -87,7 +89,7 @@ class SubmissionXMLAssembler:
             )
 
             try:
-                form_xml = self._generate_form_xml(app_form)
+                form_xml = self._generate_form_xml(app_form, pretty_print)
                 form_xml_elements.append(form_xml)
             except Exception:
                 logger.exception(
@@ -109,7 +111,7 @@ class SubmissionXMLAssembler:
 
         # Generate footer XML
         footer_xml_str = generate_application_footer_xml(
-            self.application, self.application_submission, pretty_print=False
+            self.application, self.application_submission, pretty_print=pretty_print
         )
 
         # Assemble complete XML
@@ -127,7 +129,7 @@ class SubmissionXMLAssembler:
 
         return complete_xml
 
-    def _generate_form_xml(self, app_form: Any) -> str:
+    def _generate_form_xml(self, app_form: Any, pretty_print: bool = False) -> str:
         """Generate XML for a single application form."""
         form_name = app_form.form.short_form_name
         attachment_mapping = self.attachment_mapping
@@ -135,7 +137,7 @@ class SubmissionXMLAssembler:
         request = XMLGenerationRequest(
             application_data=app_form.application_response,
             transform_config=app_form.form.json_to_xml_schema,
-            pretty_print=False,
+            pretty_print=pretty_print,
             attachment_mapping=attachment_mapping,
         )
 
