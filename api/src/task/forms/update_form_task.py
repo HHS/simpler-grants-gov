@@ -2,10 +2,7 @@ import logging
 
 import click
 import requests
-from sqlalchemy import select
 
-import src.adapters.db as db
-from src.adapters.db import flask_db
 from src.db.models.competition_models import Form
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
@@ -23,35 +20,36 @@ logger = logging.getLogger(__name__)
     "--environment", required=True, type=click.Choice(["local", "dev", "staging", "prod"])
 )
 @click.option("--form-id", required=True, type=str)
-@flask_db.with_db_session()
 @ecs_background_task(task_name="update-form")
 def update_form(
-    db_session: db.Session,
     environment: str,
     form_id: str,
 ) -> None:
     # This script is only meant for running locally at this time
     error_if_not_local()
-    UpdateFormTask(db_session, environment=environment, form_id=form_id).run()
+    UpdateFormTask(environment=environment, form_id=form_id).run()
 
 
 class UpdateFormTask(BaseFormTask):
 
-    def __init__(self, db_session: db.Session, environment: str, form_id: str) -> None:
-        super().__init__(db_session)
+    def __init__(self, environment: str, form_id: str) -> None:
+        super().__init__()
         self.environment = environment
         self.form_id = form_id
 
     def run_task(self) -> None:
-        logger.info("Fetching form from local database")
-        form = self.db_session.execute(
-            select(Form).where(Form.form_id == self.form_id)
-        ).scalar_one_or_none()
+        logger.info("Processing form for update")
+
+        # Figure out which form
+        active_forms = self.get_forms()
+        form: Form | None = None
+        for active_form in active_forms:
+            if str(active_form.form_id) == self.form_id:
+                form = active_form
+                break
 
         if form is None:
-            raise Exception(
-                f"No form found with ID {self.form_id} - have you seeded your local DB?"
-            )
+            raise Exception(f"No form found with ID {self.form_id}")
 
         request = build_form_json(form)
         headers = self.build_headers()

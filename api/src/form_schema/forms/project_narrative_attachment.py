@@ -2,6 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
+from src.form_schema.shared import COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -13,12 +14,8 @@ FORM_JSON_SCHEMA = {
             "description": "At least one file must be attached",
             "minItems": 1,
             "maxItems": 100,
-            "items": {"allOf": [{"$ref": "#/$defs/attachment_field"}]},
+            "items": {"allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}]},
         }
-    },
-    "$defs": {
-        # Just defining this separately so it's easier to refactor when we have a shared schema
-        "attachment_field": {"type": "string", "format": "uuid", "title": "Attachment"},
     },
 }
 

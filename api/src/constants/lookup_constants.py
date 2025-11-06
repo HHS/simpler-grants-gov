@@ -150,6 +150,8 @@ class FormType(StrEnum):
     BUDGET_NARRATIVE_ATTACHMENT = "BudgetNarrativeAttachment"
     PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
 
+    CD511 = "CD511"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"

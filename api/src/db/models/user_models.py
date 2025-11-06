@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
@@ -453,3 +453,22 @@ class UserProfile(ApiSchemaTable, TimestampMixin):
     first_name: Mapped[str]
     middle_name: Mapped[str | None]
     last_name: Mapped[str]
+
+
+class LegacyCertificate(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "legacy_certificate"
+
+    legacy_certificate_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    cert_id: Mapped[str] = mapped_column(index=True)
+    serial_number: Mapped[str] = mapped_column(index=True)
+    expiration_date: Mapped[date] = mapped_column(index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    user: Mapped[User] = relationship(User)
+    agency_id: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey(Agency.agency_id))
+    agency: Mapped[Agency | None] = relationship(Agency)
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id)
+    )
+    organization: Mapped[Organization | None] = relationship(Organization)

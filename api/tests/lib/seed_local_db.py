@@ -1,5 +1,7 @@
 import dataclasses
 import logging
+import uuid
+from datetime import timedelta
 
 import click
 from sqlalchemy import select
@@ -11,13 +13,8 @@ import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.db.models.competition_models import Competition, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms.budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
-from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
-from src.form_schema.forms.project_narrative_attachment import ProjectNarrativeAttachment_v1_2
-from src.form_schema.forms.sf424 import SF424_v4_0
-from src.form_schema.forms.sf424a import SF424a_v1_0
-from src.form_schema.forms.sf424b import SF424b_v1_1
-from src.form_schema.forms.sflll import SFLLL_v2_0
+from src.form_schema.forms import get_active_forms
+from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_data_utils import CompetitionContainer
@@ -107,26 +104,16 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
     """Load all of our forms into the DB"""
     logger.info("Rebuilding forms")
 
-    forms_raw = {
-        "sf424": SF424_v4_0,
-        "sf424a": SF424a_v1_0,
-        "project_abstract_summary": ProjectAbstractSummary_v2_0,
-        "project_narrative_attachment": ProjectNarrativeAttachment_v1_2,
-        "budget_narrative_attachment": BudgetNarrativeAttachment_v1_2,
-        "sf424b": SF424b_v1_1,
-        "sflll": SFLLL_v2_0,
-    }
+    active_forms = get_active_forms()
+    forms = {}
 
     # For each form we need to sync the form record into
     # the database. If the form has form instructions
     # we'll create that if it doesn't already exist.
-    forms = {}
-
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
     )
-    for form_name, form in forms_raw.items():
-
+    for form in active_forms:
         # We can't use our merge approach here because
         # we want the factory to create a file on s3
         # and that requires we run create and not build
@@ -137,10 +124,12 @@ def _build_forms(db_session: db.Session) -> dict[str, Form]:
         ):
             # Note that we make these text files as generating valid PDFs is surprisingly complex.
             factories.FormInstructionFactory.create(
-                form_instruction_id=form.form_instruction_id, file_name=f"{form_name}.txt"
+                form_instruction_id=form.form_instruction_id,
+                file_name=f"{form.short_form_name}.txt",
             )
 
-        forms[form_name] = db_session.merge(form, load=True)
+        form.form_json_schema = resolve_jsonschema(form.form_json_schema)
+        forms[form.short_form_name] = db_session.merge(form, load=True)
 
     return forms
 
@@ -154,31 +143,35 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sf424"], is_required=True
+        competition=pilot_competition, form=forms["SF424_4_0"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sf424a"], is_required=True
+        competition=pilot_competition, form=forms["SF424A"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["project_abstract_summary"], is_required=True
+        competition=pilot_competition, form=forms["Project_AbstractSummary_2_0"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["project_narrative_attachment"], is_required=True
+        competition=pilot_competition,
+        form=forms["ProjectNarrativeAttachments_1_2"],
+        is_required=True,
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["budget_narrative_attachment"], is_required=True
+        competition=pilot_competition,
+        form=forms["BudgetNarrativeAttachments_1_2"],
+        is_required=True,
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sf424b"], is_required=True
+        competition=pilot_competition, form=forms["SF424B"], is_required=True
     )
 
     factories.CompetitionFormFactory.create(
-        competition=pilot_competition, form=forms["sflll"], is_required=False
+        competition=pilot_competition, form=forms["SFLLL_2_0"], is_required=False
     )
 
     logger.info(
@@ -201,12 +194,62 @@ def _build_competition_for_form(form: Form) -> Competition:
     return competition
 
 
+def _build_static_competition_with_all_forms(
+    db_session: db.Session,
+    forms: list[Form],
+    static_opportunity_id: uuid.UUID,
+    static_competition_id: uuid.UUID,
+) -> Competition:
+    competition = db_session.execute(
+        select(Competition).where(Competition.competition_id == static_competition_id)
+    ).scalar_one_or_none()
+
+    # If the static competition doesn't yet exist, create it.
+    if competition is None:
+        competition = factories.CompetitionFactory.create(
+            competition_id=static_competition_id,
+            opportunity__opportunity_id=static_opportunity_id,
+            opportunity__opportunity_title="STATIC Opportunity with ALL forms",
+            competition_forms=[],
+            with_instruction=True,
+            # Set the close date way in the future
+            closing_date=datetime_util.get_now_us_eastern_date() + timedelta(days=365),
+        )
+        forms_to_add = forms
+    else:
+        # If the static competition already exists
+        # we want whatever forms might have been
+        # created since the competition was setup initially
+        forms_to_add = []
+
+        existing_form_ids = [c.form_id for c in competition.competition_forms]
+
+        for form in forms:
+            if form.form_id not in existing_form_ids:
+                forms_to_add.append(form)
+
+    for form in forms_to_add:
+        logger.info(f"Adding form {form.form_name} to static competition")
+        factories.CompetitionFormFactory.create(
+            competition=competition, form=form, is_required=False
+        )
+
+    logger.info(
+        f"Created/updated a static competition with ALL forms' - http://localhost:3000/opportunity/{competition.opportunity_id}"
+    )
+    # Refresh the competition so any forms we just added
+    # get added to the object
+    db_session.refresh(competition)
+    return competition
+
+
 def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     competition = factories.CompetitionFactory.create(
         opportunity__opportunity_title="Test Opportunity with ALL forms",
         competition_forms=[],
         with_instruction=True,
     )
+
     for form in forms:
         factories.CompetitionFormFactory.create(
             competition=competition, form=form, is_required=False
@@ -219,14 +262,25 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
-def _build_competitions(forms_map: dict[str, Form]) -> CompetitionContainer:
+def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
     logger.info("Creating competitions")
     _build_pilot_competition(forms_map)
 
-    all_form_competition = _build_competition_with_all_forms(list(forms_map.values()))
-    competition_container = CompetitionContainer(competition_with_all_forms=all_form_competition)
+    forms = list(forms_map.values())
 
-    for form in forms_map.values():
+    static_all_form_competition = _build_static_competition_with_all_forms(
+        db_session,
+        forms,
+        static_opportunity_id=uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
+        static_competition_id=uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
+    )
+    all_form_competition = _build_competition_with_all_forms(forms)
+    competition_container = CompetitionContainer(
+        static_competition_with_all_forms=static_all_form_competition,
+        competition_with_all_forms=all_form_competition,
+    )
+
+    for form in forms:
         competition = _build_competition_for_form(form)
         competition_container.add_form_competition(form, competition)
 
@@ -302,7 +356,7 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         _build_agencies(db_session)
     if seed_config.seed_forms:
         forms_map = _build_forms(db_session)
-        competition_container = _build_competitions(forms_map)
+        competition_container = _build_competitions(db_session, forms_map)
     if seed_config.seed_users:
         _build_organizations_and_users(db_session, competition_container)
     if seed_config.seed_e2e:

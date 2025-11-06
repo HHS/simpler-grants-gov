@@ -10,17 +10,20 @@ from tests.src.db.models.factories import FormFactory
 
 
 @pytest.fixture
-def list_forms_task(db_session):
-    return ListFormsTask(db_session, "local", False, print_output=False)
+def list_forms_task():
+    return ListFormsTask("local", False, print_output=False)
 
 
-def test_list_forms_task(list_forms_task, enable_factory_create):
+def test_list_forms_task(list_forms_task, enable_factory_create, monkeypatch):
     unchanged_form = FormFactory.create(form_name="Unchanged Form", with_instruction=True)
     new_form = FormFactory.create(form_name="New Form")
     modified_form = FormFactory.create(form_name="Modified Form")
     modified_form_with_instruction = FormFactory.create(
         form_name="Modified Form with Instruction", with_instruction=True
     )
+
+    forms = [unchanged_form, new_form, modified_form, modified_form_with_instruction]
+    monkeypatch.setattr(list_forms_task, "get_forms", lambda: forms)
 
     unchanged_form_response = build_form_json(unchanged_form)
     unchanged_form_response["updated_at"] = "2025-09-19T19:53:02.220955+00:00"
@@ -41,20 +44,20 @@ def test_list_forms_task(list_forms_task, enable_factory_create):
         "form_instruction_id": str(uuid.uuid4())
     }
 
-    with requests_mock.Mocker() as mock:
+    with requests_mock.Mocker() as req_mock:
         # By default return a 404
-        mock.get(requests_mock.ANY, status_code=404)
-        mock.get(
+        req_mock.get(requests_mock.ANY, status_code=404)
+        req_mock.get(
             f"http://localhost:8080/alpha/forms/{unchanged_form.form_id}",
             status_code=200,
             json={"data": unchanged_form_response},
         )
-        mock.get(
+        req_mock.get(
             f"http://localhost:8080/alpha/forms/{modified_form.form_id}",
             status_code=200,
             json={"data": modified_form_response},
         )
-        mock.get(
+        req_mock.get(
             f"http://localhost:8080/alpha/forms/{modified_form_with_instruction.form_id}",
             status_code=200,
             json={"data": modified_form_with_instruction_response},

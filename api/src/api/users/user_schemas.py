@@ -10,6 +10,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
@@ -255,10 +256,39 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
     )
 
 
+class UserApplicationFilterSchema(Schema):
+    application_status = fields.Nested(
+        StrSearchSchemaBuilder("UserApplicationApplicationStatusFiilterSchema")
+        .with_one_of(allowed_values=ApplicationStatus)
+        .build()
+    )
+    organization_id = fields.Nested(
+        UuidSearchSchemaBuilder("UserApplicationApplicationOrganizationIDFilterSchema")
+        .with_one_of()
+        .build()
+    )
+    competition_id = fields.Nested(
+        UuidSearchSchemaBuilder("UserApplicationApplicationCompetitionIDFilterSchema")
+        .with_one_of()
+        .build()
+    )
+
+
 class UserApplicationListRequestSchema(Schema):
     """Schema for application list request - currently empty but provided for future filtering"""
 
-    pass
+    filters = fields.Nested(UserApplicationFilterSchema(), allow_none=True)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "UserApplicationPaginationSchema",
+            [
+                "updated_at",
+            ],
+            default_sort_order=[{"order_by": "updated_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
 
 
 class UserApplicationOpportunitySchema(Schema):

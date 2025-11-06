@@ -189,3 +189,81 @@ def test_shared_common_v1_phone_number_max_length():
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "maxLength"
     assert validation_issues[0].field == "$.my_field"
+
+
+###################################
+# Contact Person Title
+###################################
+@pytest.mark.parametrize(
+    "value", ["Doctor", "Director", "3rd Best Employee", "Her Royal Highness, First of Her Name"]
+)
+def test_shared_common_v1_contact_person_title(value):
+    schema = build_schema(COMMON_SHARED_V1, "contact_person_title")
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 0
+
+
+def test_shared_common_v1_contact_person_title_min_length():
+    schema = build_schema(COMMON_SHARED_V1, "contact_person_title")
+
+    validation_issues = validate_json_schema({"my_field": ""}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "minLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+def test_shared_common_v1_contact_person_title_max_length():
+    schema = build_schema(COMMON_SHARED_V1, "phone_number")
+
+    validation_issues = validate_json_schema({"my_field": "A" * 46}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "maxLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+###################################
+# Signature
+###################################
+@pytest.mark.parametrize("value", ["Fred Jones", "Norville 'Shaggy' Rogers", "Scooby"])
+def test_shared_common_v1_signature(value):
+    schema = build_schema(COMMON_SHARED_V1, "signature")
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 0
+
+
+def test_shared_common_v1_signature_min_length():
+    schema = build_schema(COMMON_SHARED_V1, "signature")
+
+    validation_issues = validate_json_schema({"my_field": ""}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "minLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+def test_shared_common_v1_signature_max_length():
+    schema = build_schema(COMMON_SHARED_V1, "phone_number")
+
+    validation_issues = validate_json_schema({"my_field": "A" * 145}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "maxLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+###################################
+# Submitted Date
+###################################
+@pytest.mark.parametrize("value", ["2025-01-01", "1970-05-13", "2167-12-31"])
+def test_shared_common_v1_submitted_date(value):
+    schema = build_schema(COMMON_SHARED_V1, "submitted_date")
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 0
+
+
+@pytest.mark.parametrize("value", ["not-a-date", "-1234-56-78", "2025-01-01T12:00:00", "123-45-67"])
+def test_shared_common_v1_submitted_date_invalid_format(value):
+    schema = build_schema(COMMON_SHARED_V1, "submitted_date")
+
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "format"
+    assert validation_issues[0].field == "$.my_field"
