@@ -2,7 +2,7 @@
 
 import logging
 from datetime import date, datetime, timezone
-from urllib.parse import urlparse
+from typing import Annotated
 
 from common_grants_sdk.schemas.pydantic import (
     FilterInfo,
@@ -19,7 +19,7 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from pydantic import ValidationError
+from pydantic import Field, HttpUrl, TypeAdapter, ValidationError
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import OpportunityStatus
@@ -139,26 +139,32 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
 
 def validate_url(value: str | None) -> str | None:
     """
-    Validate a URL string.
+    Validate a URL string using Pydantic's HttpUrl validation.
+
+    This ensures URLs are validated with the same strict rules that Pydantic
+    uses, preventing validation errors when creating OpportunityBase objects.
+
+    We use a minimal model with the same field definition as OpportunityBase
+    to ensure we use the exact same validation rules.
 
     Args:
         value: The string to validate
 
     Returns:
-        A valid URL string or None
+        A valid URL string or None if validation fails
     """
-    # Parse the string
-    parsed = urlparse(value)
+    if value is None or value == "":
+        return None
 
-    # Check for scheme and netloc (i.e. it's a complete url)
-    if parsed.scheme and parsed.netloc:
-        return value
+    # Mirrors the HttpUrl field in OpportunityBase
+    # TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
+    UrlField = Annotated[HttpUrl, Field(strict=True)]
+    url_adapter = TypeAdapter(UrlField)
 
-    # Check for netloc only (i.e. it's a domain name)
-    if not parsed.scheme and parsed.netloc:
-        return f"https://{value}"
-
-    return None
+    try:
+        return str(url_adapter.validate_python(value))
+    except ValidationError:
+        return None
 
 
 def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase | None:

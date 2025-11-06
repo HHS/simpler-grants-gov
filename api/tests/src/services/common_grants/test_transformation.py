@@ -1,6 +1,7 @@
 """Tests for the transformation utility."""
 
 from datetime import date, datetime
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from common_grants_sdk.schemas.pydantic import (
@@ -29,6 +30,30 @@ from src.services.common_grants.transformation import (
     transform_status_to_cg,
     validate_url,
 )
+
+
+def _legacy_validate_url(value: str | None) -> str | None:
+    """
+    Validate a URL string.
+
+    Args:
+        value: The string to validate
+
+    Returns:
+        A valid URL string or None
+    """
+    # Parse the string
+    parsed = urlparse(value)
+
+    # Check for scheme and netloc (i.e. it's a complete url)
+    if parsed.scheme and parsed.netloc:
+        return value
+
+    # Check for netloc only (i.e. it's a domain name)
+    if not parsed.scheme and parsed.netloc:
+        return f"https://{value}"
+
+    return None
 
 
 class TestTransformation:
@@ -102,8 +127,9 @@ class TestTransformation:
         """Test that URLs are properly validated and fixed."""
 
         # Test valid URLs
-        assert validate_url("https://example.com") == "https://example.com"
-        assert validate_url("http://example.com") == "http://example.com"
+        # Note: Pydantic normalizes URLs (e.g., adds trailing slash), so we check for normalized versions
+        assert validate_url("https://example.com") == "https://example.com/"
+        assert validate_url("http://example.com") == "http://example.com/"
 
         # Test URLs that need fixing
         assert validate_url("example.com") is None
@@ -430,6 +456,63 @@ class TestTransformation:
 
         # Should return None for invalid data
         assert result is None
+
+    def test_validate_url_with_nasa_url_bug(self):
+        """Test that validate_url() properly rejects URLs that Pydantic HttpUrl rejects.
+
+        This test reproduces a bug where validate_url() lets through URLs
+        that Pydantic's HttpUrl validation rejects, causing transformations to fail.
+
+        The NASA URL has curly braces or other characters that urlparse accepts but
+        Pydantic's strict HttpUrl validation rejects.
+        """
+        # This URL has characters that urlparse accepts but Pydantic HttpUrl rejects
+        # Based on error: "non-URL code point" - likely curly braces or other invalid chars
+        nasa_url = "https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={D8604BE7-CAB6-C1C0-B668-423042C43AA6}&path=&method=init"
+
+        # Old implementation used urlparse, new implementation uses Pydantic HttpUrl
+        old_result = _legacy_validate_url(nasa_url)
+        new_result = validate_url(nasa_url)
+
+        assert old_result is not None, "_legacy_validate_url() should accept NASA URL"
+        assert new_result is None, "validate_url() should reject NASA URL"
+
+    def test_transform_search_result_to_cg_with_nasa_url_bug(self):
+        """Test that transformation works correctly with NASA URL that Pydantic rejects.
+
+        This test ensures that when validate_url() properly rejects invalid URLs,
+        the transformation still succeeds (with source=None) rather than failing.
+        """
+        # This URL has characters that urlparse accepts but Pydantic HttpUrl rejects
+        nasa_url = "https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={D8604BE7-CAB6-C1C0-B668-423042C43AA6}&path=&method=init"
+        assert (
+            _legacy_validate_url(nasa_url) is not None
+        ), "_legacy_validate_url() should accept NASA URL"
+
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "estimated_total_program_funding": 1000000,
+                "award_ceiling": 500000,
+                "award_floor": 10000,
+                "additional_info_url": nasa_url,
+            },
+        }
+
+        # The transformation should succeed without raising a Pydantic validation error
+        result = transform_search_result_to_cg(opp_data)
+
+        # After fix: validate_url() should reject the URL, so source should be None
+        # but transformation should still succeed
+        assert result is not None, "Transformation should succeed even with invalid URL"
+        assert result.source is None, "Invalid URL should result in source=None"
 
     def test_build_money_range_filter(self):
         """Test building money range filters."""
