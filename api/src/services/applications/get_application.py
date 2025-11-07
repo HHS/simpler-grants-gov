@@ -136,7 +136,7 @@ def get_application_with_auth(
         check_user_access(
             db_session,
             user,
-            {Privilege.MODIFY_APPLICATION},
+            {Privilege.VIEW_APPLICATION},
             application,
         )
 

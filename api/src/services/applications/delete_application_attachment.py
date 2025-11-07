@@ -2,6 +2,8 @@ import logging
 import uuid
 
 import src.adapters.db as db
+from src.auth.endpoint_access_util import check_user_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import User
 from src.services.applications.get_application_attachment import get_application_attachment
 from src.util import file_util
@@ -22,7 +24,9 @@ def delete_application_attachment(
         db_session, application_id, application_attachment_id, user
     )
     # Check privileges
-
+    check_user_access(
+        db_session, user, {Privilege.MODIFY_APPLICATION}, application_attachment.application
+    )
     # Delete the file from s3
     logger.info("Deleting application attachment from s3")
     file_util.delete_file(application_attachment.file_location)

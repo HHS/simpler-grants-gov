@@ -46,7 +46,13 @@ def add_organization_to_application(
 
     # Get the organization (raises 404 if not found)
     organization = get_organization(db_session, organization_id)
-
+    # Check user has MODIFY_APPLICATION privilege for the application
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MODIFY_APPLICATION},
+        application,
+    )
     # Check user has START_APPLICATION privilege for the organization
     check_user_access(
         db_session,

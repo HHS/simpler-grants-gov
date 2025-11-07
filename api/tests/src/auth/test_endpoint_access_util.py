@@ -1,7 +1,9 @@
 import pytest
+from sqlalchemy import event
 
 from src.auth.endpoint_access_util import (
     can_access,
+    check_user_access,
     get_roles_for_agency,
     get_roles_for_app,
     get_roles_for_org,
@@ -346,3 +348,26 @@ class TestEndpointAccessUtil(BaseTestClass):
             can_access(user_e_limited_agency_b_priv.agency_user.user, privilege, agency_b)
             == expected
         )
+
+    def test_check_user_access(self, db_session, user_a_app_a, app_owned_by_org_a):
+        queries = []
+
+        def count(*args):
+            stmt = args[2]
+            if stmt and isinstance(stmt, str):
+                queries.append(stmt.strip())
+
+        event.listen(db_session.bind, "before_cursor_execute", count)
+
+        try:
+            check_user_access(
+                db_session=db_session,
+                user=user_a_app_a.application_user.user,
+                allowed_privileges={Privilege.SUBMIT_APPLICATION},
+                resource=app_owned_by_org_a,
+            )
+        finally:
+            event.remove(db_session.bind, "before_cursor_execute", count)
+
+        # Assert: 10 queries for preloading relationships,
+        assert len(queries) == 10
