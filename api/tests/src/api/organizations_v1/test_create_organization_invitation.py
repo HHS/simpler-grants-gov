@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
 
+from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
@@ -51,9 +53,12 @@ class TestCreateOrganizationInvitation:
         )
 
     def test_create_invitation_single_role_success(
-        self, client, db_session, enable_factory_create, admin_role, member_role
+        self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
     ):
         """Should successfully create invitation with single role"""
+        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        _clear_mock_responses()
+
         # Create admin user in organization
         admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
 
@@ -101,6 +106,14 @@ class TestCreateOrganizationInvitation:
         )
         assert len(role_links) == 1
         assert role_links[0].role_id == member_role.role_id
+
+        # Verify email was sent
+        mock_responses = _get_mock_responses()
+        assert len(mock_responses) == 1
+        request = mock_responses[0][0]
+        assert request["MessageRequest"]["Addresses"] == {
+            "newuser@example.com": {"ChannelType": "EMAIL"}
+        }
 
     def test_create_invitation_multiple_roles_success(
         self, client, db_session, enable_factory_create, admin_role, member_role, limited_role
@@ -581,3 +594,147 @@ class TestCreateOrganizationInvitation:
         assert len(data["roles"]) == len(db_roles)
         assert data["roles"][0]["role_id"] == str(db_roles[0].role_id)
         assert data["roles"][0]["role_name"] == db_roles[0].role_name
+
+    def test_create_invitation_sends_email_with_proper_content(
+        self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
+    ):
+        """Should send invitation email with proper content"""
+        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        _clear_mock_responses()
+
+        # Create admin user in organization
+        admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
+
+        # Make request
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations",
+            headers={"X-SGG-Token": token},
+            json={
+                "invitee_email": "newuser@example.com",
+                "role_ids": [str(member_role.role_id)],
+            },
+        )
+
+        assert resp.status_code == 200
+
+        # Verify email was sent with correct content
+        mock_responses = _get_mock_responses()
+        assert len(mock_responses) == 1
+
+        request = mock_responses[0][0]
+        email_config = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+            "SimpleEmail"
+        ]
+
+        # Verify subject contains required text
+        subject = email_config["Subject"]["Data"]
+        assert "Invitation to join" in subject
+
+        # Verify HTML content contains required information
+        html_content = email_config["HtmlPart"]["Data"]
+        assert "invited" in html_content.lower()
+        assert "expire" in html_content.lower()
+        assert "simpler.grants.gov" in html_content
+
+    def test_create_invitation_email_failure_does_not_block_creation(
+        self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
+    ):
+        """Should create invitation even if email sending fails"""
+        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+
+        # Create admin user in organization
+        admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
+
+        # Mock send_pinpoint_email_raw to raise an exception
+        with patch(
+            "src.services.organizations_v1.create_organization_invitation.send_pinpoint_email_raw"
+        ) as mock_send:
+            mock_send.side_effect = Exception("Email service unavailable")
+
+            # Make request
+            resp = client.post(
+                f"/v1/organizations/{organization.organization_id}/invitations",
+                headers={"X-SGG-Token": token},
+                json={
+                    "invitee_email": "newuser@example.com",
+                    "role_ids": [str(member_role.role_id)],
+                },
+            )
+
+            # Invitation should still be created successfully
+            assert resp.status_code == 200
+            data = resp.get_json()["data"]
+            assert data["invitee_email"] == "newuser@example.com"
+            assert data["status"] == "pending"
+
+            # Verify database record was created
+            invitation = (
+                db_session.query(OrganizationInvitation)
+                .filter(OrganizationInvitation.invitee_email == "newuser@example.com")
+                .filter(OrganizationInvitation.organization_id == organization.organization_id)
+                .first()
+            )
+            assert invitation is not None
+
+            # Verify send_pinpoint_email_raw was called (and failed)
+            assert mock_send.called
+
+    def test_create_invitation_uses_trace_id_from_newrelic(
+        self,
+        client,
+        db_session,
+        enable_factory_create,
+        admin_role,
+        member_role,
+        monkeypatch,
+        caplog,
+    ):
+        """Should use New Relic trace.id as Pinpoint trace_id and log it"""
+        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        _clear_mock_responses()
+
+        # Create admin user in organization
+        admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
+
+        # Mock New Relic to return a specific trace.id
+        test_trace_id = "test-trace-abc123xyz"
+        import newrelic.api.time_trace
+
+        monkeypatch.setattr(
+            newrelic.api.time_trace,
+            "get_linking_metadata",
+            lambda: {"trace.id": test_trace_id, "span.id": "span-123"},
+        )
+
+        # Make request
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations",
+            headers={"X-SGG-Token": token},
+            json={
+                "invitee_email": "newuser@example.com",
+                "role_ids": [str(member_role.role_id)],
+            },
+        )
+
+        assert resp.status_code == 200
+
+        # Verify email was sent with the New Relic trace.id
+        mock_responses = _get_mock_responses()
+        assert len(mock_responses) == 1
+
+        request = mock_responses[0][0]
+        pinpoint_trace_id = request["MessageRequest"]["TraceId"]
+
+        # The Pinpoint TraceId should match the New Relic trace.id
+        assert pinpoint_trace_id is not None
+        assert pinpoint_trace_id == test_trace_id
+
+        # Verify the trace.id appears in the logs
+        log_records = [r for r in caplog.records if "Sending invitation email" in r.message]
+        assert len(log_records) == 1
+
+        log_record = log_records[0]
+
+        # Verify the New Relic trace.id in the log matches what was sent to Pinpoint
+        assert log_record.__dict__.get("trace.id") == test_trace_id
+        assert log_record.__dict__.get("trace.id") == pinpoint_trace_id
