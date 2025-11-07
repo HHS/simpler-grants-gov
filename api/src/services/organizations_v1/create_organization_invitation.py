@@ -9,7 +9,11 @@ from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
-from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
+from src.db.models.entity_models import (
+    LinkOrganizationInvitationToRole,
+    Organization,
+    OrganizationInvitation,
+)
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.invitation_email import build_invitation_email
@@ -25,7 +29,7 @@ INVITATION_EXPIRY_DAYS = 7
 
 def _send_invitation_email(
     invitation: OrganizationInvitation,
-    organization,
+    organization: Organization,
     invitee_email: str,
 ) -> None:
     """Send invitation email to the invitee.
