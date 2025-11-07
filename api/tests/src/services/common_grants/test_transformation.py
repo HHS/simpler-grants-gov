@@ -688,8 +688,8 @@ class TestTransformation:
             None,
         )
         assert log_record is not None
-        assert hasattr(log_record, "event")
-        assert log_record.event == CommonGrantsEvent.URL_VALIDATION_ERROR
+        assert hasattr(log_record, "cg_event")
+        assert log_record.cg_event == CommonGrantsEvent.URL_VALIDATION_ERROR
         assert hasattr(log_record, "url")
         assert log_record.url == invalid_url
 
@@ -728,8 +728,8 @@ class TestTransformation:
             None,
         )
         assert log_record is not None
-        assert hasattr(log_record, "event")
-        assert log_record.event == CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR
+        assert hasattr(log_record, "cg_event")
+        assert log_record.cg_event == CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR
         assert hasattr(log_record, "opportunity_id")
         assert log_record.opportunity_id == "not-a-uuid"
 

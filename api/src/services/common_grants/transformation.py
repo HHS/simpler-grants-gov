@@ -2,7 +2,6 @@
 
 import logging
 from datetime import date, datetime, timezone
-from typing import Annotated
 
 from common_grants_sdk.schemas.pydantic import (
     FilterInfo,
@@ -19,7 +18,7 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from pydantic import Field, HttpUrl, TypeAdapter, ValidationError
+from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
@@ -27,6 +26,16 @@ from src.db.models.opportunity_models import Opportunity
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
+
+
+class UrlValidator(BaseModel):
+    """Validator for a URL string using Pydantic's HttpUrl with strict mode enabled.
+
+    Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
+    TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
+    """
+
+    url: HttpUrl = Field(strict=True)
 
 
 def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
@@ -155,19 +164,14 @@ def validate_url(value: str | None) -> str | None:
     """
     if value is None or value == "":
         return None
-
-    # Mirrors the HttpUrl field in OpportunityBase
-    # TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
-    UrlField = Annotated[HttpUrl, Field(strict=True)]
-    url_adapter = TypeAdapter(UrlField)
-
     try:
-        return str(url_adapter.validate_python(value))
+        valid = UrlValidator.model_validate({"url": value})
+        return str(valid.url)
     except ValidationError:
         logger.info(
             f"URL validation failed for: {value}",
             extra={
-                "event": CommonGrantsEvent.URL_VALIDATION_ERROR,
+                "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
                 "url": value,
             },
         )
@@ -296,7 +300,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         logger.warning(
             f"Failed to transform search result to CommonGrants format: {e}",
             extra={
-                "event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
+                "cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
                 "opportunity_id": opportunity_id,
             },
         )
