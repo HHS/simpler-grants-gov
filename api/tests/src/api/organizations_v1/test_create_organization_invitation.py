@@ -679,7 +679,7 @@ class TestCreateOrganizationInvitation:
             # Verify send_pinpoint_email_raw was called (and failed)
             assert mock_send.called
 
-    def test_create_invitation_uses_trace_id_from_newrelic(
+    def test_create_invitation_generates_trace_id_for_email(
         self,
         client,
         db_session,
@@ -689,22 +689,12 @@ class TestCreateOrganizationInvitation:
         monkeypatch,
         caplog,
     ):
-        """Should use New Relic trace.id as Pinpoint trace_id and log it"""
+        """Should generate a trace_id for Pinpoint and log it"""
         monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
         _clear_mock_responses()
 
         # Create admin user in organization
         admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
-
-        # Mock New Relic to return a specific trace.id
-        test_trace_id = "test-trace-abc123xyz"
-        import newrelic.api.time_trace
-
-        monkeypatch.setattr(
-            newrelic.api.time_trace,
-            "get_linking_metadata",
-            lambda: {"trace.id": test_trace_id, "span.id": "span-123"},
-        )
 
         # Make request
         resp = client.post(
@@ -718,23 +708,22 @@ class TestCreateOrganizationInvitation:
 
         assert resp.status_code == 200
 
-        # Verify email was sent with the New Relic trace.id
+        # Verify email was sent with a trace_id
         mock_responses = _get_mock_responses()
         assert len(mock_responses) == 1
 
         request = mock_responses[0][0]
         pinpoint_trace_id = request["MessageRequest"]["TraceId"]
 
-        # The Pinpoint TraceId should match the New Relic trace.id
+        # Verify we got a trace_id (should be a UUID)
         assert pinpoint_trace_id is not None
-        assert pinpoint_trace_id == test_trace_id
+        assert len(pinpoint_trace_id) > 0
 
-        # Verify the trace.id appears in the logs
+        # Verify the trace_id appears in the logs
         log_records = [r for r in caplog.records if "Sending invitation email" in r.message]
         assert len(log_records) == 1
 
         log_record = log_records[0]
 
-        # Verify the New Relic trace.id in the log matches what was sent to Pinpoint
-        assert log_record.__dict__.get("trace.id") == test_trace_id
-        assert log_record.__dict__.get("trace.id") == pinpoint_trace_id
+        # Verify the pinpoint_trace_id in the log matches what was sent to Pinpoint
+        assert log_record.__dict__.get("pinpoint_trace_id") == pinpoint_trace_id

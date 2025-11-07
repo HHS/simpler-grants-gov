@@ -2,7 +2,6 @@ import logging
 from datetime import timedelta
 from uuid import UUID, uuid4
 
-import newrelic.api.time_trace
 from sqlalchemy import desc, select
 
 from src.adapters import db
@@ -44,14 +43,14 @@ def _send_invitation_email(
         config = EmailNotificationConfig()
         subject, content = build_invitation_email(invitation, organization)
 
-        # Use the New Relic trace ID
-        newrelic_metadata = newrelic.api.time_trace.get_linking_metadata()
-        trace_id = newrelic_metadata.get("trace.id")
+        # Generate a trace ID for correlating logs with Pinpoint email delivery
+        trace_id = str(uuid4())
 
         logger.info(
             "Sending invitation email",
             extra={
                 "invitation_id": invitation.organization_invitation_id,
+                "pinpoint_trace_id": trace_id,
             },
         )
         send_pinpoint_email_raw(
