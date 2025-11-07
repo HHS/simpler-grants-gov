@@ -1,5 +1,5 @@
 name: Scheduled Dev Deploy
-run-name: Scheduled Dev Deploy - ${{ github.scheduled_date }}
+run-name: Scheduled Dev Deploy
 
 on:
   schedule:
