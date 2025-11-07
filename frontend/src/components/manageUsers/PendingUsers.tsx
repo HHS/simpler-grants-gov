@@ -1,8 +1,6 @@
 "use client";
 
-import type {
-  OrganizationPendingInvitation,
-} from "src/types/userTypes";
+import type { OrganizationPendingInvitation } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import React from "react";
@@ -14,7 +12,9 @@ export interface UsersTableProps {
   users: OrganizationPendingInvitation[];
 }
 
-function formatUserName(user?: { first_name?: string | null; last_name?: string | null } | null): string {
+function formatUserName(
+  user?: { first_name?: string | null; last_name?: string | null } | null,
+): string {
   if (!user) return "-";
   const name = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
   return name || "-";
