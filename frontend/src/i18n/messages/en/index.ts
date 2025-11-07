@@ -1591,6 +1591,7 @@ export const messages = {
     },
   },
   Applications: {
+    numApplications: "{num, plural, =1 {1 application} other {# applications}}",
     errorMessage:
       "We have encountered an error loading your applications, please try again later.",
     metaDescription: "View your saved applications",

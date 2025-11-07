@@ -43,12 +43,8 @@ describe("Applications", () => {
       const component = await Applications({ params: localeParams });
       render(component);
 
-      expect(
-        await screen.findByText("noApplicationsMessage.primary"),
-      ).toBeVisible();
-      expect(
-        await screen.findByText("noApplicationsMessage.secondary"),
-      ).toBeVisible();
+      expect(await screen.findByText("primary")).toBeVisible();
+      expect(await screen.findByText("secondary")).toBeVisible();
     });
 
     it("passes accessibility scan", async () => {
@@ -151,7 +147,7 @@ describe("Applications", () => {
       expect(await screen.findByText("November 11, 2025")).toBeVisible();
     });
 
-    it("renders applicaiton filing name", async () => {
+    it("renders application filing name", async () => {
       applications.mockResolvedValue([basicApplication]);
       const component = await Applications({ params: localeParams });
       render(component);
@@ -219,7 +215,7 @@ describe("Applications", () => {
         ).toBeVisible();
       });
 
-      it("if started as an orgnaization", async () => {
+      it("if started as an organization", async () => {
         applications.mockResolvedValue([
           {
             ...basicApplication,

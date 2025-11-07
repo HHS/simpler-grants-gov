@@ -5,8 +5,8 @@ import { LocalizedPageProps, TFn } from "src/types/intl";
 import { formatDate } from "src/utils/dateUtil";
 
 import { useTranslations } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { FunctionComponent, PropsWithChildren } from "react";
+import { setRequestLocale } from "next-intl/server";
+import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
 import {
@@ -14,7 +14,7 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
 
-const PageLayout: FunctionComponent<PropsWithChildren> = ({ children }) => {
+const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Applications");
   return (
     <GridContainer>
@@ -25,14 +25,14 @@ const PageLayout: FunctionComponent<PropsWithChildren> = ({ children }) => {
 };
 
 const NoStartedApplications = () => {
-  const t = useTranslations("Applications");
+  const t = useTranslations("Applications.noApplicationsMessage");
 
   return (
     <div className="margin-bottom-15">
       <div className="font-sans-xl text-bold margin-bottom-3">
-        {t("noApplicationsMessage.primary")}
+        {t("primary")}
       </div>
-      <div>{t("noApplicationsMessage.secondary")}</div>
+      <div>{t("secondary")}</div>
     </div>
   );
 };
@@ -41,13 +41,13 @@ const ApplicationsErrorPage = () => {
   const t = useTranslations("Applications");
 
   return (
-    <PageLayout>
+    <ApplicationsPageWrapper>
       <div className="margin-bottom-15">
         <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
           {t("errorMessage")}
         </Alert>
       </div>
-    </PageLayout>
+    </ApplicationsPageWrapper>
   );
 };
 
@@ -117,12 +117,19 @@ const ApplicationsTable = ({
   return (
     <div>
       <span className="font-sans-lg text-bold">
-        {userApplications.length} applications
+        {t("Applications.numApplications", { num: userApplications.length })}
       </span>
 
       <TableWithResponsiveHeader
         headerContent={headerTitles}
-        tableRowData={transformTableRowData(userApplications, t)}
+        tableRowData={transformTableRowData(
+          userApplications.sort(
+            (a: ApplicationDetail, b: ApplicationDetail) =>
+              new Date(b.competition.closing_date).getTime() -
+              new Date(a.competition.closing_date).getTime(),
+          ),
+          t,
+        )}
       />
     </div>
   );
@@ -131,7 +138,6 @@ const ApplicationsTable = ({
 export default async function Applications({ params }: LocalizedPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await getTranslations({ locale });
 
   let userApplications: ApplicationDetail[];
   try {
@@ -144,12 +150,12 @@ export default async function Applications({ params }: LocalizedPageProps) {
   }
 
   return (
-    <PageLayout>
+    <ApplicationsPageWrapper>
       {userApplications?.length ? (
         <ApplicationsTable userApplications={userApplications} />
       ) : (
         <NoStartedApplications />
       )}
-    </PageLayout>
+    </ApplicationsPageWrapper>
   );
 }
