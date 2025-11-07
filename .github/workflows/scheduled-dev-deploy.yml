@@ -1,0 +1,93 @@
+name: Scheduled Dev Deploy
+run-name: Scheduled Dev Deploy - ${{ github.scheduled_date }}
+
+on:
+  schedule:
+    # Runs daily at 5 AM UTC (1 AM EST / 12 AM CST)
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  api-checks:
+    name: Run API Checks
+    uses: ./.github/workflows/ci-api.yml
+
+  api-vulnerability-scans:
+    name: API Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: api
+
+  api-deploy:
+    name: Deploy API to Dev
+    needs: [api-checks, api-vulnerability-scans]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "api"
+      environment: "dev"
+      version: "main"
+
+  frontend-checks:
+    name: Run Frontend Checks
+    uses: ./.github/workflows/ci-frontend.yml
+
+  frontend-vulnerability-scans:
+    name: Frontend Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: frontend
+
+  frontend-deploy:
+    name: Deploy Frontend to Dev
+    needs: [frontend-checks, frontend-vulnerability-scans]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "frontend"
+      environment: "dev"
+      version: "main"
+
+  analytics-checks:
+    name: Run Analytics Checks
+    uses: ./.github/workflows/ci-analytics.yml
+    secrets: inherit
+
+  analytics-vulnerability-scans:
+    name: Analytics Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: analytics
+
+  analytics-deploy:
+    name: Deploy Analytics to Dev
+    needs: [analytics-checks, analytics-vulnerability-scans]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "analytics"
+      environment: "dev"
+      version: "main"
+
+  nofos-checks:
+    name: Run NOFOs Checks
+    uses: ./.github/workflows/ci-nofos.yml
+    with:
+      version: main
+
+  nofos-vulnerability-scans:
+    name: NOFOs Vulnerability Scans
+    needs: [nofos-checks]
+    uses: ./.github/workflows/vulnerability-scans-nofos.yml
+
+  nofos-deploy:
+    name: Deploy NOFOs to Dev
+    needs: [nofos-checks, nofos-vulnerability-scans]
+    uses: ./.github/workflows/deploy-nofos.yml
+    with:
+      environment: "dev"
+      version: "main"
+
+  send-slack-notification:
+    if: failure()
+    needs: [api-deploy, frontend-deploy, analytics-deploy, nofos-deploy]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
+
