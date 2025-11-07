@@ -276,10 +276,8 @@ class UserApplicationListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserApplicationPaginationSchema",
-            [
-                "updated_at",
-            ],
-            default_sort_order=[{"order_by": "updated_at", "sort_direction": "descending"}],
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
     )
