@@ -18,7 +18,6 @@ class TestOrganizationUsers:
         owner, organization, owner_token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create additional member with different role
@@ -26,7 +25,6 @@ class TestOrganizationUsers:
             privileges=[Privilege.VIEW_APPLICATION],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Make request
@@ -68,7 +66,6 @@ class TestOrganizationUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create profile
@@ -97,7 +94,6 @@ class TestOrganizationUsers:
         user, user_org, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create different organization with its own member
@@ -106,7 +102,6 @@ class TestOrganizationUsers:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=other_organization,
-            is_organization_owner=True,
         )
 
         # User from first organization tries to access second organization's users
@@ -218,7 +213,6 @@ class TestOrganizationUsers:
         owner, organization, owner_token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Make request
@@ -247,7 +241,6 @@ class TestOrganizationUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Make request

@@ -69,7 +69,6 @@ def org_invitation_response(
         org_user = OrganizationUser(
             organization_id=invitation.organization_id,
             user=user,
-            is_organization_owner=False,
         )
         db_session.add(org_user)
         for role in invitation.linked_roles:

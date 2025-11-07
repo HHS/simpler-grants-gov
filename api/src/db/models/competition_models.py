@@ -321,6 +321,13 @@ class Application(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    application_audits: Mapped[list["ApplicationAudit"]] = relationship(
+        "ApplicationAudit",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def users(self) -> list["User"]:
         """Return the list of User objects associated with this application"""
