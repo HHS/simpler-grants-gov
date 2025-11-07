@@ -36,7 +36,6 @@ from tests.src.db.models.factories import (
 def validate_manifest_contents(contents_of_manifest: str, expected_files: list[str]):
     # We don't validate the structure, just that
     # the files we expected are present.
-    print(contents_of_manifest)
     assert contents_of_manifest.startswith("Manifest for Grant Application")
 
     for expected_file in expected_files:
