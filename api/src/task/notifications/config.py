@@ -30,3 +30,13 @@ def get_email_config() -> EmailNotificationConfig:
     if _config is None:
         _config = EmailNotificationConfig()
     return _config
+
+
+def _reset_email_config() -> None:
+    """Reset the singleton EmailNotificationConfig instance.
+
+    This is primarily used for testing to ensure environment variable changes
+    are picked up between test cases.
+    """
+    global _config
+    _config = None
