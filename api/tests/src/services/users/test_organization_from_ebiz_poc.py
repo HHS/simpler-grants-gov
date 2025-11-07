@@ -89,7 +89,6 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     org_user = result[0]
     assert org_user.user == user
     assert org_user.organization.sam_gov_entity == sam_gov_entity
-    assert org_user.is_organization_owner is True
 
     db_session.flush()
 
@@ -129,7 +128,6 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization(
     org_user = result[0]
     assert org_user.user == user
     assert org_user.organization == organization
-    assert org_user.is_organization_owner is True
 
     db_session.flush()
 
@@ -160,7 +158,8 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
     user = UserFactory.create()
     LinkExternalUserFactory.create(user=user, email="ebiz_update@example.com")
     org_user = OrganizationUserFactory.create(
-        organization=organization, user=user, is_organization_owner=False
+        organization=organization,
+        user=user,
     )
     db_session.flush()
 
@@ -170,7 +169,6 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
     assert len(result) == 1
     returned_org_user = result[0]
     assert returned_org_user == org_user
-    assert returned_org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
@@ -193,7 +191,6 @@ def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
     # All organization users should be marked as owners
     for org_user in result:
         assert org_user.user == user
-        assert org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_rollback_on_error(

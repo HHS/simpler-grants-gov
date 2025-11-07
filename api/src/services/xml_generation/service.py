@@ -7,7 +7,6 @@ from typing import Any
 import requests
 from lxml import etree as lxml_etree
 
-from .config import load_xml_transform_config
 from .models import XMLGenerationRequest, XMLGenerationResponse
 from .transformers.attachment_transformer import AttachmentTransformer
 from .transformers.base_transformer import RecursiveXMLTransformer
@@ -23,7 +22,7 @@ class XMLGenerationService:
         """Generate XML from application data.
 
         Args:
-            request: XML generation request containing application data and form name
+            request: XML generation request containing application data and transform config
 
         Returns:
             XML generation response with generated XML or error information
@@ -35,24 +34,21 @@ class XMLGenerationService:
                     success=False, error_message="No application data provided"
                 )
 
-            # Load transformation configuration
-            transform_config = load_xml_transform_config(request.form_name)
-
             # Transform the data using recursive transformer
-            transformer = RecursiveXMLTransformer(transform_config)
+            transformer = RecursiveXMLTransformer(request.transform_config)
             transformed_data = transformer.transform(request.application_data)
 
             # Generate XML
             xml_string = self._generate_xml_string(
                 transformed_data,
-                transform_config,
+                request.transform_config,
                 request.pretty_print,
                 request.attachment_mapping,
             )
 
             # Log transformation results for development
             logger.info(
-                f"XML generation successful: {len(transformed_data)} fields transformed from {len(request.application_data)} input fields for {request.form_name}"
+                f"XML generation successful: {len(transformed_data)} fields transformed from {len(request.application_data)} input fields"
             )
 
             return XMLGenerationResponse(success=True, xml_data=xml_string)

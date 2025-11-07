@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.constants import NO_VALUE, YES_VALUE
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
@@ -25,7 +26,9 @@ class TestXMLGenerationService:
 
         # Create service and request
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -53,7 +56,9 @@ class TestXMLGenerationService:
     def test_generate_xml_no_application_data(self):
         """Test XML generation when no application data is provided."""
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data={}, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data={}, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -67,7 +72,7 @@ class TestXMLGenerationService:
         # Pydantic should prevent None values for application_data
         with pytest.raises(ValidationError) as e:
             XMLGenerationRequest(
-                application_data=None, form_name="SF424_4_0"  # type: ignore[arg-type]
+                application_data=None, transform_config=FORM_XML_TRANSFORM_RULES  # type: ignore[arg-type]
             )
 
         # Verify that Pydantic correctly validates the input
@@ -82,7 +87,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -101,7 +108,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -130,7 +139,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -165,7 +176,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -197,7 +210,9 @@ class TestXMLGenerationService:
 
         # Test pretty-print (default)
         pretty_request = XMLGenerationRequest(
-            application_data=application_data, form_name="SF424_4_0", pretty_print=True
+            application_data=application_data,
+            transform_config=FORM_XML_TRANSFORM_RULES,
+            pretty_print=True,
         )
         pretty_response = service.generate_xml(pretty_request)
         assert pretty_response.success is True
@@ -205,7 +220,9 @@ class TestXMLGenerationService:
 
         # Test condensed format
         condensed_request = XMLGenerationRequest(
-            application_data=application_data, form_name="SF424_4_0", pretty_print=False
+            application_data=application_data,
+            transform_config=FORM_XML_TRANSFORM_RULES,
+            pretty_print=False,
         )
         condensed_response = service.generate_xml(condensed_request)
         assert condensed_response.success is True
@@ -241,7 +258,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -280,7 +299,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -313,7 +334,9 @@ class TestXMLGenerationService:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 

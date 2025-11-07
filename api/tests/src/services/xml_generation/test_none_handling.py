@@ -2,6 +2,7 @@
 
 import pytest
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.constants import NO_VALUE
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
@@ -20,7 +21,9 @@ class TestNoneHandling:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -42,7 +45,9 @@ class TestNoneHandling:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -68,7 +73,9 @@ class TestNoneHandling:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -92,7 +99,9 @@ class TestNoneHandling:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -123,7 +132,9 @@ class TestNoneHandling:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -157,7 +168,9 @@ class TestNoneHandling:
         }
 
         service = XMLGenerationService()
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
