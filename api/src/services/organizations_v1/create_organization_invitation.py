@@ -18,7 +18,7 @@ from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.invitation_email import build_invitation_email
 from src.services.organizations_v1.update_user_organization_roles import validate_roles
-from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.config import get_email_config
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
@@ -43,20 +43,21 @@ def _send_invitation_email(
         inviter: The user who created the invitation
         invitee_email: Email address of the invitee
     """
+    config = get_email_config()
+    subject, content = build_invitation_email(invitation, organization)
+
+    # Generate a trace ID for correlating logs with Pinpoint email delivery
+    trace_id = str(uuid4())
+
+    logger.info(
+        "Sending invitation email",
+        extra={
+            "invitation_id": invitation.organization_invitation_id,
+            "pinpoint_trace_id": trace_id,
+        },
+    )
+
     try:
-        config = EmailNotificationConfig()
-        subject, content = build_invitation_email(invitation, organization)
-
-        # Generate a trace ID for correlating logs with Pinpoint email delivery
-        trace_id = str(uuid4())
-
-        logger.info(
-            "Sending invitation email",
-            extra={
-                "invitation_id": invitation.organization_invitation_id,
-                "pinpoint_trace_id": trace_id,
-            },
-        )
         send_pinpoint_email_raw(
             to_address=invitee_email,
             subject=subject,
@@ -185,7 +186,7 @@ def create_organization_invitation(
 
     db_session.add(invitation)
 
-    # Send invitation email (non-blocking)
+    # Send invitation email (failures won't block invitation creation)
     _send_invitation_email(invitation, organization, invitee_email)
 
     logger.info("Successfully created organization invitation")
