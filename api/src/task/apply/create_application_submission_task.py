@@ -238,7 +238,11 @@ class CreateApplicationSubmissionTask(Task):
         # Create the submission object (file size will be updated after zip creation)
         application_submission = ApplicationSubmission(
             application_submission_id=submission_id,
-            application=application,
+            # We specify application_id instead of application directly
+            # as SQLAlchemy will complain about this not being added to the DB session yet.
+            # We don't want it in the DB session until we've finished processing
+            # in case we hit an issue below.
+            application_id=application.application_id,
             file_location=s3_path,
             file_size_bytes=0,
             legacy_tracking_number=tracking_number,
