@@ -3,8 +3,7 @@ run-name: Scheduled Dev Deploy
 
 on:
   schedule:
-    # Runs daily at 5 AM UTC (1 AM EST / 12 AM CST)
-    - cron: '0 5 * * *'
+    - cron: '0 10 * * *'
   workflow_dispatch:
 
 jobs:
