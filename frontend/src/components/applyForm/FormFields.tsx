@@ -25,14 +25,12 @@ export const FormFields = ({
   schema,
   uiSchema,
   formContext,
-  isFormLocked,
 }: {
   errors: FormattedFormValidationWarning[] | null;
   formData: object;
   schema: RJSFSchema;
   uiSchema: UiSchema;
   formContext?: RootBudgetFormContext;
-  isFormLocked?: boolean;
 }) => {
   try {
     let acc: JSX.Element[] = [];
@@ -86,7 +84,6 @@ export const FormFields = ({
               props: {
                 ...widgetConfig.props,
                 formContext,
-                isFormLocked,
               },
               definition: node.definition,
             });
@@ -129,7 +126,6 @@ export const FormFields = ({
                 props: {
                   ...widgetConfig.props,
                   formContext,
-                  isFormLocked,
                 },
                 definition: node.definition,
               });

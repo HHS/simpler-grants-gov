@@ -171,7 +171,6 @@ const ApplyForm = ({
               schema={formSchema}
               uiSchema={uiSchema}
               formContext={formContextValue}
-              isFormLocked={isFormLocked}
             />
           </AttachmentsProvider>
         </FormGroup>
