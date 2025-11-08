@@ -1,5 +1,5 @@
 import { identity } from "lodash";
-import { inviteUserAction } from "src/app/[locale]/(base)/user/workspace/actions";
+import { inviteUserAction } from "src/app/[locale]/(base)/dashboard/actions";
 
 const getSessionMock = jest.fn();
 const mockCreateInvitation = jest.fn();

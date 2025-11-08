@@ -25,7 +25,7 @@ export const InvitationRejectionConfirmation = ({
   onCancel: () => void;
   onConfirm: () => void;
 }) => {
-  const t = useTranslations("UserWorkspace.invitationReply");
+  const t = useTranslations("ActivityDashboard.invitationReply");
   return (
     <ReplyWidgetWrapper>
       <Grid tablet={{ col: 8 }}>
@@ -59,7 +59,7 @@ export const InvitationRejectionConfirmation = ({
 };
 
 export const InvitationRejectedNotice = () => {
-  const t = useTranslations("UserWorkspace.invitationReply");
+  const t = useTranslations("ActivityDashboard.invitationReply");
   return (
     <ReplyWidgetWrapper>
       <Grid tablet={{ col: 8 }}>
@@ -75,7 +75,7 @@ export const InvitationAcceptedNotice = ({
 }: {
   organizationName: string;
 }) => {
-  const t = useTranslations("UserWorkspace.invitationReply");
+  const t = useTranslations("ActivityDashboard.invitationReply");
   return (
     <ReplyWidgetWrapper>
       <Grid tablet={{ col: 8 }}>
@@ -101,7 +101,7 @@ export const InvitationReplyForm = ({
   onAccept: () => void;
   onReject: () => void;
 }) => {
-  const t = useTranslations("UserWorkspace.invitationReply");
+  const t = useTranslations("ActivityDashboard.invitationReply");
 
   return (
     <>
