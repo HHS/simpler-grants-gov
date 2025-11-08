@@ -5359,7 +5359,7 @@ components:
         order_by:
           type: string
           enum:
-          - updated_at
+          - created_at
           description: The field to sort the response by
         sort_direction:
           description: Whether to sort the response ascending or descending
@@ -5377,7 +5377,7 @@ components:
         sort_order:
           type: array
           default:
-          - order_by: updated_at
+          - order_by: created_at
             sort_direction: descending
           minItems: 1
           maxItems: 5
