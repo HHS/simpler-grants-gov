@@ -37,6 +37,12 @@ describe("getApplications", () => {
         pagination: {
           page_offset: 1,
           page_size: 5000,
+          sort_order: [
+            {
+              order_by: "created_at",
+              sort_direction: "descending",
+            },
+          ],
         },
       },
     });
@@ -65,6 +71,12 @@ describe("fetchApplications", () => {
         pagination: {
           page_offset: 1,
           page_size: 5000,
+          sort_order: [
+            {
+              order_by: "created_at",
+              sort_direction: "descending",
+            },
+          ],
         },
       },
     });

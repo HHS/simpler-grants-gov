@@ -16,6 +16,12 @@ export const getApplications = async (
     pagination: {
       page_offset: 1,
       page_size: 5000,
+      sort_order: [
+        {
+          order_by: "created_at",
+          sort_direction: "descending",
+        },
+      ],
     },
   };
   const subPath = `${userId}/applications`;

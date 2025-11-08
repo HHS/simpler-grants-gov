@@ -122,14 +122,7 @@ const ApplicationsTable = ({
 
       <TableWithResponsiveHeader
         headerContent={headerTitles}
-        tableRowData={transformTableRowData(
-          userApplications.sort(
-            (a: ApplicationDetail, b: ApplicationDetail) =>
-              new Date(b.competition.closing_date).getTime() -
-              new Date(a.competition.closing_date).getTime(),
-          ),
-          t,
-        )}
+        tableRowData={transformTableRowData(userApplications, t)}
       />
     </div>
   );
