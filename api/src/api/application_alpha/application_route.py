@@ -13,6 +13,8 @@ from src.api.application_alpha.application_schemas import (
     ApplicationAttachmentGetResponseSchema,
     ApplicationAttachmentUpdateRequestSchema,
     ApplicationAttachmentUpdateResponseSchema,
+    ApplicationAuditRequestSchema,
+    ApplicationAuditResponseSchema,
     ApplicationFormGetResponseSchema,
     ApplicationFormInclusionUpdateRequestSchema,
     ApplicationFormInclusionUpdateResponseSchema,
@@ -40,6 +42,7 @@ from src.services.applications.get_application_attachment import (
     get_application_attachment_with_auth,
 )
 from src.services.applications.get_application_form import get_application_form
+from src.services.applications.list_application_audit import list_application_audit
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
 from src.services.applications.update_application_attachment import update_application_attachment
@@ -416,3 +419,36 @@ def application_attachment_delete(
         delete_application_attachment(db_session, application_id, application_attachment_id, user)
 
     return response.ApiResponse(message="Success")
+
+
+@application_blueprint.post("/applications/<uuid:application_id>/audit_history")
+@application_blueprint.input(ApplicationAuditRequestSchema())
+@application_blueprint.output(ApplicationAuditResponseSchema())
+@application_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def application_audit_list(
+    db_session: db.Session, application_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    logger.info("POST /alpha/applications/:application_id/audit_history")
+
+    # Get user from token session
+    token_session = api_jwt_auth.get_user_token_session()
+    user = token_session.user
+
+    with db_session.begin():
+        db_session.add(token_session)
+        audit_events, pagination_info = list_application_audit(
+            db_session, application_id, user, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched application audit events")
+
+    return response.ApiResponse(
+        message="Success", data=audit_events, pagination_info=pagination_info
+    )

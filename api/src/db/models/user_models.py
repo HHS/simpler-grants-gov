@@ -8,12 +8,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType
+from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
 from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType
+from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
 
@@ -67,6 +67,12 @@ class User(ApiSchemaTable, TimestampMixin):
     )
     profile: Mapped["UserProfile | None"] = relationship(
         "UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    user_type: Mapped[UserType | None] = mapped_column(
+        "user_type_id",
+        LookupColumn(LkUserType),
+        ForeignKey(LkUserType.user_type_id),
+        default=UserType.STANDARD,
     )
 
     @property

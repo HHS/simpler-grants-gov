@@ -36,6 +36,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationAuditEvent,
     ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
@@ -52,6 +53,7 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+    UserType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
@@ -896,6 +898,7 @@ class UserFactory(BaseFactory):
         model = user_models.User
 
     user_id = Generators.UuidObj
+    user_type = UserType.STANDARD
 
     class Params:
         with_profile = factory.Trait(
@@ -1484,6 +1487,11 @@ class ApplicationAttachmentFactory(BaseFactory):
         lambda a: f"s3://local-mock-public-bucket/applications/{a.application_id}/attachments/{fake.uuid4()}/{a.file_name}"
     )
 
+    class Params:
+        setup_deleted = factory.Trait(
+            is_deleted=True, file_contents="SKIP", file_location="DELETED"
+        )
+
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents")  # Don't file for build strategy
@@ -1493,6 +1501,9 @@ class ApplicationAttachmentFactory(BaseFactory):
     def _create(cls, model_class, *args, **kwargs):
         file_contents = kwargs.pop("file_contents")
         attachment = super()._create(model_class, *args, **kwargs)
+
+        if file_contents == "SKIP":
+            return attachment
 
         try:
             with file_util.open_stream(attachment.file_location, "w") as my_file:
@@ -1603,6 +1614,78 @@ class ApplicationUserRoleFactory(BaseFactory):
 
     role = factory.SubFactory(RoleFactory, is_application_role=True)
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
+
+
+class ApplicationAuditFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationAudit
+
+    application_audit_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda a: a.user.user_id)
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda a: a.application.application_id)
+
+    application_audit_event = ApplicationAuditEvent.APPLICATION_CREATED
+
+    class Params:
+        is_create = factory.Trait(application_audit_event=ApplicationAuditEvent.APPLICATION_CREATED)
+        is_name_changed = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.APPLICATION_NAME_CHANGED
+        )
+        is_submit = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.APPLICATION_SUBMITTED
+        )
+        is_submit_rejected = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+        )
+        is_attachment_added = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.ATTACHMENT_ADDED,
+            target_attachment=factory.SubFactory(
+                ApplicationAttachmentFactory, application=factory.SelfAttribute("..application")
+            ),
+        )
+        is_attachment_deleted = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.ATTACHMENT_DELETED,
+            target_attachment=factory.SubFactory(
+                ApplicationAttachmentFactory,
+                application=factory.SelfAttribute("..application"),
+                setup_deleted=True,
+            ),
+        )
+        is_attachment_updated = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.ATTACHMENT_UPDATED,
+            target_attachment=factory.SubFactory(
+                ApplicationAttachmentFactory, application=factory.SelfAttribute("..application")
+            ),
+        )
+        is_submission_created = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.SUBMISSION_CREATED,
+            application=factory.SubFactory(ApplicationFactory),
+        )
+        is_user_added = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.USER_ADDED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda a: a.target_user.user_id),
+        )
+        is_user_updated = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.USER_UPDATED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda a: a.target_user.user_id),
+        )
+        is_user_removed = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.USER_REMOVED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda a: a.target_user.user_id),
+        )
+        is_form_updated = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.FORM_UPDATED,
+            target_application_form=factory.SubFactory(
+                ApplicationFormFactory, application=factory.SelfAttribute("..application")
+            ),
+        )
 
 
 ###################
