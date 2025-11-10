@@ -1,5 +1,6 @@
 """Tests for the CommonGrantsOpportunityService."""
 
+from datetime import datetime
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -16,6 +17,7 @@ from common_grants_sdk.schemas.pydantic import (
     StringArrayFilter,
 )
 
+from src.constants.lookup_constants import OpportunityStatus
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 
 
@@ -264,3 +266,186 @@ class TestCommonGrantsOpportunityService:
         # Verify totalPages is calculated correctly
         expected_total_pages = (pagination_info.total_items + 3 - 1) // 3
         assert pagination_info.total_pages == expected_total_pages
+
+    def test_search_opportunities_filters_invalid_data(self, mock_search_client, caplog):
+        """Test that search_opportunities filters out invalid data while keeping valid data."""
+        import logging
+
+        caplog.set_level(logging.WARNING)
+
+        # Create a mix of valid and invalid opportunity data
+        valid_opp_1 = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Valid Opportunity 1",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Valid description",
+                "post_date": None,
+                "close_date": None,
+                "estimated_total_program_funding": None,
+                "award_ceiling": None,
+                "award_floor": None,
+                "additional_info_url": None,
+            },
+        }
+
+        valid_opp_2 = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Valid Opportunity 2",
+            "opportunity_status": OpportunityStatus.CLOSED,
+            "created_at": datetime(2024, 2, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 2, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Another valid description",
+                "post_date": None,
+                "close_date": None,
+                "estimated_total_program_funding": None,
+                "award_ceiling": None,
+                "award_floor": None,
+                "additional_info_url": None,
+            },
+        }
+
+        # Invalid opportunity data that will fail transformation
+        invalid_opp = {
+            "opportunity_id": "not-a-valid-uuid",  # This will cause transformation to fail
+            "invalid_field": "invalid_value",
+        }
+
+        with patch(
+            "src.services.common_grants.opportunity_service.search_opportunities"
+        ) as mock_search:
+            mock_pagination = Mock()
+            mock_pagination.page_offset = 1
+            mock_pagination.page_size = 10
+            mock_pagination.total_records = 3  # Total includes invalid data
+            mock_pagination.total_pages = 1
+
+            # Return mix of valid and invalid data
+            mock_search.return_value = (
+                [valid_opp_1, invalid_opp, valid_opp_2],
+                {},
+                mock_pagination,
+            )
+
+            search_request = OpportunitySearchRequest()
+            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
+                mock_search_client, search_request
+            )
+
+            # Verify that only valid opportunities are in the result
+            assert len(opportunities) == 2
+            assert opportunities[0].title == "Valid Opportunity 1"
+            assert opportunities[1].title == "Valid Opportunity 2"
+
+            # Verify that pagination still reflects the original total
+            assert pagination_info.total_items == 3
+
+            # Verify that transformation failure was logged
+            assert any(
+                record.levelname == "WARNING"
+                and "Failed to transform search result to CommonGrants format:" in record.message
+                for record in caplog.records
+            )
+
+    def test_list_opportunities_filters_invalid_data(self, mock_search_client, caplog):
+        """Test that list_opportunities filters out invalid data while keeping valid data."""
+        import logging
+
+        caplog.set_level(logging.WARNING)
+
+        # Create a mix of valid and invalid opportunity data
+        valid_opp = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Valid Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Valid description",
+                "post_date": None,
+                "close_date": None,
+                "estimated_total_program_funding": None,
+                "award_ceiling": None,
+                "award_floor": None,
+                "additional_info_url": None,
+            },
+        }
+
+        # Invalid opportunity data
+        invalid_opp = {
+            "opportunity_id": "not-a-uuid",
+            "invalid_field": "invalid_value",
+        }
+
+        with patch(
+            "src.services.common_grants.opportunity_service.search_opportunities"
+        ) as mock_search:
+            mock_pagination = Mock()
+            mock_pagination.page_offset = 1
+            mock_pagination.page_size = 10
+            mock_pagination.total_records = 2
+            mock_pagination.total_pages = 1
+
+            # Return mix of valid and invalid data
+            mock_search.return_value = ([valid_opp, invalid_opp], {}, mock_pagination)
+
+            pagination = PaginatedBodyParams(page=1, page_size=10)
+            opportunities, pagination_info = CommonGrantsOpportunityService.list_opportunities(
+                mock_search_client, pagination
+            )
+
+            # Verify that only valid opportunities are in the result
+            assert len(opportunities) == 1
+            assert opportunities[0].title == "Valid Opportunity"
+
+            # Verify that transformation failure was logged
+            assert any(
+                record.levelname == "WARNING"
+                and "Failed to transform search result to CommonGrants format:" in record.message
+                for record in caplog.records
+            )
+
+    def test_search_opportunities_all_invalid_data(self, mock_search_client, caplog):
+        """Test that search_opportunities returns empty list when all data is invalid."""
+        import logging
+
+        caplog.set_level(logging.WARNING)
+
+        # Create only invalid opportunity data
+        invalid_opp_1 = {"opportunity_id": "not-a-uuid-1", "invalid_field": "invalid_value"}
+        invalid_opp_2 = {"opportunity_id": "not-a-uuid-2", "invalid_field": "invalid_value"}
+
+        with patch(
+            "src.services.common_grants.opportunity_service.search_opportunities"
+        ) as mock_search:
+            mock_pagination = Mock()
+            mock_pagination.page_offset = 1
+            mock_pagination.page_size = 10
+            mock_pagination.total_records = 2
+            mock_pagination.total_pages = 1
+
+            # Return only invalid data
+            mock_search.return_value = ([invalid_opp_1, invalid_opp_2], {}, mock_pagination)
+
+            search_request = OpportunitySearchRequest()
+            opportunities, pagination_info = CommonGrantsOpportunityService.search_opportunities(
+                mock_search_client, search_request
+            )
+
+            # Verify that result is empty
+            assert len(opportunities) == 0
+
+            # Verify that pagination still reflects the original total
+            assert pagination_info.total_items == 2
+
+            # Verify that transformation failures were logged (should be 2)
+            warning_logs = [
+                record
+                for record in caplog.records
+                if record.levelname == "WARNING"
+                and "Failed to transform search result to CommonGrants format:" in record.message
+            ]
+            assert len(warning_logs) == 2
