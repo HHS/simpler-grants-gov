@@ -1,15 +1,16 @@
 import pytest
 from sqlalchemy import event
+from sqlalchemy.orm import make_transient
 
 from src.auth.endpoint_access_util import (
     can_access,
-    check_user_access,
     get_roles_for_agency,
     get_roles_for_app,
     get_roles_for_org,
     get_roles_for_resource,
 )
 from src.constants.lookup_constants import Privilege
+from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -349,25 +350,37 @@ class TestEndpointAccessUtil(BaseTestClass):
             == expected
         )
 
-    def test_check_user_access(self, db_session, user_a_app_a, app_owned_by_org_a):
-        queries = []
 
-        def count(*args):
-            stmt = args[2]
-            if stmt and isinstance(stmt, str):
-                queries.append(stmt.strip())
+def test_check_user_access(db_session, user):
+    """Test that `check_user_access` preloads all user roles and privileges efficiently
+    and does not perform any lazy-loading queries during access checks."""
+    org = OrganizationFactory()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=org),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+    app = ApplicationFactory.create(organization=org)
+    ApplicationUserFactory.create(user=user, application=app)
 
-        event.listen(db_session.bind, "before_cursor_execute", count)
+    # Load the user with all roles and privileges (10 queries)
+    user_with_role = get_roles_and_privileges(db_session, user.user_id)
+    # Detach objects from the session, clear identity map reference
+    make_transient(user_with_role)
+    make_transient(app)
 
-        try:
-            check_user_access(
-                db_session=db_session,
-                user=user_a_app_a.application_user.user,
-                allowed_privileges={Privilege.SUBMIT_APPLICATION},
-                resource=app_owned_by_org_a,
-            )
-        finally:
-            event.remove(db_session.bind, "before_cursor_execute", count)
+    queries = []
 
-        # Assert: 10 queries for preloading relationships,
-        assert len(queries) == 10
+    def count(*args):
+        stmt = args[2]
+        if stmt and isinstance(stmt, str):
+            queries.append(stmt.strip())
+
+    event.listen(db_session.bind, "before_cursor_execute", count)
+
+    try:
+        can_access(user_with_role, {Privilege.SUBMIT_APPLICATION}, app)
+    finally:
+        event.remove(db_session.bind, "before_cursor_execute", count)
+
+    # Assert no additional queries made
+    assert len(queries) == 0
