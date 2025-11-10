@@ -2616,6 +2616,88 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
                 return value + 1
         return 1
 
+class VuserAccountFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_account_id = factory.Sequence(lambda n: n)
+    user_id = Generators.UuidObj
+    email = factory.LazyAttribute(lambda o: f"{o.full_name}@example.com")
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+    full_name = factory.Faker("name")
+    is_active = factory.Faker("yn_boolean")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    is_duplicate = factory.Faker("yn_boolean")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+
+class ForeignVuserAccountFactory(VuserAccountFactory):
+    class Meta:
+        model = foreign.user.VuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.VuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+class StagingVuserAccountFactory(VuserAccountFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.VuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.VuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class TuserProfileFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_profile_id = factory.Sequence(lambda n:n)
+    user_account_id = factory.Sequence(lambda n:n)
+    profile_duns = factory.Faker("sentence")
+    profile_type_id = factory.Faker("random_int", min=1, max=3)
+    profile_name = factory.Faker("name")
+    title = factory.Faker("sentence")
+    is_ebiz_poc = factory.Faker("sentence")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+
+
+class ForeignTuserProfileFactory(TuserProfileFactory):
+    class Meta:
+        model = foreign.user.TuserProfile
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.TuserProfile.user_profile_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+class StagingTuserProfileFactory(TuserProfileFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.TuserProfile
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.TuserProfile.user_profile_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
 
 class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
     class Meta:

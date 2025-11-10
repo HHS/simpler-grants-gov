@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 
@@ -76,3 +77,32 @@ class TsubscriptionOpportunityMixin:
     creator_id: Mapped[str] = mapped_column(nullable=False)
     last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
     last_upd_id: Mapped[str] = mapped_column(nullable=False)
+
+
+@declarative_mixin
+class VuserAccountMixin:
+    user_account_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[str]
+    email: Mapped[str]
+    first_name: Mapped[str]
+    last_name: Mapped[str]
+    full_name: Mapped[str]
+    is_active: Mapped[str]
+    is_deleted_legacy: Mapped[str]
+    is_duplicate: Mapped[str]
+    created_date: Mapped[datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
+
+
+@declarative_mixin
+class TuserProfileMixin:
+    user_profile_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_account_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    profile_duns: Mapped[str]
+    profile_type_id: Mapped[int]
+    profile_name: Mapped[str]
+    title: Mapped[str]
+    is_ebiz_poc: Mapped[str]
+    is_deleted_legacy: Mapped[str]
+    created_date: Mapped[datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
