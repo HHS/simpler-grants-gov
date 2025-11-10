@@ -3912,9 +3912,7 @@ def test_get_application_form_access_with_organization(
 ):
     """Test that user can access the application if organization member"""
     # Associate user with organization
-    _, org, token = create_user_in_org(
-        db_session, is_organization_owner=True, privileges=[Privilege.VIEW_APPLICATION]
-    )
+    _, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
     # Create application owned by org
     application = ApplicationFactory.create(organization=org)
     application_form = ApplicationFormFactory.create(

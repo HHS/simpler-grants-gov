@@ -253,3 +253,15 @@ class ApplicationAuditEvent(StrEnum):
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
     FORM_UPDATED = "form_updated"
+
+
+class CommonGrantsEvent(StrEnum):
+
+    URL_VALIDATION_ERROR = "url_validation_error"
+    OPPORTUNITY_VALIDATION_ERROR = "opportunity_validation_error"
+
+
+class UserType(StrEnum):
+    STANDARD = "standard"
+    INTERNAL_FRONTEND = "internal_frontend"
+    LEGACY_CERTIFICATE = "legacy_certificate"
