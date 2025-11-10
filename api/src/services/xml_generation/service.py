@@ -15,6 +15,11 @@ from .utils.attachment_mapping import AttachmentInfo
 logger = logging.getLogger(__name__)
 
 
+def _is_attribute_metadata_key(field_name: str) -> bool:
+    """Check if a field name is an attribute metadata key."""
+    return field_name.startswith("__") and field_name.endswith("__attributes")
+
+
 class XMLGenerationService:
     """Service for generating XML from JSON application data."""
 
@@ -450,6 +455,7 @@ class XMLGenerationService:
         nsmap: dict,
         namespace_fields: dict,
         xsd_url: str | None = None,
+        attributes: dict[str, str] | None = None,
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
         if isinstance(value, dict):
@@ -468,6 +474,20 @@ class XMLGenerationService:
                     nested_element = lxml_etree.SubElement(parent, element_name)
                 else:
                     nested_element = lxml_etree.SubElement(parent, field_name)
+
+            # Add attributes if present
+            if attributes:
+                for attr_name, attr_value in attributes.items():
+                    # Handle namespaced attributes
+                    if ":" in attr_name:
+                        prefix, local_name = attr_name.split(":", 1)
+                        if prefix in nsmap:
+                            attr_qname = f"{{{nsmap[prefix]}}}{local_name}"
+                            nested_element.set(attr_qname, str(attr_value))
+                        else:
+                            nested_element.set(attr_name, str(attr_value))
+                    else:
+                        nested_element.set(attr_name, str(attr_value))
 
             # Special handling for Applicant address to ensure correct sequence order
             if field_name == "Applicant":
@@ -518,7 +538,22 @@ class XMLGenerationService:
                     element = lxml_etree.SubElement(parent, element_name)
                 else:
                     element = lxml_etree.SubElement(parent, field_name)
+
             element.text = str(value)
+
+            # Add attributes if present
+            if attributes:
+                for attr_name, attr_value in attributes.items():
+                    # Handle namespaced attributes
+                    if ":" in attr_name:
+                        prefix, local_name = attr_name.split(":", 1)
+                        if prefix in nsmap:
+                            attr_qname = f"{{{nsmap[prefix]}}}{local_name}"
+                            element.set(attr_qname, str(attr_value))
+                        else:
+                            element.set(attr_name, str(attr_value))
+                    else:
+                        element.set(attr_name, str(attr_value))
 
     def _add_ordered_address_elements(
         self, parent: Any, address_data: dict, nsmap: dict, namespace_fields: dict, xsd_url: str
@@ -572,19 +607,32 @@ class XMLGenerationService:
             if field_name in data and field_name not in attachment_fields:
                 field_value = data[field_name]
                 if field_value is not None:
+                    # Check for attributes stored with special key
+                    attr_key = f"__{field_name}__attributes"
+                    attributes = data.get(attr_key, None)
                     self._add_lxml_element_to_parent(
-                        root, field_name, field_value, nsmap, namespace_fields, xsd_url
+                        root,
+                        field_name,
+                        field_value,
+                        nsmap,
+                        namespace_fields,
+                        xsd_url,
+                        attributes,
                     )
 
-        # Add any remaining fields that weren't in the predefined order (skip attachment fields)
+        # Add any remaining fields that weren't in the predefined order (skip attachment and attribute metadata)
         for field_name, field_value in data.items():
             if (
                 field_name not in sf424_order
                 and field_name not in attachment_fields
+                and not _is_attribute_metadata_key(field_name)
                 and field_value is not None
             ):
+                # Check for attributes stored with special key
+                attr_key = f"__{field_name}__attributes"
+                attributes = data.get(attr_key, None)
                 self._add_lxml_element_to_parent(
-                    root, field_name, field_value, nsmap, namespace_fields, xsd_url
+                    root, field_name, field_value, nsmap, namespace_fields, xsd_url, attributes
                 )
 
     def _add_element_to_parent(self, parent: ET.Element, field_name: str, value: Any) -> None:
