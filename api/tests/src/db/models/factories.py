@@ -2940,6 +2940,23 @@ class StagingTinstructionsFactory(AbstractStagingFactory):
     created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 
 
+class StagingTcertificatesFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.certificates.Tcertificates
+
+    previouscertid = factory.Sequence(lambda n: f"{n}")
+    currentcertid = factory.Sequence(lambda n: f"{1000 + n}")
+    orgduns = None
+    orgname = None
+    expirationdate = factory.Faker("date_between", start_date="now", end_date="+1y")
+    agencyid = factory.Faker("pystr", min_chars=15, max_chars=15)
+    serial_num = factory.Faker("pystr", min_chars=15, max_chars=15)
+    created_date = factory.Faker("date_between", start_date="-2y", end_date="-1y")
+    certemail = factory.Faker("email")
+    creator_id = factory.Faker("email")
+    is_selfsigned = "Y"
+
+
 ###################
 # Extract Factories
 ###################
