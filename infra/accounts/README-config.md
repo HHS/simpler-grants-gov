@@ -14,7 +14,12 @@ The AWS Config recorder has been updated to use the AWS Config service-linked ro
 - **Management**: Removed from Terraform state - the recorder is now managed outside of Terraform
 
 ## Known Behavior
-Terraform plans will show `Plan: 1 to add` for `module.newrelic-aws-cloud-integrations.aws_config_configuration_recorder.newrelic_recorder`. This is expected and should **not** be applied, as it would create a non-compliant recorder configuration.
+Terraform plans will show `Plan: 0 to add, 1 to change` for `module.newrelic-aws-cloud-integrations.aws_config_configuration_recorder.newrelic_recorder`. This shows Terraform wants to change the recorder back to non-compliant settings (custom role instead of service-linked role). This change should **not** be applied.
+
+To apply other changes without affecting the Config recorder, use targeted applies:
+```bash
+terraform apply -target=<specific-resource>
+```
 
 ## Verification
 Verify the recorder configuration with:
