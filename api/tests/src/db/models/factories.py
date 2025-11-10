@@ -2616,6 +2616,7 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
                 return value + 1
         return 1
 
+
 class VuserAccountFactory(BaseFactory):
     class Meta:
         abstract = True
@@ -2632,6 +2633,7 @@ class VuserAccountFactory(BaseFactory):
     created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
     last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
 
+
 class ForeignVuserAccountFactory(VuserAccountFactory):
     class Meta:
         model = foreign.user.VuserAccount
@@ -2643,6 +2645,7 @@ class ForeignVuserAccountFactory(VuserAccountFactory):
             if value is not None:
                 return value + 1
         return 1
+
 
 class StagingVuserAccountFactory(VuserAccountFactory, AbstractStagingFactory):
     class Meta:
@@ -2661,8 +2664,8 @@ class TuserProfileFactory(BaseFactory):
     class Meta:
         abstract = True
 
-    user_profile_id = factory.Sequence(lambda n:n)
-    user_account_id = factory.Sequence(lambda n:n)
+    user_profile_id = factory.Sequence(lambda n: n)
+    user_account_id = factory.Sequence(lambda n: n)
     profile_duns = factory.Faker("sentence")
     profile_type_id = factory.Faker("random_int", min=1, max=3)
     profile_name = factory.Faker("name")
@@ -2685,6 +2688,7 @@ class ForeignTuserProfileFactory(TuserProfileFactory):
                 return value + 1
         return 1
 
+
 class StagingTuserProfileFactory(TuserProfileFactory, AbstractStagingFactory):
     class Meta:
         model = staging.user.TuserProfile
@@ -2696,7 +2700,6 @@ class StagingTuserProfileFactory(TuserProfileFactory, AbstractStagingFactory):
             if value is not None:
                 return value + 1
         return 1
-
 
 
 class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
