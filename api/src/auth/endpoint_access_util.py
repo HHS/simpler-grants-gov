@@ -123,8 +123,8 @@ def check_user_access(
     allowed_privileges: set[Privilege],
     resource: Organization | Application | Agency | None,
 ) -> None:
-    """Wrapper function to preload all roles and privileges for the given user in a single query,
+    """Wrapper function to preload all roles and privileges for the given user
     then checks access using the in-memory data."""
     user_with_role = get_roles_and_privileges(db_session, user.user_id)
-    if user_with_role and not can_access(user_with_role, allowed_privileges, resource):
+    if not user_with_role or not can_access(user_with_role, allowed_privileges, resource):
         raise_flask_error(403, "Forbidden")
