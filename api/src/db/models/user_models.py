@@ -331,7 +331,7 @@ class Role(ApiSchemaTable, TimestampMixin):
         back_populates="role",
         uselist=True,
         cascade="all, delete-orphan",
-        lazy="joined",  # preload privileges
+        lazy="selectin",  # preload privileges
     )
     link_role_types: Mapped[list["LinkRoleRoleType"]] = relationship(
         back_populates="role", uselist=True, cascade="all, delete-orphan"
