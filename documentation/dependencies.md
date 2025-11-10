@@ -116,7 +116,7 @@ flowchart LR
     direction LR
         HHS/simpler-grants-gov#2356["Cross-program product strategy (Quad 2) ✔️"]:::Done
         HHS/simpler-grants-gov#2357["Cross-program team health ✔️"]:::Done
-        HHS/simpler-grants-gov#2903["Deliverable linting and mapping 🛠️"]:::InProgress
+        HHS/simpler-grants-gov#2903["Deliverable linting and mapping ✔️"]:::Done
         HHS/simpler-grants-gov#3688["P&D Work Catch All - Quad 3 ✔️"]:::Done
         HHS/simpler-grants-gov#6265["P&D catch-all: Quad 4 🛠️"]:::InProgress
     end
@@ -129,7 +129,7 @@ flowchart LR
         HHS/simpler-grants-gov#4353["CommonGrants - Developer tools ✔️"]:::Done
         HHS/simpler-grants-gov#5892["CommonGrants: Co-Planning * 🛠️"]:::InProgress
         HHS/simpler-grants-gov#6195["CommonGrants: Form library"]
-        HHS/simpler-grants-gov#6201["CommonGrants: Schema versioning"]
+        HHS/simpler-grants-gov#6201["CommonGrants: Schema versioning 🛠️"]:::InProgress
     end
 
 

@@ -38,3 +38,12 @@ export const wrapForExpectedError = async <TError = Error>(
     return e as TError;
   }
 };
+
+/*
+  Useful when wanting to test with partial data.
+*/
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
