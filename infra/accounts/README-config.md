@@ -6,32 +6,18 @@ AWS Security Hub reports Config.1 compliance issues:
 - `CONFIG_RECORDER_CUSTOM_ROLE`: Using custom role instead of service-linked role
 
 ## Solution
-The AWS Config recorder needs to be transferred from NewRelic module management to direct Terraform management with updated settings.
+The AWS Config recorder has been updated to use the AWS Config service-linked role and enabled global resource recording. It is now managed outside of Terraform to avoid conflicts with the NewRelic module.
 
-## One-Time Setup Steps
+## What Was Changed
+- **Role**: Changed from `newrelic_configuration_recorder-simpler-grants-gov` custom role to `AWSServiceRoleForConfig` service-linked role
+- **Global Resources**: Enabled `includeGlobalResourceTypes` to record IAM resources (User, Policy, Group, Role)
+- **Management**: Removed from Terraform state - the recorder is now managed outside of Terraform
 
-Run these commands in `infra/accounts/`:
-
-```bash
-# 1. Remove the recorder from NewRelic module state
-terraform state rm module.newrelic-aws-cloud-integrations.aws_config_configuration_recorder.newrelic_recorder
-
-# 2. Import the existing recorder into our new resource
-terraform import aws_config_configuration_recorder.main newrelic_configuration_recorder-simpler-grants-gov
-
-# 3. Plan and verify changes
-terraform plan
-
-# 4. Apply the updated configuration
-terraform apply
-```
-
-## What Changes
-- **Role**: Changes from `newrelic_configuration_recorder-simpler-grants-gov` custom role to `AWSServiceRoleForConfig` service-linked role
-- **Global Resources**: Enables `includeGlobalResourceTypes` to record IAM resources (User, Policy, Group, Role)
+## Known Behavior
+Terraform plans will show `Plan: 1 to add` for `module.newrelic-aws-cloud-integrations.aws_config_configuration_recorder.newrelic_recorder`. This is expected and should **not** be applied, as it would create a non-compliant recorder configuration.
 
 ## Verification
-After applying, verify with:
+Verify the recorder configuration with:
 ```bash
 aws configservice describe-configuration-recorders --region us-east-1
 ```
