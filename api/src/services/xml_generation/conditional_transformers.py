@@ -12,6 +12,52 @@ from src.util.dict_util import get_nested_value
 logger = logging.getLogger(__name__)
 
 
+def _apply_pivot_object_transform(
+    transform_config: dict[str, Any], source_data: dict[str, Any]
+) -> dict[str, Any] | None:
+    """Apply pivot transformation to restructure nested objects."""
+    source_field = transform_config.get("source_field")
+    field_mapping = transform_config.get("field_mapping", {})
+
+    # Get the source object to pivot
+    source_path = source_field.split(".") if isinstance(source_field, str) else (source_field or [])
+    source_object = get_nested_value(source_data, cast(list[str], source_path))
+
+    result = {}
+
+    for target_field, target_subfields in field_mapping.items():
+        if not isinstance(target_subfields, dict):
+            continue
+
+        # Build nested object for this target field
+        nested_result = {}
+        for target_subfield, source_path_str in target_subfields.items():
+            # Parse the source path
+            if not isinstance(source_path_str, str):
+                continue
+
+            path_parts = source_path_str.split(".")
+            value = source_object
+
+            # Navigate through the path
+            for part in path_parts:
+                if isinstance(value, dict) and part in value:
+                    value = value[part]
+                else:
+                    value = None
+                    break
+
+            # Add value if found
+            if value is not None:
+                nested_result[target_subfield] = value
+
+        # Only add target field if we got at least one value
+        if nested_result:
+            result[target_field] = nested_result
+
+    return result if result else None
+
+
 class ConditionalTransformationError(Exception):
     """Exception raised when conditional transformation fails."""
 
@@ -89,6 +135,7 @@ def apply_conditional_transform(
 
     Supports:
     - one_to_many: Map array field to multiple XML elements
+    - pivot_object: Restructure nested objects by pivoting dimensions
 
     Args:
         transform_config: Conditional transformation configuration
@@ -127,6 +174,9 @@ def apply_conditional_transform(
                 return {target_field: source_values}
 
         return None
+
+    elif transform_type == "pivot_object":
+        return _apply_pivot_object_transform(transform_config, source_data)
 
     else:
         raise ConditionalTransformationError(
