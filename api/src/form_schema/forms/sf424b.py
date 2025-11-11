@@ -1,6 +1,8 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
+from src.form_schema.shared import COMMON_SHARED_V1
 
 DIRECTIONS = """Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0040), Washington, DC 20503.
 
@@ -52,19 +54,14 @@ FORM_JSON_SCHEMA = {
     "required": ["title", "applicant_organization"],
     "properties": {
         "signature": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
             "title": "Signature of the Authorized Certifying Official",
             "description": "Completed by Grants.gov upon submission.",
-            "minLength": 1,
-            "maxLength": 144,
         },
         "title": {
             # FUTURE WORK: This gets copied from the SF-424's AuthorizedRepresentativeTitle field
-            "type": "string",
-            "title": "Title",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
             "description": "This should match the 'Authorized Representative Title' field from the SF-424 form",
-            "minLength": 1,
-            "maxLength": 45,
         },
         "applicant_organization": {
             # FUTURE WORK: This gets copied from the SF-424's OrganizationName field (called Legal Name in the UI)
@@ -75,10 +72,8 @@ FORM_JSON_SCHEMA = {
             "maxLength": 60,
         },
         "date_signed": {
-            "type": "string",
-            "format": "date",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
             "title": "Date Signed",
-            "description": "Completed by Grants.gov upon submission.",
         },
     },
 }
@@ -122,5 +117,8 @@ SF424b_v1_1 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("9db8ab35-f677-482c-93ea-9fb3eb86d7c7"),
+    form_type=FormType.SF424B,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

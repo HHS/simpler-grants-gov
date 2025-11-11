@@ -175,7 +175,7 @@ class TestEndpointAccessUtil(BaseTestClass):
 
         res = get_roles_for_org(user, org_a)
 
-        user_orgs = user.organizations
+        user_orgs = user.organization_users
         assert len(user_orgs) == 2
 
         assert len(res) == 1
@@ -316,8 +316,7 @@ class TestEndpointAccessUtil(BaseTestClass):
 
         res = get_roles_for_agency(user, agency_a)
 
-        user_agencies = user.user_agencies
-        assert len(user_agencies) == 2
+        assert len(user.agency_users) == 2
 
         assert len(res) == 1
         assert res[0].role_id == user_a_agency_a.role_id

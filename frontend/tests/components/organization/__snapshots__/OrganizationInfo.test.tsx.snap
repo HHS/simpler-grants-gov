@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OragnizationInfo matches snapshot 1`] = `
+<div>
+  <div
+    class="grid-row"
+    data-testid="grid"
+  >
+    <div
+      class="tablet:grid-col-4"
+      data-testid="grid"
+    >
+      <span
+        class="text-bold padding-right-2"
+      >
+        ebizPoc
+        :
+      </span>
+      <span>
+        first
+         
+        last
+      </span>
+    </div>
+    <div
+      class="tablet:grid-col-4"
+      data-testid="grid"
+    >
+      <span
+        class="text-bold padding-right-2"
+      >
+        contact
+        :
+      </span>
+      <span>
+        email@email.email
+      </span>
+    </div>
+    <div
+      class="tablet:grid-col-2"
+      data-testid="grid"
+    >
+      <span
+        class="text-bold padding-right-2"
+      >
+        uei
+        :
+      </span>
+      <span>
+        unique entity identifier
+      </span>
+    </div>
+    <div
+      class="tablet:grid-col-2"
+      data-testid="grid"
+    >
+      <span
+        class="text-bold padding-right-2"
+      >
+        expiration
+        :
+      </span>
+      <span>
+        1-1-25
+      </span>
+    </div>
+  </div>
+  <div
+    class="margin-top-2"
+  >
+    visitSam
+  </div>
+</div>
+`;

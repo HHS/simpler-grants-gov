@@ -19,7 +19,6 @@ class CreateOrgsFromSamEntityTask(Task):
 
         NEW_ORGANIZATION_CREATED_COUNT = "new_organization_created_count"
         NEW_USER_ORGANIZATION_CREATED_COUNT = "new_organization_user_created_count"
-        NEW_ORGANIZATION_OWNER_COUNT = "new_organization_owner_count"
 
     def run_task(self) -> None:
         with self.db_session.begin():
@@ -31,7 +30,7 @@ class CreateOrgsFromSamEntityTask(Task):
                 # we want to avoid them becoming the org owner of 500 random orgs
                 .where(SamGovEntity.ebiz_poc_email != "")
                 .options(selectinload(SamGovEntity.organization))
-                .options(selectinload(LinkExternalUser.user).selectinload(User.organizations))
+                .options(selectinload(LinkExternalUser.user).selectinload(User.organization_users))
             )
 
             for sam_gov_entity, link_external_user in sam_gov_entities:
@@ -50,7 +49,6 @@ class CreateOrgsFromSamEntityTask(Task):
             metric_mapping = {
                 "new_organization_created_count": self.Metrics.NEW_ORGANIZATION_CREATED_COUNT,
                 "new_organization_user_created_count": self.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT,
-                "new_organization_owner_count": self.Metrics.NEW_ORGANIZATION_OWNER_COUNT,
             }
             if metric_name in metric_mapping:
                 self.increment(metric_mapping[metric_name])

@@ -26,7 +26,6 @@ def test_ebiz_poc_organization_during_login_creates_organization(enable_factory_
     org_user = result[0]
     assert org_user.user == user
     assert org_user.organization.sam_gov_entity == sam_gov_entity
-    assert org_user.is_organization_owner is True
 
     db_session.flush()
 
@@ -66,7 +65,6 @@ def test_ebiz_poc_organization_during_login_existing_organization(
     org_user = result[0]
     assert org_user.user == user
     assert org_user.organization == organization
-    assert org_user.is_organization_owner is True
 
     db_session.flush()
 
@@ -108,10 +106,9 @@ def test_ebiz_poc_organization_during_login_multiple_sam_entities(
     # Verify all organization users are for the same user and are owners
     for org_user in result:
         assert org_user.user == user
-        assert org_user.is_organization_owner is True
         # Verify each user has the Organization Admin role
         assert len(org_user.organization_user_roles) == 1
         assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
     # Verify user is linked to both organizations
-    assert len(user.organizations) == 2
+    assert len(user.organization_users) == 2

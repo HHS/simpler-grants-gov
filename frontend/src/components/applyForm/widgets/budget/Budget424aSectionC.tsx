@@ -9,7 +9,7 @@ import {
   FormValidationWarning,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
-import { BUDGET_ACTIVITY_COLUMNS } from "./budgetConstants";
+import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { BaseActivityItem, MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";
@@ -82,7 +82,7 @@ function normalizeSectionCValue(rawValue: unknown): NormalizedC {
     }
 
     const items: ActivityItem[] = [];
-    for (const index of BUDGET_ACTIVITY_COLUMNS) {
+    for (const index of ACTIVITY_ITEMS) {
       items.push(pickActivityItem(rawValue[String(index)]));
     }
 
@@ -133,8 +133,6 @@ function Budget424aSectionC<
   const errors = (rawErrors as FormValidationWarning[]) || [];
 
   const { items: activityItems, totals } = normalizeSectionCValue(rawValue);
-
-  const ROWS = BUDGET_ACTIVITY_COLUMNS;
 
   function getErrorMessagesForField(fieldId: string): string[] {
     return getBudgetErrors({ errors, id: fieldId, section: "C" });
@@ -191,6 +189,7 @@ function Budget424aSectionC<
       <div className="display-flex flex-column">
         <HelperText>Sum of row {rowIndex + 8}</HelperText>
         <CurrencyInput
+          disabled
           id={idPath}
           value={get(
             activityItems,
@@ -212,6 +211,7 @@ function Budget424aSectionC<
             : `Sum of column ${fieldKey === "applicant_amount" ? "B" : fieldKey === "state_amount" ? "C" : "D"}`}
         </HelperText>
         <CurrencyInput
+          disabled
           id={idPath}
           value={totals ? totals[fieldKey] : undefined}
           bordered
@@ -224,7 +224,7 @@ function Budget424aSectionC<
     <div key={id} id={id}>
       <Table
         bordered={false}
-        className="sf424__table usa-table--borderless simpler-responsive-table width-full border-1px border-base-light table-layout-auto"
+        className="sf424__table usa-table--borderless width-full border-1px border-base-light table-layout-auto"
       >
         <thead>
           <tr className="bg-base-lighter">
@@ -286,7 +286,7 @@ function Budget424aSectionC<
 
         <tbody>
           {/* Rows 1-4: one per activity → numbered 8–11 per SF-424A */}
-          {ROWS.map((rowIndex) => (
+          {ACTIVITY_ITEMS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
               <th
                 scope="row"

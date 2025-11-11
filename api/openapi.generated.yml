@@ -24,10 +24,15 @@ tags:
 - name: Opportunity v1
 - name: Extract v1
 - name: Agency v1
+- name: Organization v1
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
 - name: Competition Alpha
+- name: CommonGrants Protocol
+  description: CommonGrants-compliant API routes for searching opportunities to promote
+    interoperability across grant systems. Learn more by visiting CommonGrants.org
+- name: LOCAL ONLY
 servers: .
 paths:
   /health:
@@ -161,6 +166,19 @@ paths:
         with endpoints.
 
         '
+  /local/local-users:
+    get:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalUserTokenResponse'
+          description: Successful response
+      tags:
+      - LOCAL ONLY
+      summary: Local Users Get
   /v1/agencies/search:
     post:
       parameters: []
@@ -536,7 +554,8 @@ paths:
       tags:
       - Form Alpha
       summary: Form Get
-      security:
+      security: &id001
+      - ApiUserKeyAuth: []
       - ApiKeyAuth: []
     put:
       parameters:
@@ -578,8 +597,52 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FormUpdateRequest'
+      security: *id001
+  /common-grants/opportunities:
+    get:
+      parameters:
+      - in: query
+        name: page
+        description: The page number to retrieve
+        schema:
+          type:
+          - integer
+          - 'null'
+        required: false
+      - in: query
+        name: pageSize
+        description: The number of items per page
+        schema:
+          type:
+          - integer
+          - 'null'
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitiesListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - CommonGrants Protocol
+      summary: List opportunities
+      description: Get a paginated list of opportunities, sorted by `lastModifiedAt`
+        with most recent first.
       security:
-      - ApiKeyAuth: []
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/profile:
     put:
       parameters:
@@ -621,7 +684,7 @@ paths:
           description: Forbidden
       tags:
       - User v1 - Internal Only
-      summary: User Profile Update
+      summary: Update the authenticated user's profile data'
       requestBody:
         content:
           application/json:
@@ -684,6 +747,126 @@ paths:
               $ref: '#/components/schemas/UserApiKeyCreateRequest'
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/privileges:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGetRolesAndPrivilegesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Get the roles and privileges for the authenticated user
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/can_access:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCanAccessResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Check user access for a given resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCanAccessRequest'
+      security:
+      - ApiJwtAuth: []
+  /common-grants/opportunities/search:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitiesSearchResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - CommonGrants Protocol
+      summary: Search opportunities
+      description: Search for opportunities based on the provided filters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunitySearchRequest'
+      security:
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/applications:
     post:
       parameters:
@@ -918,6 +1101,93 @@ paths:
               $ref: '#/components/schemas/UserSaveSearchRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}:
+    get:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Get organization information by ID
+      security:
+      - ApiJwtAuth: []
+  /v1/users/{user_id}/invitations/list:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInvitationListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: Get all invitations for a user by matching their login.gov email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInvitationListRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}:
     get:
       parameters:
@@ -1031,6 +1301,39 @@ paths:
       security:
       - ApiJwtAuth: []
       - ApiKeyAuth: []
+  /common-grants/opportunities/{oppId}:
+    get:
+      parameters:
+      - in: path
+        name: oppId
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - CommonGrants Protocol
+      summary: View opportunity details
+      description: View details about an opportunity
+      security:
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/saved-opportunities:
     post:
       parameters:
@@ -1178,6 +1481,44 @@ paths:
       security:
       - ApiUserKeyAuth: []
       - ApiKeyAuth: []
+  /v1/organizations/{organization_id}/users:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUsersResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Get all users in an organization
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -1257,6 +1598,44 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserSavedOpportunitiesRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/roles/list:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListRolesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: List organization roles
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/api-keys/{api_key_id}:
@@ -1361,6 +1740,61 @@ paths:
       summary: Delete (deactivate) an API key for the authenticated user
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/invitations:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationCreateInvitationResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Create an invitation for a new organization member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreateInvitationRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
     post:
       parameters:
@@ -1402,6 +1836,200 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
+      security:
+      - ApiJwtAuth: []
+  /alpha/applications/{application_id}/audit_history:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAuditResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Application Audit List
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationAuditRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/invitations/list:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInvitationListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: List organization invitations with filtering
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationInvitationListRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/users/{user_id}:
+    put:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUpdateUserRolesResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Update roles for an organization user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUpdateUserRolesRequest'
+      security:
+      - ApiJwtAuth: []
+    delete:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationRemoveUserResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Remove a user from an organization
       security:
       - ApiJwtAuth: []
   /v1/users/{user_id}/saved-searches/{saved_search_id}:
@@ -1591,6 +2219,60 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/invitations/{invitation_id}/organizations:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: invitation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseOrgInvitationResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Response Org Invitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponseOrgInvitationRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities/{legacy_opportunity_id}:
     delete:
       parameters:
@@ -1714,6 +2396,55 @@ paths:
       security:
       - ApiJwtAuth: []
       - InternalApiJwtAuth: []
+  /alpha/applications/{application_id}/organizations/{organization_id}:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAddOrganizationResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity
+      tags:
+      - Application Alpha
+      summary: Add an organization to an application
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments/{application_attachment_id}:
     get:
       parameters:
@@ -2099,7 +2830,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id001
+          type: &id002
           - object
           $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -2214,7 +2945,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -2227,6 +2958,52 @@ components:
             type:
             - object
             $ref: '#/components/schemas/AgencyResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    LocalUserToken:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: The ID of the user
+          example: 123e4567-e89b-12d3-a456-426614174000
+        first_name:
+          type: string
+          description: The first name of the user
+          example: Bob
+        last_name:
+          type: string
+          description: The last name of the user
+          example: Smith
+        oauth_id:
+          type: string
+          description: The OAuth id of the user - can be used to login locally via
+            our mock OAuth server
+          example: my_example_user
+        user_jwt:
+          type: string
+          description: The JWT of the user, can be used with our X-SGG-Token auth
+          example: abc123
+        user_api_key:
+          type: string
+          description: The API key of the user, can be used with our X-API-Key auth
+          example: my_example_user_token
+    LocalUserTokenResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/LocalUserToken'
         status_code:
           type: integer
           description: The HTTP status code
@@ -2405,7 +3182,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -3159,7 +3936,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id002
+          enum: &id003
           - discretionary
           - mandatory
           - continuation
@@ -3178,23 +3955,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id003
+            type: &id004
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id004
+          type: &id005
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id005
+          enum: &id006
           - forecasted
           - posted
           - closed
           - archived
-          type: &id006
+          type: &id007
           - string
         created_at:
           type: string
@@ -3267,7 +4044,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -3502,6 +4279,41 @@ components:
           - 'null'
           description: The rule schema for the form
           additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
+          additionalProperties: {}
+        form_type:
+          description: The type of the form
+          example: !!python/object/apply:src.constants.lookup_constants.FormType
+          - SF424
+          enum:
+          - SF424
+          - SF424A
+          - SF424B
+          - SFLLL
+          - ProjectNarrativeAttachment
+          - BudgetNarrativeAttachment
+          - ProjectAbstractSummary
+          - CD511
+          type:
+          - string
+          - 'null'
+          - 'null'
+        sgg_version:
+          type:
+          - string
+          - 'null'
+          description: The SGG version of the form
+          example: '1.0'
+        is_deprecated:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the form is deprecated
+          example: false
         created_at:
           type: string
           format: date-time
@@ -3530,7 +4342,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id007
+            type: &id008
             - object
             $ref: '#/components/schemas/ValidationIssue'
     FormUpdateRequest:
@@ -3615,6 +4427,41 @@ components:
           - 'null'
           description: The rule schema for the form
           additionalProperties: {}
+        json_to_xml_schema:
+          type:
+          - object
+          - 'null'
+          description: The JSON to XML schema mapping configuration for the form
+          additionalProperties: {}
+        form_type:
+          description: The type of the form
+          example: !!python/object/apply:src.constants.lookup_constants.FormType
+          - SF424
+          enum:
+          - SF424
+          - SF424A
+          - SF424B
+          - SFLLL
+          - ProjectNarrativeAttachment
+          - BudgetNarrativeAttachment
+          - ProjectAbstractSummary
+          - CD511
+          type:
+          - string
+          - 'null'
+          - 'null'
+        sgg_version:
+          type:
+          - string
+          - 'null'
+          description: The SGG version of the form
+          example: '1.0'
+        is_deprecated:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the form is deprecated
+          example: false
       required:
       - agency_code
       - form_json_schema
@@ -3637,6 +4484,272 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OppStatus:
+      type: object
+      properties:
+        value:
+          type:
+          - string
+          - 'null'
+          description: The status value, from a predefined set of options
+        customValue:
+          type:
+          - string
+          - 'null'
+          description: A custom status value
+        description:
+          type:
+          - string
+          - 'null'
+          description: A human-readable description of the status
+    Money:
+      type: object
+      properties:
+        amount:
+          type: string
+          description: The amount of money
+        currency:
+          type: string
+          description: The ISO 4217 currency code (e.g., 'USD', 'EUR')
+      required:
+      - amount
+      - currency
+    OppFunding:
+      type: object
+      properties:
+        details:
+          type:
+          - string
+          - 'null'
+          description: Details about the funding available for this opportunity that
+            don't fit other fields
+        totalAmountAvailable:
+          description: Total amount of funding available for this opportunity
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        minAwardAmount:
+          description: Minimum amount of funding granted per award
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        maxAwardAmount:
+          description: Maximum amount of funding granted per award
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        minAwardCount:
+          type:
+          - integer
+          - 'null'
+          description: Minimum number of awards granted
+        maxAwardCount:
+          type:
+          - integer
+          - 'null'
+          description: Maximum number of awards granted
+        estimatedAwardCount:
+          type:
+          - integer
+          - 'null'
+          description: Estimated number of awards that will be granted
+    SingleDateEvent:
+      type: object
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+          description: Human-readable name of the event
+        eventType:
+          type:
+          - string
+          - 'null'
+          description: Type of event
+        description:
+          type:
+          - string
+          - 'null'
+          description: Description of what this event represents
+        date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: 'Date of the event in ISO 8601 format: YYYY-MM-DD'
+        time:
+          type:
+          - string
+          - 'null'
+          description: 'Time of the event in ISO 8601 format: HH:MM:SS'
+    OppTimeline:
+      type: object
+      properties:
+        postDate:
+          description: The date (and time) at which the opportunity is posted
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SingleDateEvent'
+          - type: 'null'
+        closeDate:
+          description: The date (and time) at which the opportunity closes
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SingleDateEvent'
+          - type: 'null'
+        otherDates:
+          description: An optional map of other key dates or events in the opportunity
+            timeline
+    CustomField:
+      type: object
+      properties:
+        name:
+          type: string
+        fieldType:
+          type: string
+          enum:
+          - string
+          - number
+          - integer
+          - boolean
+          - object
+          - array
+          description: The JSON schema type to use when de-serializing the value field
+        schema:
+          type:
+          - string
+          - 'null'
+          format: url
+        value: {}
+        description:
+          type:
+          - string
+          - 'null'
+      required:
+      - fieldType
+      - name
+      - value
+    OpportunityBase:
+      type: object
+      properties:
+        createdAt:
+          description: The timestamp (in UTC) at which the record was created.
+        lastModifiedAt:
+          description: The timestamp (in UTC) at which the record was last modified.
+        id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Globally unique id for the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        title:
+          type:
+          - string
+          - 'null'
+          description: Title or name of the funding opportunity
+        status:
+          description: Status of the opportunity
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppStatus'
+          - type: 'null'
+        description:
+          type:
+          - string
+          - 'null'
+          description: Description of the opportunity's purpose and scope
+        funding:
+          description: Details about the funding available
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppFunding'
+          - type: 'null'
+        keyDates:
+          description: Key dates for the opportunity, such as when the application
+            opens and closes
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppTimeline'
+          - type: 'null'
+        source:
+          description: URL for the original source of the opportunity
+        customFields:
+          type:
+          - object
+          - 'null'
+          description: Additional custom fields specific to this opportunity
+          additionalProperties:
+            type:
+            - object
+            $ref: '#/components/schemas/CustomField'
+    PaginatedResultsInfo:
+      type: object
+      properties:
+        page:
+          type:
+          - integer
+          - 'null'
+          description: The page number to retrieve
+        pageSize:
+          type:
+          - integer
+          - 'null'
+          description: The number of items per page
+        totalItems:
+          type: integer
+          description: The total number of items
+        totalPages:
+          type: integer
+          description: The total number of pages
+      required:
+      - totalItems
+      - totalPages
+    OpportunitiesListResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        items:
+          type: array
+          description: The list of opportunities
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OpportunityBase'
+        paginationInfo:
+          description: The pagination details
+          type:
+          - object
+          $ref: '#/components/schemas/PaginatedResultsInfo'
+      required:
+      - items
+      - message
+      - paginationInfo
+      - status
     UserUpdateProfileRequest:
       type: object
       properties:
@@ -3729,44 +4842,643 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    GetUserRolesAndPrivilegesOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          description: The internal ID of the organization
+    Role:
+      type: object
+      properties:
+        role_id:
+          type: string
+          description: The internal ID of a role
+        role_name:
+          type: string
+          description: The name of the role
+        privileges:
+          type: array
+          items:
+            description: Privileges for the role
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
+            type:
+            - string
+    UserOrganization:
+      type: object
+      properties:
+        organization:
+          description: Organization details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesOrganization'
+        organization_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this organization
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    GetUserRolesAndPrivilegesApplication:
+      type: object
+      properties:
+        application_id:
+          type: string
+          description: The internal ID of the application
+        organization_id:
+          type: string
+          description: The internal ID of the organization that owns the application
+    UserApplication:
+      type: object
+      properties:
+        application:
+          description: Application details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesApplication'
+        application_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this application
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    GetUserRolesAndPrivilegesAgency:
+      type: object
+      properties:
+        agency_id:
+          type: string
+          description: The internal ID of the agency
+    UserAgency:
+      type: object
+      properties:
+        agency:
+          description: Agency details
+          type:
+          - object
+          $ref: '#/components/schemas/GetUserRolesAndPrivilegesAgency'
+        agency_user_roles:
+          type: array
+          items:
+            description: Roles the user has for this agency
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    GetRolesAndPrivilegesResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_users:
+          type: array
+          items:
+            description: List of organizations and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserOrganization'
+        application_users:
+          type: array
+          items:
+            description: List of applications and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserApplication'
+        agency_users:
+          type: array
+          items:
+            description: List of agencies and the user's roles in each
+            type:
+            - object
+            $ref: '#/components/schemas/UserAgency'
+        internal_user_roles:
+          type: array
+          items:
+            description: List of roles and the user's roles & privileges in each
+            type:
+            - object
+            $ref: '#/components/schemas/Role'
+    UserGetRolesAndPrivilegesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/GetRolesAndPrivilegesResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserCanAccessRequest:
+      type: object
+      properties:
+        resource_id:
+          type: string
+          format: uuid
+          description: The internal ID of the resource
+          example: 123e4567-e89b-12d3-a456-426614174000
+        resource_type:
+          description: Type of the resource to check access
+          enum:
+          - agency
+          - application
+          - organization
+          type:
+          - string
+        privileges:
+          type: array
+          items:
+            description: List of privileges to verify for the specified resource.
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
+            type:
+            - string
+    UserCanAccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    StringArrayFilter:
+      type: object
+      properties:
+        operator:
+          type:
+          - string
+          - 'null'
+          description: The operator to apply to the filter value
+        value:
+          type:
+          - array
+          - 'null'
+          description: The array of string values
+          items:
+            type: string
+    DateRange1:
+      type: object
+      properties:
+        min:
+          description: The minimum date in the range
+        max:
+          description: The maximum date in the range
+    DateRangeFilter:
+      type: object
+      properties:
+        operator:
+          type:
+          - string
+          - 'null'
+          description: The operator to apply to the filter value
+        value:
+          description: The date range value
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/DateRange1'
+          - type: 'null'
+    MoneyRange:
+      type: object
+      properties:
+        min:
+          description: The minimum amount in the range
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        max:
+          description: The maximum amount in the range
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+    MoneyRangeFilter:
+      type: object
+      properties:
+        operator:
+          type:
+          - string
+          - 'null'
+          description: The operator to apply to the filter value
+        value:
+          description: The money range value
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRange'
+          - type: 'null'
+    OppFilters:
+      type: object
+      properties:
+        status:
+          description: '`status.value` matches one of the following values'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/StringArrayFilter'
+          - type: 'null'
+        closeDateRange:
+          description: '`keyDates.closeDate` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/DateRangeFilter'
+          - type: 'null'
+        totalFundingAvailableRange:
+          description: '`funding.totalAmountAvailable` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRangeFilter'
+          - type: 'null'
+        minAwardAmountRange:
+          description: '`funding.minAwardAmount` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRangeFilter'
+          - type: 'null'
+        maxAwardAmountRange:
+          description: '`funding.maxAwardAmount` is between the given range'
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/MoneyRangeFilter'
+          - type: 'null'
+        customFilters:
+          description: Additional custom filters to apply to the search
+    OppSorting:
+      type: object
+      properties:
+        sortBy:
+          type: string
+          enum:
+          - lastModifiedAt
+          - createdAt
+          - title
+          - status.value
+          - keyDates.closeDate
+          - funding.maxAwardAmount
+          - funding.minAwardAmount
+          - funding.totalAmountAvailable
+          - funding.estimatedAwardCount
+          - custom
+          description: The field to sort by
+        sortOrder:
+          type:
+          - string
+          - 'null'
+          description: The sort order (asc or desc)
+        customSortBy:
+          type:
+          - string
+          - 'null'
+          description: The custom field to sort by when sortBy is 'custom'
+      required:
+      - sortBy
+    PaginatedBodyParams:
+      type: object
+      properties:
+        page:
+          type:
+          - integer
+          - 'null'
+          description: The page number to retrieve
+        pageSize:
+          type:
+          - integer
+          - 'null'
+          description: The number of items per page
+    OpportunitySearchRequest:
+      type: object
+      properties:
+        search:
+          type:
+          - string
+          - 'null'
+          description: Search query string
+        filters:
+          description: Filters to apply to the opportunity search
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppFilters'
+          - type: 'null'
+        sorting:
+          description: Sorting parameters for opportunities
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OppSorting'
+          - type: 'null'
+        pagination:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/PaginatedBodyParams'
+          - type: 'null'
+    SortedResultsInfo:
+      type: object
+      properties:
+        sortBy:
+          type: string
+          description: The field to sort by
+        customSortBy:
+          type:
+          - string
+          - 'null'
+          description: Implementation-defined sort key
+        sortOrder:
+          type: string
+          description: The order in which the results are sorted
+        errors:
+          type: array
+          default: []
+          description: Non-fatal errors that occurred during sorting
+          items:
+            type: string
+      required:
+      - sortBy
+      - sortOrder
+    FilterInfo:
+      type: object
+      properties:
+        filters:
+          description: The filters applied to the response items
+        errors:
+          type: array
+          default: []
+          description: Non-fatal errors that occurred during filtering
+          items:
+            type: string
+      required:
+      - filters
+    OpportunitiesSearchResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        items:
+          type: array
+          description: The list of opportunities
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OpportunityBase'
+        paginationInfo:
+          description: The pagination details
+          type:
+          - object
+          $ref: '#/components/schemas/PaginatedResultsInfo'
+        sortInfo:
+          description: The sorting details
+          type:
+          - object
+          $ref: '#/components/schemas/SortedResultsInfo'
+        filterInfo:
+          description: The filter details
+          type:
+          - object
+          $ref: '#/components/schemas/FilterInfo'
+      required:
+      - filterInfo
+      - items
+      - message
+      - paginationInfo
+      - sortInfo
+      - status
+    UserApplicationApplicationStatusFiilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - in_progress
+            - submitted
+            - accepted
+            type:
+            - string
+    UserApplicationApplicationOrganizationIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationApplicationCompetitionIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationFilter:
+      type: object
+      properties:
+        application_status:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationStatusFiilter'
+        organization_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationOrganizationIDFilter'
+        competition_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationCompetitionIDFilter'
+    SortOrderUserApplicationPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserApplicationPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderUserApplicationPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
     UserApplicationListRequest:
       type: object
-      properties: {}
-    SamGovEntity:
+      properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserApplicationFilter'
+          - type: 'null'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationPagination'
+      required:
+      - pagination
+    SamGovEntityResponse:
       type: object
       properties:
         uei:
           type: string
-          description: Unique Entity Identifier from SAM.gov
-          example: ABCDEFGHIJK1
+          description: Unique Entity Identifier
+          example: 000123456789
         legal_business_name:
           type: string
-          description: Legal business name as registered in SAM.gov
-          example: Example Research Corporation
+          description: Legal business name from SAM.gov
+          example: Example Inc.
         expiration_date:
           type: string
           format: date
-          description: The expiration date of the SAM.gov registration
-          example: '2025-12-31'
-    UserOrganization:
+          description: SAM.gov registration expiration date
+          example: '2025-08-11'
+        ebiz_poc_email:
+          type: string
+          description: Email address of the Electronic Business Point of Contact
+          example: ebiz@example.com
+        ebiz_poc_first_name:
+          type: string
+          description: First name of the Electronic Business Point of Contact
+          example: John
+        ebiz_poc_last_name:
+          type: string
+          description: Last name of the Electronic Business Point of Contact
+          example: Smith
+    UserOrganization1:
       type: object
       properties:
         organization_id:
           type: string
           description: The internal ID of the organization
           example: 123e4567-e89b-12d3-a456-426614174000
-        is_organization_owner:
-          type: boolean
-          description: Whether the user is an owner of this organization
-          example: true
         sam_gov_entity:
           description: SAM.gov entity information for the organization
           type:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
+          - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
+    UserApplicationOpportunity:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The opportunity ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into Conservation Techniques
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the opportunity
+          example: Department of Examples
     UserApplicationCompetition:
       type: object
       properties:
@@ -3796,6 +5508,11 @@ components:
         is_open:
           type: boolean
           description: Whether the competition is open and accepting applications
+        opportunity:
+          description: Opportunity information for this competition
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationOpportunity'
     UserApplicationListItem:
       type: object
       properties:
@@ -3824,7 +5541,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/UserOrganization'
+          - $ref: '#/components/schemas/UserOrganization1'
           - type: 'null'
         competition:
           description: Competition information
@@ -3862,7 +5579,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/UserOrganization'
+            $ref: '#/components/schemas/UserOrganization1'
         status_code:
           type: integer
           description: The HTTP status code
@@ -4080,7 +5797,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id002
+          enum: *id003
           type:
           - string
           - 'null'
@@ -4094,17 +5811,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id003
+            type: *id004
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id004
+          type: *id005
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id005
-          type: *id006
+          enum: *id006
+          type: *id007
         created_at:
           type: string
           format: date-time
@@ -4192,6 +5909,171 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OrganizationData:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        sam_gov_entity:
+          description: SAM.gov entity information
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/SamGovEntityResponse'
+          - type: 'null'
+    OrganizationGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserInvitationListRequest:
+      type: object
+      properties: {}
+    UserInvitationOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: Organization name
+          example: Example Organization
+    UserInvitationInviterUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: Inviter user unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Inviter first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Inviter last name
+          example: Doe
+        email:
+          type:
+          - string
+          - 'null'
+          description: Inviter email
+          example: admin@org.com
+    UserInvitationRole:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+          example: Organization Member
+        privileges:
+          type: array
+          description: List of privileges for this role
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
+            type:
+            - string
+    UserInvitationItem:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Invitation unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/UserInvitationOrganization'
+        status:
+          type: string
+          description: Invitation status
+          example: pending
+        created_at:
+          type: string
+          format: date-time
+          description: When the invitation was created
+          example: '2024-01-08T10:30:00Z'
+        expires_at:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          example: '2024-01-15T10:30:00Z'
+        inviter_user:
+          description: Information about who sent the invitation
+          type:
+          - object
+          $ref: '#/components/schemas/UserInvitationInviterUser'
+        roles:
+          type: array
+          description: Roles that would be assigned if invitation is accepted
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserInvitationRole'
+    UserInvitationListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of user invitations
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserInvitationItem'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAttachmentNoLink:
       type: object
       properties:
@@ -4255,7 +6137,6 @@ components:
         application_form_status:
           description: Status indicating how much of a form has been filled out
           enum:
-          - not_started
           - in_progress
           - complete
           type:
@@ -4309,9 +6190,6 @@ components:
           type: string
           description: The email address of the user
           example: user@example.com
-        is_application_owner:
-          type: boolean
-          description: Whether this user is the owner/creator of the application
     Organization:
       type: object
       properties:
@@ -4326,7 +6204,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/SamGovEntity'
+          - $ref: '#/components/schemas/SamGovEntityResponse'
           - type: 'null'
     ApplicationGetResponseData:
       type: object
@@ -4402,7 +6280,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -4451,7 +6329,6 @@ components:
         application_form_status:
           description: Status indicating how much of a form has been filled out
           enum:
-          - not_started
           - in_progress
           - complete
           type:
@@ -4471,6 +6348,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OpportunityResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code
+        message:
+          type: string
+          description: The message
+        data:
+          description: The opportunity
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityBase'
+      required:
+      - data
+      - message
+      - status
     UserSaveOpportunityRequest:
       type: object
       properties:
@@ -4565,6 +6460,93 @@ components:
             type:
             - object
             $ref: '#/components/schemas/SavedSearchResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    Role1:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+          example: Organization Admin
+        privileges:
+          type: array
+          description: List of privileges for this role
+          example:
+          - !!python/object/apply:src.constants.lookup_constants.Privilege
+            - manage_org_members
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
+            type:
+            - string
+    OrganizationMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: User unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type:
+          - string
+          - 'null'
+          description: User email from login.gov
+          example: user@example.com
+        roles:
+          type: array
+          description: User roles in this organization
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: User first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: User last name
+          example: Smith
+    OrganizationUsersResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organization members
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OrganizationMember'
         status_code:
           type: integer
           description: The HTTP status code
@@ -4705,6 +6687,24 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OrganizationListRolesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: Role information
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserApiKeyRenameRequest:
       type: object
       properties:
@@ -4745,6 +6745,85 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OrganizationCreateInvitationRequest:
+      type: object
+      properties:
+        invitee_email:
+          type: string
+          description: Email address of the user to invite
+          example: user@example.com
+        role_ids:
+          type: array
+          minItems: 1
+          description: List of role IDs to assign to the invited user
+          example:
+          - 123e4567-e89b-12d3-a456-426614174000
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - invitee_email
+      - role_ids
+    OrganizationInvitationResponse:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Invitation unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        invitee_email:
+          type: string
+          description: Email address of the invited user
+          example: user@example.com
+        status:
+          type: string
+          description: Current status of the invitation
+          example: pending
+          enum:
+          - pending
+          - accepted
+          - rejected
+          - expired
+        expires_at:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          example: '2024-01-15T10:30:00Z'
+        roles:
+          type: array
+          description: Roles assigned to this invitation
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        created_at:
+          type: string
+          format: date-time
+          description: When the invitation was created
+          example: '2024-01-08T10:30:00Z'
+    OrganizationCreateInvitationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: Created invitation information
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitationResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAttachmentCreateRequest:
       type: object
       properties:
@@ -4773,6 +6852,400 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderApplicationAuditRequestPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    ApplicationAuditRequestPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderApplicationAuditRequestPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    ApplicationAuditRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditRequestPagination'
+      required:
+      - pagination
+    SimpleUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: ID of the user
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          description: Email address of the user
+          example: example@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Users first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Users last name
+          example: Smith
+    ApplicationAuditAppForm:
+      type: object
+      properties:
+        application_form_id:
+          type: string
+          format: uuid
+          description: The ID of the application form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_form_id:
+          type: string
+          format: uuid
+          description: The ID of the competition form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          description: The ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_name:
+          type: string
+          description: The name of the form
+    ApplicationAuditAttachment:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The file name of the application attachment
+          example: my_example.pdf
+        is_deleted:
+          type: boolean
+          description: Whether the attachment has been deleted
+    ApplicationAuditData:
+      type: object
+      properties:
+        application_audit_id:
+          type: string
+          format: uuid
+          description: The ID of the application audit event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_audit_event:
+          description: The type of application audit event recorded
+          enum:
+          - application_created
+          - application_name_changed
+          - application_submitted
+          - application_submit_rejected
+          - attachment_added
+          - attachment_deleted
+          - attachment_updated
+          - submission_created
+          - user_added
+          - user_updated
+          - user_removed
+          - form_updated
+          type:
+          - string
+        user:
+          description: The user who did the event that was audited
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        target_user:
+          description: The user the audit event affected (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        target_application_form:
+          description: The application form modified (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditAppForm'
+        target_attachment:
+          description: The application attachment modified (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditAttachment'
+        created_at:
+          type: string
+          format: date-time
+          description: When the audit event was created
+    ApplicationAuditResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAuditData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    InvitationStatusFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: pending
+            enum:
+            - accepted
+            - rejected
+            - expired
+            - pending
+            type:
+            - string
+    OrganizationInvitationFilter:
+      type: object
+      properties:
+        status:
+          description: Filter invitations by status
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/InvitationStatusFilter'
+          - type: 'null'
+    OrganizationInvitationListRequest:
+      type: object
+      properties:
+        filters:
+          description: Filters to apply to the invitation list
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/OrganizationInvitationFilter'
+          - type: 'null'
+    InviterData:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: Inviter user unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          description: Inviter email address
+          example: admin@org.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Inviter first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Inviter last name
+          example: Doe
+    InviteeData:
+      type: object
+      properties:
+        user_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Invitee user unique identifier (null if not registered)
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type:
+          - string
+          - 'null'
+          description: Invitee email address
+          example: user@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Invitee first name
+          example: Jane
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Invitee last name
+          example: Smith
+    OrganizationInvitationData:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Invitation unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        invitee_email:
+          type: string
+          description: Email address of the invitee
+          example: user@example.com
+        status:
+          type: string
+          description: Current status of the invitation
+          example: pending
+        created_at:
+          type: string
+          format: date-time
+          description: When the invitation was created
+          example: '2024-01-08T10:30:00Z'
+        expires_at:
+          type: string
+          format: date-time
+          description: When the invitation expires
+          example: '2024-01-15T10:30:00Z'
+        accepted_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the invitation was accepted
+          example: '2024-01-10T14:20:00Z'
+        rejected_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the invitation was rejected
+          example: null
+        inviter_user:
+          description: Information about the user who sent the invitation
+          type:
+          - object
+          $ref: '#/components/schemas/InviterData'
+        invitee_user:
+          description: Information about the invited user (null if not registered)
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/InviteeData'
+          - type: 'null'
+        roles:
+          type: array
+          description: Roles that will be assigned when invitation is accepted
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+    OrganizationInvitationListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of organization invitations
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/OrganizationInvitationData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationUpdateUserRolesRequest:
+      type: object
+      properties:
+        role_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    OrganizationUpdateUserRolesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: Role information
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/Role1'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationRemoveUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: No data returned on successful removal
         status_code:
           type: integer
           description: The HTTP status code
@@ -4837,7 +7310,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -4860,6 +7333,91 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    UserResponseOrgInvitationRequest:
+      type: object
+      properties:
+        status:
+          enum:
+          - accepted
+          - rejected
+          - expired
+          - pending
+          description: User response to invitation
+          type:
+          - string
+    Organization1:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: The unique identifier of the organization
+          example: 456e7890-e12c-34f5-b678-901234567890
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: Organization name
+          example: Legal business name of the corresponding Sam Gov Entity
+    InvitationRole:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+    OrganizationInvitation:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Organization invitation ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          description: User response to invitation
+          enum:
+          - accepted
+          - rejected
+          - expired
+          - pending
+          type:
+          - string
+        responded_at:
+          type: string
+          format: date-time
+          description: Time User responded to invitation
+        organization:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/Organization1'
+        roles_granted:
+          type: array
+          description: Roles granted
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/InvitationRole'
+    UserResponseOrgInvitationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitation'
         status_code:
           type: integer
           description: The HTTP status code
@@ -4895,7 +7453,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -4905,6 +7463,21 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAddOrganizationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -5001,12 +7574,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 

@@ -21,14 +21,6 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("PageNotFound", () => {
-  it("renders alert with grants.gov link", () => {
-    render(<PageNotFound />);
-
-    const alert = screen.queryByTestId("alert");
-
-    expect(alert).toBeInTheDocument();
-  });
-
   it("links back to the home page", () => {
     render(<PageNotFound />);
     const link = screen.getByRole("link", { name: "visitHomepageButton" });

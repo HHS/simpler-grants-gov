@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_roles_for_agency(user: User, agency: Agency) -> list[Role]:
-    for user_agency in user.user_agencies:
+    for user_agency in user.agency_users:
         if user_agency.agency_id == agency.agency_id:
             return user_agency.roles
 
@@ -19,7 +20,7 @@ def get_roles_for_agency(user: User, agency: Agency) -> list[Role]:
 
 
 def get_roles_for_org(user: User, organization: Organization) -> list[Role]:
-    for user_organization in user.organizations:
+    for user_organization in user.organization_users:
         if user_organization.organization_id == organization.organization_id:
             return user_organization.roles
 
@@ -83,6 +84,16 @@ def can_access(
     )
 
     return False
+
+
+def verify_access(
+    user: User,
+    allowed_privileges: set[Privilege],
+    resource: Organization | Application | Agency | None,
+) -> None:
+    """Wrapper function that handles erroring if a user can't access a resource"""
+    if not can_access(user, allowed_privileges, resource):
+        raise_flask_error(403, "Forbidden")
 
 
 def get_log_info_for_resource(resource: Organization | Application | Agency | None) -> dict:

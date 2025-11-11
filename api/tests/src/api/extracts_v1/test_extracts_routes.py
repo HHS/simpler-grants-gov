@@ -13,7 +13,7 @@ from tests.src.db.models.factories import ExtractMetadataFactory
 def clear_extracts(db_session):
     db_session.query(ExtractMetadata).delete()
     db_session.commit()
-    yield
+    return
 
 
 def test_extract_metadata_get_default_dates(

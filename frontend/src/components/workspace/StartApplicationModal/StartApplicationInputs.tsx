@@ -1,4 +1,4 @@
-import { Organization } from "src/types/UserTypes";
+import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import {
@@ -15,7 +15,7 @@ export const StartApplicationOrganizationInput = ({
   selectedOrganization,
 }: {
   onOrganizationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  organizations: Organization[];
+  organizations: UserOrganization[];
   selectedOrganization?: string; // organization_id
   validationError?: string;
 }) => {

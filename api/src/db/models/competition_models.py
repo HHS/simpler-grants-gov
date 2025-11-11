@@ -2,19 +2,27 @@ import uuid
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, FormFamily
+from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
+    ApplicationStatus,
+    CompetitionOpenToApplicant,
+    FormFamily,
+    FormType,
+)
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import (
+    LkApplicationAuditEvent,
     LkApplicationStatus,
     LkCompetitionOpenToApplicant,
     LkFormFamily,
+    LkFormType,
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
@@ -210,6 +218,15 @@ class Form(ApiSchemaTable, TimestampMixin):
     )
 
     form_rule_schema: Mapped[dict | None] = mapped_column(JSONB)
+    json_to_xml_schema: Mapped[dict | None] = mapped_column(JSONB)
+
+    form_type: Mapped[FormType | None] = mapped_column(
+        "form_type_id",
+        LookupColumn(LkFormType),
+        ForeignKey(LkFormType.form_type_id),
+    )
+    sgg_version: Mapped[str | None]
+    is_deprecated: Mapped[bool | None]
 
 
 class CompetitionForm(ApiSchemaTable, TimestampMixin):
@@ -253,6 +270,12 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     application_name: Mapped[str | None]
 
+    submitted_at: Mapped[datetime | None]
+    submitted_by: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    submitted_by_user: Mapped["User | None"] = relationship(
+        "User", foreign_keys=[submitted_by], uselist=False
+    )
+
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(Organization.organization_id)
     )
@@ -271,12 +294,35 @@ class Application(ApiSchemaTable, TimestampMixin):
     application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
         "ApplicationAttachment",
         uselist=True,
+        primaryjoin=lambda: and_(
+            Application.application_id == ApplicationAttachment.application_id,
+            ApplicationAttachment.is_deleted.isnot(True),
+        ),
+        # This version of the application attachment relationship is view-only
+        # For the one that can be used to modify, use the _all_application_attachments below.
+        viewonly=True,
+    )
+
+    # Relationship that gets all application attachments INCLUDING DELETED
+    # We likely don't want to use this in most cases, preferring the above
+    # one which has only non-deleted ones.
+    _all_application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
         back_populates="application",
+        # This mostly exists so that if the app gets deleted, all attachments do as well.
         cascade="all, delete-orphan",
     )
 
     application_submissions: Mapped[list["ApplicationSubmission"]] = relationship(
         "ApplicationSubmission",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
+    application_audits: Mapped[list["ApplicationAudit"]] = relationship(
+        "ApplicationAudit",
         uselist=True,
         back_populates="application",
         cascade="all, delete-orphan",
@@ -349,6 +395,9 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     mime_type: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
 
+    # Soft delete flag
+    is_deleted: Mapped[bool | None] = mapped_column(index=True, default=False)
+
     @property
     def download_path(self) -> str:
         """Get the presigned s3 url path for downloading the file"""
@@ -373,6 +422,19 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
 
     file_location: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    # Define a sequence for the legacy tracking number, note that
+    # we start it 80 million because we want to easily be able to
+    # separate it from grants.gov's value which at the time of writing
+    # is in the 10-millions.
+    legacy_tracking_number_seq: Sequence = Sequence(
+        "legacy_tracking_number_seq", start=80_000_000, schema="api"
+    )
+    legacy_tracking_number: Mapped[int] = mapped_column(
+        BigInteger,
+        legacy_tracking_number_seq,
+        server_default=legacy_tracking_number_seq.next_value(),
+    )
 
     @property
     def download_path(self) -> str:
@@ -406,3 +468,45 @@ class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
         primary_key=True,
     )
+
+
+class ApplicationAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_audit"
+
+    application_audit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
+    )
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Application.application_id), nullable=False, index=True
+    )
+    application: Mapped[Application] = relationship(Application)
+
+    application_audit_event: Mapped[ApplicationAuditEvent] = mapped_column(
+        "application_audit_event_id",
+        LookupColumn(LkApplicationAuditEvent),
+        ForeignKey(LkApplicationAuditEvent.application_audit_event_id),
+        nullable=False,
+    )
+
+    target_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), index=True
+    )
+    target_user: Mapped["User | None"] = relationship("User", foreign_keys=[target_user_id])
+
+    target_application_form_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(ApplicationForm.application_form_id)
+    )
+    target_application_form: Mapped[ApplicationForm | None] = relationship(ApplicationForm)
+
+    target_attachment_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(ApplicationAttachment.application_attachment_id)
+    )
+    target_attachment: Mapped[ApplicationAttachment | None] = relationship(ApplicationAttachment)
+
+    audit_metadata: Mapped[dict | None] = mapped_column(JSONB)

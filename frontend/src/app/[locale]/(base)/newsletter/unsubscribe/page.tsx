@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { use } from "react";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { GridContainer } from "@trussworks/react-uswds";
 
-import BetaAlert from "src/components/BetaAlert";
 import Breadcrumbs from "src/components/Breadcrumbs";
+import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -29,24 +29,16 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
 
   return (
     <>
-      <BetaAlert />
-
-      <GridContainer className="padding-bottom-5 tablet:padding-top-0 desktop-lg:padding-top-0 border-bottom-2px border-base-lightest">
+      <GridContainer>
         <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
-        <h1>{t("title")}</h1>
-        <p className="usa-intro">{t("intro")}</p>
-        <Grid row gap className="flex-align-start">
-          <Grid>
-            <p>{t("paragraph")}</p>
-            <Link className="usa-button margin-bottom-4" href="/newsletter">
-              {t("buttonResub")}
-            </Link>
-          </Grid>
-        </Grid>
+        <h1 className="margin-top-0">{t("title")}</h1>
+        <p>{t("paragraph")}</p>
+        <p>
+          {t("cta") + " "}
+          <Link href="/newsletter">{t("buttonResub")}</Link>
+        </p>
       </GridContainer>
-      <GridContainer className="padding-bottom-5 tablet:padding-top-3 desktop-lg:padding-top-3">
-        <p className="font-sans-3xs text-base-dark">{t("disclaimer")}</p>
-      </GridContainer>
+      <SendyDisclaimer />
     </>
   );
 }

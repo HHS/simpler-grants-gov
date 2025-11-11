@@ -1,5 +1,5 @@
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
-import { Organization } from "src/types/UserTypes";
+import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { RefObject } from "react";
@@ -19,7 +19,7 @@ export const IneligibleApplicationStart = ({
   onClose,
   cancelText,
 }: {
-  organizations: Organization[];
+  organizations: UserOrganization[];
   applicantTypes: ApplicantTypes[];
   modalRef: RefObject<ModalRef | null>;
   onClose: () => void;

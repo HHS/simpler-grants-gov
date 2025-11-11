@@ -1,6 +1,5 @@
 import zoneinfo
 from datetime import date, datetime, timezone
-from typing import Optional
 
 import pytz
 
@@ -55,7 +54,7 @@ def get_now_us_eastern_date() -> date:
     return get_now_us_eastern_datetime().date()
 
 
-def datetime_str_to_date(datetime_str: Optional[str]) -> Optional[date]:
+def datetime_str_to_date(datetime_str: str | None) -> date | None:
     if not datetime_str:
         return None
     return datetime.fromisoformat(datetime_str).date()

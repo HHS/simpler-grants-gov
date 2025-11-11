@@ -67,8 +67,8 @@ def test_get_streamed_soap_response_success():
     expected_headers = {"Content-Type": "application/xml"}
 
     assert isinstance(result, SOAPResponse)
-    assert result.data == expected_data
-    assert result.status_code, 200
+    assert b"".join(result.data) == expected_data
+    assert result.status_code == 200
     assert result.headers == expected_headers
 
 

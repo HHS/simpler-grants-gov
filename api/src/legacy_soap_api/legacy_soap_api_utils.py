@@ -2,8 +2,9 @@ import io
 import json
 import logging
 import uuid
+from collections.abc import Callable, Iterator
 from enum import StrEnum
-from typing import Any, Callable
+from typing import Any
 
 import requests
 from defusedxml import minidom
@@ -79,7 +80,7 @@ def get_soap_proxy_grant_application_not_found_response(
 
 
 def get_soap_response(
-    data: bytes, status_code: int = 200, headers: dict | None = None
+    data: bytes | Iterator[bytes] | list[bytes], status_code: int = 200, headers: dict | None = None
 ) -> SOAPResponse:
     """Get SOAP response
 
@@ -138,16 +139,17 @@ def get_streamed_soap_response(response: requests.Response) -> SOAPResponse:
     GG S2S SOAP API.
     """
     chunk_size = 8192
-    data = b""
-    for chunk in response.iter_content(chunk_size=chunk_size):
-        data += chunk
 
     # We omit these headers to prevent issues from flask and wsgi from erroring chunked responses.
     response_headers = filter_headers(
         dict(response.headers), ["transfer-encoding", "keep-alive", "connection"]
     )
 
-    return get_soap_response(data, status_code=response.status_code, headers=response_headers)
+    return get_soap_response(
+        response.iter_content(chunk_size=chunk_size),
+        status_code=response.status_code,
+        headers=response_headers,
+    )
 
 
 def filter_headers(headers: dict, headers_to_omit: list | None = None) -> dict:
@@ -332,3 +334,7 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
     return None
+
+
+def convert_bool_to_yes_no(value: bool | None) -> str:
+    return "Yes" if value else "No"

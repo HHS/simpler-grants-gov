@@ -1,7 +1,8 @@
 import uuid
 
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.form_schema.forms import shared_schema
+from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -142,7 +143,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 120,
         },
         "award_amount": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Award Amount",
             "description": "For a covered Federal action where there has been an award or loan commitment by the Federal agency, enter the Federal amount of the award/loan commitment of the prime entity identified in item 4 or 5.",
         },
@@ -152,10 +153,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
                 },
             },
         },
@@ -165,10 +166,10 @@ FORM_JSON_SCHEMA = {
             "required": ["individual"],
             "properties": {
                 "individual": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
                 },
             },
         },
@@ -177,128 +178,28 @@ FORM_JSON_SCHEMA = {
             "required": ["name"],
             "properties": {
                 "signature": {
-                    "type": "string",
-                    "title": "Signature",
-                    "description": "Completed by Grants.gov upon submission.",
-                    "minLength": 1,
-                    "maxLength": 144,
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
                 },
                 "name": {
-                    "allOf": [{"$ref": "#/$defs/person_name"}],
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
                 },
                 "title": {
-                    "type": "string",
-                    "title": "Signature Title",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
                     "description": "Enter the title of the Certifying Official.",
-                    "minLength": 1,
-                    "maxLength": 45,
                 },
                 "telephone": {
-                    "type": "string",
-                    "title": "Signature Telephone Number",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
+                    "title": "Telephone No.",
                     "description": "Enter the telephone number of the certifying official.",
-                    "minLength": 1,
-                    "maxLength": 25,
                 },
                 "signed_date": {
-                    "type": "string",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
                     "title": "Signature Date",
-                    "description": "Completed by Grants.gov upon submission.",
-                    "format": "date",
                 },
             },
         },
     },
     "$defs": {
-        "person_name": {
-            # Note this is the same as the person_name from the SF424 but has no title
-            "type": "object",
-            "required": [
-                "first_name",
-                "last_name",
-            ],
-            "properties": {
-                "prefix": {
-                    "type": "string",
-                    "title": "Prefix",
-                    "minLength": 1,
-                    "maxLength": 10,
-                },
-                "first_name": {
-                    "type": "string",
-                    "title": "First Name",
-                    "description": "Enter the First Name.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "middle_name": {
-                    "type": "string",
-                    "title": "Middle Name",
-                    "description": "Enter the Middle Name.",
-                    "minLength": 1,
-                    "maxLength": 25,
-                },
-                "last_name": {
-                    "type": "string",
-                    "title": "Last Name",
-                    "description": "Enter the Last Name.",
-                    "minLength": 1,
-                    "maxLength": 60,
-                },
-                "suffix": {
-                    "type": "string",
-                    "title": "Suffix",
-                    "description": "Enter the suffix (e.g., Jr. Sr., PhD), if appropriate",
-                    "minLength": 1,
-                    "maxLength": 10,
-                },
-            },
-        },
-        "simple_address": {
-            # This address differs from the SF424 as it doesn't contain country, county or province
-            "type": "object",
-            "title": "Address",
-            "description": "Enter an address.",
-            "required": [
-                "street1",
-                "city",
-            ],
-            "properties": {
-                "street1": {
-                    "type": "string",
-                    "title": "Street 1",
-                    "description": "Enter the first line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "street2": {
-                    "type": "string",
-                    "title": "Street 2",
-                    "description": "Enter the second line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "city": {
-                    "type": "string",
-                    "title": "City",
-                    "description": "Enter the city.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "state": {
-                    "allOf": [{"$ref": "#/$defs/state_code"}],
-                    "title": "State",
-                    "description": "Enter the state.",
-                },
-                "zip_code": {
-                    "type": "string",
-                    "title": "Zip / Postal Code",
-                    "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
-                    "minLength": 1,
-                    "maxLength": 30,
-                },
-            },
-        },
         "reporting_entity_awardee": {
             "type": "object",
             "required": ["organization_name", "address"],
@@ -310,7 +211,7 @@ FORM_JSON_SCHEMA = {
                     "maxLength": 60,
                 },
                 "address": {
-                    "allOf": [{"$ref": "#/$defs/simple_address"}],
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],
                 },
                 "congressional_district": {
                     "type": "string",
@@ -321,51 +222,28 @@ FORM_JSON_SCHEMA = {
                 },
             },
         },
-        "budget_monetary_amount": {
-            # Represents a monetary amount. We use a string instead of number
-            # to avoid any floating point rounding issues.
-            "type": "string",
-            # Pattern here effectively says:
-            # * An optional negative sign
-            # * Any number of digits
-            # * An optional decimal point
-            # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^(-)?\d*([.]\d{2})?$",
-            # Limit the max amount based on the length (11-digits, allows up to 99 billion)
-            "maxLength": 14,
-        },
-        "state_code": {
-            "type": "string",
-            "title": "state",
-            "description": "US state or Territory Code",
-            "enum": shared_schema.STATES,
-        },
-        "country_code": {
-            "type": "string",
-            "title": "country",
-            "description": "country Code",
-            "enum": shared_schema.COUNTRIES,
-        },
     },
 }
 
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Background",
-        "name": "Background",
-        "children": [
-            {"type": "field", "definition": "/properties/federal_action_type"},
-            {"type": "field", "definition": "/properties/federal_action_status"},
-            {"type": "field", "definition": "/properties/report_type"},
-        ],
+        "label": "1. Type of Federal Action",
+        "name": "Type of Federal Action",
+        "children": [{"type": "field", "definition": "/properties/federal_action_type"}],
     },
     {
         "type": "section",
-        "label": "2. For Material Change Only",
-        "name": "For Material Change Only",
+        "label": "2. Status of Federal Action",
+        "name": "Status of Federal Action",
+        "children": [{"type": "field", "definition": "/properties/federal_action_status"}],
+    },
+    {
+        "type": "section",
+        "label": "3. Report Type",
+        "name": "Report Type",
         "children": [
-            # Material Change
+            {"type": "field", "definition": "/properties/report_type"},
             {"type": "field", "definition": "/properties/material_change_year"},
             {"type": "field", "definition": "/properties/material_change_quarter"},
             {"type": "field", "definition": "/properties/last_report_date"},
@@ -373,10 +251,9 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "3. Name and Address of Reporting Entity",
+        "label": "4. Name and Address of Reporting Entity",
         "name": "Name and Address of Reporting Entity",
         "children": [
-            # Reporting Entity
             {"type": "field", "definition": "/properties/reporting_entity/properties/entity_type"},
             {"type": "field", "definition": "/properties/reporting_entity/properties/tier"},
             {
@@ -411,8 +288,8 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "4. If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
-        "name": "If Reporting Entity in No.3 is Subawardee, Enter Name and Address of Prime",
+        "label": "5. If Reporting Entity in No. 4 is Subawardee, Enter Name and Address of Prime",
+        "name": "If Reporting Entity in No. 4 is Subawardee, Enter Name and Address of Prime",
         "children": [
             {
                 "type": "field",
@@ -446,23 +323,36 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "5. Details",
-        "name": "Details",
+        "label": "6. Federal Department/Agency",
+        "name": "Federal Department/Agency",
+        "children": [{"type": "field", "definition": "/properties/federal_agency_department"}],
+    },
+    {
+        "type": "section",
+        "label": "7. Federal Program Name/Description",
+        "name": "Federal Program Name/Description",
         "children": [
-            # Various fields in middle
-            {"type": "field", "definition": "/properties/federal_agency_department"},
             {"type": "field", "definition": "/properties/federal_program_name"},
             {"type": "field", "definition": "/properties/assistance_listing_number"},
-            {"type": "field", "definition": "/properties/federal_action_number"},
-            {"type": "field", "definition": "/properties/award_amount"},
         ],
     },
     {
         "type": "section",
-        "label": "6. Name and Address of Lobbying Registrant",
+        "label": "8. Federal Action Number",
+        "name": "Federal Action Number",
+        "children": [{"type": "field", "definition": "/properties/federal_action_number"}],
+    },
+    {
+        "type": "section",
+        "label": "9. Award Amount",
+        "name": "Award Amount",
+        "children": [{"type": "field", "definition": "/properties/award_amount"}],
+    },
+    {
+        "type": "section",
+        "label": "10a. Name and Address of Lobbying Registrant",
         "name": "Name and Address of Lobbying Registrant",
         "children": [
-            # Lobbying Registrant
             {
                 "type": "field",
                 "definition": "/properties/lobbying_registrant/properties/individual/properties/first_name",
@@ -507,10 +397,9 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "7. Individual Performing Services (including address if different from No. 6)",
-        "name": "Individual Performing Services (including address if different from No. 6)",
+        "label": "10b. Individual Performing Services",
+        "name": "Individual Performing Services",
         "children": [
-            # Individual performing services
             {
                 "type": "field",
                 "definition": "/properties/individual_performing_service/properties/individual/properties/first_name",
@@ -555,11 +444,15 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "8. Signature",
+        "label": "11. Signature",
         "name": "Signature",
+        "description": "Information requested through this form is authorized by title 31 U.S.C. section 1352. This disclosure of lobbying activities is a material representation of fact upon which reliance was placed by the tier above when the transaction was made or entered into. This disclosure is required pursuant to 31 U.S.C. 1352. This information will be reported to the Congress semi- annually and will be available for public inspection. Any person who fails to file the required disclosure shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure.",
         "children": [
-            # Signature block
             {"type": "null", "definition": "/properties/signature_block/properties/signature"},
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/name/properties/prefix",
+            },
             {
                 "type": "field",
                 "definition": "/properties/signature_block/properties/name/properties/first_name",
@@ -574,11 +467,15 @@ FORM_UI_SCHEMA = [
             },
             {
                 "type": "field",
-                "definition": "/properties/signature_block/properties/name/properties/prefix",
+                "definition": "/properties/signature_block/properties/name/properties/suffix",
             },
             {
                 "type": "field",
-                "definition": "/properties/signature_block/properties/name/properties/suffix",
+                "definition": "/properties/signature_block/properties/title",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/signature_block/properties/telephone",
             },
             {"type": "null", "definition": "/properties/signature_block/properties/signed_date"},
         ],
@@ -608,5 +505,8 @@ SFLLL_v2_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    form_instruction_id=uuid.UUID("17646cbc-76ea-4acc-b9bf-2582defbf0dc"),
+    form_type=FormType.SFLLL,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

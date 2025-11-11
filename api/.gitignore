@@ -12,6 +12,8 @@ dist/
 coverage.*
 .testmondata
 .pytest_cache/
+/tests/validate_legacy_soap_api/cache/*
+!/tests/validate_legacy_soap_api/cache/__init__.py
 
 # Python virtual environments
 .venv

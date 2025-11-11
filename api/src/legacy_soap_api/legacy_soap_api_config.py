@@ -22,6 +22,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_auth_content: str | None = Field(None, alias="SOAP_AUTH_CONTENT")
     soap_auth_map: dict = Field(default_factory=dict)
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
+    use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
 
     @property
     def gg_url(self) -> str:
@@ -67,6 +68,9 @@ class SimplerSoapAPI(StrEnum):
 class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
+    compare_endpoints: bool = False
+    is_mtom: bool = False
+    always_call_simpler: bool = False
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -78,7 +82,7 @@ class SOAPOperationConfig:
 
     # This value holds all namespace mappings per soap api. Grantors and Applicants APIs
     # will have different namespace configurations.
-    namespaces: dict[None | str, str] = field(default_factory=dict)
+    namespaces: dict[str | None, str] = field(default_factory=dict)
 
     # Configuration for XML namespace mapping to generate XML from SOAP XML dicts.
     # This will only be needed for the simpler SOAP data processing. The values for this property
@@ -95,6 +99,8 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="GetOpportunityListResponse",
             force_list_attributes=("OpportunityDetails",),
             key_indexes={"OpportunityDetails": "CompetitionID"},
+            compare_endpoints=True,
+            always_call_simpler=True,
             namespace_keymap={
                 "GetOpportunityListResponse": "ns2",
                 "OpportunityDetails": "ns5",
@@ -115,7 +121,13 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             },
         )
     },
-    SimplerSoapAPI.GRANTORS: {},
+    SimplerSoapAPI.GRANTORS: {
+        "GetApplicationZipRequest": SOAPOperationConfig(
+            request_operation_name="GetApplicationZipRequest",
+            response_operation_name="GetApplicationZipResponse",
+            is_mtom=True,
+        )
+    },
 }
 
 # This is a standard global namespace for SOAP XML.
@@ -132,12 +144,25 @@ SOAP_API_NAMESPACES: dict[SimplerSoapAPI, dict[str | None, str]] = {
         None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
     },
     SimplerSoapAPI.GRANTORS: {
-        "soap": SOAP_NS,
+        "ns12": "http://schemas.xmlsoap.org/wsdl/soap/",
+        "ns11": "http://schemas.xmlsoap.org/wsdl/",
+        "ns10": "http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0",
+        "ns9": "http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0",
+        "ns8": "http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0",
+        "ns7": "http://apply.grants.gov/system/AgencyManagePackage-V1.0",
+        "ns6": "http://apply.grants.gov/system/GrantsPackage-V1.0",
+        "ns5": "http://apply.grants.gov/system/GrantsOpportunity-V1.0",
+        "ns4": "http://apply.grants.gov/system/GrantsRelatedDocument-V1.0",
+        "ns3": "http://apply.grants.gov/system/GrantsTemplate-V1.0",
+        "ns2": "http://apply.grants.gov/services/AgencyWebServices-V2.0",
+        "soap": "http://schemas.xmlsoap.org/soap/envelope/",
+        "xop": "http://www.w3.org/2004/08/xop/include",
+        None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
     },
 }
 
 
-@lru_cache()
+@lru_cache
 def get_soap_operation_config(
     simpler_api: SimplerSoapAPI, request_operation_name: str
 ) -> SOAPOperationConfig | None:

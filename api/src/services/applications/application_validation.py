@@ -3,11 +3,18 @@ from enum import StrEnum
 
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus, SubmissionIssue
+from src.constants.lookup_constants import (
+    ApplicationFormStatus,
+    ApplicationStatus,
+    CompetitionOpenToApplicant,
+    SubmissionIssue,
+)
 from src.db.models.competition_models import Application, ApplicationForm, Competition
+from src.db.models.entity_models import Organization
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -88,6 +95,89 @@ def get_missing_app_form_errors(application: Application) -> list[ValidationErro
     return missing_form_errors
 
 
+def get_organization_required_errors(application: Application) -> list[ValidationErrorDetail]:
+    """Check if application requires an organization but doesn't have one"""
+    organization_errors: list[ValidationErrorDetail] = []
+
+    # Check if competition only allows organization applications (not individual)
+    allowed_applicant_types = application.competition.open_to_applicants
+    requires_organization = (
+        CompetitionOpenToApplicant.ORGANIZATION in allowed_applicant_types
+        and CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types
+    )
+
+    # If organization is required but application doesn't have one, add error
+    if requires_organization and application.organization_id is None:
+        organization_errors.append(
+            ValidationErrorDetail(
+                message="Application requires organization in order to submit",
+                type=ValidationErrorType.ORGANIZATION_REQUIRED,
+                value=None,
+            )
+        )
+
+    return organization_errors
+
+
+def get_organization_expiration_errors(
+    organization: Organization | None,
+) -> list[ValidationErrorDetail]:
+    """Check if the organization's SAM.gov entity record is expired or invalid."""
+    validation_errors: list[ValidationErrorDetail] = []
+
+    # If no organization is provided, no validation errors
+    if organization is None:
+        return validation_errors
+
+    # Check if organization has no sam.gov entity record
+    if not organization.sam_gov_entity:
+        logger.info(
+            "Organization has no SAM.gov entity record",
+            extra={"submission_issue": SubmissionIssue.ORG_NO_SAM_GOV_ENTITY},
+        )
+        validation_errors.append(
+            ValidationErrorDetail(
+                message="This organization has no SAM.gov entity record and cannot be used for applications",
+                type=ValidationErrorType.ORGANIZATION_NO_SAM_GOV_ENTITY,
+                value=None,
+            )
+        )
+        return validation_errors
+
+    sam_gov_entity = organization.sam_gov_entity
+    current_date = get_now_us_eastern_date()
+
+    # Check if organization is marked as inactive
+    if sam_gov_entity.is_inactive is True:
+        logger.info(
+            "Organization is inactive in SAM.gov",
+            extra={"submission_issue": SubmissionIssue.ORG_INACTIVE_IN_SAM_GOV},
+        )
+        validation_errors.append(
+            ValidationErrorDetail(
+                message="This organization is inactive in SAM.gov and cannot be used for applications",
+                type=ValidationErrorType.ORGANIZATION_INACTIVE_IN_SAM_GOV,
+                value=None,
+            )
+        )
+
+    # Check if organization's registration has expired
+    if sam_gov_entity.expiration_date < current_date:
+        logger.info(
+            "Organization SAM.gov registration has expired",
+            extra={"submission_issue": SubmissionIssue.ORG_SAM_GOV_EXPIRED},
+        )
+        validation_errors.append(
+            ValidationErrorDetail(
+                message=f"This organization's SAM.gov registration expired on {sam_gov_entity.expiration_date.strftime('%B %d, %Y')} and cannot be used for applications",
+                type=ValidationErrorType.ORGANIZATION_SAM_GOV_EXPIRED,
+                value=sam_gov_entity.expiration_date.isoformat(),
+            )
+        )
+
+    return validation_errors
+
+
 def is_form_required(application_form: ApplicationForm) -> bool:
     """Get whether a form is required"""
     # This is very simple at the moment, but in the future this might
@@ -111,6 +201,12 @@ def get_application_form_errors(
     # This acts as a guardrail and lets us find any other issues by
     # just iterating over the application forms below
     form_errors.extend(get_missing_app_form_errors(application))
+
+    # Check if application requires an organization but doesn't have one
+    form_errors.extend(get_organization_required_errors(application))
+
+    # Check if organization has expired SAM.gov registration or other issues
+    form_errors.extend(get_organization_expiration_errors(application.organization))
 
     # For each application form, verify it passes all validation rules
     for application_form in application.application_forms:
@@ -195,7 +291,7 @@ def validate_application_form(
                     message="is_included_in_submission must be set on all non-required forms",
                     type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
                     field="is_included_in_submission",
-                    value=None,
+                    value=application_form.application_form_id,
                 )
             )
 
@@ -212,24 +308,10 @@ def validate_application_form(
         )
         form_validation_errors.extend(json_validation_errors)
 
-    # If there are no issues, we consider the form complete
-    # Note: MISSING_INCLUDED_IN_SUBMISSION errors don't count as form completion issues since they're configuration errors
-    if (
-        len(
-            [
-                e
-                for e in form_validation_errors
-                if e.type != ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
-            ]
-        )
-        == 0
-    ):
+    # If the form has no validation issues, we'll mark it as complete
+    if len(form_validation_errors) == 0:
         application_form_status = ApplicationFormStatus.COMPLETE
-    # If the form has no answers, we assume it has not been started
-    elif len(application_form.application_response) == 0:
-        application_form_status = ApplicationFormStatus.NOT_STARTED
-    # If the form has been started, but has validation issues, assume it is in-progress
-    else:
+    else:  # Any validation issues we'll mark as in-progress
         application_form_status = ApplicationFormStatus.IN_PROGRESS
 
     application_form.application_form_status = application_form_status  # type: ignore[attr-defined]

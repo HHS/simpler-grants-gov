@@ -1,6 +1,7 @@
 import logging
+from collections.abc import Callable
 from decimal import Decimal, InvalidOperation
-from typing import Any, Callable
+from typing import Any
 
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_util import get_field_values, populate_nested_value
@@ -187,7 +188,11 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
             continue
         result += monetary_value
 
-    return str(result.quantize(result))
+    # Quantize will make the value always contain 2 values after the decimal.
+    # Because our validation of monetary fields limits them to 2 decimals
+    # this only matters when a user enters something that would be flagged
+    # for a validation issue anyways, but at least this maintains consistency.
+    return str(result.quantize(ZERO_DECIMAL))
 
 
 population_func = Callable[[JsonRuleContext, JsonRule], Any]

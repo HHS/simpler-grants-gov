@@ -78,7 +78,12 @@ class ClosingDateNotificationTask(BaseNotificationTask):
                         # == NotificationReason.CLOSING_DATE_REMINDER
                     )
                 ),
-                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
+                ~exists().where(
+                    and_(
+                        SuppressedEmail.email == LinkExternalUser.email,
+                        LinkExternalUser.user_id == UserSavedOpportunity.user_id,
+                    )
+                ),
             )
         )
 

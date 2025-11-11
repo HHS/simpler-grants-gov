@@ -1,5 +1,6 @@
 """Integration tests for conditional transformations (simplified for one-to-many only)."""
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -18,7 +19,7 @@ class TestConditionalIntegration:
         }
 
         request = XMLGenerationRequest(
-            form_name="SF424_4_0",
+            transform_config=FORM_XML_TRANSFORM_RULES,
             application_data=application_data,
             pretty_print=True,
         )
@@ -29,9 +30,9 @@ class TestConditionalIntegration:
         assert "ApplicantTypeCode1" in response.xml_data
         assert "ApplicantTypeCode2" in response.xml_data
         assert "ApplicantTypeCode3" in response.xml_data
-        assert "<ApplicantTypeCode1>A</ApplicantTypeCode1>" in response.xml_data
-        assert "<ApplicantTypeCode2>B</ApplicantTypeCode2>" in response.xml_data
-        assert "<ApplicantTypeCode3>C</ApplicantTypeCode3>" in response.xml_data
+        assert "<SF424_4_0:ApplicantTypeCode1>A</SF424_4_0:ApplicantTypeCode1>" in response.xml_data
+        assert "<SF424_4_0:ApplicantTypeCode2>B</SF424_4_0:ApplicantTypeCode2>" in response.xml_data
+        assert "<SF424_4_0:ApplicantTypeCode3>C</SF424_4_0:ApplicantTypeCode3>" in response.xml_data
 
     def test_one_to_many_single_applicant_type_code_integration(self):
         """Test one-to-many transformation with single applicant type code."""
@@ -44,7 +45,7 @@ class TestConditionalIntegration:
         }
 
         request = XMLGenerationRequest(
-            form_name="SF424_4_0",
+            transform_config=FORM_XML_TRANSFORM_RULES,
             application_data=application_data,
             pretty_print=True,
         )
@@ -53,7 +54,7 @@ class TestConditionalIntegration:
 
         # Verify only the first type code is mapped
         assert "ApplicantTypeCode1" in response.xml_data
-        assert "<ApplicantTypeCode1>A</ApplicantTypeCode1>" in response.xml_data
+        assert "<SF424_4_0:ApplicantTypeCode1>A</SF424_4_0:ApplicantTypeCode1>" in response.xml_data
         assert "ApplicantTypeCode2" not in response.xml_data
 
     def test_one_to_many_no_applicant_type_codes_integration(self):
@@ -66,7 +67,7 @@ class TestConditionalIntegration:
         }
 
         request = XMLGenerationRequest(
-            form_name="SF424_4_0",
+            transform_config=FORM_XML_TRANSFORM_RULES,
             application_data=application_data,
             pretty_print=True,
         )

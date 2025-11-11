@@ -149,8 +149,8 @@ module "service" {
   s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
   hosted_zone_id         = null
 
-  cpu                      = local.service_config.cpu
-  memory                   = local.service_config.memory
+  fargate_cpu              = local.service_config.cpu
+  fargate_memory           = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
   max_capacity             = local.service_config.instance_scaling_max_capacity

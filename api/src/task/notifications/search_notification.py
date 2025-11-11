@@ -1,8 +1,8 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import exists, select, update
+from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -50,7 +50,12 @@ class SearchNotificationTask(BaseNotificationTask):
             .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
             .where(
                 UserSavedSearch.is_deleted.isnot(True),
-                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
+                ~exists().where(
+                    and_(
+                        SuppressedEmail.email == LinkExternalUser.email,
+                        LinkExternalUser.user_id == UserSavedSearch.user_id,
+                    )
+                ),
             )
         )
 

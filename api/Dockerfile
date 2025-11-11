@@ -1,135 +1,129 @@
-# Use the official python3 image based on Debian 11 "Bullseye".
-# https://hub.docker.com/_/python
 
-# The build stage that will be used to deploy to the various environments
-# needs to be called `release` in order to integrate with the repo's
-# top-level Makefile
-FROM python:3.13-slim AS base
-# See /documentation/api/package-depedency-management.md#Upgrading Python
-# for details on upgrading your Python version
-
-# Install poetry, the package manager.
-# https://python-poetry.org
-RUN pip install --no-cache-dir poetry==2.1.3 --upgrade
-
-RUN apt-get update \
-    # Remove existing packages before installing their never versions
-    && apt-get remove --yes \
-        build-essential \
-        libpq-dev \
-        postgresql \
-        wget \
-    # Install security updates
-    # https://pythonspeed.com/articles/security-updates-in-docker/ \
-    # You can check currently installed package versions by running "make login" \
-    # to go into the Docker container, and then apt list --installed | grep <whatever>
-    && apt-get upgrade --yes \
-    && apt-get install --no-install-recommends --yes \
-        build-essential \
-        libpq-dev \
-        postgresql \
-        wget \
-        libgnutls30 \
-        linux-libc-dev \
-        libxslt1.1 \
-    # Reduce the image size by clear apt cached lists
-    # Complies with https://github.com/codacy/codacy-hadolint/blob/master/codacy-hadolint/docs/description/DL3009.md
-    && apt-get clean \
-    && rm -fr /var/lib/apt/lists/* \
-    && rm /etc/ssl/private/ssl-cert-snakeoil.key
+FROM ghcr.io/hhs/python-base-image:72ba391@sha256:1e2d72700ecfbff3a65435a64ca321d65c7bb82128e91c5825d69997cb54c8cd AS base
 
 ARG RUN_UID
 ARG RUN_USER
 
-# The following logic creates the RUN_USER home directory and the directory where
-# we will be storing the application in the image. This runs when the user is not root
-RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
-    [ "${RUN_USER}" = "root" ] || \
-    (useradd --create-home --create --user-group --home "/home/${RUN_USER}" --uid ${RUN_UID} "${RUN_USER}" \
-    && mkdir /api \
-    && chown -R ${RUN_UID} "/home/${RUN_USER}" /api)
+# Read Python version from the version file in the base image
+RUN mkdir -p /tmp && cat /python-version.txt > /tmp/py_version.txt
 
-#-----------
-# Dev image
-#-----------
+# Create user and directories
+RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${RUN_UID:?RUN_USER and RUN_UID need to be set and non-empty.}" && \
+    if [ "${RUN_USER}" != "root" ]; then \
+      grep -Eq "^${RUN_USER}:" /etc/group || groupadd -g "${RUN_UID}" "${RUN_USER}"; \
+      grep -Eq "^${RUN_USER}:" /etc/passwd || useradd -l -M -s /bin/bash -u "${RUN_UID}" -g "${RUN_USER}" "${RUN_USER}"; \
+    fi && \
+    mkdir -p "/home/${RUN_USER}" /api /api/tmp /var/spool/mail /tmp /var/tmp /usr/tmp && \
+    chown -R "${RUN_UID}:${RUN_UID}" "/home/${RUN_USER}" /api /api/tmp && \
+    chmod 700 /api/tmp && \
+    chmod 1777 /tmp /var/tmp /usr/tmp
 
+WORKDIR /api
+
+COPY pyproject.toml poetry.lock ./
+
+RUN rm -rf /api/.venv || true
+
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+ENV VIRTUALENV_ALWAYS_COPY=1
+ENV VIRTUALENV_APP_DATA="/tmp"
+
+
+
+COPY src /api/src
+COPY newrelic.ini /api/newrelic.ini
+
+# Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
+# Clean up build artifacts and caches in a single layer to reduce image size
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
+    /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
+    /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
+    SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
+    mkdir -p "${SITE_BASE}/src" && \
+    cp "/api/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
+    cp "/api/newrelic.ini" "${SITE_BASE}/newrelic.ini" && \
+    chmod 0644 "${SITE_BASE}/src/newrelic.ini" "${SITE_BASE}/newrelic.ini" && \
+    if [ ! -f "${SITE_BASE}/src/newrelic.ini" ]; then \
+      echo "ERROR: newrelic.ini missing at ${SITE_BASE}/src/newrelic.ini" >&2; \
+      ls -la "${SITE_BASE}/src" || true; \
+      exit 1; \
+    fi; \
+    (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
+    (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /api/dist /api/src || true)
+
+#==============================================
+# Stage 2: Dev image
+#==============================================
 FROM base AS dev
 ARG RUN_USER
 
-# In between ARG RUN_USER and USER ${RUN_USER}, the user is still root
-# If there is anything that needs to be ran as root, this is the spot
-
-# Install graphviz which is used to generate ERD diagrams
-RUN apt-get update && apt-get install --no-install-recommends --yes graphviz \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Disable Python optimization to preserve docstrings required by jsonpath_ng
+# https://github.com/h2non/jsonpath-ng?tab=readme-ov-file#special-note-about-ply-and-docstrings
+ENV PYTHONOPTIMIZE=0
+ENV TMPDIR="/tmp"
 
 USER ${RUN_USER}
 WORKDIR /api
 
+# In dev, prefer external venv to avoid mutating release venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=false
+
 COPY pyproject.toml poetry.lock ./
-# Explicitly create a new virtualenv to avoid getting overridden by mounted .venv folders
+
+# Explicitly create a new virtualenv
 RUN poetry config virtualenvs.in-project false && poetry env use python
+
 # Install all dependencies including dev dependencies
 RUN poetry install --no-root --with dev
 
 COPY . /api
 
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
+CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
-# Run the application.
-CMD ["poetry", "run", "python", "-m", "src"]
-
-#---------
-# Release
-#---------
-
+#==============================================
+# Stage 3: Minimal release runtime
+#==============================================
+# hadolint ignore=DL3006
 FROM base AS release
-ARG RUN_USER
 
-# Gunicorn requires this workaround to create writable temporary directory in
-# our readonly root file system. https://github.com/aws/containers-roadmap/issues/736
-RUN mkdir -p /tmp
-VOLUME ["/tmp"]
+# Working directory already set in base stage
+# User already created in base stage
 
-# TODO(https://github.com/navapbc/template-application-flask/issues/23) Productionize the Docker image
+# Copy only the virtualenv and runtime config from base stage
+COPY --from=base /api/.venv /api/.venv
+COPY --from=base /api/newrelic.ini /api/newrelic.ini
+COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
 
-WORKDIR /api
+# Clean up to reduce image size:
+# - Remove Python bytecode cache files
+# - Remove pip cache
+# - Remove test files and docs from site-packages
+RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    (find /api/.venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true) && \
+    (find /api/.venv -type f -name "*.pyc" -delete 2>/dev/null || true) && \
+    (find /api/.venv -type f -name "*.pyo" -delete 2>/dev/null || true) && \
+    (find /api/.venv -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true) && \
+    (find /api/.venv -type d -name "test" -exec rm -rf {} + 2>/dev/null || true) && \
+    rm -rf \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/pip* \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools* \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/_distutils_hack \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/pip-*.dist-info \
+      /api/.venv/lib/python"${PY_MM}"/site-packages/setuptools-*.dist-info \
+      /api/.venv/bin/pip* \
+      /api/.venv/bin/easy_install* \
+      /root/.local/share/virtualenv \
+      "/home/${RUN_USER}/.local/share/virtualenv" || true
 
-COPY . /api
+ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
+    HOST=0.0.0.0 \
+    TMPDIR="/tmp" \
+    SSL_CERT_FILE="/etc/pki/tls/certs/ca-bundle.crt" \
+    SSL_CERT_DIR="/etc/pki/tls/certs" \
+    PYTHONOPTIMIZE=0
 
-# Remove any existing virtual environments that might exist. This
-# might happen if testing out building the release image from a local machine
-# that has a virtual environment within the project api folder.
-RUN rm -fr /api/.venv
-
-# Set virtualenv location to be in project to be easy to find
-# This will create a virtualenv in /api/.venv/
-# See https://python-poetry.org/docs/configuration/#virtualenvsin-project
-# See https://python-poetry.org/docs/configuration/#using-environment-variables
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-
-# Install production runtime dependencies only
-RUN poetry install --no-root --only main
-
-# Build the application binary (python wheel) defined in pyproject.toml
-# Note that this will only copy over python files, and files stated in the
-# include section in pyproject.toml. Also note that if you change the name or
-# version section in pyproject.toml, you will need to change the dist/... to match
-# or the application will not build
-RUN poetry build --format wheel && poetry run pip install 'dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl'
-
-# Add project's virtual env to the PATH so we can directly run poetry scripts
-# defiend in pyproject.toml
-ENV PATH="/api/.venv/bin:$PATH"
-
-# Set the host to 0.0.0.0 to make the server available external
-# to the Docker container that it's running in.
-ENV HOST=0.0.0.0
-
+# Run as the non-root user
 USER ${RUN_USER}
 
-# Run the application.
-CMD ["poetry", "run", "gunicorn", "src.app:create_app()"]
+CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()"]

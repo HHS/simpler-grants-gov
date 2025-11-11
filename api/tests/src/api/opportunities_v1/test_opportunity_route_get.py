@@ -210,14 +210,14 @@ def test_get_opportunity_s3_endpoint_url_200_legacy(
     assert response.text == "Hello, world"
 
 
-def test_get_opportunity_404_not_found(client, api_auth_token, truncate_opportunities):
+def test_get_opportunity_404_not_found(client, api_auth_token):
     opportunity_id = uuid.uuid4()
     resp = client.get(f"/v1/opportunities/{opportunity_id}", headers={"X-Auth": api_auth_token})
     assert resp.status_code == 404
     assert resp.get_json()["message"] == f"Could not find Opportunity with ID {opportunity_id}"
 
 
-def test_get_opportunity_404_not_found_legacy(client, api_auth_token, truncate_opportunities):
+def test_get_opportunity_404_not_found_legacy(client, api_auth_token):
     resp = client.get("/v1/opportunities/1", headers={"X-Auth": api_auth_token})
     assert resp.status_code == 404
     assert resp.get_json()["message"] == "Could not find Opportunity with Legacy ID 1"

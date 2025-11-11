@@ -1,6 +1,7 @@
 import logging
+from collections.abc import Callable
 from enum import Enum, IntEnum, StrEnum
-from typing import Any, Callable, Type, TypeVar
+from typing import Any, TypeVar
 
 from src.db.models.lookup.lookup import LookupConfig
 from src.db.models.lookup.lookup_table import LookupTable
@@ -11,10 +12,10 @@ L = TypeVar("L", bound=LookupTable)
 
 
 class LookupRegistry:
-    _lookup_registry: dict[Type[LookupTable], LookupConfig] = {}
+    _lookup_registry: dict[type[LookupTable], LookupConfig] = {}
 
     @classmethod
-    def register_lookup(cls, lookup: LookupConfig) -> Callable[[Type[L]], Type[L]]:
+    def register_lookup(cls, lookup: LookupConfig) -> Callable[[type[L]], type[L]]:
         """
         Attach the lookup class mapping to a particular lookup table.
 
@@ -26,7 +27,7 @@ class LookupRegistry:
 
         """
 
-        def decorator(lookup_table: Type[L]) -> Type[L]:
+        def decorator(lookup_table: type[L]) -> type[L]:
             if lookup_table in cls._lookup_registry:
                 raise Exception(
                     f"Cannot attach lookup mapping to table {lookup_table.get_table_name()}, table already registered"
@@ -39,7 +40,7 @@ class LookupRegistry:
         return decorator
 
     @classmethod
-    def _get_lookup_config(cls, lookup_table: Type[LookupTable]) -> LookupConfig:
+    def _get_lookup_config(cls, lookup_table: type[LookupTable]) -> LookupConfig:
         lookup_config = cls._lookup_registry.get(lookup_table)
         if lookup_config is None:
             raise Exception(
@@ -49,7 +50,7 @@ class LookupRegistry:
 
     @classmethod
     def get_lookup_int_for_enum(
-        cls, lookup_table: Type[LookupTable], lookup_enum: StrEnum | IntEnum | None
+        cls, lookup_table: type[LookupTable], lookup_enum: StrEnum | IntEnum | None
     ) -> int | None:
         """
         Given a Lookup Table + Enum, get the lookup int value to store in the DB
@@ -63,7 +64,7 @@ class LookupRegistry:
 
     @classmethod
     def get_enum_for_lookup_int(
-        cls, lookup_table: Type[LookupTable], lookup_val: int | None
+        cls, lookup_table: type[LookupTable], lookup_val: int | None
     ) -> Enum | None:
         """
         Given a Lookup Table + lookup int, get the enum that is mapped to it
@@ -77,7 +78,7 @@ class LookupRegistry:
 
     @classmethod
     def is_valid_type_for_table(
-        cls, lookup_table: Type[LookupTable], lookup_val: Any | None
+        cls, lookup_table: type[LookupTable], lookup_val: Any | None
     ) -> bool:
         """
         Given a Lookup Table + a value, return whether it is of a type configured for the that table.
@@ -94,5 +95,5 @@ class LookupRegistry:
         return isinstance(lookup_val, lookup_config.get_enums())
 
     @classmethod
-    def get_sync_values(cls) -> dict[Type[LookupTable], LookupConfig]:
+    def get_sync_values(cls) -> dict[type[LookupTable], LookupConfig]:
         return cls._lookup_registry

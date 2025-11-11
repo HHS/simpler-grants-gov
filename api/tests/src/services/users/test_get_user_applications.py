@@ -1,18 +1,21 @@
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.services.users.get_user_applications import get_user_applications
 from tests.src.db.models.factories import (
+    AgencyFactory,
     ApplicationFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
+    OpportunityFactory,
     OrganizationFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
 
 
-def test_get_user_applications_success(enable_factory_create, db_session):
+def test_get_user_applications_success(enable_factory_create, db_session, user):
     """Test successfully retrieving applications for a user"""
-    user = UserFactory.create()
     competition = CompetitionFactory.create(competition_title="Test Competition")
 
     # Create applications
@@ -28,11 +31,26 @@ def test_get_user_applications_success(enable_factory_create, db_session):
     )
 
     # Associate user with applications
-    ApplicationUserFactory.create(user=user, application=application1)
-    ApplicationUserFactory.create(user=user, application=application2)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application1),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application2),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Verify results
     assert len(applications) == 2
@@ -46,15 +64,23 @@ def test_get_user_applications_empty(enable_factory_create, db_session):
     user = UserFactory.create()
 
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Should return empty list
     assert len(applications) == 0
 
 
-def test_get_user_applications_with_organization(enable_factory_create, db_session):
+def test_get_user_applications_with_organization(enable_factory_create, db_session, user):
     """Test retrieving applications that have organizations"""
-    user = UserFactory.create()
 
     # Create organization with SAM.gov entity
     sam_gov_entity = SamGovEntityFactory.create(legal_business_name="Test Organization")
@@ -67,10 +93,21 @@ def test_get_user_applications_with_organization(enable_factory_create, db_sessi
         application_name="Org Application",
     )
 
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Verify results
     assert len(applications) == 1
@@ -90,11 +127,26 @@ def test_get_user_applications_multiple_users(enable_factory_create, db_session)
     application1 = ApplicationFactory.create(competition=competition, application_name="User 1 App")
     application2 = ApplicationFactory.create(competition=competition, application_name="User 2 App")
 
-    ApplicationUserFactory.create(user=user1, application=application1)
-    ApplicationUserFactory.create(user=user2, application=application2)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user1, application=application1),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user2, application=application2),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Call the service for user1
-    applications = get_user_applications(db_session, user1.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user1.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Should only get user1's application
     assert len(applications) == 1
@@ -105,26 +157,54 @@ def test_get_user_applications_preloads_relationships(enable_factory_create, db_
     """Test that the service properly preloads competition and organization relationships"""
     user = UserFactory.create()
 
+    # Create agency
+    agency = AgencyFactory.create(agency_code="TEST-123", agency_name="Test Agency Name")
+
+    # Create opportunity with agency
+    opportunity = OpportunityFactory.create(
+        opportunity_title="Test Opportunity", agency_code=agency.agency_code
+    )
+
     # Create organization with SAM.gov entity
     sam_gov_entity = SamGovEntityFactory.create()
     organization = OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
 
-    competition = CompetitionFactory.create(competition_title="Test Competition")
+    competition = CompetitionFactory.create(
+        competition_title="Test Competition", opportunity=opportunity
+    )
     application = ApplicationFactory.create(
         competition=competition,
         organization=organization,
     )
 
-    ApplicationUserFactory.create(user=user, application=application)
-
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Verify relationships are loaded (should not trigger additional queries)
     app = applications[0]
 
     # Competition should be loaded
     assert app.competition.competition_title == "Test Competition"
+
+    # Opportunity should be loaded
+    assert app.competition.opportunity is not None
+    assert app.competition.opportunity.opportunity_title == "Test Opportunity"
+
+    # Agency should be loaded (via agency_record relationship)
+    assert app.competition.opportunity.agency_name == "Test Agency Name"
 
     # Organization and its SAM.gov entity should be loaded
     assert app.organization is not None

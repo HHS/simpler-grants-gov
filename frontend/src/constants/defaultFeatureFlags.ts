@@ -10,6 +10,6 @@ export const defaultFeatureFlags: FeatureFlags = {
   authOn: true,
   savedOpportunitiesOn: true,
   savedSearchesOn: true,
-  applyFormPrototypeOff: true,
+  applyFormPrototypeOff: false,
   userAdminOff: true,
 };

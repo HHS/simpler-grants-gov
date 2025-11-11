@@ -1,5 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
+from src.constants.lookup_constants import FormType
 
 
 class FormInstructionSchema(Schema):
@@ -100,6 +101,36 @@ class FormAlphaSchema(Schema):
         allow_none=True, metadata={"description": "The rule schema for the form"}
     )
 
+    json_to_xml_schema = fields.Dict(
+        allow_none=True,
+        metadata={"description": "The JSON to XML schema mapping configuration for the form"},
+    )
+
+    form_type = fields.Enum(
+        FormType,
+        allow_none=True,
+        metadata={
+            "description": "The type of the form",
+            "example": FormType.SF424,
+        },
+    )
+
+    sgg_version = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The SGG version of the form",
+            "example": "1.0",
+        },
+    )
+
+    is_deprecated = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether the form is deprecated",
+            "example": False,
+        },
+    )
+
     created_at = fields.DateTime(
         metadata={"description": "The timestamp when the form was created"}
     )
@@ -190,6 +221,36 @@ class FormUpdateRequestSchema(Schema):
 
     form_rule_schema = fields.Dict(
         allow_none=True, metadata={"description": "The rule schema for the form"}
+    )
+
+    json_to_xml_schema = fields.Dict(
+        allow_none=True,
+        metadata={"description": "The JSON to XML schema mapping configuration for the form"},
+    )
+
+    form_type = fields.Enum(
+        FormType,
+        allow_none=True,
+        metadata={
+            "description": "The type of the form",
+            "example": FormType.SF424,
+        },
+    )
+
+    sgg_version = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The SGG version of the form",
+            "example": "1.0",
+        },
+    )
+
+    is_deprecated = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether the form is deprecated",
+            "example": False,
+        },
     )
 
 

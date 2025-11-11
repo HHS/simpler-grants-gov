@@ -1,6 +1,7 @@
 import logging
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Sequence, cast
+from typing import cast
 from uuid import UUID
 
 from sqlalchemy import and_, desc, exists, func, select, tuple_, update
@@ -234,7 +235,12 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
             .where(
                 UserSavedOpportunity.is_deleted.isnot(True),
-                ~exists().where(SuppressedEmail.email == LinkExternalUser.email),
+                ~exists().where(
+                    and_(
+                        SuppressedEmail.email == LinkExternalUser.email,
+                        LinkExternalUser.user_id == UserSavedOpportunity.user_id,
+                    )
+                ),
             )
         )
 

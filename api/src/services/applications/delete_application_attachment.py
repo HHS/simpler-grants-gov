@@ -2,6 +2,9 @@ import logging
 import uuid
 
 import src.adapters.db as db
+from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import can_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import User
 from src.services.applications.get_application_attachment import get_application_attachment
 from src.util import file_util
@@ -21,10 +24,17 @@ def delete_application_attachment(
     application_attachment = get_application_attachment(
         db_session, application_id, application_attachment_id, user
     )
+    # Check privileges
+    if not can_access(user, {Privilege.MODIFY_APPLICATION}, application_attachment.application):
+        raise_flask_error(403, "Forbidden")
 
     # Delete the file from s3
     logger.info("Deleting application attachment from s3")
     file_util.delete_file(application_attachment.file_location)
 
-    # Delete the attachment from the DB
-    db_session.delete(application_attachment)
+    # Mark the attachment as deleted
+    # We keep the record in the DB for auditing purposes
+    # But still remove the actual file
+    application_attachment.is_deleted = True
+    # Remove the s3 path to make clear it's gone.
+    application_attachment.file_location = "DELETED"

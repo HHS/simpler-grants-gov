@@ -4,11 +4,13 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationAuditEvent,
     ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
     FormFamily,
+    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
@@ -19,11 +21,12 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+    UserType,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
-OPPORTUNITY_STATUS_CONFIG = LookupConfig(
+OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [
         LookupStr(OpportunityStatus.FORECASTED, 1),
         LookupStr(OpportunityStatus.POSTED, 2),
@@ -32,7 +35,7 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
+OPPORTUNITY_CATEGORY_CONFIG: LookupConfig[OpportunityCategory] = LookupConfig(
     [
         LookupStr(OpportunityCategory.DISCRETIONARY, 1),
         LookupStr(OpportunityCategory.MANDATORY, 2),
@@ -42,7 +45,7 @@ OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
     ]
 )
 
-APPLICANT_TYPE_CONFIG = LookupConfig(
+APPLICANT_TYPE_CONFIG: LookupConfig[ApplicantType] = LookupConfig(
     [
         LookupStr(ApplicantType.STATE_GOVERNMENTS, 1),
         LookupStr(ApplicantType.COUNTY_GOVERNMENTS, 2),
@@ -65,7 +68,7 @@ APPLICANT_TYPE_CONFIG = LookupConfig(
 )
 
 
-FUNDING_CATEGORY_CONFIG = LookupConfig(
+FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
     [
         LookupStr(FundingCategory.RECOVERY_ACT, 1),
         LookupStr(FundingCategory.AGRICULTURE, 2),
@@ -96,7 +99,7 @@ FUNDING_CATEGORY_CONFIG = LookupConfig(
     ]
 )
 
-FUNDING_INSTRUMENT_CONFIG = LookupConfig(
+FUNDING_INSTRUMENT_CONFIG: LookupConfig[FundingInstrument] = LookupConfig(
     [
         LookupStr(FundingInstrument.COOPERATIVE_AGREEMENT, 1),
         LookupStr(FundingInstrument.GRANT, 2),
@@ -105,19 +108,21 @@ FUNDING_INSTRUMENT_CONFIG = LookupConfig(
     ]
 )
 
-AGENCY_DOWNLOAD_FILE_TYPE_CONFIG = LookupConfig(
+AGENCY_DOWNLOAD_FILE_TYPE_CONFIG: LookupConfig[AgencyDownloadFileType] = LookupConfig(
     [LookupStr(AgencyDownloadFileType.XML, 1), LookupStr(AgencyDownloadFileType.PDF, 2)]
 )
 
-AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG = LookupConfig(
-    [
-        LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
-        LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
-        LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
-    ]
+AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG: LookupConfig[AgencySubmissionNotificationSetting] = (
+    LookupConfig(
+        [
+            LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
+            LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
+            LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
+        ]
+    )
 )
 
-JOB_STATUS_CONFIG = LookupConfig(
+JOB_STATUS_CONFIG: LookupConfig[JobStatus] = LookupConfig(
     [
         LookupStr(JobStatus.STARTED, 1),
         LookupStr(JobStatus.COMPLETED, 2),
@@ -125,16 +130,18 @@ JOB_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-EXTERNAL_USER_TYPE_CONFIG = LookupConfig([LookupStr(ExternalUserType.LOGIN_GOV, 1)])
+EXTERNAL_USER_TYPE_CONFIG: LookupConfig[ExternalUserType] = LookupConfig(
+    [LookupStr(ExternalUserType.LOGIN_GOV, 1)]
+)
 
-EXTRACT_TYPE_CONFIG = LookupConfig(
+EXTRACT_TYPE_CONFIG: LookupConfig[ExtractType] = LookupConfig(
     [
         LookupStr(ExtractType.OPPORTUNITIES_JSON, 1),
         LookupStr(ExtractType.OPPORTUNITIES_CSV, 2),
     ]
 )
 
-FORM_FAMILY_CONFIG = LookupConfig(
+FORM_FAMILY_CONFIG: LookupConfig[FormFamily] = LookupConfig(
     [
         LookupStr(FormFamily.SF_424, 1),
         LookupStr(FormFamily.SF_424_INDIVIDUAL, 2),
@@ -144,14 +151,27 @@ FORM_FAMILY_CONFIG = LookupConfig(
     ]
 )
 
-COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
+FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
+    [
+        LookupStr(FormType.SF424, 1),
+        LookupStr(FormType.SF424A, 2),
+        LookupStr(FormType.SF424B, 3),
+        LookupStr(FormType.SFLLL, 4),
+        LookupStr(FormType.PROJECT_NARRATIVE_ATTACHMENT, 5),
+        LookupStr(FormType.BUDGET_NARRATIVE_ATTACHMENT, 6),
+        LookupStr(FormType.PROJECT_ABSTRACT_SUMMARY, 7),
+        LookupStr(FormType.CD511, 8),
+    ]
+)
+
+COMPETITION_OPEN_TO_APPLICANT_CONFIG: LookupConfig[CompetitionOpenToApplicant] = LookupConfig(
     [
         LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
         LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
     ]
 )
 
-SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
+SAM_GOV_PROCESSING_STATUS_CONFIG: LookupConfig[SamGovProcessingStatus] = LookupConfig(
     [
         LookupStr(SamGovProcessingStatus.PENDING, 1),
         LookupStr(SamGovProcessingStatus.COMPLETED, 2),
@@ -160,14 +180,14 @@ SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-SAM_GOV_EXTRACT_TYPE_CONFIG = LookupConfig(
+SAM_GOV_EXTRACT_TYPE_CONFIG: LookupConfig[SamGovExtractType] = LookupConfig(
     [
         LookupStr(SamGovExtractType.MONTHLY, 1),
         LookupStr(SamGovExtractType.DAILY, 2),
     ]
 )
 
-SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
+SAM_GOV_IMPORT_TYPE_CONFIG: LookupConfig[SamGovImportType] = LookupConfig(
     [
         LookupStr(SamGovImportType.MONTHLY_EXTRACT, 1),
         LookupStr(SamGovImportType.DAILY_EXTRACT, 2),
@@ -175,7 +195,7 @@ SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
     ]
 )
 
-APPLICATION_STATUS_CONFIG = LookupConfig(
+APPLICATION_STATUS_CONFIG: LookupConfig[ApplicationStatus] = LookupConfig(
     [
         LookupStr(ApplicationStatus.IN_PROGRESS, 1),
         LookupStr(ApplicationStatus.SUBMITTED, 2),
@@ -183,7 +203,7 @@ APPLICATION_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-PRIVILEGE_CONFIG = LookupConfig(
+PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
     [
         LookupStr(Privilege.MANAGE_ORG_MEMBERS, 1),
         LookupStr(Privilege.MANAGE_ORG_ADMIN_MEMBERS, 2),
@@ -196,15 +216,42 @@ PRIVILEGE_CONFIG = LookupConfig(
         LookupStr(Privilege.UPDATE_FORM, 9),
         LookupStr(Privilege.MANAGE_AGENCY_MEMBERS, 10),
         LookupStr(Privilege.GET_SUBMITTED_APPLICATIONS, 11),
+        LookupStr(Privilege.LEGACY_AGENCY_VIEWER, 12),
+        LookupStr(Privilege.LEGACY_AGENCY_GRANT_RETRIEVER, 13),
+        LookupStr(Privilege.LEGACY_AGENCY_ASSIGNER, 14),
     ]
 )
 
-ROLE_TYPE_CONFIG = LookupConfig(
+ROLE_TYPE_CONFIG: LookupConfig[RoleType] = LookupConfig(
     [
         LookupStr(RoleType.ORGANIZATION, 1),
         LookupStr(RoleType.AGENCY, 2),
         LookupStr(RoleType.INTERNAL, 3),
         LookupStr(RoleType.APPLICATION, 4),
+    ]
+)
+
+APPLICATION_AUDIT_EVENT_CONFIG: LookupConfig[ApplicationAuditEvent] = LookupConfig(
+    [
+        LookupStr(ApplicationAuditEvent.APPLICATION_CREATED, 1),
+        LookupStr(ApplicationAuditEvent.APPLICATION_NAME_CHANGED, 2),
+        LookupStr(ApplicationAuditEvent.APPLICATION_SUBMITTED, 3),
+        LookupStr(ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED, 4),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_ADDED, 5),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_DELETED, 6),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_UPDATED, 7),
+        LookupStr(ApplicationAuditEvent.SUBMISSION_CREATED, 8),
+        LookupStr(ApplicationAuditEvent.USER_ADDED, 9),
+        LookupStr(ApplicationAuditEvent.USER_UPDATED, 10),
+        LookupStr(ApplicationAuditEvent.USER_REMOVED, 11),
+        LookupStr(ApplicationAuditEvent.FORM_UPDATED, 12),
+    ]
+)
+USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
+    [
+        LookupStr(UserType.STANDARD, 1),
+        LookupStr(UserType.INTERNAL_FRONTEND, 2),
+        LookupStr(UserType.LEGACY_CERTIFICATE, 3),
     ]
 )
 
@@ -360,6 +407,18 @@ class LkFormFamily(LookupTable, TimestampMixin):
         return LkFormFamily(form_family_id=lookup.lookup_val, description=lookup.get_description())
 
 
+@LookupRegistry.register_lookup(FORM_TYPE_CONFIG)
+class LkFormType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_form_type"
+
+    form_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkFormType":
+        return LkFormType(form_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
 @LookupRegistry.register_lookup(COMPETITION_OPEN_TO_APPLICANT_CONFIG)
 class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
     __tablename__ = "lk_competition_open_to_applicant"
@@ -452,3 +511,29 @@ class LkRoleType(LookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> "LkRoleType":
         return LkRoleType(role_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(APPLICATION_AUDIT_EVENT_CONFIG)
+class LkApplicationAuditEvent(LookupTable, TimestampMixin):
+    __tablename__ = "lk_application_audit_event"
+
+    application_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkApplicationAuditEvent":
+        return LkApplicationAuditEvent(
+            application_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(USER_TYPE_CONFIG)
+class LkUserType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_user_type"
+
+    user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkUserType":
+        return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())

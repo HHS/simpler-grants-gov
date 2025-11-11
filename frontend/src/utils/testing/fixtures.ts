@@ -1,6 +1,7 @@
 import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { Organization } from "src/types/applicationResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -16,6 +17,14 @@ import {
   SearchAPIResponse,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
+import {
+  OrganizationInvitation,
+  UserDetail,
+  UserDetailWithProfile,
+  UserOrganization,
+  UserPrivilegesResponse,
+  UserRole,
+} from "src/types/userTypes";
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
@@ -379,10 +388,25 @@ export const fakeFilterPillLabelData: FilterPillLabelData[] = [
   },
 ];
 
-export const fakeOrganization = {
+export const fakeUserOrganization: UserOrganization = {
   is_organization_owner: true,
   organization_id: "great id",
   sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
+
+export const fakeOrganizationDetailsResponse: Organization = {
+  organization_id: "great id",
+  sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
     expiration_date: "1-1-25",
     legal_business_name: "Completely Legal Organization",
     uei: "unique entity identifier",
@@ -541,4 +565,134 @@ export const fakeWidgetProps = {
   rawErrors: [],
   value: "hi",
   options: {},
+};
+
+export const fakeUser: UserDetail = {
+  user_id: "1",
+  email: "not-the-real-email@fake.com",
+  first_name: "joe",
+  last_name: "quisling",
+};
+
+export const fakeUserWithProfile: UserDetailWithProfile = {
+  user_id: "1",
+  email: "not-the-real-email@fake.com",
+  external_user_type: "whatever",
+  profile: {
+    first_name: "joe",
+    last_name: "quisling",
+  },
+};
+
+export const fakeUserRole: UserRole = {
+  role_id: "1",
+  role_name: "role_1",
+  privileges: ["view_application", "manage_org_members"],
+};
+
+export const fakeUserPrivilegesResponse: UserPrivilegesResponse = {
+  user_id: "1",
+  organization_users: [
+    {
+      organization: {
+        organization_id: "1",
+      },
+      organization_user_roles: [
+        {
+          role_id: "1",
+          role_name: "role_1",
+          privileges: ["view_application", "manage_org_members"],
+        },
+      ],
+    },
+    {
+      organization: {
+        organization_id: "4",
+      },
+      organization_user_roles: [
+        {
+          role_id: "4",
+          role_name: "role_4",
+          privileges: ["view_application", "get_submitted_applications"],
+        },
+      ],
+    },
+  ],
+  application_users: [
+    {
+      application: {
+        application_id: "1",
+      },
+      application_user_roles: [
+        {
+          role_id: "2",
+          role_name: "role_2",
+          privileges: ["view_application"],
+        },
+      ],
+    },
+  ],
+  agency_users: [
+    {
+      agency: {
+        agency_id: "3",
+      },
+      agency_user_roles: [
+        {
+          role_id: "3",
+          role_name: "role_3",
+          privileges: ["manage_agency_members"],
+        },
+      ],
+    },
+    {
+      agency: {
+        agency_id: "5",
+      },
+      agency_user_roles: [
+        {
+          role_id: "5",
+          role_name: "role_5",
+          privileges: ["manage_agency_members"],
+        },
+      ],
+    },
+  ],
+};
+
+export const fakeOrganizationInviteRecord = {
+  organization_invitation_id: "1",
+  organization_id: "2",
+  invitee_email: "not-a-real@email.org",
+  status: "pending",
+  roles: [
+    {
+      role_id: "5",
+      role_name: "role_5",
+    },
+  ],
+};
+
+export const fakeOrganizationInvitation: OrganizationInvitation = {
+  organization_invitation_id: "uuid",
+  organization: {
+    organization_id: "uuid",
+    organization_name: "Example Organization",
+  },
+  status: "pending",
+  created_at: "2024-0108T13:00Z",
+  expires_at: "2024-0115T13:00Z",
+  inviter: {
+    first_name: "John",
+    last_name: "Doe",
+    email: "admin@org.com",
+    user_id: "1",
+  },
+  roles: [
+    {
+      role_id: "uuid",
+      role_name: "Organization Member",
+      privileges: ["view_org_membership", "start_application"],
+    },
+  ],
 };

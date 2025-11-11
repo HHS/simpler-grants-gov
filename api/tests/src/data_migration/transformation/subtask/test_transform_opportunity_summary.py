@@ -13,7 +13,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformOpportunitySummary(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_opportunity_summary(self, transform_oracle_data_task):
         return TransformOpportunitySummary(transform_oracle_data_task)
 
