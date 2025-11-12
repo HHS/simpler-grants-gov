@@ -192,9 +192,7 @@ class TestPivotObjectTransformation:
         }
 
         source_data = {
-            "forecasted_cash_needs": {
-                "federal_forecasted_cash_needs": {"total_amount": "16.00"}
-            }
+            "forecasted_cash_needs": {"federal_forecasted_cash_needs": {"total_amount": "16.00"}}
         }
 
         field_path = ["forecasted_cash_needs"]
@@ -299,11 +297,7 @@ class TestPivotObjectTransformation:
         }
 
         source_data = {
-            "data": {
-                "nested": {
-                    "level1": {"level2": {"level3": {"value": "deep_value"}}}
-                }
-            }
+            "data": {"nested": {"level1": {"level2": {"level3": {"value": "deep_value"}}}}}
         }
 
         field_path = ["data", "nested"]
