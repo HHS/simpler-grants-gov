@@ -33,10 +33,6 @@ type PrimaryLink = {
   children?: PrimaryLink[];
 };
 
-type Props = {
-  locale?: string;
-};
-
 const homeRegexp = /^\/(?:e[ns])?$/;
 
 const NavLink = ({
@@ -269,7 +265,13 @@ const NavLinks = ({
   );
 };
 
-const Header = ({ locale }: Props) => {
+const Header = ({
+  locale,
+  localDev,
+}: {
+  locale?: string;
+  localDev: boolean;
+}) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
@@ -347,6 +349,7 @@ const Header = ({ locale }: Props) => {
               </div>
             </Title>
           </div>
+          {localDev && <div>dev login here</div>}
           <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
