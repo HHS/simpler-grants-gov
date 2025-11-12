@@ -1,8 +1,8 @@
-"""add_ignored_legacy_organization_user_table
+"""add_legacy_users_foreign_staging_tables
 
-Revision ID: a618fba3e090
+Revision ID: df81941231ad
 Revises: 618216bb724a
-Create Date: 2025-11-12 18:50:32.722186
+Create Date: 2025-11-12 21:26:03.101526
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "a618fba3e090"
+revision = "df81941231ad"
 down_revision = "618216bb724a"
 branch_labels = None
 depends_on = None
@@ -105,7 +105,7 @@ def upgrade():
         sa.Column("is_duplicate", sa.Text(), nullable=False),
         sa.Column("is_active", sa.Text(), nullable=False),
         sa.Column("is_email_confirm_pending", sa.Text(), nullable=True),
-        sa.Column("deactivated_date", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("deactivated_date", sa.Date(), nullable=True),
         sa.Column("mobile_number", sa.Text(), nullable=True),
         sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("creator_id", sa.Text(), nullable=True),

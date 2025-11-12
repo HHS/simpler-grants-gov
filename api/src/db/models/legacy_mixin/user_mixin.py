@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
@@ -92,7 +92,7 @@ class VuserAccountMixin:
     is_duplicate: Mapped[str]
     is_active: Mapped[str]
     is_email_confirm_pending: Mapped[str | None]
-    deactivated_date: Mapped[datetime | None]  # TODO - check whether date or datetime
+    deactivated_date: Mapped[date | None]
     mobile_number: Mapped[str | None]
     created_date: Mapped[datetime] = mapped_column(nullable=False)
     creator_id: Mapped[str | None]
