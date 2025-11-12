@@ -5,7 +5,7 @@ including if/then/else rules, field dependencies, and computed fields.
 """
 
 import logging
-from typing import Any, cast
+from typing import Any
 
 from src.util.dict_util import get_nested_value
 
@@ -19,9 +19,15 @@ def _apply_pivot_object_transform(
     source_field = transform_config.get("source_field")
     field_mapping = transform_config.get("field_mapping", {})
 
+    # Validate source_field is configured properly
+    if not source_field or not isinstance(source_field, str):
+        raise ConditionalTransformationError(
+            "pivot_object requires 'source_field' to be a non-empty string"
+        )
+
     # Get the source object to pivot
-    source_path = source_field.split(".") if isinstance(source_field, str) else (source_field or [])
-    source_object = get_nested_value(source_data, cast(list[str], source_path))
+    source_path = source_field.split(".")
+    source_object = get_nested_value(source_data, source_path)
 
     result = {}
 
@@ -90,22 +96,34 @@ def evaluate_condition(condition: dict[str, Any], source_data: dict[str, Any]) -
     if condition_type == "field_equals":
         field_path = condition.get("field")
         expected_value = condition.get("value")
-        path_list = field_path.split(".") if isinstance(field_path, str) else (field_path or [])
-        actual_value = get_nested_value(source_data, cast(list[str], path_list))
+        if not field_path or not isinstance(field_path, str):
+            raise ConditionalTransformationError(
+                "field_equals condition requires 'field' to be a non-empty string"
+            )
+        path_list = field_path.split(".")
+        actual_value = get_nested_value(source_data, path_list)
         return actual_value == expected_value
 
     elif condition_type == "field_in":
         field_path = condition.get("field")
         allowed_values = condition.get("values", [])
-        path_list = field_path.split(".") if isinstance(field_path, str) else (field_path or [])
-        actual_value = get_nested_value(source_data, cast(list[str], path_list))
+        if not field_path or not isinstance(field_path, str):
+            raise ConditionalTransformationError(
+                "field_in condition requires 'field' to be a non-empty string"
+            )
+        path_list = field_path.split(".")
+        actual_value = get_nested_value(source_data, path_list)
         return actual_value in allowed_values
 
     elif condition_type == "field_contains":
         field_path = condition.get("field")
         search_value = condition.get("value")
-        path_list = field_path.split(".") if isinstance(field_path, str) else (field_path or [])
-        actual_value = get_nested_value(source_data, cast(list[str], path_list))
+        if not field_path or not isinstance(field_path, str):
+            raise ConditionalTransformationError(
+                "field_contains condition requires 'field' to be a non-empty string"
+            )
+        path_list = field_path.split(".")
+        actual_value = get_nested_value(source_data, path_list)
         if isinstance(actual_value, list):
             return search_value in actual_value
         return False
@@ -157,10 +175,13 @@ def apply_conditional_transform(
         max_count = transform_config.get("max_count", 10)
 
         if source_field and target_pattern:
-            source_path = (
-                source_field.split(".") if isinstance(source_field, str) else (source_field or [])
-            )
-            source_values = get_nested_value(source_data, cast(list[str], source_path))
+            # Validate source_field is a string
+            if not isinstance(source_field, str):
+                raise ConditionalTransformationError(
+                    "one_to_many requires 'source_field' to be a string"
+                )
+            source_path = source_field.split(".")
+            source_values = get_nested_value(source_data, source_path)
 
             if isinstance(source_values, list):
                 result = {}
