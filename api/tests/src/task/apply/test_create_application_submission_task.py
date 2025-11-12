@@ -6,7 +6,7 @@ import pytest
 from lxml import etree as lxml_etree
 from sqlalchemy import update
 
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.xml_generation.config import FORM_XML_TRANSFORM_RULES
@@ -87,7 +87,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
     def test_run_task(self, db_session, create_submission_task):
         application_without_attachments = ApplicationFactory.create(
-            with_forms=True, application_status=ApplicationStatus.SUBMITTED
+            with_forms=True,
+            application_status=ApplicationStatus.SUBMITTED,
+            has_submitted_by_user=True,
         )
         app_without_attachments_form_file_names = [
             f"{f.form.short_form_name}.pdf"
@@ -154,6 +156,17 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
         assert no_attachment_submission.file_size_bytes > 0
 
+        # Verify audit event added
+        assert len(application_without_attachments.application_audits) == 1
+        assert (
+            application_without_attachments.application_audits[0].application_audit_event
+            == ApplicationAuditEvent.SUBMISSION_CREATED
+        )
+        assert (
+            application_without_attachments.application_audits[0].user_id
+            == application_without_attachments.submitted_by
+        )
+
         # Validate the submission with attachments
         assert application_with_attachments.application_status == ApplicationStatus.ACCEPTED
         assert len(application_with_attachments.application_submissions) == 1
@@ -176,6 +189,8 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             }
             | {f: None for f in app_with_attachments_form_file_names},
         )
+        # No user attached, no audit event added
+        assert len(application_with_attachments.application_audits) == 0
 
         # These weren't picked up
         assert len(not_picked_up_app1.application_submissions) == 0

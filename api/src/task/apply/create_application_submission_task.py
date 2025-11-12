@@ -13,8 +13,9 @@ import src.adapters.db as db
 from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import is_form_required
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
@@ -266,6 +267,16 @@ class CreateApplicationSubmissionTask(Task):
 
         # Mark the app as accepted
         application.application_status = ApplicationStatus.ACCEPTED
+
+        # Add an audit event - we need a user for the audit event
+        # So have it be the same user that submitted which shouldn't be null.
+        if application.submitted_by_user:
+            add_audit_event(
+                db_session=self.db_session,
+                application=application,
+                user=application.submitted_by_user,
+                audit_event=ApplicationAuditEvent.SUBMISSION_CREATED,
+            )
 
     def process_application_forms(self, submission: SubmissionContainer) -> None:
         """Turn an application form into a PDF and add to the zip file"""
