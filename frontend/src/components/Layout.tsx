@@ -1,5 +1,5 @@
 import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
-import { envFeatureFlags } from "src/constants/environments";
+import { envFeatureFlags, environment } from "src/constants/environments";
 import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
 import UserProvider from "src/services/auth/UserProvider";
 import { assignBaseFlags } from "src/services/featureFlags/featureFlagHelpers";
@@ -35,7 +35,7 @@ export default function Layout({ children, locale }: Props) {
           {t("Layout.skipToMain")}
         </a>
         <LoginModalProvider>
-          <Header locale={locale} />
+          <Header locale={locale} localDev={environment.LOCAL_DEV === "true"} />
           <main id="main-content" className="border-top-0">
             {children}
           </main>

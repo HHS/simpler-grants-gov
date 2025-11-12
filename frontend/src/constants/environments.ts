@@ -77,4 +77,6 @@ export const environment: { [key: string]: string } = {
   NEW_RELIC_ENABLED: NEW_RELIC_ENABLED || "false",
   NEXT_RUNTIME: NEXT_RUNTIME || "",
   IS_CI: CI || "false",
+  LOCAL_DEV:
+    ENVIRONMENT === "local" && API_URL?.includes("localhost") ? "true" : "",
 };
