@@ -1,6 +1,11 @@
 """Tests for pivot_object transformation logic."""
 
-from src.services.xml_generation.conditional_transformers import apply_conditional_transform
+import pytest
+
+from src.services.xml_generation.conditional_transformers import (
+    ConditionalTransformationError,
+    apply_conditional_transform,
+)
 
 
 class TestPivotObjectTransformation:
@@ -202,7 +207,7 @@ class TestPivotObjectTransformation:
 
     def test_pivot_missing_config_parameters(self):
         """Test pivot with missing configuration parameters."""
-        # Missing source_field
+        # Missing source_field - should raise error
         transform_config = {
             "type": "pivot_object",
             "field_mapping": {"Target": {"Field": "source.field"}},
@@ -211,10 +216,13 @@ class TestPivotObjectTransformation:
         source_data = {"data": "value"}
         field_path = ["test"]
 
-        result = apply_conditional_transform(transform_config, source_data, field_path)
-        assert result is None
+        with pytest.raises(
+            ConditionalTransformationError,
+            match="pivot_object requires 'source_field' to be a non-empty string",
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
 
-        # Missing field_mapping
+        # Missing field_mapping - returns None (empty result)
         transform_config = {"type": "pivot_object", "source_field": "data"}
 
         result = apply_conditional_transform(transform_config, source_data, field_path)
