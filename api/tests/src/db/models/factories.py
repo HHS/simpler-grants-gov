@@ -2623,15 +2623,22 @@ class VuserAccountFactory(BaseFactory):
 
     user_account_id = factory.Sequence(lambda n: n)
     user_id = Generators.UuidObj
-    email = factory.Faker("email")
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
     full_name = factory.Faker("name")
-    is_active = factory.Faker("yn_boolean")
+    email = factory.Faker("email")
+    phone_number = factory.Faker("phone_number")
+    first_name = factory.Faker("first_name")
+    middle_name = None
+    last_name = factory.Faker("last_name")
     is_deleted_legacy = factory.Faker("yn_boolean")
     is_duplicate = factory.Faker("yn_boolean")
+    is_active = factory.Faker("yn_boolean")
+    is_email_confirm_pending = factory.Faker("yn_boolean")
+    deactivated_date = None
+    mobile_number = factory.Faker("phone_number")
     created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
     last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    last_upd_id = Generators.UuidObj
 
 
 class ForeignVuserAccountFactory(VuserAccountFactory):
@@ -2665,15 +2672,22 @@ class TuserProfileFactory(BaseFactory):
         abstract = True
 
     user_profile_id = factory.Sequence(lambda n: n)
-    user_account_id = factory.Sequence(lambda n: n)
-    profile_duns = factory.Faker("sentence")
-    profile_type_id = factory.Faker("random_int", min=1, max=3)
     profile_name = factory.Faker("name")
+    profile_duns = factory.Sequence(lambda n: f"UEI{n:09d}")
+    profile_agency_code = None
     title = factory.Faker("sentence")
     is_ebiz_poc = factory.Faker("yn_boolean")
+    is_validate_mpin = factory.Faker("yn_boolean")
+    is_hidden = factory.Faker("yn_boolean")
     is_deleted_legacy = factory.Faker("yn_boolean")
+    is_default = factory.Faker("yn_boolean")
+    email_preference = None
+    profile_type_id = factory.Faker("random_int", min=1, max=3)
+    user_account_id = factory.Sequence(lambda n: n)
     created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
     last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    last_upd_id = Generators.UuidObj
 
 
 class ForeignTuserProfileFactory(TuserProfileFactory):

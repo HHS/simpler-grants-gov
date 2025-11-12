@@ -88,6 +88,8 @@ class VuserAccountMixin:
     first_name: Mapped[str | None]
     middle_name: Mapped[str | None]
     last_name: Mapped[str | None]
+    is_deleted_legacy: Mapped[str]
+    is_duplicate: Mapped[str]
     is_active: Mapped[str]
     is_email_confirm_pending: Mapped[str | None]
     deactivated_date: Mapped[datetime | None]  # TODO - check whether date or datetime

@@ -33,7 +33,7 @@ class TsubscriptionOpportunityMixin(
 
 
 class VuserAccount(StagingBase, VuserAccountMixin, StagingParamMixin):
-    __tablename__ = "v_user_account"
+    __tablename__ = "vuser_account"
 
     __table_args__ = (
         # Indexes for query performance

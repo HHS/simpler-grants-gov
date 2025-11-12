@@ -1,8 +1,8 @@
-"""user_invite_staging_tabes
+"""add_ignored_legacy_organization_user_table
 
-Revision ID: 4a8b23e05c7e
+Revision ID: a618fba3e090
 Revises: 618216bb724a
-Create Date: 2025-11-10 18:59:03.460610
+Create Date: 2025-11-12 18:50:32.722186
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "4a8b23e05c7e"
+revision = "a618fba3e090"
 down_revision = "618216bb724a"
 branch_labels = None
 depends_on = None
@@ -21,15 +21,22 @@ def upgrade():
     op.create_table(
         "tuser_profile",
         sa.Column("user_profile_id", sa.BigInteger(), nullable=False),
-        sa.Column("user_account_id", sa.BigInteger(), nullable=False),
-        sa.Column("profile_duns", sa.Text(), nullable=False),
+        sa.Column("profile_name", sa.Text(), nullable=True),
+        sa.Column("profile_duns", sa.Text(), nullable=True),
+        sa.Column("profile_agency_code", sa.Text(), nullable=True),
+        sa.Column("title", sa.Text(), nullable=True),
+        sa.Column("is_ebiz_poc", sa.Text(), nullable=True),
+        sa.Column("is_validate_mpin", sa.Text(), nullable=True),
+        sa.Column("is_hidden", sa.Text(), nullable=True),
+        sa.Column("is_deleted_legacy", sa.Text(), nullable=True),
+        sa.Column("is_default", sa.Text(), nullable=True),
+        sa.Column("email_preference", sa.Text(), nullable=True),
         sa.Column("profile_type_id", sa.BigInteger(), nullable=False),
-        sa.Column("profile_name", sa.Text(), nullable=False),
-        sa.Column("title", sa.Text(), nullable=False),
-        sa.Column("is_ebiz_poc", sa.Text(), nullable=False),
-        sa.Column("is_deleted_legacy", sa.Text(), nullable=False),
-        sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=False),
-        sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("user_account_id", sa.BigInteger(), nullable=False),
+        sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("creator_id", sa.Text(), nullable=True),
+        sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("last_upd_id", sa.Text(), nullable=True),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("transformed_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
@@ -85,18 +92,25 @@ def upgrade():
         schema="staging",
     )
     op.create_table(
-        "v_user_account",
+        "vuser_account",
         sa.Column("user_account_id", sa.BigInteger(), nullable=False),
         sa.Column("user_id", sa.Text(), nullable=False),
-        sa.Column("email", sa.Text(), nullable=False),
-        sa.Column("first_name", sa.Text(), nullable=False),
-        sa.Column("last_name", sa.Text(), nullable=False),
-        sa.Column("full_name", sa.Text(), nullable=False),
-        sa.Column("is_active", sa.Text(), nullable=False),
+        sa.Column("full_name", sa.Text(), nullable=True),
+        sa.Column("email", sa.Text(), nullable=True),
+        sa.Column("phone_number", sa.Text(), nullable=True),
+        sa.Column("first_name", sa.Text(), nullable=True),
+        sa.Column("middle_name", sa.Text(), nullable=True),
+        sa.Column("last_name", sa.Text(), nullable=True),
         sa.Column("is_deleted_legacy", sa.Text(), nullable=False),
         sa.Column("is_duplicate", sa.Text(), nullable=False),
+        sa.Column("is_active", sa.Text(), nullable=False),
+        sa.Column("is_email_confirm_pending", sa.Text(), nullable=True),
+        sa.Column("deactivated_date", sa.TIMESTAMP(timezone=True), nullable=True),
+        sa.Column("mobile_number", sa.Text(), nullable=True),
         sa.Column("created_date", sa.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("creator_id", sa.Text(), nullable=True),
         sa.Column("last_upd_date", sa.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("last_upd_id", sa.Text(), nullable=True),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.Column("transformed_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column(
@@ -113,29 +127,29 @@ def upgrade():
         ),
         sa.Column("deleted_at", sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column("transformation_notes", sa.Text(), nullable=True),
-        sa.PrimaryKeyConstraint("user_account_id", name=op.f("v_user_account_pkey")),
+        sa.PrimaryKeyConstraint("user_account_id", name=op.f("vuser_account_pkey")),
         schema="staging",
     )
     op.create_index(
-        "ix_v_user_account_email", "v_user_account", ["email"], unique=False, schema="staging"
+        "ix_v_user_account_email", "vuser_account", ["email"], unique=False, schema="staging"
     )
     op.create_index(
         "ix_v_user_account_is_active",
-        "v_user_account",
+        "vuser_account",
         ["is_active"],
         unique=False,
         schema="staging",
     )
     op.create_index(
         "ix_v_user_account_is_deleted_legacy",
-        "v_user_account",
+        "vuser_account",
         ["is_deleted_legacy"],
         unique=False,
         schema="staging",
     )
     op.create_index(
-        op.f("v_user_account_transformed_at_idx"),
-        "v_user_account",
+        op.f("vuser_account_transformed_at_idx"),
+        "vuser_account",
         ["transformed_at"],
         unique=False,
         schema="staging",
@@ -146,14 +160,14 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(
-        op.f("v_user_account_transformed_at_idx"), table_name="v_user_account", schema="staging"
+        op.f("vuser_account_transformed_at_idx"), table_name="vuser_account", schema="staging"
     )
     op.drop_index(
-        "ix_v_user_account_is_deleted_legacy", table_name="v_user_account", schema="staging"
+        "ix_v_user_account_is_deleted_legacy", table_name="vuser_account", schema="staging"
     )
-    op.drop_index("ix_v_user_account_is_active", table_name="v_user_account", schema="staging")
-    op.drop_index("ix_v_user_account_email", table_name="v_user_account", schema="staging")
-    op.drop_table("v_user_account", schema="staging")
+    op.drop_index("ix_v_user_account_is_active", table_name="vuser_account", schema="staging")
+    op.drop_index("ix_v_user_account_email", table_name="vuser_account", schema="staging")
+    op.drop_table("vuser_account", schema="staging")
     op.drop_index(
         op.f("tuser_profile_transformed_at_idx"), table_name="tuser_profile", schema="staging"
     )
