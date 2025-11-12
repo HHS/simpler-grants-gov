@@ -1,32 +1,34 @@
-# AWS Config Security Hub Compliance Fix
+# AWS Config Security Hub Compliance
 
-## Problem
-AWS Security Hub reports Config.1 compliance issues:
-- `CONFIG_RECORDER_MISSING_REQUIRED_RESOURCE_TYPES`: Missing IAM resource recording
-- `CONFIG_RECORDER_CUSTOM_ROLE`: Using custom role instead of service-linked role
+## What Was Fixed
+The AWS Config recorder `newrelic_configuration_recorder-simpler-grants-gov` was manually updated to meet Security Hub Config.1 requirements:
+- **Service-linked role**: Uses `AWSServiceRoleForConfig` instead of custom role
+- **Global resource recording**: Enabled to record IAM resources (User, Policy, Group, Role)
 
-## Solution
-The AWS Config recorder has been updated to use the AWS Config service-linked role and enabled global resource recording. It is now managed outside of Terraform to avoid conflicts with the NewRelic module.
+## Management Approach
+The Config recorder is **not managed by Terraform**. It has been removed from Terraform state to prevent conflicts with the NewRelic module, which would create a non-compliant configuration.
 
-## What Was Changed
-- **Role**: Changed from `newrelic_configuration_recorder-simpler-grants-gov` custom role to `AWSServiceRoleForConfig` service-linked role
-- **Global Resources**: Enabled `includeGlobalResourceTypes` to record IAM resources (User, Policy, Group, Role)
-- **Management**: Removed from Terraform state - the recorder is now managed outside of Terraform
+## Expected Behavior
+Terraform plans will always show:
+```
+Plan: 1 to add, 0 to change, 0 to destroy.
 
-## Known Behavior
-Terraform plans will show `Plan: 0 to add, 1 to change` for `module.newrelic-aws-cloud-integrations.aws_config_configuration_recorder.newrelic_recorder`. This shows Terraform wants to change the recorder back to non-compliant settings (custom role instead of service-linked role). This change should **not** be applied.
+# module.newrelic-aws-cloud-integrations.aws_config_configuration_recorder.newrelic_recorder will be created
+```
 
-To apply other changes without affecting the Config recorder, use targeted applies:
+**This is expected and documented.** Do not apply this change - it would create a non-compliant recorder.
+
+When applying other infrastructure changes, use targeted applies:
 ```bash
 terraform apply -target=<specific-resource>
 ```
 
 ## Verification
-Verify the recorder configuration with:
+To verify the recorder remains compliant:
 ```bash
 aws configservice describe-configuration-recorders --region us-east-1
 ```
 
-Check for:
-- `roleARN` ending in `/AWSServiceRoleForConfig`
-- `includeGlobalResourceTypes: true`
+Confirm:
+- `roleARN` ends with `/AWSServiceRoleForConfig`
+- `includeGlobalResourceTypes` is `true`
