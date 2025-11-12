@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 
 import { OrganizationInvitationReply } from "./OrganizationInvitationReply";
 
+// display prompts for all active organization invitations for a user
 export const OrganizationInvitationReplies = ({
   userInvitations,
 }: {
