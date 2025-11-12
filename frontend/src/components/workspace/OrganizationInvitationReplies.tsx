@@ -21,16 +21,16 @@ export const OrganizationInvitationReplies = ({
 
   return (
     <ul className="usa-list--unstyled">
-      {userInvitations.reduce((nodes, userInvitation) => {
+      {userInvitations.reduce((invitationsToShow, userInvitation) => {
         if (!completeStatuses.includes(userInvitation.status)) {
-          nodes.push(
+          invitationsToShow.push(
             <OrganizationInvitationReply
               key={userInvitation.organization_invitation_id}
               userInvitation={userInvitation}
             />,
           );
         }
-        return nodes;
+        return invitationsToShow;
       }, [] as ReactNode[])}
     </ul>
   );
