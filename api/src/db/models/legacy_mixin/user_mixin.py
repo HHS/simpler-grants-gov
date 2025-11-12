@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 
@@ -81,28 +80,40 @@ class TsubscriptionOpportunityMixin:
 
 @declarative_mixin
 class VuserAccountMixin:
-    user_account_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_account_id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str]
-    email: Mapped[str]
-    first_name: Mapped[str]
-    last_name: Mapped[str]
-    full_name: Mapped[str]
+    full_name: Mapped[str | None]
+    email: Mapped[str | None]
+    phone_number: Mapped[str | None]
+    first_name: Mapped[str | None]
+    middle_name: Mapped[str | None]
+    last_name: Mapped[str | None]
     is_active: Mapped[str]
-    is_deleted_legacy: Mapped[str]
-    is_duplicate: Mapped[str]
+    is_email_confirm_pending: Mapped[str | None]
+    deactivated_date: Mapped[datetime | None]  # TODO - check whether date or datetime
+    mobile_number: Mapped[str | None]
     created_date: Mapped[datetime] = mapped_column(nullable=False)
+    creator_id: Mapped[str | None]
     last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
+    last_upd_id: Mapped[str | None]
 
 
 @declarative_mixin
 class TuserProfileMixin:
-    user_profile_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user_account_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    profile_duns: Mapped[str]
+    user_profile_id: Mapped[int] = mapped_column(primary_key=True)
+    profile_name: Mapped[str | None]
+    profile_duns: Mapped[str | None]
+    profile_agency_code: Mapped[str | None]
+    title: Mapped[str | None]
+    is_ebiz_poc: Mapped[str | None]
+    is_validate_mpin: Mapped[str | None]
+    is_hidden: Mapped[str | None]
+    is_deleted_legacy: Mapped[str | None]
+    is_default: Mapped[str | None]
+    email_preference: Mapped[str | None]
     profile_type_id: Mapped[int]
-    profile_name: Mapped[str]
-    title: Mapped[str]
-    is_ebiz_poc: Mapped[str]
-    is_deleted_legacy: Mapped[str]
-    created_date: Mapped[datetime] = mapped_column(nullable=False)
-    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
+    user_account_id: Mapped[int]
+    created_date: Mapped[datetime | None]
+    creator_id: Mapped[str | None]
+    last_upd_date: Mapped[datetime | None]
+    last_upd_id: Mapped[str | None]
