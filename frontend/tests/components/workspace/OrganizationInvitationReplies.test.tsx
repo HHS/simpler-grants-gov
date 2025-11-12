@@ -1,17 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
-import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
-import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
-
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
+import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
+import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
+
+import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
 
 jest.mock("src/hooks/useFeatureFlags");
 jest.mock("src/services/auth/useUser");
 
 jest.mock("src/components/workspace/OrganizationInvitationReply", () => ({
-  OrganizationInvitationReply: ({ userInvitation }: { userInvitation: OrganizationInvitation }) => (
+  OrganizationInvitationReply: ({
+    userInvitation,
+  }: {
+    userInvitation: OrganizationInvitation;
+  }) => (
     <li data-testid={`invite-${userInvitation.organization_invitation_id}`}>
       {userInvitation.organization_invitation_id} - {userInvitation.status}
     </li>
@@ -43,9 +47,14 @@ describe("OrganizationInvitationReplies", () => {
   it("has no basic accessibility violations", async () => {
     const invites = [
       fakeOrganizationInvitation,
-      makeInvitation({ organization_invitation_id: "inv-2", status: "awaiting_response" }),
+      makeInvitation({
+        organization_invitation_id: "inv-2",
+        status: "awaiting_response",
+      }),
     ];
-    const { container } = render(<OrganizationInvitationReplies userInvitations={invites} />);
+    const { container } = render(
+      <OrganizationInvitationReplies userInvitations={invites} />,
+    );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
@@ -53,9 +62,14 @@ describe("OrganizationInvitationReplies", () => {
   it("matches snapshot with multiple invitations", () => {
     const invites = [
       fakeOrganizationInvitation,
-      makeInvitation({ organization_invitation_id: "inv-2", status: "awaiting_response" }),
+      makeInvitation({
+        organization_invitation_id: "inv-2",
+        status: "awaiting_response",
+      }),
     ];
-    const { container } = render(<OrganizationInvitationReplies userInvitations={invites} />);
+    const { container } = render(
+      <OrganizationInvitationReplies userInvitations={invites} />,
+    );
     expect(container).toMatchSnapshot();
   });
 
@@ -63,7 +77,10 @@ describe("OrganizationInvitationReplies", () => {
     const completeStatus = completeStatuses[0];
     const invites = [
       fakeOrganizationInvitation,
-      makeInvitation({ organization_invitation_id: "inv-complete", status: completeStatus }),
+      makeInvitation({
+        organization_invitation_id: "inv-complete",
+        status: completeStatus,
+      }),
     ];
 
     render(<OrganizationInvitationReplies userInvitations={invites} />);
@@ -82,7 +99,11 @@ describe("OrganizationInvitationReplies", () => {
       defaultFeatureFlags: { manageUsersOff: true },
     });
 
-    render(<OrganizationInvitationReplies userInvitations={[fakeOrganizationInvitation]} />);
+    render(
+      <OrganizationInvitationReplies
+        userInvitations={[fakeOrganizationInvitation]}
+      />,
+    );
 
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
