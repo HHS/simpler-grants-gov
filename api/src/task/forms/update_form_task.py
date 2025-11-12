@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
     help="Update a form in a given environment",
 )
 @click.option(
-    "--environment", required=True, type=click.Choice(["local", "dev", "staging", "prod"])
+    "--environment",
+    required=True,
+    type=click.Choice(["local", "dev", "staging", "training", "prod"]),
 )
 @click.option("--form-id", required=True, type=str)
 @ecs_background_task(task_name="update-form")
