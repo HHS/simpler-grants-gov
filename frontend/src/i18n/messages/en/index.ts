@@ -1591,13 +1591,29 @@ export const messages = {
     },
   },
   Applications: {
-    pageTitle: "Applications",
+    numApplications: "{num, plural, =1 {1 application} other {# applications}}",
+    errorMessage:
+      "We have encountered an error loading your applications, please try again later.",
     metaDescription: "View your saved applications",
-    pageHeading: "Applications",
     noApplicationsMessage: {
       primary: "You have not started any applications yet.",
       secondary:
         "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Applications",
+    pageTitle: "Applications",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      closeDate: "Close date",
+      status: "Status",
+      applicationName: "Application filing name",
+      type: "Type",
+      opportunity: "Opportunity",
     },
   },
 };

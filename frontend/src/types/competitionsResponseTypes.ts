@@ -1,5 +1,8 @@
 import { FormDetail } from "./formResponseTypes";
-import { OpportunityAssistanceListing } from "./opportunity/opportunityResponseTypes";
+import {
+  BaseOpportunity,
+  OpportunityAssistanceListing,
+} from "./opportunity/opportunityResponseTypes";
 
 export interface CompetitionInstructions {
   created_at: string;
@@ -24,4 +27,5 @@ export type Competition = {
   opening_date: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[];
   opportunity_id: number;
+  opportunity: BaseOpportunity;
 };
