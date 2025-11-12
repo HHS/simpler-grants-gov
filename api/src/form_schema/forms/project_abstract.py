@@ -21,7 +21,7 @@ FORM_JSON_SCHEMA = {
         "attachment": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
             "title": "Project Abstract File",
-            "description": "At least one file must be attached",
+            "description": "A file must be attached.",
         }
     },
 }
