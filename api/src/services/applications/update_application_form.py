@@ -7,9 +7,10 @@ import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import Privilege, SubmissionIssue
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege, SubmissionIssue
 from src.db.models.competition_models import ApplicationForm, CompetitionForm
 from src.db.models.user_models import User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -140,6 +141,14 @@ def update_application_form(
             "application_id": str(application_id),
             "form_id": str(form_id),
         },
+    )
+
+    add_audit_event(
+        db_session=db_session,
+        application=application,
+        user=user,
+        audit_event=ApplicationAuditEvent.FORM_UPDATED,
+        target_application_form=application_form,
     )
 
     return application_form, warnings

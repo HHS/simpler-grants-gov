@@ -245,6 +245,7 @@ APPLICATION_AUDIT_EVENT_CONFIG: LookupConfig[ApplicationAuditEvent] = LookupConf
         LookupStr(ApplicationAuditEvent.USER_UPDATED, 10),
         LookupStr(ApplicationAuditEvent.USER_REMOVED, 11),
         LookupStr(ApplicationAuditEvent.FORM_UPDATED, 12),
+        LookupStr(ApplicationAuditEvent.ORGANIZATION_ADDED, 13),
     ]
 )
 USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(

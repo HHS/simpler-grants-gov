@@ -5,7 +5,7 @@ from src.adapters import db
 from src.adapters.aws.sesv2_adapter import BaseSESV2Client
 from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
-from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.config import EmailNotificationConfig, get_email_config
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
 from src.task.notifications.search_notification import SearchNotificationTask
 from src.task.notifications.sync_suppressed_emails import SyncSuppressedEmailsTask
@@ -36,7 +36,7 @@ class EmailNotificationTask(Task):
         super().__init__(db_session)
         self.search_client = search_client
         if notification_config is None:
-            notification_config = EmailNotificationConfig()
+            notification_config = get_email_config()
         self.notification_config = notification_config
         self.sesv2_client = sesv2_client
 

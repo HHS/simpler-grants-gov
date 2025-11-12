@@ -1,5 +1,8 @@
 import logging
+from typing import Never
 from uuid import UUID
+
+from apiflask.exceptions import HTTPError
 
 import src.adapters.db as db
 from src.adapters.db import flask_db
@@ -29,11 +32,13 @@ from src.api.application_alpha.application_schemas import (
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
+from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
 )
+from src.services.applications.application_audit import add_audit_event_by_id
 from src.services.applications.create_application import create_application
 from src.services.applications.create_application_attachment import create_application_attachment
 from src.services.applications.delete_application_attachment import delete_application_attachment
@@ -284,6 +289,35 @@ def application_get(
     )
 
 
+def _handle_submit_error(
+    db_session: db.Session, error: HTTPError, application_id: UUID, user_id: UUID
+) -> Never:
+    """Handle adding an audit event whenever someone attempts to submit and fails"""
+    # We don't add audit events for 403 (auth) or 404 (not found) cases as
+    # that wouldn't be useful for a user from an auditing perspective
+    if error.status_code != 422:
+        raise error
+    try:
+        # Rollback the existing transaction
+        if db_session.is_active:
+            db_session.rollback()
+        # Make a new transaction that we just add the audit event to
+        # This does rely on the application and user to both exist, but
+        # since we check that before any 422 cases in the service logic
+        # this should be safe to just pass the IDs in.
+        with db_session.begin():
+            add_audit_event_by_id(
+                db_session,
+                application_id=application_id,
+                user_id=user_id,
+                audit_event=ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED,
+            )
+    except Exception:
+        logger.exception("Failed to add audit event for failed submission")
+
+    raise error
+
+
 @application_blueprint.post("/applications/<uuid:application_id>/submit")
 @application_blueprint.output(AbstractResponseSchema)
 @application_blueprint.doc(responses=[200, 401, 404])
@@ -298,9 +332,14 @@ def application_submit(db_session: db.Session, application_id: UUID) -> response
     token_session = api_jwt_auth.get_user_token_session()
     user = token_session.user
 
-    with db_session.begin():
-        db_session.add(token_session)
-        submit_application(db_session, application_id, user)
+    try:
+        with db_session.begin():
+            db_session.add(token_session)
+            submit_application(db_session, application_id, user)
+    except HTTPError as e:
+        # If there is an error during submit, we may add an audit event
+        # This function never returns as it will always reraise e
+        _handle_submit_error(db_session, e, application_id, user.user_id)
 
     # Return success response
     return response.ApiResponse(message="Success")

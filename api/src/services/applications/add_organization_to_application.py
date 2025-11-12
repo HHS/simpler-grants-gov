@@ -7,9 +7,15 @@ from sqlalchemy.orm import selectinload
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import CompetitionOpenToApplicant, Privilege, SubmissionIssue
+from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
+    CompetitionOpenToApplicant,
+    Privilege,
+    SubmissionIssue,
+)
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -95,6 +101,14 @@ def add_organization_to_application(
     # more privileges than they would have had they created it in the organization to begin with.
     for app_user in application.application_users:
         db_session.delete(app_user)
+        # For each deleted user, add an audit event.
+        add_audit_event(
+            db_session=db_session,
+            application=application,
+            user=user,
+            audit_event=ApplicationAuditEvent.USER_REMOVED,
+            target_user=app_user.user,
+        )
 
     logger.info(
         "Removed all application users",
@@ -118,6 +132,12 @@ def add_organization_to_application(
             "organization_id": organization_id,
             "form_count": len(application.application_forms),
         },
+    )
+    add_audit_event(
+        db_session,
+        application=application,
+        user=user,
+        audit_event=ApplicationAuditEvent.ORGANIZATION_ADDED,
     )
 
     return application
