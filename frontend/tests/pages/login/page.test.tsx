@@ -34,7 +34,10 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
-    expect(mockPush).toHaveBeenCalledWith("/test-redirect-path");
+    // URL should include cache buster parameter
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/test-redirect-path\?_cb=\d+_[a-z0-9]+$/),
+    );
     expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
@@ -45,7 +48,11 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    // First push is "/", second push is "/?_cb=..." with cache buster
     expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/\?_cb=\d+_[a-z0-9]+$/),
+    );
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
@@ -56,7 +63,11 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    // First push is "/", second push is "/?_cb=..." with cache buster
     expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/\?_cb=\d+_[a-z0-9]+$/),
+    );
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
@@ -67,7 +78,11 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
+    // First push is "/", second push is "/?_cb=..." with cache buster
     expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.stringMatching(/^\/\?_cb=\d+_[a-z0-9]+$/),
+    );
     expect(mockPush).toHaveBeenCalledTimes(2);
   });
 

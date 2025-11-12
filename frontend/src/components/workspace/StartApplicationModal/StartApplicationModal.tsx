@@ -1,6 +1,7 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { UserOrganization } from "src/types/userTypes";
+import { addCacheBuster } from "src/utils/cacheBuster";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -85,7 +86,9 @@ export const StartApplicationModal = ({
     })
       .then((data) => {
         const { applicationId } = data;
-        router.push(`/workspace/applications/application/${applicationId}`);
+        // Add cache buster for authenticated user navigation
+        const url = `/workspace/applications/application/${applicationId}`;
+        router.push(token ? addCacheBuster(url) : url);
       })
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -107,6 +110,7 @@ export const StartApplicationModal = ({
     selectedOrganization,
     validateSubmission,
     clientFetch,
+    token,
   ]);
 
   const onClose = useCallback(() => {

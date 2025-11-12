@@ -212,11 +212,16 @@ describe("StartApplicationModal", () => {
         loading={false}
       />,
     );
+
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        `/workspace/applications/application/999`,
-      );
+      expect(mockRouterPush).toHaveBeenCalledTimes(1);
     });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const calledUrl = mockRouterPush.mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    expect(calledUrl).toMatch(
+      /^\/workspace\/applications\/application\/999\?_cb=\d+_[a-z0-9]+$/,
+    );
   });
   it("renders an ineligible view if competition is org only and user has no orgs", () => {
     render(

@@ -1,6 +1,7 @@
 "use client";
 
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
+import { addCacheBuster } from "src/utils/cacheBuster";
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -16,14 +17,19 @@ export default function Login() {
       const redirectURL = SessionStorage.getItem("login-redirect");
       SessionStorage.removeItem("login-redirect");
 
-      if (
+      // Normalize invalid URLs to "/"
+      const finalRedirectURL =
         redirectURL === null ||
         redirectURL === "" ||
         redirectURL.substring(0, 1) !== "/"
-      ) {
+          ? "/"
+          : redirectURL;
+
+      if (finalRedirectURL === "/") {
         router.push("/");
       }
-      router.push(redirectURL || "/");
+      const urlWithCacheBuster = addCacheBuster(finalRedirectURL);
+      router.push(urlWithCacheBuster);
       return () => SessionStorage.removeItem("login-redirect");
     } else {
       console.error("window is undefined");

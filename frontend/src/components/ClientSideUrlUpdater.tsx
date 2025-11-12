@@ -1,16 +1,12 @@
 "use client";
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
+import { useUser } from "src/services/auth/useUser";
+import { addCacheBuster } from "src/utils/cacheBuster";
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-// This should be used as a way to force a url change from a server component
-// supports updating:
-// - the full url
-// - an individual query param
-// - the query string
-// Note that if you want to zero out the query or param value, you should explicitly pass "" (empty string)
 export function ClientSideUrlUpdater({
   param,
   value,
@@ -23,15 +19,21 @@ export function ClientSideUrlUpdater({
   query?: string;
 }) {
   const router = useRouter();
+  const { user } = useUser();
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
   // if query has been passed in, use that, otherwise pass through the current query
   const updatedQuery = query !== undefined ? query : searchParams.get("query");
 
   useEffect(() => {
     if (url) {
-      router.push(url);
+      // Check authentication using user object - must have a token
+      const isAuthenticated = !!(user && user.token);
+
+      // Add cache buster for authenticated users
+      const finalUrl = isAuthenticated ? addCacheBuster(url) : url;
+      router.push(finalUrl);
     }
-  }, [url, router]);
+  }, [url, router, user]);
   useEffect(() => {
     if (param && value !== undefined) {
       updateQueryParams(value, param, updatedQuery);

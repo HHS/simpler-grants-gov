@@ -35,21 +35,47 @@ resource "aws_cloudfront_origin_access_control" "cdn" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_origin_request_policy" "forward_all_cookies" {
+  count = local.enable_cdn ? 1 : 0
+
+  name    = "${var.service_name}-forward-all-cookies"
+  comment = "Forward all cookies and headers to origin for authentication"
+
+  cookies_config {
+    cookie_behavior = "all"
+  }
+
+  headers_config {
+    # Forward only X-User-Authenticated header set by Lambda@Edge
+    header_behavior = "whitelist"
+    headers {
+      items = ["X-User-Authenticated"]
+    }
+  }
+
+  query_strings_config {
+    query_string_behavior = "all"
+  }
+}
+
 resource "aws_cloudfront_cache_policy" "default" {
   count = local.enable_cdn ? 1 : 0
 
-  name = var.service_name
-
-  # Default to caching for 1 hour.
-  min_ttl = 3600
+  name        = "${var.service_name}-auth-aware-cache-policy"
+  comment     = "Auth-aware cache policy with X-User-Authenticated header support"
+  default_ttl = var.cdn_cache_default_ttl
+  max_ttl     = var.cdn_cache_max_ttl
+  min_ttl     = 0
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
-      cookie_behavior = "all"
+      cookie_behavior = "none"
     }
     headers_config {
-      # The only options are "none" and "whitelist", there is no "all" option
-      header_behavior = "none"
+      header_behavior = var.enable_lambda_edge && var.lambda_edge_origin_response_path != null ? "whitelist" : "none"
+      headers {
+        items = var.enable_lambda_edge && var.lambda_edge_origin_response_path != null ? ["X-User-Authenticated"] : []
+      }
     }
     query_strings_config {
       query_string_behavior = "all"
@@ -109,12 +135,33 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id       = local.default_origin_id
-    cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id         = local.default_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.default[0].id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.forward_all_cookies[0].id
+    compress                 = true
+    viewer_protocol_policy   = "redirect-to-https"
+
+    # Lambda@Edge for viewer-request event
+    dynamic "lambda_function_association" {
+      for_each = var.enable_lambda_edge && var.lambda_edge_viewer_request_path != null ? ["viewer-request"] : []
+      content {
+        event_type   = lambda_function_association.value
+        lambda_arn   = aws_lambda_function.edge_viewer_request[0].qualified_arn
+        include_body = false
+      }
+    }
+
+    # Lambda@Edge for origin-response event
+    dynamic "lambda_function_association" {
+      for_each = var.enable_lambda_edge && var.lambda_edge_origin_response_path != null ? ["origin-response"] : []
+      content {
+        event_type   = lambda_function_association.value
+        lambda_arn   = aws_lambda_function.edge_origin_response[0].qualified_arn
+        include_body = false
+      }
+    }
   }
 
   restrictions {
@@ -145,6 +192,8 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket_public_access_block.cdn[0],
     aws_s3_bucket_acl.cdn[0],
     aws_s3_bucket.cdn[0],
+    aws_lambda_function.edge_viewer_request,
+    aws_lambda_function.edge_origin_response,
   ]
 
   #checkov:skip=CKV2_AWS_42: Sometimes we don't have a skip
