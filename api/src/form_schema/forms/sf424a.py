@@ -773,6 +773,66 @@ FORM_RULE_SCHEMA = {
     },
 }
 
+# XML Transformation Rules for SF-424A
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting Simpler SF-424A JSON to XML",
+        "version": "1.0",
+        "form_name": "SF424A",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "xml_structure": {"root_element": "SF424A", "version": "2.0"},
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+            "include_null": "Include empty XML element: <Field></Field>",
+            "default_value": "Use configured default value when field is None",
+        },
+    },
+    # Forecasted Cash Needs - Section D
+    # This requires pivoting the data structure from JSON to XML format
+    "forecasted_cash_needs": {
+        "xml_transform": {
+            "type": "conditional",
+            "target": "BudgetForecastedCashNeeds",
+            "conditional_transform": {
+                "type": "pivot_object",
+                "source_field": "forecasted_cash_needs",
+                "field_mapping": {
+                    "BudgetFirstYearAmounts": {
+                        "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.total_amount",
+                        "BudgetNonFederalForecastedAmount": "non_federal_forecasted_cash_needs.total_amount",
+                        "BudgetTotalForecastedAmount": "total_forecasted_cash_needs.total_amount",
+                    },
+                    "BudgetFirstQuarterAmounts": {
+                        "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.first_quarter_amount",
+                        "BudgetNonFederalForecastedAmount": "non_federal_forecasted_cash_needs.first_quarter_amount",
+                        "BudgetTotalForecastedAmount": "total_forecasted_cash_needs.first_quarter_amount",
+                    },
+                    "BudgetSecondQuarterAmounts": {
+                        "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.second_quarter_amount",
+                        "BudgetNonFederalForecastedAmount": "non_federal_forecasted_cash_needs.second_quarter_amount",
+                        "BudgetTotalForecastedAmount": "total_forecasted_cash_needs.second_quarter_amount",
+                    },
+                    "BudgetThirdQuarterAmounts": {
+                        "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.third_quarter_amount",
+                        "BudgetNonFederalForecastedAmount": "non_federal_forecasted_cash_needs.third_quarter_amount",
+                        "BudgetTotalForecastedAmount": "total_forecasted_cash_needs.third_quarter_amount",
+                    },
+                    "BudgetFourthQuarterAmounts": {
+                        "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.fourth_quarter_amount",
+                        "BudgetNonFederalForecastedAmount": "non_federal_forecasted_cash_needs.fourth_quarter_amount",
+                        "BudgetTotalForecastedAmount": "total_forecasted_cash_needs.fourth_quarter_amount",
+                    },
+                },
+            },
+        }
+    },
+}
+
 SF424a_v1_0 = Form(
     # https://grants.gov/forms/form-items-description/fid/241
     form_id=uuid.UUID("08e6603f-d197-4a60-98cd-d49acb1fc1fd"),
