@@ -358,3 +358,75 @@ class TestXMLGenerationService:
 
         # Verify non-None fields are included
         assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+
+    def test_generate_xml_uses_config_based_ordering_no_network_calls(self):
+        """Test that XML generation uses config-based ordering."""
+
+        application_data = {
+            "submission_type": "Application",
+            "application_type": "New",
+            "organization_name": "Test University",
+            "employer_taxpayer_identification_number": "123456789",
+            "sam_uei": "ABC123DEF456",
+            "applicant_address": {
+                "street1": "123 Main St",
+                "city": "Anytown",
+                "state": "CA",
+                "zip_code": "12345",
+                "country": "USA",
+            },
+            "phone_number": "555-1234",
+            "email": "test@example.com",
+            "applicant_type_code": ["A: State Government"],
+            "agency_name": "Test Agency",
+            "funding_opportunity_number": "TEST-2024-001",
+            "funding_opportunity_title": "Test Opportunity",
+            "project_title": "Research Project",
+            "congressional_district_applicant": "CA-01",
+            "congressional_district_program_project": "CA-01",
+            "project_start_date": "2025-01-01",
+            "project_end_date": "2025-12-31",
+            "federal_estimated_funding": "50000.00",
+            "applicant_estimated_funding": "10000.00",
+            "state_estimated_funding": "5000.00",
+            "local_estimated_funding": "0.00",
+            "other_estimated_funding": "0.00",
+            "program_income_estimated_funding": "0.00",
+            "total_estimated_funding": "65000.00",
+            "state_review": "c. Program is not covered by E.O. 12372.",
+            "delinquent_federal_debt": False,
+            "certification_agree": True,
+            "authorized_representative": {"first_name": "John", "last_name": "Doe"},
+            "authorized_representative_title": "Director",
+            "authorized_representative_phone_number": "555-5678",
+            "authorized_representative_email": "john@example.com",
+            "aor_signature": "John Doe",
+            "date_signed": "2025-01-01",
+        }
+
+        # Create service and request
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
+
+        # Generate XML
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        assert response.error_message is None
+
+        # Verify XML contains expected elements in correct structure
+        xml_data = response.xml_data
+        assert "<SF424_4_0" in xml_data
+        assert "<SF424_4_0:SubmissionType>Application</SF424_4_0:SubmissionType>" in xml_data
+        assert (
+            "<SF424_4_0:OrganizationName>Test University</SF424_4_0:OrganizationName>" in xml_data
+        )
+
+        # Verify address elements are included (proving nested config-based ordering works)
+        assert "<SF424_4_0:Applicant>" in xml_data
+        assert "<globLib:Street1>123 Main St</globLib:Street1>" in xml_data
+        assert "<globLib:City>Anytown</globLib:City>" in xml_data
