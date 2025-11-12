@@ -5,9 +5,10 @@ from uuid import UUID
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_in_progress,
@@ -48,6 +49,13 @@ def update_application(
     if "application_name" in updates:
         application_name = updates.get("application_name")
         application.application_name = application_name
+        # Add an audit event when the application name is updated
+        add_audit_event(
+            db_session=db_session,
+            application=application,
+            user=user,
+            audit_event=ApplicationAuditEvent.APPLICATION_NAME_CHANGED,
+        )
 
     logger.info(
         "Updated application",

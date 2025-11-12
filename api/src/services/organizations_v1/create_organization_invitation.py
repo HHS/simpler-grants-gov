@@ -5,19 +5,76 @@ from uuid import UUID, uuid4
 from sqlalchemy import desc, select
 
 from src.adapters import db
+from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
-from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
+from src.db.models.entity_models import (
+    LinkOrganizationInvitationToRole,
+    Organization,
+    OrganizationInvitation,
+)
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.invitation_email import build_invitation_email
 from src.services.organizations_v1.update_user_organization_roles import validate_roles
+from src.task.notifications.config import get_email_config
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 
 # Invitation expires after 7 days
 INVITATION_EXPIRY_DAYS = 7
+
+
+def _send_invitation_email(
+    invitation: OrganizationInvitation,
+    organization: Organization,
+    invitee_email: str,
+) -> None:
+    """Send invitation email to the invitee.
+
+    This function handles all email sending logic including configuration,
+    error handling, and logging. Email failures do not raise exceptions.
+
+    Args:
+        invitation: The created invitation record
+        organization: The organization the user is being invited to
+        inviter: The user who created the invitation
+        invitee_email: Email address of the invitee
+    """
+    config = get_email_config()
+    subject, content = build_invitation_email(invitation, organization)
+
+    # Generate a trace ID for correlating logs with Pinpoint email delivery
+    trace_id = str(uuid4())
+
+    logger.info(
+        "Sending invitation email",
+        extra={
+            "invitation_id": invitation.organization_invitation_id,
+            "pinpoint_trace_id": trace_id,
+        },
+    )
+
+    try:
+        send_pinpoint_email_raw(
+            to_address=invitee_email,
+            subject=subject,
+            message=content,
+            app_id=config.app_id,
+            trace_id=trace_id,
+        )
+        logger.info(
+            "Invitation email sent successfully",
+            extra={"invitation_id": invitation.organization_invitation_id},
+        )
+    except Exception:
+        logger.exception(
+            "Failed to send invitation email",
+            extra={"invitation_id": invitation.organization_invitation_id},
+        )
+        # Don't raise - email failure should not block invitation creation
 
 
 def check_duplicate_invitation(
@@ -128,6 +185,9 @@ def create_organization_invitation(
     )
 
     db_session.add(invitation)
+
+    # Send invitation email (failures won't block invitation creation)
+    _send_invitation_email(invitation, organization, invitee_email)
 
     logger.info("Successfully created organization invitation")
     return invitation

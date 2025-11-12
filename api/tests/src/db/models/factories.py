@@ -1443,6 +1443,11 @@ class ApplicationFactory(BaseFactory):
             organization=factory.SubFactory("tests.src.db.models.factories.OrganizationFactory")
         )
 
+        has_submitted_by_user = factory.Trait(
+            submitted_by=factory.LazyAttribute(lambda a: a.submitted_by_user.user_id),
+            submitted_by_user=factory.SubFactory(UserFactory),
+        )
+
 
 class ApplicationFormFactory(BaseFactory):
     class Meta:
