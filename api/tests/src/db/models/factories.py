@@ -2623,7 +2623,7 @@ class VuserAccountFactory(BaseFactory):
 
     user_account_id = factory.Sequence(lambda n: n)
     user_id = Generators.UuidObj
-    email = factory.LazyAttribute(lambda o: f"{o.full_name}@example.com")
+    email = factory.Faker("email")
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     full_name = factory.Faker("name")
@@ -2670,7 +2670,7 @@ class TuserProfileFactory(BaseFactory):
     profile_type_id = factory.Faker("random_int", min=1, max=3)
     profile_name = factory.Faker("name")
     title = factory.Faker("sentence")
-    is_ebiz_poc = factory.Faker("sentence")
+    is_ebiz_poc = factory.Faker("yn_boolean")
     is_deleted_legacy = factory.Faker("yn_boolean")
     created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
     last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
