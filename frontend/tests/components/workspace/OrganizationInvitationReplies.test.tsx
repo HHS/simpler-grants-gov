@@ -1,3 +1,12 @@
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => false,
+    setFeatureFlag: jest.fn(),
+    featureFlags: { manageUsersOff: false },
+    defaultFeatureFlags: { manageUsersOff: false },
+  }),
+}));
+
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";

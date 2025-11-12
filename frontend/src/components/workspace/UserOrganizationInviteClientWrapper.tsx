@@ -18,17 +18,17 @@ export const UserOrganizationInviteClientWrapper = ({
   const { checkFeatureFlag } = useFeatureFlags();
 
   if (checkFeatureFlag("manageUsersOff")) {
-    return (
-      <div className="border-2px border-primary radius-md padding-x-2 padding-y-4">
-        <h3>{t("heading")}</h3>
-        <div>{t("description")}</div>
-        <UserInviteForm
-          organizationId={organizationId}
-          roles={organizationRoles}
-        />
-      </div>
-    );
-  } else {
-    return <></>;
+    return null;
   }
+
+  return (
+    <div className="border-2px border-primary radius-md padding-x-2 padding-y-4">
+      <h3>{t("heading")}</h3>
+      <div>{t("description")}</div>
+      <UserInviteForm
+        organizationId={organizationId}
+        roles={organizationRoles}
+      />
+    </div>
+  );
 };
