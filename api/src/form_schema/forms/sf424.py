@@ -896,6 +896,20 @@ FORM_XML_TRANSFORM_RULES = {
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
     "fax_number": {"xml_transform": {"target": "Fax"}},
     "email": {"xml_transform": {"target": "Email"}},
+    # One-to-many mapping - applicant type codes (must come before agency_name per XSD)
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "target": "ApplicantTypeCode",  # Not used for one-to-many
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+            },
+        }
+    },
+    "applicant_type_other_specify": {"xml_transform": {"target": "ApplicantTypeOtherSpecify"}},
     # Opportunity information - direct field mappings
     "agency_name": {"xml_transform": {"target": "AgencyName"}},
     "assistance_listing_number": {"xml_transform": {"target": "CFDANumber"}},
@@ -1014,19 +1028,6 @@ FORM_XML_TRANSFORM_RULES = {
     },
     "aor_signature": {"xml_transform": {"target": "AORSignature"}},
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
-    # One-to-many mapping example - applicant type codes
-    "applicant_type_code_mapping": {
-        "xml_transform": {
-            "target": "ApplicantTypeCode",  # Not used for one-to-many
-            "type": "conditional",
-            "conditional_transform": {
-                "type": "one_to_many",
-                "source_field": "applicant_type_code",
-                "target_pattern": "ApplicantTypeCode{index}",
-                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
-            },
-        }
-    },
 }
 
 
