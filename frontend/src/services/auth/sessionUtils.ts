@@ -14,7 +14,7 @@ export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
 export const newExpirationDate = () => {
   if (
     environment.AUTH_EXPIRATION_TIME !== "0" &&
-    environment.ENVIRONMENT === "dev"
+    environment.ENVIRONMENT === "local"
   ) {
     return new Date(
       Date.now() + parseInt(environment.AUTH_EXPIRATION_TIME, 10),
