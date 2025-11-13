@@ -20,6 +20,8 @@ export function NavigationCacheBuster() {
   const routerRef = useRef(router);
   const userRef = useRef(user);
   const processedLinks = useRef(new WeakSet<HTMLAnchorElement>());
+  // Value of wasAuthenticatedRef can be null if the component is not mounted yet or not checked yet 
+  const wasAuthenticatedRef = useRef<boolean | null>(null);
 
   // Keep router and user refs updated
   useEffect(() => {
@@ -30,12 +32,17 @@ export function NavigationCacheBuster() {
     userRef.current = user;
   }, [user]);
 
-  // Clean current URL when user logs out
+  // Clean current URL when user logs out (transition from authenticated to not authenticated)
   useEffect(() => {
     const isAuthenticated = !!(user && user.token);
+    const wasAuthenticated = wasAuthenticatedRef.current;
 
-    // If user is not authenticated and current URL has cache buster, remove it
-    if (!isAuthenticated && typeof window !== "undefined") {
+    // Only clean URL if user just logged out (was authenticated, now is not)
+    if (
+      wasAuthenticated === true &&
+      !isAuthenticated &&
+      typeof window !== "undefined"
+    ) {
       const currentUrl = new URL(window.location.href);
       if (currentUrl.searchParams.has("_cb")) {
         currentUrl.searchParams.delete("_cb");
@@ -44,6 +51,9 @@ export function NavigationCacheBuster() {
         routerRef.current.replace(cleanUrl);
       }
     }
+
+    // Update the ref for next render
+    wasAuthenticatedRef.current = isAuthenticated;
   }, [user]);
 
   // Monitor and modify links when they're rendered
