@@ -1,6 +1,6 @@
 import pytest
 
-from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
 from src.validation.validation_constants import ValidationErrorType
 from tests.lib.application_test_utils import create_user_in_app
 from tests.src.db.models.factories import (
@@ -40,6 +40,13 @@ def test_application_update_success(
     # Refresh the application from the database before checking
     db_session.refresh(application)
     assert application.application_name == new_name
+
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_NAME_CHANGED
+    )
+    assert application.application_audits[0].user_id == user.user_id
 
 
 def test_application_update_unauthorized(client, enable_factory_create, db_session):

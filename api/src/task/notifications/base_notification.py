@@ -6,7 +6,7 @@ from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications import constants
-from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.config import EmailNotificationConfig, get_email_config
 from src.task.notifications.constants import Metrics, UserEmailNotification
 from src.task.task import Task
 
@@ -26,7 +26,7 @@ class BaseNotificationTask(Task):
         )
 
         if notification_config is None:
-            notification_config = EmailNotificationConfig()
+            notification_config = get_email_config()
         self.notification_config = notification_config
 
     @abstractmethod

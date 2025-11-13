@@ -145,11 +145,13 @@ class FormType(StrEnum):
     SF424 = "SF424"
     SF424A = "SF424A"
     SF424B = "SF424B"
+    SF424D = "SF424D"
     SFLLL = "SFLLL"
     PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
     BUDGET_NARRATIVE_ATTACHMENT = "BudgetNarrativeAttachment"
+    OTHER_NARRATIVE_ATTACHMENT = "OtherNarrativeAttachment"
     PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
-
+    PROJECT_ABSTRACT = "ProjectAbstract"
     CD511 = "CD511"
 
 
@@ -253,6 +255,7 @@ class ApplicationAuditEvent(StrEnum):
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
     FORM_UPDATED = "form_updated"
+    ORGANIZATION_ADDED = "organization_added"
 
 
 class CommonGrantsEvent(StrEnum):

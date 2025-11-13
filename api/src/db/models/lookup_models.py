@@ -161,6 +161,9 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.BUDGET_NARRATIVE_ATTACHMENT, 6),
         LookupStr(FormType.PROJECT_ABSTRACT_SUMMARY, 7),
         LookupStr(FormType.CD511, 8),
+        LookupStr(FormType.SF424D, 9),
+        LookupStr(FormType.OTHER_NARRATIVE_ATTACHMENT, 10),
+        LookupStr(FormType.PROJECT_ABSTRACT, 11),
     ]
 )
 
@@ -245,6 +248,7 @@ APPLICATION_AUDIT_EVENT_CONFIG: LookupConfig[ApplicationAuditEvent] = LookupConf
         LookupStr(ApplicationAuditEvent.USER_UPDATED, 10),
         LookupStr(ApplicationAuditEvent.USER_REMOVED, 11),
         LookupStr(ApplicationAuditEvent.FORM_UPDATED, 12),
+        LookupStr(ApplicationAuditEvent.ORGANIZATION_ADDED, 13),
     ]
 )
 USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(

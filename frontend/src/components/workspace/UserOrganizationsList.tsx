@@ -13,7 +13,7 @@ const OrganizationItem = ({
   organization: Organization;
   role: string;
 }) => {
-  const t = useTranslations("UserWorkspace");
+  const t = useTranslations("ActivityDashboard");
   return (
     <li className="border-base-lighter border-1px padding-2 margin-top-2">
       <Grid row>
@@ -34,7 +34,7 @@ const OrganizationItem = ({
 };
 
 const NoOrganizations = () => {
-  const t = useTranslations("UserWorkspace.noOrganizations");
+  const t = useTranslations("ActivityDashboard.noOrganizations");
   return (
     <li className="border-base-lighter border-1px padding-2 margin-top-2">
       <h3>{t("title")}</h3>
@@ -50,7 +50,7 @@ export const UserOrganizationsList = ({
   userOrganizations: Organization[];
   userRoles: UserPrivilegesResponse;
 }) => {
-  const t = useTranslations("UserWorkspace");
+  const t = useTranslations("ActivityDashboard");
   return (
     <div className="margin-top-4">
       <h2>{t("organizations")}</h2>

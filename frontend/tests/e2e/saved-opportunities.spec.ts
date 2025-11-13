@@ -27,7 +27,7 @@ test("shows save / search cta if logged in", async ({ page, context }, {
   await dropDownButton.click();
 
   const savedOpportunitiesNavItem = page.locator(
-    "ul#Workspace li:nth-child(1)",
+    "ul#Workspace li:nth-child(2)",
   );
   await expect(savedOpportunitiesNavItem).toHaveText("Saved opportunities");
   await savedOpportunitiesNavItem.click();

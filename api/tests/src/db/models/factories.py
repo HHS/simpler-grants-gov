@@ -1443,6 +1443,11 @@ class ApplicationFactory(BaseFactory):
             organization=factory.SubFactory("tests.src.db.models.factories.OrganizationFactory")
         )
 
+        has_submitted_by_user = factory.Trait(
+            submitted_by=factory.LazyAttribute(lambda a: a.submitted_by_user.user_id),
+            submitted_by_user=factory.SubFactory(UserFactory),
+        )
+
 
 class ApplicationFormFactory(BaseFactory):
     class Meta:
@@ -2612,6 +2617,105 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
     def _setup_next_sequence(cls):
         if _db_session is not None:
             value = _db_session.query(func.max(foreign.user.TuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class VuserAccountFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_account_id = factory.Sequence(lambda n: n)
+    user_id = Generators.UuidObj
+    full_name = factory.Faker("name")
+    email = factory.Faker("email")
+    phone_number = factory.Faker("phone_number")
+    first_name = factory.Faker("first_name")
+    middle_name = None
+    last_name = factory.Faker("last_name")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    is_duplicate = factory.Faker("yn_boolean")
+    is_active = factory.Faker("yn_boolean")
+    is_email_confirm_pending = factory.Faker("yn_boolean")
+    deactivated_date = None
+    mobile_number = factory.Faker("phone_number")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    last_upd_id = Generators.UuidObj
+
+
+class ForeignVuserAccountFactory(VuserAccountFactory):
+    class Meta:
+        model = foreign.user.VuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.VuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class StagingVuserAccountFactory(VuserAccountFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.VuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.VuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class TuserProfileFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_profile_id = factory.Sequence(lambda n: n)
+    profile_name = factory.Faker("name")
+    profile_duns = factory.Sequence(lambda n: f"UEI{n:09d}")
+    profile_agency_code = None
+    title = factory.Faker("sentence")
+    is_ebiz_poc = factory.Faker("yn_boolean")
+    is_validate_mpin = factory.Faker("yn_boolean")
+    is_hidden = factory.Faker("yn_boolean")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    is_default = factory.Faker("yn_boolean")
+    email_preference = None
+    profile_type_id = factory.Faker("random_int", min=1, max=3)
+    user_account_id = factory.Sequence(lambda n: n)
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    last_upd_id = Generators.UuidObj
+
+
+class ForeignTuserProfileFactory(TuserProfileFactory):
+    class Meta:
+        model = foreign.user.TuserProfile
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.TuserProfile.user_profile_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class StagingTuserProfileFactory(TuserProfileFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.TuserProfile
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.TuserProfile.user_profile_id)).scalar()
             if value is not None:
                 return value + 1
         return 1

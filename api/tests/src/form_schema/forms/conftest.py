@@ -6,11 +6,14 @@ from src.db.models.competition_models import Form
 from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
     CD511_v1_1,
+    OtherNarrativeAttachment_v1_2,
+    ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
+    SF424d_v1_1,
     SFLLL_v2_0,
 )
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
@@ -69,8 +72,18 @@ def sf424b_v1_1():
 
 
 @pytest.fixture(scope="session")
+def sf424d_v1_1():
+    return setup_resolved_form(SF424d_v1_1)
+
+
+@pytest.fixture(scope="session")
 def sflll_v2_0():
     return setup_resolved_form(SFLLL_v2_0)
+
+
+@pytest.fixture(scope="session")
+def project_abstract_v1_2():
+    return setup_resolved_form(ProjectAbstract_v1_2)
 
 
 @pytest.fixture(scope="session")
@@ -86,6 +99,11 @@ def project_narrative_attachment_v1_2():
 @pytest.fixture(scope="session")
 def budget_narrative_attachment_v1_2():
     return setup_resolved_form(BudgetNarrativeAttachment_v1_2)
+
+
+@pytest.fixture(scope="session")
+def other_narrative_attachment_v1_2():
+    return setup_resolved_form(OtherNarrativeAttachment_v1_2)
 
 
 @pytest.fixture(scope="session")
