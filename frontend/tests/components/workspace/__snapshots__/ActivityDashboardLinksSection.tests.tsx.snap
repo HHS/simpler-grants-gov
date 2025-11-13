@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`WorkspaceLinksSection matches snapshot 1`] = `
+exports[`ActivityDashboardLinksSection matches snapshot 1`] = `
 <div>
   <div
     class="margin-top-4"

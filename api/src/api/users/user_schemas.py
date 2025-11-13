@@ -236,12 +236,6 @@ class UserOrganizationSchema(Schema):
             "example": "123e4567-e89b-12d3-a456-426614174000",
         }
     )
-    is_organization_owner = fields.Boolean(
-        metadata={
-            "description": "Whether the user is an owner of this organization",
-            "example": True,
-        }
-    )
     sam_gov_entity = fields.Nested(
         SamGovEntityResponseSchema,
         allow_none=True,
@@ -282,10 +276,8 @@ class UserApplicationListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserApplicationPaginationSchema",
-            [
-                "updated_at",
-            ],
-            default_sort_order=[{"order_by": "updated_at", "sort_direction": "descending"}],
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
     )

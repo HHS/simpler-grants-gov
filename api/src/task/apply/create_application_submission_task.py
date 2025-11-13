@@ -13,12 +13,15 @@ import src.adapters.db as db
 from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import is_form_required
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
+from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
+from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping_from_list
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -39,11 +42,14 @@ class SubmissionContainer:
 
     application: Application
     submission_zip: zipfile.ZipFile
+    application_submission: ApplicationSubmission
 
     form_pdf_metadata: list[FileMetadata] = field(default_factory=list)
     attachment_metadata: list[FileMetadata] = field(default_factory=list)
+    xml_metadata: FileMetadata | None = None
 
     file_names_in_zip: set[str] = field(default_factory=set)
+    attachment_filename_overrides: dict[str, str] = field(default_factory=dict)
 
     def get_file_name_in_zip(self, file_name: str) -> str:
         if file_name not in self.file_names_in_zip:
@@ -64,6 +70,8 @@ class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
 
     application_submission_batch_size: int = 25  # APPLICATION_SUBMISSION_BATCH_SIZE
     application_submission_max_batches: int = 100  # APPLICATION_SUBMISSION_MAX_BATCHES
+
+    enable_xml_generation: bool = False  # ENABLE_XML_GENERATION
 
 
 class CreateApplicationSubmissionTask(Task):
@@ -224,27 +232,51 @@ class CreateApplicationSubmissionTask(Task):
 
         submission_id = uuid.uuid4()
         s3_path = build_s3_application_submission_path(self.s3_config, application, submission_id)
+
+        # Get the tracking number from the sequence before creating the record
+        tracking_number = self.db_session.scalar(ApplicationSubmission.legacy_tracking_number_seq)
+
+        # Create the submission object (file size will be updated after zip creation)
+        application_submission = ApplicationSubmission(
+            application_submission_id=submission_id,
+            # We specify application_id instead of application directly
+            # as SQLAlchemy will complain about this not being added to the DB session yet.
+            # We don't want it in the DB session until we've finished processing
+            # in case we hit an issue below.
+            application_id=application.application_id,
+            file_location=s3_path,
+            file_size_bytes=0,
+            legacy_tracking_number=tracking_number,
+        )
+
         with file_util.open_stream(s3_path, "wb") as outfile:
             with zipfile.ZipFile(outfile, "w") as submission_zip:
 
-                submission_container = SubmissionContainer(application, submission_zip)
+                submission_container = SubmissionContainer(
+                    application, submission_zip, application_submission
+                )
 
                 self.process_application_forms(submission_container)
                 self.process_application_attachments(submission_container)
+                self.process_xml_generation(submission_container)
                 self.create_manifest_file(submission_container)
 
-        # Get the size of the zip from s3
-        zip_length = file_util.get_file_length_bytes(s3_path)
-
-        # Create the submission record in the DB and mark the app as accepted
-        application_submission = ApplicationSubmission(
-            application_submission_id=submission_id,
-            application=application,
-            file_location=s3_path,
-            file_size_bytes=zip_length,
-        )
+        # Update the file size now that the zip is complete
+        application_submission.file_size_bytes = file_util.get_file_length_bytes(s3_path)
         self.db_session.add(application_submission)
+
+        # Mark the app as accepted
         application.application_status = ApplicationStatus.ACCEPTED
+
+        # Add an audit event - we need a user for the audit event
+        # So have it be the same user that submitted which shouldn't be null.
+        if application.submitted_by_user:
+            add_audit_event(
+                db_session=self.db_session,
+                application=application,
+                user=application.submitted_by_user,
+                audit_event=ApplicationAuditEvent.SUBMISSION_CREATED,
+            )
 
     def process_application_forms(self, submission: SubmissionContainer) -> None:
         """Turn an application form into a PDF and add to the zip file"""
@@ -319,11 +351,63 @@ class CreateApplicationSubmissionTask(Task):
                 # Copy the contents of the file to the ZIP, renaming the file if it has
                 # the same filename as something already in the ZIP
                 file_name_in_zip = submission.get_file_name_in_zip(application_attachment.file_name)
+
+                # Track filename overrides if the file was renamed
+                if file_name_in_zip != application_attachment.file_name:
+                    attachment_id_str = str(application_attachment.application_attachment_id)
+                    submission.attachment_filename_overrides[attachment_id_str] = file_name_in_zip
+
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
                     file_in_zip.write(attachment_file.read())
 
                 file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
                 submission.attachment_metadata.append(FileMetadata(file_name_in_zip, file_size))
+
+    def process_xml_generation(self, submission: SubmissionContainer) -> None:
+        """Generate GrantApplication.xml and add to zip if feature flag enabled"""
+        log_extra = {
+            "application_id": submission.application.application_id,
+            "competition_id": submission.application.competition_id,
+        }
+        if not self.app_submission_config.enable_xml_generation:
+            logger.info(
+                "Skipping XML generation - feature flag disabled",
+                extra=log_extra,
+            )
+            return
+
+        logger.info("Generating XML for application submission", extra=log_extra)
+
+        # Create attachment mapping once for all forms
+        attachment_mapping = create_attachment_mapping_from_list(
+            submission.application.application_attachments,
+            filename_overrides=submission.attachment_filename_overrides,
+        )
+
+        xml_assembler = SubmissionXMLAssembler(
+            submission.application, submission.application_submission, attachment_mapping
+        )
+
+        xml_content = xml_assembler.generate_complete_submission_xml()
+
+        if not xml_content:
+            logger.warning(
+                "XML generation returned empty content - skipping",
+                extra=log_extra,
+            )
+            return
+
+        file_name_in_zip = submission.get_file_name_in_zip("GrantApplication.xml")
+        with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
+            file_in_zip.write(xml_content.encode("utf-8"))
+
+        file_size = submission.submission_zip.getinfo(file_name_in_zip).file_size
+        submission.xml_metadata = FileMetadata(file_name_in_zip, file_size)
+
+        logger.info(
+            "Successfully added XML to application submission zip",
+            extra=log_extra | {"xml_size_bytes": file_size},
+        )
 
     def create_manifest_file(self, submission: SubmissionContainer) -> None:
         """Add a manifest file to the zip"""
@@ -378,42 +462,50 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
 
     This file is formatted like:
 
-        Manifest for Grant Application {application_id}
+        Manifest for Grant Application # GRANT00838603
 
-        Forms include in ZIP (total #)
-        1. Form FormXYZ.pdf (size X)
-        2. Form FormABC.pdf (size X)
+        Grant Application XML file (total 1):
+         1. GrantApplication.xml. (size 13390 bytes)
 
-        Attachments included in ZIP (total #)
-        1. my-attachment.txt (size X)
-        2. another-attachment.docx (size X)
+        Forms Included in Zip File(total 2):
+         1. Form SFLLL_2_0-V2.0.pdf (size 20927 bytes)
+         2. Form SF424_Short_3_0-V3.0.pdf (size 21985 bytes)
+
+        Attachments Included in Zip File (total 0):
     """
     sections = []
 
-    # Add a header
-    sections.append(f"Manifest for Grant Application {submission.application.application_id}")
+    # Add a header with tracking number
+    tracking_num = f"GRANT{submission.application_submission.legacy_tracking_number:08d}"
+    sections.append(f"Manifest for Grant Application # {tracking_num}")
+
+    # Process the XML file first (to match grants.gov format)
+    if submission.xml_metadata is not None:
+        xml_lines = ["Grant Application XML file (total 1):"]
+        xml_lines.append(
+            f" 1. {submission.xml_metadata.file_name}. (size {submission.xml_metadata.file_size_in_bytes} bytes)"
+        )
+        sections.append("\n".join(xml_lines))
 
     # Process the forms
     if len(submission.form_pdf_metadata) > 0:
-        form_lines = [f"Forms included in ZIP (total {len(submission.form_pdf_metadata)})"]
+        form_lines = [f"Forms Included in Zip File(total {len(submission.form_pdf_metadata)}):"]
         for i, app_form in enumerate(submission.form_pdf_metadata, start=1):
             form_lines.append(
-                f"{i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)"
+                f" {i}. Form {app_form.file_name} (size {app_form.file_size_in_bytes} bytes)"
             )
-
         sections.append("\n".join(form_lines))
 
     # Process the attachments
+    attachment_lines = [
+        f"Attachments Included in Zip File (total {len(submission.attachment_metadata)}):"
+    ]
     if len(submission.attachment_metadata) > 0:
-        attachment_lines = [
-            f"Attachments included in ZIP (total {len(submission.attachment_metadata)})"
-        ]
         for i, app_attachment in enumerate(submission.attachment_metadata, start=1):
             attachment_lines.append(
-                f"{i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)"
+                f" {i}. {app_attachment.file_name} (size {app_attachment.file_size_in_bytes} bytes)"
             )
+    sections.append("\n".join(attachment_lines))
 
-        sections.append("\n".join(attachment_lines))
-
-    # Return any sections populated
+    # Return all sections
     return "\n\n".join(sections)

@@ -5,9 +5,10 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.create_application_attachment import upsert_application_attachment
 from src.services.applications.get_application_attachment import get_application_attachment
 
@@ -58,4 +59,12 @@ def update_application_attachment(
         "Updated application attachment",
         extra={"application_attachment_id": application_attachment_id},
     )
+    add_audit_event(
+        db_session=db_session,
+        application=application_attachment.application,
+        user=user,
+        audit_event=ApplicationAuditEvent.ATTACHMENT_UPDATED,
+        target_attachment=application_attachment,
+    )
+
     return updated_application_attachment
