@@ -27,9 +27,6 @@ class RecursiveXMLTransformer:
         Returns:
             Transformed data ready for XML generation
         """
-        if not source_data:
-            return {}
-
         # Store root data for conditional transformations
         self.root_source_data = source_data
 
@@ -83,6 +80,17 @@ class RecursiveXMLTransformer:
         """Process a single XML transformation rule."""
         transform_rule = rule_config["xml_transform"]
         current_path = path + [key]
+
+        # Check if this is a static value (no source data needed)
+        if "static_value" in transform_rule:
+            target_field = transform_rule["target"]
+            static_val = transform_rule["static_value"]
+            result[target_field] = static_val
+
+            logger.debug(
+                f"Applied static value for {'.'.join(current_path)} -> {target_field}: {static_val}"
+            )
+            return
 
         # Get the source value from the input data
         transform_type = transform_rule.get("type", "simple")
@@ -208,6 +216,11 @@ class RecursiveXMLTransformer:
                 # Standard field assignment for all other cases
                 target_field = transform_rule["target"]
                 result[target_field] = transformed_value
+
+                # Handle attributes for nested objects only
+                if transform_type == "nested_object" and "attributes" in transform_rule:
+                    result[f"__{target_field}__attributes"] = transform_rule["attributes"]
+
                 logger.debug(
                     f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
                 )
@@ -236,17 +249,26 @@ class RecursiveXMLTransformer:
                 return None
 
             nested_result = {}
-            # Process child transformation rules
-            for child_key, child_config in full_rule_config.items():
-                if child_key == "xml_transform":
-                    continue
-                if isinstance(child_config, dict) and "xml_transform" in child_config:
-                    child_transform = child_config["xml_transform"]
-                    if child_key in source_value and source_value[child_key] is not None:
-                        nested_result[child_transform["target"]] = source_value[child_key]
-                        logger.debug(
-                            f"Nested transform: {'.'.join(path)}.{child_key} -> {child_transform['target']}"
-                        )
+
+            # Check if nested_fields is defined in the transform_rule
+            nested_fields = transform_rule.get("nested_fields")
+
+            if nested_fields:
+                # New format: nested fields are inside nested_fields key
+                for child_key, child_config in nested_fields.items():
+                    if isinstance(child_config, dict) and "xml_transform" in child_config:
+                        child_transform = child_config["xml_transform"]
+                        if child_key in source_value and source_value[child_key] is not None:
+                            nested_result[child_transform["target"]] = source_value[child_key]
+            else:
+                # Nested fields may be siblings of xml_transform in full_rule_config
+                for child_key, child_config in full_rule_config.items():
+                    if child_key == "xml_transform":
+                        continue
+                    if isinstance(child_config, dict) and "xml_transform" in child_config:
+                        child_transform = child_config["xml_transform"]
+                        if child_key in source_value and source_value[child_key] is not None:
+                            nested_result[child_transform["target"]] = source_value[child_key]
 
             return nested_result if nested_result else None
         else:

@@ -47,7 +47,7 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || github.ref_name == 'main' && '["dev", "staging"]' || '["dev"]')  }}
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}

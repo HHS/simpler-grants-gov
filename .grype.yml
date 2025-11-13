@@ -56,3 +56,10 @@ ignore:
   # Issue with zip64 in the zipfile module which we aren't using
   # Fixed in latest Python version
   - vulnerability: CVE-2025-8291
+
+  # CVE-2025-6075: Python version finding (Low severity)
+  # This is flagging Python 3.13.9 as needing an upgrade to 3.15.0
+  # Python 3.15.0 does not exist yet - this appears to be a false positive
+  # or premature CVE. We are running the latest stable Python 3.13.x version.
+  # Last checked: November 12th, 2025
+  - vulnerability: CVE-2025-6075

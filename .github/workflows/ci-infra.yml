@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Run Checkov check
         # Pin to specific checkov version rather than running from checkov@master
         # since checkov frequently adds new checks that can cause CI checks to fail unpredictably.

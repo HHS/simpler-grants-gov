@@ -13,7 +13,7 @@ jest.mock("react", () => ({
   useActionState: () => mockUseActionState() as unknown,
 }));
 
-jest.mock("src/app/[locale]/(base)/user/workspace/actions", () => ({
+jest.mock("src/app/[locale]/(base)/dashboard/actions", () => ({
   inviteUserAction: noop,
 }));
 

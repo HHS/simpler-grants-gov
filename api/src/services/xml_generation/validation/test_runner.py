@@ -7,6 +7,7 @@ from typing import Any
 
 import click
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -60,7 +61,7 @@ class ValidationTestRunner:
         try:
             # Generate XML
             request = XMLGenerationRequest(
-                form_name=form_name,
+                transform_config=FORM_XML_TRANSFORM_RULES,
                 application_data=json_input,
                 pretty_print=pretty_print,
             )
