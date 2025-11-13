@@ -2,8 +2,7 @@ import logging
 from uuid import UUID
 
 import src.adapters.db as db
-from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
@@ -31,8 +30,12 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     application = get_application(db_session, application_id, user)
 
     # Check privileges
-    if not can_access(user, {Privilege.SUBMIT_APPLICATION}, application):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.SUBMIT_APPLICATION},
+        application,
+    )
 
     # Run validations
     validate_application_in_progress(application, ApplicationAction.SUBMIT)
