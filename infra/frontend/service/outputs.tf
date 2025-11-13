@@ -31,3 +31,8 @@ output "service_endpoint" {
 output "service_name" {
   value = local.service_config.service_name
 }
+
+output "cloudfront_distribution_id" {
+  description = "The ID of the CloudFront distribution for cache invalidation"
+  value       = module.service.cloudfront_distribution_id
+}

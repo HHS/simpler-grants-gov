@@ -6,8 +6,8 @@ import { Metadata } from "next";
 import { environment } from "src/constants/environments";
 import { LayoutProps } from "src/types/generalTypes";
 
+import { CookieCacheBuster } from "src/components/CookieCacheBuster";
 import Layout from "src/components/Layout";
-import { NavigationCacheBuster } from "src/components/NavigationCacheBuster";
 import RootLayoutWrapper from "src/components/RootLayoutWrapper";
 
 import "src/styles/styles.scss";
@@ -22,7 +22,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   return (
     <RootLayoutWrapper params={params}>
       <Layout locale={locale}>
-        <NavigationCacheBuster />
+        <CookieCacheBuster />
         {children}
       </Layout>
     </RootLayoutWrapper>

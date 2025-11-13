@@ -69,13 +69,13 @@ resource "aws_cloudfront_cache_policy" "default" {
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
-      cookie_behavior = "none"
+      cookie_behavior = "whitelist"
+      cookies {
+        items = ["cache_buster"]
+      }
     }
     headers_config {
-      header_behavior = var.enable_lambda_edge && var.lambda_edge_origin_response_path != null ? "whitelist" : "none"
-      headers {
-        items = var.enable_lambda_edge && var.lambda_edge_origin_response_path != null ? ["X-User-Authenticated"] : []
-      }
+      header_behavior = "none"
     }
     query_strings_config {
       query_string_behavior = "all"

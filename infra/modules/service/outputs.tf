@@ -53,3 +53,8 @@ output "app_security_group_id" {
 output "service_logs_arn" {
   value = aws_cloudwatch_log_group.service_logs.arn
 }
+
+output "cloudfront_distribution_id" {
+  description = "The ID of the CloudFront distribution for cache invalidation"
+  value       = var.enable_cdn ? aws_cloudfront_distribution.cdn[0].id : null
+}
