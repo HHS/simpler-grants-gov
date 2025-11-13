@@ -42,7 +42,7 @@ export async function ManageUsersPageContent({
           { title: "home", path: "/" },
           {
             title: "Workspace",
-            path: `/user/workspace`,
+            path: `/dashboard`,
           },
           {
             title: name ?? "Organization",
