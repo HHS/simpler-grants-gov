@@ -36,7 +36,7 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         cert_id = str(uuid.uuid4())
         result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
-        assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_INVALID
+        assert result == SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Tcertificate not found" in warning_messages
 
@@ -48,7 +48,7 @@ class TestSetupCertUserTask(BaseTestClass):
         )
         cert_id = str(tcertificate.currentcertid)
         result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
-        assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_INVALID
+        assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Cert is expired" in warning_messages
 
@@ -71,7 +71,7 @@ class TestSetupCertUserTask(BaseTestClass):
         tcertificate = StagingTcertificatesFactory(serial_num=None, agencyid=agency.agency_code)
         cert_id = str(tcertificate.currentcertid)
         result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
-        assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_INVALID
+        assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Tcertificate is missing serial number" in warning_messages
 

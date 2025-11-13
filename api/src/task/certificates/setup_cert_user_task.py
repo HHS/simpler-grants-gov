@@ -30,10 +30,12 @@ FUTURE_DATE = datetime_util.make_timezone_aware(datetime(2050, 1, 1), "US/Easter
 
 class SetupCertUserTaskStatus(StrEnum):
     INVALID_ROLE_IDS = "Invalid role ids"
-    TCERTIFICATE_IS_INVALID = "Tcertificate is invalid"
     AGENCY_NOT_FOUND = "Agency not found"
     LEGACY_CERTIFICATE_ALREADY_EXISTS = "LegacyCertificate already exists"
     SUCCESS = "Success"
+    TCERTIFICATE_IS_EXPIRED = "Tcertificate is expired"
+    TCERTIFICATE_NOT_FOUND = "Tcertificate not found"
+    TCERTIFICATE_IS_MISSING_SERIAL_NUMBER = "Tcertificate is missing serial number"
 
 
 @task_blueprint.cli.command("setup-cert-user", help="Setup the LegacyCertificate and User")
@@ -56,19 +58,32 @@ class SetupCertUserTask(Task):
 
     def run_task(self) -> SetupCertUserTaskStatus:  # type: ignore [override]
         logger.info("setup cert user start")
-        roles = self.get_roles()
-        if roles is None:
-            return SetupCertUserTaskStatus.INVALID_ROLE_IDS
-        tcertificate = self.get_tcertificate()
-        if tcertificate is None:
-            return SetupCertUserTaskStatus.TCERTIFICATE_IS_INVALID
-        agencies = self.get_agencies(tcertificate)
-        if agencies is None:
-            return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
-        if self.is_existing_certificate(tcertificate):
-            return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
-        else:
-            self.process_cert_user(roles, tcertificate, agencies)
+        with self.db_session.begin():
+            roles = self.get_roles()
+            if roles is None:
+                return SetupCertUserTaskStatus.INVALID_ROLE_IDS
+
+            tcertificate = self.get_tcertificate()
+            if tcertificate is None:
+                logger.warning("Tcertificate not found")
+                return SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
+            if not tcertificate.serial_num:
+                logger.warning("Tcertificate is missing serial number")
+                return SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
+            self.valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
+            if self.valid_expiration_date <= datetime_util.get_now_us_eastern_date():
+                logger.warning("Cert is expired")
+                return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
+            if self.is_existing_certificate(tcertificate):
+                logger.warning("Tcertificate is missing serial number")
+                return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
+
+            agencies = self.get_agencies(tcertificate)
+            if agencies is None:
+                return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
+
+            else:
+                self.process_cert_user(roles, tcertificate, agencies)
         logger.info("setup cert user complete")
         return SetupCertUserTaskStatus.SUCCESS
 
@@ -87,7 +102,6 @@ class SetupCertUserTask(Task):
             user=user,
         )
         self.db_session.add(legacy_certificate)
-        self.db_session.commit()
 
     def create_user_with_agency_roles(self, agencies: list[Agency], roles: list[Role]) -> User:
         user = User(user_type=UserType.LEGACY_CERTIFICATE)
@@ -111,22 +125,11 @@ class SetupCertUserTask(Task):
         return roles
 
     def get_tcertificate(self) -> staging.certificates.Tcertificates | None:
-        tcertificate = self.db_session.scalars(
+        return self.db_session.scalars(
             select(staging.certificates.Tcertificates).where(
                 staging.certificates.Tcertificates.currentcertid == self.cert_id
             )
         ).one_or_none()
-        if tcertificate is None:
-            logger.warning("Tcertificate not found")
-            return None
-        self.valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
-        if self.valid_expiration_date <= datetime_util.get_now_us_eastern_date():
-            logger.warning("Cert is expired")
-            return None
-        if not tcertificate.serial_num:
-            logger.warning("Tcertificate is missing serial number")
-            return None
-        return tcertificate
 
     def get_agencies(self, tcertificate: staging.certificates.Tcertificates) -> list[Agency] | None:
         agency = self.db_session.scalar(
