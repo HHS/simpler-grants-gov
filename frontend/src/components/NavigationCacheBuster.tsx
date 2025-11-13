@@ -78,12 +78,21 @@ export function NavigationCacheBuster() {
             const currentUser = userRef.current;
             const isAuthenticated = !!(currentUser && currentUser.token);
 
+            // Only intercept if authenticated (need to add cache buster)
+            // or if URL has cache buster that needs to be removed
+            const clickedUrl = new URL(anchor.href);
+            const hasCacheBuster = clickedUrl.searchParams.has("_cb");
+
+            if (!isAuthenticated && !hasCacheBuster) {
+              // Not authenticated and no cache buster - let browser handle normally
+              return;
+            }
+
             e.preventDefault();
             e.stopPropagation();
 
             // Re-parse the URL at click time to get the current href value
             try {
-              const clickedUrl = new URL(anchor.href);
               // Remove existing _cb parameter if present
               clickedUrl.searchParams.delete("_cb");
               const pathWithQuery =
