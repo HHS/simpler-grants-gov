@@ -25,22 +25,6 @@ const AccountNavLink = () => {
   );
 };
 
-const WorkspaceNavLink = () => {
-  const t = useTranslations("Header.navLinks");
-  return (
-    <Link
-      className="display-flex usa-button usa-button--unstyled text-no-underline"
-      href="/user/workspace"
-    >
-      <USWDSIcon
-        name="notifications_active"
-        className="usa-icon--size-3 display-block"
-      />
-      {t("workspace")}
-    </Link>
-  );
-};
-
 // used in three different places
 // 1. on desktop - nav item drop down button content
 // 2. on mobile - nav item drop down button content, without email text
@@ -148,7 +132,6 @@ const UserDropdown = ({ user }: { user: UserProfile }) => {
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
           showUserAdminNavItems && <AccountNavLink key="account" />,
-          showUserAdminNavItems && <WorkspaceNavLink key="workspace" />,
           <LogoutNavItem key="logout" />,
         ].filter(Boolean)}
         type="subnav"

@@ -1,6 +1,6 @@
 services:
   grants-db:
-    image: postgres:15-alpine
+    image: postgres:17.5-alpine
     container_name: grants-db
     command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
     env_file: ./local.env
