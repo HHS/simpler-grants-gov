@@ -110,3 +110,10 @@ export type OrganizationInvitation = {
 };
 
 export const completeStatuses = ["rejected", "accepted", "expired"];
+
+export interface TestUser extends UserDetailProfile {
+  oauth_id: string;
+  user_api_key: string;
+  user_id: string;
+  user_jwt: string;
+}
