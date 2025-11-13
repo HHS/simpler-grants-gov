@@ -1,5 +1,5 @@
 import { LOGIN_URL } from "src/constants/auth";
-import SessionStorage from "src/services/sessionStorage/sessionStorage";
+import { storeCurrentPage } from "src/services/sessionStorage/sessionStorage";
 
 import { PropsWithChildren } from "react";
 
@@ -15,10 +15,7 @@ export function LoginLink({
       key="login-link"
       className={className}
       onClick={() => {
-        const startURL = `${location.pathname}${location.search}`;
-        if (startURL !== "") {
-          SessionStorage.setItem("login-redirect", startURL);
-        }
+        storeCurrentPage();
       }}
     >
       {children}

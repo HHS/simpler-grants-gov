@@ -49,4 +49,11 @@ class SessionStorage {
   }
 }
 
+export const storeCurrentPage = () => {
+  const startURL = `${location.pathname}${location.search}`;
+  if (startURL !== "") {
+    SessionStorage.setItem("login-redirect", startURL);
+  }
+};
+
 export default SessionStorage;
