@@ -154,6 +154,8 @@ class FormType(StrEnum):
     PROJECT_ABSTRACT = "ProjectAbstract"
     CD511 = "CD511"
 
+    SUPPLEMENTARY_NEH_COVER_SHEET = "SupplementaryNEHCoverSheet"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
