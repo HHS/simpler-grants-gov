@@ -6995,6 +6995,7 @@ components:
           - user_updated
           - user_removed
           - form_updated
+          - organization_added
           type:
           - string
         user:

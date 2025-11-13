@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { WORKSPACE_CRUMBS } from "src/constants/breadcrumbs";
+import { ACTIVITY_DASHBOARD_CRUMBS } from "src/constants/breadcrumbs";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
@@ -15,10 +15,10 @@ import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { ActivityDashboardLinksSection } from "src/components/workspace/ActivityDashboardLinksSection";
 import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
 import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
-import { WorkspaceLinksSection } from "src/components/workspace/WorkspaceLinksSection";
 
 export async function generateMetadata({
   params,
@@ -26,14 +26,14 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("UserWorkspace.pageTitle"),
+    title: t("ActivityDashboard.pageTitle"),
     description: t("Index.metaDescription"),
   };
   return meta;
 }
 
-async function UserWorkspace() {
-  const t = await getTranslations("UserWorkspace");
+async function ActivityDashboard() {
+  const t = await getTranslations("ActivityDashboard");
 
   const session = await getSession();
   if (!session?.email) {
@@ -65,7 +65,7 @@ async function UserWorkspace() {
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <Breadcrumbs breadcrumbList={WORKSPACE_CRUMBS} />
+      <Breadcrumbs breadcrumbList={ACTIVITY_DASHBOARD_CRUMBS} />
       <h1 className="margin-top-2">
         {t.rich("title", {
           color: (chunks) => (
@@ -83,7 +83,7 @@ async function UserWorkspace() {
       {userInvitations?.length && (
         <OrganizationInvitationReplies userInvitations={userInvitations} />
       )}
-      <WorkspaceLinksSection />
+      <ActivityDashboardLinksSection />
       {userRoles && userOrganizations ? (
         <UserOrganizationsList
           userOrganizations={userOrganizations}
@@ -97,7 +97,7 @@ async function UserWorkspace() {
 }
 
 export default withFeatureFlag<object, never>(
-  UserWorkspace,
+  ActivityDashboard,
   "userAdminOff",
   () => redirect("/maintenance"),
 );
