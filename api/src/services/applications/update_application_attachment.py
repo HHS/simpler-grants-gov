@@ -3,8 +3,7 @@ import uuid
 
 import src.adapters.db as db
 import src.util.file_util as file_util
-from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from src.db.models.user_models import User
@@ -28,8 +27,12 @@ def update_application_attachment(
         db_session, application_id, application_attachment_id, user
     )
     # Check privileges
-    if not can_access(user, {Privilege.MODIFY_APPLICATION}, application_attachment.application):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MODIFY_APPLICATION},
+        application_attachment.application,
+    )
 
     # Store the old file location before updating
     old_s3_file_location = application_attachment.file_location

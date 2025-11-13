@@ -27,6 +27,7 @@ def test_application_update_success(
     # Update the application name
     new_name = "Updated Application Name"
     request_data = {"application_name": new_name}
+
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json=request_data,
