@@ -3,7 +3,7 @@
 import {
   inviteUserAction,
   OrganizationInviteValidationErrors,
-} from "src/app/[locale]/(base)/user/workspace/actions";
+} from "src/app/[locale]/(base)/dashboard/actions";
 import { UserRole } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";

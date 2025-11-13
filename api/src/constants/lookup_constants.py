@@ -257,6 +257,7 @@ class ApplicationAuditEvent(StrEnum):
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
     FORM_UPDATED = "form_updated"
+    ORGANIZATION_ADDED = "organization_added"
 
 
 class CommonGrantsEvent(StrEnum):
