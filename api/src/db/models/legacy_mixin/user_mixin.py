@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 

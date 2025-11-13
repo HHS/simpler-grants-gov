@@ -3,7 +3,6 @@
 #
 # The order of the columns must match the remote Oracle database. The names are not required to
 # match by oracle_fdw, but we are matching them for maintainability.
-from sqlalchemy import Index
 
 from src.db.models.legacy_mixin import user_mixin
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
