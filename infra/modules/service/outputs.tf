@@ -56,5 +56,5 @@ output "service_logs_arn" {
 
 output "cloudfront_distribution_id" {
   description = "The ID of the CloudFront distribution for cache invalidation"
-  value       = var.enable_cdn ? aws_cloudfront_distribution.cdn[0].id : null
+  value       = local.enable_cdn ? aws_cloudfront_distribution.cdn[0].id : null
 }
