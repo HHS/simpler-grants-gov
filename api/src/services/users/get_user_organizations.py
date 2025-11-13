@@ -34,7 +34,6 @@ def get_user_organizations(db_session: db.Session, user_id: UUID) -> list[dict[s
 
         org_data: dict[str, Any] = {
             "organization_id": str(organization.organization_id),
-            "is_organization_owner": org_user.is_organization_owner,
             "sam_gov_entity": sam_gov_entity,
         }
 

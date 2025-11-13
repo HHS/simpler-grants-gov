@@ -41,7 +41,16 @@ def test_get_user_applications_success(enable_factory_create, db_session, user):
     )
 
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Verify results
     assert len(applications) == 2
@@ -55,7 +64,16 @@ def test_get_user_applications_empty(enable_factory_create, db_session):
     user = UserFactory.create()
 
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Should return empty list
     assert len(applications) == 0
@@ -80,7 +98,16 @@ def test_get_user_applications_with_organization(enable_factory_create, db_sessi
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Verify results
     assert len(applications) == 1
@@ -110,7 +137,16 @@ def test_get_user_applications_multiple_users(enable_factory_create, db_session)
     )
 
     # Call the service for user1
-    applications = get_user_applications(db_session, user1.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user1.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Should only get user1's application
     assert len(applications) == 1
@@ -146,7 +182,16 @@ def test_get_user_applications_preloads_relationships(enable_factory_create, db_
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
     # Call the service
-    applications = get_user_applications(db_session, user.user_id)
+    applications, _ = get_user_applications(
+        db_session,
+        user.user_id,
+        {
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
 
     # Verify relationships are loaded (should not trigger additional queries)
     app = applications[0]

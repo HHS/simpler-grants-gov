@@ -1,3 +1,7 @@
+"use client";
+
+// we can remove the "use client" decorator after we remove the feature flag
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 
 import { ReactNode } from "react";
@@ -10,10 +14,16 @@ export const OrganizationInvitationReplies = ({
 }: {
   userInvitations: OrganizationInvitation[];
 }) => {
+  const { checkFeatureFlag } = useFeatureFlags();
+
+  if (checkFeatureFlag("manageUsersOff")) {
+    return null;
+  }
+
   return (
     <ul className="usa-list--unstyled">
       {userInvitations.reduce((invitationsToShow, userInvitation) => {
-        if (completeStatuses.indexOf(userInvitation.status) === -1) {
+        if (!completeStatuses.includes(userInvitation.status)) {
           invitationsToShow.push(
             <OrganizationInvitationReply
               key={userInvitation.organization_invitation_id}

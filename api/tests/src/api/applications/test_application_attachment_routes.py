@@ -7,7 +7,7 @@ import requests
 from sqlalchemy import select
 
 import src.util.file_util as file_util
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import ApplicationAttachment
 from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
@@ -40,7 +40,7 @@ def test_application_attachment_create_200(
     file_name,
     expected_mimetype,
 ):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     response = client.post(
@@ -65,6 +65,15 @@ def test_application_attachment_create_200(
     assert application_attachment.mime_type == expected_mimetype
     assert application_attachment.file_size_bytes > 0
     assert file_util.file_exists(application_attachment.file_location) is True
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_ADDED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert str(application.application_audits[0].target_attachment_id) == application_attachment_id
 
 
 def test_application_attachment_create_404_not_found(
@@ -286,7 +295,7 @@ def test_application_attachment_update_200(
     file_name,
     expected_mimetype,
 ):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     # Create an existing attachment first
@@ -312,6 +321,15 @@ def test_application_attachment_update_200(
     assert existing_attachment.mime_type == expected_mimetype
     assert existing_attachment.file_size_bytes > 0
     assert file_util.file_exists(existing_attachment.file_location) is True
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert str(application.application_audits[0].target_attachment_id) == application_attachment_id
 
 
 def test_application_attachment_update_404_application_not_found(
@@ -475,7 +493,7 @@ def test_application_attachment_update_deletes_old_file_different_name(
     s3_config,
 ):
     """Test that updating an attachment with different filename deletes the old file"""
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     # Create attachment with initial file
@@ -508,6 +526,18 @@ def test_application_attachment_update_deletes_old_file_different_name(
     if old_file_location != existing_attachment.file_location:
         assert file_util.file_exists(old_file_location) is False
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_attachment_id
+        == existing_attachment.application_attachment_id
+    )
+
 
 def test_application_attachment_update_same_filename_overwrites(
     db_session,
@@ -516,7 +546,7 @@ def test_application_attachment_update_same_filename_overwrites(
     s3_config,
 ):
     """Test that updating an attachment with same filename updates the attachment"""
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     # Create attachment with initial file
@@ -546,6 +576,18 @@ def test_application_attachment_update_same_filename_overwrites(
     if old_file_location != existing_attachment.file_location:
         assert file_util.file_exists(old_file_location) is False
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_attachment_id
+        == existing_attachment.application_attachment_id
+    )
+
 
 ##########################################
 # Delete application attachment tests
@@ -553,7 +595,7 @@ def test_application_attachment_update_same_filename_overwrites(
 
 
 def test_application_attachment_delete_200(db_session, enable_factory_create, client, s3_config):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     application_attachment = ApplicationAttachmentFactory.create(application=application)
@@ -582,6 +624,18 @@ def test_application_attachment_delete_200(db_session, enable_factory_create, cl
     assert (
         application.application_attachments[0].application_attachment_id
         == second_attachment.application_attachment_id
+    )
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_DELETED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_attachment_id
+        == application_attachment.application_attachment_id
     )
 
 
