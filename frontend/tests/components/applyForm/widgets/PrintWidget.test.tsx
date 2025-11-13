@@ -19,7 +19,7 @@ describe("PrintWidget", () => {
     formClassName: "test-form-class",
     inputClassName: "test-input-class",
     placeholder: "",
-    readonly: false,
+    readOnly: false,
     disabled: false,
     autofocus: false,
     label: "Test Label",

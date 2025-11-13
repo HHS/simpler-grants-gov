@@ -48,7 +48,7 @@ function SelectWidget<
   id,
   disabled,
   options = {},
-  readonly,
+  readOnly,
   required,
   schema,
   value,
@@ -143,7 +143,7 @@ function SelectWidget<
         defaultValue={updateOnInput ? undefined : selectValue}
         value={updateOnInput ? selectValue : undefined}
         required={required}
-        disabled={disabled || readonly}
+        disabled={disabled || readOnly}
         autoFocus={autofocus}
         onChange={updateOnInput ? handleChange : noop}
         onBlur={updateOnInput ? handleBlur : undefined}

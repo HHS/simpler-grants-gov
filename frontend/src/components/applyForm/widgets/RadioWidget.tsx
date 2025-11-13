@@ -68,7 +68,7 @@ export default function RadioWidget<
   options = {},
   schema,
   required,
-  readonly,
+  readOnly,
   value,
   autofocus = false,
   rawErrors = [],
@@ -168,7 +168,7 @@ export default function RadioWidget<
             key={optionId(id, index)}
             name={id}
             required={required}
-            disabled={disabled || itemDisabled || readonly}
+            disabled={disabled || itemDisabled || readOnly}
             autoFocus={autofocus && index === 0}
             aria-describedby={describedby}
             checked={updateOnInput ? checked : undefined}
