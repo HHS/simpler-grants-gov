@@ -7,7 +7,7 @@ from sqlalchemy import desc, select
 from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
@@ -154,8 +154,12 @@ def create_organization_invitation(
     organization = get_organization(db_session, organization_id)
 
     # Check if user has permission to manage org members
-    if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
+    )
 
     # Validate roles exist and are organization roles - get roles back from validation
     roles = validate_roles(db_session, role_ids)

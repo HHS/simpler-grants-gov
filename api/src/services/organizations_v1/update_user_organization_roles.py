@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.user_models import LinkRoleRoleType, OrganizationUserRole, Role, User
 from src.services.organizations_v1.get_organization import get_organization
@@ -47,8 +47,12 @@ def update_user_organization_roles(
     # Lookup organization
     organization = get_organization(db_session, organization_id)
     # Permission checks
-    if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
+    )
 
     # Validate target user exists
     org_user = validate_organization_user_exists(db_session, target_user_id, organization)
