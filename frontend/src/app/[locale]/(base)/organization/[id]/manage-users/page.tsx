@@ -31,6 +31,6 @@ function ManageUsersPage({ params }: ManageUsersPageProps) {
 
 export default withFeatureFlag<ManageUsersPageProps, never>(
   ManageUsersPage,
-  "userAdminOff",
+  "manageUsersOff",
   () => redirect("/maintenance"),
 );

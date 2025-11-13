@@ -1,11 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { useFeatureFlags } from "src/hooks/useFeatureFlags";
+import { useUser } from "src/services/auth/useUser";
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 
 import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
 
-// mock the child so tests focus on the parent logic
+jest.mock("src/hooks/useFeatureFlags");
+jest.mock("src/services/auth/useUser");
+
 jest.mock("src/components/workspace/OrganizationInvitationReply", () => ({
   OrganizationInvitationReply: ({
     userInvitation,
@@ -23,11 +27,23 @@ const makeInvitation = (overrides: Partial<OrganizationInvitation>) => ({
   ...overrides,
 });
 
-describe("OrganizationInvitationReplies", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+beforeEach(() => {
+  jest.resetAllMocks();
+
+  (useUser as jest.Mock).mockReturnValue({
+    featureFlags: { manageUsersOff: false },
+    defaultFeatureFlags: { manageUsersOff: false },
   });
 
+  (useFeatureFlags as jest.Mock).mockReturnValue({
+    checkFeatureFlag: () => false,
+    setFeatureFlag: jest.fn(),
+    featureFlags: { manageUsersOff: false },
+    defaultFeatureFlags: { manageUsersOff: false },
+  });
+});
+
+describe("OrganizationInvitationReplies", () => {
   it("has no basic accessibility violations", async () => {
     const invites = [
       fakeOrganizationInvitation,
@@ -69,10 +85,27 @@ describe("OrganizationInvitationReplies", () => {
 
     render(<OrganizationInvitationReplies userInvitations={invites} />);
 
-    // only the active invitation should be rendered
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(1);
     expect(screen.getByTestId("invite-uuid")).toBeInTheDocument();
     expect(screen.queryByTestId("invite-inv-complete")).not.toBeInTheDocument();
+  });
+
+  it("renders nothing when the feature gate is ON (manageUsersOff=true)", () => {
+    (useFeatureFlags as jest.Mock).mockReturnValue({
+      checkFeatureFlag: () => true,
+      setFeatureFlag: jest.fn(),
+      featureFlags: { manageUsersOff: true },
+      defaultFeatureFlags: { manageUsersOff: true },
+    });
+
+    render(
+      <OrganizationInvitationReplies
+        userInvitations={[fakeOrganizationInvitation]}
+      />,
+    );
+
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
 });
