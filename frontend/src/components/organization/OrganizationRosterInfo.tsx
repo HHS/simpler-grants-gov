@@ -27,7 +27,7 @@ export const OrganizationRosterInfo = ({
       <h3>{t("title")}</h3>
       <div>
         {t("explanation")} {t("manageUsersExplanation")}{" "}
-        {checkFeatureFlag("manageUsersOff") &&
+        {!checkFeatureFlag("manageUsersOff") &&
           manageUsersPrivilege?.authorized && (
             <Link
               href={`/organization/${organizationId}/manage-users`}

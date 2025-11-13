@@ -1,5 +1,6 @@
 "use client";
 
+// we can remove the "use client" decorator after we remove the feature flag
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 

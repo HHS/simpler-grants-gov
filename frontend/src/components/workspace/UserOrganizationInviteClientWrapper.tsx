@@ -1,6 +1,5 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { UserRole } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -15,11 +14,6 @@ export const UserOrganizationInviteClientWrapper = ({
   organizationRoles: UserRole[];
 }) => {
   const t = useTranslations("ManageUsers.inviteUser");
-  const { checkFeatureFlag } = useFeatureFlags();
-
-  if (checkFeatureFlag("manageUsersOff")) {
-    return null;
-  }
 
   return (
     <div className="border-2px border-primary radius-md padding-x-2 padding-y-4">
