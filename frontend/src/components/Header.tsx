@@ -92,6 +92,7 @@ const NavLinks = ({
   const showSavedSearch = checkFeatureFlag("savedSearchesOn");
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
   const showDeveloperPortal = !checkFeatureFlag("developerPageOff");
+  const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -122,6 +123,17 @@ const NavLinks = ({
     }
 
     const workspaceSubNavs = [];
+
+    if (showUserAdminNavItems) {
+      workspaceSubNavs.push({
+        text: t("activityDashboard"),
+        href: "/dashboard",
+      });
+    }
+    workspaceSubNavs.push({
+      text: t("applications"),
+      href: "/applications",
+    });
     if (showSavedOpportunities) {
       workspaceSubNavs.push({
         text: t("savedOpportunities"),
@@ -147,6 +159,7 @@ const NavLinks = ({
     showSavedOpportunities,
     showSavedSearch,
     showDeveloperPortal,
+    showUserAdminNavItems,
   ]);
 
   const getCurrentNavItemIndex = useCallback(
