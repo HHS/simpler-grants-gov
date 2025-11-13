@@ -20,7 +20,7 @@ export function NavigationCacheBuster() {
   const routerRef = useRef(router);
   const userRef = useRef(user);
   const processedLinks = useRef(new WeakSet<HTMLAnchorElement>());
-  // Value of wasAuthenticatedRef can be null if the component is not mounted yet or not checked yet 
+  // Value of wasAuthenticatedRef can be null if the component is not mounted yet or not checked yet
   const wasAuthenticatedRef = useRef<boolean | null>(null);
 
   // Keep router and user refs updated
