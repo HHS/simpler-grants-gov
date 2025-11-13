@@ -21,7 +21,18 @@ export function addCacheBuster(url: string): string {
   const urlWithoutHash = hasHash ? url.substring(0, hashIndex) : url;
   const hashFragment = hasHash ? url.substring(hashIndex) : "";
 
+  // Parse URL to remove existing _cb parameters
+  const [pathAndQuery, existingParams] = urlWithoutHash.split("?");
+  const searchParams = new URLSearchParams(existingParams || "");
+
+  // Remove all existing _cb parameters (there might be multiple due to bugs)
+  searchParams.delete("_cb");
+
+  // Add new cache buster
   const cacheBuster = generateCacheBuster();
-  const separator = urlWithoutHash.includes("?") ? "&" : "?";
-  return `${urlWithoutHash}${separator}_cb=${cacheBuster}${hashFragment}`;
+  searchParams.set("_cb", cacheBuster);
+
+  // Rebuild URL
+  const queryString = searchParams.toString();
+  return `${pathAndQuery}?${queryString}${hashFragment}`;
 }
