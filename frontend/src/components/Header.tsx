@@ -7,6 +7,7 @@ import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
+import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
@@ -25,6 +26,7 @@ import {
 import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
+import { TestUserSelect } from "./TestUserSelect";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
@@ -268,9 +270,11 @@ const NavLinks = ({
 const Header = ({
   locale,
   localDev,
+  testUsers,
 }: {
   locale?: string;
   localDev: boolean;
+  testUsers: TestUser[];
 }) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
@@ -349,7 +353,7 @@ const Header = ({
               </div>
             </Title>
           </div>
-          {localDev && <div>dev login here</div>}
+          {localDev && testUsers && <TestUserSelect testUsers={testUsers} />}
           <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}

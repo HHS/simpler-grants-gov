@@ -1,11 +1,13 @@
 import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import { envFeatureFlags, environment } from "src/constants/environments";
 import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
+import { getSession } from "src/services/auth/session";
 import UserProvider from "src/services/auth/UserProvider";
 import { assignBaseFlags } from "src/services/featureFlags/featureFlagHelpers";
+import { getTestUsers } from "src/services/fetch/fetchers/userFetcher";
+import { TestUser } from "src/types/userTypes";
 
-import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ActivityMonitor } from "./ActivityMonitor";
 import Footer from "./Footer";
@@ -17,10 +19,18 @@ type Props = {
   locale: string;
 };
 
-export default function Layout({ children, locale }: Props) {
+export default async function Layout({ children, locale }: Props) {
   setRequestLocale(locale);
+  const t = await getTranslations();
+  let testUsers: TestUser[] = [];
 
-  const t = useTranslations();
+  if (environment.LOCAL_DEV) {
+    try {
+      testUsers = await getTestUsers();
+    } catch (e) {
+      console.error("unable to fetch test users, oh well", e);
+    }
+  }
 
   return (
     <UserProvider
@@ -35,7 +45,11 @@ export default function Layout({ children, locale }: Props) {
           {t("Layout.skipToMain")}
         </a>
         <LoginModalProvider>
-          <Header locale={locale} localDev={environment.LOCAL_DEV === "true"} />
+          <Header
+            locale={locale}
+            localDev={environment.LOCAL_DEV === "true"}
+            testUsers={testUsers}
+          />
           <main id="main-content" className="border-top-0">
             {children}
           </main>
