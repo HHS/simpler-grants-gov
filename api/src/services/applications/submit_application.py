@@ -4,9 +4,10 @@ from uuid import UUID
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
 from src.db.models.competition_models import Application
 from src.db.models.user_models import User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
@@ -46,5 +47,12 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
 
     # Add application metadata to logs
     add_application_metadata_to_logs(application)
+
+    add_audit_event(
+        db_session=db_session,
+        application=application,
+        user=user,
+        audit_event=ApplicationAuditEvent.APPLICATION_SUBMITTED,
+    )
 
     return application
