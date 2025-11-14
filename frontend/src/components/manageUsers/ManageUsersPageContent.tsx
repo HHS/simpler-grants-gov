@@ -7,6 +7,7 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
+import { UserOrganizationInvite } from "./UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
   organizationId,
@@ -55,6 +56,7 @@ export async function ManageUsersPageContent({
         ]}
       />
       <PageHeader organizationName={name} pageHeader={t("pageHeading")} />
+      <UserOrganizationInvite organizationId={organizationId} />
     </GridContainer>
   );
 }
