@@ -28,5 +28,5 @@ def get_active_forms() -> list[Form]:
         ProjectNarrativeAttachment_v1_2,
         OtherNarrativeAttachment_v1_2,
         CD511_v1_1,
-        SupplementaryNEHCoverSheet_v3_0
+        SupplementaryNEHCoverSheet_v3_0,
     ]
