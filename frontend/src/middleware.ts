@@ -54,7 +54,7 @@ export default function middleware(request: NextRequest): NextResponse {
     return new NextResponse(
       JSON.stringify({ params: params.entries(), cacheControl }),
       {
-        status: 201,
+        status: 200,
         headers: {
           "Cache-Control": cacheControl.join(", "),
           "Content-Type": "application/json",
