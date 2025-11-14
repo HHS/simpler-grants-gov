@@ -45,7 +45,10 @@ resource "aws_cloudfront_cache_policy" "default" {
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
-      cookie_behavior = "all"
+      cookie_behavior = "whitelist"
+      cookies {
+        items = ["session"]
+      }
     }
     headers_config {
       # The only options are "none" and "whitelist", there is no "all" option
