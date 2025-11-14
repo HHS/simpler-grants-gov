@@ -107,6 +107,7 @@ class SetupCertUserTask(Task):
             user=user,
         )
         self.db_session.add(legacy_certificate)
+
         logger.info(
             "Created legacy certificate",
             extra={
@@ -119,18 +120,24 @@ class SetupCertUserTask(Task):
     def create_user_with_agency_roles(self, agencies: list[Agency], roles: list[Role]) -> User:
         user = User(user_id=uuid.uuid4(), user_type=UserType.LEGACY_CERTIFICATE)
         self.db_session.add(user)
+
         log_extra = {"user_id": user.user_id}
         logger.info("Created legacy cert user", extra=log_extra)
-        for a in agencies:
-            agency_user = AgencyUser(user=user, agency=a)
+
+        for agency in agencies:
+            agency_user = AgencyUser(user=user, agency=agency)
             self.db_session.add(agency_user)
+
             agency_roles = [AgencyUserRole(agency_user=agency_user, role=r) for r in roles]
+
             self.db_session.add_all(agency_roles)
+
             logger.info(
                 "Added user to agency",
                 extra=log_extra
-                | {"agency_code": a.agency_code, "role_ids": [r.role_id for r in roles]},
+                | {"agency_code": agency.agency_code, "role_ids": [r.role_id for r in roles]},
             )
+
         return user
 
     def get_roles(self) -> list[Role] | None:
