@@ -42,6 +42,27 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
+  if (request.url.includes("/cdn")) {
+    const url = new URL(request.url);
+    const params = new URLSearchParams(url.search);
+
+    const cacheControl: string[] = [];
+
+    cacheControl.push(`max-age: ${params.get("max-age") || "10"}`);
+    cacheControl.push(params.get("cache") || "no-store");
+
+    return new NextResponse(
+      JSON.stringify({ params: params.entries(), cacheControl }),
+      {
+        status: 201,
+        headers: {
+          "Cache-Control": cacheControl.join(", "),
+          "Content-Type": "application/json",
+        },
+      },
+    );
+  }
+
   const response = request.url.match(/api\//)
     ? featureFlagsManager.middleware(request, NextResponse.next())
     : featureFlagsManager.middleware(request, i18nMiddleware(request));
