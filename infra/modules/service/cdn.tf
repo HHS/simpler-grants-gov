@@ -46,11 +46,7 @@ resource "aws_cloudfront_origin_request_policy" "forward_all_cookies" {
   }
 
   headers_config {
-    # Forward only X-User-Authenticated header set by Lambda@Edge
-    header_behavior = "whitelist"
-    headers {
-      items = ["X-User-Authenticated"]
-    }
+    header_behavior = "none"
   }
 
   query_strings_config {
@@ -142,26 +138,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     origin_request_policy_id = aws_cloudfront_origin_request_policy.forward_all_cookies[0].id
     compress                 = true
     viewer_protocol_policy   = "redirect-to-https"
-
-    # Lambda@Edge for viewer-request event
-    dynamic "lambda_function_association" {
-      for_each = var.enable_lambda_edge && var.lambda_edge_viewer_request_path != null ? ["viewer-request"] : []
-      content {
-        event_type   = lambda_function_association.value
-        lambda_arn   = aws_lambda_function.edge_viewer_request[0].qualified_arn
-        include_body = false
-      }
-    }
-
-    # Lambda@Edge for origin-response event
-    dynamic "lambda_function_association" {
-      for_each = var.enable_lambda_edge && var.lambda_edge_origin_response_path != null ? ["origin-response"] : []
-      content {
-        event_type   = lambda_function_association.value
-        lambda_arn   = aws_lambda_function.edge_origin_response[0].qualified_arn
-        include_body = false
-      }
-    }
   }
 
   restrictions {
@@ -192,8 +168,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     aws_s3_bucket_public_access_block.cdn[0],
     aws_s3_bucket_acl.cdn[0],
     aws_s3_bucket.cdn[0],
-    aws_lambda_function.edge_viewer_request,
-    aws_lambda_function.edge_origin_response,
   ]
 
   #checkov:skip=CKV2_AWS_42: Sometimes we don't have a skip

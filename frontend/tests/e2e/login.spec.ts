@@ -42,9 +42,7 @@ test.describe("Login Page Redirect", () => {
     page,
   }) => {
     await page.goto(`/login`);
-    // URL should be /?_cb=... (cache buster is always added)
-    // Match full URL or just the path with cache buster
-    await expect(page).toHaveURL(/\/\?_cb=\d+_[a-z0-9]+$/);
+    await expect(page).toHaveURL("/");
   });
 
   test("should redirect to stored URL after login", async ({ page }) => {
@@ -52,9 +50,7 @@ test.describe("Login Page Redirect", () => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
     await page.goto(`/login`);
-    // URL should be /opportunities?_cb=... (cache buster is always added)
-    // Match full URL or just the path with cache buster
-    await expect(page).toHaveURL(/\/opportunities\?_cb=\d+_[a-z0-9]+$/);
+    await expect(page).toHaveURL("/opportunities");
   });
 
   test("should redirect to home page when stored URL is empty", async ({
@@ -64,9 +60,7 @@ test.describe("Login Page Redirect", () => {
       sessionStorage.setItem("login-redirect", "");
     });
     await page.goto(`/login`);
-    // URL should be /?_cb=... (cache buster is always added)
-    // Match full URL or just the path with cache buster
-    await expect(page).toHaveURL(/\/\?_cb=\d+_[a-z0-9]+$/);
+    await expect(page).toHaveURL("/");
   });
 
   test("should redirect to home page when stored URL is external", async ({
@@ -76,10 +70,8 @@ test.describe("Login Page Redirect", () => {
       sessionStorage.setItem("login-redirect", "https://external.com");
     });
     await page.goto(`/login`);
-    // External URLs are intercepted by the test route handler and redirected to /
-    // The login page should still add cache buster, but the interceptor might redirect to / first
-    // So we check that we end up at / (with or without cache buster, as the interceptor may override)
-    await expect(page).toHaveURL(/\/$|\/\?_cb=\d+_[a-z0-9]+$/);
+    // External URLs are redirected to /
+    await expect(page).toHaveURL("/");
   });
 
   test('should display "Redirecting..." text while redirecting', async ({

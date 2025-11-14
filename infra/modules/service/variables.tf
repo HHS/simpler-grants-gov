@@ -361,24 +361,6 @@ variable "optional_extra_alb_domains" {
   default     = []
 }
 
-variable "enable_lambda_edge" {
-  description = "Enable Lambda@Edge for CloudFront distribution"
-  type        = bool
-  default     = false
-}
-
-variable "lambda_edge_viewer_request_path" {
-  description = "Path to Lambda@Edge viewer-request function source file (Python file)"
-  type        = string
-  default     = null
-}
-
-variable "lambda_edge_origin_response_path" {
-  description = "Path to Lambda@Edge origin-response function source file (Python file)"
-  type        = string
-  default     = null
-}
-
 variable "cdn_cache_default_ttl" {
   description = "Default TTL for CloudFront cache policy in seconds"
   type        = number

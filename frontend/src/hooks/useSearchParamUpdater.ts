@@ -5,10 +5,8 @@ import {
   defaultFilterValues,
   SEARCH_NO_STATUS_VALUE,
 } from "src/constants/search";
-import { useUser } from "src/services/auth/useUser";
 import { FrontendFilterNames } from "src/types/search/searchFilterTypes";
 import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
-import { addCacheBuster } from "src/utils/cacheBuster";
 import { queryParamsToQueryString } from "src/utils/generalUtils";
 import { paramsToFormattedQuery } from "src/utils/search/searchUtils";
 
@@ -19,14 +17,6 @@ export function useSearchParamUpdater() {
   const pathname = usePathname() || "";
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
-  const { user } = useUser();
-
-  // Helper to add cache buster if authenticated
-  const withCacheBuster = (url: string) => {
-    // Check authentication using user object - must have a token
-    const isAuthenticated = !!(user && user.token);
-    return isAuthenticated ? addCacheBuster(url) : url;
-  };
 
   const updateQueryParams = (
     queryParamValue: string | Set<string>,
@@ -55,26 +45,18 @@ export function useSearchParamUpdater() {
     }
 
     sendGAEvent("event", "search_term", { key: finalQueryParamValue });
-    router.push(
-      withCacheBuster(`${pathname}${paramsToFormattedQuery(params)}`),
-      { scroll },
-    );
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const replaceQueryParams = (
     params: ValidSearchQueryParamData | { savedSearch?: string },
   ) => {
-    router.push(
-      withCacheBuster(`${pathname}${queryParamsToQueryString(params)}`),
-    );
+    router.push(`${pathname}${queryParamsToQueryString(params)}`);
   };
 
   const setQueryParam = (key: string, value: string, scroll = false) => {
     params.set(key, value);
-    router.push(
-      withCacheBuster(`${pathname}${paramsToFormattedQuery(params)}`),
-      { scroll },
-    );
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const setQueryParams = (
@@ -85,18 +67,12 @@ export function useSearchParamUpdater() {
       params.set(queryParamKey, queryParamValue);
     });
 
-    router.push(
-      withCacheBuster(`${pathname}${paramsToFormattedQuery(params)}`),
-      { scroll },
-    );
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const removeQueryParam = (paramKey: string, scroll = false) => {
     params.delete(paramKey);
-    router.push(
-      withCacheBuster(`${pathname}${paramsToFormattedQuery(params)}`),
-      { scroll },
-    );
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
   const clearQueryParams = (paramsToRemove?: string[]) => {
@@ -104,9 +80,7 @@ export function useSearchParamUpdater() {
     paramsToClear.forEach((paramKey) => {
       params.delete(paramKey);
     });
-    router.push(
-      withCacheBuster(`${pathname}${paramsToFormattedQuery(params)}`),
-    );
+    router.push(`${pathname}${paramsToFormattedQuery(params)}`);
   };
 
   const removeQueryParamValue = (

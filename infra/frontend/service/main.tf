@@ -152,12 +152,7 @@ module "service" {
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
-  enable_alb_cdn     = true
-  enable_lambda_edge = false
-  # Lambda@Edge no longer needed - using cookie-based cache busting instead
-  # lambda_edge_viewer_request_path  = "${path.module}/lambda-edge-viewer-request/index.py"
-  # lambda_edge_origin_response_path = "${path.module}/lambda-edge-origin-response/index.py"
-
+  enable_alb_cdn = true
 
   extra_environment_variables = merge(
     {

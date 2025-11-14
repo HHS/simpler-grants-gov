@@ -34,10 +34,7 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
-    // URL should include cache buster parameter
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/test-redirect-path\?_cb=\d+_[a-z0-9]+$/),
-    );
+    expect(mockPush).toHaveBeenCalledWith("/test-redirect-path");
     expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
@@ -48,12 +45,8 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
-    // First push is "/", second push is "/?_cb=..." with cache buster
     expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/\?_cb=\d+_[a-z0-9]+$/),
-    );
-    expect(mockPush).toHaveBeenCalledTimes(2);
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should redirect to home if redirect URL is empty", () => {
@@ -63,12 +56,8 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
-    // First push is "/", second push is "/?_cb=..." with cache buster
     expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/\?_cb=\d+_[a-z0-9]+$/),
-    );
-    expect(mockPush).toHaveBeenCalledTimes(2);
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should redirect to home if redirect URL doesn't start with /", () => {
@@ -78,12 +67,8 @@ describe("Login Page", () => {
 
     expect(mockGetItem).toHaveBeenCalledWith("login-redirect");
     expect(mockRemoveItem).toHaveBeenCalledWith("login-redirect");
-    // First push is "/", second push is "/?_cb=..." with cache buster
     expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringMatching(/^\/\?_cb=\d+_[a-z0-9]+$/),
-    );
-    expect(mockPush).toHaveBeenCalledTimes(2);
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("should display 'Redirecting...' text", () => {
