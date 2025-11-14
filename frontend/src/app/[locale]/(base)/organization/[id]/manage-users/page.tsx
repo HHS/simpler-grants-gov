@@ -1,10 +1,15 @@
+import { Metadata } from "next";
+import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
-import { use } from "react";
+import { notFound, redirect } from "next/navigation";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
+import { AuthorizationGate } from "src/components/user/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 interface ManageUsersPageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -13,20 +18,38 @@ interface ManageUsersPageProps {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+  params: Promise<{ locale: string; }>;
+}): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-
-  return {
+    const meta: Metadata = {
     title: t("ManageUsers.pageTitle"),
     description: t("Index.metaDescription"),
   };
+
+  return meta
 }
 
-function ManageUsersPage({ params }: ManageUsersPageProps) {
-  const { id: organizationId } = use(params);
-  return <ManageUsersPageContent organizationId={organizationId} />;
+async function ManageUsersPage({ params }: ManageUsersPageProps) {
+  const session = await getSession();
+  const { id } = await params;
+  return (
+    <AuthorizationGate
+      resourcePromises={{
+        organizationDetails: getOrganizationDetails(session?.token || "", id),
+      }}
+      requiredPrivileges={[
+        {
+          resourceId: id,
+          resourceType: "organization",
+          privilege: "manage_org_members",
+        },
+      ]}
+      onUnauthorized={() => <UnauthorizedMessage />}
+    >
+      <ManageUsersPageContent organizationId={id} />
+    </AuthorizationGate>
+  );
 }
 
 export default withFeatureFlag<ManageUsersPageProps, never>(
