@@ -39,7 +39,7 @@ class SetupCertUserTaskStatus(StrEnum):
 
 
 @task_blueprint.cli.command("setup-cert-user", help="Setup the LegacyCertificate and User")
-@click.option("--cert-id", "-t", help="currentcertid on Tcertificate")
+@click.option("--tcertficates-id", "-t", help="tcertificates_id on Staging Tcertificate")
 @click.option("--role-ids", "-t", help="role_id of role that needs to be added", multiple=True)
 @flask_db.with_db_session()
 @ecs_background_task(task_name="setup-cert-user")
@@ -49,9 +49,9 @@ def setup_cert_user(db_session: db.Session, cert_id: str, role_ids: list[str]) -
 
 class SetupCertUserTask(Task):
 
-    def __init__(self, db_session: db.Session, cert_id: str, role_ids: list[str]):
+    def __init__(self, db_session: db.Session, tcertificates_id: str, role_ids: list[str]):
         super().__init__(db_session)
-        self.cert_id = cert_id
+        self.tcertificates_id = tcertificates_id
         self.role_ids = role_ids
         self.valid_expiration_date = FUTURE_DATE
         self.top_agency: Agency | None = None
@@ -127,7 +127,8 @@ class SetupCertUserTask(Task):
     def get_tcertificate(self) -> staging.certificates.Tcertificates | None:
         return self.db_session.scalars(
             select(staging.certificates.Tcertificates).where(
-                staging.certificates.Tcertificates.currentcertid == self.cert_id
+                staging.certificates.Tcertificates.tcertificates_id
+                == uuid.UUID(self.tcertificates_id)
             )
         ).one_or_none()
 

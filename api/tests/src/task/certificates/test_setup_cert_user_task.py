@@ -24,8 +24,8 @@ class TestSetupCertUserTask(BaseTestClass):
     ):
         role_id = str(uuid.uuid4())
         tcertificate = StagingTcertificatesFactory()
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [role_id]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [role_id]).run_task()
         assert result == SetupCertUserTaskStatus.INVALID_ROLE_IDS
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Invalid role ids" in warning_messages
@@ -34,8 +34,8 @@ class TestSetupCertUserTask(BaseTestClass):
         self, enable_factory_create, db_session, caplog
     ):
         role = RoleFactory.create(is_agency_role=True)
-        cert_id = str(uuid.uuid4())
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(uuid.uuid4())
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Tcertificate not found" in warning_messages
@@ -46,8 +46,8 @@ class TestSetupCertUserTask(BaseTestClass):
         tcertificate = StagingTcertificatesFactory(
             expirationdate=date(2023, 12, 31), agencyid=agency.agency_code
         )
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Cert is expired" in warning_messages
@@ -57,8 +57,8 @@ class TestSetupCertUserTask(BaseTestClass):
     ):
         role = RoleFactory.create(is_agency_role=True)
         tcertificate = StagingTcertificatesFactory(agencyid="XYZ")
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.AGENCY_NOT_FOUND
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Agency not found" in warning_messages
@@ -69,8 +69,8 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(serial_num=None, agencyid=agency.agency_code)
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
         warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
         assert "Tcertificate is missing serial number" in warning_messages
@@ -81,11 +81,13 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(agencyid=agency.agency_code)
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.SUCCESS
         legacy_certificate = (
-            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == cert_id).first()
+            db_session.query(LegacyCertificate)
+            .filter(LegacyCertificate.cert_id == tcertificate.currentcertid)
+            .first()
         )
         assert legacy_certificate.user
 
@@ -95,8 +97,8 @@ class TestSetupCertUserTask(BaseTestClass):
         tcertificate = StagingTcertificatesFactory(
             agencyid=agency.agency_code, expirationdate=date(2070, 12, 31)
         )
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.SUCCESS
         legacy_certificate = db_session.scalars(
             select(LegacyCertificate).where(LegacyCertificate.cert_id == tcertificate.currentcertid)
@@ -113,11 +115,13 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(agencyid=agency.agency_code, expirationdate=None)
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.SUCCESS
         legacy_certificate_expiration_date = db_session.execute(
-            select(LegacyCertificate.expiration_date).where(LegacyCertificate.cert_id == cert_id)
+            select(LegacyCertificate.expiration_date).where(
+                LegacyCertificate.cert_id == tcertificate.currentcertid
+            )
         ).scalar()
         assert legacy_certificate_expiration_date == FUTURE_DATE
 
@@ -127,13 +131,13 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(agencyid=agency.agency_code)
-        cert_id = str(tcertificate.currentcertid)
-        LegacyAgencyCertificateFactory(cert_id=cert_id, agency=agency)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        LegacyAgencyCertificateFactory(cert_id=tcertificate.currentcertid, agency=agency)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
         legacy_certificate_count = db_session.scalars(
             select(func.count(LegacyCertificate.legacy_certificate_id)).where(
-                LegacyCertificate.cert_id == cert_id
+                LegacyCertificate.cert_id == tcertificate.currentcertid
             )
         ).one()
         assert legacy_certificate_count == 1
@@ -146,11 +150,13 @@ class TestSetupCertUserTask(BaseTestClass):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(agencyid=agency.agency_code)
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.SUCCESS
         legacy_certificate = (
-            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == cert_id).first()
+            db_session.query(LegacyCertificate)
+            .filter(LegacyCertificate.cert_id == tcertificate.currentcertid)
+            .first()
         )
         user = legacy_certificate.user
         agency_user = db_session.scalars(
@@ -169,13 +175,15 @@ class TestSetupCertUserTask(BaseTestClass):
         role_2 = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(agencyid=agency.agency_code)
-        cert_id = str(tcertificate.currentcertid)
+        tcert_id = str(tcertificate.tcertificates_id)
         result = SetupCertUserTask(
-            db_session, cert_id, [str(role_1.role_id), str(role_2.role_id)]
+            db_session, tcert_id, [str(role_1.role_id), str(role_2.role_id)]
         ).run_task()
         assert result == SetupCertUserTaskStatus.SUCCESS
         legacy_certificate = (
-            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == cert_id).first()
+            db_session.query(LegacyCertificate)
+            .filter(LegacyCertificate.cert_id == tcertificate.currentcertid)
+            .first()
         )
         user = legacy_certificate.user
         agency_user_ids = list(
@@ -202,11 +210,13 @@ class TestSetupCertUserTask(BaseTestClass):
         agency_1 = AgencyFactory(agency_code=agency_code, is_multilevel_agency=True)
         agency_2 = AgencyFactory(agency_code=f"{agency_code}-ABC", is_multilevel_agency=False)
         tcertificate = StagingTcertificatesFactory(agencyid=agency_1.agency_code)
-        cert_id = str(tcertificate.currentcertid)
-        result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
+        tcert_id = str(tcertificate.tcertificates_id)
+        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.SUCCESS
         legacy_certificate = (
-            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == cert_id).first()
+            db_session.query(LegacyCertificate)
+            .filter(LegacyCertificate.cert_id == tcertificate.currentcertid)
+            .first()
         )
         user = legacy_certificate.user
         agency_user_1 = db_session.scalars(

@@ -2944,6 +2944,7 @@ class StagingTcertificatesFactory(AbstractStagingFactory):
     class Meta:
         model = staging.certificates.Tcertificates
 
+    tcertificates_id = Generators.UuidObj
     previouscertid = factory.Sequence(lambda n: f"{n}")
     currentcertid = factory.Sequence(lambda n: f"{1000 + n}")
     orgduns = None
