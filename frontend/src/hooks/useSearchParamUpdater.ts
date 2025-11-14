@@ -18,11 +18,20 @@ export function useSearchParamUpdater() {
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
 
+  // note that providing an empty string as `queryParamValue` will remove the param.
+  // also note that "query" is the name of a query param, but it is being handled separately
+  // in this implementation. To set a new keyword query in the url without touching other params,
+  // you can use a call such as `updateQueryParams("", "query", queryTerm)`.
   const updateQueryParams = (
+    // The parameter value that is not the query term. Query term is treated
+    // separately because updates to it are captured, ie if a user updates the
+    // search term and then clicks a facet, the updated term is used.
     queryParamValue: string | Set<string>,
+    // Key of the parameter.
     key: string,
     queryTerm?: string | null,
-
+    // Determines whether the state update scrolls the user to the top. This
+    // is useful for components that are expected to be "under the fold."
     scroll = false,
   ) => {
     const finalQueryParamValue =
@@ -89,11 +98,14 @@ export function useSearchParamUpdater() {
   ) => {
     const paramToEdit = searchParams.get(queryParamKey);
     const defaultValues = defaultFilterValues[queryParamKey];
-
+    // if no param value is present but default values are, we can remove a default value
+    // that is in place though not explicitly set in the query params
+    // ex. removing forecasted status from default /search state
     if (!paramToEdit && !defaultValues) {
       return;
     }
-
+    // note that this default case will never be hit due to the early return
+    // but ts isn't quite smart enough to realize, so adding the [] to satisfy the compiler
     const paramValues = paramToEdit
       ? paramToEdit.split(",")
       : defaultValues || [];

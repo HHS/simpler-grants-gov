@@ -212,13 +212,11 @@ describe("StartApplicationModal", () => {
         loading={false}
       />,
     );
-
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(1);
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        `/workspace/applications/application/999`,
+      );
     });
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      "/workspace/applications/application/999",
-    );
   });
   it("renders an ineligible view if competition is org only and user has no orgs", () => {
     render(

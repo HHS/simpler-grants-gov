@@ -1,8 +1,9 @@
 import { Metadata } from "next";
 import { environment } from "src/constants/environments";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
-import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { getSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
@@ -69,7 +70,9 @@ function Search({ searchParams, params }: SearchPageProps) {
   // this full list ensures that filter pills will always have labels regardless of opportunity status selection
   const agencyListPromise = performAgencySearch();
 
-  const savedOpportunitiesPromise = fetchSavedOpportunities();
+  const savedOpportunitiesPromise = getSession().then((session) =>
+    session ? getSavedOpportunities(session.token, session.user_id) : [],
+  );
 
   return (
     <QueryProvider>

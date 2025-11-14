@@ -14,6 +14,9 @@ const nrExternals = require("@newrelic/next/load-externals");
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 const appSassOptions = sassOptions(basePath);
 
+// Only upgrade insecure requests in production, not in local dev
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline';
@@ -28,7 +31,7 @@ const cspHeader = `
     script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
+    ${isDevelopment ? "" : "upgrade-insecure-requests;"}
     `;
 
 const securityHeaders = [
