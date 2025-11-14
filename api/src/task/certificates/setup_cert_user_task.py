@@ -75,7 +75,7 @@ class SetupCertUserTask(Task):
                 logger.warning("Cert is expired")
                 return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
             if self.is_existing_certificate(tcertificate):
-                logger.warning("Tcertificate is missing serial number")
+                logger.warning("LegacyCertificate already exists")
                 return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
 
             agencies = self.get_agencies(tcertificate)
@@ -164,6 +164,5 @@ class SetupCertUserTask(Task):
             )
         ).one_or_none()
         if existing_tcertificate:
-            logger.warning("LegacyCertificate already exists")
             return True
         return False

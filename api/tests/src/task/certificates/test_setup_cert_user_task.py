@@ -56,7 +56,7 @@ class TestSetupCertUserTask(BaseTestClass):
         self, enable_factory_create, db_session, caplog
     ):
         role = RoleFactory.create(is_agency_role=True)
-        tcertificate = StagingTcertificatesFactory()
+        tcertificate = StagingTcertificatesFactory(agencyid="XYZ")
         cert_id = str(tcertificate.currentcertid)
         result = SetupCertUserTask(db_session, cert_id, [str(role.role_id)]).run_task()
         assert result == SetupCertUserTaskStatus.AGENCY_NOT_FOUND
