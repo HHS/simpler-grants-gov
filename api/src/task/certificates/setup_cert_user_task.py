@@ -54,36 +54,38 @@ class SetupCertUserTask(Task):
         self.tcertificates_id = tcertificates_id
         self.role_ids = role_ids
         self.valid_expiration_date = FUTURE_DATE
-        self.top_agency: Agency | None = None
 
-    def run_task(self) -> SetupCertUserTaskStatus:  # type: ignore [override]
-        logger.info("setup cert user start")
+    def run_task(self) -> None:
         with self.db_session.begin():
-            roles = self.get_roles()
-            if roles is None:
-                return SetupCertUserTaskStatus.INVALID_ROLE_IDS
+            self.setup_cert()
 
-            tcertificate = self.get_tcertificate()
-            if tcertificate is None:
-                logger.warning("Tcertificate not found")
-                return SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
-            if not tcertificate.serial_num:
-                logger.warning("Tcertificate is missing serial number")
-                return SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
-            self.valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
-            if self.valid_expiration_date <= datetime_util.get_now_us_eastern_date():
-                logger.warning("Cert is expired")
-                return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
-            if self.is_existing_certificate(tcertificate):
-                logger.warning("LegacyCertificate already exists")
-                return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
+    def setup_cert(self) -> SetupCertUserTaskStatus:
+        logger.info("setup cert user start")
+        roles = self.get_roles()
+        if roles is None:
+            return SetupCertUserTaskStatus.INVALID_ROLE_IDS
 
-            agencies = self.get_agencies(tcertificate)
-            if agencies is None:
-                return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
+        tcertificate = self.get_tcertificate()
+        if tcertificate is None:
+            logger.warning("Tcertificate not found")
+            return SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
+        if not tcertificate.serial_num:
+            logger.warning("Tcertificate is missing serial number")
+            return SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
+        self.valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
+        if self.valid_expiration_date <= datetime_util.get_now_us_eastern_date():
+            logger.warning("Cert is expired")
+            return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
+        if self.is_existing_certificate(tcertificate):
+            logger.warning("LegacyCertificate already exists")
+            return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
 
-            else:
-                self.process_cert_user(roles, tcertificate, agencies)
+        agency, related_agencies = self.get_agencies(tcertificate)
+        if agency is None:
+            return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
+
+        else:
+            self.process_cert_user(roles, tcertificate, agency, related_agencies)
         logger.info("setup cert user complete")
         return SetupCertUserTaskStatus.SUCCESS
 
@@ -91,26 +93,44 @@ class SetupCertUserTask(Task):
         self,
         roles: list[Role],
         tcertificate: staging.certificates.Tcertificates,
-        agencies: list[Agency],
+        agency: Agency,
+        related_agencies: list[Agency],
     ) -> None:
-        user = self.create_user_with_agency_roles(agencies, roles)
+        all_agencies = related_agencies + [agency]
+        user = self.create_user_with_agency_roles(all_agencies, roles)
         legacy_certificate = LegacyCertificate(
-            agency=self.top_agency,
+            legacy_certificate_id=uuid.uuid4(),
+            agency=agency,
             cert_id=tcertificate.currentcertid,
             expiration_date=self.valid_expiration_date,
             serial_number=tcertificate.serial_num,
             user=user,
         )
         self.db_session.add(legacy_certificate)
+        logger.info(
+            "Created legacy certificate",
+            extra={
+                "legacy_certificate_id": legacy_certificate.legacy_certificate_id,
+                "user_id": user.user_id,
+                "agency_code": agency.agency_code,
+            },
+        )
 
     def create_user_with_agency_roles(self, agencies: list[Agency], roles: list[Role]) -> User:
-        user = User(user_type=UserType.LEGACY_CERTIFICATE)
+        user = User(user_id=uuid.uuid4(), user_type=UserType.LEGACY_CERTIFICATE)
         self.db_session.add(user)
+        log_extra = {"user_id": user.user_id}
+        logger.info("Created legacy cert user", extra=log_extra)
         for a in agencies:
             agency_user = AgencyUser(user=user, agency=a)
             self.db_session.add(agency_user)
             agency_roles = [AgencyUserRole(agency_user=agency_user, role=r) for r in roles]
             self.db_session.add_all(agency_roles)
+            logger.info(
+                "Added user to agency",
+                extra=log_extra
+                | {"agency_code": a.agency_code, "role_ids": [r.role_id for r in roles]},
+            )
         return user
 
     def get_roles(self) -> list[Role] | None:
@@ -120,7 +140,8 @@ class SetupCertUserTask(Task):
             ).all()
         )
         if len(self.role_ids) != len(roles):
-            logger.warning("Invalid role ids")
+            log_extra = {"found_role_ids": [r.role_id for r in roles] if roles else []}
+            logger.warning("Invalid role ids", extra=log_extra)
             return None
         return roles
 
@@ -132,15 +153,16 @@ class SetupCertUserTask(Task):
             )
         ).one_or_none()
 
-    def get_agencies(self, tcertificate: staging.certificates.Tcertificates) -> list[Agency] | None:
+    def get_agencies(
+        self, tcertificate: staging.certificates.Tcertificates
+    ) -> tuple[Agency | None, list[Agency]]:
         agency = self.db_session.scalar(
             select(Agency).where(Agency.agency_code == tcertificate.agencyid)
         )
         if not agency:
             logger.warning("Agency not found")
-            return None
-        self.top_agency = agency
-        agencies: list[Agency] = [agency]
+            return (None, [])
+        agencies: tuple[Agency | None, list[Agency]] = (agency, [])
         """
         If the tcertificate agency has is_multilevel marked as True then:
         1. fetch every agency that starts with the same prefix as the agency:
@@ -155,7 +177,7 @@ class SetupCertUserTask(Task):
                     select(Agency).where(Agency.agency_code.like(search_pattern))
                 ).all()
             )
-            agencies.extend(agency_query_results)
+            agencies[1].extend(agency_query_results)
         return agencies
 
     def is_existing_certificate(self, tcertificate: staging.certificates.Tcertificates) -> bool:
@@ -164,6 +186,4 @@ class SetupCertUserTask(Task):
                 LegacyCertificate.cert_id == tcertificate.currentcertid
             )
         ).one_or_none()
-        if existing_tcertificate:
-            return True
-        return False
+        return existing_tcertificate is not None
