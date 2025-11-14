@@ -59,7 +59,7 @@ export const inviteUserAction = async (
 
   const requestData = {
     email: formData.get("email") as string,
-    roleId: formData.get("role") as string,
+    roleId: [formData.get("role") as string],
     organizationId,
   };
 
@@ -69,6 +69,7 @@ export const inviteUserAction = async (
       session.token,
       requestData,
     );
+
     return { data: inviteUserResponse, success: true };
   } catch (e) {
     const error = e as Error;
