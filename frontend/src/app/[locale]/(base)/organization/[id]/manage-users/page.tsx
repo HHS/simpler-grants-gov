@@ -1,11 +1,10 @@
 import { Metadata } from "next";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
@@ -18,16 +17,16 @@ interface ManageUsersPageProps {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; }>;
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-    const meta: Metadata = {
+  const meta: Metadata = {
     title: t("ManageUsers.pageTitle"),
     description: t("Index.metaDescription"),
   };
 
-  return meta
+  return meta;
 }
 
 async function ManageUsersPage({ params }: ManageUsersPageProps) {
