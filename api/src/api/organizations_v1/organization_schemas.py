@@ -321,3 +321,15 @@ class OrganizationInvitationListResponseSchema(AbstractResponseSchema):
         fields.Nested(OrganizationInvitationDataSchema),
         metadata={"description": "List of organization invitations"},
     )
+
+
+class OrganizationIgnoreLegacyUserRequestSchema(Schema):
+    """Schema for handling requests to ignore a legacy user within an organization."""
+
+    email = fields.String(
+        required=True, metadata={"description": "Email address of the legacy user to ignore"}
+    )
+
+
+class OrganizationIgnoreLegacyUserResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
