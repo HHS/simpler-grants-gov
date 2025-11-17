@@ -185,11 +185,9 @@ FORM_JSON_SCHEMA = {
             "readOnly": True,
         },
         "organization_name": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Legal Name",
             "description": "Enter the legal name of the applicant that will undertake the assistance activity.",
-            "minLength": 1,
-            "maxLength": 60,
         },
         "employer_taxpayer_identification_number": {
             "type": "string",

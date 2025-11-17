@@ -2,6 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
+from src.form_schema.shared import COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -28,11 +29,9 @@ FORM_JSON_SCHEMA = {
             # NOTE: This is named OrganizationName in the XSD, but
             # the UI calls it an applicant name.
             # FUTURE WORK: This gets copied from the SF-424's OrganizationName field (called Legal Name in the UI)
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Applicant Name",
             "description": "This should match the 'Legal Name' field from the SF-424 form",
-            "minLength": 1,
-            "maxLength": 60,
         },
         "project_title": {
             # FUTURE WORK: This gets copied from the SF-424's ProjectTitle field

@@ -1,5 +1,5 @@
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension.field_validators import Email, Length
+from src.api.schemas.extension.field_validators import Email, Length, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
@@ -321,3 +321,17 @@ class OrganizationInvitationListResponseSchema(AbstractResponseSchema):
         fields.Nested(OrganizationInvitationDataSchema),
         metadata={"description": "List of organization invitations"},
     )
+
+
+class OrganizationIgnoreLegacyUserRequestSchema(Schema):
+    """Schema for handling requests to ignore a legacy user within an organization."""
+
+    email = fields.String(
+        required=True,
+        metadata={"description": "Email address of the legacy user to ignore"},
+        validate=[validators.Email()],
+    )
+
+
+class OrganizationIgnoreLegacyUserResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

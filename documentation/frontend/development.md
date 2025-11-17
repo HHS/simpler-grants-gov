@@ -10,7 +10,7 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 For version 0.1.0, please install and use node <= v22.13.0.
 
-Run `npm install && npm run dev` to install and start the application.
+Run `npm install && npm run local` to install and start the application.
 
 Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 
@@ -32,7 +32,7 @@ Running authentication locally requires running the API and sharing the correct 
 
 1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
 2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
-3. Restart the API (if necessary reseed the database, then `make start`) and frontend (`npm run dev`) for development
+3. Restart the API (if necessary reseed the database, then `make start`) and frontend (`npm run local`) for development
 
 ### 🏛️ "Built" version
 

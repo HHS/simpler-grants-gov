@@ -26,7 +26,7 @@ function TextWidget<
 >({
   id,
   disabled,
-  readonly,
+  readOnly,
   required,
   schema,
   value,
@@ -124,7 +124,7 @@ function TextWidget<
         name={id}
         aria-required={required}
         disabled={disabled}
-        readOnly={readonly}
+        readOnly={readOnly}
         placeholder={placeholder ?? undefined}
         list={examples ? examplesId<T>(id) : undefined}
         aria-describedby={describedby}
