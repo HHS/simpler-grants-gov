@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
     CompetitionOpenToApplicant,
@@ -52,28 +52,20 @@ def add_organization_to_application(
 
     # Get the organization (raises 404 if not found)
     organization = get_organization(db_session, organization_id)
-
     # Check user has MODIFY_APPLICATION privilege for the application
-    if not can_access(user, {Privilege.MODIFY_APPLICATION}, application):
-        logger.info(
-            "User does not have MODIFY_APPLICATION privilege",
-            extra={
-                "user_id": user.user_id,
-                "application_id": application_id,
-            },
-        )
-        raise_flask_error(403, "Forbidden")
-
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MODIFY_APPLICATION},
+        application,
+    )
     # Check user has START_APPLICATION privilege for the organization
-    if not can_access(user, {Privilege.START_APPLICATION}, organization):
-        logger.info(
-            "User does not have START_APPLICATION privilege for organization",
-            extra={
-                "user_id": user.user_id,
-                "organization_id": organization_id,
-            },
-        )
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.START_APPLICATION},
+        organization,
+    )
 
     # Validate application is in progress
     validate_application_in_progress(application, ApplicationAction.MODIFY)

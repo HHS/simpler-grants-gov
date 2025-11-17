@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -172,3 +172,23 @@ class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
         ForeignKey(OrganizationInvitation.organization_invitation_id), primary_key=True
     )
     organization_invitation: Mapped[OrganizationInvitation] = relationship(OrganizationInvitation)
+
+
+class IgnoredLegacyOrganizationUser(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "ignored_legacy_organization_user"
+    __table_args__ = (
+        # We want a unique constraint to prevent duplicate hide records for an organization
+        UniqueConstraint("organization_id", "email"),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
+    ignored_legacy_organization_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Organization.organization_id))
+    organization: Mapped["Organization"] = relationship(Organization)
+    email: Mapped[str] = mapped_column(index=True)
+    ignored_by_user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("api.user.user_id"), index=True
+    )
+    user: Mapped["User"] = relationship("User")
