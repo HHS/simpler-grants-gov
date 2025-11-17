@@ -115,15 +115,16 @@ class XMLGenerationService:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
 
-        # Get version from config
+        # Get version and namespace prefix from config
         xml_config = (transform_config or {}).get("_xml_config", {})
         xml_structure = xml_config.get("xml_structure", {})
         form_version = xml_structure.get("version")
+        root_namespace_prefix = xml_structure.get("root_namespace_prefix", root_element_name)
 
         # Create namespace map for lxml with all required namespaces
-        # Use root element name as the default namespace prefix (makes it generic for any form)
+        # Use configured namespace prefix for root element (or fall back to root element name)
         nsmap = {
-            root_element_name: default_namespace,
+            root_namespace_prefix: default_namespace,
         }
 
         # Add additional namespaces
@@ -165,7 +166,7 @@ class XMLGenerationService:
             transform_config or {},
             xsd_url,
             attachment_field_names,
-            root_element_name,
+            root_namespace_prefix,  # Use namespace prefix for lookups in nsmap
         )
 
         # Add attachment elements if present in data

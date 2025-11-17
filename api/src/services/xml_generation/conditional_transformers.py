@@ -12,6 +12,37 @@ from src.util.dict_util import get_nested_value
 logger = logging.getLogger(__name__)
 
 
+def _transform_nested_field_names(
+    data: dict[str, Any], transform_config_root: dict[str, Any]
+) -> dict[str, Any]:
+    """Transform field names in a nested object based on transform rules."""
+    if not isinstance(data, dict) or not transform_config_root:
+        return data
+
+    result = {}
+    for field_name, field_value in data.items():
+        # Skip metadata fields
+        if field_name.startswith("__"):
+            result[field_name] = field_value
+            continue
+
+        # Look up transform rule for this field
+        if field_name in transform_config_root:
+            field_config = transform_config_root[field_name]
+            if isinstance(field_config, dict):
+                xml_transform = field_config.get("xml_transform", {})
+                target_name = xml_transform.get("target")
+                if target_name and xml_transform.get("type") != "attribute":
+                    # Use transformed name
+                    result[target_name] = field_value
+                    continue
+
+        # Keep original name if no transformation found
+        result[field_name] = field_value
+
+    return result
+
+
 def _apply_pivot_object_transform(
     transform_config: dict[str, Any], source_data: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -65,7 +96,9 @@ def _apply_pivot_object_transform(
 
 
 def _apply_array_decomposition_transform(
-    transform_config: dict[str, Any], source_data: dict[str, Any]
+    transform_config: dict[str, Any],
+    source_data: dict[str, Any],
+    transform_config_root: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Apply array decomposition transformation.
 
@@ -79,6 +112,11 @@ def _apply_array_decomposition_transform(
     - item_attributes: List of attribute names to extract from source items (optional)
     - total_field: Field containing the total/summary (optional)
     - total_wrapper: XML wrapper element name for totals (optional)
+
+    Args:
+        transform_config: Array decomposition configuration
+        source_data: Source data to transform
+        transform_config_root: Root transform configuration for field name lookups
     """
     source_array_field = transform_config.get("source_array_field")
     field_mappings = transform_config.get("field_mappings", {})
@@ -138,12 +176,25 @@ def _apply_array_decomposition_transform(
                             attrs = {}
                             for attr_name in item_attributes:
                                 if attr_name in item and item[attr_name] is not None:
-                                    attrs[attr_name] = item[attr_name]
+                                    # Transform attribute name if transform config is provided
+                                    transformed_attr_name = attr_name
+                                    if transform_config_root and attr_name in transform_config_root:
+                                        attr_config = transform_config_root[attr_name]
+                                        if isinstance(attr_config, dict):
+                                            xml_transform = attr_config.get("xml_transform", {})
+                                            if xml_transform.get("type") == "attribute":
+                                                target_name = xml_transform.get("target")
+                                                if target_name:
+                                                    transformed_attr_name = target_name
+                                    attrs[transformed_attr_name] = item[attr_name]
                             if attrs:
                                 wrapped_value["__attributes"] = attrs
 
                         # Add the actual data
                         if isinstance(value, dict):
+                            # Transform field names if transform config is provided
+                            if transform_config_root:
+                                value = _transform_nested_field_names(value, transform_config_root)
                             wrapped_value.update(value)
                         else:
                             wrapped_value["value"] = value
@@ -161,6 +212,11 @@ def _apply_array_decomposition_transform(
                 if total_wrapper:
                     wrapped_total = {"__wrapper": total_wrapper}
                     if isinstance(total_value, dict):
+                        # Transform field names if transform config is provided
+                        if transform_config_root:
+                            total_value = _transform_nested_field_names(
+                                total_value, transform_config_root
+                            )
                         wrapped_total.update(total_value)
                     else:
                         wrapped_total["value"] = total_value
@@ -258,7 +314,10 @@ def evaluate_condition(condition: dict[str, Any], source_data: dict[str, Any]) -
 
 
 def apply_conditional_transform(
-    transform_config: dict[str, Any], source_data: dict[str, Any], field_path: list[str]
+    transform_config: dict[str, Any],
+    source_data: dict[str, Any],
+    field_path: list[str],
+    transform_config_root: dict[str, Any] | None = None,
 ) -> Any:
     """Apply conditional transformation logic.
 
@@ -272,6 +331,7 @@ def apply_conditional_transform(
         transform_config: Conditional transformation configuration
         source_data: Source data for evaluation
         field_path: Current field path for context
+        transform_config_root: Root transform configuration for field name lookups
 
     Returns:
         Transformed value or None if conditions not met
@@ -343,7 +403,9 @@ def apply_conditional_transform(
         return _apply_pivot_object_transform(transform_config, source_data)
 
     elif transform_type == "array_decomposition":
-        return _apply_array_decomposition_transform(transform_config, source_data)
+        return _apply_array_decomposition_transform(
+            transform_config, source_data, transform_config_root
+        )
 
     else:
         raise ConditionalTransformationError(

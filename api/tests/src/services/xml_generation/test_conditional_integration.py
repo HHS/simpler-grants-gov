@@ -1,5 +1,7 @@
 """Integration tests for conditional transformations."""
 
+from lxml import etree as lxml_etree
+
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
@@ -184,9 +186,52 @@ class TestArrayDecompositionIntegration:
         assert "ResourceLineItem" in response.xml_data
         assert "ResourceTotals" in response.xml_data
 
-        # Verify activity_title appears as an attribute on line items
-        assert 'SF424A:activity_title="Activity 1"' in response.xml_data
-        assert 'SF424A:activity_title="Activity 2"' in response.xml_data
+        # Get the XML data for detailed assertions
+        xml_data = response.xml_data
+
+        # Verify activityTitle appears as an attribute on line items (XSD-compliant name and namespace)
+        assert 'SF424A:activityTitle="Activity 1"' in xml_data
+        assert 'SF424A:activityTitle="Activity 2"' in xml_data
+
+        # Verify NonFederalResources section structure matches XSD expectations
+        # The XSD expects this specific structure for the NonFederalResources section
+        assert "NonFederalResources>" in xml_data
+        assert "ResourceLineItem" in xml_data  # Line items
+        assert "ResourceTotals>" in xml_data  # Totals use different wrapper
+
+        # Verify the activityTitle is an attribute on line items (not in totals) - XSD-compliant name and namespace
+        assert "ResourceLineItem" in xml_data and 'SF424A:activityTitle="Activity 1"' in xml_data
+        assert "ResourceLineItem" in xml_data and 'SF424A:activityTitle="Activity 2"' in xml_data
+
+        # Verify totals don't have activityTitle attribute using XML parsing
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_data.encode("utf-8"), parser=parser)
+
+        # Find all ResourceTotals elements (regardless of namespace prefix)
+        totals_elements = root.xpath(".//*[local-name()='ResourceTotals']")
+        assert len(totals_elements) == 1, "Should have exactly one ResourceTotals element"
+
+        # Verify ResourceTotals has no activityTitle attribute (XSD-compliant name)
+        totals_element = totals_elements[0]
+        # Check if any attribute name ends with 'activityTitle' (to handle namespaced attributes)
+        totals_has_activity_title = any(
+            attr_name.endswith("activityTitle") for attr_name in totals_element.attrib.keys()
+        )
+        assert (
+            not totals_has_activity_title
+        ), "ResourceTotals should not have activityTitle attribute"
+
+        # Find all ResourceLineItem elements
+        line_item_elements = root.xpath(".//*[local-name()='ResourceLineItem']")
+        assert len(line_item_elements) == 2, "Should have exactly two ResourceLineItem elements"
+
+        # Verify each line item HAS activityTitle attribute (XSD-compliant name)
+        for line_item in line_item_elements:
+            # Check if any attribute name ends with 'activityTitle' (to handle namespaced attributes)
+            has_activity_title = any(
+                attr_name.endswith("activityTitle") for attr_name in line_item.attrib.keys()
+            )
+            assert has_activity_title, "ResourceLineItem should have activityTitle attribute"
 
     def test_sf424a_budget_sections_with_minimal_data(self):
         """Test array decomposition with minimal budget data."""
@@ -308,21 +353,42 @@ class TestArrayDecompositionIntegration:
         # Verify the exact XML structure
         xml_data = response.xml_data
 
-        # Check ResourceLineItem with activity_title attribute
-        assert '<SF424A:ResourceLineItem SF424A:activity_title="Line 1">' in xml_data
-        assert "<SF424A:applicant_amount>10.00</SF424A:applicant_amount>" in xml_data
-        assert "<SF424A:state_amount>20.00</SF424A:state_amount>" in xml_data
-        assert "<SF424A:other_amount>30.00</SF424A:other_amount>" in xml_data
+        # Check ResourceLineItem with activityTitle attribute (XSD-compliant name and namespace)
+        assert 'SF424A:activityTitle="Line 1"' in xml_data
+        assert (
+            "<SF424A:BudgetApplicantContributionAmount>10.00</SF424A:BudgetApplicantContributionAmount>"
+            in xml_data
+        )
+        assert (
+            "<SF424A:BudgetStateContributionAmount>20.00</SF424A:BudgetStateContributionAmount>"
+            in xml_data
+        )
+        assert (
+            "<SF424A:BudgetOtherContributionAmount>30.00</SF424A:BudgetOtherContributionAmount>"
+            in xml_data
+        )
 
-        # Check ResourceTotals without activity_title attribute
+        # Check ResourceTotals without activityTitle attribute
         assert "<SF424A:ResourceTotals>" in xml_data
-        assert "<SF424A:applicant_amount>120.00</SF424A:applicant_amount>" in xml_data
-        assert "<SF424A:state_amount>150.00</SF424A:state_amount>" in xml_data
-        assert "<SF424A:other_amount>180.00</SF424A:other_amount>" in xml_data
-        assert "<SF424A:total_amount>450.00</SF424A:total_amount>" in xml_data
+        assert (
+            "<SF424A:BudgetApplicantContributionAmount>120.00</SF424A:BudgetApplicantContributionAmount>"
+            in xml_data
+        )
+        assert (
+            "<SF424A:BudgetStateContributionAmount>150.00</SF424A:BudgetStateContributionAmount>"
+            in xml_data
+        )
+        assert (
+            "<SF424A:BudgetOtherContributionAmount>180.00</SF424A:BudgetOtherContributionAmount>"
+            in xml_data
+        )
+        assert (
+            "<SF424A:BudgetTotalContributionAmount>450.00</SF424A:BudgetTotalContributionAmount>"
+            in xml_data
+        )
 
-        # Verify ResourceTotals does NOT have activity_title attribute
-        assert "ResourceTotals SF424A:activity_title" not in xml_data
+        # Verify ResourceTotals does NOT have activityTitle attribute
+        assert "ResourceTotals SF424A:activityTitle" not in xml_data
 
     def test_sf424a_budget_sections_empty_line_items(self):
         """Test array decomposition with empty activity line items."""

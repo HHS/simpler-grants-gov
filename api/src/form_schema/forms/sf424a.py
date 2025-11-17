@@ -783,14 +783,67 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424A-V1.0",
             "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
-        "xml_structure": {"root_element": "SF424A", "version": "2.0"},
+        "xml_structure": {
+            "root_element": "BudgetInformation",
+            "root_namespace_prefix": "SF424A",  # Use SF424A: prefix for root element per XSD
+            "version": "2.0",
+            # Required attributes for XSD validation
+            "root_attributes": {
+                "programType": "program_type",  # Maps to input field
+                "glob:coreSchemaVersion": "1.0",  # Static value required by XSD
+            },
+        },
         "null_handling_options": {
             "exclude": "Default - exclude field entirely from XML (recommended)",
             "include_null": "Include empty XML element: <Field></Field>",
             "default_value": "Use configured default value when field is None",
         },
+    },
+    # Required first child element for XSD validation
+    "form_version_identifier": {
+        "xml_transform": {
+            "target": "glob:FormVersionIdentifier",
+            "namespace": "glob",
+        }
+    },
+    # Program type - required root attribute (mapped via xml_structure.root_attributes)
+    "program_type": {
+        "xml_transform": {
+            "target": "programType",
+            "type": "attribute",  # This will be handled as a root attribute
+        }
+    },
+    # Activity title - appears as an attribute on line items
+    "activity_title": {
+        "xml_transform": {
+            "target": "activityTitle",
+            "type": "attribute",
+        }
+    },
+    # Non-Federal Resources field mappings (Section C)
+    # These map the internal field names to XSD element names
+    "applicant_amount": {
+        "xml_transform": {
+            "target": "BudgetApplicantContributionAmount",
+        }
+    },
+    "state_amount": {
+        "xml_transform": {
+            "target": "BudgetStateContributionAmount",
+        }
+    },
+    "other_amount": {
+        "xml_transform": {
+            "target": "BudgetOtherContributionAmount",
+        }
+    },
+    "total_amount": {
+        "xml_transform": {
+            "target": "BudgetTotalContributionAmount",
+        }
     },
     # Forecasted Cash Needs - Section D
     # This requires pivoting the data structure from JSON to XML format
