@@ -87,6 +87,14 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "title": "Submitted Date",
         "description": "Completed by Grants.gov upon submission.",
     },
+    # This mirrors the "globLib:OrganizationNameDataType" from grants.gov
+    # Which is used for applicant / organization name and represents who is applying
+    "organization_name": {
+        "type": "string",
+        "title": "Organization Name",
+        "minLength": 1,
+        "maxLength": 60,
+    },
 }
 
 
