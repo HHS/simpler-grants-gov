@@ -50,6 +50,9 @@ export const renderWidget = ({
     console.error(`Unknown widget type: ${type}`, definition);
     throw new Error(`Unknown widget type: ${type}`);
   }
+  if (props.isFormLocked) {
+    props.disabled = true;
+  }
 
   // key prop can't be spread due to React internal rules
   const key = props.key as string;
