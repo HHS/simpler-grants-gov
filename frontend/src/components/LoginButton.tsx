@@ -1,5 +1,5 @@
 import { LOGIN_URL } from "src/constants/auth";
-import { storeCurrentPage } from "src/services/sessionStorage/sessionStorage";
+import { storeCurrentPage } from "src/utils/userUtils";
 
 import { PropsWithChildren } from "react";
 

@@ -23,6 +23,7 @@ export default async function Layout({ children, locale }: Props) {
   const t = await getTranslations();
   let testUsers: TestUser[] = [];
 
+  // to populate local user quick login dropdown
   if (environment.LOCAL_DEV) {
     try {
       testUsers = await getTestUsers();

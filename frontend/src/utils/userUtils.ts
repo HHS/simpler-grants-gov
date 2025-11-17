@@ -1,3 +1,4 @@
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserPrivilegesResponse } from "src/types/userTypes";
 
@@ -19,4 +20,11 @@ export const userRoleForOrganization = (
         .map((role) => role.role_name)
         .join(", ")
     : organizationPrivilegeSet.organization_user_roles[0].role_name;
+};
+
+export const storeCurrentPage = () => {
+  const startURL = `${location.pathname}${location.search}`;
+  if (startURL !== "") {
+    SessionStorage.setItem("login-redirect", startURL);
+  }
 };

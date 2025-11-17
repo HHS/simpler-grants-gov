@@ -1,7 +1,7 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
-import { storeCurrentPage } from "src/services/sessionStorage/sessionStorage";
 import { TestUser } from "src/types/userTypes";
+import { storeCurrentPage } from "src/utils/userUtils";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
