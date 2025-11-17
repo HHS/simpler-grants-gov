@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.adapters import db
+from src.api.route_utils import raise_flask_error
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser
 from src.db.models.user_models import User
 from src.services.organizations_v1.list_organization_invitations import (
@@ -37,7 +38,9 @@ def ignore_legacy_user_organization(
                 "ignored_by_user_id": user.user_id,
             },
         )
-        return
+        raise_flask_error(
+            400, f"User with email {email} is already ignored for organization {organization_id}"
+        )
 
     # Add record to database if not existing
     ignored_user = IgnoredLegacyOrganizationUser(

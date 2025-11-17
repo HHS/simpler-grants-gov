@@ -4,8 +4,7 @@ import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege
-from src.db.models.entity_models import IgnoredLegacyOrganizationUser, Organization
-from tests.lib.db_testing import cascade_delete_from_db_table
+from src.db.models.entity_models import IgnoredLegacyOrganizationUser
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import IgnoredLegacyOrganizationUserFactory
 
@@ -18,15 +17,10 @@ class TestIgnoreLegacyUserOrganization:
         user, org, token = create_user_in_org(db_session, privileges=[Privilege.MANAGE_ORG_MEMBERS])
         return user, org, token
 
-    @pytest.fixture(autouse=True)
-    def clear_data(self, db_session):
-        cascade_delete_from_db_table(db_session, IgnoredLegacyOrganizationUser)
-        cascade_delete_from_db_table(db_session, Organization)
-
     def test_ignore_legacy_user_organization_200(
         self, db_session, enable_factory_create, client, user_org_a
     ):
-        """Test successfull addition of user to ignore table"""
+        """Verify that a legacy user can be successfully added to the organization’s ignore list."""
         user, org, token = user_org_a
         resp = client.post(
             f"/v1/organizations/{org.organization_id}/legacy-users/ignore",
@@ -35,19 +29,23 @@ class TestIgnoreLegacyUserOrganization:
         )
         assert resp.status_code == 200
 
-        ignored_users = db_session.query(IgnoredLegacyOrganizationUser).all()
-        assert len(ignored_users) == 1
-        assert ignored_users[0].email == "test@gmail.com"
-        assert ignored_users[0].ignored_by_user_id == user.user_id
-        assert ignored_users[0].organization_id == org.organization_id
+        ignored_users = (
+            db_session.query(IgnoredLegacyOrganizationUser)
+            .filter_by(organization_id=org.organization_id, email="test@gmail.com")
+            .one_or_none()
+        )
+        assert ignored_users
+        assert ignored_users.email == "test@gmail.com"
+        assert ignored_users.ignored_by_user_id == user.user_id
+        assert ignored_users.organization_id == org.organization_id
 
-    def test_ignore_legacy_user_organization_previously_ignored(
+    def test_ignore_legacy_user_organization_previously_ignored_400(
         self, enable_factory_create, client, db_session, user_org_a
     ):
-        """Test ignoring previously ignored user does not throw an error"""
+        """Test ignoring previously ignored user throws error"""
         # Create an ignored user record for an org
         user, org, token = user_org_a
-        ignored_user = IgnoredLegacyOrganizationUserFactory.create(
+        IgnoredLegacyOrganizationUserFactory.create(
             organization=org, user=user, email="test@gmail.com"
         )
 
@@ -56,14 +54,7 @@ class TestIgnoreLegacyUserOrganization:
             headers={"X-SGG-Token": token},
             json={"email": "test@gmail.com"},
         )
-        assert resp.status_code == 200
-
-        ignored_users = db_session.query(IgnoredLegacyOrganizationUser).all()
-        assert len(ignored_users) == 1
-        assert (
-            ignored_users[0].ignored_legacy_organization_user_id
-            == ignored_user.ignored_legacy_organization_user_id
-        )
+        assert resp.status_code == 400
 
     def test_ignore_legacy_user_organization_no_token(self, client):
         """Test hitting endpoint without auth returns 401"""
@@ -116,6 +107,3 @@ class TestIgnoreLegacyUserOrganization:
             json={},
         )
         assert resp.status_code == 422
-
-    def test_ignore_legacy_user_organization_422_invalid_email(self, client, db_session, user):
-        pass
