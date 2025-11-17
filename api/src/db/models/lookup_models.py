@@ -164,6 +164,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.SF424D, 9),
         LookupStr(FormType.OTHER_NARRATIVE_ATTACHMENT, 10),
         LookupStr(FormType.PROJECT_ABSTRACT, 11),
+        LookupStr(FormType.SUPPLEMENTARY_NEH_COVER_SHEET, 12),
     ]
 )
 
