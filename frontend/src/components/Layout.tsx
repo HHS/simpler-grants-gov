@@ -26,6 +26,7 @@ export default async function Layout({ children, locale }: Props) {
   // to populate local user quick login dropdown
   if (environment.LOCAL_DEV) {
     try {
+      // if this returns more than 500 users we likely are in a deployed env and will disable the feature
       testUsers = await getTestUsers();
     } catch (e) {
       console.error("unable to fetch test users, oh well", e);
@@ -47,7 +48,9 @@ export default async function Layout({ children, locale }: Props) {
         <LoginModalProvider>
           <Header
             locale={locale}
-            localDev={environment.LOCAL_DEV === "true"}
+            localDev={
+              environment.LOCAL_DEV === "true" && testUsers.length < 500
+            }
             testUsers={testUsers}
           />
           <main id="main-content" className="border-top-0">
