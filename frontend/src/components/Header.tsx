@@ -269,12 +269,12 @@ const NavLinks = ({
 
 const Header = ({
   locale,
-  localDev,
-  testUsers,
+  localDev = false,
+  testUsers = [],
 }: {
   locale?: string;
-  localDev: boolean;
-  testUsers: TestUser[];
+  localDev?: boolean;
+  testUsers?: TestUser[];
 }) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
