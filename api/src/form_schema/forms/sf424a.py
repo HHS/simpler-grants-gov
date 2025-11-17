@@ -834,6 +834,61 @@ FORM_XML_TRANSFORM_RULES = {
     # Budget sections decomposition
     # Transform row-oriented activity_line_items array to column-oriented arrays
     # organized by section type (budget_summary, budget_categories, etc.)
+    #
+    # Note: This transformation handles the data restructuring step. The XML generation
+    # phase (not shown here) will handle:
+    # - Adding activity_title as an XML attribute to each line item
+    # - Using different XML element names for line items vs totals
+    #   (e.g., ResourceLineItem vs ResourceTotals)
+    # - Proper XML namespace handling and element ordering
+    #
+    # Example transformation - this input structure:
+    # {
+    #   "activity_line_items": [
+    #     {
+    #       "activity_title": "Activity 1",
+    #       "budget_summary": {"total_amount": "5000.00"},
+    #       "budget_categories": {"personnel_amount": "2000.00"},
+    #       "non_federal_resources": {"applicant_amount": "500.00"},
+    #       "federal_fund_estimates": {"first_year_amount": "5000.00"}
+    #     },
+    #     {
+    #       "activity_title": "Activity 2",
+    #       "budget_summary": {"total_amount": "8000.00"},
+    #       "budget_categories": {"personnel_amount": "3000.00"},
+    #       "non_federal_resources": {"applicant_amount": "1000.00"},
+    #       "federal_fund_estimates": {"first_year_amount": "8000.00"}
+    #     }
+    #   ],
+    #   "total_budget_summary": {"total_amount": "13000.00"},
+    #   "total_budget_categories": {"personnel_amount": "5000.00"},
+    #   "total_non_federal_resources": {"applicant_amount": "1500.00"},
+    #   "total_federal_fund_estimates": {"first_year_amount": "13000.00"}
+    # }
+    #
+    # Becomes this output structure:
+    # {
+    #   "BudgetSummaries": [
+    #     {"total_amount": "5000.00"},    # Activity 1
+    #     {"total_amount": "8000.00"},    # Activity 2
+    #     {"total_amount": "13000.00"}    # Total
+    #   ],
+    #   "BudgetCategories": [
+    #     {"personnel_amount": "2000.00"},  # Activity 1
+    #     {"personnel_amount": "3000.00"},  # Activity 2
+    #     {"personnel_amount": "5000.00"}   # Total
+    #   ],
+    #   "NonFederalResources": [
+    #     {"applicant_amount": "500.00"},   # Activity 1
+    #     {"applicant_amount": "1000.00"},  # Activity 2
+    #     {"applicant_amount": "1500.00"}   # Total
+    #   ],
+    #   "FederalFundEstimates": [
+    #     {"first_year_amount": "5000.00"},  # Activity 1
+    #     {"first_year_amount": "8000.00"},  # Activity 2
+    #     {"first_year_amount": "13000.00"}  # Total
+    #   ]
+    # }
     "budget_sections": {
         "xml_transform": {
             "type": "conditional",
