@@ -33,6 +33,7 @@ function Budget424aSectionB<
   value,
   rawErrors,
   formContext,
+  disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined
@@ -268,7 +269,7 @@ function Budget424aSectionB<
                           {cellInput({
                             fieldKey: row.key,
                             index: columnIndex,
-                            disabled: disableActivityCells,
+                            disabled: disableActivityCells || disabled,
                           })}
                         </div>
                       </div>
@@ -309,6 +310,7 @@ function Budget424aSectionB<
                 {cellInput({
                   fieldKey: "program_income_amount",
                   index: columnIndex,
+                  disabled,
                 })}
               </td>
             ))}

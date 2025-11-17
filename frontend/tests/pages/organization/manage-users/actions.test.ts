@@ -1,5 +1,5 @@
 import { identity } from "lodash";
-import { inviteUserAction } from "src/app/[locale]/(base)/user/workspace/actions";
+import { inviteUserAction } from "src/app/[locale]/(base)/organization/[id]/manage-users/actions";
 
 const getSessionMock = jest.fn();
 const mockCreateInvitation = jest.fn();
@@ -58,7 +58,7 @@ describe("user profile form action", () => {
     const result = await inviteUserAction(null, inviteFormData, "1");
     expect(result.data).toEqual({
       email: "an email",
-      roleId: "smith",
+      roleId: ["smith"],
       organizationId: "1",
     });
   });

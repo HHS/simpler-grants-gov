@@ -38,6 +38,7 @@ function Budget424aSectionD<
   value,
   rawErrors,
   formContext,
+  disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined
@@ -126,7 +127,7 @@ function Budget424aSectionD<
             colKey === "total_amount" ||
             rowKey === "total_forecasted_cash_needs"
           }
-          disabled={isComputedField}
+          disabled={isComputedField || disabled}
         />
       </div>
     );

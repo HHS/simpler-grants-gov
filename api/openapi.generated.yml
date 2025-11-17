@@ -1838,6 +1838,49 @@ paths:
               $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/audit_history:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAuditResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Application Audit List
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationAuditRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/organizations/{organization_id}/invitations/list:
     post:
       parameters:
@@ -4250,10 +4293,14 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
+          - OtherNarrativeAttachment
           - ProjectAbstractSummary
+          - ProjectAbstract
+          - CD511
           type:
           - string
           - 'null'
@@ -4397,10 +4444,14 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
+          - OtherNarrativeAttachment
           - ProjectAbstractSummary
+          - ProjectAbstract
+          - CD511
           type:
           - string
           - 'null'
@@ -5258,9 +5309,119 @@ components:
       - paginationInfo
       - sortInfo
       - status
+    UserApplicationApplicationStatusFiilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - in_progress
+            - submitted
+            - accepted
+            type:
+            - string
+    UserApplicationApplicationOrganizationIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationApplicationCompetitionIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationFilter:
+      type: object
+      properties:
+        application_status:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationStatusFiilter'
+        organization_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationOrganizationIDFilter'
+        competition_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationCompetitionIDFilter'
+    SortOrderUserApplicationPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserApplicationPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderUserApplicationPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
     UserApplicationListRequest:
       type: object
-      properties: {}
+      properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserApplicationFilter'
+          - type: 'null'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationPagination'
+      required:
+      - pagination
     SamGovEntityResponse:
       type: object
       properties:
@@ -5296,10 +5457,6 @@ components:
           type: string
           description: The internal ID of the organization
           example: 123e4567-e89b-12d3-a456-426614174000
-        is_organization_owner:
-          type: boolean
-          description: Whether the user is an owner of this organization
-          example: true
         sam_gov_entity:
           description: SAM.gov entity information for the organization
           type:
@@ -6701,6 +6858,193 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderApplicationAuditRequestPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    ApplicationAuditRequestPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderApplicationAuditRequestPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    ApplicationAuditRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditRequestPagination'
+      required:
+      - pagination
+    SimpleUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: ID of the user
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          description: Email address of the user
+          example: example@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Users first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Users last name
+          example: Smith
+    ApplicationAuditAppForm:
+      type: object
+      properties:
+        application_form_id:
+          type: string
+          format: uuid
+          description: The ID of the application form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_form_id:
+          type: string
+          format: uuid
+          description: The ID of the competition form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          description: The ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_name:
+          type: string
+          description: The name of the form
+    ApplicationAuditAttachment:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The file name of the application attachment
+          example: my_example.pdf
+        is_deleted:
+          type: boolean
+          description: Whether the attachment has been deleted
+    ApplicationAuditData:
+      type: object
+      properties:
+        application_audit_id:
+          type: string
+          format: uuid
+          description: The ID of the application audit event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_audit_event:
+          description: The type of application audit event recorded
+          enum:
+          - application_created
+          - application_name_changed
+          - application_submitted
+          - application_submit_rejected
+          - attachment_added
+          - attachment_deleted
+          - attachment_updated
+          - submission_created
+          - user_added
+          - user_updated
+          - user_removed
+          - form_updated
+          - organization_added
+          type:
+          - string
+        user:
+          description: The user who did the event that was audited
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        target_user:
+          description: The user the audit event affected (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        target_application_form:
+          description: The application form modified (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditAppForm'
+        target_attachment:
+          description: The application attachment modified (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditAttachment'
+        created_at:
+          type: string
+          format: date-time
+          description: When the audit event was created
+    ApplicationAuditResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAuditData'
         status_code:
           type: integer
           description: The HTTP status code

@@ -65,11 +65,9 @@ FORM_JSON_SCHEMA = {
         },
         "applicant_organization": {
             # FUTURE WORK: This gets copied from the SF-424's OrganizationName field (called Legal Name in the UI)
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Applicant Organization",
             "description": "This should match the 'Legal Name' field from the SF-424 form",
-            "minLength": 1,
-            "maxLength": 60,
         },
         "date_signed": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],

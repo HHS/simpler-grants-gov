@@ -7,8 +7,9 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
     ApplicationStatus,
     CompetitionOpenToApplicant,
     Privilege,
@@ -18,6 +19,7 @@ from src.constants.static_role_values import APPLICATION_OWNER
 from src.db.models.competition_models import Application, ApplicationForm, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import ApplicationUser, ApplicationUserRole, User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_logging import add_application_metadata_to_logs
 from src.services.applications.application_validation import (
     ApplicationAction,
@@ -47,6 +49,14 @@ def _assign_application_owner_role(
             "application_id": application_user.application_id,
             "user_id": application_user.user_id,
         },
+    )
+    # Add an audit event for the user being added as part of app creation
+    add_audit_event(
+        db_session=db_session,
+        application=application,
+        user=user,
+        audit_event=ApplicationAuditEvent.USER_ADDED,
+        target_user=user,
     )
 
 
@@ -120,8 +130,12 @@ def create_application(
             raise_flask_error(404, "Organization not found")
 
         # Check privileges
-        if not can_access(user, {Privilege.START_APPLICATION}, organization):
-            raise_flask_error(403, "Forbidden")
+        check_user_access(
+            db_session,
+            user,
+            {Privilege.START_APPLICATION},
+            organization,
+        )
 
     # Verify the competition is open
     validate_competition_open(competition, ApplicationAction.START)
@@ -142,6 +156,12 @@ def create_application(
         organization_id=organization_id,  # Set the organization ID if provided
     )
     db_session.add(application)
+    add_audit_event(
+        db_session=db_session,
+        application=application,
+        user=user,
+        audit_event=ApplicationAuditEvent.APPLICATION_CREATED,
+    )
 
     # Assign the Application Owner role to the user if application is not owned by organization
     if not organization_id:

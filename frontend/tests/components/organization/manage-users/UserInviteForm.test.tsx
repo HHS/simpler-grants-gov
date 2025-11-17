@@ -4,7 +4,7 @@ import { noop } from "lodash";
 import { fakeUserRole } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { UserInviteForm } from "src/components/workspace/UserInviteForm";
+import { UserInviteForm } from "src/components/manageUsers/UserInviteForm";
 
 const mockUseActionState = jest.fn();
 
@@ -13,9 +13,12 @@ jest.mock("react", () => ({
   useActionState: () => mockUseActionState() as unknown,
 }));
 
-jest.mock("src/app/[locale]/(base)/user/workspace/actions", () => ({
-  inviteUserAction: noop,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/organization/[id]/manage-users/actions",
+  () => ({
+    inviteUserAction: noop,
+  }),
+);
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),

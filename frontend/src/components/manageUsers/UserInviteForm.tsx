@@ -3,7 +3,7 @@
 import {
   inviteUserAction,
   OrganizationInviteValidationErrors,
-} from "src/app/[locale]/(base)/user/workspace/actions";
+} from "src/app/[locale]/(base)/organization/[id]/manage-users/actions";
 import { UserRole } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -149,7 +149,6 @@ export function UserInviteForm({
               <Select
                 name="role"
                 id="inviteUser-role"
-                // defaultValue={t("inputs.role.placeholder")}
                 disabled={isPending || showSuccess}
                 value={formState.data?.roles[0].role_name}
               >

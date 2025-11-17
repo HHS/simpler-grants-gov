@@ -1,6 +1,7 @@
 """Tests for the transformation utility."""
 
 from datetime import date, datetime
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from common_grants_sdk.schemas.pydantic import (
@@ -17,7 +18,7 @@ from common_grants_sdk.schemas.pydantic import (
     StringArrayFilter,
 )
 
-from src.constants.lookup_constants import OpportunityStatus
+from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
     build_filter_info,
     build_money_range_filter,
@@ -29,6 +30,30 @@ from src.services.common_grants.transformation import (
     transform_status_to_cg,
     validate_url,
 )
+
+
+def _legacy_validate_url(value: str | None) -> str | None:
+    """
+    Validate a URL string.
+
+    Args:
+        value: The string to validate
+
+    Returns:
+        A valid URL string or None
+    """
+    # Parse the string
+    parsed = urlparse(value)
+
+    # Check for scheme and netloc (i.e. it's a complete url)
+    if parsed.scheme and parsed.netloc:
+        return value
+
+    # Check for netloc only (i.e. it's a domain name)
+    if not parsed.scheme and parsed.netloc:
+        return f"https://{value}"
+
+    return None
 
 
 class TestTransformation:
@@ -102,8 +127,9 @@ class TestTransformation:
         """Test that URLs are properly validated and fixed."""
 
         # Test valid URLs
-        assert validate_url("https://example.com") == "https://example.com"
-        assert validate_url("http://example.com") == "http://example.com"
+        # Note: Pydantic normalizes URLs (e.g., adds trailing slash), so we check for normalized versions
+        assert validate_url("https://example.com") == "https://example.com/"
+        assert validate_url("http://example.com") == "http://example.com/"
 
         # Test URLs that need fixing
         assert validate_url("example.com") is None
@@ -431,6 +457,63 @@ class TestTransformation:
         # Should return None for invalid data
         assert result is None
 
+    def test_validate_url_with_nasa_url_bug(self):
+        """Test that validate_url() properly rejects URLs that Pydantic HttpUrl rejects.
+
+        This test reproduces a bug where validate_url() lets through URLs
+        that Pydantic's HttpUrl validation rejects, causing transformations to fail.
+
+        The NASA URL has curly braces or other characters that urlparse accepts but
+        Pydantic's strict HttpUrl validation rejects.
+        """
+        # This URL has characters that urlparse accepts but Pydantic HttpUrl rejects
+        # Based on error: "non-URL code point" - likely curly braces or other invalid chars
+        nasa_url = "https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={D8604BE7-CAB6-C1C0-B668-423042C43AA6}&path=&method=init"
+
+        # Old implementation used urlparse, new implementation uses Pydantic HttpUrl
+        old_result = _legacy_validate_url(nasa_url)
+        new_result = validate_url(nasa_url)
+
+        assert old_result is not None, "_legacy_validate_url() should accept NASA URL"
+        assert new_result is None, "validate_url() should reject NASA URL"
+
+    def test_transform_search_result_to_cg_with_nasa_url_bug(self):
+        """Test that transformation works correctly with NASA URL that Pydantic rejects.
+
+        This test ensures that when validate_url() properly rejects invalid URLs,
+        the transformation still succeeds (with source=None) rather than failing.
+        """
+        # This URL has characters that urlparse accepts but Pydantic HttpUrl rejects
+        nasa_url = "https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId={D8604BE7-CAB6-C1C0-B668-423042C43AA6}&path=&method=init"
+        assert (
+            _legacy_validate_url(nasa_url) is not None
+        ), "_legacy_validate_url() should accept NASA URL"
+
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "estimated_total_program_funding": 1000000,
+                "award_ceiling": 500000,
+                "award_floor": 10000,
+                "additional_info_url": nasa_url,
+            },
+        }
+
+        # The transformation should succeed without raising a Pydantic validation error
+        result = transform_search_result_to_cg(opp_data)
+
+        # After fix: validate_url() should reject the URL, so source should be None
+        # but transformation should still succeed
+        assert result is not None, "Transformation should succeed even with invalid URL"
+        assert result.source is None, "Invalid URL should result in source=None"
+
     def test_build_money_range_filter(self):
         """Test building money range filters."""
         # Test with min and max amounts
@@ -575,3 +658,119 @@ class TestTransformation:
 
         # Check that filters are not present when empty
         assert "filters" not in result
+
+    def test_url_validation_error_logging(self, caplog):
+        """Test that URL validation errors are logged correctly."""
+        import logging
+
+        # Set up logging to capture info level logs
+        caplog.set_level(logging.INFO)
+
+        # Test with an invalid URL that should trigger the logging
+        invalid_url = "https://example.com/path/{invalid-chars}"
+
+        result = validate_url(invalid_url)
+
+        # Verify the URL was rejected
+        assert result is None
+
+        # Verify the log was captured
+        assert any(
+            record.levelname == "INFO"
+            and "URL validation failed for:" in record.message
+            and invalid_url in record.message
+            for record in caplog.records
+        )
+
+        # Verify the extra data is present in the log record
+        log_record = next(
+            (record for record in caplog.records if "URL validation failed for:" in record.message),
+            None,
+        )
+        assert log_record is not None
+        assert hasattr(log_record, "cg_event")
+        assert log_record.cg_event == CommonGrantsEvent.URL_VALIDATION_ERROR
+        assert hasattr(log_record, "url")
+        assert log_record.url == invalid_url
+
+    def test_transformation_failure_logging(self, caplog):
+        """Test that transformation failures are logged correctly."""
+        import logging
+
+        # Set up logging to capture warning level logs
+        caplog.set_level(logging.WARNING)
+
+        # Test with invalid data that should cause transformation to fail
+        invalid_opp_data = {
+            "opportunity_id": "not-a-uuid",  # Invalid UUID format will cause failure
+            "invalid_field": "invalid_value",
+        }
+
+        result = transform_search_result_to_cg(invalid_opp_data)
+
+        # Verify the transformation failed
+        assert result is None
+
+        # Verify the log was captured
+        assert any(
+            record.levelname == "WARNING"
+            and "Failed to transform search result to CommonGrants format:" in record.message
+            for record in caplog.records
+        )
+
+        # Verify the extra data is present in the log record
+        log_record = next(
+            (
+                record
+                for record in caplog.records
+                if "Failed to transform search result to CommonGrants format:" in record.message
+            ),
+            None,
+        )
+        assert log_record is not None
+        assert hasattr(log_record, "cg_event")
+        assert log_record.cg_event == CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR
+        assert hasattr(log_record, "opportunity_id")
+        assert log_record.opportunity_id == "not-a-uuid"
+
+    def test_transformation_with_invalid_url_logs_but_succeeds(self, caplog):
+        """Test that transformation with invalid URL logs error but still succeeds."""
+        import logging
+
+        # Set up logging to capture info level logs
+        caplog.set_level(logging.INFO)
+
+        # Create opportunity data with an invalid URL
+        invalid_url = "https://example.com/path/{invalid}"
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "estimated_total_program_funding": 1000000,
+                "award_ceiling": 500000,
+                "award_floor": 10000,
+                "additional_info_url": invalid_url,
+            },
+        }
+
+        # Transform the opportunity
+        result = transform_search_result_to_cg(opp_data)
+
+        # Verify transformation succeeded
+        assert result is not None
+        assert result.title == "Test Opportunity"
+        assert result.source is None  # URL should be None due to validation failure
+
+        # Verify URL validation error was logged
+        assert any(
+            record.levelname == "INFO"
+            and "URL validation failed for:" in record.message
+            and invalid_url in record.message
+            for record in caplog.records
+        )

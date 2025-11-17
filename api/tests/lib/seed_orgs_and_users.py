@@ -215,61 +215,74 @@ def _build_organizations_and_users(
     ########################
 
     if competition_container is not None:
+        # A static application against the static competition
+        # which the frontend wants to make a quick way to get to the app page
+        _add_application(
+            db_session,
+            competition=competition_container.static_competition_with_all_forms,
+            app_owner=many_app_user,
+            application_name="Static All-form App",
+            static_application_id=uuid.UUID("892a6aa8-92b1-46c2-a26b-21a6aaab825d"),
+        )
+
         # An application started against the competition with all forms
         _add_application(
+            db_session,
             competition=competition_container.competition_with_all_forms,
-            organization=org3,
-            app_owner=many_app_user,
+            app_owner=org3,
             application_name="All forms",
         )
 
         # An application for each competition that has a form
         for form, competition in competition_container.form_specific_competitions.values():
             _add_application(
+                db_session,
                 competition=competition,
-                organization=org2,
-                app_owner=many_app_user,
+                app_owner=org2,
                 application_name=f"App for {form.short_form_name}",
             )
 
         # Very long application names
         _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(SF424a_v1_0),
             app_owner=many_app_user,
             application_name="My really really really long Individual application name that'll take up a lot of space",
         )
         _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(SF424_v4_0),
-            organization=org3,
-            app_owner=many_app_user,
+            app_owner=org3,
             application_name="My quite long organization application name that'll take up almost as much space",
         )
 
         # Applications in other statuses
         _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(ProjectAbstractSummary_v2_0),
             app_owner=many_app_user,
             application_status=ApplicationStatus.SUBMITTED,
             application_name="Submitted individual app",
         )
         _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(SF424_v4_0),
-            organization=org2,
-            app_owner=many_app_user,
+            app_owner=org2,
             application_status=ApplicationStatus.SUBMITTED,
             application_name="Submitted org app",
         )
 
         _add_application(
+            db_session,
             competition=competition_container.competition_with_all_forms,
             app_owner=many_app_user,
             application_status=ApplicationStatus.ACCEPTED,
             application_name="Accepted individual app",
         )
         _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(SF424_v4_0),
-            organization=org2,
-            app_owner=many_app_user,
+            app_owner=org2,
             application_status=ApplicationStatus.ACCEPTED,
             application_name="Accepted org app",
         )
@@ -369,31 +382,52 @@ def _add_saved_searches(user: User, db_session: db.Session, count: int = 2) -> N
 
 
 def _add_application(
+    db_session: db.Session,
     competition: Competition,
     application_name: str,
-    organization: Organization | None = None,
-    app_owner: User | None = None,
+    app_owner: User | Organization,
     application_status: ApplicationStatus = ApplicationStatus.IN_PROGRESS,
+    static_application_id: uuid.UUID | None = None,
 ) -> Application:
     app_params: dict = {
         "competition": competition,
         "application_status": application_status,
         "application_name": application_name,
     }
-    if organization is not None:
-        app_params["organization"] = organization
+
+    if isinstance(app_owner, Organization):
+        app_params["organization"] = app_owner
         app_type = "organization"
     else:
         app_type = "individual"
 
+    if static_application_id is not None:
+        existing_static_app = db_session.execute(
+            select(Application).where(Application.application_id == static_application_id)
+        ).scalar_one_or_none()
+
+        # If the app already exists, we only
+        # want to make sure all the forms are present.
+        # Note that if you do this with an app that has a submission zip
+        # it won't magically update that zip as that'd be really complex
+        # to fix the ZIP and this function already has enough going on
+        if existing_static_app:
+            logger.info(
+                f"Static application {static_application_id} already exists, no need to recreate."
+            )
+            handle_static_application_forms(existing_static_app, competition)
+            return existing_static_app
+
+        # App doesn't exist
+        app_params["application_id"] = static_application_id
+
     logger.info(f"Creating an {app_type} application '{application_name}'")
     application = factories.ApplicationFactory.create(**app_params)
 
-    # TODO - when auth gets adjusted for the apply endpoints, we'll
-    # only want to add this if there is no org, but at the moment
-    # being in an org doesn't quite give you access to apps, so we'll
-    # add the users too.
-    if app_owner is not None:
+    # To mimic how start-application behaves, only add an application
+    # owner user if it's not an organization. In the future we can
+    # make this function also let you add users to the app, but not using that much yet.
+    if isinstance(app_owner, User):
         factories.ApplicationUserFactory(application=application, user=app_owner, as_owner=True)
 
     # This bit is mostly copied from the start application endpoint
@@ -447,3 +481,22 @@ def _add_application(
         )
 
     return application
+
+
+def handle_static_application_forms(application: Application, competition: Competition):
+    existing_comp_forms_on_app = [
+        app_form.competition_form_id for app_form in application.application_forms
+    ]
+
+    for competition_form in competition.competition_forms:
+        if competition_form.competition_form_id in existing_comp_forms_on_app:
+            continue
+
+        logger.info(
+            f"Adding new form {competition_form.form.form_name} to static application {application.application_id}"
+        )
+        application_form = factories.ApplicationFormFactory.create(
+            application=application, competition_form=competition_form, application_response={}
+        )
+
+        validate_application_form(application_form, ApplicationAction.START)

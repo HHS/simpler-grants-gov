@@ -30,6 +30,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     rawErrors = [],
     disabled,
     options,
+    readOnly,
   } = props;
   const { contentMediaType, title, description } = schema;
 
@@ -143,6 +144,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
           name={id}
           required={required}
           disabled={disabled}
+          readOnly={readOnly}
           ref={fileInputRef}
           onChange={(e) => {
             handleChange(e).catch((error) => console.error(error));
@@ -159,6 +161,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
           <Button
             type="button"
             unstyled
+            disabled={disabled}
             onClick={handleDeleteClick}
             className="margin-left-1"
           >
