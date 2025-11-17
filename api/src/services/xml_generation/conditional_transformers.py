@@ -154,6 +154,7 @@ def apply_conditional_transform(
     Supports:
     - one_to_many: Map array field to multiple XML elements
     - pivot_object: Restructure nested objects by pivoting dimensions
+    - conditional_structure: Select different structures based on data conditions
 
     Args:
         transform_config: Conditional transformation configuration
@@ -195,6 +196,36 @@ def apply_conditional_transform(
                 return {target_field: source_values}
 
         return None
+
+    elif transform_type == "conditional_structure":
+        # Handle conditional structure selection based on data conditions
+        condition = transform_config.get("condition")
+        if_true_config = transform_config.get("if_true")
+        if_false_config = transform_config.get("if_false")
+
+        if not condition:
+            raise ConditionalTransformationError(
+                "conditional_structure requires a 'condition' configuration"
+            )
+
+        if not if_true_config:
+            raise ConditionalTransformationError(
+                "conditional_structure requires an 'if_true' configuration"
+            )
+
+        # Evaluate the condition
+        condition_result = evaluate_condition(condition, source_data)
+
+        # Select the appropriate structure based on condition result
+        selected_config = if_true_config if condition_result else if_false_config
+
+        # If no config for this branch, return None (structure not applicable)
+        if not selected_config:
+            return None
+
+        # Return the configuration that will be used by the transformer
+        # This includes the target and any nested field mappings
+        return selected_config
 
     elif transform_type == "pivot_object":
         return _apply_pivot_object_transform(transform_config, source_data)
