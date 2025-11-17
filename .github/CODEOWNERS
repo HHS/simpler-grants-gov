@@ -3,7 +3,7 @@
 
 * @mdragon # project lead
 
-/documentation/  @andycochran @btabaska @chouinar @doug-s-nava @joshtonava @mdragon @myduong-navapbc @widal001 @prasnava @jakobpederson @ErinPattisonNava # everyone
+/documentation/  @andycochran @btabaska @chouinar @doug-s-nava @joshtonava @mdragon @myduong-navapbc @widal001 @prasnava @jakobpederson @ErinPattisonNava @glenblosser-nava # everyone
 
 /analytics/               @widal001
 /documentation/analytics/ @widal001
@@ -11,8 +11,8 @@
 /api/               @chouinar @mdragon @joshtonava @jakobpederson @chay-REIsys
 /documentation/api/ @chouinar @mdragon @joshtonava @jakobpederson @chay-REIsys
 
-/frontend/               @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @chay-REIsys
-/documentation/frontend/ @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @chay-REIsys
+/frontend/               @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @chay-REIsys @glenblosser-nava
+/documentation/frontend/ @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @chay-REIsys @glenblosser-nava
 
 /infra/                    @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
 /infra/nofos/              @mdragon @pcraig3 @joshtonava @chouinar @prasnava 

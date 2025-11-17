@@ -34,7 +34,7 @@ export default function MultiSelect<
 >({
   id,
   disabled,
-  readonly,
+  readOnly,
   required,
   schema,
   value,
@@ -162,7 +162,7 @@ export default function MultiSelect<
         id={`${id}__combobox`}
         name={`${id}__combobox_input`}
         options={availableOptions}
-        disabled={disabled || readonly || atMaxSelection}
+        disabled={disabled || readOnly || atMaxSelection}
         onChange={(val?: string) => {
           if (!val) return;
           addByLabelOrValue(val);
@@ -198,7 +198,7 @@ export default function MultiSelect<
                 <Pill
                   label={label}
                   onClose={() => {
-                    if (disabled || readonly) return;
+                    if (disabled || readOnly) return;
                     removeValue(v);
                   }}
                 />
