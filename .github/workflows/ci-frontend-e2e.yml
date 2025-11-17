@@ -45,6 +45,7 @@ jobs:
       - run: |
           npm ci
           npx playwright install --with-deps
+          docker rmi node:22 node:20 node:18
 
       - name: Start API Server for e2e tests
         run: |
@@ -56,6 +57,7 @@ jobs:
           # Run init first to generate JWT keys in override.env
           make init
           # Now run the seeding and populate commands
+          echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
@@ -82,7 +84,7 @@ jobs:
         run: |
           npm run test:e2e
 
-      - name: Show API logs on failure
+      - name: Debug logging on failure
         if: failure()
         run: |
           cd ../api
@@ -94,6 +96,9 @@ jobs:
           echo ""
           echo "=== Container Status ==="
           docker ps -a
+          echo ""
+          echo "=== Disk free ==="
+          df -h
           echo ""
         shell: bash
 
