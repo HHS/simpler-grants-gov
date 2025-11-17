@@ -165,6 +165,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.OTHER_NARRATIVE_ATTACHMENT, 10),
         LookupStr(FormType.PROJECT_ABSTRACT, 11),
         LookupStr(FormType.SUPPLEMENTARY_NEH_COVER_SHEET, 12),
+        LookupStr(FormType.GG_LOBBYING_FORM, 13),
     ]
 )
 

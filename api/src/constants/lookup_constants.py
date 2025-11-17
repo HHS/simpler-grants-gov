@@ -156,6 +156,8 @@ class FormType(StrEnum):
 
     SUPPLEMENTARY_NEH_COVER_SHEET = "SupplementaryNEHCoverSheet"
 
+    GG_LOBBYING_FORM = "GGLobbyingForm"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"

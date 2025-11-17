@@ -2,6 +2,7 @@ from src.db.models.competition_models import Form
 
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from .cd511 import CD511_v1_1
+from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .project_abstract import ProjectAbstract_v1_2
 from .project_abstract_summary import ProjectAbstractSummary_v2_0
@@ -29,4 +30,5 @@ def get_active_forms() -> list[Form]:
         OtherNarrativeAttachment_v1_2,
         CD511_v1_1,
         SupplementaryNEHCoverSheet_v3_0,
+        GG_LobbyingForm_v1_1,
     ]
