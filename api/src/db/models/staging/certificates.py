@@ -1,6 +1,7 @@
 import uuid
 
-from sqlalchemy import Uuid, text
+from sqlalchemy import text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.models.legacy_mixin.certificates_mixin import TcertificatesMixin
@@ -11,5 +12,5 @@ class Tcertificates(StagingBase, TcertificatesMixin, StagingParamMixin):
     __tablename__ = "tcertificates"
 
     tcertificates_id: Mapped[uuid.UUID | None] = mapped_column(
-        Uuid(as_uuid=True), server_default=text("gen_random_uuid()")
+        UUID, server_default=text("gen_random_uuid()"), unique=True
     )

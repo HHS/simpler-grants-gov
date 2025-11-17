@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime
+from datetime import date
 from enum import StrEnum
 
 import click
@@ -25,7 +25,7 @@ from src.task.task_blueprint import task_blueprint
 
 logger = logging.getLogger(__name__)
 
-FUTURE_DATE = datetime_util.make_timezone_aware(datetime(2050, 1, 1), "US/Eastern").date()
+FUTURE_DATE = date(2050, 1, 1)
 
 
 class SetupCertUserTaskStatus(StrEnum):
@@ -53,7 +53,6 @@ class SetupCertUserTask(Task):
         super().__init__(db_session)
         self.tcertificates_id = tcertificates_id
         self.role_ids = role_ids
-        self.valid_expiration_date = FUTURE_DATE
 
     def run_task(self) -> None:
         with self.db_session.begin():
@@ -72,8 +71,8 @@ class SetupCertUserTask(Task):
         if not tcertificate.serial_num:
             logger.warning("Tcertificate is missing serial number")
             return SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
-        self.valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
-        if self.valid_expiration_date <= datetime_util.get_now_us_eastern_date():
+        valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
+        if valid_expiration_date <= datetime_util.get_now_us_eastern_date():
             logger.warning("Cert is expired")
             return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
         if self.is_existing_certificate(tcertificate):
@@ -85,7 +84,9 @@ class SetupCertUserTask(Task):
             return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
 
         else:
-            self.process_cert_user(roles, tcertificate, agency, related_agencies)
+            self.process_cert_user(
+                roles, tcertificate, agency, related_agencies, valid_expiration_date
+            )
         logger.info("setup cert user complete")
         return SetupCertUserTaskStatus.SUCCESS
 
@@ -95,6 +96,7 @@ class SetupCertUserTask(Task):
         tcertificate: staging.certificates.Tcertificates,
         agency: Agency,
         related_agencies: list[Agency],
+        valid_expiration_date: date,
     ) -> None:
         all_agencies = related_agencies + [agency]
         user = self.create_user_with_agency_roles(all_agencies, roles)
@@ -102,7 +104,7 @@ class SetupCertUserTask(Task):
             legacy_certificate_id=uuid.uuid4(),
             agency=agency,
             cert_id=tcertificate.currentcertid,
-            expiration_date=self.valid_expiration_date,
+            expiration_date=valid_expiration_date,
             serial_number=tcertificate.serial_num,
             user=user,
         )
