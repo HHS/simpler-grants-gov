@@ -205,10 +205,8 @@ FORM_JSON_SCHEMA = {
             "required": ["organization_name", "address"],
             "properties": {
                 "organization_name": {
-                    "type": "string",
+                    "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
                     "title": "Organization Name",
-                    "minLength": 1,
-                    "maxLength": 60,
                 },
                 "address": {
                     "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("simple_address")}],

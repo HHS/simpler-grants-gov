@@ -57,10 +57,8 @@ FORM_JSON_SCHEMA = {
         # Note this was called OrganizationName in the legacy system
         # but the display text was "Name of Applicant".
         "applicant_name": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Name of Applicant",
-            "minLength": 1,
-            "maxLength": 60,
         },
         "award_number": {
             "type": "string",
