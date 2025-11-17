@@ -82,10 +82,21 @@ class TestConditionalIntegration:
 
 
 class TestArrayDecompositionIntegration:
-    """Test end-to-end array decomposition transformation integration for SF-424A."""
+    """Test end-to-end array decomposition transformation integration for SF-424A.
+
+    These tests verify that the array_decomposition transform correctly reorganizes
+    row-oriented data into column-oriented structure AND that the XML generation
+    properly handles the wrapper elements and attributes to produce the correct XML.
+    """
 
     def test_sf424a_budget_sections_array_decomposition_integration(self):
-        """Test complete array decomposition for SF-424A budget sections."""
+        """Test complete array decomposition for SF-424A budget sections.
+
+        Verifies that:
+        1. Array decomposition transforms data correctly
+        2. XML generation creates proper wrapper elements (ResourceLineItem vs ResourceTotals)
+        3. Activity title appears as an attribute on line items only
+        """
         service = XMLGenerationService()
 
         # Test data with activity line items and totals
@@ -167,6 +178,16 @@ class TestArrayDecompositionIntegration:
         assert "NonFederalResources" in response.xml_data
         assert "FederalFundEstimates" in response.xml_data
 
+        # Verify wrapper elements are used correctly
+        assert "SummaryLineItem" in response.xml_data
+        assert "SummaryTotals" in response.xml_data
+        assert "ResourceLineItem" in response.xml_data
+        assert "ResourceTotals" in response.xml_data
+
+        # Verify activity_title appears as an attribute on line items
+        assert 'SF424A:activity_title="Activity 1"' in response.xml_data
+        assert 'SF424A:activity_title="Activity 2"' in response.xml_data
+
     def test_sf424a_budget_sections_with_minimal_data(self):
         """Test array decomposition with minimal budget data."""
         service = XMLGenerationService()
@@ -240,6 +261,68 @@ class TestArrayDecompositionIntegration:
         # Verify BudgetSections is present with only line items (no total)
         assert "BudgetSections" in response.xml_data
         assert "BudgetSummaries" in response.xml_data
+
+    def test_sf424a_non_federal_resources_xml_structure(self):
+        """Test that NonFederalResources produces the exact XML structure with attributes.
+
+        This test validates the complete XML structure including:
+        - ResourceLineItem elements with activity_title attribute
+        - ResourceTotals element without activity_title
+        - Proper nesting and namespacing
+        """
+        service = XMLGenerationService()
+
+        # Test data matching the PR comment example
+        application_data = {
+            "activity_line_items": [
+                {
+                    "activity_title": "Line 1",
+                    "non_federal_resources": {
+                        "applicant_amount": "10.00",
+                        "state_amount": "20.00",
+                        "other_amount": "30.00",
+                        "total_amount": "60.00",
+                    },
+                },
+            ],
+            "total_non_federal_resources": {
+                "applicant_amount": "120.00",
+                "state_amount": "150.00",
+                "other_amount": "180.00",
+                "total_amount": "450.00",
+            },
+        }
+
+        request = XMLGenerationRequest(
+            transform_config=SF424A_TRANSFORM_RULES,
+            application_data=application_data,
+            pretty_print=True,
+        )
+
+        response = service.generate_xml(request)
+
+        # Verify the transformation succeeded
+        assert response.success is True
+        assert response.xml_data is not None
+
+        # Verify the exact XML structure
+        xml_data = response.xml_data
+
+        # Check ResourceLineItem with activity_title attribute
+        assert "<SF424A:ResourceLineItem SF424A:activity_title=\"Line 1\">" in xml_data
+        assert "<SF424A:applicant_amount>10.00</SF424A:applicant_amount>" in xml_data
+        assert "<SF424A:state_amount>20.00</SF424A:state_amount>" in xml_data
+        assert "<SF424A:other_amount>30.00</SF424A:other_amount>" in xml_data
+
+        # Check ResourceTotals without activity_title attribute
+        assert "<SF424A:ResourceTotals>" in xml_data
+        assert "<SF424A:applicant_amount>120.00</SF424A:applicant_amount>" in xml_data
+        assert "<SF424A:state_amount>150.00</SF424A:state_amount>" in xml_data
+        assert "<SF424A:other_amount>180.00</SF424A:other_amount>" in xml_data
+        assert "<SF424A:total_amount>450.00</SF424A:total_amount>" in xml_data
+
+        # Verify ResourceTotals does NOT have activity_title attribute
+        assert "ResourceTotals SF424A:activity_title" not in xml_data
 
     def test_sf424a_budget_sections_empty_line_items(self):
         """Test array decomposition with empty activity line items."""

@@ -899,19 +899,31 @@ FORM_XML_TRANSFORM_RULES = {
                 "field_mappings": {
                     "BudgetSummaries": {
                         "item_field": "budget_summary",
+                        "item_wrapper": "SummaryLineItem",
+                        "item_attributes": ["activity_title"],
                         "total_field": "total_budget_summary",
+                        "total_wrapper": "SummaryTotals",
                     },
                     "BudgetCategories": {
                         "item_field": "budget_categories",
+                        "item_wrapper": "CategoryLineItem",
+                        "item_attributes": ["activity_title"],
                         "total_field": "total_budget_categories",
+                        "total_wrapper": "CategoryTotals",
                     },
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
+                        "item_wrapper": "ResourceLineItem",
+                        "item_attributes": ["activity_title"],
                         "total_field": "total_non_federal_resources",
+                        "total_wrapper": "ResourceTotals",
                     },
                     "FederalFundEstimates": {
                         "item_field": "federal_fund_estimates",
+                        "item_wrapper": "EstimateLineItem",
+                        "item_attributes": ["activity_title"],
                         "total_field": "total_federal_fund_estimates",
+                        "total_wrapper": "EstimateTotals",
                     },
                 },
             },

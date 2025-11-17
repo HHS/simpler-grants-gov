@@ -541,6 +541,243 @@ class TestArrayDecompositionTransform:
         result = apply_conditional_transform(transform_config, source_data, field_path)
         assert result is None
 
+    def test_array_decomposition_with_item_wrapper(self):
+        """Test array decomposition with item_wrapper configuration."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Resources": {
+                    "item_field": "resource",
+                    "item_wrapper": "ResourceLineItem",
+                    "total_field": "total_resource",
+                    "total_wrapper": "ResourceTotals",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"resource": {"amount": "100.00"}},
+                {"resource": {"amount": "200.00"}},
+            ],
+            "total_resource": {"amount": "300.00"},
+        }
+        field_path = ["resources"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert "Resources" in result
+        assert len(result["Resources"]) == 3
+        
+        # Check line items have wrapper
+        assert result["Resources"][0]["__wrapper"] == "ResourceLineItem"
+        assert result["Resources"][0]["amount"] == "100.00"
+        assert result["Resources"][1]["__wrapper"] == "ResourceLineItem"
+        assert result["Resources"][1]["amount"] == "200.00"
+        
+        # Check total has different wrapper
+        assert result["Resources"][2]["__wrapper"] == "ResourceTotals"
+        assert result["Resources"][2]["amount"] == "300.00"
+
+    def test_array_decomposition_with_item_attributes(self):
+        """Test array decomposition with item_attributes configuration."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "activity_line_items",
+            "field_mappings": {
+                "BudgetSummaries": {
+                    "item_field": "budget_summary",
+                    "item_wrapper": "SummaryLineItem",
+                    "item_attributes": ["activity_title"],
+                },
+            },
+        }
+        source_data = {
+            "activity_line_items": [
+                {
+                    "activity_title": "Activity 1",
+                    "budget_summary": {"total_amount": "5000.00"},
+                },
+                {
+                    "activity_title": "Activity 2",
+                    "budget_summary": {"total_amount": "8000.00"},
+                },
+            ],
+        }
+        field_path = ["budget_sections"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert "BudgetSummaries" in result
+        assert len(result["BudgetSummaries"]) == 2
+        
+        # Check first item has wrapper and attributes
+        assert result["BudgetSummaries"][0]["__wrapper"] == "SummaryLineItem"
+        assert result["BudgetSummaries"][0]["__attributes"] == {"activity_title": "Activity 1"}
+        assert result["BudgetSummaries"][0]["total_amount"] == "5000.00"
+        
+        # Check second item
+        assert result["BudgetSummaries"][1]["__wrapper"] == "SummaryLineItem"
+        assert result["BudgetSummaries"][1]["__attributes"] == {"activity_title": "Activity 2"}
+        assert result["BudgetSummaries"][1]["total_amount"] == "8000.00"
+
+    def test_array_decomposition_with_multiple_attributes(self):
+        """Test array decomposition extracts multiple attributes."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_attributes": ["title", "code", "id"],
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {
+                    "title": "Item A",
+                    "code": "CODE-A",
+                    "id": 1,
+                    "data": {"value": "100"},
+                },
+                {
+                    "title": "Item B",
+                    "code": "CODE-B",
+                    # id is missing
+                    "data": {"value": "200"},
+                },
+            ],
+        }
+        field_path = ["data"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert len(result["Data"]) == 2
+        
+        # First item has all attributes
+        assert result["Data"][0]["__attributes"] == {
+            "title": "Item A",
+            "code": "CODE-A",
+            "id": 1,
+        }
+        
+        # Second item only has available attributes
+        assert result["Data"][1]["__attributes"] == {
+            "title": "Item B",
+            "code": "CODE-B",
+        }
+
+    def test_array_decomposition_attributes_without_wrapper(self):
+        """Test array decomposition can extract attributes without wrapper."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_attributes": ["title"],
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"title": "Item 1", "data": {"value": "100"}},
+            ],
+        }
+        field_path = ["data"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert result["Data"][0]["__attributes"] == {"title": "Item 1"}
+        assert result["Data"][0]["value"] == "100"
+        # No __wrapper key when not specified
+        assert "__wrapper" not in result["Data"][0]
+
+    def test_array_decomposition_wrapper_without_attributes(self):
+        """Test array decomposition can use wrapper without attributes."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_wrapper": "DataItem",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"data": {"value": "100"}},
+            ],
+        }
+        field_path = ["data"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert result["Data"][0]["__wrapper"] == "DataItem"
+        assert result["Data"][0]["value"] == "100"
+        # No __attributes key when not specified
+        assert "__attributes" not in result["Data"][0]
+
+    def test_array_decomposition_skips_none_attributes(self):
+        """Test array decomposition skips None attribute values."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_attributes": ["title", "code"],
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"title": "Item 1", "code": None, "data": {"value": "100"}},
+            ],
+        }
+        field_path = ["data"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        # Only non-None attributes should be included
+        assert result["Data"][0]["__attributes"] == {"title": "Item 1"}
+
+    def test_array_decomposition_no_attributes_if_all_none(self):
+        """Test array decomposition doesn't add __attributes if all are None."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Data": {
+                    "item_field": "data",
+                    "item_wrapper": "DataItem",
+                    "item_attributes": ["title", "code"],
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"title": None, "code": None, "data": {"value": "100"}},
+            ],
+        }
+        field_path = ["data"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert result["Data"][0]["__wrapper"] == "DataItem"
+        assert result["Data"][0]["value"] == "100"
+        # No __attributes key when all are None
+        assert "__attributes" not in result["Data"][0]
+
 
 class TestConditionalStructure:
     """Test conditional structure selection logic."""

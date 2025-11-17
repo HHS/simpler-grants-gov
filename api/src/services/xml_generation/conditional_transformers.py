@@ -70,7 +70,15 @@ def _apply_array_decomposition_transform(
     """Apply array decomposition transformation.
 
     Transforms row-oriented array data into column-oriented structure by extracting
-    specific fields from each array element and grouping them by field type.
+    specific fields from each array element and grouping them by field type. Supports
+    XML wrapper elements and attributes for proper XML generation.
+    
+    Configuration options per field mapping:
+    - item_field: Field to extract from each array item (required)
+    - item_wrapper: XML wrapper element name for line items (optional)
+    - item_attributes: List of attribute names to extract from source items (optional)
+    - total_field: Field containing the total/summary (optional)
+    - total_wrapper: XML wrapper element name for totals (optional)
     """
     source_array_field = transform_config.get("source_array_field")
     field_mappings = transform_config.get("field_mappings", {})
@@ -102,7 +110,10 @@ def _apply_array_decomposition_transform(
             continue
 
         item_field = mapping_config.get("item_field")
+        item_wrapper = mapping_config.get("item_wrapper")
+        item_attributes = mapping_config.get("item_attributes", [])
         total_field = mapping_config.get("total_field")
+        total_wrapper = mapping_config.get("total_wrapper")
 
         if not item_field:
             logger.warning(f"Skipping field mapping '{output_field_name}': missing 'item_field'")
@@ -114,14 +125,48 @@ def _apply_array_decomposition_transform(
             if isinstance(item, dict) and item_field in item:
                 value = item[item_field]
                 if value is not None:
-                    extracted_values.append(value)
+                    # Wrap value with metadata if configured
+                    if item_wrapper or item_attributes:
+                        wrapped_value = {}
+                        
+                        # Add wrapper element name
+                        if item_wrapper:
+                            wrapped_value["__wrapper"] = item_wrapper
+                        
+                        # Extract attributes from source item
+                        if item_attributes:
+                            attrs = {}
+                            for attr_name in item_attributes:
+                                if attr_name in item and item[attr_name] is not None:
+                                    attrs[attr_name] = item[attr_name]
+                            if attrs:
+                                wrapped_value["__attributes"] = attrs
+                        
+                        # Add the actual data
+                        if isinstance(value, dict):
+                            wrapped_value.update(value)
+                        else:
+                            wrapped_value["value"] = value
+                        
+                        extracted_values.append(wrapped_value)
+                    else:
+                        extracted_values.append(value)
 
         # Add total field if configured and available
         if total_field:
             total_path = total_field.split(".")
             total_value = get_nested_value(source_data, total_path)
             if total_value is not None:
-                extracted_values.append(total_value)
+                # Wrap total value with metadata if configured
+                if total_wrapper:
+                    wrapped_total = {"__wrapper": total_wrapper}
+                    if isinstance(total_value, dict):
+                        wrapped_total.update(total_value)
+                    else:
+                        wrapped_total["value"] = total_value
+                    extracted_values.append(wrapped_total)
+                else:
+                    extracted_values.append(total_value)
 
         # Add to result if we have any values
         if extracted_values:
