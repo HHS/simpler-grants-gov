@@ -104,7 +104,7 @@ const LogoutNavItem = () => {
   );
 };
 
-const UserDropdown = ({
+export const UserDropdown = ({
   user,
   isApplicationTestUser,
 }: {
