@@ -4293,10 +4293,13 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
+          - OtherNarrativeAttachment
           - ProjectAbstractSummary
+          - ProjectAbstract
           - CD511
           type:
           - string
@@ -4441,10 +4444,13 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
+          - OtherNarrativeAttachment
           - ProjectAbstractSummary
+          - ProjectAbstract
           - CD511
           type:
           - string
