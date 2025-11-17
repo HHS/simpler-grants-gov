@@ -133,3 +133,410 @@ class TestApplyConditionalTransform:
             ConditionalTransformationError, match="Unknown conditional transform type"
         ):
             apply_conditional_transform(transform_config, source_data, field_path)
+
+
+class TestArrayDecompositionTransform:
+    """Test array decomposition transformation logic."""
+
+    def test_array_decomposition_basic(self):
+        """Test basic array decomposition with multiple fields."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "activity_line_items",
+            "field_mappings": {
+                "BudgetSummaries": {
+                    "item_field": "budget_summary",
+                    "total_field": "total_budget_summary",
+                },
+                "BudgetCategories": {
+                    "item_field": "budget_categories",
+                    "total_field": "total_budget_categories",
+                },
+            },
+        }
+        source_data = {
+            "activity_line_items": [
+                {
+                    "activity_title": "Activity 1",
+                    "budget_summary": {"amount": "1000"},
+                    "budget_categories": {"personnel": "500"},
+                },
+                {
+                    "activity_title": "Activity 2",
+                    "budget_summary": {"amount": "2000"},
+                    "budget_categories": {"personnel": "1000"},
+                },
+            ],
+            "total_budget_summary": {"amount": "3000"},
+            "total_budget_categories": {"personnel": "1500"},
+        }
+        field_path = ["budget_sections"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        expected = {
+            "BudgetSummaries": [
+                {"amount": "1000"},
+                {"amount": "2000"},
+                {"amount": "3000"},
+            ],
+            "BudgetCategories": [
+                {"personnel": "500"},
+                {"personnel": "1000"},
+                {"personnel": "1500"},
+            ],
+        }
+        assert result == expected
+
+    def test_array_decomposition_without_totals(self):
+        """Test array decomposition without total fields."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+                "Values": {
+                    "item_field": "value",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"name": "Item1", "value": 100},
+                {"name": "Item2", "value": 200},
+                {"name": "Item3", "value": 300},
+            ],
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        expected = {
+            "Names": ["Item1", "Item2", "Item3"],
+            "Values": [100, 200, 300],
+        }
+        assert result == expected
+
+    def test_array_decomposition_with_missing_item_fields(self):
+        """Test array decomposition when some items don't have the field."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"name": "Item1"},
+                {"other_field": "value"},  # missing 'name'
+                {"name": "Item3"},
+            ],
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        # Should only include items that have the field
+        expected = {
+            "Names": ["Item1", "Item3"],
+        }
+        assert result == expected
+
+    def test_array_decomposition_with_none_values(self):
+        """Test array decomposition skips None values in items."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Values": {
+                    "item_field": "value",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"value": 100},
+                {"value": None},  # Should be skipped
+                {"value": 300},
+            ],
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        expected = {
+            "Values": [100, 300],
+        }
+        assert result == expected
+
+    def test_array_decomposition_empty_array(self):
+        """Test array decomposition with empty source array."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+            },
+        }
+        source_data = {
+            "items": [],
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+        assert result is None
+
+    def test_array_decomposition_missing_source_array(self):
+        """Test array decomposition with missing source array."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+            },
+        }
+        source_data = {
+            "other_field": "value",
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+        assert result is None
+
+    def test_array_decomposition_none_source_array(self):
+        """Test array decomposition with None source array."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+            },
+        }
+        source_data = {
+            "items": None,
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+        assert result is None
+
+    def test_array_decomposition_missing_total_field(self):
+        """Test array decomposition when total field is missing."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Values": {
+                    "item_field": "value",
+                    "total_field": "total_value",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"value": 100},
+                {"value": 200},
+            ],
+            # total_value is missing
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        # Should still work without total
+        expected = {
+            "Values": [100, 200],
+        }
+        assert result == expected
+
+    def test_array_decomposition_none_total_field(self):
+        """Test array decomposition when total field is None."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Values": {
+                    "item_field": "value",
+                    "total_field": "total_value",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"value": 100},
+                {"value": 200},
+            ],
+            "total_value": None,
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        # Should not include None total
+        expected = {
+            "Values": [100, 200],
+        }
+        assert result == expected
+
+    def test_array_decomposition_nested_source_field(self):
+        """Test array decomposition with nested source array path."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "budget.line_items",
+            "field_mappings": {
+                "Amounts": {
+                    "item_field": "amount",
+                },
+            },
+        }
+        source_data = {
+            "budget": {
+                "line_items": [
+                    {"amount": 1000},
+                    {"amount": 2000},
+                ],
+            },
+        }
+        field_path = ["budget_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        expected = {
+            "Amounts": [1000, 2000],
+        }
+        assert result == expected
+
+    def test_array_decomposition_nested_total_field(self):
+        """Test array decomposition with nested total field path."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Values": {
+                    "item_field": "value",
+                    "total_field": "summary.total_value",
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"value": 100},
+                {"value": 200},
+            ],
+            "summary": {
+                "total_value": 300,
+            },
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        expected = {
+            "Values": [100, 200, 300],
+        }
+        assert result == expected
+
+    def test_array_decomposition_missing_source_array_field_config(self):
+        """Test array decomposition raises error when source_array_field is missing."""
+        transform_config = {
+            "type": "array_decomposition",
+            # Missing source_array_field
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+            },
+        }
+        source_data = {"items": []}
+        field_path = ["test"]
+
+        with pytest.raises(
+            ConditionalTransformationError,
+            match="array_decomposition requires 'source_array_field'",
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
+
+    def test_array_decomposition_invalid_source_array_field_type(self):
+        """Test array decomposition raises error when source_array_field is not a string."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": ["items"],  # Should be string, not list
+            "field_mappings": {
+                "Names": {
+                    "item_field": "name",
+                },
+            },
+        }
+        source_data = {"items": []}
+        field_path = ["test"]
+
+        with pytest.raises(
+            ConditionalTransformationError,
+            match="array_decomposition requires 'source_array_field'",
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
+
+    def test_array_decomposition_missing_field_mappings(self):
+        """Test array decomposition raises error when field_mappings is missing."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            # Missing field_mappings
+        }
+        source_data = {"items": []}
+        field_path = ["test"]
+
+        with pytest.raises(
+            ConditionalTransformationError,
+            match="array_decomposition requires 'field_mappings'",
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
+
+    def test_array_decomposition_invalid_field_mappings_type(self):
+        """Test array decomposition raises error when field_mappings is not a dict."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": "invalid",  # Should be dict, not string
+        }
+        source_data = {"items": []}
+        field_path = ["test"]
+
+        with pytest.raises(
+            ConditionalTransformationError,
+            match="array_decomposition requires 'field_mappings'",
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
+
+    def test_array_decomposition_all_fields_excluded(self):
+        """Test array decomposition returns None when all fields are excluded."""
+        transform_config = {
+            "type": "array_decomposition",
+            "source_array_field": "items",
+            "field_mappings": {
+                "Values": {
+                    "item_field": "missing_field",  # Field doesn't exist in items
+                },
+            },
+        }
+        source_data = {
+            "items": [
+                {"name": "Item1"},
+                {"name": "Item2"},
+            ],
+        }
+        field_path = ["items_decomposition"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+        assert result is None

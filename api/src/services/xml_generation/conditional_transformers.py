@@ -64,6 +64,74 @@ def _apply_pivot_object_transform(
     return result if result else None
 
 
+def _apply_array_decomposition_transform(
+    transform_config: dict[str, Any], source_data: dict[str, Any]
+) -> dict[str, Any] | None:
+    """Apply array decomposition transformation.
+    
+    Transforms row-oriented array data into column-oriented structure by extracting
+    specific fields from each array element and grouping them by field type.
+    """
+    source_array_field = transform_config.get("source_array_field")
+    field_mappings = transform_config.get("field_mappings", {})
+
+    # Validate configuration
+    if not source_array_field or not isinstance(source_array_field, str):
+        raise ConditionalTransformationError(
+            "array_decomposition requires 'source_array_field' to be a non-empty string"
+        )
+
+    if not field_mappings or not isinstance(field_mappings, dict):
+        raise ConditionalTransformationError(
+            "array_decomposition requires 'field_mappings' to be a non-empty dictionary"
+        )
+
+    # Get the source array
+    source_path = source_array_field.split(".")
+    source_array = get_nested_value(source_data, source_path)
+
+    # If source array doesn't exist or is empty, return None
+    if not source_array or not isinstance(source_array, list):
+        return None
+
+    result = {}
+
+    # Process each field mapping
+    for output_field_name, mapping_config in field_mappings.items():
+        if not isinstance(mapping_config, dict):
+            continue
+
+        item_field = mapping_config.get("item_field")
+        total_field = mapping_config.get("total_field")
+
+        if not item_field:
+            logger.warning(
+                f"Skipping field mapping '{output_field_name}': missing 'item_field'"
+            )
+            continue
+
+        # Extract the field from each item in the array
+        extracted_values = []
+        for item in source_array:
+            if isinstance(item, dict) and item_field in item:
+                value = item[item_field]
+                if value is not None:
+                    extracted_values.append(value)
+
+        # Add total field if configured and available
+        if total_field:
+            total_path = total_field.split(".")
+            total_value = get_nested_value(source_data, total_path)
+            if total_value is not None:
+                extracted_values.append(total_value)
+
+        # Add to result if we have any values
+        if extracted_values:
+            result[output_field_name] = extracted_values
+
+    return result if result else None
+
+
 class ConditionalTransformationError(Exception):
     """Exception raised when conditional transformation fails."""
 
@@ -154,6 +222,7 @@ def apply_conditional_transform(
     Supports:
     - one_to_many: Map array field to multiple XML elements
     - pivot_object: Restructure nested objects by pivoting dimensions
+    - array_decomposition: Transform row-oriented arrays to column-oriented structure
 
     Args:
         transform_config: Conditional transformation configuration
@@ -198,6 +267,9 @@ def apply_conditional_transform(
 
     elif transform_type == "pivot_object":
         return _apply_pivot_object_transform(transform_config, source_data)
+
+    elif transform_type == "array_decomposition":
+        return _apply_array_decomposition_transform(transform_config, source_data)
 
     else:
         raise ConditionalTransformationError(

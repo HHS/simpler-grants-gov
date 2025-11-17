@@ -831,6 +831,37 @@ FORM_XML_TRANSFORM_RULES = {
             },
         }
     },
+    # Budget sections decomposition
+    # Transform row-oriented activity_line_items array to column-oriented arrays
+    # organized by section type (budget_summary, budget_categories, etc.)
+    "budget_sections": {
+        "xml_transform": {
+            "type": "conditional",
+            "target": "BudgetSections",
+            "conditional_transform": {
+                "type": "array_decomposition",
+                "source_array_field": "activity_line_items",
+                "field_mappings": {
+                    "BudgetSummaries": {
+                        "item_field": "budget_summary",
+                        "total_field": "total_budget_summary",
+                    },
+                    "BudgetCategories": {
+                        "item_field": "budget_categories",
+                        "total_field": "total_budget_categories",
+                    },
+                    "NonFederalResources": {
+                        "item_field": "non_federal_resources",
+                        "total_field": "total_non_federal_resources",
+                    },
+                    "FederalFundEstimates": {
+                        "item_field": "federal_fund_estimates",
+                        "total_field": "total_federal_fund_estimates",
+                    },
+                },
+            },
+        }
+    },
 }
 
 SF424a_v1_0 = Form(
