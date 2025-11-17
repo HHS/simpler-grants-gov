@@ -15,6 +15,7 @@ from src.form_schema.forms import (
     SF424b_v1_1,
     SF424d_v1_1,
     SFLLL_v2_0,
+    SupplementaryNEHCoverSheet_v3_0,
 )
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
@@ -109,3 +110,8 @@ def other_narrative_attachment_v1_2():
 @pytest.fixture(scope="session")
 def cd511_v1_1():
     return setup_resolved_form(CD511_v1_1)
+
+
+@pytest.fixture(scope="session")
+def supplementary_neh_cover_sheet_v3_0():
+    return setup_resolved_form(SupplementaryNEHCoverSheet_v3_0)

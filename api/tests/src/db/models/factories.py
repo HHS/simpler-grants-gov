@@ -3091,6 +3091,18 @@ class LinkOrganizationInvitationToRoleFactory(BaseFactory):
     )
 
 
+class IgnoredLegacyOrganizationUserFactory(BaseFactory):
+    class Meta:
+        model = entity_models.IgnoredLegacyOrganizationUser
+
+    ignored_legacy_organization_user_id = Generators.UuidObj
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+    email = factory.Faker("email")
+    user = factory.SubFactory(UserFactory)
+    ignored_by_user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
         model = user_models.SuppressedEmail

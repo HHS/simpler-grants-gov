@@ -540,3 +540,170 @@ class TestArrayDecompositionTransform:
 
         result = apply_conditional_transform(transform_config, source_data, field_path)
         assert result is None
+
+
+class TestConditionalStructure:
+    """Test conditional structure selection logic."""
+
+    def test_conditional_structure_if_true_branch(self):
+        """Test conditional structure selects if_true branch when condition is True."""
+        transform_config = {
+            "type": "conditional_structure",
+            "condition": {"type": "field_equals", "field": "entity_type", "value": "prime"},
+            "if_true": {
+                "target": "PrimeEntity",
+                "nested_fields": {
+                    "organization_name": {
+                        "xml_transform": {"target": "PrimeName", "type": "simple"}
+                    },
+                    "uei_number": {"xml_transform": {"target": "PrimeUEI", "type": "simple"}},
+                },
+            },
+            "if_false": {
+                "target": "SubawardeeEntity",
+                "nested_fields": {
+                    "organization_name": {
+                        "xml_transform": {"target": "SubawardeeName", "type": "simple"}
+                    }
+                },
+            },
+        }
+        source_data = {"entity_type": "prime"}
+        field_path = ["report_entity"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        # Should return the if_true configuration
+        assert result is not None
+        assert result["target"] == "PrimeEntity"
+        assert "nested_fields" in result
+        assert "organization_name" in result["nested_fields"]
+        assert "uei_number" in result["nested_fields"]
+
+    def test_conditional_structure_if_false_branch(self):
+        """Test conditional structure selects if_false branch when condition is False."""
+        transform_config = {
+            "type": "conditional_structure",
+            "condition": {"type": "field_equals", "field": "entity_type", "value": "prime"},
+            "if_true": {
+                "target": "PrimeEntity",
+                "nested_fields": {
+                    "organization_name": {
+                        "xml_transform": {"target": "PrimeName", "type": "simple"}
+                    }
+                },
+            },
+            "if_false": {
+                "target": "SubawardeeEntity",
+                "nested_fields": {
+                    "organization_name": {
+                        "xml_transform": {"target": "SubawardeeName", "type": "simple"}
+                    }
+                },
+            },
+        }
+        source_data = {"entity_type": "subawardee"}
+        field_path = ["report_entity"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        # Should return the if_false configuration
+        assert result is not None
+        assert result["target"] == "SubawardeeEntity"
+        assert "nested_fields" in result
+        assert "organization_name" in result["nested_fields"]
+
+    def test_conditional_structure_no_if_false_returns_none(self):
+        """Test conditional structure returns None when if_false is missing and condition is False."""
+        transform_config = {
+            "type": "conditional_structure",
+            "condition": {"type": "field_equals", "field": "entity_type", "value": "prime"},
+            "if_true": {
+                "target": "PrimeEntity",
+                "nested_fields": {
+                    "organization_name": {
+                        "xml_transform": {"target": "PrimeName", "type": "simple"}
+                    }
+                },
+            },
+            # No if_false branch
+        }
+        source_data = {"entity_type": "subawardee"}
+        field_path = ["report_entity"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        # Should return None when condition is False and no if_false branch
+        assert result is None
+
+    def test_conditional_structure_missing_condition_raises_error(self):
+        """Test conditional structure raises error when condition is missing."""
+        transform_config = {
+            "type": "conditional_structure",
+            # No condition
+            "if_true": {"target": "PrimeEntity", "nested_fields": {}},
+        }
+        source_data = {"entity_type": "prime"}
+        field_path = ["report_entity"]
+
+        with pytest.raises(
+            ConditionalTransformationError, match="conditional_structure requires a 'condition'"
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
+
+    def test_conditional_structure_missing_if_true_raises_error(self):
+        """Test conditional structure raises error when if_true is missing."""
+        transform_config = {
+            "type": "conditional_structure",
+            "condition": {"type": "field_equals", "field": "entity_type", "value": "prime"},
+            # No if_true
+        }
+        source_data = {"entity_type": "prime"}
+        field_path = ["report_entity"]
+
+        with pytest.raises(
+            ConditionalTransformationError, match="conditional_structure requires an 'if_true'"
+        ):
+            apply_conditional_transform(transform_config, source_data, field_path)
+
+    def test_conditional_structure_with_complex_condition(self):
+        """Test conditional structure with complex AND condition."""
+        transform_config = {
+            "type": "conditional_structure",
+            "condition": {
+                "type": "and",
+                "conditions": [
+                    {"type": "field_equals", "field": "entity_type", "value": "prime"},
+                    {"type": "field_equals", "field": "report_type", "value": "final"},
+                ],
+            },
+            "if_true": {"target": "PrimeFinalReport", "nested_fields": {}},
+            "if_false": {"target": "OtherReport", "nested_fields": {}},
+        }
+        source_data = {"entity_type": "prime", "report_type": "final"}
+        field_path = ["report"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert result["target"] == "PrimeFinalReport"
+
+    def test_conditional_structure_with_field_in_condition(self):
+        """Test conditional structure with field_in condition."""
+        transform_config = {
+            "type": "conditional_structure",
+            "condition": {
+                "type": "field_in",
+                "field": "entity_type",
+                "values": ["prime", "contractor"],
+            },
+            "if_true": {"target": "PrimeOrContractor", "nested_fields": {}},
+            "if_false": {"target": "OtherEntity", "nested_fields": {}},
+        }
+        source_data = {"entity_type": "contractor"}
+        field_path = ["entity"]
+
+        result = apply_conditional_transform(transform_config, source_data, field_path)
+
+        assert result is not None
+        assert result["target"] == "PrimeOrContractor"

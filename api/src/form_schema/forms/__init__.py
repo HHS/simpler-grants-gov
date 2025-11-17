@@ -11,6 +11,7 @@ from .sf424a import SF424a_v1_0
 from .sf424b import SF424b_v1_1
 from .sf424d import SF424d_v1_1
 from .sflll import SFLLL_v2_0
+from .supplementary_neh_cover_sheet import SupplementaryNEHCoverSheet_v3_0
 
 
 def get_active_forms() -> list[Form]:
@@ -27,4 +28,5 @@ def get_active_forms() -> list[Form]:
         ProjectNarrativeAttachment_v1_2,
         OtherNarrativeAttachment_v1_2,
         CD511_v1_1,
+        SupplementaryNEHCoverSheet_v3_0,
     ]
