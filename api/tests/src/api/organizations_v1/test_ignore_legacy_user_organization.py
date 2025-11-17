@@ -107,3 +107,15 @@ class TestIgnoreLegacyUserOrganization:
             json={},
         )
         assert resp.status_code == 422
+
+    def test_ignore_legacy_user_organization_422_invalid_email(
+        self, client, db_session, enable_factory_create, user_org_a
+    ):
+        """Test error when request does not include an invalid email"""
+        user, org, token = user_org_a
+        resp = client.post(
+            f"/v1/organizations/{org.organization_id}/legacy-users/ignore",
+            headers={"X-SGG-Token": token},
+            json={"email": "test@.com"},
+        )
+        assert resp.status_code == 500
