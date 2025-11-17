@@ -9,6 +9,7 @@
     "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build -- --no-lint",
     "build": "next build",
     "dev": "NEW_RELIC_ENABLED=false next dev",
+    "local": "ENVIRONMENT=local NEW_RELIC_ENABLED=false next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
