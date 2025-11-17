@@ -74,6 +74,13 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "minLength": 1,
         "maxLength": 45,
     },
+    "contact_email": {
+        "type": "string",
+        "title": "Email",
+        "format": "email",
+        "minLength": 1,
+        "maxLength": 60,
+    },
     "signature": {
         "type": "string",
         "title": "Signature",
@@ -95,6 +102,12 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "minLength": 1,
         "maxLength": 60,
     },
+    "sam_uei": {
+        "type": "string",
+        "title": "SAM UEI",
+        "minLength": 12,
+        "maxLength": 12,
+    }
 }
 
 

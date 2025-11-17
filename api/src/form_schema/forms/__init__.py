@@ -13,7 +13,7 @@ from .sf424b import SF424b_v1_1
 from .sf424d import SF424d_v1_1
 from .sflll import SFLLL_v2_0
 from .supplementary_neh_cover_sheet import SupplementaryNEHCoverSheet_v3_0
-
+from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
 
 def get_active_forms() -> list[Form]:
     """Get all active forms."""
@@ -31,4 +31,5 @@ def get_active_forms() -> list[Form]:
         CD511_v1_1,
         SupplementaryNEHCoverSheet_v3_0,
         GG_LobbyingForm_v1_1,
+        EPA_FORM_4700_4_v5_0
     ]
