@@ -30,6 +30,7 @@ describe("logRequest", () => {
           "sec-fetch-dest": "empty",
         }),
       }),
+      200,
     );
     expect(infoMock).not.toHaveBeenCalled();
   });
@@ -45,6 +46,7 @@ describe("logRequest", () => {
           "X-Amz-Cf-Id": "a trace id",
         }),
       }),
+      200,
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({
@@ -53,6 +55,7 @@ describe("logRequest", () => {
       userAgent: "sure",
       acceptLanguage: "ES",
       awsTraceId: "a trace id",
+      statusCode: 200,
     });
   });
 });
