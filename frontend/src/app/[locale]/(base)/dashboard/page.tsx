@@ -17,7 +17,6 @@ import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { ActivityDashboardLinksSection } from "src/components/workspace/ActivityDashboardLinksSection";
 import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
-import { UserOrganizationInvite } from "src/components/workspace/UserOrganizationInvite";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 
 export async function generateMetadata({
@@ -73,13 +72,6 @@ async function ActivityDashboard() {
           ),
         })}
       </h1>
-      <UserOrganizationInvite
-        organizationId={
-          userOrganizations && userOrganizations[0]
-            ? userOrganizations[0].organization_id
-            : "1"
-        }
-      />
       {userInvitations?.length && (
         <OrganizationInvitationReplies userInvitations={userInvitations} />
       )}

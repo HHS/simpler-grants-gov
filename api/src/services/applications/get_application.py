@@ -7,8 +7,8 @@ from sqlalchemy.orm import selectinload
 import src.adapters.db as db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import Privilege, SubmissionIssue
+from src.auth.endpoint_access_util import check_user_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import (
     Application,
     ApplicationForm,
@@ -132,15 +132,12 @@ def get_application_with_auth(
     if not user and not is_internal_user:
         raise Exception("No user found, but not marked as internal auth")
     # Check privileges
-    if user and not can_access(user, {Privilege.VIEW_APPLICATION}, application):
-        logger.info(
-            "User attempted to access an application they are not associated with",
-            extra={
-                "user_id": user.user_id,
-                "application_id": application.application_id,
-                "submission_issue": SubmissionIssue.UNAUTHORIZED_APPLICATION_ACCESS,
-            },
+    if user:
+        check_user_access(
+            db_session,
+            user,
+            {Privilege.VIEW_APPLICATION},
+            application,
         )
-        raise_flask_error(403, "Forbidden")
 
     return application
