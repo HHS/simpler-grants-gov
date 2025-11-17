@@ -72,7 +72,7 @@ def _apply_array_decomposition_transform(
     Transforms row-oriented array data into column-oriented structure by extracting
     specific fields from each array element and grouping them by field type. Supports
     XML wrapper elements and attributes for proper XML generation.
-    
+
     Configuration options per field mapping:
     - item_field: Field to extract from each array item (required)
     - item_wrapper: XML wrapper element name for line items (optional)
@@ -128,11 +128,11 @@ def _apply_array_decomposition_transform(
                     # Wrap value with metadata if configured
                     if item_wrapper or item_attributes:
                         wrapped_value = {}
-                        
+
                         # Add wrapper element name
                         if item_wrapper:
                             wrapped_value["__wrapper"] = item_wrapper
-                        
+
                         # Extract attributes from source item
                         if item_attributes:
                             attrs = {}
@@ -141,13 +141,13 @@ def _apply_array_decomposition_transform(
                                     attrs[attr_name] = item[attr_name]
                             if attrs:
                                 wrapped_value["__attributes"] = attrs
-                        
+
                         # Add the actual data
                         if isinstance(value, dict):
                             wrapped_value.update(value)
                         else:
                             wrapped_value["value"] = value
-                        
+
                         extracted_values.append(wrapped_value)
                     else:
                         extracted_values.append(value)

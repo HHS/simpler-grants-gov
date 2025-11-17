@@ -569,13 +569,13 @@ class TestArrayDecompositionTransform:
         assert result is not None
         assert "Resources" in result
         assert len(result["Resources"]) == 3
-        
+
         # Check line items have wrapper
         assert result["Resources"][0]["__wrapper"] == "ResourceLineItem"
         assert result["Resources"][0]["amount"] == "100.00"
         assert result["Resources"][1]["__wrapper"] == "ResourceLineItem"
         assert result["Resources"][1]["amount"] == "200.00"
-        
+
         # Check total has different wrapper
         assert result["Resources"][2]["__wrapper"] == "ResourceTotals"
         assert result["Resources"][2]["amount"] == "300.00"
@@ -612,12 +612,12 @@ class TestArrayDecompositionTransform:
         assert result is not None
         assert "BudgetSummaries" in result
         assert len(result["BudgetSummaries"]) == 2
-        
+
         # Check first item has wrapper and attributes
         assert result["BudgetSummaries"][0]["__wrapper"] == "SummaryLineItem"
         assert result["BudgetSummaries"][0]["__attributes"] == {"activity_title": "Activity 1"}
         assert result["BudgetSummaries"][0]["total_amount"] == "5000.00"
-        
+
         # Check second item
         assert result["BudgetSummaries"][1]["__wrapper"] == "SummaryLineItem"
         assert result["BudgetSummaries"][1]["__attributes"] == {"activity_title": "Activity 2"}
@@ -657,14 +657,14 @@ class TestArrayDecompositionTransform:
 
         assert result is not None
         assert len(result["Data"]) == 2
-        
+
         # First item has all attributes
         assert result["Data"][0]["__attributes"] == {
             "title": "Item A",
             "code": "CODE-A",
             "id": 1,
         }
-        
+
         # Second item only has available attributes
         assert result["Data"][1]["__attributes"] == {
             "title": "Item B",

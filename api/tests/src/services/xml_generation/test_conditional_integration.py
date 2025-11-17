@@ -309,7 +309,7 @@ class TestArrayDecompositionIntegration:
         xml_data = response.xml_data
 
         # Check ResourceLineItem with activity_title attribute
-        assert "<SF424A:ResourceLineItem SF424A:activity_title=\"Line 1\">" in xml_data
+        assert '<SF424A:ResourceLineItem SF424A:activity_title="Line 1">' in xml_data
         assert "<SF424A:applicant_amount>10.00</SF424A:applicant_amount>" in xml_data
         assert "<SF424A:state_amount>20.00</SF424A:state_amount>" in xml_data
         assert "<SF424A:other_amount>30.00</SF424A:other_amount>" in xml_data
