@@ -1,38 +1,31 @@
 import { getSession } from "src/services/auth/session";
-import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
+import {
+  getOrganizationDetails,
+  getOrganizationRoles,
+  getOrganizationUsers,
+} from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
+import { UserDetail, UserRole } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
+import { ActiveUsersSection } from "./ActiveUsersSection";
 import { UserOrganizationInvite } from "./UserOrganizationInvite";
+import { LocalizedPageProps } from "src/types/intl";
+import { ManageUsersPageParams } from "src/app/[locale]/(base)/organization/[id]/manage-users/page";
 
-export async function ManageUsersPageContent({
-  organizationId,
-}: {
-  organizationId: string;
-}) {
+interface ManageUsersPageContentProps {
+  params: ManageUsersPageParams
+}
+
+export async function ManageUsersPageContent({ params }: ManageUsersPageContentProps) {
   const t = await getTranslations("ManageUsers");
+  const { id: organizationId } = params;
 
-  const session = await getSession();
-  if (!session?.token) {
-    return (
-      <GridContainer className="padding-top-2 tablet:padding-y-6">
-        <ErrorMessage>{t("errors.notLoggedInMessage")}</ErrorMessage>
-      </GridContainer>
-    );
-  }
   let userOrganizations: Organization | undefined;
-  try {
-    userOrganizations = await getOrganizationDetails(
-      session.token,
-      organizationId,
-    );
-  } catch (error) {
-    console.error("Unable to fetch organization information", error);
-  }
 
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
 
@@ -57,6 +50,7 @@ export async function ManageUsersPageContent({
       />
       <PageHeader organizationName={name} pageHeader={t("pageHeading")} />
       <UserOrganizationInvite organizationId={organizationId} />
+      <ActiveUsersSection organizationId={organizationId} />
     </GridContainer>
   );
 }

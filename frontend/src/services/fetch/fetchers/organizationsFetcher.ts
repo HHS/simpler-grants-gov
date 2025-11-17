@@ -1,3 +1,5 @@
+import { UnauthorizedError } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import { UserDetail, UserRole } from "src/types/userTypes";
@@ -35,11 +37,16 @@ export const getUserOrganizations = async (
 };
 
 export const getOrganizationUsers = async (
-  token: string,
   organizationId: string,
 ): Promise<UserDetail[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/users`,

@@ -1538,19 +1538,16 @@ export const messages = {
   ManageUsers: {
     pageTitle: "Manage Users | Simpler.Grants.gov",
     pageHeading: "Manage Users",
-    activeUsersHeading: "Active Users",
+    activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
+    activeUsersFetchError: "We have encountered an error retrieving the Active Users roster, please try again later.",
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
     pendingUsersHeading: "Pending Users",
     pendingUsersTableDescription:
       "Any users waiting to join your organization will appear below.",
-    errors: {
-      fetchError: "Failed to get Users",
-      notLoggedInMessage: "You are not logged in",
-    },
     usersTable: {
       admin: "Administrator",
       emailHeading: "Email",

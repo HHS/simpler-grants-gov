@@ -74,12 +74,12 @@ export interface UserDetailProfile {
   first_name: string;
   middle_name?: string;
   last_name: string;
-  roles?: UserRole[];
+  roles: UserRole[];
 }
 
 export interface UserDetail extends UserDetailProfile {
   user_id: string;
-  email: string;
+  email?: string;
 }
 
 export interface UserDetailWithProfile {
