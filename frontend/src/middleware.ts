@@ -42,6 +42,8 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
+  const cacheControl: string[] = [];
+
   if (request.url.includes("/cdn")) {
     const url = new URL(request.url);
     const params = new URLSearchParams(url.search);
@@ -49,7 +51,13 @@ export default function middleware(request: NextRequest): NextResponse {
     const cacheControl: string[] = [];
 
     cacheControl.push(`max-age: ${params.get("max-age") || "10"}`);
-    cacheControl.push(params.get("cache") || "no-store");
+    cacheControl.push(
+      params.get("cache") ||
+        (request.cookies.has("session") &&
+        request.cookies.get("session")?.value !== ""
+          ? "no-store"
+          : "public"),
+    );
 
     return new NextResponse(
       JSON.stringify({ params: params.entries(), cacheControl }),
@@ -84,7 +92,31 @@ export default function middleware(request: NextRequest): NextResponse {
     });
   }
 
-  logRequest(request);
+  logRequest(request, response.status);
 
+  if (
+    request.cookies.has("session") &&
+    request.cookies.get("session")?.value !== ""
+  ) {
+    cacheControl.push("no-store");
+    cacheControl.push("max-age=0");
+  }
+
+  const headers = {
+    ...response.headers,
+    "Cache-Control": cacheControl.join(", "),
+  };
+
+  if (cacheControl.length > 0) {
+    response.headers.set("Cache-Control", cacheControl.join(", "));
+  }
+  return response;
+
+  if (cacheControl.length > 0) {
+    return new NextResponse(response.body, {
+      status: response.status,
+      headers,
+    });
+  }
   return response;
 }

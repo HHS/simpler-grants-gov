@@ -38,7 +38,7 @@ const pinoConfig =
 
 export const logger = pino(pinoConfig);
 
-export const logRequest = (request: NextRequest) => {
+export const logRequest = (request: NextRequest, statusCode: number) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;
 
@@ -57,6 +57,7 @@ export const logRequest = (request: NextRequest) => {
         userAgent: headers.get("user-agent"),
         acceptLanguage: headers.get("accept-language"),
         awsTraceId: headers.get("X-Amz-Cf-Id"),
+        statusCode,
       });
     }
   }
