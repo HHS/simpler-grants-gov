@@ -6,6 +6,7 @@ from typing import Any
 from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
+from src.services.applications.application_validation import is_form_required
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -33,6 +34,10 @@ class SubmissionXMLAssembler:
     def get_supported_forms(self) -> list[ApplicationForm]:
         """Get list of application forms that are supported for XML generation.
 
+        Filters out forms that are:
+        - Not required AND not included in submission
+        - Don't have XML transform config
+
         Returns:
             List of ApplicationForm objects for supported forms only
         """
@@ -40,6 +45,11 @@ class SubmissionXMLAssembler:
 
         for app_form in self.application.application_forms:
             form_name = app_form.form.short_form_name
+
+            # Skip forms that are not required and not included in submission
+            if not is_form_required(app_form) and not app_form.is_included_in_submission:
+                continue
+
             if app_form.form.json_to_xml_schema is not None:
                 supported_forms.append(app_form)
             else:
