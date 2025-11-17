@@ -201,17 +201,33 @@ class RecursiveXMLTransformer:
         """Add transformed value to result dictionary."""
         # Add to result if transformation succeeded and produced non-None value
         if transformed_value is not None:
+            conditional_transform = transform_rule.get("conditional_transform", {})
+            conditional_type = conditional_transform.get("type")
+
             # Handle one-to-many mappings that return dictionaries
             if (
                 isinstance(transformed_value, dict)
                 and transform_type == "conditional"
-                and transform_rule.get("conditional_transform", {}).get("type") == "one_to_many"
+                and conditional_type == "one_to_many"
             ):
                 # Add all key-value pairs from one-to-many result
                 result.update(transformed_value)
                 logger.debug(
                     f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
                 )
+            # Handle conditional_structure that returns nested objects
+            elif (
+                isinstance(transformed_value, dict)
+                and transform_type == "conditional"
+                and conditional_type == "conditional_structure"
+            ):
+                # Get the target field name from the transform rule
+                target_field = transform_rule.get("target")
+                if target_field:
+                    result[target_field] = transformed_value
+                    logger.debug(
+                        f"Conditional structure transform {'.'.join(current_path)} -> {target_field}"
+                    )
             else:
                 # Standard field assignment for all other cases
                 target_field = transform_rule["target"]
@@ -236,7 +252,22 @@ class RecursiveXMLTransformer:
             conditional_config = transform_rule.get("conditional_transform")
             if conditional_config:
                 # Use the stored root source data for condition evaluation
-                return apply_conditional_transform(conditional_config, self.root_source_data, path)
+                conditional_result = apply_conditional_transform(
+                    conditional_config, self.root_source_data, path
+                )
+
+                # Check if this is a conditional_structure result
+                if (
+                    conditional_config.get("type") == "conditional_structure"
+                    and isinstance(conditional_result, dict)
+                    and "target" in conditional_result
+                ):
+                    # Handle conditional structure - extract and process nested fields
+                    return self._process_conditional_structure(
+                        conditional_result, source_value, path
+                    )
+
+                return conditional_result
             else:
                 logger.warning(
                     f"Conditional transform specified but no conditional_transform config at {'.'.join(path)}"
@@ -285,3 +316,57 @@ class RecursiveXMLTransformer:
                 )
 
             return transformed_value
+
+    def _process_conditional_structure(
+        self, structure_config: dict[str, Any], source_value: Any, path: list[str]
+    ) -> dict[str, Any] | None:
+        """Process a conditional structure configuration.
+
+        Args:
+            structure_config: Selected structure configuration (from if_true or if_false)
+            source_value: Source data value at this path
+            path: Current field path
+
+        Returns:
+            Nested dictionary with transformed fields, or None if source_value is not a dict
+        """
+        if not isinstance(source_value, dict):
+            return None
+
+        nested_result = {}
+        nested_fields = structure_config.get("nested_fields", {})
+
+        # Process each nested field according to its configuration
+        for field_key, field_config in nested_fields.items():
+            if not isinstance(field_config, dict):
+                continue
+
+            # Check if this nested field has an xml_transform
+            if "xml_transform" in field_config:
+                child_transform = field_config["xml_transform"]
+                target_name = child_transform.get("target")
+
+                if field_key in source_value:
+                    field_value = source_value[field_key]
+
+                    # Handle None values based on null_handling
+                    if field_value is None:
+                        null_handling = child_transform.get("null_handling", "exclude")
+                        if null_handling == "exclude":
+                            continue
+                        elif null_handling == "include_null":
+                            nested_result[target_name] = "INCLUDE_NULL_MARKER"
+                            continue
+                        elif null_handling == "default_value":
+                            field_value = child_transform.get("default_value")
+
+                    # Apply value transformation if specified
+                    if "value_transform" in child_transform:
+                        field_value = apply_value_transformation(
+                            field_value, child_transform["value_transform"]
+                        )
+
+                    if field_value is not None:
+                        nested_result[target_name] = field_value
+
+        return nested_result if nested_result else None
