@@ -1,8 +1,8 @@
 """add_ignored_legacy_organization_user_table
 
-Revision ID: 19e80334aaae
+Revision ID: 53eee8fd684e
 Revises: df81941231ad
-Create Date: 2025-11-13 21:16:33.936592
+Create Date: 2025-11-17 06:12:31.841617
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "19e80334aaae"
+revision = "53eee8fd684e"
 down_revision = "df81941231ad"
 branch_labels = None
 depends_on = None

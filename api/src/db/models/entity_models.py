@@ -184,7 +184,7 @@ class IgnoredLegacyOrganizationUser(ApiSchemaTable, TimestampMixin):
         ApiSchemaTable.__table_args__,
     )
 
-    ignored_legacy_organization_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
+    ignored_legacy_organization_user_id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Organization.organization_id))
     organization: Mapped["Organization"] = relationship(Organization)
     email: Mapped[str] = mapped_column(index=True)
