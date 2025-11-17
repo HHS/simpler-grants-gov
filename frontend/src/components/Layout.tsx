@@ -1,7 +1,6 @@
 import { defaultFeatureFlags } from "src/constants/defaultFeatureFlags";
 import { envFeatureFlags, environment } from "src/constants/environments";
 import { LoginModalProvider } from "src/services/auth/LoginModalProvider";
-import { getSession } from "src/services/auth/session";
 import UserProvider from "src/services/auth/UserProvider";
 import { assignBaseFlags } from "src/services/featureFlags/featureFlagHelpers";
 import { getTestUsers } from "src/services/fetch/fetchers/userFetcher";
