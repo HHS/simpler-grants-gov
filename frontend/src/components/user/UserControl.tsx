@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { applicationTestUserId, testApplicationId } from "src/constants/auth";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { UserProfile } from "src/types/authTypes";
@@ -12,6 +13,19 @@ import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 import { LoginButton } from "src/components/LoginButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
+
+// links directly to a test application, only used in local environments when logged in as specific test user
+const TestApplicationLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href={`/workspace/applications/application/${testApplicationId}`}
+    >
+      {t("testApplication")}
+    </Link>
+  );
+};
 
 const AccountNavLink = () => {
   const t = useTranslations("Header.navLinks");
@@ -90,7 +104,13 @@ const LogoutNavItem = () => {
   );
 };
 
-const UserDropdown = ({ user }: { user: UserProfile }) => {
+const UserDropdown = ({
+  user,
+  isApplicationTestUser,
+}: {
+  user: UserProfile;
+  isApplicationTestUser: boolean;
+}) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
 
   const { checkFeatureFlag } = useFeatureFlags();
@@ -132,6 +152,7 @@ const UserDropdown = ({ user }: { user: UserProfile }) => {
         items={[
           <UserEmailItem key="email" isSubnav={true} email={user.email} />,
           showUserAdminNavItems && <AccountNavLink key="account" />,
+          isApplicationTestUser && <TestApplicationLink />,
           <LogoutNavItem key="logout" />,
         ].filter(Boolean)}
         type="subnav"
@@ -141,15 +162,22 @@ const UserDropdown = ({ user }: { user: UserProfile }) => {
   );
 };
 
-export const UserControl = () => {
+export const UserControl = ({ localDev }: { localDev: boolean }) => {
   const t = useTranslations("Header");
 
   const { user } = useUser();
 
+  const isApplicationTestUser =
+    localDev && user?.user_id === applicationTestUserId;
   return (
     <>
       {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
-      {!!user?.token && <UserDropdown user={user} />}
+      {!!user?.token && (
+        <UserDropdown
+          user={user}
+          isApplicationTestUser={isApplicationTestUser}
+        />
+      )}
     </>
   );
 };
