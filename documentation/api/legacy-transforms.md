@@ -49,6 +49,22 @@ we add a few additional columns for our transformation process.
 * `transformation_notes` - Freeform text field for putting notes about the transformation if an odd circumstance was hit. Occasionally set for certain scenarios in transformations.
 * `created_at`/`updated_at`/`deleted_at` - just metadata auditing columns, not directly used in the process
 
+# First Time Environment Setup
+If we are setting up an environment for the first time ever, we need to manually create
+the Oracle FDW connection. This will require you have a username/password and have
+setup our infra to allow a peering connecting to the Oracle DB.
+
+Once we have that we can setup the foreign data wrapper connection like so.
+
+```postgresql
+CREATE SERVER oracle FOREIGN DATA WRAPPER oracle_fdw OPTIONS (dbserver '<server URL - will look like url:1521/something>');
+
+-- TODO Creating the user mapping / setting up the user privileges
+
+-- Change the isolation level to avoid connection issues as the default is unreliable.
+alter server grants options (ADD isolation_level 'read_committed');
+```
+
 # Staging & Foreign Table Setup
 For each table we want to copy, we define two SQLAlchemy tables,
 a "staging" table where we'll copy the unchanged data directly,
