@@ -54,6 +54,12 @@ If we are setting up an environment for the first time ever, we need to manually
 the Oracle FDW connection. This will require you have a username/password and have
 setup our infra to allow a peering connecting to the Oracle DB.
 
+- To configure the peering the connection, we need request these values from the legacy grants environment: vpc peer owner id and aws peer vpc id.
+- Update the below aws ssm parameters values:
+  - /network/{environment_name}/dms/peer-owner-id
+  - /network/{environment_name}/dms/peer-vpc-id
+- Ensure the vpc cdir ranges don't overlap with the peered vpc
+
 Once we have that we can setup the foreign data wrapper connection like so.
 
 ```postgresql
