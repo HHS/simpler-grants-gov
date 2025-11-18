@@ -159,6 +159,7 @@ class FormType(StrEnum):
     GG_LOBBYING_FORM = "GGLobbyingForm"
 
     EPA_FORM_4700_4 = "EPAForm4700-4"
+    EPA_KEY_CONTACTS = "EPAKeyContacts"
 
 
 class CompetitionOpenToApplicant(StrEnum):
