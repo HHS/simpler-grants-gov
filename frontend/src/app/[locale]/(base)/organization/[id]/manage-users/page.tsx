@@ -11,7 +11,7 @@ export type ManageUsersPageParams = LocalizedPageProps & {
 };
 
 interface ManageUsersPageProps {
-  params: ManageUsersPageParams;
+  params: Promise<ManageUsersPageParams>;
 }
 
 export async function generateMetadata({ params }: ManageUsersPageParams) {
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: ManageUsersPageParams) {
   };
 }
 
-function ManageUsersPage({ params }: ManageUsersPageProps) {
-  const { id: organizationId } = params;
+async function ManageUsersPage({ params }: ManageUsersPageProps) {
+  const { id: organizationId } = await params;
   return <ManageUsersPageContent organizationId={organizationId} />;
 }
 
