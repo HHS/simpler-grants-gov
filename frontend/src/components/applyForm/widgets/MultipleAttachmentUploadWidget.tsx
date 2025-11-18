@@ -31,6 +31,8 @@ const MultipleAttachmentUploadWidget = ({
   rawErrors = [],
   schema,
   onChange,
+  readOnly,
+  disabled,
 }: UswdsWidgetProps) => {
   const { description, options, title } = schema as SchemaWithLabelOption;
 
@@ -179,6 +181,7 @@ const MultipleAttachmentUploadWidget = ({
         id={id}
         name={id}
         ref={fileInputRef}
+        disabled={disabled}
         type="file"
         multiple
         className="usa-file-input__input"
@@ -200,6 +203,7 @@ const MultipleAttachmentUploadWidget = ({
         <MultipleAttachmentUploadList
           uploadedFiles={uploadedFiles}
           handleRemove={(index) => handleRemove(index)}
+          readOnly={disabled || readOnly}
         />
       )}
 

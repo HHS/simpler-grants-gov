@@ -21,10 +21,6 @@
   * [Spring 2025 Collaborative Coding Challenge](get-involved/community-events/spring-2025-collaborative-coding-challenge/README.md)
     * [Event Submissions & Winners](get-involved/community-events/spring-2025-collaborative-coding-challenge/event-submissions-and-winners.md)
 * [Communication channels](get-involved/communication-channels/README.md)
-  * [Slack - Community chat](get-involved/communication-channels/slack-community-chat/README.md)
-    * [Naming Conventions](get-involved/communication-channels/slack-community-chat/naming-conventions.md)
-    * [Recommended Channels](get-involved/communication-channels/slack-community-chat/recommended-channels.md)
-    * [Installing Slack](get-involved/communication-channels/slack-community-chat/installing-slack.md)
   * [Zoom - Public Meetings](get-involved/communication-channels/zoom-public-meetings.md)
 
 ## Product
