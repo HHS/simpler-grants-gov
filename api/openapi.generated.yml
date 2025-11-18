@@ -1936,6 +1936,61 @@ paths:
               $ref: '#/components/schemas/OrganizationInvitationListRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/legacy-users/ignore:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationIgnoreLegacyUserResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Organization Ignore Legacy User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationIgnoreLegacyUserRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/organizations/{organization_id}/users/{user_id}:
     put:
       parameters:
@@ -4301,6 +4356,8 @@ components:
           - ProjectAbstractSummary
           - ProjectAbstract
           - CD511
+          - SupplementaryNEHCoverSheet
+          - GGLobbyingForm
           type:
           - string
           - 'null'
@@ -4452,6 +4509,8 @@ components:
           - ProjectAbstractSummary
           - ProjectAbstract
           - CD511
+          - SupplementaryNEHCoverSheet
+          - GGLobbyingForm
           type:
           - string
           - 'null'
@@ -7212,6 +7271,27 @@ components:
             type:
             - object
             $ref: '#/components/schemas/OrganizationInvitationData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationIgnoreLegacyUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email address of the legacy user to ignore
+      required:
+      - email
+    OrganizationIgnoreLegacyUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code

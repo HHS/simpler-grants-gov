@@ -783,14 +783,67 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424A-V1.0",
             "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
-        "xml_structure": {"root_element": "SF424A", "version": "2.0"},
+        "xml_structure": {
+            "root_element": "BudgetInformation",
+            "root_namespace_prefix": "SF424A",  # Use SF424A: prefix for root element per XSD
+            "version": "2.0",
+            # Required attributes for XSD validation
+            "root_attributes": {
+                "programType": "program_type",  # Maps to input field
+                "glob:coreSchemaVersion": "1.0",  # Static value required by XSD
+            },
+        },
         "null_handling_options": {
             "exclude": "Default - exclude field entirely from XML (recommended)",
             "include_null": "Include empty XML element: <Field></Field>",
             "default_value": "Use configured default value when field is None",
         },
+    },
+    # Required first child element for XSD validation
+    "form_version_identifier": {
+        "xml_transform": {
+            "target": "glob:FormVersionIdentifier",
+            "namespace": "glob",
+        }
+    },
+    # Program type - required root attribute (mapped via xml_structure.root_attributes)
+    "program_type": {
+        "xml_transform": {
+            "target": "programType",
+            "type": "attribute",  # This will be handled as a root attribute
+        }
+    },
+    # Activity title - appears as an attribute on line items
+    "activity_title": {
+        "xml_transform": {
+            "target": "activityTitle",
+            "type": "attribute",
+        }
+    },
+    # Non-Federal Resources field mappings (Section C)
+    # These map the internal field names to XSD element names
+    "applicant_amount": {
+        "xml_transform": {
+            "target": "BudgetApplicantContributionAmount",
+        }
+    },
+    "state_amount": {
+        "xml_transform": {
+            "target": "BudgetStateContributionAmount",
+        }
+    },
+    "other_amount": {
+        "xml_transform": {
+            "target": "BudgetOtherContributionAmount",
+        }
+    },
+    "total_amount": {
+        "xml_transform": {
+            "target": "BudgetTotalContributionAmount",
+        }
     },
     # Forecasted Cash Needs - Section D
     # This requires pivoting the data structure from JSON to XML format
@@ -826,6 +879,104 @@ FORM_XML_TRANSFORM_RULES = {
                         "BudgetFederalForecastedAmount": "federal_forecasted_cash_needs.fourth_quarter_amount",
                         "BudgetNonFederalForecastedAmount": "non_federal_forecasted_cash_needs.fourth_quarter_amount",
                         "BudgetTotalForecastedAmount": "total_forecasted_cash_needs.fourth_quarter_amount",
+                    },
+                },
+            },
+        }
+    },
+    # Budget sections decomposition
+    # Transform row-oriented activity_line_items array to column-oriented arrays
+    # organized by section type (budget_summary, budget_categories, etc.)
+    #
+    # Note: This transformation handles the data restructuring step. The XML generation
+    # phase (not shown here) will handle:
+    # - Adding activity_title as an XML attribute to each line item
+    # - Using different XML element names for line items vs totals
+    #   (e.g., ResourceLineItem vs ResourceTotals)
+    # - Proper XML namespace handling and element ordering
+    #
+    # Example transformation - this input structure:
+    # {
+    #   "activity_line_items": [
+    #     {
+    #       "activity_title": "Activity 1",
+    #       "budget_summary": {"total_amount": "5000.00"},
+    #       "budget_categories": {"personnel_amount": "2000.00"},
+    #       "non_federal_resources": {"applicant_amount": "500.00"},
+    #       "federal_fund_estimates": {"first_year_amount": "5000.00"}
+    #     },
+    #     {
+    #       "activity_title": "Activity 2",
+    #       "budget_summary": {"total_amount": "8000.00"},
+    #       "budget_categories": {"personnel_amount": "3000.00"},
+    #       "non_federal_resources": {"applicant_amount": "1000.00"},
+    #       "federal_fund_estimates": {"first_year_amount": "8000.00"}
+    #     }
+    #   ],
+    #   "total_budget_summary": {"total_amount": "13000.00"},
+    #   "total_budget_categories": {"personnel_amount": "5000.00"},
+    #   "total_non_federal_resources": {"applicant_amount": "1500.00"},
+    #   "total_federal_fund_estimates": {"first_year_amount": "13000.00"}
+    # }
+    #
+    # Becomes this output structure:
+    # {
+    #   "BudgetSummaries": [
+    #     {"total_amount": "5000.00"},    # Activity 1
+    #     {"total_amount": "8000.00"},    # Activity 2
+    #     {"total_amount": "13000.00"}    # Total
+    #   ],
+    #   "BudgetCategories": [
+    #     {"personnel_amount": "2000.00"},  # Activity 1
+    #     {"personnel_amount": "3000.00"},  # Activity 2
+    #     {"personnel_amount": "5000.00"}   # Total
+    #   ],
+    #   "NonFederalResources": [
+    #     {"applicant_amount": "500.00"},   # Activity 1
+    #     {"applicant_amount": "1000.00"},  # Activity 2
+    #     {"applicant_amount": "1500.00"}   # Total
+    #   ],
+    #   "FederalFundEstimates": [
+    #     {"first_year_amount": "5000.00"},  # Activity 1
+    #     {"first_year_amount": "8000.00"},  # Activity 2
+    #     {"first_year_amount": "13000.00"}  # Total
+    #   ]
+    # }
+    "budget_sections": {
+        "xml_transform": {
+            "type": "conditional",
+            "target": "BudgetSections",
+            "conditional_transform": {
+                "type": "array_decomposition",
+                "source_array_field": "activity_line_items",
+                "field_mappings": {
+                    "BudgetSummaries": {
+                        "item_field": "budget_summary",
+                        "item_wrapper": "SummaryLineItem",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_budget_summary",
+                        "total_wrapper": "SummaryTotals",
+                    },
+                    "BudgetCategories": {
+                        "item_field": "budget_categories",
+                        "item_wrapper": "CategoryLineItem",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_budget_categories",
+                        "total_wrapper": "CategoryTotals",
+                    },
+                    "NonFederalResources": {
+                        "item_field": "non_federal_resources",
+                        "item_wrapper": "ResourceLineItem",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_non_federal_resources",
+                        "total_wrapper": "ResourceTotals",
+                    },
+                    "FederalFundEstimates": {
+                        "item_field": "federal_fund_estimates",
+                        "item_wrapper": "EstimateLineItem",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_federal_fund_estimates",
+                        "total_wrapper": "EstimateTotals",
                     },
                 },
             },

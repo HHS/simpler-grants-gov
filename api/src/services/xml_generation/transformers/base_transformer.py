@@ -252,8 +252,9 @@ class RecursiveXMLTransformer:
             conditional_config = transform_rule.get("conditional_transform")
             if conditional_config:
                 # Use the stored root source data for condition evaluation
+                # Pass root transform config for nested field name transformations
                 conditional_result = apply_conditional_transform(
-                    conditional_config, self.root_source_data, path
+                    conditional_config, self.root_source_data, path, self.transform_config
                 )
 
                 # Check if this is a conditional_structure result
