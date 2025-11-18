@@ -4,6 +4,7 @@ from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
 from src.constants.lookup_constants import OrganizationInvitationStatus
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -335,3 +336,39 @@ class OrganizationIgnoreLegacyUserRequestSchema(Schema):
 
 class OrganizationIgnoreLegacyUserResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
+
+
+class LegacyUserDataSchema(Schema):
+    """Schema for individual legacy user data"""
+
+    email = fields.String(
+        required=True,
+        metadata={"description": "Legacy user email address", "example": "user@example.com"},
+    )
+    full_name = fields.String(
+        required=True,
+        metadata={"description": "Legacy user full name", "example": "John Doe"},
+    )
+
+
+class LegacyUsersListRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/legacy-users request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "LegacyUserPaginationSchema",
+            ["email", "full_name", "created_date"],
+            default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
+        ),
+        required=True,
+        metadata={"description": "Pagination parameters for legacy user list"},
+    )
+
+
+class LegacyUsersListResponseSchema(AbstractResponseSchema):
+    """Schema for list legacy users response"""
+
+    data = fields.List(
+        fields.Nested(LegacyUserDataSchema),
+        metadata={"description": "List of legacy users"},
+    )
