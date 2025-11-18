@@ -2,17 +2,6 @@
 description: >-
   Photography and illustrations serve to visually communicate Grant.gov's story,
   values, and personality.
-layout:
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # Photos and illustrations

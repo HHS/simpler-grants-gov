@@ -1,17 +1,3 @@
----
-layout:
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
----
-
 # Typography
 
 Typography is one of the most, if not the most, important communication tools for our brand. It carries our brand voice; with it, we establish our tone, personality, and message.&#x20;
