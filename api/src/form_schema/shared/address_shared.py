@@ -24,15 +24,9 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
             },
         ],
         "properties": {
-            "street1": {
-                "allOf": [{"$ref": "#/street1"}],
-            },
-            "street2": {
-                "allOf": [{"$ref": "#/street2"}],
-            },
-            "city": {
-                "allOf": [{"$ref": "#/city"}],
-            },
+            "street1": {"$ref": "#/street1"},
+            "street2": {"$ref": "#/street2"},
+            "city": {"$ref": "#/city"},
             "county": {
                 "type": "string",
                 "title": "County/Parish",
@@ -40,9 +34,7 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
                 "minLength": 1,
                 "maxLength": 30,
             },
-            "state": {
-                "allOf": [{"$ref": "#/state"}],
-            },
+            "state": {"$ref": "#/state"},
             "province": {
                 "type": "string",
                 "title": "Province",
@@ -56,9 +48,7 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
                 "title": "Country",
                 "description": "Enter the country.",
             },
-            "zip_code": {
-                "allOf": [{"$ref": "#/zip_code"}],
-            },
+            "zip_code": {"$ref": "#/zip_code"},
         },
     },
     # An address containing the core address fields
@@ -71,21 +61,11 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
             "city",
         ],
         "properties": {
-            "street1": {
-                "allOf": [{"$ref": "#/street1"}],
-            },
-            "street2": {
-                "allOf": [{"$ref": "#/street2"}],
-            },
-            "city": {
-                "allOf": [{"$ref": "#/city"}],
-            },
-            "state": {
-                "allOf": [{"$ref": "#/state"}],
-            },
-            "zip_code": {
-                "allOf": [{"$ref": "#/zip_code"}],
-            },
+            "street1": {"$ref": "#/street1"},
+            "street2": {"$ref": "#/street2"},
+            "city": {"$ref": "#/city"},
+            "state": {"$ref": "#/state"},
+            "zip_code": {"$ref": "#/zip_code"},
         },
     },
     "street1": {

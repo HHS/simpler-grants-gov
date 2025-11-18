@@ -78,7 +78,9 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "type": "string",
         "title": "Email",
         "format": "email",
-        "minLength": 1,
+        # We don't set a min-length for email as the format
+        # will flag an empty string as invalid format, and
+        # two errors for the same problem is confusing.
         "maxLength": 60,
     },
     "signature": {
@@ -107,7 +109,7 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "title": "SAM UEI",
         "minLength": 12,
         "maxLength": 12,
-    }
+    },
 }
 
 

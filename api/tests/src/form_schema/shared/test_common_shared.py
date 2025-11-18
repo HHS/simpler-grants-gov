@@ -222,6 +222,35 @@ def test_shared_common_v1_contact_person_title_max_length():
 
 
 ###################################
+# Contact Email
+###################################
+@pytest.mark.parametrize("value", ["person@mail.com", "example@example.net", "bob.smith+1@gov.gov"])
+def test_shared_common_v1_contact_email(value):
+    schema = build_schema(COMMON_SHARED_V1, "contact_email")
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 0
+
+
+def test_shared_common_v1_contact_email_max_length():
+    schema = build_schema(COMMON_SHARED_V1, "contact_email")
+
+    validation_issues = validate_json_schema({"my_field": "A" * 52 + "@mail.com"}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "maxLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+@pytest.mark.parametrize("value", ["joesmith", "place.gov", "hello", ".com at .com"])
+def test_shared_common_v1_contact_email_format(value):
+    schema = build_schema(COMMON_SHARED_V1, "contact_email")
+
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "format"
+    assert validation_issues[0].field == "$.my_field"
+
+
+###################################
 # Signature
 ###################################
 @pytest.mark.parametrize("value", ["Fred Jones", "Norville 'Shaggy' Rogers", "Scooby"])
@@ -292,6 +321,34 @@ def test_shared_common_v1_organization_name_max_length():
     schema = build_schema(COMMON_SHARED_V1, "organization_name")
 
     validation_issues = validate_json_schema({"my_field": "A" * 61}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "maxLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+###################################
+# SAM UEI
+###################################
+@pytest.mark.parametrize("value", ["ABC123XYZ456", "TESTUEI00001", "XYZ000000000"])
+def test_shared_common_v1_sam_uei(value):
+    schema = build_schema(COMMON_SHARED_V1, "sam_uei")
+    validation_issues = validate_json_schema({"my_field": value}, schema)
+    assert len(validation_issues) == 0
+
+
+def test_shared_common_v1_sam_uei_min_length():
+    schema = build_schema(COMMON_SHARED_V1, "sam_uei")
+
+    validation_issues = validate_json_schema({"my_field": "A" * 11}, schema)
+    assert len(validation_issues) == 1
+    assert validation_issues[0].type == "minLength"
+    assert validation_issues[0].field == "$.my_field"
+
+
+def test_shared_common_v1_sam_uei_max_length():
+    schema = build_schema(COMMON_SHARED_V1, "sam_uei")
+
+    validation_issues = validate_json_schema({"my_field": "A" * 13}, schema)
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "maxLength"
     assert validation_issues[0].field == "$.my_field"

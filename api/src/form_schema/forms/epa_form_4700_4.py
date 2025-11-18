@@ -2,7 +2,7 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.form_schema.shared import COMMON_SHARED_V1, ADDRESS_SHARED_V1
+from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
 
 DIRECTIONS = """General. Recipients of Federal financial assistance from the U.S. Environmental Protection Agency must comply with the following statutes and regulations.
 
@@ -20,27 +20,20 @@ FORM_JSON_SCHEMA = {
         "point_of_contact_phone_number",
         "point_of_contact_email",
         "point_of_contact_title",
-        "applicant_signature"
+        "applicant_signature",
     ],
     "properties": {
         "applicant_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
-            "title": "Name"
+            "title": "Name",
         },
         # NOTE - this isn't the same address type as most other forms
         # There is only a single line for address, and all fields are always required.
         "applicant_address": {
             "type": "object",
-            "required": [
-                "address", "city", "state", "zip_code"
-            ],
+            "required": ["address", "city", "state", "zip_code"],
             "properties": {
-                "address": {
-                    "type": "string",
-                    "title": "Address",
-                    "minLength": 1,
-                    "maxLength": 110
-                },
+                "address": {"type": "string", "title": "Address", "minLength": 1, "maxLength": 110},
                 "city": {
                     "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("city")}],
                 },
@@ -49,12 +42,12 @@ FORM_JSON_SCHEMA = {
                 },
                 "zip_code": {
                     "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("zip_code")}],
-                }
-            }
+                },
+            },
         },
         "sam_uei": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
-            "title": "Unique Entity Identifier (UEI)"
+            "title": "Unique Entity Identifier (UEI)",
         },
         # This doesn't follow the normal convention of multiple fields for a name
         # and instead just has a big name textbox
@@ -62,83 +55,81 @@ FORM_JSON_SCHEMA = {
             "type": "string",
             "title": "Name",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
         },
         "point_of_contact_phone_number": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
-            "title": "Phone"
+            "title": "Phone",
         },
         "point_of_contact_email": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
-            "title": "Email"
+            "title": "Email",
         },
         "point_of_contact_title": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
-            "title": "Title"
+            "title": "Title",
         },
-        "federal_financial_assistance": { # FederalFinancialAssistanceQuestion
+        "federal_financial_assistance": {  # FederalFinancialAssistanceQuestion
             "type": "boolean",
-            "title": "Is the applicant currently receiving EPA Assistance?"
+            "title": "Is the applicant currently receiving EPA Assistance?",
         },
-        "civil_rights_lawsuit_question1": { # CivilRightsLawSuits1
+        "civil_rights_lawsuit_question1": {  # CivilRightsLawSuits1
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
-            "title": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.) IV. List all civil rights"
+            "title": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.) IV. List all civil rights",
         },
-        "civil_rights_lawsuit_question2": { # CivilRightsLawSuits2
+        "civil_rights_lawsuit_question2": {  # CivilRightsLawSuits2
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
-            "title": "List all civil rights lawsuits and administrative complaints decided against the applicant/recipient within the last year that alleged discrimination based on race, color, national origin, sex, age, or disability and enclose a copy of all decisions. Please describe all corrective actions taken. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)"
+            "title": "List all civil rights lawsuits and administrative complaints decided against the applicant/recipient within the last year that alleged discrimination based on race, color, national origin, sex, age, or disability and enclose a copy of all decisions. Please describe all corrective actions taken. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)",
         },
-        "civil_rights_lawsuit_question3": { # CivilRightsLawSuits3
+        "civil_rights_lawsuit_question3": {  # CivilRightsLawSuits3
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
-            "title": "List all civil rights compliance reviews of the applicant/recipient conducted under federal nondiscrimination laws by any federal agency within the last two years and enclose a copy of the review and any decisions, orders, or agreements based on the review. Please describe any corrective action taken. (40 C.F.R. § 7.80(c)(3))"
+            "title": "List all civil rights compliance reviews of the applicant/recipient conducted under federal nondiscrimination laws by any federal agency within the last two years and enclose a copy of the review and any decisions, orders, or agreements based on the review. Please describe any corrective action taken. (40 C.F.R. § 7.80(c)(3))",
         },
-        "construction_federal_assistance": { # ConstructionFederalAssistance
+        "construction_federal_assistance": {  # ConstructionFederalAssistance
             "type": "boolean",
-            "title": "Is the applicant requesting EPA assistance for new construction? If no, proceed to VII; if yes, answer (a) and/or (b) below"
+            "title": "Is the applicant requesting EPA assistance for new construction? If no, proceed to VII; if yes, answer (a) and/or (b) below",
         },
-        # TODO - should this be conditionally required off of the above question? It reads like that
-        "construction_new_facilities": { # Construction
+        "construction_new_facilities": {  # Construction
             "type": "boolean",
-            "title": "a. If the grant is for new construction, will all new facilities or alterations to existing facilities be designed and constructed to be readily accessible to and usable by persons with disabilities? If yes, proceed to VII; if no, proceed to VI(b)"
+            "title": "a. If the grant is for new construction, will all new facilities or alterations to existing facilities be designed and constructed to be readily accessible to and usable by persons with disabilities? If yes, proceed to VII; if no, proceed to VI(b)",
         },
-        # TODO - should this be conditionally required off of the above being False? It reads like that
-        "construction_new_facilities_explanation": { # Construction2
+        "construction_new_facilities_explanation": {  # Construction2
             "type": "string",
             "title": "b. If the grant is for new construction and the new facilities or alterations to existing facilities will not be readily accessible to and usable by persons with disabilities, explain how a regulatory exception (40 C.F.R. 7.70) applies.",
             "minLength": 1,
             "maxLength": 500,
         },
-        "notice1": { # Notice1
+        "notice1": {  # Notice1
             "type": "boolean",
-            "title": "Does the applicant/recipient provide initial and continuing notice that it does not discriminate on the basis of race, color, national origin, sex, age, or disability in its program or activities? (40 C.F.R 5.140 and 7.95)"
+            "title": "Does the applicant/recipient provide initial and continuing notice that it does not discriminate on the basis of race, color, national origin, sex, age, or disability in its program or activities? (40 C.F.R 5.140 and 7.95)",
         },
-        "notice2": { # Notice2
+        "notice2": {  # Notice2
             "type": "boolean",
-            "title": "a. Do the methods of notice accommodate those with impaired vision or hearing?"
+            "title": "a. Do the methods of notice accommodate those with impaired vision or hearing?",
         },
-        "notice3": { # Notice3
+        "notice3": {  # Notice3
             "type": "boolean",
-            "title": "b. Is the notice posted in a prominent place in the applicant's/recipient’s website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?"
+            "title": "b. Is the notice posted in a prominent place in the applicant's/recipient’s website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?",
         },
-        "notice4": { # Notice4
+        "notice4": {  # Notice4
             "type": "boolean",
-            "title": "c. Does the notice identify a designated civil rights coordinator?"
+            "title": "c. Does the notice identify a designated civil rights coordinator?",
         },
-        "demographic_data": { # Demographic
+        "demographic_data": {  # Demographic
             "type": "boolean",
-            "title": "Does the applicant/recipient maintain demographic data on the race, color, national origin, sex, age, or disability status of the population it serves? (40 C.F.R. 7.85(a))"
+            "title": "Does the applicant/recipient maintain demographic data on the race, color, national origin, sex, age, or disability status of the population it serves? (40 C.F.R. 7.85(a))",
         },
-        "policy": { # Policy
+        "policy": {  # Policy
             "type": "boolean",
-            "title": "Does the applicant/recipient have a policy/procedure for providing meaningful access to services for persons with limited English proficiency? (Title VI, 40 C.F.R. Part 7, Lau v Nichols 414 U.S. (1974))"
+            "title": "Does the applicant/recipient have a policy/procedure for providing meaningful access to services for persons with limited English proficiency? (Title VI, 40 C.F.R. Part 7, Lau v Nichols 414 U.S. (1974))",
         },
-        "policy_explanation": { # Policy2
+        "policy_explanation": {  # Policy2
             "type": "string",
             "title": "If the applicant is an education program or activity, or has 15 or more employees, has it designated an employee to coordinate its compliance with 40 C.F.R. Parts 5 and 7? Provide the name, title, position, mailing address, e-mail address, fax number, and telephone number of the designated coordinator.",
             "minLength": 1,
             "maxLength": 1000,
         },
-        "program_explanation": { # Program
+        "program_explanation": {  # Program
             "type": "string",
             "title": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7? Provide a legal citation or applicant’s/ recipient’s website address for, or a copy of, the procedures.",
             "minLength": 1,
@@ -154,22 +145,18 @@ FORM_JSON_SCHEMA = {
                 },
                 "aor_title": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
-                    "title": "B. Title of Authorized Official"
+                    "title": "B. Title of Authorized Official",
                 },
                 "submitted_date": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
                     "title": "C. Date",
                 },
-            }
-        }
+            },
+        },
     },
     "$defs": {
-        "civil_rights_lawsuit_question": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4000
-        }
-    }
+        "civil_rights_lawsuit_question": {"type": "string", "minLength": 1, "maxLength": 4000}
+    },
 }
 
 FORM_UI_SCHEMA = [
@@ -183,7 +170,7 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/applicant_address/properties/city"},
             {"type": "field", "definition": "/properties/applicant_address/properties/state"},
             {"type": "field", "definition": "/properties/applicant_address/properties/zip_code"},
-        ]
+        ],
     },
     {
         "type": "section",
@@ -191,7 +178,7 @@ FORM_UI_SCHEMA = [
         "name": "uei",
         "children": [
             {"type": "field", "definition": "/properties/sam_uei"},
-        ]
+        ],
     },
     {
         "type": "section",
@@ -202,7 +189,7 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/point_of_contact_phone_number"},
             {"type": "field", "definition": "/properties/point_of_contact_email"},
             {"type": "field", "definition": "/properties/point_of_contact_title"},
-        ]
+        ],
     },
     # I have no idea how we want to organize and group these fields
     # so deferring to frontend to sort that out with product folks
@@ -212,12 +199,24 @@ FORM_UI_SCHEMA = [
         "label": "III-XI",
         "name": "questions",
         "children": [
-            {"type": "field", "definition": "/properties/federal_financial_assistance", "widget": "Radio"},
+            {
+                "type": "field",
+                "definition": "/properties/federal_financial_assistance",
+                "widget": "Radio",
+            },
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question1"},
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question2"},
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question3"},
-            {"type": "field", "definition": "/properties/construction_federal_assistance", "widget": "Radio"},
-            {"type": "field", "definition": "/properties/construction_new_facilities", "widget": "Radio"},
+            {
+                "type": "field",
+                "definition": "/properties/construction_federal_assistance",
+                "widget": "Radio",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/construction_new_facilities",
+                "widget": "Radio",
+            },
             {"type": "field", "definition": "/properties/construction_new_facilities_explanation"},
             {"type": "field", "definition": "/properties/notice1", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice2", "widget": "Radio"},
@@ -227,7 +226,7 @@ FORM_UI_SCHEMA = [
             {"type": "field", "definition": "/properties/policy", "widget": "Radio"},
             {"type": "field", "definition": "/properties/policy_explanation"},
             {"type": "field", "definition": "/properties/program_explanation"},
-        ]
+        ],
     },
     {
         "type": "section",
@@ -235,19 +234,24 @@ FORM_UI_SCHEMA = [
         "name": "signature",
         "description": "I certify that the statements I have made on this form and all attachments thereto are true, accurate and complete. I acknowledge that any knowingly false or misleading statement may be punishable by fine or imprisonment or both under applicable law. I assure that I will fully comply with all applicable civil rights statutes and EPA regulations.",
         "children": [
-            {"type": "null", "definition": "/properties/applicant_signature/properties/aor_signature"},
+            {
+                "type": "null",
+                "definition": "/properties/applicant_signature/properties/aor_signature",
+            },
             {"type": "field", "definition": "/properties/applicant_signature/properties/aor_title"},
-            {"type": "null", "definition": "/properties/applicant_signature/properties/submitted_date"},
-        ]
+            {
+                "type": "null",
+                "definition": "/properties/applicant_signature/properties/submitted_date",
+            },
+        ],
     },
     {
         "type": "section",
         "label": "Instructions for EPA Form 4700-4 (Rev. 04/2021)",
         "name": "instructions",
         "description": DIRECTIONS,
-        "children": []
-    }
-
+        "children": [],
+    },
 ]
 
 FORM_RULE_SCHEMA = {
@@ -257,7 +261,7 @@ FORM_RULE_SCHEMA = {
     "application_signature": {
         "aor_signature": {"gg_post_population": {"rule": "signature"}},
         "submitted_date": {"gg_post_population": {"rule": "current_date"}},
-    }
+    },
 }
 
 EPA_FORM_4700_4_v5_0 = Form(
