@@ -167,7 +167,7 @@ CD511_v1_1 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/276
     form_id=uuid.UUID("7057eaee-f043-4029-b7f2-c932f11ce900"),
     legacy_form_id=276,
-    form_name="CD511 Form",
+    form_name="CD511",
     short_form_name="CD511",
     form_version="1.1",
     agency_code="SGG",
