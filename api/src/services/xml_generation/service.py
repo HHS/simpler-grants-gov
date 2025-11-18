@@ -115,15 +115,16 @@ class XMLGenerationService:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
 
-        # Get version from config
+        # Get version and namespace prefix from config
         xml_config = (transform_config or {}).get("_xml_config", {})
         xml_structure = xml_config.get("xml_structure", {})
         form_version = xml_structure.get("version")
+        root_namespace_prefix = xml_structure.get("root_namespace_prefix", root_element_name)
 
         # Create namespace map for lxml with all required namespaces
-        # Use root element name as the default namespace prefix (makes it generic for any form)
+        # Use configured namespace prefix for root element (or fall back to root element name)
         nsmap = {
-            root_element_name: default_namespace,
+            root_namespace_prefix: default_namespace,
         }
 
         # Add additional namespaces
@@ -165,7 +166,7 @@ class XMLGenerationService:
             transform_config or {},
             xsd_url,
             attachment_field_names,
-            root_element_name,
+            root_namespace_prefix,  # Use namespace prefix for lookups in nsmap
         )
 
         # Add attachment elements if present in data
@@ -300,7 +301,103 @@ class XMLGenerationService:
         attributes: dict[str, str] | None = None,
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
-        if isinstance(value, dict):
+        if isinstance(value, list):
+            # Handle arrays - create wrapper element first, then add items
+            if field_name in namespace_fields:
+                namespace_prefix = namespace_fields[field_name]
+                namespace_uri = nsmap.get(namespace_prefix, "")
+                element_name = f"{{{namespace_uri}}}{field_name}"
+                wrapper_element = lxml_etree.SubElement(parent, element_name)
+            else:
+                default_namespace_uri = (
+                    nsmap.get(root_element_name or "", "") if root_element_name else ""
+                )
+                if default_namespace_uri:
+                    element_name = f"{{{default_namespace_uri}}}{field_name}"
+                    wrapper_element = lxml_etree.SubElement(parent, element_name)
+                else:
+                    wrapper_element = lxml_etree.SubElement(parent, field_name)
+
+            # Add each item in the array
+            for item in value:
+                if isinstance(item, dict):
+                    # Check for __wrapper and __attributes metadata
+                    item_wrapper = item.get("__wrapper")
+                    item_attributes = item.get("__attributes", {})
+
+                    # Create a copy of item without metadata keys
+                    item_data = {k: v for k, v in item.items() if not k.startswith("__")}
+
+                    # Use wrapper as element name, or default to field_name
+                    item_element_name = item_wrapper if item_wrapper else field_name
+
+                    # Create the item element
+                    if item_element_name in namespace_fields:
+                        namespace_prefix = namespace_fields[item_element_name]
+                        namespace_uri = nsmap.get(namespace_prefix, "")
+                        full_element_name = f"{{{namespace_uri}}}{item_element_name}"
+                        item_element = lxml_etree.SubElement(wrapper_element, full_element_name)
+                    else:
+                        default_namespace_uri = (
+                            nsmap.get(root_element_name or "", "") if root_element_name else ""
+                        )
+                        if default_namespace_uri:
+                            full_element_name = f"{{{default_namespace_uri}}}{item_element_name}"
+                            item_element = lxml_etree.SubElement(wrapper_element, full_element_name)
+                        else:
+                            item_element = lxml_etree.SubElement(wrapper_element, item_element_name)
+
+                    # Add attributes to the item element
+                    if item_attributes:
+                        for attr_name, attr_value in item_attributes.items():
+                            # Handle namespaced attributes
+                            if ":" in attr_name:
+                                prefix, local_name = attr_name.split(":", 1)
+                                if prefix in nsmap:
+                                    attr_qname = f"{{{nsmap[prefix]}}}{local_name}"
+                                    item_element.set(attr_qname, str(attr_value))
+                                else:
+                                    item_element.set(attr_name, str(attr_value))
+                            else:
+                                # For non-namespaced attributes, add namespace prefix
+                                if root_element_name and root_element_name in nsmap:
+                                    attr_qname = f"{{{nsmap[root_element_name]}}}{attr_name}"
+                                    item_element.set(attr_qname, str(attr_value))
+                                else:
+                                    item_element.set(attr_name, str(attr_value))
+
+                    # Add the data fields as child elements
+                    for data_field, data_value in item_data.items():
+                        if data_value is not None:
+                            self._add_lxml_element_to_parent(
+                                item_element,
+                                data_field,
+                                data_value,
+                                nsmap,
+                                namespace_fields,
+                                xsd_url,
+                                transform_config,
+                                root_element_name,
+                            )
+                else:
+                    # Simple value in array - create element with field_name
+                    if field_name in namespace_fields:
+                        namespace_prefix = namespace_fields[field_name]
+                        namespace_uri = nsmap.get(namespace_prefix, "")
+                        element_name = f"{{{namespace_uri}}}{field_name}"
+                        item_element = lxml_etree.SubElement(wrapper_element, element_name)
+                    else:
+                        default_namespace_uri = (
+                            nsmap.get(root_element_name or "", "") if root_element_name else ""
+                        )
+                        if default_namespace_uri:
+                            element_name = f"{{{default_namespace_uri}}}{field_name}"
+                            item_element = lxml_etree.SubElement(wrapper_element, element_name)
+                        else:
+                            item_element = lxml_etree.SubElement(wrapper_element, field_name)
+                    item_element.text = str(item)
+
+        elif isinstance(value, dict):
             # Create nested element for dictionary values
             if field_name in namespace_fields:
                 # Use configured namespace
