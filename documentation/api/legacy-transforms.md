@@ -65,7 +65,17 @@ Once we have that we can setup the foreign data wrapper connection like so.
 ```postgresql
 CREATE SERVER oracle FOREIGN DATA WRAPPER oracle_fdw OPTIONS (dbserver '<server URL - will look like url:1521/something>');
 
--- TODO Creating the user mapping / setting up the user privileges
+Grant priveleges to the app user so it can have full access to the legacy foreign tables schema.
+
+CREATE USER MAPPING FOR app
+SERVER oracle_fdw
+OPTIONS (
+user ...
+pass ...
+)
+
+GRANT USAGE ON FOREIGN DATA WRAPPER oracle_fdw TO app;
+GRANT USAGE ON FOREIGN SERVER oracle_fdw_server TO app;
 
 -- Change the isolation level to avoid connection issues as the default is unreliable.
 alter server grants options (ADD isolation_level 'read_committed');
