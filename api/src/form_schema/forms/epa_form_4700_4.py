@@ -27,9 +27,9 @@ FORM_JSON_SCHEMA = {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Name"
         },
-        # NOTE - this isn't the same address type
+        # NOTE - this isn't the same address type as most other forms
+        # There is only a single line for address, and all fields are always required.
         "applicant_address": {
-            # TODO not standard, need to make something new
             "type": "object",
             "required": [
                 "address", "city", "state", "zip_code"
@@ -41,28 +41,21 @@ FORM_JSON_SCHEMA = {
                     "minLength": 1,
                     "maxLength": 110
                 },
-                # TODO - make these something we can import easily by moving them to the top level
                 "city": {
-                    "type": "string",
-                    "title": "City"
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("city")}],
                 },
                 "state": {
-                    "type": "string",
-                    "title": "State",
-                    "enum": ["New York", "Michigan"]
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("state")}],
                 },
                 "zip_code": {
-                    "type": "string",
-                    "title": "Zip Code"
+                    "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("zip_code")}],
                 }
             }
         },
         "sam_uei": {
-            # TODO - this isn't prepopulated in grants.gov, should we do that?
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
             "title": "Unique Entity Identifier (UEI)"
         },
-        # TODO - should we move these 4 fields into an object?
         # This doesn't follow the normal convention of multiple fields for a name
         # and instead just has a big name textbox
         "point_of_contact_name": {
@@ -145,7 +138,7 @@ FORM_JSON_SCHEMA = {
             "minLength": 1,
             "maxLength": 1000,
         },
-        "program_explanation": {
+        "program_explanation": { # Program
             "type": "string",
             "title": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7? Provide a legal citation or applicant’s/ recipient’s website address for, or a copy of, the procedures.",
             "minLength": 1,
@@ -258,8 +251,13 @@ FORM_UI_SCHEMA = [
 ]
 
 FORM_RULE_SCHEMA = {
-    # TODO - need to prepopulate UEI
-    # TODO - need to postpopulate the signature/date
+    #### PRE-POPULATION RULES
+    "sam_uei": {"gg_pre_population": {"rule": "uei"}},
+    #### POST-POPULATION RULES
+    "application_signature": {
+        "aor_signature": {"gg_post_population": {"rule": "signature"}},
+        "submitted_date": {"gg_post_population": {"rule": "current_date"}},
+    }
 }
 
 EPA_FORM_4700_4_v5_0 = Form(
