@@ -75,7 +75,7 @@ pass ...
 )
 
 GRANT USAGE ON FOREIGN DATA WRAPPER oracle_fdw TO app;
-GRANT USAGE ON FOREIGN SERVER oracle_fdw_server TO app;
+GRANT USAGE ON FOREIGN SERVER oracle_fdw TO app;
 
 -- Change the isolation level to avoid connection issues as the default is unreliable.
 alter server grants options (ADD isolation_level 'read_committed');
