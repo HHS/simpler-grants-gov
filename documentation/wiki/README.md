@@ -2,20 +2,6 @@
 description: Welcome to the public wiki for the Simpler.Grants.gov initiative.
 cover: .gitbook/assets/Logo.png
 coverY: 0
-layout:
-  cover:
-    visible: true
-    size: hero
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: false
-  pagination:
-    visible: false
 ---
 
 # Welcome
