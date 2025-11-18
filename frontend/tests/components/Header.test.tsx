@@ -1,5 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { Response } from "node-fetch";
+import { fakeTestUser } from "src/utils/testing/fixtures";
 import { render, screen, waitFor } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
@@ -266,5 +267,17 @@ describe("Header", () => {
     });
     render(<Header {...props} />);
     expect(mockShowSnackbar).toHaveBeenCalledTimes(1);
+  });
+  it("renders test user dropdown when local and test users are present", () => {
+    render(<Header localDev={true} testUsers={[fakeTestUser]} />);
+
+    const testUserDropdown = screen.getByRole("combobox");
+    expect(testUserDropdown).toBeInTheDocument();
+  });
+  it("does not render test user dropdown by default", () => {
+    render(<Header />);
+
+    const testUserDropdown = screen.queryByRole("combobox");
+    expect(testUserDropdown).not.toBeInTheDocument();
   });
 });

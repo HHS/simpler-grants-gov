@@ -91,3 +91,10 @@ export const toDynamicOrganizationsEndpoint = (
     method: type as ApiMethod,
   };
 };
+
+export const getLocalUsersEndpoint = {
+  basePath: environment.API_URL,
+  version: "",
+  namespace: "local/local-users",
+  method: "GET" as ApiMethod,
+};
