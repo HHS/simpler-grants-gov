@@ -1,0 +1,51 @@
+name: ECR Cleanup
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "dry run without deleting images"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  cleanup-ecr:
+    name: Clean up unused ECR images
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: shared
+
+      - name: Make cleanup script executable
+        run: chmod +x ./bin/cleanup-ecr.sh
+
+      - name: Run ECR cleanup (Dry Run)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          echo "Running in DRY RUN mode - no images will be deleted"
+          ./bin/cleanup-ecr.sh --dry-run
+
+      - name: Run ECR cleanup (Production)
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+        run: |
+          echo "Running ECR cleanup - unused images will be deleted"
+          ./bin/cleanup-ecr.sh
+
+  send-slack-notification:
+    if: failure()
+    needs: [cleanup-ecr]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
