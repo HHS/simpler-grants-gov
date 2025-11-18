@@ -468,3 +468,123 @@ class TestSubmissionXMLAssembler:
         assert "http://apply.grants.gov/system/Header-V1.0" in root.nsmap.values()
         assert "http://apply.grants.gov/system/Footer-V1.0" in root.nsmap.values()
         assert "http://apply.grants.gov/system/Global-V1.0" in root.nsmap.values()
+
+    def test_get_supported_forms_filters_non_required_not_included(
+        self, sample_application, sample_application_submission, enable_factory_create
+    ):
+        """Test that non-required forms with is_included_in_submission=False are filtered out."""
+        # Create a non-required form with XML support
+        optional_form = FormFactory.create(
+            form_name="Optional Form",
+            short_form_name="OPTIONAL_1_0",
+            form_version="1.0",
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,  # Has XML support
+        )
+
+        # Create competition form marked as NOT required
+        competition_form = CompetitionFormFactory.create(
+            competition=sample_application.competition,
+            form=optional_form,
+            is_required=False,  # NOT required
+        )
+
+        # Create application form with is_included_in_submission=False
+        ApplicationFormFactory.create(
+            application=sample_application,
+            competition_form=competition_form,
+            application_response={"some_field": "some_value"},
+            is_included_in_submission=False,  # NOT included
+        )
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+        supported_forms = assembler.get_supported_forms()
+
+        # Should only return SF424_4_0 (required), not the optional form
+        assert len(supported_forms) == 1
+        assert supported_forms[0].form.short_form_name == "SF424_4_0"
+
+    def test_get_supported_forms_includes_non_required_when_included(
+        self, sample_application, sample_application_submission, enable_factory_create
+    ):
+        """Test that non-required forms with is_included_in_submission=True are included."""
+        # Create a non-required form with XML support
+        optional_form = FormFactory.create(
+            form_name="Optional Form",
+            short_form_name="OPTIONAL_1_0",
+            form_version="1.0",
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,  # Has XML support
+        )
+
+        # Create competition form marked as NOT required
+        competition_form = CompetitionFormFactory.create(
+            competition=sample_application.competition,
+            form=optional_form,
+            is_required=False,  # NOT required
+        )
+
+        # Create application form with is_included_in_submission=True
+        ApplicationFormFactory.create(
+            application=sample_application,
+            competition_form=competition_form,
+            application_response={"some_field": "some_value"},
+            is_included_in_submission=True,  # IS included
+        )
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+        supported_forms = assembler.get_supported_forms()
+
+        # Should return both SF424_4_0 and the optional form
+        assert len(supported_forms) == 2
+        form_names = {form.form.short_form_name for form in supported_forms}
+        assert "SF424_4_0" in form_names
+        assert "OPTIONAL_1_0" in form_names
+
+    def test_get_supported_forms_includes_required_regardless_of_is_included(
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
+    ):
+        """Test that required forms are included regardless of is_included_in_submission value."""
+        # Update the existing SF424 form to have is_included_in_submission=False
+        # (should still be included because it's required)
+        sample_application.application_forms[0].is_included_in_submission = False
+        db_session.flush()
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+        supported_forms = assembler.get_supported_forms()
+
+        # Should still return SF424_4_0 because it's required
+        assert len(supported_forms) == 1
+        assert supported_forms[0].form.short_form_name == "SF424_4_0"
+
+    def test_get_supported_forms_filters_non_required_null_is_included(
+        self, sample_application, sample_application_submission, enable_factory_create
+    ):
+        """Test that non-required forms with is_included_in_submission=None are filtered out."""
+        # Create a non-required form with XML support
+        optional_form = FormFactory.create(
+            form_name="Optional Form",
+            short_form_name="OPTIONAL_1_0",
+            form_version="1.0",
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,  # Has XML support
+        )
+
+        # Create competition form marked as NOT required
+        competition_form = CompetitionFormFactory.create(
+            competition=sample_application.competition,
+            form=optional_form,
+            is_required=False,  # NOT required
+        )
+
+        # Create application form with is_included_in_submission=None
+        ApplicationFormFactory.create(
+            application=sample_application,
+            competition_form=competition_form,
+            application_response={"some_field": "some_value"},
+            is_included_in_submission=None,  # NULL/None
+        )
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+        supported_forms = assembler.get_supported_forms()
+
+        # Should only return SF424_4_0 (required), not the optional form
+        assert len(supported_forms) == 1
+        assert supported_forms[0].form.short_form_name == "SF424_4_0"
