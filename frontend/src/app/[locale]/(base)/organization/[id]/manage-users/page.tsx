@@ -1,20 +1,20 @@
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { use } from "react";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
+export type ManageUsersPageParams = LocalizedPageProps & {
+  id: string;
+};
+
 interface ManageUsersPageProps {
-  params: Promise<{ locale: string; id: string }>;
+  params: ManageUsersPageParams;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export async function generateMetadata({ params }: ManageUsersPageParams) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
@@ -25,7 +25,7 @@ export async function generateMetadata({
 }
 
 function ManageUsersPage({ params }: ManageUsersPageProps) {
-  const { id: organizationId } = use(params);
+  const { id: organizationId } = params;
   return <ManageUsersPageContent organizationId={organizationId} />;
 }
 

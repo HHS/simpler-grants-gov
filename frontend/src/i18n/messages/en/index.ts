@@ -1547,6 +1547,8 @@ export const messages = {
     pendingUsersHeading: "Pending Users",
     pendingUsersTableDescription:
       "Any users waiting to join your organization will appear below.",
+    PendingUsersFetchError:
+      "We have encountered an error retrieving the Pending Users list, please try again later.",
     errors: {
       fetchError: "Failed to get Users",
       notLoggedInMessage: "You are not logged in",

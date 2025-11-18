@@ -110,3 +110,23 @@ export type OrganizationInvitation = {
 };
 
 export const completeStatuses = ["rejected", "accepted", "expired"];
+
+export interface InvitationUser {
+  user_id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+export interface OrganizationPendingInvitation {
+  organization_invitation_id: string;
+  status: "pending" | "accepted" | "rejected" | "expired" | string;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  rejected_at: string | null;
+  invitee_email: string;
+  invitee_user: InvitationUser | null;
+  inviter_user: InvitationUser;
+  roles: UserRole[];
+}
