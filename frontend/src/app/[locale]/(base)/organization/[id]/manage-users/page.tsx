@@ -6,13 +6,13 @@ import { redirect } from "next/navigation";
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
 interface ManageUsersPageProps {
-  params: Promise<{ id: string; locale: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string; locale: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
