@@ -85,7 +85,6 @@ export const OrganizationRoster = async ({
   let organizationUsers;
   try {
     organizationUsers = await getOrganizationUsers(
-      session.token,
       organizationId,
     );
   } catch (e) {
