@@ -49,6 +49,38 @@ we add a few additional columns for our transformation process.
 * `transformation_notes` - Freeform text field for putting notes about the transformation if an odd circumstance was hit. Occasionally set for certain scenarios in transformations.
 * `created_at`/`updated_at`/`deleted_at` - just metadata auditing columns, not directly used in the process
 
+# First Time Environment Setup
+If we are setting up an environment for the first time ever, we need to manually create
+the Oracle FDW connection. This will require you have a username/password and have
+setup our infra to allow a peering connecting to the Oracle DB.
+
+- To configure the peering the connection, we need request these values from the legacy grants environment: vpc peer owner id and aws peer vpc id.
+- Update the below aws ssm parameters values:
+  - /network/{environment_name}/dms/peer-owner-id
+  - /network/{environment_name}/dms/peer-vpc-id
+- Ensure the vpc cdir ranges don't overlap with the peered vpc
+
+Once we have that we can setup the foreign data wrapper connection like so.
+
+```postgresql
+CREATE SERVER oracle FOREIGN DATA WRAPPER oracle_fdw OPTIONS (dbserver '<server URL - will look like url:1521/something>');
+
+Grant priveleges to the app user so it can have full access to the legacy foreign tables schema.
+
+CREATE USER MAPPING FOR app
+SERVER oracle_fdw
+OPTIONS (
+user ...
+pass ...
+)
+
+GRANT USAGE ON FOREIGN DATA WRAPPER oracle_fdw TO app;
+GRANT USAGE ON FOREIGN SERVER oracle_fdw TO app;
+
+-- Change the isolation level to avoid connection issues as the default is unreliable.
+alter server grants options (ADD isolation_level 'read_committed');
+```
+
 # Staging & Foreign Table Setup
 For each table we want to copy, we define two SQLAlchemy tables,
 a "staging" table where we'll copy the unchanged data directly,
