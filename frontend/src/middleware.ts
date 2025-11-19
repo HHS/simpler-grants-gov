@@ -55,7 +55,7 @@ export default function middleware(request: NextRequest): NextResponse {
 
     const cacheControl: string[] = [];
 
-    cacheControl.push(`max-age: ${params.get("max-age") || "10"}`);
+    cacheControl.push(`max-age=${params.get("max-age") || "10"}`);
     cacheControl.push(
       params.get("cache") ||
         (request.cookies.has("session") &&
