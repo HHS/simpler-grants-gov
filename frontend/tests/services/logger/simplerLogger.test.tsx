@@ -4,7 +4,7 @@
 
 import { logRequest } from "src/services/logger/simplerLogger";
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const infoMock = jest.fn();
 
@@ -30,7 +30,9 @@ describe("logRequest", () => {
           "sec-fetch-dest": "empty",
         }),
       }),
-      { status: 200 },
+      new NextResponse(null, {
+        status: 200,
+      }),
     );
     expect(infoMock).not.toHaveBeenCalled();
   });
@@ -46,7 +48,9 @@ describe("logRequest", () => {
           "X-Amz-Cf-Id": "a trace id",
         }),
       }),
-      { status: 200 },
+      new NextResponse(null, {
+        status: 200,
+      }),
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({
@@ -73,7 +77,10 @@ describe("logRequest", () => {
           Cookies: "session=abc;",
         }),
       }),
-      { status: 200, headers: new Headers({ "cache-control": "no-store" }) },
+      new NextResponse(null, {
+        status: 200,
+        headers: new Headers({ "cache-control": "no-store" }),
+      }),
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({
