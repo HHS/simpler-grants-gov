@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
-# Requires bash 4.0+
 
 set -euo pipefail
 
-# Check bash version
-if ((BASH_VERSINFO[0] < 4)); then
-    echo "ERROR: This script requires bash 4.0 or higher (you have ${BASH_VERSION})"
-fi
-
 REGION="us-east-1"
-DRY_RUN=false
+DRY_RUN=true
 
 declare -A active_tags_map
 
 REPOSITORIES=(
     "simpler-grants-gov-api"
-    "simpler-grants-gov-frontend"
     "simpler-grants-gov-analytics"
+    "simpler-grants-gov-api"
     "simpler-grants-gov-fluentbit"
+    "simpler-grants-gov-frontend"
     "simpler-grants-gov-nofos"
 )
 
@@ -52,6 +47,7 @@ get_active_tags() {
     local task_def_count
     task_def_count=$(echo "$task_defs" | wc -w | tr -d ' ')
     echo "Found $task_def_count active task definitions"
+    echo "Fetching container images ..."
 
     local all_images
     all_images=$(for task_def_arn in $task_defs; do
@@ -63,15 +59,33 @@ get_active_tags() {
     done | jq -s 'add | unique | .[]' -r)
 
     local tag_count=0
-    for image_url in $all_images; do
-        if [[ $image_url =~ ([^/]+):([^:]+)$ ]]; then
-            local repo="${BASH_REMATCH[1]}"
-            local tag="${BASH_REMATCH[2]}"
-            local repo_tag="$repo:$tag"
-            active_tags_map["$repo_tag"]=1
-            ((tag_count++))
+    while IFS= read -r image_url || [ -n "$image_url" ]; do
+        [ -z "$image_url" ] && continue
+
+        local repo
+        local tag
+        repo=""
+        tag=""
+
+        # check sha256 image tags
+        if [[ $image_url =~ /([^/@:]+)@sha256:([a-f0-9]+)$ ]]; then
+            repo="${BASH_REMATCH[1]}"
+            tag="sha256:${BASH_REMATCH[2]}"
+        # check regular image tags
+        elif [[ $image_url =~ /([^/@:]+):([^@:]+)$ ]]; then
+            repo="${BASH_REMATCH[1]}"
+            tag="${BASH_REMATCH[2]}"
+        # Skip plain repo names or unparseable URLs
+        else
+            continue
         fi
-    done
+
+        [ -n "$repo" ] && [ -n "$tag" ] || continue
+
+        local repo_tag="$repo:$tag"
+        active_tags_map["$repo_tag"]=1
+        ((tag_count++)) || true
+    done <<< "$all_images"
 
     echo "Found $tag_count unique active image tags"
 }
@@ -108,7 +122,14 @@ get_tags_to_delete() {
         tags=$(echo "$image_json" | jq -r '.tags[]?' 2>/dev/null || echo "")
 
         local is_active=false
-        if [ -n "$tags" ]; then
+
+        # Check if the sha256 image tag is active
+        if is_tag_active "$repo_name" "$image_digest"; then
+            is_active=true
+        fi
+
+        # Also check if any normal tagged images are active
+        if [ "$is_active" = false ] && [ -n "$tags" ]; then
             for tag in $tags; do
                 if is_tag_active "$repo_name" "$tag"; then
                     is_active=true
@@ -118,7 +139,7 @@ get_tags_to_delete() {
         fi
 
         if [ "$is_active" = true ]; then
-            ((active_count++))
+            ((active_count++)) || true
         else
             delete_array+=("$image_digest")
         fi
@@ -135,9 +156,12 @@ delete_images() {
         local batch=("${images_to_delete[@]:i:100}")
 
         if [ "$DRY_RUN" = true ]; then
-            echo "[DRY RUN] Would delete ${#batch[@]} images from $repo_name"
+            echo "[DRY RUN] Would delete ${#batch[@]} images from $repo_name:"
+            for digest in "${batch[@]}"; do
+                echo "  - $digest"
+            done
         else
-            # Use jq to build JSON properly instead of string concatenation
+
             local image_ids
             image_ids=$(printf '%s\n' "${batch[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0)) | map({imageDigest: .})')
 
@@ -169,9 +193,6 @@ delete_images() {
 cleanup_repository() {
     local repo_name=$1
 
-    echo ""
-    echo "Processing repository: $repo_name"
-
     local images
     images=$(aws ecr describe-images \
         --repository-name "$repo_name" \
@@ -183,49 +204,83 @@ cleanup_repository() {
 
     local total_images
     total_images=$(echo "$images" | jq '.imageDetails | length')
-    echo "Total images in repository: $total_images"
 
     if [ "$total_images" -eq 0 ]; then
-        echo "No images to process"
         return
     fi
-
 
     local active_count=0
     for repo_tag in "${!active_tags_map[@]}"; do
         if [[ $repo_tag == $repo_name:* ]]; then
-            ((active_count++))
+            ((active_count++)) || true
         fi
     done
-    echo "Active tags to preserve: $active_count"
 
     local images_to_delete=()
     local active_images=0
     get_tags_to_delete "$repo_name" "$images" images_to_delete active_images
 
-    echo "Images to delete: ${#images_to_delete[@]}"
-    echo "Active images to preserve: $active_images"
+    # Store results for summary table
+    repository_results+=("$repo_name|$total_images|$active_images|${#images_to_delete[@]}")
 
-    if [ ${#images_to_delete[@]} -gt 0 ]; then
+    # Store full image URLs for images to delete
+    for digest in "${images_to_delete[@]}"; do
+        images_to_delete_urls+=("$ECR_REGISTRY/$repo_name@$digest")
+    done
+
+    if [ ${#images_to_delete[@]} -gt 0 ] && [ "$DRY_RUN" = false ]; then
         delete_images "$repo_name" "${images_to_delete[@]}"
-    else
-        echo "No images to delete"
+    fi
+}
+
+print_summary_table() {
+    echo ""
+    echo "========================================================================================================="
+    printf "%-40s | %-15s | %-15s | %-15s\n" "Repository" "Total Images" "Active Images" "Images to Delete"
+    echo "========================================================================================================="
+
+    for result in "${repository_results[@]}"; do
+        IFS='|' read -r repo total active delete <<< "$result"
+        printf "%-40s | %-15s | %-15s | %-15s\n" "$repo" "$total" "$active" "$delete"
+    done
+
+    echo "========================================================================================================="
+    echo ""
+
+    if [ ${#images_to_delete_urls[@]} -gt 0 ]; then
+        echo "Images to be deleted:"
+        echo ""
+
+        printf '%s\n' "${images_to_delete_urls[@]}" | sort | while read -r url; do
+            echo "  $url"
+        done
+        echo ""
     fi
 }
 
 main() {
     echo "ECR Cleanup Starting"
     echo "Dry Run: $DRY_RUN"
-    echo "Repositories: ${REPOSITORIES[*]}"
+    echo ""
+
+    # Get ECR registry URL
+    local account_id
+    account_id=$(aws sts get-caller-identity --query Account --output text)
+    ECR_REGISTRY="$account_id.dkr.ecr.$REGION.amazonaws.com"
 
     get_active_tags
 
     echo ""
-    echo "Step 2: Cleaning up repositories"
+    echo "Analyzing repositories..."
+
+    repository_results=()
+    images_to_delete_urls=()
 
     for repo in "${REPOSITORIES[@]}"; do
         cleanup_repository "$repo"
     done
+
+    print_summary_table
 }
 
 main

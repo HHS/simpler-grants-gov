@@ -30,7 +30,7 @@ jobs:
           environment: shared
 
       - name: Make cleanup script executable
-        run: chmod +x ./bin/cleanup-ecr.sh
+        run: chmod +x ./bin/cleanup-ecr
 
       - name: Run ECR cleanup (Dry Run)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
@@ -42,7 +42,7 @@ jobs:
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
         run: |
           echo "Running ECR cleanup - unused images will be deleted"
-          ./bin/cleanup-ecr.sh
+          ./bin/cleanup-ecr
 
   send-slack-notification:
     if: failure()
