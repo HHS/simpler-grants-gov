@@ -3,9 +3,10 @@ import { getOrganizationPendingInvitations } from "src/services/fetch/fetchers/o
 import type {
   InvitationUser,
   OrganizationPendingInvitation,
+  UserRole,
 } from "src/types/userTypes";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import React from "react";
 import { Alert } from "@trussworks/react-uswds";
 
@@ -15,11 +16,15 @@ import {
 } from "src/components/TableWithResponsiveHeader";
 
 function formatFullName(user: InvitationUser | null): string {
-  if (!user) return "-";
+  if (!user) return " ";
 
   const parts = [user.first_name, user.last_name].filter(Boolean);
 
   return parts.join(" ");
+}
+
+function formatRoleNames(roles: UserRole[]): string {
+  return roles.map(role => role.role_name).join(", ");
 }
 
 interface PendingUsersSectionProps {
@@ -29,7 +34,7 @@ interface PendingUsersSectionProps {
 export async function PendingUsersSection({
   organizationId,
 }: PendingUsersSectionProps) {
-  const t = useTranslations("ManageUsers");
+  const t = await getTranslations("ManageUsers");
   let pendingUsers: OrganizationPendingInvitation[] = [];
   let hasError = false;
 
@@ -53,9 +58,9 @@ export async function PendingUsersSection({
   ) => {
     return userDetails.map((user) => {
       return [
-        { cellData: <>{formatFullName(user.invitee_user)}</> },
-        { cellData: <>{user.invitee_email}</> },
-        { cellData: <>{user.roles[0].role_name}</> },
+        { cellData: formatFullName(user.invitee_user) },
+        { cellData: user.invitee_email },
+        { cellData: formatRoleNames(user.roles) },
       ];
     });
   };
@@ -73,6 +78,10 @@ export async function PendingUsersSection({
         <Alert slim headingLevel="h6" noIcon type="error">
           {t("PendingUsersFetchError")}
         </Alert>
+      ) : pendingUsers.length === 0 ? (
+        <p data-testid="pending-users-empty">
+          {t("pendingUsersTableZeroState")}
+        </p>
       ) : (
         <TableWithResponsiveHeader
           headerContent={tableHeaders}

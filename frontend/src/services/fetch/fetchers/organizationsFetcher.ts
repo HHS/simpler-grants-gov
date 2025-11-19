@@ -3,6 +3,7 @@ import { getSession } from "src/services/auth/session";
 import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import {
+  OrganizationInvitationStatus,
   OrganizationPendingInvitation,
   UserDetail,
   UserRole,
@@ -115,7 +116,7 @@ export const getOrganizationPendingInvitations = async (
     body: {
       filters: {
         status: {
-          one_of: ["pending"],
+          one_of: [OrganizationInvitationStatus.Pending],
         },
       },
     },

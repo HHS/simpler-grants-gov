@@ -118,9 +118,16 @@ export interface InvitationUser {
   last_name: string | null;
 }
 
+export enum OrganizationInvitationStatus {
+  Pending = "pending",
+  Accepted = "accepted",
+  Rejected = "rejected",
+  Expired = "expired",
+}
+
 export interface OrganizationPendingInvitation {
   organization_invitation_id: string;
-  status: "pending" | "accepted" | "rejected" | "expired" | string;
+  status: OrganizationInvitationStatus;
   created_at: string;
   expires_at: string;
   accepted_at: string | null;
