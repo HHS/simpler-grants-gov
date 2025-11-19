@@ -9,6 +9,8 @@ from src.api.organizations_v1.organization_schemas import (
     OrganizationCreateInvitationRequestSchema,
     OrganizationCreateInvitationResponseSchema,
     OrganizationGetResponseSchema,
+    OrganizationIgnoreLegacyUserRequestSchema,
+    OrganizationIgnoreLegacyUserResponseSchema,
     OrganizationInvitationListRequestSchema,
     OrganizationInvitationListResponseSchema,
     OrganizationListRolesResponseSchema,
@@ -24,6 +26,9 @@ from src.services.organizations_v1.create_organization_invitation import (
     create_organization_invitation,
 )
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.ignore_legacy_user_organization import (
+    ignore_legacy_user_organization,
+)
 from src.services.organizations_v1.list_organization_invitations import (
     list_organization_invitations_and_verify_access,
 )
@@ -225,3 +230,29 @@ def organization_invitations_list(
         )
 
     return response.ApiResponse(message="Success", data=invitations)
+
+
+@organization_blueprint.post("/<uuid:organization_id>/legacy-users/ignore")
+@organization_blueprint.input(OrganizationIgnoreLegacyUserRequestSchema, location="json")
+@organization_blueprint.output(OrganizationIgnoreLegacyUserResponseSchema)
+@organization_blueprint.doc(responses=[200, 400, 401, 403, 404, 422])
+@organization_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def organization_ignore_legacy_user(
+    db_session: db.Session, organization_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"organization_id": organization_id})
+    logger.info("POST /v1/organizations/:organization_id/legacy-users/ignore")
+
+    # Get authenticated user
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    with db_session.begin():
+        # Add the user from the token session to our current session
+        db_session.add(user_token_session)
+
+        ignore_legacy_user_organization(
+            db_session, user_token_session.user, organization_id, json_data
+        )
+
+    return response.ApiResponse(message="Success")
