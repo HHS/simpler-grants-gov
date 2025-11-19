@@ -1549,8 +1549,7 @@ export const messages = {
       "Any users waiting to join your organization will appear below.",
     PendingUsersFetchError:
       "We have encountered an error retrieving the Pending Users list, please try again later.",
-    pendingUsersTableZeroState:
-      "There are no pending users",
+    pendingUsersTableZeroState: "There are no pending users",
     errors: {
       fetchError: "Failed to get Users",
       notLoggedInMessage: "You are not logged in",

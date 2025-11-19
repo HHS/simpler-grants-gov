@@ -24,7 +24,7 @@ function formatFullName(user: InvitationUser | null): string {
 }
 
 function formatRoleNames(roles: UserRole[]): string {
-  return roles.map(role => role.role_name).join(", ");
+  return roles.map((role) => role.role_name).join(", ");
 }
 
 interface PendingUsersSectionProps {
