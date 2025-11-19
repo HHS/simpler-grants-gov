@@ -97,3 +97,37 @@ export const inviteUserToOrganization = async (
   const json = (await response.json()) as { data: OrganizationInviteRecord };
   return json.data;
 };
+
+export const updateOrganizationUserRoles = async (
+  organizationId: string,
+  userId: string,
+  roleIds: string[],
+): Promise<UserDetail> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+  const resp = await fetchOrganizationWithMethod("PUT")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    body: { role_ids: roleIds },
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const deleteOrganizationUser = async (
+  organizationId: string,
+  userId: string,
+): Promise<UserDetail> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};

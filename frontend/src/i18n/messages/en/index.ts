@@ -1559,12 +1559,19 @@ export const messages = {
       roleHeading: "Role",
       selectRoleFor: "Select role for",
     },
-    confirmationModal: {
+    roleChangeModal: {
       header: "Confirm role change",
       description: "Are you sure you want to change this user's role to",
       cancel: "Cancel",
       confirm: "Confirm",
       saving: "Saving...",
+    },
+    deleteUserModal: {
+      header: "Delete User",
+      description: "Are you sure you want to delete this user?",
+      cancel: "Cancel",
+      delete: "Delete",
+      deleting: "Deleting...",
     },
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
