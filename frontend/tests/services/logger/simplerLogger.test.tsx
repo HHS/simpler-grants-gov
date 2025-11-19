@@ -60,7 +60,7 @@ describe("logRequest", () => {
       acceptLanguage: "ES",
       awsTraceId: "a trace id",
       statusCode: 200,
-      cacheControl: undefined,
+      cacheControl: null,
       hasSessionCookie: false,
     });
   });
