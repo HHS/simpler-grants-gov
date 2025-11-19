@@ -84,9 +84,7 @@ export const OrganizationRoster = async ({
 
   let organizationUsers;
   try {
-    organizationUsers = await getOrganizationUsers(
-      organizationId,
-    );
+    organizationUsers = await getOrganizationUsers(organizationId);
   } catch (e) {
     console.error(e);
     return <ServerErrorAlert />;
