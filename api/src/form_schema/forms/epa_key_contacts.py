@@ -11,25 +11,15 @@ FORM_JSON_SCHEMA = {
     # their own nested required fields.
     "required": [],
     "properties": {
-        "authorized_representative": {
-            "$ref": "#/$defs/key_contact_person"
-        },
-        "payee": {
-            "$ref": "#/$defs/key_contact_person"
-        },
-        "administrative_contact": {
-            "$ref": "#/$defs/key_contact_person"
-        },
-        "project_manager": {
-            "$ref": "#/$defs/key_contact_person"
-        },
+        "authorized_representative": {"$ref": "#/$defs/key_contact_person"},
+        "payee": {"$ref": "#/$defs/key_contact_person"},
+        "administrative_contact": {"$ref": "#/$defs/key_contact_person"},
+        "project_manager": {"$ref": "#/$defs/key_contact_person"},
     },
     "$defs": {
         "key_contact_person": {
             "type": "object",
-            "required": [
-                "name", "address"
-            ],
+            "required": ["name", "address", "phone"],
             "properties": {
                 "name": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
@@ -53,10 +43,10 @@ FORM_JSON_SCHEMA = {
                 "email": {
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
                     "title": "E-mail Address",
-                }
-            }
+                },
+            },
         }
-    }
+    },
 }
 
 FORM_UI_SCHEMA = [
@@ -66,22 +56,64 @@ FORM_UI_SCHEMA = [
         "description": "Original awards and amendments will be sent to this individual for review and acceptance, unless otherwise indicated.",
         "name": "authorized_representative",
         "children": [
-            {"type": "field", "definition": "/properties/authorized_representative/properties/name/properties/prefix"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/name/properties/first_name"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/name/properties/middle_name"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/name/properties/last_name"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/name/properties/suffix"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/title"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/address/properties/street1"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/address/properties/street2"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/address/properties/city"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/address/properties/state"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/address/properties/zip_code"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/address/properties/country"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/phone"},
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/name/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/name/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/name/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/name/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/name/properties/suffix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/title",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/address/properties/street1",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/address/properties/street2",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/address/properties/city",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/address/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/address/properties/zip_code",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/address/properties/country",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/phone",
+            },
             {"type": "field", "definition": "/properties/authorized_representative/properties/fax"},
-            {"type": "field", "definition": "/properties/authorized_representative/properties/email"},
-        ]
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/email",
+            },
+        ],
     },
     {
         "type": "section",
@@ -90,21 +122,45 @@ FORM_UI_SCHEMA = [
         "name": "payee",
         "children": [
             {"type": "field", "definition": "/properties/payee/properties/name/properties/prefix"},
-            {"type": "field", "definition": "/properties/payee/properties/name/properties/first_name"},
-            {"type": "field", "definition": "/properties/payee/properties/name/properties/middle_name"},
-            {"type": "field", "definition": "/properties/payee/properties/name/properties/last_name"},
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/name/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/name/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/name/properties/last_name",
+            },
             {"type": "field", "definition": "/properties/payee/properties/name/properties/suffix"},
             {"type": "field", "definition": "/properties/payee/properties/title"},
-            {"type": "field", "definition": "/properties/payee/properties/address/properties/street1"},
-            {"type": "field", "definition": "/properties/payee/properties/address/properties/street2"},
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/address/properties/street1",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/address/properties/street2",
+            },
             {"type": "field", "definition": "/properties/payee/properties/address/properties/city"},
-            {"type": "field", "definition": "/properties/payee/properties/address/properties/state"},
-            {"type": "field", "definition": "/properties/payee/properties/address/properties/zip_code"},
-            {"type": "field", "definition": "/properties/payee/properties/address/properties/country"},
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/address/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/address/properties/zip_code",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/payee/properties/address/properties/country",
+            },
             {"type": "field", "definition": "/properties/payee/properties/phone"},
             {"type": "field", "definition": "/properties/payee/properties/fax"},
             {"type": "field", "definition": "/properties/payee/properties/email"},
-        ]
+        ],
     },
     {
         "type": "section",
@@ -112,22 +168,55 @@ FORM_UI_SCHEMA = [
         "description": "Individual from Sponsored Programs Office to contact concerning administrative matters (i.e., indirect cost computation, rebudgeting requests etc).",
         "name": "administrative_contact",
         "children": [
-            {"type": "field", "definition": "/properties/administrative_contact/properties/name/properties/prefix"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/name/properties/first_name"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/name/properties/middle_name"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/name/properties/last_name"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/name/properties/suffix"},
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/name/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/name/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/name/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/name/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/name/properties/suffix",
+            },
             {"type": "field", "definition": "/properties/administrative_contact/properties/title"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/address/properties/street1"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/address/properties/street2"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/address/properties/city"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/address/properties/state"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/address/properties/zip_code"},
-            {"type": "field", "definition": "/properties/administrative_contact/properties/address/properties/country"},
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/address/properties/street1",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/address/properties/street2",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/address/properties/city",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/address/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/address/properties/zip_code",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/administrative_contact/properties/address/properties/country",
+            },
             {"type": "field", "definition": "/properties/administrative_contact/properties/phone"},
             {"type": "field", "definition": "/properties/administrative_contact/properties/fax"},
             {"type": "field", "definition": "/properties/administrative_contact/properties/email"},
-        ]
+        ],
     },
     {
         "type": "section",
@@ -135,22 +224,55 @@ FORM_UI_SCHEMA = [
         "description": "Individual responsible for the technical completion of the proposed work.",
         "name": "project_manager",
         "children": [
-            {"type": "field", "definition": "/properties/project_manager/properties/name/properties/prefix"},
-            {"type": "field", "definition": "/properties/project_manager/properties/name/properties/first_name"},
-            {"type": "field", "definition": "/properties/project_manager/properties/name/properties/middle_name"},
-            {"type": "field", "definition": "/properties/project_manager/properties/name/properties/last_name"},
-            {"type": "field", "definition": "/properties/project_manager/properties/name/properties/suffix"},
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/name/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/name/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/name/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/name/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/name/properties/suffix",
+            },
             {"type": "field", "definition": "/properties/project_manager/properties/title"},
-            {"type": "field", "definition": "/properties/project_manager/properties/address/properties/street1"},
-            {"type": "field", "definition": "/properties/project_manager/properties/address/properties/street2"},
-            {"type": "field", "definition": "/properties/project_manager/properties/address/properties/city"},
-            {"type": "field", "definition": "/properties/project_manager/properties/address/properties/state"},
-            {"type": "field", "definition": "/properties/project_manager/properties/address/properties/zip_code"},
-            {"type": "field", "definition": "/properties/project_manager/properties/address/properties/country"},
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/address/properties/street1",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/address/properties/street2",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/address/properties/city",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/address/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/address/properties/zip_code",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_manager/properties/address/properties/country",
+            },
             {"type": "field", "definition": "/properties/project_manager/properties/phone"},
             {"type": "field", "definition": "/properties/project_manager/properties/fax"},
             {"type": "field", "definition": "/properties/project_manager/properties/email"},
-        ]
+        ],
     },
 ]
 

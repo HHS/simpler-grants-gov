@@ -68,16 +68,11 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
             "zip_code": {"$ref": "#/zip_code"},
         },
     },
-    # TODO - test
     "simple_address_with_country": {
         "type": "object",
         "title": "Address",
         "description": "Enter an address.",
-        "required": [
-            "street1",
-            "city",
-            "country"
-        ],
+        "required": ["street1", "city", "country"],
         "allOf": [
             # If country is United States, state and zip_code are required
             {

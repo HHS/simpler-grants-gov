@@ -1,4 +1,5 @@
 import copy
+
 import pytest
 
 from src.db.models.competition_models import Form
@@ -6,6 +7,7 @@ from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
+    EPA_KEY_CONTACT_v2_0,
     GG_LobbyingForm_v1_1,
     OtherNarrativeAttachment_v1_2,
     ProjectAbstract_v1_2,
@@ -17,7 +19,6 @@ from src.form_schema.forms import (
     SF424d_v1_1,
     SFLLL_v2_0,
     SupplementaryNEHCoverSheet_v3_0,
-    EPA_KEY_CONTACT_v2_0
 )
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
@@ -127,6 +128,7 @@ def gg_lobbying_form_v1_1():
 @pytest.fixture(scope="session")
 def epa_form_4700_4_v5_0():
     return setup_resolved_form(EPA_FORM_4700_4_v5_0)
+
 
 @pytest.fixture(scope="session")
 def epa_key_contact_v2_0():
