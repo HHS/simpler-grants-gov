@@ -1,6 +1,7 @@
 """Recursive transformer for converting JSON data to XML-ready format."""
 
 import logging
+import re
 from typing import Any
 
 from src.util.dict_util import get_nested_value
@@ -9,6 +10,9 @@ from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
 
 logger = logging.getLogger(__name__)
+
+# Pattern for field references: snake_case identifiers (lowercase letters, digits, underscores)
+FIELD_REFERENCE_PATTERN = re.compile(r"^[a-z_][a-z0-9_]*$")
 
 
 class RecursiveXMLTransformer:
@@ -32,6 +36,38 @@ class RecursiveXMLTransformer:
 
         # Start recursive transformation from root
         result = self._process_transform_rules(source_data, self.transform_config, [])
+
+        # Preserve root attribute values for XML generation
+        # Root attributes are defined in _xml_config.xml_structure.root_attributes
+        # and map attribute names to source field names or static values
+        xml_config = self.transform_config.get("_xml_config", {})
+        xml_structure = xml_config.get("xml_structure", {})
+        root_attributes = xml_structure.get("root_attributes", {})
+
+        if root_attributes:
+            # Extract attribute values from source data
+            root_attr_values = {}
+            for attr_name, source_field_or_value in root_attributes.items():
+                if isinstance(source_field_or_value, str):
+                    # Determine if it's a field reference or static value
+                    # Field references are snake_case identifiers (only lowercase, digits, underscores)
+                    # Static values can have dots, hyphens, uppercase, or other characters
+                    is_field_reference = bool(FIELD_REFERENCE_PATTERN.match(source_field_or_value))
+
+                    if is_field_reference and source_field_or_value in source_data:
+                        # It's a field reference and exists - get value from source data
+                        root_attr_values[attr_name] = source_data[source_field_or_value]
+                    elif not is_field_reference:
+                        # It's a static value - always include it
+                        root_attr_values[attr_name] = source_field_or_value
+                    # else: It's a field reference but doesn't exist in data - skip it
+                else:
+                    # Non-string values are static values
+                    root_attr_values[attr_name] = source_field_or_value
+
+            # Store root attributes in result with special key
+            if root_attr_values:
+                result["__root_attributes__"] = root_attr_values
 
         logger.info(
             f"Transformed {len(result)} fields from {len(source_data)} input fields using recursive pattern"
@@ -204,16 +240,24 @@ class RecursiveXMLTransformer:
             conditional_transform = transform_rule.get("conditional_transform", {})
             conditional_type = conditional_transform.get("type")
 
-            # Handle one-to-many mappings that return dictionaries
+            # Handle transforms that return dictionaries to be spread at current level
+            # - one_to_many: Always spreads (never has a target)
+            # - array_decomposition: Spreads only when no target is specified (for XSD compliance)
             if (
                 isinstance(transformed_value, dict)
                 and transform_type == "conditional"
-                and conditional_type == "one_to_many"
+                and (
+                    conditional_type == "one_to_many"
+                    or (
+                        conditional_type == "array_decomposition"
+                        and not transform_rule.get("target")
+                    )
+                )
             ):
-                # Add all key-value pairs from one-to-many result
+                # Add all key-value pairs from the result (spread them at current level)
                 result.update(transformed_value)
                 logger.debug(
-                    f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
+                    f"{conditional_type} transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
                 )
             # Handle conditional_structure that returns nested objects
             elif (

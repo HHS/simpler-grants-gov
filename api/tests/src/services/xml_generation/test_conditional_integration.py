@@ -171,14 +171,12 @@ class TestArrayDecompositionIntegration:
         assert response.xml_data is not None
         assert response.error_message is None
 
-        # Verify the BudgetSections element is present
-        assert "BudgetSections" in response.xml_data
-
-        # Verify arrays are present in the output
-        assert "BudgetSummaries" in response.xml_data
+        # Verify arrays are present in the output (XSD-compliant names)
+        # Note: Per XSD, these are direct children of BudgetInformation, not wrapped in BudgetSections
+        assert "BudgetSummary" in response.xml_data  # Singular per XSD
         assert "BudgetCategories" in response.xml_data
         assert "NonFederalResources" in response.xml_data
-        assert "FederalFundEstimates" in response.xml_data
+        assert "FederalFundsNeeded" in response.xml_data  # XSD name
 
         # Verify wrapper elements are used correctly
         assert "SummaryLineItem" in response.xml_data
@@ -264,9 +262,8 @@ class TestArrayDecompositionIntegration:
         assert response.success is True
         assert response.xml_data is not None
 
-        # Verify BudgetSections is present
-        assert "BudgetSections" in response.xml_data
-        assert "BudgetSummaries" in response.xml_data
+        # Verify BudgetSummary is present (direct child per XSD, not wrapped)
+        assert "BudgetSummary" in response.xml_data  # Singular per XSD
 
     def test_sf424a_budget_sections_without_totals(self):
         """Test array decomposition when totals are not provided."""
@@ -303,9 +300,8 @@ class TestArrayDecompositionIntegration:
         assert response.success is True
         assert response.xml_data is not None
 
-        # Verify BudgetSections is present with only line items (no total)
-        assert "BudgetSections" in response.xml_data
-        assert "BudgetSummaries" in response.xml_data
+        # Verify BudgetSummary is present with only line items (no total)
+        assert "BudgetSummary" in response.xml_data  # Singular per XSD
 
     def test_sf424a_non_federal_resources_xml_structure(self):
         """Test that NonFederalResources produces the exact XML structure with attributes.
@@ -414,9 +410,9 @@ class TestArrayDecompositionIntegration:
         assert response.success is True
         assert response.xml_data is not None
 
-        # BudgetSections should not be present with empty array
+        # Budget sections should not be present with empty array
         # (conditional transform returns None for empty arrays)
-        assert "BudgetSections" not in response.xml_data
+        assert "BudgetSummary" not in response.xml_data
 
     def test_sf424a_budget_sections_with_all_fields(self):
         """Test array decomposition with comprehensive budget data."""
@@ -509,9 +505,9 @@ class TestArrayDecompositionIntegration:
         assert response.xml_data is not None
         assert response.error_message is None
 
-        # Verify all budget sections are present
-        assert "BudgetSections" in response.xml_data
-        assert "BudgetSummaries" in response.xml_data
+        # Verify all budget sections are present (XSD-compliant names)
+        # Note: These are direct children of BudgetInformation per XSD
+        assert "BudgetSummary" in response.xml_data  # Singular per XSD
         assert "BudgetCategories" in response.xml_data
         assert "NonFederalResources" in response.xml_data
-        assert "FederalFundEstimates" in response.xml_data
+        assert "FederalFundsNeeded" in response.xml_data  # XSD name
