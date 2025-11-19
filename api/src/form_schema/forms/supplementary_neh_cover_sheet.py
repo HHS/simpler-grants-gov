@@ -445,7 +445,7 @@ SupplementaryNEHCoverSheet_v3_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    form_instruction_id=uuid.UUID("92d4a1e3-a8a7-4dd6-afc5-65a462f2e061"),
+    # No instructions
     form_type=FormType.SUPPLEMENTARY_NEH_COVER_SHEET,
     sgg_version="1.0",
     is_deprecated=False,
