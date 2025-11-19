@@ -1,10 +1,11 @@
+import { useTranslations } from "next-intl";
+
 export const PageHeader = ({
   organizationName,
-  pageHeader,
 }: {
   organizationName?: string;
-  pageHeader: string;
 }) => {
+  const t = useTranslations("ManageUsers");
   return (
     <h1 className="margin-bottom-05 font-sans-2xl">
       {organizationName && (
@@ -12,7 +13,7 @@ export const PageHeader = ({
           {organizationName}
         </span>
       )}
-      {pageHeader}
+      {t("pageHeading")}
     </h1>
   );
 };

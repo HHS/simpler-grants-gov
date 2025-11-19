@@ -4,29 +4,35 @@ import type { UserDetail, UserRole } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import React from "react";
+import { Alert } from "@trussworks/react-uswds";
 
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "../TableWithResponsiveHeader";
-import { Alert } from "@trussworks/react-uswds";
+} from "src/components/TableWithResponsiveHeader";
 
 function formatFullName(user: UserDetail): string {
-  if (!user || !user.first_name) return "-";
+  if (!user) return " ";
 
-  const parts = [user.first_name, user.middle_name, user.last_name].filter(
-    Boolean,
-  );
+  const parts = [user.first_name, user.last_name].filter(Boolean);
 
   return parts.join(" ");
 }
 
+function formatRoleNames(roles?: UserRole[]): string {
+  if (!roles || roles.length === 0) {
+    return "";
+  }
+
+  return roles.map((role) => role.role_name).join(", ");
+}
+
 interface ActiveUsersSectionProps {
-    organizationId: string;
+  organizationId: string;
 }
 
 export async function ActiveUsersSection({
-  organizationId
+  organizationId,
 }: ActiveUsersSectionProps) {
   const t = useTranslations("ManageUsers");
   let userData: UserDetail[] = [];
@@ -50,9 +56,9 @@ export async function ActiveUsersSection({
   const transformTableRowData = (userDetails: UserDetail[]) => {
     return userDetails.map((user) => {
       return [
-        { cellData: <>{formatFullName(user)}</> },
-        { cellData: <>{user.email}</> },
-        { cellData: <>{user.roles[0].role_name}</> },
+        { cellData: formatFullName(user) },
+        { cellData: user.email },
+        { cellData: formatRoleNames(user.roles) },
       ];
     });
   };
@@ -70,6 +76,8 @@ export async function ActiveUsersSection({
         <Alert slim headingLevel="h6" noIcon type="error">
           {t("activeUsersFetchError")}
         </Alert>
+      ) : userData.length === 0 ? (
+        <p data-testid="active-users-empty">{t("activeUsersTableZeroState")}</p>
       ) : (
         <TableWithResponsiveHeader
           headerContent={tableHeaders}

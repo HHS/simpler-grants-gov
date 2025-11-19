@@ -7,11 +7,14 @@ import { UserDetail, UserRole } from "src/types/userTypes";
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
 export const getOrganizationDetails = async (
-  token: string,
   organizationId: string,
 ): Promise<Organization> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const resp = await fetchOrganizationWithMethod("GET")({
     subPath: organizationId,

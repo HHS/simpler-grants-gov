@@ -1541,7 +1541,9 @@ export const messages = {
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
-    activeUsersFetchError: "We have encountered an error retrieving the Active Users roster, please try again later.",
+    activeUsersFetchError:
+      "We have encountered an error retrieving the Active Users roster, please try again later.",
+    activeUsersTableZeroState: "There are no active users",
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
