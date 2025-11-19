@@ -97,7 +97,7 @@ export default function middleware(request: NextRequest): NextResponse {
     });
   }
 
-  logRequest(request);
+  logRequest(request, response.status);
 
   if (
     request.cookies.has("session") &&
