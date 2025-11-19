@@ -10,6 +10,7 @@ import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManage
 import createIntlMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
+import { environment } from "./constants/environments";
 import { logRequest } from "./services/logger/simplerLogger";
 
 export const config = {
@@ -42,6 +43,39 @@ const i18nMiddleware = createIntlMiddleware({
 });
 
 export default function middleware(request: NextRequest): NextResponse {
+  const cacheControl: string[] = [];
+
+  // only allow for cdn testing/troubleshooting in lower envs
+  if (
+    request.url.includes("/cdn") &&
+    ["dev", "local"].indexOf(environment.ENVIRONMENT) > -1
+  ) {
+    const url = new URL(request.url);
+    const params = new URLSearchParams(url.search);
+
+    const cacheControl: string[] = [];
+
+    cacheControl.push(`max-age: ${params.get("max-age") || "10"}`);
+    cacheControl.push(
+      params.get("cache") ||
+        (request.cookies.has("session") &&
+        request.cookies.get("session")?.value !== ""
+          ? "no-store"
+          : "public"),
+    );
+
+    return new NextResponse(
+      JSON.stringify({ params: params.entries(), cacheControl }),
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": cacheControl.join(", "),
+          "Content-Type": "application/json",
+        },
+      },
+    );
+  }
+
   const response = request.url.match(/api\//)
     ? featureFlagsManager.middleware(request, NextResponse.next())
     : featureFlagsManager.middleware(request, i18nMiddleware(request));
@@ -65,5 +99,16 @@ export default function middleware(request: NextRequest): NextResponse {
 
   logRequest(request);
 
+  if (
+    request.cookies.has("session") &&
+    request.cookies.get("session")?.value !== ""
+  ) {
+    cacheControl.push("no-store");
+    cacheControl.push("max-age=0");
+  }
+
+  if (cacheControl.length > 0) {
+    response.headers.set("Cache-Control", cacheControl.join(", "));
+  }
   return response;
 }
