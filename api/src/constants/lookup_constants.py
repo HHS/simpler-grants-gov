@@ -158,6 +158,8 @@ class FormType(StrEnum):
 
     GG_LOBBYING_FORM = "GGLobbyingForm"
 
+    EPA_FORM_4700_4 = "EPAForm4700-4"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
