@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 
