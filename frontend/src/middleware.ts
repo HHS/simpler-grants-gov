@@ -64,7 +64,7 @@ export default function middleware(request: NextRequest): NextResponse {
           : "public"),
     );
 
-    return new NextResponse(
+    const response = new NextResponse(
       JSON.stringify({ params: params.entries(), cacheControl }),
       {
         status: 200,
@@ -74,6 +74,9 @@ export default function middleware(request: NextRequest): NextResponse {
         },
       },
     );
+    logRequest(request, response);
+
+    return response;
   }
 
   const response = request.url.match(/api\//)
@@ -96,9 +99,6 @@ export default function middleware(request: NextRequest): NextResponse {
       headers: response.headers,
     });
   }
-
-  logRequest(request, response.status);
-
   if (
     request.cookies.has("session") &&
     request.cookies.get("session")?.value !== ""
@@ -110,5 +110,8 @@ export default function middleware(request: NextRequest): NextResponse {
   if (cacheControl.length > 0) {
     response.headers.set("Cache-Control", cacheControl.join(", "));
   }
+
+  logRequest(request, response);
+
   return response;
 }

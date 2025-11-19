@@ -30,7 +30,7 @@ describe("logRequest", () => {
           "sec-fetch-dest": "empty",
         }),
       }),
-      200,
+      { status: 200 },
     );
     expect(infoMock).not.toHaveBeenCalled();
   });
@@ -46,7 +46,7 @@ describe("logRequest", () => {
           "X-Amz-Cf-Id": "a trace id",
         }),
       }),
-      200,
+      { status: 200 },
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({
@@ -56,6 +56,35 @@ describe("logRequest", () => {
       acceptLanguage: "ES",
       awsTraceId: "a trace id",
       statusCode: 200,
+      cacheControl: undefined,
+      hasSessionCookie: false,
+    });
+  });
+  it("logs correct header values", () => {
+    logRequest(
+      new NextRequest("http://anywhere.com", {
+        headers: new Headers({
+          "next-url": "",
+          "sec-fetch-mode": "bors",
+          "sec-fetch-dest": "empties",
+          "user-agent": "sure",
+          "accept-language": "ES",
+          "X-Amz-Cf-Id": "a trace id",
+          Cookies: "session=abc;",
+        }),
+      }),
+      { status: 200, headers: new Headers({ "cache-control": "no-store" }) },
+    );
+    expect(infoMock).toHaveBeenCalledTimes(1);
+    expect(infoMock).toHaveBeenCalledWith({
+      url: "http://anywhere.com/",
+      method: "GET",
+      userAgent: "sure",
+      acceptLanguage: "ES",
+      awsTraceId: "a trace id",
+      statusCode: 200,
+      cacheControl: "no-store",
+      hasSessionCookie: false,
     });
   });
 });
