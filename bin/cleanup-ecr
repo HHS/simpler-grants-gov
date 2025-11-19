@@ -80,7 +80,10 @@ get_active_tags() {
             continue
         fi
 
-        [ -n "$repo" ] && [ -n "$tag" ] || continue
+        if [ -z "$repo" ] || [ -z "$tag" ]; then
+            continue
+        fi
+
 
         local repo_tag="$repo:$tag"
         active_tags_map["$repo_tag"]=1
