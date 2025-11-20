@@ -763,6 +763,106 @@ SF424A_TEST_CASES = [
     },
 ]
 
+# Sample test cases for EPA Form 4700-4 validation
+EPA4700_4_TEST_CASES = [
+    {
+        "name": "minimal_valid_epa4700_4",
+        "json_input": {
+            "applicant_name": "Test University",
+            "applicant_address": {
+                "address": "123 Main Street",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+            },
+            "sam_uei": "TEST12345678",
+            "point_of_contact_name": "John Doe",
+            "point_of_contact_phone_number": "555-123-4567",
+            "point_of_contact_email": "john.doe@test.edu",
+            "point_of_contact_title": "Director",
+            "applicant_signature": {
+                "aor_signature": "John Doe Signature",
+                "aor_title": "Director",
+                "submitted_date": "2025-01-15",
+            },
+        },
+        "form_name": "EPA4700_4",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "complete_epa4700_4_with_all_fields",
+        "json_input": {
+            "applicant_name": "Environmental Research Institute",
+            "applicant_address": {
+                "address": "456 Green Boulevard, Suite 200",
+                "city": "Arlington",
+                "state": "VA: Virginia",
+                "zip_code": "22202",
+            },
+            "sam_uei": "ENVR98765432",
+            "point_of_contact_name": "Jane Smith",
+            "point_of_contact_phone_number": "555-987-6543",
+            "point_of_contact_email": "jane.smith@envresearch.org",
+            "point_of_contact_title": "Program Manager",
+            "federal_financial_assistance": True,
+            "civil_rights_lawsuit_question1": "No pending lawsuits or administrative complaints.",
+            "civil_rights_lawsuit_question2": "No civil rights lawsuits decided against the applicant in the last year.",
+            "civil_rights_lawsuit_question3": "One compliance review conducted by DOJ in 2023, resulting in no findings. Copy of review attached.",
+            "construction_federal_assistance": True,
+            "construction_new_facilities": True,
+            "notice1": True,
+            "notice2": True,
+            "notice3": True,
+            "notice4": True,
+            "demographic_data": True,
+            "policy": True,
+            "policy_explanation": "Civil Rights Coordinator: Maria Garcia, Title: Compliance Officer, Address: 456 Green Blvd, Arlington VA 22202, Email: compliance@envresearch.org, Phone: 555-987-6544",
+            "program_explanation": "Grievance procedures are available at https://envresearch.org/civil-rights-grievance or by contacting the Civil Rights Coordinator listed above.",
+            "applicant_signature": {
+                "aor_signature": "Jane Smith Signature",
+                "aor_title": "Executive Director",
+                "submitted_date": "2025-01-20",
+            },
+        },
+        "form_name": "EPA4700_4",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "epa4700_4_with_construction_explanation",
+        "json_input": {
+            "applicant_name": "City of Springfield",
+            "applicant_address": {
+                "address": "100 City Hall Plaza",
+                "city": "Springfield",
+                "state": "IL: Illinois",
+                "zip_code": "62701",
+            },
+            "sam_uei": "CITY12345678",
+            "point_of_contact_name": "Robert Johnson",
+            "point_of_contact_phone_number": "555-111-2222",
+            "point_of_contact_email": "r.johnson@springfield.gov",
+            "point_of_contact_title": "City Engineer",
+            "federal_financial_assistance": False,
+            "construction_federal_assistance": True,
+            "construction_new_facilities": False,
+            "construction_new_facilities_explanation": "The project involves renovation of an existing water treatment facility built in 1975. Due to the historic nature of the building and structural constraints, full accessibility modifications would compromise the building's structural integrity per 40 C.F.R. 7.70(b).",
+            "notice1": True,
+            "demographic_data": False,
+            "policy": False,
+            "applicant_signature": {
+                "aor_signature": "Robert Johnson Signature",
+                "aor_title": "City Engineer",
+                "submitted_date": "2025-01-18",
+            },
+        },
+        "form_name": "EPA4700_4",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "pretty_print": True,
+    },
+]
+
 
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
@@ -770,7 +870,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
     Returns:
         List of all test case dictionaries
     """
-    return SF424_TEST_CASES + SF424A_TEST_CASES
+    return SF424_TEST_CASES + SF424A_TEST_CASES + EPA4700_4_TEST_CASES
 
 
 def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:

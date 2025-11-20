@@ -7,6 +7,9 @@ from typing import Any
 
 import click
 
+from src.form_schema.forms.epa_form_4700_4 import (
+    FORM_XML_TRANSFORM_RULES as EPA4700_4_TRANSFORM_RULES,
+)
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
@@ -20,6 +23,7 @@ logger = logging.getLogger(__name__)
 FORM_TRANSFORM_RULES = {
     "SF424_4_0": SF424_TRANSFORM_RULES,
     "SF424A": SF424A_TRANSFORM_RULES,
+    "EPA4700_4": EPA4700_4_TRANSFORM_RULES,
 }
 
 
