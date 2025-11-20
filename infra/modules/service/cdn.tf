@@ -71,7 +71,7 @@ resource "aws_cloudfront_cache_policy" "default" {
     }
     headers_config {
       # The only options are "none" and "whitelist", there is no "all" option
-      header_behavior = "none"
+      header_behavior = "allViewer"
     }
     query_strings_config {
       query_string_behavior = "all"
