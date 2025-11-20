@@ -9,8 +9,10 @@ from apiflask import HTTPError
 from botocore.exceptions import ClientError
 
 from src.constants.lookup_constants import Privilege
+from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.user_models import AgencyUser, LegacyCertificate
 from src.legacy_soap_api.applicants.schemas import (
     CFDADetails,
     GetOpportunityListResponse,
@@ -46,6 +48,13 @@ from tests.util.minifiers import minify_xml
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
+
+
+@pytest.fixture(autouse=True)
+def cleanup_agencies(db_session):
+    cascade_delete_from_db_table(db_session, LegacyCertificate)
+    cascade_delete_from_db_table(db_session, AgencyUser)
+    cascade_delete_from_db_table(db_session, Agency)
 
 
 def get_simpler_applicants_soap_client(request_data, db_session):
@@ -372,13 +381,11 @@ class TestSimplerSOAPGetApplicationZip:
     def test_get_simpler_soap_response_returns_mtom_xml(
         self, mock_validate_certificate, db_session, enable_factory_create, mock_s3_bucket
     ):
-        agency = AgencyFactory.create(agency_code=f"123-{uuid.uuid4()}")
+        agency = AgencyFactory.create()
         legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
         mock_validate_certificate.return_value = legacy_certificate
         submission = ApplicationSubmissionFactory.create()
-        agency_user = AgencyUserFactory.create(
-            agency=legacy_certificate.agency, user=legacy_certificate.user
-        )
+        agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
         role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_GRANT_RETRIEVER])
         AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
         application_user = ApplicationUserFactory.create(
@@ -469,8 +476,7 @@ class TestSimplerSOAPGetApplicationZip:
         self, mock_validate_certificate, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
-        agency = AgencyFactory.create(agency_code=f"123-{uuid.uuid4()}")
-        legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
+        legacy_certificate = LegacyAgencyCertificateFactory.create()
         mock_validate_certificate.return_value = legacy_certificate
         submission = ApplicationSubmissionFactory.create()
         agency_user = AgencyUserFactory.create(

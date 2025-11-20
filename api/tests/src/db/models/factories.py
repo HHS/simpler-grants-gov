@@ -254,6 +254,21 @@ class CustomProvider(BaseProvider):
 
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
+    # This is to help with the unique agency code conflicts
+    AGENCY_CODE_FORMATS = [
+        "???",
+        "????",
+        "???-??",
+        "???-???",
+        "???-???-##",
+        "???-???-???-##",
+        "???-??-##-??",
+    ]
+
+    def random_agency_code(self) -> str:
+        pattern = self.bothify(self.random_element(self.AGENCY_CODE_FORMATS)).upper()
+        return self.generator.parse(pattern)
+
     def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -1721,7 +1736,7 @@ class AgencyFactory(BaseFactory):
 
     agency_name = factory.Faker("agency_name")
 
-    agency_code = factory.Iterator(CustomProvider.AGENCIES)
+    agency_code = factory.LazyFunction(lambda: fake.unique.random_agency_code())
 
     sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
 
