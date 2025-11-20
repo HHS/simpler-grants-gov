@@ -1,7 +1,13 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+
+import React from "react";
+
 import "@testing-library/jest-dom";
 
+import {
+  generateMetadata,
+  ManageUsersPage,
+} from "src/app/[locale]/(base)/organization/[id]/manage-users/page";
 
 jest.mock("src/components/manageUsers/ManageUsersPageContent", () => ({
   ManageUsersPageContent: ({ organizationId }: { organizationId: string }) => (
@@ -34,12 +40,6 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
 }));
-
-import {
-  ManageUsersPage,
-  generateMetadata,
-} from "src/app/[locale]/(base)/organization/[id]/manage-users/page";
-
 
 describe("ManageUsersPage", () => {
   it("renders the manage users page content with the organizationId", async () => {
