@@ -108,9 +108,18 @@ get_tags_to_delete() {
     local -n delete_array=$3
     local -n active_count=$4
 
+    local current_timestamp
+    current_timestamp=$(date +%s)
+    local thirty_days_seconds=$((30 * 24 * 60 * 60))
+    local cutoff_timestamp=$((current_timestamp - thirty_days_seconds))
+
     local image_data
     image_data=$(echo "$images" | jq -r '.imageDetails[] |
-        {digest: .imageDigest, tags: (.imageTags // [])} |
+        {
+            digest: .imageDigest,
+            tags: (.imageTags // []),
+            pushedAt: .imagePushedAt
+        } |
         @json')
 
     while IFS= read -r image_json; do
@@ -124,7 +133,22 @@ get_tags_to_delete() {
         local tags
         tags=$(echo "$image_json" | jq -r '.tags[]?' 2>/dev/null || echo "")
 
+        local pushed_at
+        pushed_at=$(echo "$image_json" | jq -r '.pushedAt // ""')
+
         local is_active=false
+        local is_recent=false
+
+        # Check if the image is less than 30 days old
+        if [ -n "$pushed_at" ] && [ "$pushed_at" != "null" ]; then
+            local pushed_at_epoch
+            # Using python for the date timestamp conversion
+            pushed_at_epoch=$(python3 -c "from datetime import datetime; print(int(datetime.fromisoformat('$pushed_at'.replace('Z', '+00:00')).timestamp()))" 2>/dev/null || echo "0")
+
+            if [ "$pushed_at_epoch" -gt "$cutoff_timestamp" ]; then
+                is_recent=true
+            fi
+        fi
 
         # Check if the sha256 image tag is active
         if is_tag_active "$repo_name" "$image_digest"; then
@@ -141,7 +165,8 @@ get_tags_to_delete() {
             done
         fi
 
-        if [ "$is_active" = true ]; then
+        # Keep image if it's active OR recent (less than 30 days old)
+        if [ "$is_active" = true ] || [ "$is_recent" = true ]; then
             ((active_count++)) || true
         else
             delete_array+=("$image_digest")
