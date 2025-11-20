@@ -39,14 +39,14 @@ resource "aws_cloudfront_origin_request_policy" "forward_all_cookies" {
   count = local.enable_cdn ? 1 : 0
 
   name    = "${var.service_name}-forward-cookies"
-  comment = "Forward all cookies to origin so Next.js can check session cookie"
+  comment = "Forward all cookies and headers to origin so Next.js can check session cookie"
 
   cookies_config {
     cookie_behavior = "all"
   }
 
   headers_config {
-    header_behavior = "none"
+    header_behavior = "allViewer"
   }
 
   query_strings_config {
@@ -71,7 +71,7 @@ resource "aws_cloudfront_cache_policy" "default" {
     }
     headers_config {
       # The only options are "none" and "whitelist", there is no "all" option
-      header_behavior = "allViewer"
+      header_behavior = "none"
     }
     query_strings_config {
       query_string_behavior = "all"
