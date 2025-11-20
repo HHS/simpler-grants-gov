@@ -1,10 +1,10 @@
-from datetime import date
-from src.constants.lookup_constants import Privilege
 import uuid
+from datetime import date
 from unittest.mock import patch
 
 import pytest
 
+from src.constants.lookup_constants import Privilege
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
@@ -75,16 +75,16 @@ def test_validate_certificate_raies_error_when_no_legacy_certificate_found(
     with pytest.raises(
         SOAPClientCertificateLookupError, match="could not retrieve client cert for serial number"
     ):
-        validate_certificate(
-            db_session, soap_auth, SimplerSoapAPI.GRANTORS
-        )
+        validate_certificate(db_session, soap_auth, SimplerSoapAPI.GRANTORS)
 
 
 def test_validate_certificate_raises_error_when_certificate_expired(
     enable_factory_create, db_session
 ) -> None:
     agency = AgencyFactory.create(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
-    legacy_certificate = LegacyAgencyCertificateFactory.create(expiration_date=date(2004, 1, 1), agency=agency)
+    legacy_certificate = LegacyAgencyCertificateFactory.create(
+        expiration_date=date(2004, 1, 1), agency=agency
+    )
     soap_auth = SOAPAuth(
         certificate={
             "cert": "MOCKED_CERT_STRING_HERE",
@@ -93,9 +93,7 @@ def test_validate_certificate_raises_error_when_certificate_expired(
         }
     )
     with pytest.raises(SOAPClientCertificateLookupError, match="certificate is expired"):
-        validate_certificate(
-            db_session, soap_auth, SimplerSoapAPI.GRANTORS
-        )
+        validate_certificate(db_session, soap_auth, SimplerSoapAPI.GRANTORS)
 
 
 def test_validate_certificate_raises_error_when_certificate_has_no_agency_when_grantor(
@@ -110,9 +108,7 @@ def test_validate_certificate_raises_error_when_certificate_has_no_agency_when_g
         }
     )
     with pytest.raises(SOAPClientCertificateLookupError, match="certificate does not have agency"):
-        validate_certificate(
-            db_session, soap_auth, SimplerSoapAPI.GRANTORS
-        )
+        validate_certificate(db_session, soap_auth, SimplerSoapAPI.GRANTORS)
 
 
 def test_validate_certificate_does_not_raise_agency_error_when_certificate_has_no_agency_when_applicant(
@@ -141,6 +137,4 @@ def test_validate_certificate_raises_error_if_not_soap_auth(
     role = RoleFactory(privileges=[Privilege.LEGACY_AGENCY_VIEWER])
     AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
     with pytest.raises(SOAPClientCertificateLookupError, match="no soap auth"):
-        validate_certificate(
-            db_session, None, SimplerSoapAPI.GRANTORS
-        )
+        validate_certificate(db_session, None, SimplerSoapAPI.GRANTORS)

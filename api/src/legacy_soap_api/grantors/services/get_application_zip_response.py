@@ -1,23 +1,25 @@
 import logging
-from src.auth.endpoint_access_util import verify_access
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 import uuid
 
 from botocore.exceptions import ClientError
 from sqlalchemy import select
 
 import src.adapters.db as db
+from src.auth.endpoint_access_util import verify_access
 from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
+from src.legacy_soap_api.legacy_soap_api_auth import ENDPOINT_PRIVILEGES, validate_certificate
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
-from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, ENDPOINT_PRIVILEGES
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
 
 def get_application_zip_response(
-    db_session: db.Session, soap_request: SOAPRequest, get_application_zip_request: grantor_schemas.GetApplicationZipRequest
+    db_session: db.Session,
+    soap_request: SOAPRequest,
+    get_application_zip_request: grantor_schemas.GetApplicationZipRequest,
 ) -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
     xop_data_instance = grantor_schemas.XOPIncludeData(
         **{"@href": f"cid:{uuid.uuid4()}-0001@apply.grants.gov"}
@@ -43,7 +45,9 @@ def get_application_zip_response(
     ).scalar()
 
     if application:
-        certificate = validate_certificate(db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name)
+        certificate = validate_certificate(
+            db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
+        )
         if soap_request.operation_name in ENDPOINT_PRIVILEGES:
             verify_access(
                 certificate.user,

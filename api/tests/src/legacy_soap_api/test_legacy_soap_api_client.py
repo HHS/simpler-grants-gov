@@ -1,14 +1,14 @@
 import logging
-from src.constants.lookup_constants import Privilege
-from apiflask import HTTPError
 import uuid
 from collections.abc import Iterator
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from apiflask import HTTPError
 from botocore.exceptions import ClientError
 
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.legacy_soap_api.applicants.schemas import (
@@ -27,16 +27,16 @@ from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
-    ApplicationSubmissionFactory,
-    CompetitionFactory,
-    OpportunityAssistanceListingFactory,
-    OpportunityFactory,
-    LegacyAgencyCertificateFactory,
     AgencyUserFactory,
-    RoleFactory,
     AgencyUserRoleFactory,
+    ApplicationSubmissionFactory,
     ApplicationUserFactory,
     ApplicationUserRoleFactory,
+    CompetitionFactory,
+    LegacyAgencyCertificateFactory,
+    OpportunityAssistanceListingFactory,
+    OpportunityFactory,
+    RoleFactory,
 )
 from tests.src.legacy_soap_api.soap_request_templates import (
     get_opportunity_list_requests as mock_requests,
@@ -366,7 +366,9 @@ class TestSimplerBaseSOAPClient:
 
 
 class TestSimplerSOAPGetApplicationZip:
-    @patch("src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate")
+    @patch(
+        "src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate"
+    )
     def test_get_simpler_soap_response_returns_mtom_xml(
         self, mock_validate_certificate, db_session, enable_factory_create, mock_s3_bucket
     ):
@@ -379,7 +381,9 @@ class TestSimplerSOAPGetApplicationZip:
         )
         role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_GRANT_RETRIEVER])
         AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
-        application_user = ApplicationUserFactory.create(application=submission.application, user=legacy_certificate.user)
+        application_user = ApplicationUserFactory.create(
+            application=submission.application, user=legacy_certificate.user
+        )
         ApplicationUserRoleFactory.create(application_user=application_user, role=role)
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
@@ -426,7 +430,9 @@ class TestSimplerSOAPGetApplicationZip:
                 "MIME-Version": "1.0",
             }
 
-    @patch("src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate")
+    @patch(
+        "src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate"
+    )
     def test_get_simpler_soap_response_returns_error_if_certificate_user_does_not_have_permissions(
         self, mock_validate_certificate, db_session, enable_factory_create, mock_s3_bucket
     ):
@@ -456,7 +462,9 @@ class TestSimplerSOAPGetApplicationZip:
         with pytest.raises(HTTPError):
             client.get_simpler_soap_response(mock_proxy_response)
 
-    @patch("src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate")
+    @patch(
+        "src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate"
+    )
     def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
         self, mock_validate_certificate, db_session, enable_factory_create, caplog
     ):
@@ -470,7 +478,9 @@ class TestSimplerSOAPGetApplicationZip:
         )
         role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_GRANT_RETRIEVER])
         AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
-        application_user = ApplicationUserFactory.create(application=submission.application, user=legacy_certificate.user)
+        application_user = ApplicationUserFactory.create(
+            application=submission.application, user=legacy_certificate.user
+        )
         ApplicationUserRoleFactory.create(application_user=application_user, role=role)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
