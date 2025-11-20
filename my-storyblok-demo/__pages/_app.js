@@ -17,7 +17,7 @@ import StoryblokProvider from "../components/StoryblokProvider";
 //   },
 // });
 
-function MyApp({ Component, pageProps }) {
+function RootLayout({ Component, pageProps }) {
   return (
     <StoryblokProvider>
       <Component {...pageProps} />

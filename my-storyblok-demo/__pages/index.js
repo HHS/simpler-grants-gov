@@ -1,15 +1,12 @@
 import Head from "next/head";
 
+import { getStoryblokApi } from "../lib/storyblok";
 
-import {
-  useStoryblokState,
-  getStoryblokApi,
-  StoryblokComponent,
-} from "@storyblok/react";
+import { useStoryblokState, StoryblokComponent } from "@storyblok/react";
 
 export default function Home({ story }) {
   story = useStoryblokState(story);
-
+  console.log("!!! story");
   return (
     <div>
       <Head>
