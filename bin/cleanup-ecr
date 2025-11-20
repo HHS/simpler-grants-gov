@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REGION="us-east-1"
-DRY_RUN=true
+DRY_RUN=false
 
 declare -A active_tags_map
 
