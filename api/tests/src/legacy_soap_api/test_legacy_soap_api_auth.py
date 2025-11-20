@@ -31,7 +31,6 @@ MOCK_CLIENT_CERT = SOAPClientCertificate(
     fingerprint=MOCK_FINGERPRINT,
     serial_number=123,
 )
-AGENCY_CODE = "ABC123XYZ"
 
 
 @patch("src.legacy_soap_api.legacy_soap_api_auth.get_soap_client_certificate")
@@ -134,7 +133,7 @@ def test_validate_certificate_raises_error_if_not_soap_auth(
     agency_user = AgencyUserFactory.create(
         agency=legacy_certificate.agency, user=legacy_certificate.user
     )
-    role = RoleFactory(privileges=[Privilege.LEGACY_AGENCY_VIEWER])
+    role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_VIEWER])
     AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
     with pytest.raises(SOAPClientCertificateLookupError, match="no soap auth"):
         validate_certificate(db_session, None, SimplerSoapAPI.GRANTORS)
