@@ -4,12 +4,13 @@ from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.shared import COMMON_SHARED_V1
 
-DIRECTIONS = """Applicants should also review the instructions for certification included in the regulations before completing this form. Signature on this form provides for
-compliance with certification requirements under 15 CFR Part 28, 'New Restrictions on Lobbying.' The certifications shall be treated as a material representation
-of fact upon which reliance will be placed when the Department of Commerce determines to award the covered transaction, grant, or cooperative agreement.
+DIRECTIONS_CERTIFICATION_TITLE = "CERTIFICATION REGARDING LOBBYING"
 
-LOBBYING
+DIRECTIONS_CERTIFICATION_BODY = "Applicants should also review the instructions for certification included in the regulations before completing this form. Signature on this form provides for compliance with certification requirements under 15 CFR Part 28, 'New Restrictions on Lobbying.' The certifications shall be treated as a material representation of fact upon which reliance will be placed when the Department of Commerce determines to award the covered transaction, grant, or cooperative agreement."
 
+DIRECTIONS_LOBBYING_TITLE = "Lobbying"
+
+DIRECTIONS_LOBBYING_BODY = """
 As required by Section 1352, Title 31 of the U.S. Code, and implemented at 15 CFR Part 28, for persons entering into a grant, cooperative agreement or contract over $100,000 or a loan or loan guarantee over $150,000 as defined at 15 CFR Part 28, Sections 28.105 and 28.110, the applicant certifies that to the best of his or her knowledge and belief, that:
 
 (1) No Federal appropriated funds have been paid or will be paid, by or on behalf of the undersigned, to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress in connection with the awarding of any Federal contract, the making of any Federal grant, the making of any Federal loan, the entering into of any cooperative agreement, and the extension, continuation, renewal, amendment, or modification of any Federal contract, grant, loan, or cooperative agreement.
@@ -19,17 +20,19 @@ As required by Section 1352, Title 31 of the U.S. Code, and implemented at 15 CF
 (3) The undersigned shall require that the language of this certification be included in the award documents for all subawards at all tiers (including subcontracts, subgrants, and contracts under grants, loans, and cooperative agreements) and that all subrecipients shall certify and disclose accordingly.
 
 This certification is a material representation of fact upon which reliance was placed when this transaction was made or entered into. Submission of this certification is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required certification shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure occurring on or before October 23, 1996, and of not less than $11,000 and not more than $110,000 for each such failure occurring after October 23, 1996.
+"""
 
-Statement for Loan Guarantees and Loan Insurance
+DIRECTIONS_LOANS_TITLE = "Statement for Loan Guarantees and Loan Insurance"
 
+DIRECTIONS_LOANS_BODY = """
 The undersigned states, to the best of his or her knowledge and belief, that:
 
 In any funds have been paid or will be paid to any person for influencing or attempting to influence an officer or employee of any agency, a Member of Congress, an officer or employee of Congress, or an employee of a Member of Congress in connection with this commitment providing for the United States to insure or guarantee a loan, the undersigned shall complete and submit Standard Form-LLL, 'Disclosure Form to Report Lobbying,' in accordance with its instructions.
 
 Submission of this statement is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required statement shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure occurring on or before October 23, 1996, and of not less than $11,000 and not more than $110,000 for each such failure occurring after October 23, 1996.
-
-As the duly authorized representative of the applicant, I hereby certify that the applicant will comply with the above applicable certification.
 """
+
+DIRECTIONS_COMPLY_TITLE = "As the duly authorized representative of the applicant, I hereby certify that the applicant will comply with the above applicable certification."
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -76,7 +79,7 @@ FORM_JSON_SCHEMA = {
         },
         "contact_person": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
-            "title": "Contact Name",
+            "title": "Contact Person",
         },
         "contact_person_title": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
@@ -93,15 +96,36 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Directions",
-        "name": "directions",
-        "description": DIRECTIONS,
+        "label": DIRECTIONS_CERTIFICATION_TITLE,
+        "name": "directions1",
+        "description": DIRECTIONS_CERTIFICATION_BODY,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": DIRECTIONS_LOBBYING_TITLE,
+        "name": "directions2",
+        "description": DIRECTIONS_LOBBYING_BODY,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": DIRECTIONS_LOANS_TITLE,
+        "name": "directions3",
+        "description": DIRECTIONS_LOANS_BODY,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": DIRECTIONS_COMPLY_TITLE,
+        "name": "directions4",
+        "description": "",
         "children": [],
     },
     {
         "type": "section",
         "name": "award",
-        "label": "2. Award",
+        "label": "1. Award",
         "children": [
             {"type": "field", "definition": "/properties/applicant_name"},
             {"type": "field", "definition": "/properties/award_number"},
@@ -111,7 +135,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "contact_person",
-        "label": "3. Contact Person",
+        "label": "2. Contact Person",
         "children": [
             {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
             {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
@@ -124,7 +148,7 @@ FORM_UI_SCHEMA = [
     {
         "type": "section",
         "name": "signature",
-        "label": "4. Signature",
+        "label": "3. Signature",
         "children": [
             {"type": "null", "definition": "/properties/signature"},
             {"type": "null", "definition": "/properties/submitted_date"},
