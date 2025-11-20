@@ -60,7 +60,7 @@ resource "aws_cloudfront_cache_policy" "default" {
   name = var.service_name
 
   # Default to caching for 1 hour.
-  min_ttl = 3600
+  min_ttl = 0
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
