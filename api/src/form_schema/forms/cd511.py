@@ -79,7 +79,7 @@ FORM_JSON_SCHEMA = {
         },
         "contact_person": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
-            "title": "Contact Name",
+            "title": "Contact Person",
         },
         "contact_person_title": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
