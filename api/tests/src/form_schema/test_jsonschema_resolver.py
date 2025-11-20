@@ -101,19 +101,40 @@ def test_resolve_jsonschema_shared_schema():
 
     expected_schema = copy.deepcopy(schema)
     resolved_address = ADDRESS_SHARED_V1.json_schema["address"]
-    resolved_address["properties"]["state"]["allOf"][0] = ADDRESS_SHARED_V1.json_schema[
-        "state_code"
-    ]
-    resolved_address["properties"]["country"]["allOf"][0] = ADDRESS_SHARED_V1.json_schema[
-        "country_code"
-    ]
+    resolved_address_properties = {
+        "street1": ADDRESS_SHARED_V1.json_schema["street1"],
+        "street2": ADDRESS_SHARED_V1.json_schema["street2"],
+        "city": ADDRESS_SHARED_V1.json_schema["city"],
+        "zip_code": ADDRESS_SHARED_V1.json_schema["zip_code"],
+        "state": {
+            "allOf": [ADDRESS_SHARED_V1.json_schema["state_code"]],
+            "title": "State",
+            "description": "Enter the state.",
+        },
+        "province": ADDRESS_SHARED_V1.json_schema["address"]["properties"]["province"],
+        "country": {
+            "allOf": [ADDRESS_SHARED_V1.json_schema["country_code"]],
+            "title": "Country",
+            "description": "Enter the country.",
+        },
+    }
+    resolved_address["properties"] = resolved_address_properties
     expected_schema["properties"]["address"] = resolved_address
 
     resolved_simple_address = ADDRESS_SHARED_V1.json_schema["simple_address"]
-    resolved_simple_address["properties"]["state"]["allOf"][0] = ADDRESS_SHARED_V1.json_schema[
-        "state_code"
-    ]
-    expected_schema["properties"]["simple_address"]["allOf"][0] = resolved_simple_address
+    resolved_simple_address_properties = {
+        "street1": ADDRESS_SHARED_V1.json_schema["street1"],
+        "street2": ADDRESS_SHARED_V1.json_schema["street2"],
+        "city": ADDRESS_SHARED_V1.json_schema["city"],
+        "zip_code": ADDRESS_SHARED_V1.json_schema["zip_code"],
+        "state": {
+            "allOf": [ADDRESS_SHARED_V1.json_schema["state_code"]],
+            "title": "State",
+            "description": "Enter the state.",
+        },
+    }
+    resolved_simple_address["properties"] = resolved_simple_address_properties
+    expected_schema["properties"]["simple_address"]["allOf"] = [resolved_simple_address]
 
     expected_schema["properties"]["attachment"]["allOf"][0] = COMMON_SHARED_V1.json_schema[
         "attachment"
