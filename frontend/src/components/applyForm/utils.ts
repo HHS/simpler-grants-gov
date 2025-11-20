@@ -778,9 +778,7 @@ export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<RJSFSchema> => {
   try {
-    const dereferenced = (await $Refparser.dereference(
-      formSchema,
-    )) as RJSFSchema;
+    const dereferenced = await $Refparser.dereference(formSchema);
     const condensedProperties = mergeAllOf({
       properties: dereferenced.properties,
     } as JSONSchema7);
