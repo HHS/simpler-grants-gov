@@ -50,7 +50,42 @@ export default function middleware(request: NextRequest): NextResponse {
     request.url.includes("/cdn") &&
     ["dev", "local"].indexOf(environment.ENVIRONMENT) > -1
   ) {
+    const handleCdnTest = (request) => {
     const url = new URL(request.url);
+        const params = new URLSearchParams(url.search);
+
+    const cacheControl: string[] = [];
+         cacheControl.push(`max-age=${params.get("max-age") || "10"}`);
+    cacheControl.push(
+      params.get("cache") ||
+        (request.cookies.has("session") &&
+        request.cookies.get("session")?.value !== ""
+          ? "no-store"
+          : "public"),
+    );
+
+    const response = new NextResponse(
+      JSON.stringify({ params: params.entries(), cacheControl }),
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": cacheControl.join(", "),
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    return response
+  }
+    }
+    
+    ...
+    
+    if (isACdnTestRequest) {
+      const response = handleCdnTest(request}
+          logRequest(request, response);
+          return response
+    }
     const params = new URLSearchParams(url.search);
 
     const cacheControl: string[] = [];
