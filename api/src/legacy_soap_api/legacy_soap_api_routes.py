@@ -4,7 +4,10 @@ from flask import request
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY, get_soap_auth
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    MTLS_CERT_HEADER_KEY,
+    get_soap_auth,
+)
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response

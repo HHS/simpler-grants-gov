@@ -225,6 +225,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     def GetApplicationZipRequest(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
         return get_application_zip_response(
             db_session=self.db_session,
+            soap_request=self.soap_request,
             get_application_zip_request=grantors_schemas.GetApplicationZipRequest(
                 **self.get_soap_request_dict()
             ),
