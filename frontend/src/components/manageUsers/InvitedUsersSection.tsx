@@ -7,7 +7,6 @@ import type {
 } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
-import React from "react";
 import { Alert } from "@trussworks/react-uswds";
 
 import {
@@ -27,13 +26,13 @@ function formatRoleNames(roles: UserRole[]): string {
   return roles.map((role) => role.role_name).join(", ");
 }
 
-interface PendingUsersSectionProps {
+interface InvitedUsersSectionProps {
   organizationId: string;
 }
 
-export async function PendingUsersSection({
+export async function InvitedUsersSection({
   organizationId,
-}: PendingUsersSectionProps) {
+}: InvitedUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
   let pendingUsers: OrganizationPendingInvitation[] = [];
   let hasError = false;
@@ -68,19 +67,19 @@ export async function PendingUsersSection({
   return (
     <section className="usa-table-container--scrollable margin-bottom-5">
       <h2 className="margin-bottom-1 font-sans-lg">
-        {t("pendingUsersHeading")}
+        {t("invitedUsersHeading")}
       </h2>
       <p className="margin-bottom-2 margin-top-1">
-        {t("pendingUsersTableDescription")}
+        {t("invitedUsersTableDescription")}
       </p>
 
       {hasError ? (
         <Alert slim headingLevel="h6" noIcon type="error">
-          {t("PendingUsersFetchError")}
+          {t("invitedUsersFetchError")}
         </Alert>
       ) : pendingUsers.length === 0 ? (
         <p data-testid="pending-users-empty">
-          {t("pendingUsersTableZeroState")}
+          {t("invitedUsersTableZeroState")}
         </p>
       ) : (
         <TableWithResponsiveHeader
