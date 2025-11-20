@@ -23,7 +23,7 @@ export async function generateMetadata({
   };
 }
 
-export async function ManageUsersPage({ params }: ManageUsersPageProps) {
+async function ManageUsersPage({ params }: ManageUsersPageProps) {
   const { id: organizationId } = await params;
 
   return <ManageUsersPageContent organizationId={organizationId} />;
