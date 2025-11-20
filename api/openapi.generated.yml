@@ -4358,6 +4358,7 @@ components:
           - CD511
           - SupplementaryNEHCoverSheet
           - GGLobbyingForm
+          - EPAForm4700-4
           type:
           - string
           - 'null'
@@ -4511,6 +4512,7 @@ components:
           - CD511
           - SupplementaryNEHCoverSheet
           - GGLobbyingForm
+          - EPAForm4700-4
           type:
           - string
           - 'null'
