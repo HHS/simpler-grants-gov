@@ -81,6 +81,12 @@ locals {
     training = ["poetry", "run", "flask", "task", "sam-extracts"]
     prod     = ["poetry", "run", "flask", "task", "sam-extracts"]
   }
+  build-automatic-opportunities-state = {
+    dev      = "ENABLED"
+    staging  = "ENABLED"
+    training = "ENABLED"
+    prod     = "DISABLED"
+  }
   scheduled_jobs = {
     load-transform = {
       task_command = local.load-transform-args[var.environment]
@@ -153,6 +159,15 @@ locals {
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+    }
+    build-automatic-opportunities = {
+      # Every day at 8am Eastern Time during DST. 9am during non-DST.
+      schedule_expression = "cron(0 13 * * ? *)"
+      # Only enable in dev/staging/training, do not run in prod
+      state            = local.build-automatic-opportunities-state[var.environment]
+      cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
+      mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
+      environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
   }
 }
