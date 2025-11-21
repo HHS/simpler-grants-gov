@@ -156,7 +156,7 @@ resource "aws_api_gateway_rest_api" "api" {
         }
       },
       # Legacy SOAP endpoint
-      "/{service_name}services/v2/{service_port_name}" : {
+      "/{service_name}/services/v2/{service_port_name}" : {
         "post" : {
           "parameters" : [
             {
