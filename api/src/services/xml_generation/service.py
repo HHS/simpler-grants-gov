@@ -15,8 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 def _is_attribute_metadata_key(field_name: str) -> bool:
-    """Check if a field name is an attribute metadata key."""
-    return field_name.startswith("__") and field_name.endswith("__attributes")
+    """Check if a field name is an attribute or other metadata key.
+
+    Metadata keys start with double underscores and include:
+    - __field__attributes: Field-specific attributes
+    - __root_attributes__: Root element attributes
+    - __wrapper: Wrapper element name for array items
+    """
+    return field_name.startswith("__")
 
 
 class XMLGenerationService:
@@ -74,11 +80,7 @@ class XMLGenerationService:
         xml_structure = xml_config.get("xml_structure", {})
         root_element_name = xml_structure.get("root_element", "SF424_4_0")
 
-        # Validate that version is present in xml_structure
-        if "version" not in xml_structure:
-            raise ValueError(
-                f"Missing required 'version' in xml_structure configuration for root element '{root_element_name}'"
-            )
+        # Version is optional (SF-424 uses it, SF-424A does not)
 
         # Get namespace configuration
         namespace_config = xml_config.get("namespaces", {})
@@ -141,10 +143,31 @@ class XMLGenerationService:
             root_element_with_namespace = f"{{{default_namespace}}}{root_element_name}"
             root = lxml_etree.Element(root_element_with_namespace, nsmap=nsmap)
 
-            # Add FormVersion attribute with proper namespace prefix
-            root.set(f"{{{default_namespace}}}FormVersion", form_version)
+            # Add FormVersion attribute if present (SF-424 uses this, SF-424A does not)
+            if form_version:
+                root.set(f"{{{default_namespace}}}FormVersion", form_version)
         else:
             root = lxml_etree.Element(root_element_name, nsmap=nsmap)
+
+        # Add root attributes from transformed data (preserved by transformer)
+        # Root attributes are stored in a special key by the transformer
+        root_attr_values = data.get("__root_attributes__", {})
+        if root_attr_values:
+            for attr_name, attr_value in root_attr_values.items():
+                # Determine namespace for the attribute
+                if ":" in attr_name:
+                    # Attribute has explicit namespace prefix (e.g., "glob:coreSchemaVersion")
+                    namespace_prefix, attr_local_name = attr_name.split(":", 1)
+                    if namespace_prefix in nsmap:
+                        attr_qualified_name = f"{{{nsmap[namespace_prefix]}}}{attr_local_name}"
+                    else:
+                        attr_qualified_name = attr_name
+                else:
+                    # Use default namespace for the attribute
+                    attr_qualified_name = f"{{{default_namespace}}}{attr_name}"
+
+                if attr_value is not None:
+                    root.set(attr_qualified_name, str(attr_value))
 
         # Add data elements with namespace support in correct order
         # Get XSD URL from config for dynamic ordering
@@ -267,7 +290,9 @@ class XMLGenerationService:
                 # Handle conditional transforms (e.g., one-to-many)
                 if xml_transform.get("type") == "conditional":
                     conditional_transform = xml_transform.get("conditional_transform", {})
-                    if conditional_transform.get("type") == "one_to_many":
+                    conditional_type = conditional_transform.get("type")
+
+                    if conditional_type == "one_to_many":
                         # Expand one-to-many pattern into actual field names
                         target_pattern = conditional_transform.get("target_pattern")
                         max_count = conditional_transform.get("max_count", 10)
@@ -275,6 +300,13 @@ class XMLGenerationService:
                             for i in range(1, max_count + 1):
                                 field_name = target_pattern.format(index=i)
                                 element_order.append(field_name)
+                    elif conditional_type == "array_decomposition" and not xml_transform.get(
+                        "target"
+                    ):
+                        # Array decomposition without target spreads fields - add output field names
+                        field_mappings = conditional_transform.get("field_mappings", {})
+                        for output_field_name in field_mappings.keys():
+                            element_order.append(output_field_name)
                     else:
                         # Other conditional types - use target if available
                         target = xml_transform.get("target")
@@ -445,6 +477,10 @@ class XMLGenerationService:
                 )
             else:
                 for nested_field, nested_value in value.items():
+                    # Skip special metadata keys (like __wrapper, __attributes, etc.)
+                    if nested_field.startswith("__"):
+                        continue
+
                     if nested_value is not None or nested_value == "INCLUDE_NULL_MARKER":
                         # Check for attributes for nested fields
                         nested_attr_key = f"__{nested_field}__attributes"
@@ -585,8 +621,12 @@ class XMLGenerationService:
         # Get element order from transform configuration
         sf424_order = self._get_element_order_from_config(transform_config)
 
-        # Add elements in the correct order (skip attachment fields)
+        # Add elements in the correct order (skip attachment fields and special keys)
         for field_name in sf424_order:
+            # Skip special metadata keys (like __root_attributes__)
+            if field_name.startswith("__"):
+                continue
+
             if field_name in data and field_name not in attachment_fields:
                 field_value = data[field_name]
                 if field_value is not None:
