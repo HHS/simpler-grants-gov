@@ -1,0 +1,36 @@
+name: CloudFront Cache Invalidation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to invalidate cache for
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - training
+          - prod
+
+jobs:
+  invalidate-cache:
+    name: Invalidate CloudFront Cache
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: frontend
+          environment: ${{ inputs.environment }}
+
+      - name: Invalidate CloudFront cache
+        run: make invalidate-cloudfront-cache ENVIRONMENT=${{ inputs.environment }}

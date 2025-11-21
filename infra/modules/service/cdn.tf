@@ -35,17 +35,39 @@ resource "aws_cloudfront_origin_access_control" "cdn" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_origin_request_policy" "forward_all_cookies" {
+  count = local.enable_cdn ? 1 : 0
+
+  name    = "${var.service_name}-forward-cookies"
+  comment = "Forward all cookies and headers to origin so Next.js can check session cookie"
+
+  cookies_config {
+    cookie_behavior = "all"
+  }
+
+  headers_config {
+    header_behavior = "allViewer"
+  }
+
+  query_strings_config {
+    query_string_behavior = "all"
+  }
+}
+
 resource "aws_cloudfront_cache_policy" "default" {
   count = local.enable_cdn ? 1 : 0
 
   name = var.service_name
 
   # Default to caching for 1 hour.
-  min_ttl = 3600
+  min_ttl = 0
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
-      cookie_behavior = "all"
+      cookie_behavior = "whitelist"
+      cookies {
+        items = ["session"]
+      }
     }
     headers_config {
       # The only options are "none" and "whitelist", there is no "all" option
@@ -53,6 +75,29 @@ resource "aws_cloudfront_cache_policy" "default" {
     }
     query_strings_config {
       query_string_behavior = "all"
+    }
+  }
+}
+
+resource "aws_cloudfront_cache_policy" "api_no_cache" {
+  count = local.enable_cdn ? 1 : 0
+
+  name = "${var.service_name}-api-no-cache"
+
+  # Do not cache API routes
+  min_ttl     = 0
+  default_ttl = 0
+  max_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "none"
+    }
+    headers_config {
+      header_behavior = "none"
+    }
+    query_strings_config {
+      query_string_behavior = "none"
     }
   }
 }
@@ -108,13 +153,26 @@ resource "aws_cloudfront_distribution" "cdn" {
     bucket          = aws_s3_bucket.cdn[0].bucket_domain_name
   }
 
+  # Bypass cache for /api/* routes
+  ordered_cache_behavior {
+    path_pattern             = "/api/*"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"]
+    target_origin_id         = local.default_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.api_no_cache[0].id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.forward_all_cookies[0].id
+    compress                 = true
+    viewer_protocol_policy   = "redirect-to-https"
+  }
+
   default_cache_behavior {
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id       = local.default_origin_id
-    cache_policy_id        = aws_cloudfront_cache_policy.default[0].id
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD", "OPTIONS"]
+    target_origin_id         = local.default_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.default[0].id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.forward_all_cookies[0].id
+    compress                 = true
+    viewer_protocol_policy   = "redirect-to-https"
   }
 
   restrictions {
