@@ -83,9 +83,9 @@ export default function middleware(request: NextRequest): NextResponse {
   // only allow for cdn testing/troubleshooting in lower envs
 
   if (isACdnTestRequest(request)) {
-    const response = handleCdnTest(request);
-    logRequest(request, response);
-    return response;
+    const testResponse = handleCdnTest(request);
+    logRequest(request, testResponse);
+    return testResponse;
   }
   const response = request.url.match(/api\//)
     ? featureFlagsManager.middleware(request, NextResponse.next())
