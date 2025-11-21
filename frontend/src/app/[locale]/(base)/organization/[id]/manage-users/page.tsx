@@ -1,4 +1,4 @@
-import withFeatureFlagProps from "src/services/featureFlags/withFeatureFlag";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -29,7 +29,7 @@ async function ManageUsersPage({ params }: ManageUsersPageProps) {
   return <ManageUsersPageContent organizationId={organizationId} />;
 }
 
-export default withFeatureFlagProps<ManageUsersPageProps, never>(
+export default withFeatureFlag<ManageUsersPageProps, never>(
   ManageUsersPage,
   "manageUsersOff",
   () => redirect("/maintenance"),
