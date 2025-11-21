@@ -1097,6 +1097,7 @@ SF424a_v1_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=uuid.UUID("e89a8372-1a6e-43fb-897f-29c89f243f9e"),
     form_type=FormType.SF424A,
     sgg_version="1.0",
