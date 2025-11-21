@@ -7,7 +7,7 @@ from sqlalchemy.engine import Row
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import LegacyUserStatus
+from src.constants.lookup_constants import LegacyProfileType, LegacyUserStatus
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
@@ -31,20 +31,19 @@ def list_legacy_users_and_verify_access(
     user: User,
     organization_id: UUID,
     request_data: dict,
-    profile_type_id: int = 4,
 ) -> tuple[list[dict], PaginationInfo]:
     """
     List legacy users from Oracle staging tables that can be invited to the organization.
 
     Uses SQL window function for efficient deduplication by email.
     Computes status based on membership and invitation state.
+    Filters to organization applicant profile type (profile_type_id=4).
 
     Args:
         db_session: Database session
         user: Authenticated user making the request
         organization_id: Organization ID to list users for
         request_data: Request body containing pagination parameters and filters
-        profile_type_id: Legacy profile type to filter (default: 4 = Organization Applicant)
 
     Returns:
         Tuple of (list of legacy user dicts with status, pagination info)
@@ -120,7 +119,7 @@ def list_legacy_users_and_verify_access(
         .join(TuserProfile, VuserAccount.user_account_id == TuserProfile.user_account_id)
         .where(
             TuserProfile.profile_duns == uei,
-            TuserProfile.profile_type_id == profile_type_id,
+            TuserProfile.profile_type_id == LegacyProfileType.ORGANIZATION_APPLICANT,
             VuserAccount.is_active == "Y",
             VuserAccount.is_deleted_legacy == "N",
             TuserProfile.is_deleted_legacy == "N",
