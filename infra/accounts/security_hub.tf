@@ -30,11 +30,8 @@ resource "aws_securityhub_standards_subscription" "nist_800_53" {
   standards_arn = "arn:aws:securityhub:${data.aws_region.current.name}::standards/nist-800-53/v/5.0.0"
 }
 
-# Configure finding aggregation (regional)
-resource "aws_securityhub_finding_aggregator" "main" {
-  depends_on   = [aws_securityhub_account.main]
-  linking_mode = "ALL_REGIONS"
-}
+# Note: Finding aggregation is managed by the delegated administrator account
+# This member account cannot create finding aggregators
 
 # Enable AWS service integrations
 resource "aws_securityhub_product_subscription" "guardduty" {
