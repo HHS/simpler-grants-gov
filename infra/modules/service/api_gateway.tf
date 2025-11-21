@@ -155,18 +155,10 @@ resource "aws_api_gateway_rest_api" "api" {
           }
         }
       },
-      # Legacy SOAP endpoint
-      "/{service_name}/services/v2/{service_port_name}" : {
+      # Legacy SOAP endpoints
+      "/grantsws-agency/services/v2/{service_port_name}" : {
         "post" : {
           "parameters" : [
-            {
-              "name" : "service_name",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            },
             {
               "name" : "service_port_name",
               "in" : "path",
@@ -179,9 +171,31 @@ resource "aws_api_gateway_rest_api" "api" {
           "x-amazon-apigateway-integration" : {
             "type" : "http_proxy",
             "httpMethod" : "POST",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/{service_name}services/v2/{service_port_name}",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/grantsws-agency/services/v2/{service_port_name}",
             "requestParameters" : {
-              "integration.request.path.service_name" : "method.request.path.service_name",
+              "integration.request.path.service_port_name" : "method.request.path.service_port_name",
+            },
+            "passthroughBehavior" : "when_no_match"
+          }
+        }
+      },
+      "/grantsws-applicant/services/v2/{service_port_name}" : {
+        "post" : {
+          "parameters" : [
+            {
+              "name" : "service_port_name",
+              "in" : "path",
+              "required" : true,
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          ],
+          "x-amazon-apigateway-integration" : {
+            "type" : "http_proxy",
+            "httpMethod" : "POST",
+            "uri" : "https://${var.optional_extra_alb_domains[0]}/grantsws-applicant/services/v2/{service_port_name}",
+            "requestParameters" : {
               "integration.request.path.service_port_name" : "method.request.path.service_port_name",
             },
             "passthroughBehavior" : "when_no_match"
