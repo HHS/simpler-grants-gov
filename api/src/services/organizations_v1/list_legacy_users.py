@@ -2,10 +2,11 @@ import logging
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import exists, func, select
+from sqlalchemy import case, exists, func, literal, select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import LegacyUserStatus
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
@@ -21,6 +22,7 @@ class LegacyUserListParams(BaseModel):
     """Pydantic model for parsing request parameters"""
 
     pagination: PaginationParams
+    filters: dict | None = None  # Optional filters from request schema
 
 
 def list_legacy_users_and_verify_access(
@@ -34,16 +36,17 @@ def list_legacy_users_and_verify_access(
     List legacy users from Oracle staging tables that can be invited to the organization.
 
     Uses SQL window function for efficient deduplication by email.
+    Computes status based on membership and invitation state.
 
     Args:
         db_session: Database session
         user: Authenticated user making the request
         organization_id: Organization ID to list users for
-        request_data: Request body containing pagination parameters
+        request_data: Request body containing pagination parameters and filters
         profile_type_id: Legacy profile type to filter (default: 4 = Organization Applicant)
 
     Returns:
-        Tuple of (list of legacy user dicts, pagination info)
+        Tuple of (list of legacy user dicts with status, pagination info)
 
     Raises:
         403: User lacks MANAGE_ORG_MEMBERS privilege
@@ -58,10 +61,40 @@ def list_legacy_users_and_verify_access(
     if not uei:
         raise_flask_error(400, "Organization does not have a UEI")
 
-    # 3. Parse pagination parameters
+    # 3. Parse pagination parameters and filters
     params = LegacyUserListParams.model_validate(request_data)
 
-    # 4. Build deduplicated query using window function
+    # 4. Build subqueries to check membership and invitation status
+    # Subquery to check if user is a member
+    is_member_subquery = (
+        exists(
+            select(1)
+            .select_from(OrganizationUser)
+            .join(User, OrganizationUser.user_id == User.user_id)
+            .join(LinkExternalUser, User.user_id == LinkExternalUser.user_id)
+            .where(
+                OrganizationUser.organization_id == organization_id,
+                func.lower(LinkExternalUser.email) == func.lower(VuserAccount.email),
+            )
+        )
+    ).label("is_member")
+
+    # Subquery to check if user has pending invitation
+    has_pending_invitation_subquery = (
+        exists(
+            select(1)
+            .select_from(OrganizationInvitation)
+            .where(
+                OrganizationInvitation.organization_id == organization_id,
+                func.lower(OrganizationInvitation.invitee_email) == func.lower(VuserAccount.email),
+                OrganizationInvitation.accepted_at.is_(None),
+                OrganizationInvitation.rejected_at.is_(None),
+                OrganizationInvitation.expires_at > func.now(),
+            )
+        )
+    ).label("has_pending_invitation")
+
+    # 5. Build deduplicated query with status computation using window function
     # Use ROW_NUMBER() to rank duplicates by created_date (most recent first)
     ranked_subquery = (
         select(
@@ -69,12 +102,18 @@ def list_legacy_users_and_verify_access(
             VuserAccount.email,
             VuserAccount.full_name,
             VuserAccount.created_date,
+            # Compute status with precedence: member > pending_invitation > available
+            case(
+                (is_member_subquery, literal(LegacyUserStatus.MEMBER)),
+                (has_pending_invitation_subquery, literal(LegacyUserStatus.PENDING_INVITATION)),
+                else_=literal(LegacyUserStatus.AVAILABLE),
+            ).label("status"),
             func.row_number()
             .over(
                 partition_by=func.lower(VuserAccount.email),
                 order_by=VuserAccount.created_date.desc().nulls_last(),
             )
-            .label("rn"),
+            .label("duplicate_rank"),
         )
         .join(TuserProfile, VuserAccount.user_account_id == TuserProfile.user_account_id)
         .where(
@@ -83,31 +122,7 @@ def list_legacy_users_and_verify_access(
             VuserAccount.is_active == "Y",
             VuserAccount.is_deleted_legacy == "N",
             TuserProfile.is_deleted_legacy == "N",
-            # Exclude existing members
-            ~exists(
-                select(1)
-                .select_from(OrganizationUser)
-                .join(User, OrganizationUser.user_id == User.user_id)
-                .join(LinkExternalUser, User.user_id == LinkExternalUser.user_id)
-                .where(
-                    OrganizationUser.organization_id == organization_id,
-                    func.lower(LinkExternalUser.email) == func.lower(VuserAccount.email),
-                )
-            ),
-            # Exclude pending invitations
-            ~exists(
-                select(1)
-                .select_from(OrganizationInvitation)
-                .where(
-                    OrganizationInvitation.organization_id == organization_id,
-                    func.lower(OrganizationInvitation.invitee_email)
-                    == func.lower(VuserAccount.email),
-                    OrganizationInvitation.accepted_at.is_(None),
-                    OrganizationInvitation.rejected_at.is_(None),
-                    OrganizationInvitation.expires_at > func.now(),
-                )
-            ),
-            # Exclude ignored users
+            # Still exclude ignored users - they should never be returned
             ~exists(
                 select(1)
                 .select_from(IgnoredLegacyOrganizationUser)
@@ -120,11 +135,19 @@ def list_legacy_users_and_verify_access(
         )
     ).subquery()
 
-    # 5. Get total count of deduplicated users for pagination info
+    # 6. Get total count of deduplicated users for pagination info (before status filtering)
     count_query = select(func.count()).select_from(ranked_subquery).where(ranked_subquery.c.rn == 1)
+
+    # 7. Apply status filter to count query if provided
+    status_filters = None
+    if params.filters and params.filters.get("status") and params.filters["status"].get("one_of"):
+        status_filters = params.filters["status"]["one_of"]
+        if status_filters:
+            count_query = count_query.where(ranked_subquery.c.status.in_(status_filters))
+
     total_records = db_session.execute(count_query).scalar()
 
-    # 6. Build final query with sorting and pagination
+    # 8. Build final query with sorting and pagination
     # Map order_by field to column
     order_by_map = {
         "email": ranked_subquery.c.email,
@@ -139,19 +162,25 @@ def list_legacy_users_and_verify_access(
     else:
         order_column = order_column.asc()
 
-    # 7. Apply pagination
+    # 9. Build and execute final query
+    final_query = select(ranked_subquery).where(
+        ranked_subquery.c.rn == 1
+    )  # Only get the most recent for each email
+
+    # Apply status filter if provided
+    if status_filters:
+        final_query = final_query.where(ranked_subquery.c.status.in_(status_filters))
+
     final_query = (
-        select(ranked_subquery)
-        .where(ranked_subquery.c.rn == 1)  # Only get the most recent for each email
-        .order_by(order_column)
+        final_query.order_by(order_column)
         .limit(params.pagination.page_size)
         .offset((params.pagination.page_offset - 1) * params.pagination.page_size)
     )
 
-    # 8. Execute query
+    # 10. Execute query
     results = db_session.execute(final_query).all()
 
-    # 9. Create pagination info
+    # 11. Create pagination info
     total_pages = (
         (total_records + params.pagination.page_size - 1) // params.pagination.page_size
         if total_records > 0
@@ -166,7 +195,7 @@ def list_legacy_users_and_verify_access(
         sort_direction=params.pagination.sort_direction,
     )
 
-    # 10. Format results
+    # 12. Format results
     formatted_users = [format_legacy_user_from_row(row) for row in results]
 
     logger.info(
@@ -176,6 +205,7 @@ def list_legacy_users_and_verify_access(
             "total_records": total_records,
             "page_offset": params.pagination.page_offset,
             "page_size": params.pagination.page_size,
+            "status_filters": status_filters,
         },
     )
 
@@ -184,4 +214,4 @@ def list_legacy_users_and_verify_access(
 
 def format_legacy_user_from_row(row) -> dict:
     """Format a legacy user row from the subquery into response format."""
-    return {"email": row.email, "full_name": row.full_name}
+    return {"email": row.email, "full_name": row.full_name, "status": row.status}
