@@ -3,8 +3,6 @@ from unittest.mock import patch
 
 import pytest
 
-from src.db.models.agency_models import Agency
-from src.db.models.user_models import AgencyUser, LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
@@ -14,7 +12,6 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     validate_certificate,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import LegacyAgencyCertificateFactory
 
 MOCK_FINGERPRINT = "123"
@@ -26,13 +23,6 @@ MOCK_CLIENT_CERT = SOAPClientCertificate(
     fingerprint=MOCK_FINGERPRINT,
     serial_number=123,
 )
-
-
-@pytest.fixture(autouse=True)
-def cleanup_agencies(db_session):
-    cascade_delete_from_db_table(db_session, LegacyCertificate)
-    cascade_delete_from_db_table(db_session, AgencyUser)
-    cascade_delete_from_db_table(db_session, Agency)
 
 
 @patch("src.legacy_soap_api.legacy_soap_api_auth.get_soap_client_certificate")

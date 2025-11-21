@@ -7,8 +7,8 @@ import pytest
 import requests
 from apiflask import HTTPError
 from botocore.exceptions import ClientError
+from sqlalchemy import update
 
-from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import AgencyUser, LegacyCertificate
@@ -53,9 +53,9 @@ BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
 
 @pytest.fixture(autouse=True)
 def cleanup_agencies(db_session):
-    cascade_delete_from_db_table(db_session, LegacyCertificate)
     cascade_delete_from_db_table(db_session, AgencyUser)
-    cascade_delete_from_db_table(db_session, Agency)
+    db_session.execute(update(LegacyCertificate).values(agency_id=None))
+    db_session.commit()
 
 
 def get_simpler_applicants_soap_client(request_data, db_session):
