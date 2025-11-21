@@ -1547,9 +1547,12 @@ export const messages = {
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
-    pendingUsersHeading: "Pending Users",
-    pendingUsersTableDescription:
-      "Any users waiting to join your organization will appear below.",
+    invitedUsersHeading: "Invited users",
+    invitedUsersTableDescription:
+      "These users have been invited to join your organization but haven’t accepted yet. Once they accept, they’ll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+    invitedUsersFetchError:
+      "We have encountered an error retrieving the Pending Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no pending users",
     usersTable: {
       admin: "Administrator",
       emailHeading: "Email",

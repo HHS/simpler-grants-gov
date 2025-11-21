@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 
@@ -23,6 +24,10 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   let title = `${t("OrganizationDetail.pageTitle")}`;
   try {
+    const session = await getSession();
+    if (!session?.token) {
+      throw new Error("not logged in");
+    }
     const organizationDetails = await getOrganizationDetails(id);
     title = `${t("OrganizationDetail.pageTitle")} - ${organizationDetails.sam_gov_entity.legal_business_name || ""}`;
   } catch (error) {

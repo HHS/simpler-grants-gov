@@ -6,6 +6,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
 import { ActiveUsersSection } from "./ActiveUsersSection";
+import { InvitedUsersSection } from "./InvitedUsersSection";
 import { UserOrganizationInvite } from "./UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
@@ -42,6 +43,7 @@ export async function ManageUsersPageContent({
       <PageHeader organizationName={name} />
       <UserOrganizationInvite organizationId={organizationId} />
       <ActiveUsersSection organizationId={organizationId} />
+      <InvitedUsersSection organizationId={organizationId} />
     </GridContainer>
   );
 }

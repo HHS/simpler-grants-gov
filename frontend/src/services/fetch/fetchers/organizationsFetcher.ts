@@ -2,7 +2,12 @@ import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
-import { UserDetail, UserRole } from "src/types/userTypes";
+import {
+  OrganizationInvitationStatus,
+  OrganizationPendingInvitation,
+  UserDetail,
+  UserRole,
+} from "src/types/userTypes";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
@@ -95,5 +100,35 @@ export const inviteUserToOrganization = async (
     },
   });
   const json = (await response.json()) as { data: OrganizationInviteRecord };
+  return json.data;
+};
+
+export const getOrganizationPendingInvitations = async (
+  organizationId: string,
+): Promise<OrganizationPendingInvitation[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const ssgToken = {
+    "X-SGG-Token": session.token,
+  };
+  const response = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/invitations/list`,
+    additionalHeaders: ssgToken,
+    body: {
+      filters: {
+        status: {
+          one_of: [OrganizationInvitationStatus.Pending],
+        },
+      },
+    },
+  });
+
+  const json = (await response.json()) as {
+    data: OrganizationPendingInvitation[];
+  };
   return json.data;
 };

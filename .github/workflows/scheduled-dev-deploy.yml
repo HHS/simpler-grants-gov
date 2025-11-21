@@ -85,7 +85,7 @@ jobs:
       version: "main"
 
   send-slack-notification:
-    if: failure()
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
     needs: [api-deploy, frontend-deploy, analytics-deploy, nofos-deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

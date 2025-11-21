@@ -8,6 +8,8 @@ Several components like tests, linting, and scripts can be run either inside of 
 
 **Running in Docker is the default**, but on some machines like the M1 Mac, running natively may be desirable for performance reasons.
 
+If you are looking to develop using a Windows computer, see [windows-setup.md](./windows-setup.md) for installation and development instructions.
+
 ## Docker
 
 This section covers development using Docker. There are a number of Docker commands included in the [Makefile](../../api/Makefile) which are helpful for local development. Run `make help` for a list of commands.
