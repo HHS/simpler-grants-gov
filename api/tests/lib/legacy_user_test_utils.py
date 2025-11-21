@@ -16,11 +16,12 @@ from tests.src.db.models.factories import (
 def create_legacy_user_with_status(
     uei: str,
     email: str,
-    full_name: str | None = None,
     status: LegacyUserStatus = LegacyUserStatus.AVAILABLE,
     organization=None,
     inviter=None,
     created_date: datetime | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
     **kwargs,
 ):
     """Create a legacy user in staging tables with specified status.
@@ -32,11 +33,12 @@ def create_legacy_user_with_status(
     Args:
         uei: UEI for the user's profile
         email: User's email address
-        full_name: User's full name (defaults to "User {email}")
         status: LegacyUserStatus (AVAILABLE, MEMBER, or PENDING_INVITATION)
         organization: Organization for MEMBER/PENDING_INVITATION status (required for those statuses)
         inviter: User who sent invitation (required for PENDING_INVITATION status)
         created_date: Optional creation date for the user account
+        first_name: User's first name (defaults to "User")
+        last_name: User's last name (defaults to email)
         **kwargs: Additional arguments passed to StagingVuserAccountFactory
 
     Returns:
@@ -67,7 +69,8 @@ def create_legacy_user_with_status(
     # Create staging user account
     account_kwargs = {
         "email": email,
-        "full_name": full_name or f"User {email}",
+        "first_name": first_name or "User",
+        "last_name": last_name or email,
         "is_active": "Y",
         "is_deleted_legacy": "N",
         **kwargs,

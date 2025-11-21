@@ -346,9 +346,13 @@ class LegacyUserDataSchema(Schema):
         required=True,
         metadata={"description": "Legacy user email address", "example": "user@example.com"},
     )
-    full_name = fields.String(
-        required=True,
-        metadata={"description": "Legacy user full name", "example": "John Doe"},
+    first_name = fields.String(
+        allow_none=True,
+        metadata={"description": "Legacy user first name", "example": "John"},
+    )
+    last_name = fields.String(
+        allow_none=True,
+        metadata={"description": "Legacy user last name", "example": "Doe"},
     )
     status = fields.String(
         required=True,
@@ -375,7 +379,7 @@ class LegacyUserFilterSchema(Schema):
 LegacyUserSortOrderSchema = Schema.from_dict(
     {
         "order_by": fields.String(
-            validate=[validators.OneOf(["email", "full_name", "created_date"])],
+            validate=[validators.OneOf(["email", "first_name", "last_name", "created_date"])],
             required=True,
             metadata={"description": "The field to sort the response by"},
         ),
