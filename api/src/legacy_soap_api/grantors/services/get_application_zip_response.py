@@ -8,7 +8,8 @@ import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
-from src.legacy_soap_api.legacy_soap_api_auth import ENDPOINT_PRIVILEGES, validate_certificate
+from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate
+from src.legacy_soap_api.legacy_soap_api_config import get_soap_operation_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 from src.util import file_util
@@ -43,15 +44,15 @@ def get_application_zip_response(
             ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number),
         )
     ).scalar()
-
     if application:
+        soap_config = get_soap_operation_config(soap_request.api_name, soap_request.operation_name)
         certificate = validate_certificate(
             db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
         )
-        if soap_request.operation_name in ENDPOINT_PRIVILEGES:
+        if soap_config and soap_config.privileges is not None:
             verify_access(
                 certificate.user,
-                {ENDPOINT_PRIVILEGES[soap_request.operation_name]},
+                set(soap_config.privileges),
                 application.application,
             )
 

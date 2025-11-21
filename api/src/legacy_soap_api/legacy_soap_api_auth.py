@@ -8,9 +8,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
 from pydantic import BaseModel
 from requests.adapters import HTTPAdapter
+from sqlalchemy import select
 
 import src.adapters.db as db
-from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
@@ -19,14 +19,6 @@ from src.util.datetime_util import get_now_us_eastern_date
 logger = logging.getLogger(__name__)
 
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
-
-ENDPOINT_PRIVILEGES = dict(
-    GetSubmissionListExpandedRequest=Privilege.LEGACY_AGENCY_VIEWER,
-    GetApplicationRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
-    GetApplicationZipRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
-    ConfirmApplicationDeliveryRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
-    UpdateApplicationInfoReqest=Privilege.LEGACY_AGENCY_ASSIGNER,
-)
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -125,21 +117,17 @@ def validate_certificate(
         raise SOAPClientCertificateLookupError("no soap auth")
 
     serial_number_str = str(soap_auth.certificate.serial_number)
-    legacy_certificate = (
-        db_session.query(LegacyCertificate)
-        .filter(LegacyCertificate.serial_number == serial_number_str)
-        .first()
-    )
-    extra_data = {"serial_number": serial_number_str}
+    legacy_certificate = db_session.execute(
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number_str)
+    ).scalar_one_or_none()
 
     if not legacy_certificate:
         logger.warning(
             "soap_client_certificate: could not retrieve client cert for serial number",
-            extra=extra_data,
         )
         raise SOAPClientCertificateLookupError("could not retrieve client cert for serial number")
 
-    extra_data.update({"legacy_certificate_id": str(legacy_certificate.legacy_certificate_id)})
+    extra_data = {"legacy_certificate_id": legacy_certificate.legacy_certificate_id}
     if legacy_certificate.expiration_date <= get_now_us_eastern_date():
         logger.warning(
             "soap_client_certificate: certificate is expired",

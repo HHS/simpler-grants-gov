@@ -1,10 +1,8 @@
-import uuid
 from datetime import date
 from unittest.mock import patch
 
 import pytest
 
-from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import AgencyUser, LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_auth import (
@@ -17,13 +15,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import (
-    AgencyFactory,
-    AgencyUserFactory,
-    AgencyUserRoleFactory,
-    LegacyAgencyCertificateFactory,
-    RoleFactory,
-)
+from tests.src.db.models.factories import LegacyAgencyCertificateFactory
 
 MOCK_FINGERPRINT = "123"
 MOCK_CERT = "456"
@@ -137,12 +129,5 @@ def test_validate_certificate_does_not_raise_agency_error_when_certificate_has_n
 def test_validate_certificate_raises_error_if_not_soap_auth(
     enable_factory_create, db_session
 ) -> None:
-    agency = AgencyFactory.create(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
-    legacy_certificate = LegacyAgencyCertificateFactory.create(
-        agency=agency, agency_id=agency.agency_id
-    )
-    agency_user = AgencyUserFactory.create(agency=legacy_certificate.agency)
-    role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_VIEWER])
-    AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
     with pytest.raises(SOAPClientCertificateLookupError, match="no soap auth"):
         validate_certificate(db_session, None, SimplerSoapAPI.GRANTORS)

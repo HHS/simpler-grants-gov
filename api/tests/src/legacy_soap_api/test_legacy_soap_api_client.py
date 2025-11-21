@@ -8,7 +8,6 @@ import requests
 from apiflask import HTTPError
 from botocore.exceptions import ClientError
 
-from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
@@ -18,27 +17,29 @@ from src.legacy_soap_api.applicants.schemas import (
     GetOpportunityListResponse,
     OpportunityDetails,
 )
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_config import (
+    ENDPOINT_PRIVILEGES,
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.util.datetime_util import parse_grants_gov_date
+from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
-    AgencyUserFactory,
-    AgencyUserRoleFactory,
     ApplicationSubmissionFactory,
     ApplicationUserFactory,
     ApplicationUserRoleFactory,
     CompetitionFactory,
-    LegacyAgencyCertificateFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
-    RoleFactory,
 )
 from tests.src.legacy_soap_api.soap_request_templates import (
     get_opportunity_list_requests as mock_requests,
@@ -375,23 +376,18 @@ class TestSimplerBaseSOAPClient:
 
 
 class TestSimplerSOAPGetApplicationZip:
-    @patch(
-        "src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate"
-    )
     def test_get_simpler_soap_response_returns_mtom_xml(
-        self, mock_validate_certificate, db_session, enable_factory_create, mock_s3_bucket
+        self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
-        mock_validate_certificate.return_value = legacy_certificate
+        cert_user_data = setup_cert_user(agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]])
         submission = ApplicationSubmissionFactory.create()
-        agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
-        role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_GRANT_RETRIEVER])
-        AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
         application_user = ApplicationUserFactory.create(
-            application=submission.application, user=legacy_certificate.user
+            application=submission.application, user=cert_user_data["legacy_certificate"].user
         )
-        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
+        ApplicationUserRoleFactory.create(
+            application_user=application_user, role=cert_user_data["role"]
+        )
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
@@ -413,6 +409,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=cert_user_data["soap_certificate"]),
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
@@ -437,11 +434,8 @@ class TestSimplerSOAPGetApplicationZip:
                 "MIME-Version": "1.0",
             }
 
-    @patch(
-        "src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate"
-    )
     def test_get_simpler_soap_response_returns_error_if_certificate_user_does_not_have_permissions(
-        self, mock_validate_certificate, db_session, enable_factory_create, mock_s3_bucket
+        self, db_session, enable_factory_create, mock_s3_bucket
     ):
         submission = ApplicationSubmissionFactory.create()
         request_xml_bytes = (
@@ -456,6 +450,9 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
+        agency = AgencyFactory()
+        wrong_privilege = ENDPOINT_PRIVILEGES["GetSubmissionListExpandedRequest"]
+        cert_user_data = setup_cert_user(agency, [wrong_privilege])
         soap_request = SOAPRequest(
             data=request_xml_bytes,
             full_path="x",
@@ -463,31 +460,26 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=cert_user_data["soap_certificate"]),
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         with pytest.raises(HTTPError):
             client.get_simpler_soap_response(mock_proxy_response)
 
-    @patch(
-        "src.legacy_soap_api.grantors.services.get_application_zip_response.validate_certificate"
-    )
     def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
-        self, mock_validate_certificate, db_session, enable_factory_create, caplog
+        self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
-        legacy_certificate = LegacyAgencyCertificateFactory.create()
-        mock_validate_certificate.return_value = legacy_certificate
         submission = ApplicationSubmissionFactory.create()
-        agency_user = AgencyUserFactory.create(
-            agency=legacy_certificate.agency, user=legacy_certificate.user
-        )
-        role = RoleFactory.create(privileges=[Privilege.LEGACY_AGENCY_GRANT_RETRIEVER])
-        AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
+        agency = AgencyFactory()
+        cert_user_data = setup_cert_user(agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]])
         application_user = ApplicationUserFactory.create(
-            application=submission.application, user=legacy_certificate.user
+            application=submission.application, user=cert_user_data["legacy_certificate"].user
         )
-        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
+        ApplicationUserRoleFactory.create(
+            application_user=application_user, role=cert_user_data["role"]
+        )
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -507,6 +499,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=cert_user_data["soap_certificate"]),
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
