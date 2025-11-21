@@ -28,12 +28,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        # Ensure organization has a UEI (factory generates unique UEIs)
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create legacy users with different statuses
         # Available user
@@ -129,11 +126,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create available user
         vuseraccount = StagingVuserAccountFactory.create(
@@ -199,11 +194,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create users with all three statuses
         # Available
@@ -292,9 +285,7 @@ class TestListLegacyUsers:
             db_session=db_session,
         )
 
-        # Ensure organization has UEI but no matching legacy users
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
+        # Ensure organization has UEI but no matching legacy users (auto-created)
         db_session.commit()
 
         resp = client.post(
@@ -316,11 +307,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create 15 legacy users
         for i in range(15):
@@ -369,11 +358,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create legacy user
         vuseraccount = StagingVuserAccountFactory.create(
@@ -416,11 +403,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create two user accounts with same email (case insensitive)
         vuseraccount_old = StagingVuserAccountFactory.create(
@@ -473,11 +458,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create user who is both a member AND has a pending invitation
         vuseraccount = StagingVuserAccountFactory.create(
@@ -536,11 +519,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create 5 legacy users
         for i in range(5):
@@ -579,11 +560,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create 5 legacy users with predictable emails for sorting
         for i in range(5):
@@ -631,11 +610,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create users with specific names for sorting
         for name in ["Charlie", "Alice", "Bob"]:
@@ -683,11 +660,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         vuseraccount = StagingVuserAccountFactory.create(
             email="test@example.com",
@@ -767,9 +742,10 @@ class TestListLegacyUsers:
         """Test that user not in organization gets 403"""
         user, token = create_user_not_in_org(db_session)
 
-        # Create a different organization
-        other_organization = OrganizationFactory.create()
-        other_organization.sam_gov_entity = SamGovEntityFactory.create()
+        # Create a different organization with SAM.gov entity
+        other_organization = OrganizationFactory.create(
+            sam_gov_entity=SamGovEntityFactory.create()
+        )
         db_session.commit()
 
         resp = client.post(
@@ -825,9 +801,8 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        organization.sam_gov_entity = SamGovEntityFactory.create()
         db_session.commit()
 
         resp = client.post(
@@ -848,11 +823,9 @@ class TestListLegacyUsers:
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
+            with_sam_gov_entity=True,
         )
-
-        sam_gov_entity = SamGovEntityFactory.create()
-        organization.sam_gov_entity = sam_gov_entity
-        uei = sam_gov_entity.uei
+        uei = organization.sam_gov_entity.uei
 
         # Create a few test users
         for i in range(5):
