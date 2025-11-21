@@ -10,7 +10,7 @@ from src.constants.lookup_constants import LegacyUserStatus
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from src.services.organizations_v1.list_organization_invitations import (
     get_organization_and_verify_access,
 )
@@ -136,7 +136,7 @@ def list_legacy_users_and_verify_access(
     ).subquery()
 
     # 6. Get total count of deduplicated users for pagination info (before status filtering)
-    count_query = select(func.count()).select_from(ranked_subquery).where(ranked_subquery.c.rn == 1)
+    count_query = select(func.count()).select_from(ranked_subquery).where(ranked_subquery.c.duplicate_rank == 1)
 
     # 7. Apply status filter to count query if provided
     status_filters = None
@@ -154,17 +154,18 @@ def list_legacy_users_and_verify_access(
         "full_name": ranked_subquery.c.full_name,
         "created_date": ranked_subquery.c.created_date,
     }
-    order_column = order_by_map.get(params.pagination.order_by, ranked_subquery.c.email)
 
-    # Apply sort direction
-    if params.pagination.sort_direction == "descending":
+    # Apply sorting from the first sort_order (schema ensures at least one exists via default)
+    first_sort = params.pagination.sort_order[0]
+    order_column = order_by_map.get(first_sort.order_by, ranked_subquery.c.email)
+    if first_sort.sort_direction == "descending":
         order_column = order_column.desc()
     else:
         order_column = order_column.asc()
 
     # 9. Build and execute final query
     final_query = select(ranked_subquery).where(
-        ranked_subquery.c.rn == 1
+        ranked_subquery.c.duplicate_rank == 1
     )  # Only get the most recent for each email
 
     # Apply status filter if provided
@@ -191,8 +192,10 @@ def list_legacy_users_and_verify_access(
         page_size=params.pagination.page_size,
         total_pages=total_pages,
         total_records=total_records,
-        order_by=params.pagination.order_by,
-        sort_direction=params.pagination.sort_direction,
+        sort_order=[
+            SortOrder(order_by=sort_param.order_by, sort_direction=sort_param.sort_direction)
+            for sort_param in params.pagination.sort_order
+        ],
     )
 
     # 12. Format results

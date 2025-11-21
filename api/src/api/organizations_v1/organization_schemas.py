@@ -1,6 +1,6 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Email, Length, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
 from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
@@ -390,7 +390,7 @@ class LegacyUsersListRequestSchema(Schema):
     )
 
 
-class LegacyUsersListResponseSchema(AbstractResponseSchema):
+class LegacyUsersListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for list legacy users response"""
 
     data = fields.List(
