@@ -380,14 +380,14 @@ class TestSimplerSOAPGetApplicationZip:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        cert_user_data = setup_cert_user(agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]])
+        user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
+            agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]]
+        )
         submission = ApplicationSubmissionFactory.create()
         application_user = ApplicationUserFactory.create(
-            application=submission.application, user=cert_user_data["legacy_certificate"].user
+            application=submission.application, user=user
         )
-        ApplicationUserRoleFactory.create(
-            application_user=application_user, role=cert_user_data["role"]
-        )
+        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
@@ -409,7 +409,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
-            auth=SOAPAuth(certificate=cert_user_data["soap_certificate"]),
+            auth=SOAPAuth(certificate=soap_client_certificate),
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
@@ -450,9 +450,11 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
-        agency = AgencyFactory()
+        agency = AgencyFactory.create()
         wrong_privilege = ENDPOINT_PRIVILEGES["GetSubmissionListExpandedRequest"]
-        cert_user_data = setup_cert_user(agency, [wrong_privilege])
+        user, legacy_certificate, _, soap_client_certificate = setup_cert_user(
+            agency, [wrong_privilege]
+        )
         soap_request = SOAPRequest(
             data=request_xml_bytes,
             full_path="x",
@@ -460,7 +462,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
-            auth=SOAPAuth(certificate=cert_user_data["soap_certificate"]),
+            auth=SOAPAuth(certificate=soap_client_certificate),
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
@@ -473,13 +475,13 @@ class TestSimplerSOAPGetApplicationZip:
         caplog.set_level(logging.INFO)
         submission = ApplicationSubmissionFactory.create()
         agency = AgencyFactory()
-        cert_user_data = setup_cert_user(agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]])
+        user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
+            agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]]
+        )
         application_user = ApplicationUserFactory.create(
-            application=submission.application, user=cert_user_data["legacy_certificate"].user
+            application=submission.application, user=user
         )
-        ApplicationUserRoleFactory.create(
-            application_user=application_user, role=cert_user_data["role"]
-        )
+        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -499,7 +501,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
-            auth=SOAPAuth(certificate=cert_user_data["soap_certificate"]),
+            auth=soap_client_certificate,
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
