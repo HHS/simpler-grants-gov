@@ -42,78 +42,51 @@ const i18nMiddleware = createIntlMiddleware({
   localePrefix: "as-needed",
 });
 
+const handleCdnTest = (request: NextRequest) => {
+  const url = new URL(request.url);
+  const params = new URLSearchParams(url.search);
+
+  const cacheControl: string[] = [];
+  cacheControl.push(`max-age=${params.get("max-age") || "10"}`);
+  cacheControl.push(
+    params.get("cache") ||
+      (request.cookies.has("session") &&
+      request.cookies.get("session")?.value !== ""
+        ? "no-store"
+        : "public"),
+  );
+
+  const response = new NextResponse(
+    JSON.stringify({ params: params.entries(), cacheControl }),
+    {
+      status: 200,
+      headers: {
+        "Cache-Control": cacheControl.join(", "),
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  return response;
+};
+
+const isACdnTestRequest = (request: NextRequest): boolean => {
+  return (
+    request.url.includes("/cdn") &&
+    ["dev", "local"].indexOf(environment.ENVIRONMENT) > -1
+  );
+};
+
 export default function middleware(request: NextRequest): NextResponse {
   const cacheControl: string[] = [];
 
   // only allow for cdn testing/troubleshooting in lower envs
-  if (
-    request.url.includes("/cdn") &&
-    ["dev", "local"].indexOf(environment.ENVIRONMENT) > -1
-  ) {
-    const handleCdnTest = (request) => {
-    const url = new URL(request.url);
-        const params = new URLSearchParams(url.search);
 
-    const cacheControl: string[] = [];
-         cacheControl.push(`max-age=${params.get("max-age") || "10"}`);
-    cacheControl.push(
-      params.get("cache") ||
-        (request.cookies.has("session") &&
-        request.cookies.get("session")?.value !== ""
-          ? "no-store"
-          : "public"),
-    );
-
-    const response = new NextResponse(
-      JSON.stringify({ params: params.entries(), cacheControl }),
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": cacheControl.join(", "),
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    return response
-  }
-    }
-    
-    ...
-    
-    if (isACdnTestRequest) {
-      const response = handleCdnTest(request}
-          logRequest(request, response);
-          return response
-    }
-    const params = new URLSearchParams(url.search);
-
-    const cacheControl: string[] = [];
-
-    cacheControl.push(`max-age=${params.get("max-age") || "10"}`);
-    cacheControl.push(
-      params.get("cache") ||
-        (request.cookies.has("session") &&
-        request.cookies.get("session")?.value !== ""
-          ? "no-store"
-          : "public"),
-    );
-
-    const response = new NextResponse(
-      JSON.stringify({ params: params.entries(), cacheControl }),
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": cacheControl.join(", "),
-          "Content-Type": "application/json",
-        },
-      },
-    );
+  if (isACdnTestRequest(request)) {
+    const response = handleCdnTest(request);
     logRequest(request, response);
-
     return response;
   }
-
   const response = request.url.match(/api\//)
     ? featureFlagsManager.middleware(request, NextResponse.next())
     : featureFlagsManager.middleware(request, i18nMiddleware(request));
