@@ -1,5 +1,6 @@
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
+import { AuthorizedData } from "src/types/authTypes";
 
 import { GridContainer } from "@trussworks/react-uswds";
 
@@ -11,8 +12,10 @@ import { UserOrganizationInvite } from "./UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
   organizationId,
+  authorizedData,
 }: {
   organizationId: string;
+  authorizedData?: AuthorizedData;
 }) {
   let userOrganizations: Organization | undefined;
   try {
@@ -42,8 +45,8 @@ export async function ManageUsersPageContent({
       />
       <PageHeader organizationName={name} />
       <UserOrganizationInvite organizationId={organizationId} />
-      <ActiveUsersSection organizationId={organizationId} />
-      <InvitedUsersSection organizationId={organizationId} />
+      <ActiveUsersSection authorizedData={authorizedData} />
+      <InvitedUsersSection authorizedData={authorizedData} />
     </GridContainer>
   );
 }

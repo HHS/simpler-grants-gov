@@ -4,8 +4,8 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
-import { UnauthorizedError } from "src/errors";
-import type { UserDetail } from "src/types/userTypes";
+import type { AuthorizedData, FetchedResource } from "src/types/authTypes";
+import type { UserDetail, UserRole } from "src/types/userTypes";
 
 import { ActiveUsersSection } from "src/components/manageUsers/ActiveUsersSection";
 
@@ -19,52 +19,42 @@ jest.mock("next-intl/server", () => ({
   getTranslations: (ns: string) => getTranslationsMock(ns),
 }));
 
-type GetOrgUsersFn = (organizationId: string) => Promise<UserDetail[]>;
-
-const getOrganizationUsersMock: jest.MockedFunction<GetOrgUsersFn> = jest.fn<
-  Promise<UserDetail[]>,
-  [string]
->((_orgId: string) => Promise.resolve([] as UserDetail[]));
-
-jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
-  getOrganizationUsers: (...args: Parameters<GetOrgUsersFn>) =>
-    getOrganizationUsersMock(...args),
-}));
-
-const tableWithResponsiveHeaderMock = jest.fn<
-  void,
-  [
-    {
-      headerContent: { cellData: string }[];
-      tableRowData: { cellData: unknown }[][];
-    },
-  ]
->();
+const tableWithResponsiveHeaderMock = jest.fn<void, [unknown]>();
 
 jest.mock("src/components/TableWithResponsiveHeader", () => ({
   TableWithResponsiveHeader: (props: unknown) => {
-    tableWithResponsiveHeaderMock(
-      props as {
-        headerContent: { cellData: string }[];
-        tableRowData: { cellData: unknown }[][];
-      },
-    );
+    tableWithResponsiveHeaderMock(props);
     return <div data-testid="active-users-table" />;
   },
 }));
 
 describe("ActiveUsersSection", () => {
-  const organizationId = "org-123";
+  const makeAuthorizedData = (
+    activeUsersList: FetchedResource,
+  ): AuthorizedData => ({
+    fetchedResources: {
+      activeUsersList,
+    },
+    confirmedPrivileges: [],
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    getOrganizationUsersMock.mockResolvedValue([] as UserDetail[]);
+  });
+
+  it("throws if authorizedData is missing", async () => {
+    await expect(ActiveUsersSection({})).rejects.toThrow(
+      "ActiveUsersList must be wrapped in AuthorizationGate",
+    );
   });
 
   it("renders zero-state text when there are no active users", async () => {
-    getOrganizationUsersMock.mockResolvedValueOnce([] as UserDetail[]);
+    const authorizedData = makeAuthorizedData({
+      data: [] as UserDetail[],
+      statusCode: 200,
+    });
 
-    const component = await ActiveUsersSection({ organizationId });
+    const component = await ActiveUsersSection({ authorizedData });
     render(component);
 
     expect(await screen.findByTestId("active-users-empty")).toHaveTextContent(
@@ -72,47 +62,55 @@ describe("ActiveUsersSection", () => {
     );
   });
 
-  it("renders an error alert when there is a non-UnauthorizedError", async () => {
-    getOrganizationUsersMock.mockRejectedValueOnce(new Error("some failure"));
+  it("renders an error message when there is an error or no data", async () => {
+    const authorizedData = makeAuthorizedData({
+      data: undefined,
+      statusCode: 500,
+      error: "something went wrong",
+    });
 
-    const component = await ActiveUsersSection({ organizationId });
+    const component = await ActiveUsersSection({ authorizedData });
     render(component);
 
     expect(await screen.findByText("activeUsersFetchError")).toBeVisible();
   });
 
-  it("rethrows UnauthorizedError so it can be handled upstream", async () => {
-    getOrganizationUsersMock.mockRejectedValueOnce(
-      new UnauthorizedError("No active session"),
-    );
-
-    await expect(ActiveUsersSection({ organizationId })).rejects.toBeInstanceOf(
-      UnauthorizedError,
-    );
-  });
-
   it("renders a table with formatted name, email, and roles when active users exist", async () => {
-    const users = [
+    const roles: UserRole[] = [
       {
-        first_name: "Ada",
-        last_name: "Lovelace",
-        email: "ada@example.com",
-        roles: [{ role_name: "Admin" }],
+        role_id: "role-1",
+        role_name: "Admin",
+        privileges: [],
       },
     ];
 
-    getOrganizationUsersMock.mockResolvedValueOnce(
-      users as unknown as UserDetail[],
-    );
+    const users: UserDetail[] = [
+      {
+        user_id: "user-1",
+        email: "ada@example.com",
+        first_name: "Ada",
+        middle_name: undefined,
+        last_name: "Lovelace",
+        roles,
+      },
+    ];
 
-    const component = await ActiveUsersSection({ organizationId });
+    const authorizedData = makeAuthorizedData({
+      data: users,
+      statusCode: 200,
+    });
+
+    const component = await ActiveUsersSection({ authorizedData });
     render(component);
 
     expect(await screen.findByTestId("active-users-table")).toBeVisible();
 
     expect(tableWithResponsiveHeaderMock).toHaveBeenCalledTimes(1);
 
-    const tableProps = tableWithResponsiveHeaderMock.mock.calls[0][0];
+    const tableProps = tableWithResponsiveHeaderMock.mock.calls[0][0] as {
+      headerContent: { cellData: string }[];
+      tableRowData: { cellData: unknown }[][];
+    };
 
     expect(tableProps.headerContent.map((h) => h.cellData)).toEqual([
       "usersTable.nameHeading",

@@ -1,49 +1,41 @@
-import { UnauthorizedError } from "src/errors";
-import { getOrganizationPendingInvitations } from "src/services/fetch/fetchers/organizationsFetcher";
-import type {
-  InvitationUser,
-  OrganizationPendingInvitation,
-  UserRole,
-} from "src/types/userTypes";
+import { AuthorizedData } from "src/types/authTypes";
+import type { OrganizationPendingInvitation } from "src/types/userTypes";
+import { formatRoleNames } from "src/utils/formatRoleName";
+import { formatFullName } from "src/utils/userNameUtils";
 
 import { getTranslations } from "next-intl/server";
-import { Alert } from "@trussworks/react-uswds";
+import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
 
-function formatFullName(user: InvitationUser | null): string {
-  if (!user) return " ";
-
-  const parts = [user.first_name, user.last_name].filter(Boolean);
-
-  return parts.join(" ");
-}
-
-function formatRoleNames(roles: UserRole[]): string {
-  return roles.map((role) => role.role_name).join(", ");
-}
-
 interface InvitedUsersSectionProps {
-  organizationId: string;
+  authorizedData?: AuthorizedData;
 }
 
 export async function InvitedUsersSection({
-  organizationId,
+  authorizedData,
 }: InvitedUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
-  let pendingUsers: OrganizationPendingInvitation[] = [];
-  let hasError = false;
+  let invitedUsers: OrganizationPendingInvitation[] = [];
 
-  try {
-    pendingUsers = await getOrganizationPendingInvitations(organizationId);
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      throw error;
-    }
-    hasError = true;
+  if (!authorizedData) {
+    throw new Error("ActiveUsersList must be wrapped in AuthorizationGate");
+  }
+
+  const { fetchedResources } = authorizedData;
+  const {
+    invitedUsersList: { data, error },
+  } = fetchedResources;
+
+  if (error || !data) {
+    return (
+      <GridContainer className="padding-top-2 tablet:padding-y-6">
+        <ErrorMessage>{t("invitedUsersFetchError")}</ErrorMessage>
+      </GridContainer>
+    );
   }
 
   const tableHeaders: TableCellData[] = [
@@ -51,6 +43,8 @@ export async function InvitedUsersSection({
     { cellData: t("usersTable.emailHeading") },
     { cellData: t("usersTable.roleHeading") },
   ];
+
+  invitedUsers = data as OrganizationPendingInvitation[];
 
   const transformTableRowData = (
     userDetails: OrganizationPendingInvitation[],
@@ -73,18 +67,14 @@ export async function InvitedUsersSection({
         {t("invitedUsersTableDescription")}
       </p>
 
-      {hasError ? (
-        <Alert slim headingLevel="h6" noIcon type="error">
-          {t("invitedUsersFetchError")}
-        </Alert>
-      ) : pendingUsers.length === 0 ? (
+      {invitedUsers.length === 0 ? (
         <p data-testid="pending-users-empty">
           {t("invitedUsersTableZeroState")}
         </p>
       ) : (
         <TableWithResponsiveHeader
           headerContent={tableHeaders}
-          tableRowData={transformTableRowData(pendingUsers)}
+          tableRowData={transformTableRowData(invitedUsers)}
         />
       )}
     </section>
