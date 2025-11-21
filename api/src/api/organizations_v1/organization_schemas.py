@@ -5,7 +5,7 @@ from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
 from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
 from src.pagination.pagination_models import SortDirection
-from src.pagination.pagination_schema import BasePaginationSchema, generate_pagination_schema
+from src.pagination.pagination_schema import BasePaginationSchema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -426,7 +426,9 @@ class LegacyUsersListRequestSchema(Schema):
     pagination = fields.Nested(
         LegacyUserPaginationSchema(),
         required=True,
-        metadata={"description": "Pagination parameters for legacy user list (defaults: page_size=10, page_offset=1, sort by email ascending)"},
+        metadata={
+            "description": "Pagination parameters for legacy user list (defaults: page_size=10, page_offset=1, sort by email ascending)"
+        },
     )
 
 

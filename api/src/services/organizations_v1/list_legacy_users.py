@@ -2,7 +2,8 @@ import logging
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import case, exists, func, literal, select
+from sqlalchemy import asc, case, desc, exists, func, literal, select
+from sqlalchemy.engine import Row
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
@@ -53,18 +54,19 @@ def list_legacy_users_and_verify_access(
         404: Organization not found
         400: Organization does not have a UEI
     """
-    # 1. Get organization and verify access
+    # Get organization and verify access
     organization = get_organization_and_verify_access(db_session, user, organization_id)
 
-    # 2. Get organization UEI from SAM.gov entity
+    # Get organization UEI from SAM.gov entity
     uei = organization.sam_gov_entity.uei if organization.sam_gov_entity else None
     if not uei:
         raise_flask_error(400, "Organization does not have a UEI")
 
-    # 3. Parse pagination parameters and filters
+    # Parse pagination parameters and filters
     params = LegacyUserListParams.model_validate(request_data)
 
-    # 4. Build subqueries to check membership and invitation status
+    # Build subqueries to check membership and invitation status
+
     # Subquery to check if user is a member
     is_member_subquery = (
         exists(
@@ -94,7 +96,7 @@ def list_legacy_users_and_verify_access(
         )
     ).label("has_pending_invitation")
 
-    # 5. Build deduplicated query with status computation using window function
+    # Build deduplicated query with status computation using window function
     # Use ROW_NUMBER() to rank duplicates by created_date (most recent first)
     ranked_subquery = (
         select(
@@ -135,19 +137,23 @@ def list_legacy_users_and_verify_access(
         )
     ).subquery()
 
-    # 6. Get total count of deduplicated users for pagination info (before status filtering)
-    count_query = select(func.count()).select_from(ranked_subquery).where(ranked_subquery.c.duplicate_rank == 1)
+    # Get total count of deduplicated users for pagination info (before status filtering)
+    count_query = (
+        select(func.count())
+        .select_from(ranked_subquery)
+        .where(ranked_subquery.c.duplicate_rank == 1)
+    )
 
-    # 7. Apply status filter to count query if provided
+    # Apply status filter to count query if provided
     status_filters = None
     if params.filters and params.filters.get("status") and params.filters["status"].get("one_of"):
         status_filters = params.filters["status"]["one_of"]
         if status_filters:
             count_query = count_query.where(ranked_subquery.c.status.in_(status_filters))
 
-    total_records = db_session.execute(count_query).scalar()
+    total_records = db_session.execute(count_query).scalar_one()
 
-    # 8. Build final query with sorting and pagination
+    # Build final query with sorting and pagination
     # Map order_by field to column
     order_by_map = {
         "email": ranked_subquery.c.email,
@@ -157,13 +163,9 @@ def list_legacy_users_and_verify_access(
 
     # Apply sorting from the first sort_order (schema ensures at least one exists via default)
     first_sort = params.pagination.sort_order[0]
-    order_column = order_by_map.get(first_sort.order_by, ranked_subquery.c.email)
-    if first_sort.sort_direction == "descending":
-        order_column = order_column.desc()
-    else:
-        order_column = order_column.asc()
+    base_order_column = order_by_map.get(first_sort.order_by, ranked_subquery.c.email)
 
-    # 9. Build and execute final query
+    # Build and execute final query
     final_query = select(ranked_subquery).where(
         ranked_subquery.c.duplicate_rank == 1
     )  # Only get the most recent for each email
@@ -172,16 +174,20 @@ def list_legacy_users_and_verify_access(
     if status_filters:
         final_query = final_query.where(ranked_subquery.c.status.in_(status_filters))
 
-    final_query = (
-        final_query.order_by(order_column)
-        .limit(params.pagination.page_size)
-        .offset((params.pagination.page_offset - 1) * params.pagination.page_size)
+    # Apply sorting and pagination
+    if first_sort.sort_direction == "descending":
+        final_query = final_query.order_by(desc(base_order_column))
+    else:
+        final_query = final_query.order_by(asc(base_order_column))
+
+    final_query = final_query.limit(params.pagination.page_size).offset(
+        (params.pagination.page_offset - 1) * params.pagination.page_size
     )
 
-    # 10. Execute query
+    # Execute query
     results = db_session.execute(final_query).all()
 
-    # 11. Create pagination info
+    # Create pagination info
     total_pages = (
         (total_records + params.pagination.page_size - 1) // params.pagination.page_size
         if total_records > 0
@@ -198,7 +204,7 @@ def list_legacy_users_and_verify_access(
         ],
     )
 
-    # 12. Format results
+    # Format results
     formatted_users = [format_legacy_user_from_row(row) for row in results]
 
     logger.info(
@@ -215,6 +221,6 @@ def list_legacy_users_and_verify_access(
     return formatted_users, pagination_info
 
 
-def format_legacy_user_from_row(row) -> dict:
+def format_legacy_user_from_row(row: Row) -> dict:
     """Format a legacy user row from the subquery into response format."""
     return {"email": row.email, "full_name": row.full_name, "status": row.status}
