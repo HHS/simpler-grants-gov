@@ -4,17 +4,13 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from src.constants.lookup_constants import LegacyUserStatus, Privilege
+from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 from tests.src.db.models.factories import (
     IgnoredLegacyOrganizationUserFactory,
-    LinkExternalUserFactory,
     OrganizationFactory,
     OrganizationInvitationFactory,
-    OrganizationUserFactory,
     SamGovEntityFactory,
-    StagingTuserProfileFactory,
-    StagingVuserAccountFactory,
-    UserFactory,
 )
 
 
@@ -33,65 +29,23 @@ class TestListLegacyUsers:
         uei = organization.sam_gov_entity.uei
 
         # Create legacy users with different statuses
-        # Available user
-        vuseraccount_available = StagingVuserAccountFactory.create(
-            email="available@example.com",
-            full_name="Available User",
-            is_active="Y",
-            is_deleted_legacy="N",
+        create_legacy_user_with_status(
+            uei, "available@example.com", "Available User", status=LegacyUserStatus.AVAILABLE
         )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount_available.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-
-        # Member user (in organization)
-        vuseraccount_member = StagingVuserAccountFactory.create(
-            email="member@example.com",
-            full_name="Member User",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount_member.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-        # Link this user to the organization
-        member_user = UserFactory.create()
-        LinkExternalUserFactory.create(
-            user=member_user,
-            email=vuseraccount_member.email,
-        )
-        OrganizationUserFactory.create(
-            user=member_user,
+        create_legacy_user_with_status(
+            uei,
+            "member@example.com",
+            "Member User",
+            status=LegacyUserStatus.MEMBER,
             organization=organization,
         )
-
-        # Pending invitation user
-        vuseraccount_pending = StagingVuserAccountFactory.create(
-            email="pending@example.com",
-            full_name="Pending User",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount_pending.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-        # Create pending invitation
-        OrganizationInvitationFactory.create(
+        create_legacy_user_with_status(
+            uei,
+            "pending@example.com",
+            "Pending User",
+            status=LegacyUserStatus.PENDING_INVITATION,
             organization=organization,
-            inviter_user=user,
-            invitee_email=vuseraccount_pending.email,
-            expires_at=datetime.now(UTC) + timedelta(days=7),
-            accepted_at=None,
-            rejected_at=None,
+            inviter=user,
         )
 
         db_session.commit()
@@ -130,40 +84,15 @@ class TestListLegacyUsers:
         )
         uei = organization.sam_gov_entity.uei
 
-        # Create available user
-        vuseraccount = StagingVuserAccountFactory.create(
-            email="available@example.com",
-            full_name="Available User",
-            is_active="Y",
-            is_deleted_legacy="N",
+        # Create available and member users
+        create_legacy_user_with_status(
+            uei, "available@example.com", "Available User", status=LegacyUserStatus.AVAILABLE
         )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-
-        # Create member user
-        vuseraccount_member = StagingVuserAccountFactory.create(
-            email="member@example.com",
-            full_name="Member User",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount_member.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-        member_user = UserFactory.create()
-        LinkExternalUserFactory.create(
-            user=member_user,
-            email=vuseraccount_member.email,
-        )
-        OrganizationUserFactory.create(
-            user=member_user,
+        create_legacy_user_with_status(
+            uei,
+            "member@example.com",
+            "Member User",
+            status=LegacyUserStatus.MEMBER,
             organization=organization,
         )
 
@@ -199,54 +128,18 @@ class TestListLegacyUsers:
         uei = organization.sam_gov_entity.uei
 
         # Create users with all three statuses
-        # Available
-        vuseraccount1 = StagingVuserAccountFactory.create(
-            email="available@example.com",
-            is_active="Y",
-            is_deleted_legacy="N",
+        create_legacy_user_with_status(
+            uei, "available@example.com", status=LegacyUserStatus.AVAILABLE
         )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount1.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
+        create_legacy_user_with_status(
+            uei, "member@example.com", status=LegacyUserStatus.MEMBER, organization=organization
         )
-
-        # Member
-        vuseraccount2 = StagingVuserAccountFactory.create(
-            email="member@example.com",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount2.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-        member_user = UserFactory.create()
-        LinkExternalUserFactory.create(user=member_user, email=vuseraccount2.email)
-        OrganizationUserFactory.create(user=member_user, organization=organization)
-
-        # Pending invitation
-        vuseraccount3 = StagingVuserAccountFactory.create(
-            email="pending@example.com",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount3.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-        OrganizationInvitationFactory.create(
+        create_legacy_user_with_status(
+            uei,
+            "pending@example.com",
+            status=LegacyUserStatus.PENDING_INVITATION,
             organization=organization,
-            inviter_user=user,
-            invitee_email=vuseraccount3.email,
-            expires_at=datetime.now(UTC) + timedelta(days=7),
-            accepted_at=None,
-            rejected_at=None,
+            inviter=user,
         )
 
         db_session.commit()
@@ -313,17 +206,7 @@ class TestListLegacyUsers:
 
         # Create 15 legacy users
         for i in range(15):
-            vuseraccount = StagingVuserAccountFactory.create(
-                email=f"user{i}@example.com",
-                is_active="Y",
-                is_deleted_legacy="N",
-            )
-            StagingTuserProfileFactory.create(
-                user_account_id=vuseraccount.user_account_id,
-                profile_duns=uei,
-                profile_type_id=4,
-                is_deleted_legacy="N",
-            )
+            create_legacy_user_with_status(uei, f"user{i}@example.com")
 
         db_session.commit()
 
@@ -363,24 +246,13 @@ class TestListLegacyUsers:
         uei = organization.sam_gov_entity.uei
 
         # Create legacy user
-        vuseraccount = StagingVuserAccountFactory.create(
-            email="ignored@example.com",
-            full_name="Ignored User",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
+        create_legacy_user_with_status(uei, "ignored@example.com", "Ignored User")
 
         # Ignore this user
         IgnoredLegacyOrganizationUserFactory.create(
             organization=organization,
             user=user,
-            email=vuseraccount.email,
+            email="ignored@example.com",
         )
 
         db_session.commit()
@@ -408,32 +280,17 @@ class TestListLegacyUsers:
         uei = organization.sam_gov_entity.uei
 
         # Create two user accounts with same email (case insensitive)
-        vuseraccount_old = StagingVuserAccountFactory.create(
-            email="duplicate@example.com",
-            full_name="Old User",
+        create_legacy_user_with_status(
+            uei,
+            "duplicate@example.com",
+            "Old User",
             created_date=datetime(2020, 1, 1, tzinfo=UTC),
-            is_active="Y",
-            is_deleted_legacy="N",
         )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount_old.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-
-        vuseraccount_new = StagingVuserAccountFactory.create(
-            email="DUPLICATE@example.com",  # Case insensitive match
-            full_name="New User",
+        create_legacy_user_with_status(
+            uei,
+            "DUPLICATE@example.com",  # Case insensitive match
+            "New User",
             created_date=datetime(2024, 1, 1, tzinfo=UTC),
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount_new.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
         )
 
         db_session.commit()
@@ -462,36 +319,21 @@ class TestListLegacyUsers:
         )
         uei = organization.sam_gov_entity.uei
 
-        # Create user who is both a member AND has a pending invitation
-        vuseraccount = StagingVuserAccountFactory.create(
-            email="both@example.com",
-            full_name="Both Status User",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
-
-        # Make them a member
-        member_user = UserFactory.create()
-        LinkExternalUserFactory.create(
-            user=member_user,
-            email=vuseraccount.email,
-        )
-        OrganizationUserFactory.create(
-            user=member_user,
+        # Create user as a member (will test that member status takes precedence)
+        create_legacy_user_with_status(
+            uei,
+            "both@example.com",
+            "Both Status User",
+            status=LegacyUserStatus.MEMBER,
             organization=organization,
         )
 
-        # Also give them a pending invitation
+        # Also create a pending invitation for the same user
+        # (Member status should take precedence in the CASE statement)
         OrganizationInvitationFactory.create(
             organization=organization,
             inviter_user=user,
-            invitee_email=vuseraccount.email,
+            invitee_email="both@example.com",
             expires_at=datetime.now(UTC) + timedelta(days=7),
             accepted_at=None,
             rejected_at=None,
@@ -525,17 +367,7 @@ class TestListLegacyUsers:
 
         # Create 5 legacy users
         for i in range(5):
-            vuseraccount = StagingVuserAccountFactory.create(
-                email=f"user{i}@example.com",
-                is_active="Y",
-                is_deleted_legacy="N",
-            )
-            StagingTuserProfileFactory.create(
-                user_account_id=vuseraccount.user_account_id,
-                profile_duns=uei,
-                profile_type_id=4,
-                is_deleted_legacy="N",
-            )
+            create_legacy_user_with_status(uei, f"user{i}@example.com")
 
         db_session.commit()
 
@@ -566,17 +398,7 @@ class TestListLegacyUsers:
 
         # Create 5 legacy users with predictable emails for sorting
         for i in range(5):
-            vuseraccount = StagingVuserAccountFactory.create(
-                email=f"user{i}@example.com",
-                is_active="Y",
-                is_deleted_legacy="N",
-            )
-            StagingTuserProfileFactory.create(
-                user_account_id=vuseraccount.user_account_id,
-                profile_duns=uei,
-                profile_type_id=4,
-                is_deleted_legacy="N",
-            )
+            create_legacy_user_with_status(uei, f"user{i}@example.com")
 
         db_session.commit()
 
@@ -616,18 +438,7 @@ class TestListLegacyUsers:
 
         # Create users with specific names for sorting
         for name in ["Charlie", "Alice", "Bob"]:
-            vuseraccount = StagingVuserAccountFactory.create(
-                email=f"{name.lower()}@example.com",
-                full_name=name,
-                is_active="Y",
-                is_deleted_legacy="N",
-            )
-            StagingTuserProfileFactory.create(
-                user_account_id=vuseraccount.user_account_id,
-                profile_duns=uei,
-                profile_type_id=4,
-                is_deleted_legacy="N",
-            )
+            create_legacy_user_with_status(uei, f"{name.lower()}@example.com", name)
 
         db_session.commit()
 
@@ -664,18 +475,7 @@ class TestListLegacyUsers:
         )
         uei = organization.sam_gov_entity.uei
 
-        vuseraccount = StagingVuserAccountFactory.create(
-            email="test@example.com",
-            full_name="Test User",
-            is_active="Y",
-            is_deleted_legacy="N",
-        )
-        StagingTuserProfileFactory.create(
-            user_account_id=vuseraccount.user_account_id,
-            profile_duns=uei,
-            profile_type_id=4,
-            is_deleted_legacy="N",
-        )
+        create_legacy_user_with_status(uei, "test@example.com", "Test User")
 
         db_session.commit()
 
@@ -743,9 +543,7 @@ class TestListLegacyUsers:
         user, token = create_user_not_in_org(db_session)
 
         # Create a different organization with SAM.gov entity
-        other_organization = OrganizationFactory.create(
-            sam_gov_entity=SamGovEntityFactory.create()
-        )
+        other_organization = OrganizationFactory.create(sam_gov_entity=SamGovEntityFactory.create())
         db_session.commit()
 
         resp = client.post(
@@ -829,17 +627,7 @@ class TestListLegacyUsers:
 
         # Create a few test users
         for i in range(5):
-            vuseraccount = StagingVuserAccountFactory.create(
-                email=f"user{i}@example.com",
-                is_active="Y",
-                is_deleted_legacy="N",
-            )
-            StagingTuserProfileFactory.create(
-                user_account_id=vuseraccount.user_account_id,
-                profile_duns=uei,
-                profile_type_id=4,
-                is_deleted_legacy="N",
-            )
+            create_legacy_user_with_status(uei, f"user{i}@example.com")
 
         db_session.commit()
 
