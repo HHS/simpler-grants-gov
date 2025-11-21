@@ -161,8 +161,10 @@ locals {
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     build-automatic-opportunities = {
-      # Every day at 8am Eastern Time during DST. 9am during non-DST.
-      schedule_expression = "cron(0 13 * * ? *)"
+      task_command = ["poetry", "run", "flask", "task", "build-automatic-opportunities"]
+      # Every day at 7:15am Eastern Time during DST. 8:15am during non-DST.
+      # Runs just before the search load job that runs 30 minutes after the hour.
+      schedule_expression = "cron(15 12 * * ? *)"
       # Only enable in dev/staging/training, do not run in prod
       state            = local.build-automatic-opportunities-state[var.environment]
       cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
