@@ -208,7 +208,7 @@ class TestListLegacyUsers:
     def test_list_legacy_users_200_uses_pagination_defaults(
         self, client, db_session, enable_factory_create
     ):
-        """Test that pagination defaults are applied when not provided"""
+        """Test that default sort_order is applied when not provided"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
@@ -216,35 +216,33 @@ class TestListLegacyUsers:
         )
         uei = organization.sam_gov_entity.uei
 
-        # Create 15 legacy users
-        for i in range(15):
-            create_legacy_user_with_status(uei, f"user{i}@example.com")
+        # Create users with different emails to test sorting
+        create_legacy_user_with_status(uei, "zebra@example.com")
+        create_legacy_user_with_status(uei, "apple@example.com")
+        create_legacy_user_with_status(uei, "banana@example.com")
 
         db_session.commit()
 
-        # Call with empty pagination object - should use all defaults
+        # Call without sort_order - should use default (email ascending)
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
-            json={"pagination": {}},  # Empty pagination uses defaults
+            json={"pagination": {"page_offset": 1, "page_size": 10}},  # No sort_order
         )
 
         assert resp.status_code == 200
         data = resp.get_json()
         assert data["message"] == "Success"
-
-        # Should return first 10 (default page_size)
-        assert len(data["data"]) == 10
-
-        # Should be on page 1 (default page_offset)
-        assert data["pagination_info"]["page_offset"] == 1
-        assert data["pagination_info"]["page_size"] == 10
-        assert data["pagination_info"]["total_records"] == 15
-        assert data["pagination_info"]["total_pages"] == 2
+        assert len(data["data"]) == 3
 
         # Should be sorted by email ascending (default sort_order)
         assert data["pagination_info"]["sort_order"][0]["order_by"] == "email"
         assert data["pagination_info"]["sort_order"][0]["sort_direction"] == "ascending"
+
+        # Verify actual sort order in results
+        assert data["data"][0]["email"] == "apple@example.com"
+        assert data["data"][1]["email"] == "banana@example.com"
+        assert data["data"][2]["email"] == "zebra@example.com"
 
     def test_list_legacy_users_200_excludes_ignored_users(
         self, client, db_session, enable_factory_create
@@ -639,7 +637,7 @@ class TestListLegacyUsers:
     def test_list_legacy_users_200_partial_pagination_uses_defaults(
         self, client, db_session, enable_factory_create
     ):
-        """Test that partial pagination parameters use defaults for missing values"""
+        """Test that omitting sort_order uses the default (email ascending)"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
@@ -647,24 +645,28 @@ class TestListLegacyUsers:
         )
         uei = organization.sam_gov_entity.uei
 
-        # Create a few test users
-        for i in range(5):
-            create_legacy_user_with_status(uei, f"user{i}@example.com")
+        # Create users to test default sorting
+        create_legacy_user_with_status(uei, "zulu@example.com")
+        create_legacy_user_with_status(uei, "alpha@example.com")
 
         db_session.commit()
 
-        # Provide only page_size, should use default page_offset=1
+        # Provide page_size and page_offset but omit sort_order
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
-            json={"pagination": {"page_size": 3}},  # Only page_size provided
+            json={"pagination": {"page_size": 10, "page_offset": 1}},  # No sort_order
         )
 
         assert resp.status_code == 200
         data = resp.get_json()
-        assert len(data["data"]) == 3
-        assert data["pagination_info"]["page_offset"] == 1  # Default
-        assert data["pagination_info"]["page_size"] == 3
+        assert len(data["data"]) == 2
+        # Should use default sort_order (email ascending)
+        assert data["pagination_info"]["sort_order"][0]["order_by"] == "email"
+        assert data["pagination_info"]["sort_order"][0]["sort_direction"] == "ascending"
+        # Verify sort order
+        assert data["data"][0]["email"] == "alpha@example.com"
+        assert data["data"][1]["email"] == "zulu@example.com"
 
     @pytest.mark.parametrize(
         "privilege_set,expected_status",

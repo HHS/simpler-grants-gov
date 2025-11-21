@@ -4,8 +4,7 @@ from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMi
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
 from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
-from src.pagination.pagination_models import SortDirection
-from src.pagination.pagination_schema import BasePaginationSchema
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -375,46 +374,11 @@ class LegacyUserFilterSchema(Schema):
     )
 
 
-# Custom pagination schema with defaults: page_size=10, page_offset=1
-LegacyUserSortOrderSchema = Schema.from_dict(
-    {
-        "order_by": fields.String(
-            validate=[validators.OneOf(["email", "first_name", "last_name", "created_date"])],
-            required=True,
-            metadata={"description": "The field to sort the response by"},
-        ),
-        "sort_direction": fields.Enum(
-            SortDirection,
-            required=True,
-            metadata={"description": "Whether to sort the response ascending or descending"},
-        ),
-    },
-    name="LegacyUserSortOrderSchema",
-)
-
-LegacyUserPaginationSchema = BasePaginationSchema.from_dict(
-    {
-        "sort_order": fields.List(
-            fields.Nested(LegacyUserSortOrderSchema()),
-            metadata={"description": "The list of sorting rules"},
-            validate=[validators.Length(min=1, max=5)],
-            load_default=[{"order_by": "email", "sort_direction": "ascending"}],
-        ),
-        "page_size": fields.Integer(
-            load_default=10,  # Default page size of 10
-            validate=[validators.Range(min=1, max=5000)],
-            metadata={"description": "The size of the page to fetch", "example": 10},
-        ),
-        "page_offset": fields.Integer(
-            load_default=1,  # Default to first page
-            validate=[validators.Range(min=1)],
-            metadata={
-                "description": "The page number to fetch, starts counting from 1",
-                "example": 1,
-            },
-        ),
-    },
-    name="LegacyUserPaginationSchema",
+# Generate pagination schema with defaults for sort order
+LegacyUserPaginationSchema = generate_pagination_schema(
+    "LegacyUserPaginationSchema",
+    ["email", "first_name", "last_name", "created_date"],
+    default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
 )
 
 
@@ -431,7 +395,7 @@ class LegacyUsersListRequestSchema(Schema):
         LegacyUserPaginationSchema(),
         required=True,
         metadata={
-            "description": "Pagination parameters for legacy user list (defaults: page_size=10, page_offset=1, sort by email ascending)"
+            "description": "Pagination parameters for legacy user list (default sort: email ascending)"
         },
     )
 
