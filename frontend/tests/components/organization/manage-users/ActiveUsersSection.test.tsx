@@ -11,13 +11,12 @@ import { ActiveUsersSection } from "src/components/manageUsers/ActiveUsersSectio
 
 type TranslationFn = (key: string) => string;
 
-type UseTranslationsFn = (ns: string) => TranslationFn;
+const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
+  (_ns: string) => Promise.resolve((key: string) => key),
+);
 
-const useTranslationsImpl: UseTranslationsFn = (_ns: string) => (key: string) =>
-  key;
-
-jest.mock("next-intl", () => ({
-  useTranslations: (ns: string) => useTranslationsImpl(ns),
+jest.mock("next-intl/server", () => ({
+  getTranslations: (ns: string) => getTranslationsMock(ns),
 }));
 
 type GetOrgUsersFn = (organizationId: string) => Promise<UserDetail[]>;
