@@ -24,7 +24,7 @@ def _transform_nested_field_names(
 
     # First, iterate over transform config to maintain correct order per XSD
     for field_name, field_config in transform_config_root.items():
-        # Skip metadata config fields
+        # Skip metadata config fields (both single and double underscore)
         if field_name.startswith("_"):
             continue
 
@@ -33,12 +33,6 @@ def _transform_nested_field_names(
             continue
 
         field_value = data[field_name]
-
-        # Skip metadata fields
-        if field_name.startswith("__"):
-            result[field_name] = field_value
-            processed_fields.add(field_name)
-            continue
 
         # Transform field name if configured
         if isinstance(field_config, dict):

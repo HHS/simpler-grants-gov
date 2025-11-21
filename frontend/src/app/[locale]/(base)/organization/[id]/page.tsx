@@ -28,7 +28,7 @@ export async function generateMetadata({
     if (!session?.token) {
       throw new Error("not logged in");
     }
-    const organizationDetails = await getOrganizationDetails(session.token, id);
+    const organizationDetails = await getOrganizationDetails(id);
     title = `${t("OrganizationDetail.pageTitle")} - ${organizationDetails.sam_gov_entity.legal_business_name || ""}`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
@@ -45,12 +45,10 @@ export async function generateMetadata({
 async function OrganizationDetailPage({ params }: OrganizationDetailPageProps) {
   const { id } = await params;
 
-  const session = await getSession();
-
   return (
     <AuthorizationGate
       resourcePromises={{
-        organizationDetails: getOrganizationDetails(session?.token || "", id),
+        organizationDetails: getOrganizationDetails(id),
       }}
       requiredPrivileges={[
         {
