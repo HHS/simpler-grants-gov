@@ -2,7 +2,7 @@ import { UnauthorizedError } from "src/errors";
 import { getOrganizationUsers } from "src/services/fetch/fetchers/organizationsFetcher";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import React from "react";
 import { Alert } from "@trussworks/react-uswds";
 
@@ -34,7 +34,7 @@ interface ActiveUsersSectionProps {
 export async function ActiveUsersSection({
   organizationId,
 }: ActiveUsersSectionProps) {
-  const t = useTranslations("ManageUsers");
+  const t = await getTranslations("ManageUsers");
   let userData: UserDetail[] = [];
   let hasError = false;
 
