@@ -789,7 +789,6 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_structure": {
             "root_element": "BudgetInformation",
             "root_namespace_prefix": "SF424A",  # Use SF424A: prefix for root element per XSD
-            "version": "2.0",
             # Required attributes for XSD validation
             "root_attributes": {
                 "programType": "program_type",  # Maps to input field
@@ -805,17 +804,12 @@ FORM_XML_TRANSFORM_RULES = {
     # Required first child element for XSD validation
     "form_version_identifier": {
         "xml_transform": {
-            "target": "glob:FormVersionIdentifier",
+            "target": "FormVersionIdentifier",
             "namespace": "glob",
         }
     },
-    # Program type - required root attribute (mapped via xml_structure.root_attributes)
-    "program_type": {
-        "xml_transform": {
-            "target": "programType",
-            "type": "attribute",  # This will be handled as a root attribute
-        }
-    },
+    # Note: program_type is handled as a root attribute via xml_structure.root_attributes
+    # and should NOT have a separate xml_transform rule
     # Activity title - appears as an attribute on line items
     "activity_title": {
         "xml_transform": {
@@ -845,7 +839,167 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "BudgetTotalContributionAmount",
         }
     },
-    # Forecasted Cash Needs - Section D
+    # CFDA/Assistance Listing Number - appears in Section A
+    "assistance_listing_number": {
+        "xml_transform": {
+            "target": "CFDANumber",
+        }
+    },
+    # Section A - Budget Summary field mappings
+    "federal_estimated_unobligated_amount": {
+        "xml_transform": {
+            "target": "BudgetFederalEstimatedUnobligatedAmount",
+        }
+    },
+    "non_federal_estimated_unobligated_amount": {
+        "xml_transform": {
+            "target": "BudgetNonFederalEstimatedUnobligatedAmount",
+        }
+    },
+    "federal_new_or_revised_amount": {
+        "xml_transform": {
+            "target": "BudgetFederalNewOrRevisedAmount",
+        }
+    },
+    "non_federal_new_or_revised_amount": {
+        "xml_transform": {
+            "target": "BudgetNonFederalNewOrRevisedAmount",
+        }
+    },
+    # total_amount is already mapped above for multiple sections
+    "total_new_or_revised_amount": {
+        "xml_transform": {
+            "target": "BudgetTotalNewOrRevisedAmount",
+        }
+    },
+    # Section B - Budget Categories field mappings
+    "personnel_amount": {
+        "xml_transform": {
+            "target": "BudgetPersonnelRequestedAmount",
+        }
+    },
+    "fringe_benefits_amount": {
+        "xml_transform": {
+            "target": "BudgetFringeBenefitsRequestedAmount",
+        }
+    },
+    "travel_amount": {
+        "xml_transform": {
+            "target": "BudgetTravelRequestedAmount",
+        }
+    },
+    "equipment_amount": {
+        "xml_transform": {
+            "target": "BudgetEquipmentRequestedAmount",
+        }
+    },
+    "supplies_amount": {
+        "xml_transform": {
+            "target": "BudgetSuppliesRequestedAmount",
+        }
+    },
+    "contractual_amount": {
+        "xml_transform": {
+            "target": "BudgetContractualRequestedAmount",
+        }
+    },
+    "construction_amount": {
+        "xml_transform": {
+            "target": "BudgetConstructionRequestedAmount",
+        }
+    },
+    # other_amount already mapped above for multiple sections
+    "total_direct_charge_amount": {
+        "xml_transform": {
+            "target": "BudgetTotalDirectChargesAmount",
+        }
+    },
+    "total_indirect_charge_amount": {
+        "xml_transform": {
+            "target": "BudgetIndirectChargesAmount",
+        }
+    },
+    # total_amount already mapped
+    "program_income_amount": {
+        "xml_transform": {
+            "target": "ProgramIncomeAmount",
+        }
+    },
+    # Section E - Federal Funds Needed field mappings
+    "first_year_amount": {
+        "xml_transform": {
+            "target": "BudgetFirstYearAmount",
+        }
+    },
+    "second_year_amount": {
+        "xml_transform": {
+            "target": "BudgetSecondYearAmount",
+        }
+    },
+    "third_year_amount": {
+        "xml_transform": {
+            "target": "BudgetThirdYearAmount",
+        }
+    },
+    "fourth_year_amount": {
+        "xml_transform": {
+            "target": "BudgetFourthYearAmount",
+        }
+    },
+    # Budget sections decomposition
+    # Transform row-oriented activity_line_items array to column-oriented arrays
+    # organized by section type (budget_summary, budget_categories, etc.)
+    #
+    # Note: This transformation handles the data restructuring step. The XML generation
+    # phase will handle:
+    # - Adding activity_title and assistance_listing_number as XML attributes on line items
+    # - Using different XML element names for line items vs totals per XSD
+    # - Proper XML namespace handling and element ordering
+    #
+    # XSD Structure per section:
+    # - BudgetSummary: SummaryLineItem (with activityTitle & CFDANumber) + SummaryTotals
+    # - BudgetCategories: CategorySet (with activityTitle) + CategoryTotals
+    # - NonFederalResources: ResourceLineItem (with activityTitle) + ResourceTotals
+    # - FederalFundsNeeded: FundsLineItem (with activityTitle) + FundsTotals
+    "budget_sections": {
+        "xml_transform": {
+            "type": "conditional",
+            # No target - array decomposition outputs multiple fields at root level per XSD
+            "conditional_transform": {
+                "type": "array_decomposition",
+                "source_array_field": "activity_line_items",
+                "field_mappings": {
+                    # Section A - Budget Summary (XSD requires BudgetSummary with SummaryLineItem/SummaryTotals)
+                    # Note: CFDANumber (assistance_listing_number) is a child element, not an attribute
+                    "BudgetSummary": {
+                        "item_field": "budget_summary",
+                        "item_wrapper": "SummaryLineItem",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_budget_summary",
+                        "total_wrapper": "SummaryTotals",
+                    },
+                    # Section B - Budget Categories (XSD requires CategorySet/CategoryTotals)
+                    "BudgetCategories": {
+                        "item_field": "budget_categories",
+                        "item_wrapper": "CategorySet",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_budget_categories",
+                        "total_wrapper": "CategoryTotals",
+                    },
+                    # Section C - Non-Federal Resources (XSD requires ResourceLineItem/ResourceTotals)
+                    "NonFederalResources": {
+                        "item_field": "non_federal_resources",
+                        "item_wrapper": "ResourceLineItem",
+                        "item_attributes": ["activity_title"],
+                        "total_field": "total_non_federal_resources",
+                        "total_wrapper": "ResourceTotals",
+                    },
+                    # Note: FederalFundsNeeded moved to separate config after BudgetForecastedCashNeeds for correct XSD order
+                },
+            },
+        }
+    },
+    # Forecasted Cash Needs - Section D (after budget sections per XSD order)
     # This requires pivoting the data structure from JSON to XML format
     "forecasted_cash_needs": {
         "xml_transform": {
@@ -884,103 +1038,50 @@ FORM_XML_TRANSFORM_RULES = {
             },
         }
     },
-    # Budget sections decomposition
-    # Transform row-oriented activity_line_items array to column-oriented arrays
-    # organized by section type (budget_summary, budget_categories, etc.)
-    #
-    # Note: This transformation handles the data restructuring step. The XML generation
-    # phase (not shown here) will handle:
-    # - Adding activity_title as an XML attribute to each line item
-    # - Using different XML element names for line items vs totals
-    #   (e.g., ResourceLineItem vs ResourceTotals)
-    # - Proper XML namespace handling and element ordering
-    #
-    # Example transformation - this input structure:
-    # {
-    #   "activity_line_items": [
-    #     {
-    #       "activity_title": "Activity 1",
-    #       "budget_summary": {"total_amount": "5000.00"},
-    #       "budget_categories": {"personnel_amount": "2000.00"},
-    #       "non_federal_resources": {"applicant_amount": "500.00"},
-    #       "federal_fund_estimates": {"first_year_amount": "5000.00"}
-    #     },
-    #     {
-    #       "activity_title": "Activity 2",
-    #       "budget_summary": {"total_amount": "8000.00"},
-    #       "budget_categories": {"personnel_amount": "3000.00"},
-    #       "non_federal_resources": {"applicant_amount": "1000.00"},
-    #       "federal_fund_estimates": {"first_year_amount": "8000.00"}
-    #     }
-    #   ],
-    #   "total_budget_summary": {"total_amount": "13000.00"},
-    #   "total_budget_categories": {"personnel_amount": "5000.00"},
-    #   "total_non_federal_resources": {"applicant_amount": "1500.00"},
-    #   "total_federal_fund_estimates": {"first_year_amount": "13000.00"}
-    # }
-    #
-    # Becomes this output structure:
-    # {
-    #   "BudgetSummaries": [
-    #     {"total_amount": "5000.00"},    # Activity 1
-    #     {"total_amount": "8000.00"},    # Activity 2
-    #     {"total_amount": "13000.00"}    # Total
-    #   ],
-    #   "BudgetCategories": [
-    #     {"personnel_amount": "2000.00"},  # Activity 1
-    #     {"personnel_amount": "3000.00"},  # Activity 2
-    #     {"personnel_amount": "5000.00"}   # Total
-    #   ],
-    #   "NonFederalResources": [
-    #     {"applicant_amount": "500.00"},   # Activity 1
-    #     {"applicant_amount": "1000.00"},  # Activity 2
-    #     {"applicant_amount": "1500.00"}   # Total
-    #   ],
-    #   "FederalFundEstimates": [
-    #     {"first_year_amount": "5000.00"},  # Activity 1
-    #     {"first_year_amount": "8000.00"},  # Activity 2
-    #     {"first_year_amount": "13000.00"}  # Total
-    #   ]
-    # }
-    "budget_sections": {
+    # Section E - Federal Funds Needed (separate from budget_sections for correct XSD order)
+    # Must come AFTER BudgetForecastedCashNeeds per XSD
+    "budget_sections_federal_funds": {
         "xml_transform": {
             "type": "conditional",
-            "target": "BudgetSections",
+            # No target - array decomposition outputs fields at root level per XSD
             "conditional_transform": {
                 "type": "array_decomposition",
                 "source_array_field": "activity_line_items",
                 "field_mappings": {
-                    "BudgetSummaries": {
-                        "item_field": "budget_summary",
-                        "item_wrapper": "SummaryLineItem",
-                        "item_attributes": ["activity_title"],
-                        "total_field": "total_budget_summary",
-                        "total_wrapper": "SummaryTotals",
-                    },
-                    "BudgetCategories": {
-                        "item_field": "budget_categories",
-                        "item_wrapper": "CategoryLineItem",
-                        "item_attributes": ["activity_title"],
-                        "total_field": "total_budget_categories",
-                        "total_wrapper": "CategoryTotals",
-                    },
-                    "NonFederalResources": {
-                        "item_field": "non_federal_resources",
-                        "item_wrapper": "ResourceLineItem",
-                        "item_attributes": ["activity_title"],
-                        "total_field": "total_non_federal_resources",
-                        "total_wrapper": "ResourceTotals",
-                    },
-                    "FederalFundEstimates": {
+                    # Section E - Federal Funds Needed (XSD requires FundsLineItem/FundsTotals)
+                    "FederalFundsNeeded": {
                         "item_field": "federal_fund_estimates",
-                        "item_wrapper": "EstimateLineItem",
+                        "item_wrapper": "FundsLineItem",
                         "item_attributes": ["activity_title"],
                         "total_field": "total_federal_fund_estimates",
-                        "total_wrapper": "EstimateTotals",
+                        "total_wrapper": "FundsTotals",
                     },
                 },
             },
         }
+    },
+    # Section F - Other Information (nested object with child field mappings)
+    # Must be LAST per XSD sequence order
+    "other_information": {
+        "xml_transform": {
+            "target": "OtherInformation",
+            "type": "nested_object",
+        },
+        "direct_charges_explanation": {
+            "xml_transform": {
+                "target": "OtherDirectChargesExplanation",
+            }
+        },
+        "indirect_charges_explanation": {
+            "xml_transform": {
+                "target": "OtherIndirectChargesExplanation",
+            }
+        },
+        "remarks": {
+            "xml_transform": {
+                "target": "Remarks",
+            }
+        },
     },
 }
 
@@ -996,6 +1097,7 @@ SF424a_v1_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=uuid.UUID("e89a8372-1a6e-43fb-897f-29c89f243f9e"),
     form_type=FormType.SF424A,
     sgg_version="1.0",
