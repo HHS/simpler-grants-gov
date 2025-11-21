@@ -8,8 +8,13 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
 from pydantic import BaseModel
 from requests.adapters import HTTPAdapter
+from sqlalchemy import select
 
+import src.adapters.db as db
+from src.db.models.user_models import LegacyCertificate
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 
@@ -100,3 +105,41 @@ def get_soap_client_certificate(urlencoded_cert: str) -> SOAPClientCertificate:
         issuer=cert.issuer.rfc4514_string(),
         serial_number=cert.serial_number,
     )
+
+
+def validate_certificate(
+    db_session: db.Session, soap_auth: SOAPAuth | None, api_name: str
+) -> LegacyCertificate:
+    if not soap_auth:
+        logger.warning(
+            "soap_client_certificate: no soap auth",
+        )
+        raise SOAPClientCertificateLookupError("no soap auth")
+
+    serial_number_str = str(soap_auth.certificate.serial_number)
+    legacy_certificate = db_session.execute(
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number_str)
+    ).scalar_one_or_none()
+
+    if not legacy_certificate:
+        logger.warning(
+            "soap_client_certificate: could not retrieve client cert for serial number",
+        )
+        raise SOAPClientCertificateLookupError("could not retrieve client cert for serial number")
+
+    extra_data = {"legacy_certificate_id": legacy_certificate.legacy_certificate_id}
+    if legacy_certificate.expiration_date <= get_now_us_eastern_date():
+        logger.warning(
+            "soap_client_certificate: certificate is expired",
+            extra=extra_data,
+        )
+        raise SOAPClientCertificateLookupError("certificate is expired")
+
+    if not legacy_certificate.agency and api_name == SimplerSoapAPI.GRANTORS:
+        logger.warning(
+            "soap_client_certificate: certificate does not have agency",
+            extra=extra_data,
+        )
+        raise SOAPClientCertificateLookupError("certificate does not have agency")
+
+    return legacy_certificate

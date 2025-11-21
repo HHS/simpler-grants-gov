@@ -1,9 +1,16 @@
 from collections.abc import Iterator
+from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
 
-from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from src.legacy_soap_api.legacy_soap_api_schemas import (
+    FaultMessage,
+    SOAPOperationNotSupported,
+    SOAPRequest,
+    SOAPResponse,
+)
 
 
 def xml_bytes() -> bytes:
@@ -18,6 +25,46 @@ def xml_streamer() -> Iterator:
     yield b"<soap:Envelope><Body><GetOpportunityListResponse><OpportunityDetails>"
     yield (b"<ns5:OpeningDate>2025-07-20-04:00</ns5:OpeningDate>")
     yield b"</OpportunityDetails></GetOpportunityListResponse></Body></soap:Envelope>"
+
+
+def test_legacy_soap_api_request_raises_error_if_soap_config_privileges_are_none() -> None:
+    with patch(
+        "src.legacy_soap_api.legacy_soap_api_schemas.get_soap_operation_config"
+    ) as mock_config:
+        mock_config.return_value = SOAPOperationConfig(
+            request_operation_name="GetApplicationZipRequest",
+            response_operation_name="GetApplicationZipResponse",
+            compare_endpoints=False,
+            namespace_keymap={
+                "GetApplicationZipResponse": "ns2",
+            },
+            privileges=None,
+            is_mtom=True,
+        )
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            "<gran:GrantsGovTrackingNumber>GRANT9000000</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        with pytest.raises(
+            SOAPOperationNotSupported,
+            match="Simpler grantors SOAP API has no privileges set for GetApplicationZipRequest",
+        ):
+            SOAPRequest(
+                data=request_xml_bytes,
+                full_path="x",
+                headers={},
+                method="POST",
+                api_name=SimplerSoapAPI.GRANTORS,
+                operation_name="GetApplicationZipRequest",
+            ).get_soap_request_operation_config()
 
 
 def test_legacy_soap_api_response_schema_missing_required_fields() -> None:

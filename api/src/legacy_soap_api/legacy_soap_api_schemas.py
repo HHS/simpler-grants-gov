@@ -74,6 +74,11 @@ class SOAPRequest(BaseModel):
                 f"Simpler {self.api_name.value} SOAP API does not support {operation_name}"
             )
 
+        if operation_config.privileges is None:
+            raise SOAPOperationNotSupported(
+                f"Simpler {self.api_name.value} SOAP API has no privileges set for {operation_name}"
+            )
+
         return operation_config
 
 

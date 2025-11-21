@@ -7,10 +7,24 @@ from typing import Any
 
 from pydantic import Field
 
+from src.constants.lookup_constants import Privilege
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+ENDPOINT_PRIVILEGES = dict(
+    GetSubmissionListExpandedRequest=Privilege.LEGACY_AGENCY_VIEWER,
+    GetApplicationRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
+    GetApplicationZipRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
+    ConfirmApplicationDeliveryRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
+    UpdateApplicationInfoReqest=Privilege.LEGACY_AGENCY_ASSIGNER,
+)
+
+
+class SOAPOperationConfigError(Exception):
+    pass
 
 
 class LegacySoapAPIConfig(PydanticBaseEnvConfig):
@@ -71,6 +85,7 @@ class SOAPOperationConfig:
     compare_endpoints: bool = False
     is_mtom: bool = False
     always_call_simpler: bool = False
+    privileges: list[Privilege] | None = None
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -119,6 +134,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
                 "PackageID": None,  # No namespace prefix
                 "SchemaURL": None,  # No namespace prefix
             },
+            privileges=[],
         )
     },
     SimplerSoapAPI.GRANTORS: {
@@ -126,6 +142,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
             is_mtom=True,
+            privileges=[ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]],
         )
     },
 }
