@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from apiflask.exceptions import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import select
 
@@ -50,11 +51,22 @@ def get_application_zip_response(
             db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
         )
         if soap_config and soap_config.privileges is not None:
-            verify_access(
-                certificate.user,
-                set(soap_config.privileges),
-                application.application,
-            )
+            try:
+                verify_access(
+                    certificate.user,
+                    set(soap_config.privileges),
+                    application.application,
+                )
+            except HTTPError as e:
+                logger.info(
+                    "User did not have permission to access this application",
+                    extra={
+                        "user_id": certificate.user.user_id,
+                        "application_submission_id": application.application_submission_id,
+                        "priviliges": soap_config.privileges,
+                    },
+                )
+                raise e
 
         try:
             filestream = file_util.open_stream(application.download_path, mode="rb")

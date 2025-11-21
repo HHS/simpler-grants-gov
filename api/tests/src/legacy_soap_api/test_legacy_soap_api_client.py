@@ -501,7 +501,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
-            auth=soap_client_certificate,
+            auth=SOAPAuth(certificate=soap_client_certificate),
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
