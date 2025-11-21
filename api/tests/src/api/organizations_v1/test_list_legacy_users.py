@@ -293,7 +293,8 @@ class TestListLegacyUsers:
         )
 
         # Ensure organization has UEI but no matching legacy users
-        organization.sam_gov_entity = SamGovEntityFactory.create(uei="TEST123456789")
+        sam_gov_entity = SamGovEntityFactory.create()
+        organization.sam_gov_entity = sam_gov_entity
         db_session.commit()
 
         resp = client.post(
@@ -307,6 +308,59 @@ class TestListLegacyUsers:
         assert data["message"] == "Success"
         assert data["data"] == []
         assert data["pagination_info"]["total_records"] == 0
+
+    def test_list_legacy_users_200_uses_pagination_defaults(
+        self, client, db_session, enable_factory_create
+    ):
+        """Test that pagination defaults are applied when not provided"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        sam_gov_entity = SamGovEntityFactory.create()
+        organization.sam_gov_entity = sam_gov_entity
+        uei = sam_gov_entity.uei
+
+        # Create 15 legacy users
+        for i in range(15):
+            vuseraccount = StagingVuserAccountFactory.create(
+                email=f"user{i}@example.com",
+                is_active="Y",
+                is_deleted_legacy="N",
+            )
+            StagingTuserProfileFactory.create(
+                user_account_id=vuseraccount.user_account_id,
+                profile_duns=uei,
+                profile_type_id=4,
+                is_deleted_legacy="N",
+            )
+
+        db_session.commit()
+
+        # Call with empty pagination object - should use all defaults
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/legacy-users",
+            headers={"X-SGG-Token": token},
+            json={"pagination": {}},  # Empty pagination uses defaults
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["message"] == "Success"
+
+        # Should return first 10 (default page_size)
+        assert len(data["data"]) == 10
+
+        # Should be on page 1 (default page_offset)
+        assert data["pagination_info"]["page_offset"] == 1
+        assert data["pagination_info"]["page_size"] == 10
+        assert data["pagination_info"]["total_records"] == 15
+        assert data["pagination_info"]["total_pages"] == 2
+
+        # Should be sorted by email ascending (default sort_order)
+        assert data["pagination_info"]["sort_order"][0]["order_by"] == "email"
+        assert data["pagination_info"]["sort_order"][0]["sort_direction"] == "ascending"
 
     def test_list_legacy_users_200_excludes_ignored_users(
         self, client, db_session, enable_factory_create
@@ -787,25 +841,47 @@ class TestListLegacyUsers:
 
         assert resp.status_code == 422
 
-    def test_list_legacy_users_422_missing_pagination(
+    def test_list_legacy_users_200_partial_pagination_uses_defaults(
         self, client, db_session, enable_factory_create
     ):
-        """Test that missing pagination returns 422"""
+        """Test that partial pagination parameters use defaults for missing values"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
-        organization.sam_gov_entity = SamGovEntityFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create()
+        organization.sam_gov_entity = sam_gov_entity
+        uei = sam_gov_entity.uei
+
+        # Create a few test users
+        for i in range(5):
+            vuseraccount = StagingVuserAccountFactory.create(
+                email=f"user{i}@example.com",
+                is_active="Y",
+                is_deleted_legacy="N",
+            )
+            StagingTuserProfileFactory.create(
+                user_account_id=vuseraccount.user_account_id,
+                profile_duns=uei,
+                profile_type_id=4,
+                is_deleted_legacy="N",
+            )
+
         db_session.commit()
 
+        # Provide only page_size, should use default page_offset=1
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
-            json={},  # Missing required pagination
+            json={"pagination": {"page_size": 3}},  # Only page_size provided
         )
 
-        assert resp.status_code == 422
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert len(data["data"]) == 3
+        assert data["pagination_info"]["page_offset"] == 1  # Default
+        assert data["pagination_info"]["page_size"] == 3
 
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
