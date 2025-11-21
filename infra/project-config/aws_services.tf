@@ -7,6 +7,7 @@ locals {
     "backup",
     "cloudfront",
     "cloudwatch",
+    "config",
     "cognito-idp",
     "dynamodb",
     "ec2",
