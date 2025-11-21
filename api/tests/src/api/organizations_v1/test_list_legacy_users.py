@@ -492,9 +492,7 @@ class TestListLegacyUsers:
         )
         uei = organization.sam_gov_entity.uei
 
-        create_legacy_user_with_status(
-            uei, "test@example.com", first_name="Test", last_name="User"
-        )
+        create_legacy_user_with_status(uei, "test@example.com", first_name="Test", last_name="User")
 
         db_session.commit()
 

@@ -1,8 +1,10 @@
 import logging
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, select
+from sqlalchemy.sql import Select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
@@ -52,14 +54,11 @@ def get_pending_invitation_emails_for_organization(
     Returns a set of lowercase email addresses for efficient lookup.
     Only includes non-expired invitations that haven't been accepted or rejected.
     """
-    query = (
-        select(func.lower(OrganizationInvitation.invitee_email))
-        .where(
-            OrganizationInvitation.organization_id == organization_id,
-            OrganizationInvitation.accepted_at.is_(None),
-            OrganizationInvitation.rejected_at.is_(None),
-            OrganizationInvitation.expires_at > func.now(),
-        )
+    query = select(func.lower(OrganizationInvitation.invitee_email)).where(
+        OrganizationInvitation.organization_id == organization_id,
+        OrganizationInvitation.accepted_at.is_(None),
+        OrganizationInvitation.rejected_at.is_(None),
+        OrganizationInvitation.expires_at > func.now(),
     )
 
     results = db_session.execute(query).scalars().all()
@@ -86,7 +85,7 @@ def compute_user_status(
 
 def build_deduplicated_legacy_user_query(
     db_session: db.Session, organization_id: UUID, uei: str
-) -> tuple[select, dict]:
+) -> tuple[Select[Any], dict[str, Any]]:
     """
     Build a query for deduplicated legacy users.
 
@@ -131,16 +130,13 @@ def build_deduplicated_legacy_user_query(
     ).cte("deduplicated_users")
 
     # Select from CTE where row_num = 1 (most recent for each email)
-    query = (
-        select(
-            deduplicated_cte.c.user_account_id,
-            deduplicated_cte.c.email,
-            deduplicated_cte.c.first_name,
-            deduplicated_cte.c.last_name,
-            deduplicated_cte.c.created_date,
-        )
-        .where(deduplicated_cte.c.row_num == 1)
-    )
+    query = select(
+        deduplicated_cte.c.user_account_id,
+        deduplicated_cte.c.email,
+        deduplicated_cte.c.first_name,
+        deduplicated_cte.c.last_name,
+        deduplicated_cte.c.created_date,
+    ).where(deduplicated_cte.c.row_num == 1)
 
     # Map of field names to CTE columns for sorting
     column_map = {
@@ -182,28 +178,29 @@ def list_legacy_users_and_verify_access(
         404: Organization not found
         400: Organization does not have a UEI
     """
-    # 1. Get organization and verify access
+    # Get organization and verify access
     organization = get_organization_and_verify_access(db_session, user, organization_id)
 
-    # 2. Get organization UEI from SAM.gov entity
+    # Get organization UEI from SAM.gov entity
     uei = organization.sam_gov_entity.uei if organization.sam_gov_entity else None
     if not uei:
         raise_flask_error(400, "Organization does not have a UEI")
 
-    # 3. Parse request parameters
+    # Parse request parameters
     params = LegacyUserListParams.model_validate(request_data)
     status_filters = None
     if params.filters and params.filters.get("status") and params.filters["status"].get("one_of"):
         status_filters = set(params.filters["status"]["one_of"])
 
-    # 4. Fetch member and invitation emails (small datasets, queried once)
+    # Fetch member and invitation emails (small datasets, queried once)
     member_emails = get_member_emails_for_organization(db_session, organization_id)
     invitation_emails = get_pending_invitation_emails_for_organization(db_session, organization_id)
 
-    # 5. Build deduplicated query using CTE with window function
+    # Build deduplicated query using CTE with window function
+    base_query: Select[Any]
     base_query, column_map = build_deduplicated_legacy_user_query(db_session, organization_id, uei)
 
-    # 6. Apply sorting
+    # Apply sorting
     first_sort = params.pagination.sort_order[0]
     order_by_column = column_map.get(first_sort.order_by, column_map["email"])
     if first_sort.sort_direction == "descending":
@@ -211,7 +208,7 @@ def list_legacy_users_and_verify_access(
     else:
         base_query = base_query.order_by(asc(order_by_column))
 
-    # 7. Execute query with pagination
+    # Execute query with pagination
     total_count_query = select(func.count()).select_from(base_query.subquery())
     total_records = db_session.execute(total_count_query).scalar_one()
 
@@ -219,7 +216,7 @@ def list_legacy_users_and_verify_access(
     paginated_query = base_query.offset(offset).limit(params.pagination.page_size)
     users = db_session.execute(paginated_query).all()
 
-    # 8. Compute status for each user (Python, easy to understand)
+    # Compute status for each user (Python, easy to understand)
     users_with_status = []
     for user_record in users:
         status = compute_user_status(user_record.email, member_emails, invitation_emails)
@@ -228,14 +225,16 @@ def list_legacy_users_and_verify_access(
         if status_filters and status not in status_filters:
             continue
 
-        users_with_status.append({
-            "email": user_record.email,
-            "first_name": user_record.first_name,
-            "last_name": user_record.last_name,
-            "status": status,
-        })
+        users_with_status.append(
+            {
+                "email": user_record.email,
+                "first_name": user_record.first_name,
+                "last_name": user_record.last_name,
+                "status": status,
+            }
+        )
 
-    # 9. Build pagination info
+    # Build pagination info
     # Note: total_records and total_pages don't account for status filtering,
     # but this is acceptable since status filtering is done in Python
     total_pages = (total_records + params.pagination.page_size - 1) // params.pagination.page_size
