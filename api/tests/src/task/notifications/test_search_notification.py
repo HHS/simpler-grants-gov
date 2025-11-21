@@ -10,7 +10,7 @@ from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog, UserSavedSearch
-from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.config import EmailNotificationConfig, _reset_email_config
 from src.task.notifications.constants import NotificationReason
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.search_notification import (
@@ -44,19 +44,20 @@ def setup_opensearch_data(opportunity_index_alias, search_client):
     # Swap the search index alias
     search_client.swap_alias_index(index_name, opportunity_index_alias)
 
-    yield index_name
+    return index_name
 
 
 @pytest.fixture(autouse=True)
 def clear_data(db_session):
-    """Clear all notification logs"""
+    """Clear all notification logs and reset email config singleton"""
+    _reset_email_config()
     cascade_delete_from_db_table(db_session, UserNotificationLog)
     cascade_delete_from_db_table(db_session, Opportunity)
     cascade_delete_from_db_table(db_session, UserSavedSearch)
     cascade_delete_from_db_table(db_session, SuppressedEmail)
 
 
-@pytest.fixture()
+@pytest.fixture
 def notification_task(db_session, search_client):
     notification_config = EmailNotificationConfig()
     notification_config.reset_emails_without_sending = False

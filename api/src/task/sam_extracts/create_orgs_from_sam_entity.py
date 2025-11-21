@@ -19,7 +19,6 @@ class CreateOrgsFromSamEntityTask(Task):
 
         NEW_ORGANIZATION_CREATED_COUNT = "new_organization_created_count"
         NEW_USER_ORGANIZATION_CREATED_COUNT = "new_organization_user_created_count"
-        NEW_ORGANIZATION_OWNER_COUNT = "new_organization_owner_count"
 
     def run_task(self) -> None:
         with self.db_session.begin():
@@ -50,7 +49,6 @@ class CreateOrgsFromSamEntityTask(Task):
             metric_mapping = {
                 "new_organization_created_count": self.Metrics.NEW_ORGANIZATION_CREATED_COUNT,
                 "new_organization_user_created_count": self.Metrics.NEW_USER_ORGANIZATION_CREATED_COUNT,
-                "new_organization_owner_count": self.Metrics.NEW_ORGANIZATION_OWNER_COUNT,
             }
             if metric_name in metric_mapping:
                 self.increment(metric_mapping[metric_name])

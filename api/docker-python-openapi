@@ -1,0 +1,32 @@
+FROM --platform=linux/amd64 amazonlinux:2023 AS graphviz-downloader
+
+RUN dnf -y install cpio && \
+    dnf -y install --downloadonly --downloaddir=/tmp/rpms \
+    graphviz-2.44.0-25.amzn2023.0.7 graphviz-gd cairo pango librsvg2 && \
+    mkdir -p /runtime/rootfs && cd /runtime/rootfs && \
+    for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
+    rm -rf /tmp/rpms
+
+FROM ghcr.io/hhs/python-base-image:72ba391@sha256:1e2d72700ecfbff3a65435a64ca321d65c7bb82128e91c5825d69997cb54c8cd
+
+ARG RUN_USER
+ARG RUN_UID
+
+COPY --from=graphviz-downloader /runtime/rootfs/ /
+
+RUN /usr/bin/dot -c
+
+RUN groupadd -g ${RUN_UID} ${RUN_USER} && \
+    useradd -l -M -s /bin/bash -u ${RUN_UID} -g ${RUN_USER} ${RUN_USER} && \
+    mkdir -p /home/${RUN_USER} /api && \
+    chown -R ${RUN_UID}:${RUN_UID} /home/${RUN_USER} /api
+
+# Ensure /usr/bin is in the PATH for graphviz executables
+ENV PATH="/usr/bin:${PATH}"
+
+WORKDIR /api
+USER ${RUN_USER}
+
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-root --with dev
+COPY . /api

@@ -6,10 +6,13 @@ import {
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import {
+  OrganizationInvitation,
   UserDetailProfile,
   UserDetailWithProfile,
+  UserPrivilegeDefinition,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
+import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
@@ -63,4 +66,41 @@ export const getUserPrivileges = async (
   const json = (await resp.json()) as { data: UserPrivilegesResponse };
 
   return json.data;
+};
+
+export const checkUserPrivilege = async (
+  token: string,
+  userId: string,
+  privilegeDefinition: UserPrivilegeDefinition,
+): Promise<undefined> => {
+  const { privilege, resourceId, resourceType } = privilegeDefinition;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  await fetchUserWithMethod("POST")({
+    subPath: `${userId}/can_access`,
+    additionalHeaders: ssgToken,
+    body: {
+      resource_type: resourceType,
+      resource_id: resourceId,
+      privileges: [privilege],
+    },
+  });
+};
+
+export const getUserInvitations = async (
+  _token: string,
+  _userId: string,
+): Promise<OrganizationInvitation[]> => {
+  return Promise.resolve([fakeOrganizationInvitation]);
+  // const ssgToken = {
+  //   "X-SGG-Token": token,
+  // };
+  // const resp = await fetchUserWithMethod("POST")({
+  //   subPath: `${userId}/invitations/list`,
+  //   additionalHeaders: ssgToken,
+  // });
+  // const json = (await resp.json()) as { data: OrganizationInvitation[] };
+
+  // return json.data;
 };

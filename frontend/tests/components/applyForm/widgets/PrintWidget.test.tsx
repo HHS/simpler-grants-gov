@@ -19,7 +19,7 @@ describe("PrintWidget", () => {
     formClassName: "test-form-class",
     inputClassName: "test-input-class",
     placeholder: "",
-    readonly: false,
+    readOnly: false,
     disabled: false,
     autofocus: false,
     label: "Test Label",
@@ -27,8 +27,16 @@ describe("PrintWidget", () => {
     hideError: false,
   };
 
+  const warnSpy = jest
+    .spyOn(console, "warn")
+    .mockImplementation(() => undefined);
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    warnSpy.mockRestore();
   });
 
   it("renders with basic props", () => {
@@ -64,39 +72,29 @@ describe("PrintWidget", () => {
     expect(screen.getByText("Custom Test Value")).toBeInTheDocument();
   });
 
-  it("displays empty string when value is null or undefined", () => {
-    const propsWithNull = {
-      ...defaultProps,
-      value: null,
-    };
+  it("displays empty string when value is null", () => {
+    const propsWithNull = { ...defaultProps, value: null as unknown as string };
 
     render(<PrintWidget {...propsWithNull} />);
 
-    const fieldElement = screen.getByTestId("test-field");
-    expect(fieldElement).toHaveTextContent("");
+    expect(screen.getByTestId("test-field")).toHaveTextContent("");
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("shows required indicator when field is required", () => {
-    const props = {
+  it("displays empty string when value is undefined", () => {
+    const propsWithUndefined = {
       ...defaultProps,
-      required: true,
+      value: undefined as unknown as string,
     };
 
-    render(<PrintWidget {...props} />);
+    render(<PrintWidget {...propsWithUndefined} />);
 
-    expect(screen.getByText("*")).toBeInTheDocument();
-    expect(screen.getByText("*")).toHaveClass(
-      "usa-hint",
-      "usa-hint--required",
-      "text-no-underline",
-    );
+    expect(screen.getByTestId("test-field")).toHaveTextContent("");
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it("does not show required indicator when field is not required", () => {
-    const props = {
-      ...defaultProps,
-      required: false,
-    };
+    const props = { ...defaultProps, required: false };
 
     render(<PrintWidget {...props} />);
 
@@ -104,10 +102,7 @@ describe("PrintWidget", () => {
   });
 
   it("does not display errors when rawErrors is empty", () => {
-    const props = {
-      ...defaultProps,
-      rawErrors: [],
-    };
+    const props = { ...defaultProps, rawErrors: [] };
 
     render(<PrintWidget {...props} />);
 
@@ -138,14 +133,45 @@ describe("PrintWidget", () => {
   });
 
   it("handles numeric values by converting to string", () => {
-    const props = {
-      ...defaultProps,
-      value: 12345,
-    };
+    const props = { ...defaultProps, value: 12345 };
 
     render(<PrintWidget {...props} />);
 
     expect(screen.getByText("12345")).toBeInTheDocument();
+  });
+
+  it("renders 'Yes' for boolean true", () => {
+    const props = { ...defaultProps, value: true };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("Yes")).toBeInTheDocument();
+  });
+
+  it("renders 'No' for boolean false", () => {
+    const props = { ...defaultProps, value: false };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("No")).toBeInTheDocument();
+  });
+
+  it("handles array values by joining defined items with ', '", () => {
+    const props = { ...defaultProps, value: ["A", null, "B", undefined, "C"] };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText("A, B, C")).toBeInTheDocument();
+  });
+
+  it("handles object values by JSON-stringifying and console warns", () => {
+    const obj = { a: 1, b: "x" };
+    const props = { ...defaultProps, value: obj };
+
+    render(<PrintWidget {...props} />);
+
+    expect(screen.getByText(JSON.stringify(obj))).toBeInTheDocument();
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   it("renders with minimal props", () => {

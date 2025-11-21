@@ -1,6 +1,6 @@
 services:
   grants-db:
-    image: postgres:15-alpine
+    image: postgres:17.5-alpine
     container_name: grants-db
     command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off"
     env_file: ./local.env
@@ -39,18 +39,19 @@ services:
     networks:
       - default
 
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2
-    container_name: opensearch-dashboards
-    ports:
-      - 5601:5601 # Map host port 5601 to container port 5601
-    expose:
-      - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
-    environment:
-      - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
-      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
-    networks:
-      - default
+  # opensearch-dashboards disabled to save resources in CI
+  # opensearch-dashboards:
+  #   image: opensearchproject/opensearch-dashboards:2
+  #   container_name: opensearch-dashboards
+  #   ports:
+  #     - 5601:5601 # Map host port 5601 to container port 5601
+  #   expose:
+  #     - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
+  #   environment:
+  #     - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
+  #     - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
+  #   networks:
+  #     - default
 
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
@@ -135,6 +136,26 @@ services:
       - "8082:8080"
     volumes:
       - ./mock-soap-services/applicants:/opt/imposter/config:ro
+    networks:
+      - default
+
+  openapi-tools:
+    profiles:
+      - openapi-tools
+    build:
+      context: .
+      dockerfile: docker-python-openapi
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-api}
+    working_dir: /api
+    volumes:
+      - .:/api
+    env_file:
+      - path: ./local.env
+        required: true
+      - path: ./override.env
+        required: false
     networks:
       - default
 

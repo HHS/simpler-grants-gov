@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
@@ -8,12 +8,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now as sqlnow
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType
+from src.constants.lookup_constants import ExternalUserType, Privilege, RoleType, UserType
 from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType
+from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
 from src.db.models.opportunity_models import Opportunity
 from src.util import datetime_util
 
@@ -65,14 +65,32 @@ class User(ApiSchemaTable, TimestampMixin):
     api_keys: Mapped[list["UserApiKey"]] = relationship(
         "UserApiKey", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
-    profile: Mapped["UserProfile"] = relationship(
+    profile: Mapped["UserProfile | None"] = relationship(
         "UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    user_type: Mapped[UserType | None] = mapped_column(
+        "user_type_id",
+        LookupColumn(LkUserType),
+        ForeignKey(LkUserType.user_type_id),
+        default=UserType.STANDARD,
     )
 
     @property
     def email(self) -> str | None:
         if self.linked_login_gov_external_user is not None:
             return self.linked_login_gov_external_user.email
+        return None
+
+    @property
+    def first_name(self) -> str | None:
+        if self.profile is not None:
+            return self.profile.first_name
+        return None
+
+    @property
+    def last_name(self) -> str | None:
+        if self.profile is not None:
+            return self.profile.last_name
         return None
 
     @property
@@ -224,8 +242,6 @@ class ApplicationUser(ApiSchemaTable, TimestampMixin):
     )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), index=True)
 
-    is_application_owner: Mapped[bool | None]
-
     application: Mapped[Application] = relationship(Application, back_populates="application_users")
     user: Mapped[User] = relationship(User, back_populates="application_users")
     application_user_roles: Mapped[list["ApplicationUserRole"]] = relationship(
@@ -254,8 +270,6 @@ class OrganizationUser(ApiSchemaTable, TimestampMixin):
     organization_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
-
-    is_organization_owner: Mapped[bool]
 
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Organization.organization_id), index=True
@@ -443,3 +457,22 @@ class UserProfile(ApiSchemaTable, TimestampMixin):
     first_name: Mapped[str]
     middle_name: Mapped[str | None]
     last_name: Mapped[str]
+
+
+class LegacyCertificate(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "legacy_certificate"
+
+    legacy_certificate_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    cert_id: Mapped[str] = mapped_column(index=True)
+    serial_number: Mapped[str] = mapped_column(index=True)
+    expiration_date: Mapped[date] = mapped_column(index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    user: Mapped[User] = relationship(User)
+    agency_id: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey(Agency.agency_id))
+    agency: Mapped[Agency | None] = relationship(Agency)
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id)
+    )
+    organization: Mapped[Organization | None] = relationship(Organization)

@@ -45,3 +45,8 @@ class ValidationErrorType(StrEnum):
     UNKNOWN_APPLICATION_ATTACHMENT = "unknown_application_attachment"
 
     MISSING_INCLUDED_IN_SUBMISSION = "missing_included_in_submission"
+
+    ORGANIZATION_REQUIRED = "organization_required"
+    ORGANIZATION_NO_SAM_GOV_ENTITY = "organization_no_sam_gov_entity"
+    ORGANIZATION_INACTIVE_IN_SAM_GOV = "organization_inactive_in_sam_gov"
+    ORGANIZATION_SAM_GOV_EXPIRED = "organization_sam_gov_expired"

@@ -9,7 +9,7 @@ class XMLGenerationRequest(BaseModel):
     """Request model for XML generation."""
 
     application_data: dict[str, Any]
-    form_name: str = "SF424_4_0"
+    transform_config: dict[str, Any]
     pretty_print: bool = True
     attachment_mapping: dict[str, Any] | None = None
 

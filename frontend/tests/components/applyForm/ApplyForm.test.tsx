@@ -134,6 +134,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -148,6 +149,7 @@ describe("ApplyForm", () => {
     expect(nameField).toHaveAttribute("maxLength", "60");
     expect(nameField).toHaveAttribute("name", "name");
     expect(nameField).toHaveValue("myself");
+    expect(nameField).toBeEnabled();
 
     const dobLabel = screen.getByText("Date of birth");
     expect(dobLabel).toBeInTheDocument();
@@ -157,6 +159,7 @@ describe("ApplyForm", () => {
     expect(dobField).toBeInTheDocument();
     expect(dobField).not.toBeRequired();
     expect(dobField).toHaveAttribute("type", "date");
+    expect(dobField).toBeEnabled();
 
     const nav = screen.getByTestId("InPageNavigation");
     expect(nav).toHaveTextContent("navTitle");
@@ -171,9 +174,27 @@ describe("ApplyForm", () => {
     expect(selectField).not.toBeRequired();
     expect(screen.getAllByRole("option").length).toBe(2);
     expect(screen.getByText("test select option")).toBeInTheDocument();
+    expect(selectField).toBeEnabled();
 
     const button = screen.getByTestId("apply-form-save");
     expect(button).toBeInTheDocument();
+  });
+
+  it("cannot be edited or saved when application is submitted", () => {
+    render(
+      <ApplyForm
+        applicationId=""
+        formId="test"
+        formSchema={formSchema}
+        savedFormData={{ name: "myself" }}
+        uiSchema={uiSchema}
+        validationWarnings={[]}
+        attachments={[]}
+        applicationStatus="submitted"
+      />,
+    );
+    const button = screen.queryByTestId("apply-form-save");
+    expect(button).not.toBeInTheDocument();
   });
 
   it("calls handleFormAction action on save", () => {
@@ -196,6 +217,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -234,6 +256,7 @@ describe("ApplyForm", () => {
         savedFormData={{}}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const alert = screen.getByTestId("alert");
@@ -259,6 +282,7 @@ describe("ApplyForm", () => {
         formId="test"
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -285,6 +309,7 @@ describe("ApplyForm", () => {
         formId="test"
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
 
@@ -324,6 +349,7 @@ describe("ApplyForm", () => {
           },
         ]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const button = screen.getByTestId("apply-form-save");
@@ -367,6 +393,7 @@ describe("ApplyForm", () => {
           },
         ]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const button = screen.getByTestId("apply-form-save");
@@ -404,6 +431,7 @@ describe("ApplyForm", () => {
         uiSchema={uiSchema}
         validationWarnings={[]}
         attachments={[]}
+        applicationStatus="in_progress"
       />,
     );
     const button = screen.getByTestId("apply-form-save");

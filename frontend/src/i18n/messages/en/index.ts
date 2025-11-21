@@ -485,20 +485,18 @@ export const messages = {
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You're subscribed",
-    intro:
-      "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "We'll keep you informed of our progress and every opportunity to get involved.",
   },
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
-    title: "You have unsubscribed",
-    intro:
-      "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    title: "You've been unsubscribed",
+    paragraph:
+      "You'll no longer receive project updates from Simpler.Grants.gov.",
+    cta: "Change your mind?",
     buttonResub: "Re-subscribe",
+  },
+  SendyDisclaimer: {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -618,6 +616,8 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      activityDashboard: "Activity Dashboard",
+      applications: "Applications",
       community: "Community",
       developer: "Developer Portal",
       developers: "Developers",
@@ -699,6 +699,7 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    unauthorizedExplanation: "This content is not available",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
@@ -1451,11 +1452,65 @@ export const messages = {
     errorHeading: "Error",
     successHeading: "Account updated",
   },
-  UserWorkspace: {
-    pageTitle: "User Workspace | Simpler.Grants.gov",
-    title: "User Workspace",
+  ActivityDashboard: {
+    pageTitle: "Activity Dashboard | Simpler.Grants.gov",
+    title: "Welcome to your activity dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
-    organizations: "Organizations",
+    organizations: "Your organizations",
+    noOrganizations: {
+      title: "You're not a member of any organizations yet",
+      description:
+        "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
+    },
+    organizationButtons: {
+      view: "View organization details",
+      manage: "Manage users",
+    },
+    linksSection: {
+      heading: "Your recent activity",
+      applications: {
+        heading: "Applications",
+        description: "You can now apply for select opportunities on Simpler.",
+        linkText: "View applications",
+      },
+      savedQueries: {
+        heading: "Saved queries",
+        description: "Return to your preferred search terms and filters.",
+        linkText: "View saved queries",
+      },
+      savedOpportunities: {
+        heading: "Saved opportunities",
+        description: "Keep track of oppportunities you're interested in.",
+        linkText: "View saved opportunities",
+      },
+    },
+    invitationReply: {
+      ctaTitle: "would like to add you to their team.",
+      description:
+        "Click Accept to join and gain access to your team, organization details and available applications.",
+      accept: "Accept",
+      reject: "Reject",
+      dismiss: "Dismiss",
+      accepted: {
+        ctaTitle: "Congrats, you've been added to {orgName}!",
+        description:
+          "Join your team by collaborating on applications and searching for the right opportunities.",
+      },
+      rejected: {
+        ctaTitle: "The invitation has been rejected.",
+        description:
+          "If you change your mind, an organization admin can add you again.",
+      },
+      rejectConfirmation: {
+        ctaTitle:
+          "Are you sure you want to reject this organization's invitation?",
+        description:
+          "You'll need to be re-added by an organization admin if you change your mind later.",
+        confirm: "Reject invitation",
+        cancel: "Cancel",
+      },
+      apiError: "Unable to update user organization invitation.",
+    },
   },
   OrganizationDetail: {
     pageTitle: "Organization",
@@ -1472,11 +1527,94 @@ export const messages = {
       explanation: "Your organization's active members are listed below.",
       manageUsersExplanation:
         "Manage Users to add or update roles and permissions.",
+      manageUsersCTA: "Manage Users",
       headings: {
         email: "Email",
         name: "Name",
         roles: "Roles",
       },
+    },
+  },
+  ManageUsers: {
+    pageTitle: "Manage Users | Simpler.Grants.gov",
+    pageHeading: "Manage Users",
+    activeUsersHeading: "Active Users",
+    activeUsersTableDescription:
+      "Adjust permissions for active users so they have the right access for their role.",
+    grantsGovUsersHeading: "Grants.gov Users",
+    grantsGovUsersTableDescription:
+      "Manage users from your Grants.gov organization here in Simpler.",
+    invitedUsersHeading: "Invited users",
+    invitedUsersTableDescription:
+      "These users have been invited to join your organization but haven’t accepted yet. Once they accept, they’ll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+    invitedUsersFetchError:
+      "We have encountered an error retrieving the Pending Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no pending users",
+    usersTable: {
+      admin: "Administrator",
+      emailHeading: "Email",
+      member: "Member",
+      nameHeading: "Name",
+      noUsersFound: "No users found.",
+      roleHeading: "Role",
+      selectRoleFor: "Select role for",
+    },
+    confirmationModal: {
+      header: "Confirm role change",
+      description: "Are you sure you want to change this user's role to",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      saving: "Saving...",
+    },
+    inviteUser: {
+      heading: "Add users to collaborate on opportunities.",
+      errorHeading: "Error",
+      description:
+        "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
+      inputs: {
+        email: {
+          label: "Email address",
+          placeholder: "Enter a valid email address",
+        },
+        role: {
+          label: "Role",
+          placeholder: "- Select a role -",
+        },
+      },
+      button: {
+        label: "Add to organization",
+        success: "User added to pending",
+      },
+      validationErrors: {
+        email: "Email is required",
+        role: "Role is required",
+      },
+    },
+  },
+  Applications: {
+    numApplications: "{num, plural, =1 {1 application} other {# applications}}",
+    errorMessage:
+      "We have encountered an error loading your applications, please try again later.",
+    metaDescription: "View your saved applications",
+    noApplicationsMessage: {
+      primary: "You have not started any applications yet.",
+      secondary:
+        "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Applications",
+    pageTitle: "Applications",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      closeDate: "Close date",
+      status: "Status",
+      applicationName: "Application filing name",
+      type: "Type",
+      opportunity: "Opportunity",
     },
   },
 };

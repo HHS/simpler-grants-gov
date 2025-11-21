@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import User
@@ -58,7 +58,11 @@ def get_organization_and_verify_access(
     organization = get_organization(db_session, organization_id)
 
     # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
-    if not can_access(user, {Privilege.VIEW_ORG_MEMBERSHIP}, organization):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.VIEW_ORG_MEMBERSHIP},
+        organization,
+    )
 
     return organization

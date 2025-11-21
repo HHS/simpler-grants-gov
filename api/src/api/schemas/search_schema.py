@@ -1,5 +1,7 @@
+from collections.abc import Callable
 from enum import StrEnum
-from typing import Any, Callable, Pattern, Type
+from re import Pattern
+from typing import Any
 
 from marshmallow import ValidationError, validates_schema
 
@@ -84,7 +86,7 @@ class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
     def with_one_of(
         self,
         *,
-        allowed_values: Type[StrEnum] | None = None,
+        allowed_values: type[StrEnum] | None = None,
         pattern: str | Pattern | None = None,
         example: str | None = None,
         minimum_length: int | None = None
@@ -346,4 +348,34 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
                 )
 
         self.schema_fields["validate_date_range"] = validate_date_range
+        return self
+
+
+class UuidSearchSchemaBuilder(BaseSearchSchemaBuilder):
+    """Builder for setting up a filter for UUID values in a search endpoint schema.
+
+    Our schemas are set up to look like:
+        { "filters": { "field": { "one_of": ["uuid1", "uuid2"] } } }
+
+    This helps generate the filters for a given UUID field. Currently, only a `one_of` filter is implemented,
+    allowing the user to specify one or more UUIDs to match exactly. The `fields.UUID()` type ensures
+    strict UUID format validation (e.g., "f47ac10b-58cc-4372-a567-0e02b2c3d479").
+
+    While filtering by multiple UUIDs may not be common in all cases, we maintain consistency with
+    the overall filter structure used across other field types.
+
+    Usage::
+        # In a search request schema, you would use it like so
+        class UserApplicationFilterSchema(Schema):
+            example_uuid_field = fields.Nested(
+                UuidSearchSchemaBuilder("ExampleUuidFieldSchema")
+                .with_one_of()
+                .build()
+            )
+    """
+
+    def with_one_of(
+        self,
+    ) -> "UuidSearchSchemaBuilder":
+        self.schema_fields["one_of"] = fields.List(fields.UUID(), allow_none=True)
         return self

@@ -21,10 +21,6 @@
   * [Spring 2025 Collaborative Coding Challenge](get-involved/community-events/spring-2025-collaborative-coding-challenge/README.md)
     * [Event Submissions & Winners](get-involved/community-events/spring-2025-collaborative-coding-challenge/event-submissions-and-winners.md)
 * [Communication channels](get-involved/communication-channels/README.md)
-  * [Slack - Community chat](get-involved/communication-channels/slack-community-chat/README.md)
-    * [Naming Conventions](get-involved/communication-channels/slack-community-chat/naming-conventions.md)
-    * [Recommended Channels](get-involved/communication-channels/slack-community-chat/recommended-channels.md)
-    * [Installing Slack](get-involved/communication-channels/slack-community-chat/installing-slack.md)
   * [Zoom - Public Meetings](get-involved/communication-channels/zoom-public-meetings.md)
 
 ## Product
@@ -124,6 +120,7 @@
     * [Participatory Budgeting/Co-Planning Pilot Tool](product/decisions/adr/participatory-budgeting-co-planning-pilot-tool.md)
     * [Co-planning tool](product/decisions/adr/2025-08-28-co-planning-tool.md)
     * [API Key Management](product/decisions/adr/2025-09-04-api-key-management.md)
+    * [CommonGrants adoption in SGG](product/decisions/adr/2025-10-27-common-grants-in-sgg.md)
   * [Infra](product/decisions/infra/README.md)
     * [Use markdown architectural decision records](product/decisions/infra/0000-use-markdown-architectural-decision-records.md)
     * [CI/CD interface](product/decisions/infra/0001-ci-cd-interface.md)

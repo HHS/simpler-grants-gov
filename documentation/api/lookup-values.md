@@ -108,7 +108,6 @@ In order to reference these lookup values on another table, you just need to def
 
 ```py
 import uuid
-from typing import Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
@@ -124,7 +123,7 @@ class ExampleTable(Base, TimestampMixin):
 
     example_table_id: Mapped[int] = mapped_column(primary_key=True)
 
-    example: Optional[Example] = mapped_column(
+    example: Mapped[Example | None] = mapped_column(
         "example_id", LookupColumn(LkExample), ForeignKey(LkExample.example_id)
     )
 ```

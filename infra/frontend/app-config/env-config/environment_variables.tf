@@ -115,11 +115,15 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-user-admin-off"
     },
+    FEATURE_MANAGE_USERS_OFF = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-manage-users-off"
+    },
     API_JWT_PUBLIC_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"
     },
-    API_AUTH_X_API_KEY = {
+    API_GW_AUTH = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/X-API-KEY"
     },

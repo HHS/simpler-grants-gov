@@ -109,6 +109,8 @@ function Budget424aSectionA<
   value,
   rawErrors,
   formContext,
+  readOnly,
+  disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined
@@ -254,6 +256,8 @@ function Budget424aSectionA<
                       formClassName="margin-left-2"
                       inputClassName="minw-10"
                       value={getItemVal(row, "activity_title")}
+                      disabled={disabled}
+                      readOnly={readOnly}
                     />
                   </div>
                 </div>
@@ -272,6 +276,8 @@ function Budget424aSectionA<
                       })}
                       inputClassName="minw-10"
                       value={getItemVal(row, "assistance_listing_number")}
+                      disabled={disabled}
+                      readOnly={readOnly}
                     />
                   </div>
                 </div>
@@ -291,6 +297,7 @@ function Budget424aSectionA<
                         row,
                         "federal_estimated_unobligated_amount",
                       )}
+                      disabled={disabled}
                     />
                   </div>
                 </div>
@@ -310,6 +317,7 @@ function Budget424aSectionA<
                         row,
                         "non_federal_estimated_unobligated_amount",
                       )}
+                      disabled={disabled}
                     />
                   </div>
                 </div>
@@ -326,6 +334,7 @@ function Budget424aSectionA<
                         id: `activity_line_items[${row}]--budget_summary--federal_new_or_revised_amount`,
                       })}
                       value={getBudgetVal(row, "federal_new_or_revised_amount")}
+                      disabled={disabled}
                     />
                   </div>
                 </div>
@@ -345,6 +354,7 @@ function Budget424aSectionA<
                         row,
                         "non_federal_new_or_revised_amount",
                       )}
+                      disabled={disabled}
                     />
                   </div>
                 </div>
@@ -359,6 +369,7 @@ function Budget424aSectionA<
                       Sum of row {row + 1}
                     </div>
                     <CurrencyInput
+                      disabled
                       id={`activity_line_items[${row}]--budget_summary--total_amount`}
                       rawErrors={getErrorsA({
                         errors,
@@ -389,6 +400,7 @@ function Budget424aSectionA<
             <td className="padding-05">
               <HelperText hasHorizontalLine>Sum of column C</HelperText>
               <CurrencyInput
+                disabled
                 id={
                   "total_budget_summary--federal_estimated_unobligated_amount"
                 }
@@ -404,6 +416,7 @@ function Budget424aSectionA<
             <td className="padding-05">
               <HelperText hasHorizontalLine>Sum of column D</HelperText>
               <CurrencyInput
+                disabled
                 id={
                   "total_budget_summary--non_federal_estimated_unobligated_amount"
                 }
@@ -419,6 +432,7 @@ function Budget424aSectionA<
             <td className="padding-05">
               <HelperText hasHorizontalLine>Sum of column E</HelperText>
               <CurrencyInput
+                disabled
                 id={"total_budget_summary--federal_new_or_revised_amount"}
                 rawErrors={getErrorsA({
                   errors,
@@ -432,6 +446,7 @@ function Budget424aSectionA<
             <td className="padding-05">
               <HelperText hasHorizontalLine>Sum of column F</HelperText>
               <CurrencyInput
+                disabled
                 id={"total_budget_summary--non_federal_new_or_revised_amount"}
                 rawErrors={getErrorsA({
                   errors,
@@ -445,6 +460,7 @@ function Budget424aSectionA<
             <td className="padding-05">
               <HelperText hasHorizontalLine>Sum of column G</HelperText>
               <CurrencyInput
+                disabled
                 id={"total_budget_summary--total_amount"}
                 rawErrors={getErrorsA({
                   errors,

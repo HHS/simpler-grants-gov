@@ -7,12 +7,20 @@ from typing import Any
 
 import click
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
+from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
 from .xsd_validator import XSDValidator
 
 logger = logging.getLogger(__name__)
+
+# Map form names to their transform rules
+FORM_TRANSFORM_RULES = {
+    "SF424_4_0": SF424_TRANSFORM_RULES,
+    "SF424A": SF424A_TRANSFORM_RULES,
+}
 
 
 class ValidationTestRunner:
@@ -58,9 +66,21 @@ class ValidationTestRunner:
         logger.info(f"Running validation test: {test_name}")
 
         try:
+            # Get transform rules for the form
+            transform_config = FORM_TRANSFORM_RULES.get(form_name)
+            if not transform_config:
+                return {
+                    "test_name": test_name,
+                    "success": False,
+                    "error": "configuration_error",
+                    "error_message": f"No transform rules found for form: {form_name}",
+                    "xml_content": None,
+                    "validation_result": None,
+                }
+
             # Generate XML
             request = XMLGenerationRequest(
-                form_name=form_name,
+                transform_config=transform_config,
                 application_data=json_input,
                 pretty_print=pretty_print,
             )

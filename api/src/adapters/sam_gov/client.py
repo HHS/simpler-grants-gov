@@ -150,8 +150,8 @@ class SamGovClient(BaseSamGovClient):
 
         except requests.RequestException as e:
             raise Exception(f"Request failed: {str(e)}") from e
-        except IOError as e:
-            raise IOError(f"Failed to save file: {str(e)}") from e
+        except OSError as e:
+            raise OSError(f"Failed to save file: {str(e)}") from e
         except Exception as e:
             raise Exception(f"Error downloading extract: {str(e)}") from e
 

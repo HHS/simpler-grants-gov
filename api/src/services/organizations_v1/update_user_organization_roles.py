@@ -1,11 +1,12 @@
 import logging
+from collections.abc import Sequence
 from uuid import UUID
 
 from sqlalchemy import select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.user_models import LinkRoleRoleType, OrganizationUserRole, Role, User
 from src.services.organizations_v1.get_organization import get_organization
@@ -14,8 +15,8 @@ from src.services.organizations_v1.organization_user_utils import validate_organ
 logger = logging.getLogger(__name__)
 
 
-def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> None:
-    """Validate provided roles"""
+def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> Sequence[Role]:
+    """Validate provided roles and return them"""
     # TODO: In the future, extend this query to check if the role is either:
     #         - a core role (shared across all orgs), OR
     #         - owned by the organization making the request
@@ -35,6 +36,8 @@ def validate_roles(db_session: db.Session, role_ids: set[UUID]) -> None:
         missing = role_ids - {r.role_id for r in roles}
         raise_flask_error(404, message=f"Could not find the following role IDs: {missing}")
 
+    return roles
+
 
 def update_user_organization_roles(
     db_session: db.Session, user: User, target_user_id: UUID, organization_id: UUID, data: dict
@@ -44,8 +47,12 @@ def update_user_organization_roles(
     # Lookup organization
     organization = get_organization(db_session, organization_id)
     # Permission checks
-    if not can_access(user, {Privilege.MANAGE_ORG_MEMBERS}, organization):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
+    )
 
     # Validate target user exists
     org_user = validate_organization_user_exists(db_session, target_user_id, organization)

@@ -36,6 +36,7 @@ def setup_application_for_form_validation(
     agency_code: str | None = None,
     user_email: str | None = None,
     attachment_ids: list[str] | None = None,
+    deleted_attachment_ids: list[str] | None = None,
     has_organization: bool = False,
     uei: str | None = None,
     has_assistance_listing_number: bool = True,
@@ -101,9 +102,14 @@ def setup_application_for_form_validation(
             ApplicationAttachmentFactory.create(
                 application_attachment_id=attachment_id, application=application
             )
+    if deleted_attachment_ids is not None:
+        for attachment_id in deleted_attachment_ids:
+            ApplicationAttachmentFactory.create(
+                application_attachment_id=attachment_id, application=application, is_deleted=True
+            )
 
     if user_email is not None:
-        app_user = ApplicationUserFactory.create(application=application, is_application_owner=True)
+        app_user = ApplicationUserFactory.create(application=application)
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
 
     return application_form

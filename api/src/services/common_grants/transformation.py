@@ -2,8 +2,6 @@
 
 import logging
 from datetime import date, datetime, timezone
-from typing import List
-from urllib.parse import urlparse
 
 from common_grants_sdk.schemas.pydantic import (
     FilterInfo,
@@ -20,14 +18,24 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 from src.api.response import ValidationErrorDetail
-from src.constants.lookup_constants import OpportunityStatus
+from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
+
+
+class UrlValidator(BaseModel):
+    """Validator for a URL string using Pydantic's HttpUrl with strict mode enabled.
+
+    Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
+    TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
+    """
+
+    url: HttpUrl = Field(strict=True)
 
 
 def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
@@ -140,26 +148,34 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
 
 def validate_url(value: str | None) -> str | None:
     """
-    Validate a URL string.
+    Validate a URL string using Pydantic's HttpUrl validation.
+
+    This ensures URLs are validated with the same strict rules that Pydantic
+    uses, preventing validation errors when creating OpportunityBase objects.
+
+    We use a minimal model with the same field definition as OpportunityBase
+    to ensure we use the exact same validation rules.
 
     Args:
         value: The string to validate
 
     Returns:
-        A valid URL string or None
+        A valid URL string or None if validation fails
     """
-    # Parse the string
-    parsed = urlparse(value)
-
-    # Check for scheme and netloc (i.e. it's a complete url)
-    if parsed.scheme and parsed.netloc:
-        return value
-
-    # Check for netloc only (i.e. it's a domain name)
-    if not parsed.scheme and parsed.netloc:
-        return f"https://{value}"
-
-    return None
+    if value is None or value == "":
+        return None
+    try:
+        valid = UrlValidator.model_validate({"url": value})
+        return str(valid.url)
+    except ValidationError:
+        logger.info(
+            f"URL validation failed for: {value}",
+            extra={
+                "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
+                "url": value,
+            },
+        )
+        return None
 
 
 def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase | None:
@@ -281,7 +297,13 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             lastModifiedAt=opp_data.get("updated_at") or datetime.now(timezone.utc),
         )
     except Exception as e:
-        logger.exception(f"Failed to transform search result to CommonGrants format: {e}")
+        logger.warning(
+            f"Failed to transform search result to CommonGrants format: {e}",
+            extra={
+                "cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
+                "opportunity_id": opportunity_id,
+            },
+        )
         return None
 
 
@@ -413,7 +435,7 @@ def transform_search_request_from_cg(
 
 def transform_validation_error_from_cg(
     validation_error: ValidationError,
-) -> List[ValidationErrorDetail]:
+) -> list[ValidationErrorDetail]:
     """Transform a CG ValidationError to v1 format.
 
     Args:
@@ -422,7 +444,7 @@ def transform_validation_error_from_cg(
     Returns:
         List of v1 error objects
     """
-    validation_details: List[ValidationErrorDetail] = []
+    validation_details: list[ValidationErrorDetail] = []
 
     # Handle pydantic ValidationError
     # Pydantic structures errors as: [{'loc': ('field',), 'msg': 'message', 'type': 'error_type'}]

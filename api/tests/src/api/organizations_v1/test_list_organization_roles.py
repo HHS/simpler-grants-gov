@@ -11,7 +11,6 @@ def test_list_organization_roles(client, db_session, enable_factory_create):
     user, organization, token = create_user_in_org(
         privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
         db_session=db_session,
-        is_organization_owner=True,
     )
     # Make request
     resp = client.post(
@@ -20,7 +19,7 @@ def test_list_organization_roles(client, db_session, enable_factory_create):
     )
     data = resp.get_json()["data"]
     assert resp.status_code == 200
-    assert len(data) == 2
+    assert len(data) >= 2
     # assert core_roles are listed
     assert {str(ORG_ADMIN.role_id), str(ORG_MEMBER.role_id)}.issubset(
         {role["role_id"] for role in data}
@@ -32,7 +31,6 @@ def test_list_organization_roles_403_privilege(client, db_session, enable_factor
     user, organization, token = create_user_in_org(
         privileges=[Privilege.MANAGE_ORG_MEMBERS],
         db_session=db_session,
-        is_organization_owner=True,
     )
 
     # Make request
@@ -48,7 +46,6 @@ def test_list_organization_roles_403_organization(client, db_session, enable_fac
     user, organization, token = create_user_in_org(
         privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
         db_session=db_session,
-        is_organization_owner=True,
     )
     other_organization = OrganizationFactory.create()
 

@@ -8,6 +8,7 @@ from sqlalchemy import select
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
     ApplicationFormStatus,
     CompetitionOpenToApplicant,
     Privilege,
@@ -24,11 +25,15 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
     OpportunityFactory,
     OrganizationFactory,
+    OrganizationUserFactory,
+    OrganizationUserRoleFactory,
+    RoleFactory,
     SamGovEntityFactory,
     UserFactory,
 )
@@ -82,6 +87,16 @@ def test_application_start_success(
     assert application is not None
     assert str(application.competition_id) == competition_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
+    assert len(application.application_audits) == 2
+    assert {a.application_audit_event for a in application.application_audits} == {
+        ApplicationAuditEvent.APPLICATION_CREATED,
+        ApplicationAuditEvent.USER_ADDED,
+    }
+
+    for app_audit in application.application_audits:
+        assert app_audit.user_id == user.user_id
+        if app_audit.application_audit_event == ApplicationAuditEvent.USER_ADDED:
+            assert app_audit.target_user_id == user.user_id
 
 
 def test_application_start_logging_enhancement(
@@ -424,7 +439,7 @@ def test_application_form_update_success_create(
 ):
     """Test successful creation of an application form response"""
     # Create application
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     competition_form = CompetitionFormFactory.create(competition=application.competition)
@@ -454,6 +469,18 @@ def test_application_form_update_success_create(
     assert application_form is not None
     assert application_form.application_response == {"name": "John Doe"}
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
+
 
 def test_application_form_update_success_update(
     client,
@@ -462,7 +489,7 @@ def test_application_form_update_success_update(
 ):
     """Test successful update of an existing application form response"""
     # Create application
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
@@ -494,6 +521,18 @@ def test_application_form_update_success_update(
     db_session.refresh(existing_form)
     assert existing_form.application_response == {"name": "Updated Name"}
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == existing_form.application_form_id
+    )
+
 
 @pytest.mark.parametrize(
     "application_response,expected_warnings,expected_form_status",
@@ -509,7 +548,7 @@ def test_application_form_update_success_update(
                     "value": None,
                 }
             ],
-            ApplicationFormStatus.NOT_STARTED,
+            ApplicationFormStatus.IN_PROGRESS,
         ),
         # Validation on age field
         (
@@ -536,7 +575,7 @@ def test_application_form_update_with_validation_warnings(
     expected_warnings,
     expected_form_status,
 ):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
@@ -569,11 +608,23 @@ def test_application_form_update_with_validation_warnings(
     db_session.refresh(existing_application_form)
     assert existing_application_form.application_response == application_response
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == existing_application_form.application_form_id
+    )
+
 
 def test_application_form_update_with_rule_validation_issues(
     client, enable_factory_create, db_session
 ):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(
@@ -617,6 +668,18 @@ def test_application_form_update_with_rule_validation_issues(
     db_session.refresh(existing_application_form)
     assert existing_application_form.application_response == application_response
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == existing_application_form.application_form_id
+    )
+
 
 def test_application_form_update_with_invalid_schema_500(
     client,
@@ -653,6 +716,9 @@ def test_application_form_update_with_invalid_schema_500(
     # Verify the response was not updated
     db_session.refresh(existing_application_form)
     assert existing_application_form.application_response == {"name": "Original Name"}
+
+    # Verify no audit event added
+    assert len(application.application_audits) == 0
 
 
 def test_application_form_update_application_not_found(
@@ -1069,7 +1135,12 @@ def test_application_form_get_success(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application_form.application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -1109,18 +1180,18 @@ def test_application_form_get_application_not_found(
 
 
 def test_application_form_get_form_not_found(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
-    application = ApplicationFactory.create()
-
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
     non_existent_app_form_id = str(uuid.uuid4())
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/application_form/{non_existent_app_form_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
@@ -1161,6 +1232,8 @@ def test_application_form_get_with_attachments(
     attachment2 = ApplicationAttachmentFactory.create(
         application=application_form.application, file_name="my_file_b.pdf"
     )
+    # Add a deleted attachment that won't get picked up
+    ApplicationAttachmentFactory.create(application=application_form.application, is_deleted=True)
 
     CompetitionFormFactory.create(
         competition=application_form.application.competition,
@@ -1168,7 +1241,12 @@ def test_application_form_get_with_attachments(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application_form.application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -1215,7 +1293,10 @@ def test_application_get_success(client, enable_factory_create, db_session, user
     application_forms = sorted(application.application_forms, key=lambda x: x.application_form_id)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1269,22 +1350,24 @@ def test_application_get_success(client, enable_factory_create, db_session, user
 
 
 def test_application_get_with_attachments(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
-    application = ApplicationFactory.create()
+    # Associate user with application
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
     attachment1 = ApplicationAttachmentFactory.create(
         application=application, file_name="my_file_a.txt"
     )
     attachment2 = ApplicationAttachmentFactory.create(
         application=application, file_name="my_file_b.pdf"
     )
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    # Add a deleted attachment that won't get picked up
+    ApplicationAttachmentFactory.create(application=application, is_deleted=True)
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -1338,7 +1421,10 @@ def test_application_get_success_with_validation_issues(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1421,10 +1507,18 @@ def test_application_get_success_with_rule_validation_issue(
 
     # Create an application with two app forms, one partially filled out, one not started
     application = ApplicationFactory.create(competition=competition)
+
+    # This attachment is deleted, so validation won't see it
+    deleted_attachment = ApplicationAttachmentFactory.create(
+        application=application, is_deleted=True
+    )
+
     application_form_a = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form_a,
-        application_response={"attachment_field": "b6b58969-499c-438c-b6ca-19c416b198f9"},
+        application_response={
+            "attachment_field": str(deleted_attachment.application_attachment_id)
+        },
     )
     application_form_b = ApplicationFormFactory.create(
         application=application,
@@ -1433,7 +1527,10 @@ def test_application_get_success_with_rule_validation_issue(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -1461,7 +1558,7 @@ def test_application_get_success_with_rule_validation_issue(
             "field": "$.attachment_field",
             "message": "Field references application_attachment_id not on the application",
             "type": "unknown_application_attachment",
-            "value": "b6b58969-499c-438c-b6ca-19c416b198f9",
+            "value": str(deleted_attachment.application_attachment_id),
         }
     ]
 
@@ -1535,7 +1632,7 @@ def test_application_get_unauthorized(client, enable_factory_create, db_session)
                     "value": None,
                 }
             ],
-            ApplicationFormStatus.NOT_STARTED,
+            ApplicationFormStatus.IN_PROGRESS,
         ),
         # Validation on age field
         (
@@ -1582,7 +1679,10 @@ def test_application_form_get_with_validation_warnings(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the GET request
     response = client.get(
@@ -1628,7 +1728,10 @@ def test_application_form_get_with_rule_validation_issue(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the GET request
     response = client.get(
@@ -1678,7 +1781,10 @@ def test_application_form_get_with_invalid_schema(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Make the GET request
     response = client.get(
@@ -1720,7 +1826,10 @@ def test_application_submit_success(
     application_id = str(application.application_id)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
@@ -1734,6 +1843,14 @@ def test_application_submit_success(
     # Verify application status was updated
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMITTED
+    )
+    assert application.application_audits[0].user_id == user.user_id
 
 
 def test_application_submit_logging_enhancement(
@@ -1769,7 +1886,10 @@ def test_application_submit_logging_enhancement(
     application_id = str(application.application_id)
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     # Set log level to capture INFO messages
     caplog.set_level(logging.INFO)
@@ -1806,6 +1926,14 @@ def test_application_submit_logging_enhancement(
 
     assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMITTED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+
 
 def test_application_submit_validation_issues(
     client, enable_factory_create, db_session, user, user_auth_token
@@ -1829,7 +1957,10 @@ def test_application_submit_validation_issues(
         application=application, competition_form=competition_form, application_response={"name": 5}
     )
 
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
@@ -1862,6 +1993,13 @@ def test_application_submit_validation_issues(
         }
     ]
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+    )
+
 
 def test_application_submit_rule_validation_issue(
     client,
@@ -1893,7 +2031,10 @@ def test_application_submit_rule_validation_issue(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
@@ -1926,6 +2067,14 @@ def test_application_submit_rule_validation_issue(
         }
     ]
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+
 
 def test_application_submit_invalid_required_form(
     client, enable_factory_create, db_session, user, user_auth_token
@@ -1945,7 +2094,10 @@ def test_application_submit_invalid_required_form(
         application_status=ApplicationStatus.IN_PROGRESS, competition=competition
     )
 
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
 
     # Setup an application form without any answers yet
     application_form = ApplicationFormFactory.create(
@@ -1970,6 +2122,13 @@ def test_application_submit_invalid_required_form(
             "value": str(application_form.application_form_id),
         }
     ]
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+    )
 
 
 @pytest.mark.parametrize(
@@ -2008,24 +2167,26 @@ def test_application_form_update_forbidden_not_in_progress(
         == "Cannot modify application, not currently in progress"
     )
 
+    # No audit events as submission issue isn't added for a 403
+    assert len(application.application_audits) == 0
+
 
 @pytest.mark.parametrize(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_submit_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user, user_auth_token, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test submission fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.SUBMIT_APPLICATION], status=initial_status
+    )
     application_id = str(application.application_id)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
 
     response = client.post(
         f"/alpha/applications/{application_id}/submit",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response
@@ -2044,6 +2205,9 @@ def test_application_submit_forbidden_not_in_progress(
     # Verify application status remains unchanged
     db_session.refresh(application)
     assert application.application_status == initial_status
+
+    # No audit events as submission issue isn't added for a 403
+    assert len(application.application_audits) == 0
 
 
 def test_application_start_associates_user(
@@ -2086,7 +2250,6 @@ def test_application_start_associates_user(
     assert application_user is not None
     assert application_user.user_id == user.user_id
     assert application_user.application_id == application.application_id
-    assert application_user.is_application_owner is True
 
 
 def test_application_start_with_custom_name(
@@ -2169,7 +2332,7 @@ def test_application_get_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_get_forbidden_if_not_associated(
@@ -2186,7 +2349,7 @@ def test_application_form_get_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_form_update_forbidden_if_not_associated(
@@ -2206,7 +2369,7 @@ def test_application_form_update_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_submit_forbidden_if_not_associated(
@@ -2221,20 +2384,20 @@ def test_application_submit_forbidden_if_not_associated(
     )
 
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
 
 def test_application_get_success_when_associated(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test application get succeeds when user is associated with the application"""
-    application = ApplicationFactory.create(with_forms=True)
-
-    ApplicationUserFactory.create(application=application, user=user)
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -2250,8 +2413,12 @@ def test_application_form_get_success_when_associated(
     application_form = ApplicationFormFactory.create(
         application_response={"name": "John Doe"},
     )
-
-    ApplicationUserFactory.create(application=application_form.application, user=user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -2269,7 +2436,7 @@ def test_application_form_update_success_when_associated(
     db_session,
 ):
     """Test application form update succeeds when user is associated with the application"""
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
 
@@ -2295,6 +2462,18 @@ def test_application_form_update_success_when_associated(
 
     assert application_form is not None
     assert application_form.application_response == {"name": "John Doe"}
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_submit_success_when_associated(
@@ -2326,8 +2505,10 @@ def test_application_submit_success_when_associated(
     )
 
     # Create ApplicationUser association
-    ApplicationUserFactory.create(application=application, user=user)
-
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
     response = client.post(
         f"/alpha/applications/{application.application_id}/submit",
         headers={"X-SGG-Token": user_auth_token},
@@ -2348,9 +2529,10 @@ def test_application_get_includes_application_name_and_users(
     application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS, application_name="Test Application Name"
     )
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2401,7 +2583,10 @@ def test_application_get_includes_organization_with_sam_gov_entity(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2444,7 +2629,10 @@ def test_application_get_includes_organization_without_sam_gov_entity(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2475,7 +2663,10 @@ def test_application_get_without_organization(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}",
@@ -2530,6 +2721,16 @@ def test_application_start_with_organization_success(
     assert str(application.competition_id) == competition_id
     assert str(application.organization_id) == organization_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+    # Assert it does create an application user
+    assert not application.application_users
+
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_CREATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
 
 
 def test_application_start_with_organization_and_custom_name(
@@ -2803,7 +3004,12 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
     )
 
     # Associate the application with a different user (not the test user)
-    ApplicationUserFactory.create(application=application_form.application, user=other_user)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=other_user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     # Create the competition form relationship
     CompetitionFormFactory.create(
@@ -2831,7 +3037,7 @@ def test_application_form_get_with_internal_jwt_vs_regular_jwt(
         headers={"X-SGG-Token": user_token},
     )
     assert response.status_code == 403
-    assert "Unauthorized" in response.json["message"]
+    assert "Forbidden" in response.json["message"]
 
     # Internal JWT should succeed
     response = client.get(
@@ -2910,10 +3116,13 @@ def test_application_start_organization_not_allowed(
     assert len(applications_count) == 0
 
 
-def test_application_start_individual_not_allowed(
+def test_application_start_individual_on_org_only_competition_allowed(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
-    """Test application creation fails when applying as individual but competition only allows organizations"""
+    """Test application creation succeeds when applying as individual even when competition only allows organizations
+
+    Individuals can start applications for org-only competitions and add an organization later.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -2934,16 +3143,19 @@ def test_application_start_individual_not_allowed(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": user_auth_token}
     )
 
-    assert response.status_code == 422
-    assert "This competition does not allow individual applications" in response.json["message"]
+    # Should succeed - individuals can start applications and add organization later
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert application.organization_id is None
 
 
 def test_application_start_organization_allowed(
@@ -3100,14 +3312,14 @@ def test_application_form_inclusion_update_success_true(
 ):
     """Test successfully setting form inclusion to true"""
     # Create application with a form
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with some data but no inclusion flag set
-    ApplicationFormFactory.create(
+    application_form = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3127,13 +3339,28 @@ def test_application_form_inclusion_update_success_true(
     assert response.status_code == 200
     assert response.json["message"] == "Success"
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
+
 
 def test_application_start_organization_no_sam_gov_entity(
     client,
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization has no SAM.gov entity record"""
+    """Test application creation succeeds even when organization has no SAM.gov entity record
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
 
@@ -3155,19 +3382,19 @@ def test_application_start_organization_no_sam_gov_entity(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    assert (
-        "This organization has no SAM.gov entity record and cannot be used for applications"
-        in response.json["message"]
-    )
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_start_organization_expired_entity(
@@ -3175,7 +3402,10 @@ def test_application_start_organization_expired_entity(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization's SAM.gov entity has expired"""
+    """Test application creation succeeds even when organization's SAM.gov entity has expired
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
     past_expiration_date = today - timedelta(days=30)  # Expired 30 days ago
@@ -3203,17 +3433,19 @@ def test_application_start_organization_expired_entity(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    expected_message = f"This organization's SAM.gov registration expired on {past_expiration_date.strftime('%B %d, %Y')} and cannot be used for applications"
-    assert expected_message in response.json["message"]
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_start_organization_inactive_entity(
@@ -3221,7 +3453,10 @@ def test_application_start_organization_inactive_entity(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization's SAM.gov entity is inactive"""
+    """Test application creation succeeds even when organization's SAM.gov entity is inactive
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
     future_expiration_date = today + timedelta(days=365)  # Valid expiration date
@@ -3248,19 +3483,19 @@ def test_application_start_organization_inactive_entity(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    assert (
-        "This organization is inactive in SAM.gov and cannot be used for applications"
-        in response.json["message"]
-    )
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_start_organization_valid_entity_success(
@@ -3309,14 +3544,14 @@ def test_application_form_inclusion_update_success_false(
 ):
     """Test successfully setting form inclusion to false"""
     # Create application with a form
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with inclusion initially set to true
-    ApplicationFormFactory.create(
+    application_form = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3350,6 +3585,18 @@ def test_application_form_inclusion_update_success_false(
     assert str(application.competition_id) == competition_id
     assert str(application.organization_id) == organization_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_start_organization_entity_expiring_today(
@@ -3391,7 +3638,10 @@ def test_application_start_organization_entity_expiring_yesterday(
     enable_factory_create,
     db_session,
 ):
-    """Test application creation fails when organization's SAM.gov entity expired yesterday"""
+    """Test application creation succeeds even when organization's SAM.gov entity expired yesterday
+
+    The validation error will appear during GET/submit, not during start.
+    """
     today = get_now_us_eastern_date()
     future_date = today + timedelta(days=10)
     yesterday = today - timedelta(days=1)
@@ -3416,17 +3666,19 @@ def test_application_start_organization_entity_expiring_yesterday(
         "/alpha/applications/start", json=request_data, headers={"X-SGG-Token": token}
     )
 
-    assert response.status_code == 422
-    expected_message = f"This organization's SAM.gov registration expired on {yesterday.strftime('%B %d, %Y')} and cannot be used for applications"
-    assert expected_message in response.json["message"]
+    # Should succeed - validation happens during GET/submit, not start
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert "application_id" in response.json["data"]
 
-    # Verify no application was created
-    applications_count = (
-        db_session.execute(select(Application).where(Application.competition_id == competition_id))
-        .scalars()
-        .all()
-    )
-    assert len(applications_count) == 0
+    # Verify application was created
+    application_id = response.json["data"]["application_id"]
+    application = db_session.execute(
+        select(Application).where(Application.application_id == application_id)
+    ).scalar_one_or_none()
+
+    assert application is not None
+    assert str(application.organization_id) == organization_id
 
 
 def test_application_form_inclusion_update_application_form_not_found(
@@ -3537,7 +3789,7 @@ def test_application_form_update_with_pre_population(
         opportunity_number="UPDATE-OPP-456", opportunity_title="Updated Opportunity Title"
     )
 
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     application.competition.opportunity = opportunity
@@ -3586,6 +3838,18 @@ def test_application_form_update_with_pre_population(
     assert application_form.application_response["user_input_field"] == "User provided data"
     # Should also have pre-populated data
     assert application_form.application_response["opportunity_number_field"] == "UPDATE-OPP-456"
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_form_update_overwrites_user_changes_with_pre_population(
@@ -3658,7 +3922,12 @@ def test_application_form_get_with_submitted_application_status(
     )
 
     # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application_form.application)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(
+            user=user, application=application_form.application
+        ),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
 
     response = client.get(
         f"/alpha/applications/{application_form.application_id}/application_form/{application_form.application_form_id}",
@@ -3759,3 +4028,349 @@ def test_application_form_inclusion_update_403_access(
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
+
+
+def test_get_application_access_403(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_application_form_access_403(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that user can not access the application without correct privilege"""
+    application = ApplicationFactory.create()
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    # Associate user with application
+    ApplicationUserFactory.create(user=user, application=application)
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_application_form_access_with_organization(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """Test that user can access the application if organization member"""
+    # Associate user with organization
+    _, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
+    # Create application owned by org
+    application = ApplicationFactory.create(organization=org)
+    application_form = ApplicationFormFactory.create(
+        application=application,
+        application_response={"name": "John Doe"},
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/application_form/{application_form.application_form_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+
+
+def test_add_organization_to_application_success(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test successfully adding an organization to an application via route"""
+    # Create a competition that allows organization applications
+    competition = CompetitionFactory.create(
+        open_to_applicants={
+            CompetitionOpenToApplicant.INDIVIDUAL,
+            CompetitionOpenToApplicant.ORGANIZATION,
+        }
+    )
+
+    # Create an application without an organization
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application (MODIFY_APPLICATION privilege)
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    # Add a second user to the app that will also be removed
+    second_user = ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    ).application_user
+
+    # Create organization and give user START_APPLICATION privilege
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    # Make the PUT request
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"
+    assert response.json["data"]["application_id"] == str(application.application_id)
+
+    # Verify the organization was added in the database
+    db_session.refresh(application)
+    assert application.organization_id == organization.organization_id
+
+    # Application users were removed
+    assert application.application_users == []
+
+    assert len(application.application_audits) == 3
+    assert {a.application_audit_event for a in application.application_audits} == {
+        ApplicationAuditEvent.ORGANIZATION_ADDED,
+        ApplicationAuditEvent.USER_REMOVED,
+    }
+
+    for app_audit in application.application_audits:
+        assert app_audit.user_id == user.user_id
+        if app_audit.application_audit_event == ApplicationAuditEvent.USER_REMOVED:
+            assert app_audit.target_user_id in (user.user_id, second_user.user_id)
+
+
+def test_add_organization_to_application_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when application doesn't exist"""
+    organization = OrganizationFactory.create()
+    non_existent_application_id = uuid.uuid4()
+
+    response = client.put(
+        f"/alpha/applications/{non_existent_application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert "Application not found" in response.json["message"]
+
+
+def test_add_organization_organization_not_found(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when organization doesn't exist"""
+    competition = CompetitionFactory.create()
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    non_existent_organization_id = uuid.uuid4()
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{non_existent_organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        f"Could not find Organization with ID {non_existent_organization_id}"
+        in response.json["message"]
+    )
+
+
+def test_add_organization_no_modify_application_privilege(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when user doesn't have MODIFY_APPLICATION privilege"""
+    competition = CompetitionFactory.create()
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application but without MODIFY_APPLICATION privilege
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert "Forbidden" in response.json["message"]
+
+
+def test_add_organization_no_start_application_privilege(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test adding organization fails when user doesn't have START_APPLICATION privilege"""
+    competition = CompetitionFactory.create(
+        open_to_applicants={CompetitionOpenToApplicant.ORGANIZATION}
+    )
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+    )
+
+    # Associate user with application with MODIFY_APPLICATION privilege
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    # Create organization but user doesn't have START_APPLICATION privilege
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_ORG_MEMBERSHIP]),
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/organizations/{organization.organization_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert "Forbidden" in response.json["message"]
+
+
+def test_application_get_shows_expired_org_warning(client, enable_factory_create, db_session):
+    """Test that GET application shows warning when organization has expired SAM.gov entity"""
+    today = get_now_us_eastern_date()
+    past_expiration_date = today - timedelta(days=30)
+
+    # Create organization with expired sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=past_expiration_date, is_inactive=False
+    )
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.START_APPLICATION, Privilege.VIEW_APPLICATION],
+        sam_gov_entity=sam_gov_entity,
+    )
+
+    competition = CompetitionFactory.create()
+
+    # Start an application with the expired org
+    application = ApplicationFactory.create(
+        competition=competition,
+        organization=organization,
+    )
+
+    # Associate user with application
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
+    )
+
+    # GET the application
+    response = client.get(
+        f"/alpha/applications/{application.application_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    # Check for warnings about expired org
+    assert "warnings" in response.json
+    warnings = response.json["warnings"]
+
+    # Verify there's a warning about the expired SAM.gov registration
+    expired_warning_found = any(
+        "SAM.gov registration expired" in str(warning.get("message", "")) for warning in warnings
+    )
+    assert expired_warning_found, "Expected warning about expired SAM.gov registration not found"
+
+
+def test_application_submit_fails_with_expired_org(client, enable_factory_create, db_session):
+    """Test that SUBMIT application fails with 422 when organization has expired SAM.gov entity"""
+    today = get_now_us_eastern_date()
+    past_expiration_date = today - timedelta(days=30)
+
+    # Create organization with expired sam.gov entity
+    sam_gov_entity = SamGovEntityFactory.create(
+        expiration_date=past_expiration_date, is_inactive=False
+    )
+    user, organization, token = create_user_in_org(
+        db_session=db_session,
+        privileges=[Privilege.START_APPLICATION, Privilege.SUBMIT_APPLICATION],
+        sam_gov_entity=sam_gov_entity,
+    )
+
+    # Create a simple competition with a form
+    competition = CompetitionFactory.create()
+    form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
+    competition_form = CompetitionFormFactory.create(
+        competition=competition, form=form, is_required=True
+    )
+
+    # Create application with the expired org
+    application = ApplicationFactory.create(
+        competition=competition,
+        organization=organization,
+        application_status=ApplicationStatus.IN_PROGRESS,
+    )
+
+    # Associate user with application
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+    )
+
+    # Add a valid form response
+    ApplicationFormFactory.create(
+        application=application,
+        competition_form=competition_form,
+        application_response={"name": "Test Name"},
+    )
+
+    # Try to submit the application
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/submit",
+        headers={"X-SGG-Token": token},
+    )
+
+    # Should fail with 422
+    assert response.status_code == 422
+
+    # Check that the error mentions the expired SAM.gov registration
+    response_text = str(response.json)
+    assert (
+        "SAM.gov registration expired" in response_text
+    ), "Expected error about expired SAM.gov registration not found in response"

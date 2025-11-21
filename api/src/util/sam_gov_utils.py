@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 import src.adapters.db as db
 from src.constants.static_role_values import ORG_ADMIN
@@ -75,13 +75,6 @@ def link_sam_gov_entity_if_not_exists(
         organization_user = OrganizationUser(organization=organization, user=user)
         db_session.add(organization_user)
         logger.info("Added user to organization", extra=log_extra)
-
-    # As we know they're the ebiz POC from the initial query,
-    # make them the owner if they aren't already
-    if organization_user.is_organization_owner is not True:
-        increment_metric("new_organization_owner_count")
-        organization_user.is_organization_owner = True
-        logger.info("Made user an owner of the organization", extra=log_extra)
 
     # Ensure the organization user has the Organization Admin role
     _assign_organization_admin_role(db_session, organization_user, log_extra, increment_metric)

@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import Tuple
 
 import pytest
 
@@ -31,7 +30,7 @@ from tests.conftest import BaseTestClass
 
 
 class BaseTransformTestClass(BaseTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_oracle_data_task(
         self, db_session, enable_factory_create, truncate_opportunities
     ) -> TransformOracleDataTask:
@@ -372,7 +371,7 @@ def setup_opportunity_attachment(
 
 
 def validate_matching_fields(
-    source, destination, fields: list[Tuple[str, str]], expect_all_to_match: bool
+    source, destination, fields: list[tuple[str, str]], expect_all_to_match: bool
 ):
     mismatched_fields = []
 

@@ -108,6 +108,7 @@ function Budget424aSectionE<
   value,
   rawErrors,
   formContext,
+  disabled,
 }: UswdsWidgetProps<T, S, F>): JSX.Element {
   const rootFormDataFromContext = (
     formContext as { rootFormData?: unknown } | undefined
@@ -157,6 +158,7 @@ function Budget424aSectionE<
     return (
       <CurrencyInput
         id={idPath}
+        disabled={disabled}
         rawErrors={getErrorMessagesForField(idPath)}
         value={get(
           activityItems,
@@ -172,6 +174,7 @@ function Budget424aSectionE<
       <div className="display-flex flex-column">
         <HelperText hasHorizontalLine>{helper}</HelperText>
         <CurrencyInput
+          disabled
           id={idPath}
           rawErrors={getErrorMessagesForField(idPath)}
           value={totals ? totals[yearKey] : undefined}

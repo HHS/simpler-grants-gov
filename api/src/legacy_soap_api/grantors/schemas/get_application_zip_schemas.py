@@ -1,6 +1,6 @@
-from typing import Self
+from typing import Any, Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
@@ -28,9 +28,13 @@ class GetApplicationZipResponseSOAPBody(BaseModel):
 
 class GetApplicationZipResponseSOAPEnvelope(BaseModel):
     Body: GetApplicationZipResponseSOAPBody
+    _mtom_file_stream: Any | None = PrivateAttr(default=None)
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
-        return self.model_dump(by_alias=True)
+        envelope_dict = {"Body": self.Body.model_dump(by_alias=True)}
+        if self._mtom_file_stream:
+            envelope_dict["_mtom_file_stream"] = self._mtom_file_stream
+        return envelope_dict
 
 
 class GetApplicationZipRequest(BaseModel):

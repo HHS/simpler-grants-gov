@@ -7,12 +7,17 @@ import { getTranslations } from "next-intl/server";
 import { Alert, Table } from "@trussworks/react-uswds";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
+import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
 
-export const OrganizationRosterSkeleton = () => {
+export const OrganizationRosterSkeleton = ({
+  organizationId,
+}: {
+  organizationId: string;
+}) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
   return (
     <>
-      <OrganizationRosterInfo />
+      <OrganizationRosterInfo organizationId={organizationId} />
       <Table className="width-full overflow-wrap simpler-application-forms-table">
         <thead>
           <tr>
@@ -62,18 +67,6 @@ const OrganizationUserRow = ({
   );
 };
 
-const OrganizationRosterInfo = () => {
-  const t = useTranslations("OrganizationDetail.rosterTable");
-  return (
-    <>
-      <h3>{t("title")}</h3>
-      <div>
-        {t("explanation")} {t("manageUsersExplanation")}
-      </div>
-    </>
-  );
-};
-
 export const OrganizationRoster = async ({
   organizationId,
 }: {
@@ -103,7 +96,7 @@ export const OrganizationRoster = async ({
   if (organizationUsers?.length) {
     return (
       <>
-        <OrganizationRosterInfo />
+        <OrganizationRosterInfo organizationId={organizationId} />
         <Table className="width-full overflow-wrap simpler-application-forms-table">
           <thead>
             <tr>

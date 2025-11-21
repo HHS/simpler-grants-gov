@@ -1,7 +1,6 @@
 """Tests for configurable XML namespaces feature."""
 
-from unittest.mock import patch
-
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -27,7 +26,9 @@ class TestConfigurableNamespaces:
             "authorized_representative": {"first_name": "John", "last_name": "Doe"},
         }
 
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -60,7 +61,9 @@ class TestConfigurableNamespaces:
             "submission_type": "Application",
         }
 
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -84,7 +87,9 @@ class TestConfigurableNamespaces:
             },
         }
 
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
 
         response = service.generate_xml(request)
 
@@ -95,30 +100,3 @@ class TestConfigurableNamespaces:
         # Verify namespace declarations are present
         assert 'xmlns:SF424_4_0="http://apply.grants.gov/forms/SF424_4_0-V4.0"' in xml_content
         assert 'xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"' in xml_content
-
-    def test_missing_version_raises_error(self):
-        """Test that missing version in xml_structure raises a clear error."""
-        service = XMLGenerationService()
-        application_data = {"submission_type": "Application"}
-        request = XMLGenerationRequest(application_data=application_data, form_name="SF424_4_0")
-
-        # Mock the config to have missing version
-        mock_config = {
-            "_xml_config": {
-                "namespaces": {"default": "http://example.com"},
-                "xml_structure": {"root_element": "TestForm"},  # Missing version!
-            }
-        }
-
-        with patch(
-            "src.services.xml_generation.service.load_xml_transform_config",
-            return_value=mock_config,
-        ):
-            response = service.generate_xml(request)
-
-            assert not response.success
-            assert (
-                "Missing required 'version' in xml_structure configuration"
-                in response.error_message
-            )
-            assert "TestForm" in response.error_message

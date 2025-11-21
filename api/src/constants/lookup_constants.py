@@ -145,10 +145,20 @@ class FormType(StrEnum):
     SF424 = "SF424"
     SF424A = "SF424A"
     SF424B = "SF424B"
+    SF424D = "SF424D"
     SFLLL = "SFLLL"
     PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
     BUDGET_NARRATIVE_ATTACHMENT = "BudgetNarrativeAttachment"
+    OTHER_NARRATIVE_ATTACHMENT = "OtherNarrativeAttachment"
     PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
+    PROJECT_ABSTRACT = "ProjectAbstract"
+    CD511 = "CD511"
+
+    SUPPLEMENTARY_NEH_COVER_SHEET = "SupplementaryNEHCoverSheet"
+
+    GG_LOBBYING_FORM = "GGLobbyingForm"
+
+    EPA_FORM_4700_4 = "EPAForm4700-4"
 
 
 class CompetitionOpenToApplicant(StrEnum):
@@ -203,7 +213,6 @@ class ApplicationStatus(StrEnum):
 
 
 class ApplicationFormStatus(StrEnum):
-    NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
 
@@ -220,6 +229,9 @@ class Privilege(StrEnum):
     UPDATE_FORM = "update_form"
     MANAGE_AGENCY_MEMBERS = "manage_agency_members"
     GET_SUBMITTED_APPLICATIONS = "get_submitted_applications"
+    LEGACY_AGENCY_VIEWER = "legacy_agency_viewer"
+    LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
+    LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
 
 
 class RoleType(StrEnum):
@@ -227,3 +239,38 @@ class RoleType(StrEnum):
     AGENCY = "agency"
     INTERNAL = "internal"
     APPLICATION = "application"
+
+
+class OrganizationInvitationStatus(StrEnum):
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+    PENDING = "pending"
+
+
+class ApplicationAuditEvent(StrEnum):
+    APPLICATION_CREATED = "application_created"
+    APPLICATION_NAME_CHANGED = "application_name_changed"
+    APPLICATION_SUBMITTED = "application_submitted"
+    APPLICATION_SUBMIT_REJECTED = "application_submit_rejected"
+    ATTACHMENT_ADDED = "attachment_added"
+    ATTACHMENT_DELETED = "attachment_deleted"
+    ATTACHMENT_UPDATED = "attachment_updated"
+    SUBMISSION_CREATED = "submission_created"
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
+    FORM_UPDATED = "form_updated"
+    ORGANIZATION_ADDED = "organization_added"
+
+
+class CommonGrantsEvent(StrEnum):
+
+    URL_VALIDATION_ERROR = "url_validation_error"
+    OPPORTUNITY_VALIDATION_ERROR = "opportunity_validation_error"
+
+
+class UserType(StrEnum):
+    STANDARD = "standard"
+    INTERNAL_FRONTEND = "internal_frontend"
+    LEGACY_CERTIFICATE = "legacy_certificate"

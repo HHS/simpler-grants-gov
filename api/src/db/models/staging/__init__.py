@@ -1,5 +1,6 @@
 from . import (
     attachment,
+    certificates,
     competition,
     forecast,
     instructions,
@@ -22,4 +23,5 @@ __all__ = [
     "user",
     "competition",
     "instructions",
+    "certificates",
 ]
