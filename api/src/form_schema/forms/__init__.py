@@ -3,6 +3,7 @@ from src.db.models.competition_models import Form
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from .cd511 import CD511_v1_1
 from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
+from .epa_key_contacts import EPA_KEY_CONTACT_v2_0
 from .gg_lobbying_form import GG_LobbyingForm_v1_1
 from .other_narrative_attachment import OtherNarrativeAttachment_v1_2
 from .project_abstract import ProjectAbstract_v1_2
@@ -33,4 +34,5 @@ def get_active_forms() -> list[Form]:
         SupplementaryNEHCoverSheet_v3_0,
         GG_LobbyingForm_v1_1,
         EPA_FORM_4700_4_v5_0,
+        EPA_KEY_CONTACT_v2_0,
     ]

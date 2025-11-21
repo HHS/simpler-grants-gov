@@ -187,3 +187,103 @@ def test_shared_address_v1_simple_address_max_length():
             assert validation_issue.type == "enum"
         else:
             assert validation_issue.type == "maxLength"
+
+
+###################################
+# Simple Address with Country
+###################################
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "street1": "456 Route 1",
+            "city": "Pizzaville",
+            "country": "CAN: CANADA",
+        },
+        {
+            "street1": "123 Main St",
+            "city": "Exampleburg",
+            "state": "NY: New York",
+            "country": "USA: UNITED STATES",
+            "zip_code": "12345",
+        },
+        {
+            "street1": "789 Broken Dreams Blvd",
+            "street2": "Room #101",
+            "city": "Placetown",
+            "state": "MI: Michigan",
+            "country": "USA: UNITED STATES",
+            "zip_code": "56789",
+        },
+    ],
+)
+def test_shared_address_v1_simple_address_with_country_happy(data):
+    schema = build_schema(ADDRESS_SHARED_V1, "simple_address_with_country")
+    validation_issues = validate_json_schema({"my_field": data}, schema)
+    assert len(validation_issues) == 0
+
+
+@pytest.mark.parametrize(
+    "data,required_fields",
+    [
+        ({}, ["$.my_field.street1", "$.my_field.city", "$.my_field.country"]),
+        (
+            {
+                "street1": "123 Main St",
+                "city": "Exampleburg",
+                "country": "USA: UNITED STATES",
+            },
+            ["$.my_field.state", "$.my_field.zip_code"],
+        ),
+    ],
+)
+def test_shared_address_v1_simple_address_with_country_with_required_issues(data, required_fields):
+    schema = build_schema(ADDRESS_SHARED_V1, "simple_address_with_country")
+    validation_issues = validate_json_schema({"my_field": data}, schema)
+
+    assert len(validation_issues) == len(required_fields)
+    for validation_issue in validation_issues:
+        assert validation_issue.type == "required"
+        assert validation_issue.field in required_fields
+
+
+def test_shared_address_v1_simple_address_with_country_min_length():
+    data = {
+        "street1": "",
+        "street2": "",
+        "city": "",
+        "state": "",
+        "country": "",
+        "zip_code": "",
+    }
+    schema = build_schema(ADDRESS_SHARED_V1, "simple_address_with_country")
+    validation_issues = validate_json_schema({"my_field": data}, schema)
+
+    assert len(validation_issues) == 6
+    for validation_issue in validation_issues:
+        if validation_issue.field in ("$.my_field.country", "$.my_field.state"):
+            assert validation_issue.type == "enum"
+        else:
+            assert validation_issue.type == "minLength"
+
+
+def test_shared_address_v1_simple_address_with_country_max_length():
+    data = {
+        "street1": "A" * 56,
+        "street2": "B" * 56,
+        "city": "C" * 36,
+        "state": "D" * 10,
+        "country": "E" * 10,
+        "zip_code": "F" * 31,
+    }
+    schema = build_schema(ADDRESS_SHARED_V1, "simple_address_with_country")
+    validation_issues = validate_json_schema({"my_field": data}, schema)
+
+    assert len(validation_issues) == 6
+    for validation_issue in validation_issues:
+        if validation_issue.field in ("$.my_field.country", "$.my_field.state"):
+            assert validation_issue.type == "enum"
+        else:
+            assert validation_issue.type == "maxLength"
