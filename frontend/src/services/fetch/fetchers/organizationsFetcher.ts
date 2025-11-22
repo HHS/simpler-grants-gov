@@ -60,8 +60,19 @@ export const getOrganizationUsers = async (
     subPath: `${organizationId}/users`,
     additionalHeaders: ssgToken,
   });
+
   const json = (await resp.json()) as { data: UserDetail[] };
-  return json.data;
+
+  // Sort by email, this will be temp until we get the results from the backend with sorting applied
+  const sorted = [...json.data].sort((first, second) => {
+    const a = (first.email ?? "").toLowerCase();
+    const b = (second.email ?? "").toLowerCase();
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  });
+
+  return sorted;
 };
 
 export const getOrganizationRoles = async (
@@ -130,5 +141,14 @@ export const getOrganizationPendingInvitations = async (
   const json = (await response.json()) as {
     data: OrganizationPendingInvitation[];
   };
-  return json.data;
+  // Sort by email, this will be temp until we get the results from the backend with sorting applied
+  const sorted = [...json.data].sort((first, second) => {
+    const a = (first.invitee_email ?? "").toLowerCase();
+    const b = (second.invitee_email ?? "").toLowerCase();
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  });
+
+  return sorted;
 };
