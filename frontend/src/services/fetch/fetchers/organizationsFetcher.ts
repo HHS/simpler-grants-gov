@@ -141,6 +141,7 @@ export const getOrganizationPendingInvitations = async (
   const json = (await response.json()) as {
     data: OrganizationPendingInvitation[];
   };
+
   // Sort by email, this will be temp until we get the results from the backend with sorting applied
   const sorted = [...json.data].sort((first, second) => {
     const a = (first.invitee_email ?? "").toLowerCase();
