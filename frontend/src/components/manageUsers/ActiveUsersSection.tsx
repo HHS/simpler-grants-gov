@@ -1,9 +1,10 @@
 import { AuthorizedData } from "src/types/authTypes";
-import type { OrganizationPendingInvitation } from "src/types/userTypes";
+import type { UserDetail } from "src/types/userTypes";
 import { formatRoleNames } from "src/utils/formatRoleName";
 import { formatFullName } from "src/utils/userNameUtils";
 
 import { getTranslations } from "next-intl/server";
+import React from "react";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import {
@@ -11,15 +12,15 @@ import {
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
 
-interface InvitedUsersSectionProps {
+interface ActiveUsersSectionProps {
   authorizedData?: AuthorizedData;
 }
 
-export async function InvitedUsersSection({
+export async function ActiveUsersSection({
   authorizedData,
-}: InvitedUsersSectionProps) {
+}: ActiveUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
-  let invitedUsers: OrganizationPendingInvitation[] = [];
+  let userData: UserDetail[] = [];
 
   if (!authorizedData) {
     throw new Error("ActiveUsersList must be wrapped in AuthorizationGate");
@@ -27,16 +28,18 @@ export async function InvitedUsersSection({
 
   const { fetchedResources } = authorizedData;
   const {
-    invitedUsersList: { data, error },
+    activeUsersList: { data, error },
   } = fetchedResources;
 
   if (error || !data) {
     return (
       <GridContainer className="padding-top-2 tablet:padding-y-6">
-        <ErrorMessage>{t("invitedUsersFetchError")}</ErrorMessage>
+        <ErrorMessage>{t("activeUsersFetchError")}</ErrorMessage>
       </GridContainer>
     );
   }
+
+  userData = data as UserDetail[];
 
   const tableHeaders: TableCellData[] = [
     { cellData: t("usersTable.nameHeading") },
@@ -44,15 +47,11 @@ export async function InvitedUsersSection({
     { cellData: t("usersTable.roleHeading") },
   ];
 
-  invitedUsers = data as OrganizationPendingInvitation[];
-
-  const transformTableRowData = (
-    userDetails: OrganizationPendingInvitation[],
-  ) => {
+  const transformTableRowData = (userDetails: UserDetail[]) => {
     return userDetails.map((user) => {
       return [
-        { cellData: formatFullName(user.invitee_user) },
-        { cellData: user.invitee_email },
+        { cellData: formatFullName(user) },
+        { cellData: user.email },
         { cellData: formatRoleNames(user.roles) },
       ];
     });
@@ -61,20 +60,20 @@ export async function InvitedUsersSection({
   return (
     <section className="usa-table-container--scrollable margin-bottom-5 margin-top-5">
       <h2 className="margin-bottom-1 font-sans-lg">
-        {t("invitedUsersHeading")}
+        {t("activeUsersHeading")}
       </h2>
       <p className="margin-bottom-2 margin-top-1 maxw-full">
-        {t("invitedUsersTableDescription")}
+        {t("activeUsersTableDescription")}
       </p>
 
-      {invitedUsers.length === 0 ? (
-        <p data-testid="pending-users-empty" className="maxw-full">
-          {t("invitedUsersTableZeroState")}
+      {userData.length === 0 ? (
+        <p className="maxw-full" data-testid="active-users-empty">
+          {t("activeUsersTableZeroState")}
         </p>
       ) : (
         <TableWithResponsiveHeader
           headerContent={tableHeaders}
-          tableRowData={transformTableRowData(invitedUsers)}
+          tableRowData={transformTableRowData(userData)}
         />
       )}
     </section>

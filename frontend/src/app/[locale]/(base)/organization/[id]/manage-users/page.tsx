@@ -1,9 +1,15 @@
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import {
+  getOrganizationPendingInvitations,
+  getOrganizationUsers,
+} from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
+import { AuthorizationGate } from "src/components/user/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 interface ManageUsersPageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -26,7 +32,24 @@ export async function generateMetadata({
 async function ManageUsersPage({ params }: ManageUsersPageProps) {
   const { id: organizationId } = await params;
 
-  return <ManageUsersPageContent organizationId={organizationId} />;
+  return (
+    <AuthorizationGate
+      resourcePromises={{
+        invitedUsersList: getOrganizationPendingInvitations(organizationId),
+        activeUsersList: getOrganizationUsers(organizationId),
+      }}
+      requiredPrivileges={[
+        {
+          resourceId: organizationId,
+          resourceType: "organization",
+          privilege: "manage_org_members",
+        },
+      ]}
+      onUnauthorized={() => <UnauthorizedMessage />}
+    >
+      <ManageUsersPageContent organizationId={organizationId} />
+    </AuthorizationGate>
+  );
 }
 
 export default withFeatureFlag<ManageUsersPageProps, never>(
