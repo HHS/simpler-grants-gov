@@ -67,7 +67,9 @@ export async function ActiveUsersSection({
       </p>
 
       {userData.length === 0 ? (
-        <p className="maxw-full" data-testid="active-users-empty">{t("activeUsersTableZeroState")}</p>
+        <p className="maxw-full" data-testid="active-users-empty">
+          {t("activeUsersTableZeroState")}
+        </p>
       ) : (
         <TableWithResponsiveHeader
           headerContent={tableHeaders}
