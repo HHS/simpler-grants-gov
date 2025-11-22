@@ -25,7 +25,7 @@ export async function ManageUsersPageContent({
   }
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
   return (
-    <GridContainer className="padding-top-2 tablet:padding-y-6">
+    <GridContainer className="padding-top-1">
       <Breadcrumbs
         breadcrumbList={[
           { title: "home", path: "/" },

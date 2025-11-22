@@ -59,16 +59,16 @@ export async function InvitedUsersSection({
   };
 
   return (
-    <section className="usa-table-container--scrollable margin-bottom-5">
+    <section className="usa-table-container--scrollable margin-bottom-5 margin-top-5">
       <h2 className="margin-bottom-1 font-sans-lg">
         {t("invitedUsersHeading")}
       </h2>
-      <p className="margin-bottom-2 margin-top-1">
+      <p className="margin-bottom-2 margin-top-1 maxw-full">
         {t("invitedUsersTableDescription")}
       </p>
 
       {invitedUsers.length === 0 ? (
-        <p data-testid="pending-users-empty">
+        <p data-testid="pending-users-empty" className="maxw-full">
           {t("invitedUsersTableZeroState")}
         </p>
       ) : (

@@ -58,16 +58,16 @@ export async function ActiveUsersSection({
   };
 
   return (
-    <section className="usa-table-container--scrollable margin-bottom-5">
+    <section className="usa-table-container--scrollable margin-bottom-5 margin-top-5">
       <h2 className="margin-bottom-1 font-sans-lg">
         {t("activeUsersHeading")}
       </h2>
-      <p className="margin-bottom-2 margin-top-1">
+      <p className="margin-bottom-2 margin-top-1 maxw-full">
         {t("activeUsersTableDescription")}
       </p>
 
       {userData.length === 0 ? (
-        <p data-testid="active-users-empty">{t("activeUsersTableZeroState")}</p>
+        <p className="maxw-full" data-testid="active-users-empty">{t("activeUsersTableZeroState")}</p>
       ) : (
         <TableWithResponsiveHeader
           headerContent={tableHeaders}
