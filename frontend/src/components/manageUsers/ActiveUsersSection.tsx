@@ -1,37 +1,47 @@
-import { AuthorizedData } from "src/types/authTypes";
-import type { UserDetail } from "src/types/userTypes";
-import { formatRoleNames } from "src/utils/formatRoleName";
-import { formatFullName } from "src/utils/userNameUtils";
-
 import { getTranslations } from "next-intl/server";
-import React from "react";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import {
-  TableCellData,
-  TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+import { RoleManager } from "src/components/manageUsers/RoleManager";
+
+
+import type {
+  UserDetail,
+  UserRole,
+} from "src/types/userTypes";
+import type { AuthorizedData, FetchedResource } from "src/types/authTypes";
+import { TableCellData, TableWithResponsiveHeader } from "../TableWithResponsiveHeader";
 
 interface ActiveUsersSectionProps {
+  organizationId: string;
   authorizedData?: AuthorizedData;
 }
 
 export async function ActiveUsersSection({
   authorizedData,
+  organizationId,
 }: ActiveUsersSectionProps) {
   const t = await getTranslations("ManageUsers");
-  let userData: UserDetail[] = [];
 
   if (!authorizedData) {
     throw new Error("ActiveUsersList must be wrapped in AuthorizationGate");
   }
 
-  const { fetchedResources } = authorizedData;
+  // 👇 Just tell TS what these two resources are, using the existing FetchedResource type
   const {
-    activeUsersList: { data, error },
-  } = fetchedResources;
+    activeUsersList,
+    organizationRolesList,
+  } = authorizedData.fetchedResources as {
+    activeUsersList: FetchedResource;
+    organizationRolesList: FetchedResource;
+  };
 
-  if (error || !data) {
+  const usersData = activeUsersList.data as UserDetail[] | undefined;
+  const usersError = activeUsersList.error;
+
+  const rolesData = organizationRolesList.data as UserRole[] | undefined;
+  const rolesError = organizationRolesList.error;
+
+  if (usersError || !usersData) {
     return (
       <GridContainer className="padding-top-2 tablet:padding-y-6">
         <ErrorMessage>{t("activeUsersFetchError")}</ErrorMessage>
@@ -39,7 +49,18 @@ export async function ActiveUsersSection({
     );
   }
 
-  userData = data as UserDetail[];
+  // ✅ rolesData is now treated as UserRole[] | undefined
+  const availableRoles: UserRole[] = rolesData ?? [];
+
+  const roleOptions =
+    availableRoles.length > 0
+      ? availableRoles.map((role) => ({
+          value: role.role_id,
+          label: role.role_name,
+        }))
+      : [];
+
+  const userData = usersData;
 
   const tableHeaders: TableCellData[] = [
     { cellData: t("usersTable.nameHeading") },
@@ -47,15 +68,33 @@ export async function ActiveUsersSection({
     { cellData: t("usersTable.roleHeading") },
   ];
 
-  const transformTableRowData = (userDetails: UserDetail[]) => {
-    return userDetails.map((user) => {
+  const transformTableRowData = (userDetails: UserDetail[]) =>
+    userDetails.map((user) => {
+      const currentRoleId =
+        user.roles && user.roles.length > 0
+          ? user.roles[0].role_id
+          : availableRoles[0]?.role_id ?? "";
+
       return [
-        { cellData: formatFullName(user) },
+        { cellData: `${user.first_name} ${user.last_name}` },
         { cellData: user.email },
-        { cellData: formatRoleNames(user.roles) },
+        {
+          cellData:
+            roleOptions.length === 0 || !currentRoleId ? (
+              (user.roles ?? [])
+                .map((r) => r.role_name)
+                .join(", ") || t("rolePicker.emptyState")
+            ) : (
+              <RoleManager
+                organizationId={organizationId}
+                userId={user.user_id}
+                currentRoleId={currentRoleId}
+                roleOptions={roleOptions}
+              />
+            ),
+        },
       ];
     });
-  };
 
   return (
     <section className="usa-table-container--scrollable margin-bottom-5 margin-top-5">

@@ -1553,6 +1553,9 @@ export const messages = {
     invitedUsersFetchError:
       "We have encountered an error retrieving the Invited Users list, please try again later.",
     invitedUsersTableZeroState: "There are no invited users.",
+    rolePicker: {
+      emptyState: "No role assigned"
+    },
     usersTable: {
       admin: "Administrator",
       emailHeading: "Email",

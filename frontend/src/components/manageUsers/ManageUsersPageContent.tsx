@@ -45,7 +45,7 @@ export async function ManageUsersPageContent({
       />
       <PageHeader organizationName={name} />
       <UserOrganizationInvite organizationId={organizationId} />
-      <ActiveUsersSection authorizedData={authorizedData} />
+      <ActiveUsersSection authorizedData={authorizedData} organizationId={organizationId} />
       <InvitedUsersSection authorizedData={authorizedData} />
     </GridContainer>
   );
