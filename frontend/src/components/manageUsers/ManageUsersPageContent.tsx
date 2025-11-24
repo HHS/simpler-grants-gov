@@ -1,17 +1,21 @@
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
+import { AuthorizedData } from "src/types/authTypes";
 
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
+import { ActiveUsersSection } from "./ActiveUsersSection";
 import { InvitedUsersSection } from "./InvitedUsersSection";
 import { UserOrganizationInvite } from "./UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
   organizationId,
+  authorizedData,
 }: {
   organizationId: string;
+  authorizedData?: AuthorizedData;
 }) {
   let userOrganizations: Organization | undefined;
   try {
@@ -21,7 +25,7 @@ export async function ManageUsersPageContent({
   }
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
   return (
-    <GridContainer className="padding-top-2 tablet:padding-y-6">
+    <GridContainer className="padding-top-1">
       <Breadcrumbs
         breadcrumbList={[
           { title: "home", path: "/" },
@@ -41,7 +45,8 @@ export async function ManageUsersPageContent({
       />
       <PageHeader organizationName={name} />
       <UserOrganizationInvite organizationId={organizationId} />
-      <InvitedUsersSection organizationId={organizationId} />
+      <ActiveUsersSection authorizedData={authorizedData} />
+      <InvitedUsersSection authorizedData={authorizedData} />
     </GridContainer>
   );
 }
