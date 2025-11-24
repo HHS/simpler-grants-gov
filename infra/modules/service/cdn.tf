@@ -105,8 +105,9 @@ resource "aws_cloudfront_cache_policy" "api_no_cache" {
 resource "aws_cloudfront_distribution" "cdn" {
   count = local.enable_cdn ? 1 : 0
 
-  enabled = local.enable_cdn ? true : false
-  aliases = local.cdn_domain_name == null ? null : [local.cdn_domain_name]
+  enabled             = local.enable_cdn ? true : false
+  aliases             = local.cdn_domain_name == null ? null : [local.cdn_domain_name]
+  default_root_object = "index.html"
 
   dynamic "origin" {
     for_each = var.enable_alb_cdn ? [1] : []
