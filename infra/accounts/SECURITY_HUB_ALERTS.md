@@ -40,25 +40,50 @@ Email notifications are automatically sent to `grantsalerts@navapbc.com` when CR
 
 ## Slack Integration (Optional)
 
-To enable Slack notifications:
+To enable Slack notifications via webhook:
 
-1. **Create a Slack App** with appropriate permissions
-2. **Add GitHub Secrets**:
-   - `SECURITY_ALERTS_SLACK_CHANNEL_ID` - Your Slack channel ID
-   - `SECURITY_ALERTS_SLACK_BOT_TOKEN` - Your Slack bot token
+### 1. Create a Slack Webhook
 
-3. **Enable in Terraform**:
-   Edit `infra/project-config/system_notifications.tf`:
-   ```hcl
-   security-alerts = {
-     type                    = "slack"
-     channel_id_secret_name  = "SECURITY_ALERTS_SLACK_CHANNEL_ID"
-     slack_token_secret_name = "SECURITY_ALERTS_SLACK_BOT_TOKEN"
-   }
-   ```
+1. Go to your Slack workspace settings
+2. Navigate to **Apps** > **Incoming Webhooks**
+3. Create a new webhook for your desired channel
+4. Copy the webhook URL (e.g., `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXX`)
 
-4. **Create GitHub Workflow** (optional):
-   You can create a GitHub Actions workflow that listens to the SNS topic via webhook and posts to Slack with richer formatting.
+### 2. Store Webhook in AWS Secrets Manager
+
+```bash
+aws secretsmanager create-secret \
+  --name security-hub-slack-webhook \
+  --secret-string '{"webhook_url":"https://hooks.slack.com/services/YOUR/WEBHOOK/URL"}' \
+  --region us-east-1
+```
+
+### 3. Enable in Terraform
+
+Uncomment the Slack integration resources in `infra/accounts/security_hub_alerts.tf`:
+
+- `data.aws_secretsmanager_secret.slack_webhook`
+- `data.aws_secretsmanager_secret_version.slack_webhook`
+- `aws_iam_role.security_hub_slack_lambda`
+- `aws_iam_role_policy_attachment.lambda_basic`
+- `aws_iam_role_policy.lambda_secrets`
+- `aws_lambda_function.security_hub_slack`
+- `aws_lambda_permission.allow_sns`
+- `aws_sns_topic_subscription.security_hub_findings_slack`
+
+### 4. Apply Terraform
+
+```bash
+cd infra/accounts
+terraform init
+terraform plan
+terraform apply
+```
+
+The Lambda function will automatically format Security Hub findings as rich Slack messages with:
+- Color-coded severity (🚨 Red for CRITICAL, ⚠️ Orange for HIGH)
+- Formatted finding details
+- Direct links to AWS console
 
 ## Testing the Alerts
 
