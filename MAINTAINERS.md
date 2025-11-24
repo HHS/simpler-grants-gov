@@ -20,6 +20,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Jakob Pederson
 * Erin Pattison
 * Glen Blosser
+* Hao Wang
 
 ## Content and Design
 
