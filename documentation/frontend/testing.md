@@ -14,4 +14,12 @@ Using this function, tests should work automatically in CI, but they will requir
 
 - run `make db-seed-local` in the /api directory. This will create the necessary DB records for the spoofed user and spit out an API auth token in a file at /api/e2e_token.tmp.
 - copy the token variable declaration from the e2e_token.tmp file into your frontend .env.local file
+- by default Playwright will point tests to your localhost:3000 - this can be changed by adding an entry into your .env.local to point to a deployed environment
+
+```
+PLAYWRIGHT_BASE_URL="https://staging.simpler.grants.gov"
+```
+
 - that's it! Running e2e tests using the functionality mentioned above should now work locally
+
+Optionally, install the VS Code "Playwright Test for VSCode" plugin, and follow directions for setup, in order to easily run tests from your local IDE.
