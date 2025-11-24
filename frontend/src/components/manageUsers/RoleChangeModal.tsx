@@ -10,6 +10,7 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
+import { LoadingButton } from "src/components/LoadingButton";
 import { SimplerModal } from "src/components/SimplerModal";
 
 export interface RoleChangeModalProps {
@@ -41,25 +42,16 @@ export function RoleChangeModal({
       <p className="font-sans-2xs margin-y-4">{modalDescription}</p>
       <ModalFooter>
         <ButtonGroup>
-          <Button
-            type="button"
-            onClick={onConfirm}
-            disabled={isSubmitting}
-            aria-busy={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="display-inline-flex flex-align-center">
-                <span>{t("saving")}</span>
-                <span
-                  className="margin-left-1 usa-spinner usa-spinner--small"
-                  role="status"
-                  aria-hidden
-                />
-              </span>
-            ) : (
-              t("confirm")
-            )}
-          </Button>
+          {isSubmitting ? (
+            <LoadingButton
+              id="role-change-confirm-button"
+              message={t("saving")}
+            />
+          ) : (
+            <Button type="button" onClick={onConfirm}>
+              {t("confirm")}
+            </Button>
+          )}
           <ModalToggleButton
             modalRef={modalRef}
             closer

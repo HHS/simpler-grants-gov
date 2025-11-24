@@ -73,31 +73,37 @@ export async function ActiveUsersSection({
       const canEditRoles =
         !rolesFetchFailed && roleOptions.length > 0 && !!currentRoleId;
 
-      // Text to display when we are not rendering the RoleManager:
-      // join all assigned role names, or fall back is an empty string
-      const roleText =
-        (user.roles ?? []).map((r) => r.role_name).join(", ") || "";
-
       // Prefer formatted full name; fall back to empty string if no name data is present.
       const name = formatFullName(user) || "";
+
+      let roleCell: React.ReactNode;
+
+      // Note: scaffolding this for future task to disable the dropdown for ebizpocs
+      // If editing is allowed, show the role dropdown+modal
+      // Otherwise, show the read-only role text
+      if (canEditRoles) {
+        roleCell = (
+          <RoleManager
+            organizationId={organizationId}
+            userId={user.user_id}
+            currentRoleId={currentRoleId}
+            roleOptions={roleOptions}
+          />
+        );
+      } else {
+        // Text to display when we are not rendering the RoleManager:
+        // join all assigned role names, or fall back is an empty string
+        const roleText =
+          (user.roles ?? []).map((r) => r.role_name).join(", ") || "";
+
+        roleCell = roleText;
+      }
 
       return [
         { cellData: name },
         { cellData: user.email },
         {
-          // Note: scaffolding this for future task to disable the dropdown for ebizpocs
-          // If editing is allowed, show the role dropdown+modal
-          // Otherwise, show the read-only role text
-          cellData: canEditRoles ? (
-            <RoleManager
-              organizationId={organizationId}
-              userId={user.user_id}
-              currentRoleId={currentRoleId}
-              roleOptions={roleOptions}
-            />
-          ) : (
-            roleText
-          ),
+          cellData: roleCell,
         },
       ];
     });

@@ -96,13 +96,6 @@ export function RoleManager({
     }
   };
 
-  const handleConfirmClick = () => {
-    // We intentionally do not `await` here because this is an event handler;
-    // the async work is handled internally by `handleConfirm`.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    handleConfirm();
-  };
-
   const selectValue = pendingRoleId ?? selectedRoleId;
   const selectId = `role-select-${userId}`;
 
@@ -131,7 +124,11 @@ export function RoleManager({
         isSubmitting={isSubmitting}
         modalRef={modalRef}
         nextRoleName={getRoleLabel(pendingRoleId)}
-        onConfirm={handleConfirmClick}
+        onConfirm={() => {
+          handleConfirm().catch((error) => {
+            console.error("Failed to confirm role change", error);
+          });
+        }}
         onCancel={handleCancel}
       />
     </>
