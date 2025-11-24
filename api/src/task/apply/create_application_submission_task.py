@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import StrEnum
 
+import click
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -449,9 +450,10 @@ def build_s3_application_submission_path(
     "create-application-submission",
     help="Create application submissions for all submitted apps",
 )
+@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job)
 @flask_db.with_db_session()
 @ecs_background_task(task_name="create-application-submission")
-def create_application_submission(db_session: db.Session) -> None:
+def create_application_submission(db_session: db.Session, scheduled_job_name: str | None) -> None:
     CreateApplicationSubmissionTask(db_session).run()
 
 

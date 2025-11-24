@@ -4,6 +4,7 @@ import os
 from collections.abc import Iterator, Sequence
 from enum import StrEnum
 
+import click
 from pydantic import Field
 from sqlalchemy import exists, select
 from sqlalchemy.orm import noload, selectinload
@@ -33,9 +34,10 @@ logger = logging.getLogger(__name__)
     "export-opportunity-data",
     help="Generate JSON and CSV files containing an export of all opportunity data",
 )
+@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job)
 @flask_db.with_db_session()
 @ecs_background_task(task_name="export-opportunity-data")
-def export_opportunity_data(db_session: db.Session) -> None:
+def export_opportunity_data(db_session: db.Session, scheduled_job_name: str | None) -> None:
     ExportOpportunityDataTask(db_session).run()
 
 

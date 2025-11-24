@@ -7,7 +7,9 @@ locals {
 
   scheduled_jobs = {
     sprint-reports = {
-      task_command        = ["make", "gh-extract-transform-and-load"]
+      task_command = [
+        "poetry", "run", "analytics", "etl", "extract_transform_and_load"
+      ]
       schedule_expression = "rate(8 hours)"
       state               = "ENABLED"
     }

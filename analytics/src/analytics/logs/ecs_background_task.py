@@ -48,6 +48,9 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     def decorator(f: Callable[P, T]) -> Callable[P, T]:
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            # Extract scheduled_job_name from kwargs if present
+            scheduled_job_name = kwargs.pop("scheduled_job_name", None)
+
             # Wrap with New Relic instrumentation
             application = newrelic.agent.register_application(timeout=10.0)
             with (
@@ -57,7 +60,7 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
                     group="Python/AnalyticsTask",
                 ),
                 # Wrap with our own logging (timing/general logs)
-                _ecs_background_task_impl(task_name),
+                _ecs_background_task_impl(task_name, scheduled_job_name),
             ):
                 # Finally actually run the task
                 return f(*args, **kwargs)
@@ -68,12 +71,12 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
 
 
 @contextlib.contextmanager
-def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
+def _ecs_background_task_impl(task_name: str, scheduled_job_name: str | None = None) -> Generator[None, None, None]:
     # The actual implementation, see the docs on the
     # decorator method above for details on usage
 
     start = time.perf_counter()
-    _add_log_metadata(task_name)
+    _add_log_metadata(task_name, scheduled_job_name)
 
     logger.info("Starting ECS task %s", task_name)
 
@@ -95,17 +98,17 @@ def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
     )
 
 
-def _add_log_metadata(task_name: str) -> None:
+def _add_log_metadata(task_name: str, scheduled_job_name: str | None = None) -> None:
     # Note we set an "aws.ecs.task_name" as well pulled from ECS
     # which may be different as that value is set based on our infra setup
     # while this one is just based on whatever we passed the @ecs_background_task decorator
     add_extra_data_to_global_logs(
         {"task_name": task_name, "task_uuid": str(uuid.uuid4())},
     )
-    add_extra_data_to_global_logs(_get_ecs_metadata())
+    add_extra_data_to_global_logs(_get_ecs_metadata(scheduled_job_name))
 
 
-def _get_ecs_metadata() -> dict:
+def _get_ecs_metadata(scheduled_job_name: str | None = None) -> dict:
     # Retrieve ECS metadata from an AWS-provided metadata URI.
     # This URI is injected to all ECS tasks by AWS as an envar.
     # See:
@@ -133,12 +136,9 @@ def _get_ecs_metadata() -> dict:
         ],
     )
 
-    # Step function only
-    step_function_name = os.environ.get("SCHEDULED_JOB_NAME", None)
-
     return {
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        "scheduled_job_name": step_function_name,
+        "scheduled_job_name": scheduled_job_name,
     }

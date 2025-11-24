@@ -171,6 +171,7 @@ def transform_and_load(
 def extract_transform_and_load(
     config_file: Annotated[str, CONFIG_FILE_ARG],
     effective_date: Annotated[str, EFFECTIVE_DATE_ARG],
+    scheduled_job_name: Annotated[str | None, typer.Option(help="Name of the scheduled job)] = None,
 ) -> None:
     """Export data from GitHub, transform it, and load into analytics warehouse."""
     # get configuration
@@ -222,7 +223,9 @@ def validate_effective_date(effective_date: str) -> str | None:
 
 @etl_app.command(name="opportunity-load")
 @ecs_background_task("opportunity-load")
-def load_opportunity_data() -> None:
+def load_opportunity_data(
+    scheduled_job_name: Annotated[str | None, typer.Option(help="Name of the scheduled job)] = None,
+) -> None:
     """Grabs data from s3 bucket and loads it into opportunity tables."""
     extract_copy_opportunity_data()
 
