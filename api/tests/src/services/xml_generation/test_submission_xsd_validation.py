@@ -12,6 +12,7 @@ from lxml import etree as lxml_etree
 import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
+from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from src.services.xml_generation.validation.xsd_validator import XSDValidator
 from tests.src.db.models.factories import (
@@ -543,3 +544,296 @@ class TestSubmissionXSDValidation:
         footer_idx = next(i for i, child in enumerate(children) if "Footer" in child.tag)
 
         assert header_idx < forms_idx < footer_idx, "Elements not in correct order"
+
+    @pytest.fixture
+    def sflll_application(self, enable_factory_create, db_session: db.Session):
+        """Create an application with SF-LLL form and realistic data."""
+        agency = AgencyFactory.create()
+
+        opportunity = OpportunityFactory.create(
+            opportunity_number="TEST-SFLLL-001",
+            opportunity_title="SF-LLL Test Opportunity",
+            agency_code=agency.agency_code,
+        )
+
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="93.123"
+        )
+
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id="TEST-SFLLL-COMP-001",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+        )
+
+        # Create SF-LLL form with XML transform config
+        sflll_form = FormFactory.create(
+            form_name="Disclosure of Lobbying Activities (SF-LLL)",
+            short_form_name="SFLLL_2_0",
+            form_version="2.0",
+            json_to_xml_schema=SFLLL_TRANSFORM_RULES,
+        )
+
+        application = ApplicationFactory.create(
+            competition=competition, application_name="SF-LLL Test Application"
+        )
+
+        # Create competition form
+        competition_form = CompetitionFormFactory.create(competition=competition, form=sflll_form)
+
+        # Create application form with minimal XSD-compliant data for SF-LLL
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "federal_action_type": "Grant",
+                "federal_action_status": "InitialAward",
+                "report_type": "InitialFiling",
+                "reporting_entity": {
+                    "entity_type": "Prime",
+                    "applicant_reporting_entity": {
+                        "entity_type": "Prime",
+                        "organization_name": "Test Research Institute",
+                        "address": {
+                            "street1": "456 Science Drive",
+                            "city": "Bethesda",
+                            "state": "MD: Maryland",
+                            "zip_code": "20814",
+                        },
+                        "congressional_district": "MD-008",
+                    },
+                },
+                "federal_agency_department": "Department of Health and Human Services",
+                "federal_program_name": "Research Grant Program",
+                "assistance_listing_number": "93.123",
+                "federal_action_number": "5R01GM123456-01",
+                "award_amount": "500000.00",
+                "lobbying_registrant": {
+                    "individual": {
+                        "first_name": "John",
+                        "last_name": "Smith",
+                    },
+                    "address": {
+                        "street1": "789 K Street NW",
+                        "city": "Washington",
+                        "state": "DC: District of Columbia",
+                        "zip_code": "20001",
+                    },
+                },
+                "individual_performing_service": {
+                    "individual": {
+                        "name": {
+                            "first_name": "Jane",
+                            "last_name": "Doe",
+                        },
+                        "address": {
+                            "street1": "100 Lobby Lane",
+                            "city": "Washington",
+                            "state": "DC: District of Columbia",
+                            "zip_code": "20002",
+                        },
+                    },
+                },
+                "signature_block": {
+                    "name": {
+                        "first_name": "Alice",
+                        "last_name": "Johnson",
+                    },
+                    "title": "Chief Financial Officer",
+                    "telephone": "301-555-1234",
+                    "signed_date": "2025-01-15",
+                    "signature": "Alice Johnson Signature",
+                },
+            },
+        )
+
+        return application
+
+    def test_sflll_xsd_validation(self, sflll_application, xsd_validator, db_session):
+        """Test that SF-LLL form XML passes XSD validation."""
+        # Create submission
+        application_submission = ApplicationSubmissionFactory.create(
+            application=sflll_application,
+            legacy_tracking_number=55555555,
+        )
+
+        # Generate complete submission XML
+        assembler = SubmissionXMLAssembler(sflll_application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        assert xml_string is not None
+
+        # Parse complete XML
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        forms_element = root.find(".//Forms")
+        assert forms_element is not None
+
+        # Extract SF-LLL element
+        sflll_ns = "{http://apply.grants.gov/forms/SFLLL_2_0-V2.0}"
+        sflll_elements = forms_element.findall(f".//{sflll_ns}LobbyingActivitiesDisclosure_2_0")
+        assert len(sflll_elements) == 1, "Expected exactly one SF-LLL element"
+
+        # Validate against XSD
+        sflll_xml = lxml_etree.tostring(sflll_elements[0], encoding="unicode")
+        sflll_xsd_path = self._get_xsd_file_path(
+            xsd_validator, "https://apply07.grants.gov/apply/forms/schemas/SFLLL_2_0-V2.0.xsd"
+        )
+        sflll_validation = xsd_validator.validate_xml(sflll_xml, sflll_xsd_path)
+        assert sflll_validation[
+            "valid"
+        ], f"SF-LLL validation failed: {sflll_validation['error_message']}"
+
+    def test_sflll_with_subawardee_xsd_validation(
+        self, enable_factory_create, xsd_validator, db_session
+    ):
+        """Test that SF-LLL with subawardee data passes XSD validation."""
+        agency = AgencyFactory.create()
+
+        opportunity = OpportunityFactory.create(
+            opportunity_number="TEST-SFLLL-SUB-001",
+            opportunity_title="SF-LLL Subawardee Test Opportunity",
+            agency_code=agency.agency_code,
+        )
+
+        assistance_listing = OpportunityAssistanceListingFactory.create(
+            opportunity=opportunity, assistance_listing_number="81.086"
+        )
+
+        competition = CompetitionFactory.create(
+            opportunity=opportunity,
+            public_competition_id="TEST-SFLLL-SUB-COMP-001",
+            opening_date=date(2025, 1, 1),
+            closing_date=date(2025, 12, 31),
+            opportunity_assistance_listing=assistance_listing,
+        )
+
+        # Create SF-LLL form with XML transform config
+        sflll_form = FormFactory.create(
+            form_name="Disclosure of Lobbying Activities (SF-LLL)",
+            short_form_name="SFLLL_2_0",
+            form_version="2.0",
+            json_to_xml_schema=SFLLL_TRANSFORM_RULES,
+        )
+
+        application = ApplicationFactory.create(
+            competition=competition, application_name="SF-LLL Subawardee Test Application"
+        )
+
+        # Create competition form
+        competition_form = CompetitionFormFactory.create(competition=competition, form=sflll_form)
+
+        # Create application form with subawardee data
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "federal_action_type": "CoopAgree",
+                "federal_action_status": "InitialAward",
+                "report_type": "InitialFiling",
+                "reporting_entity": {
+                    "entity_type": "SubAwardee",
+                    "tier": 1,
+                    "applicant_reporting_entity": {
+                        "entity_type": "SubAwardee",
+                        "organization_name": "Small Research Company LLC",
+                        "address": {
+                            "street1": "123 Innovation Way",
+                            "city": "Boston",
+                            "state": "MA: Massachusetts",
+                            "zip_code": "02101",
+                        },
+                        "congressional_district": "MA-007",
+                    },
+                    "prime_reporting_entity": {
+                        "entity_type": "Prime",
+                        "organization_name": "Major University System",
+                        "address": {
+                            "street1": "999 Academic Drive",
+                            "city": "Cambridge",
+                            "state": "MA: Massachusetts",
+                            "zip_code": "02138",
+                        },
+                        "congressional_district": "MA-005",
+                    },
+                },
+                "federal_agency_department": "Department of Energy",
+                "federal_program_name": "Clean Energy Innovation Program",
+                "assistance_listing_number": "81.086",
+                "federal_action_number": "DE-FOA-2025-001",
+                "award_amount": "250000.00",
+                "lobbying_registrant": {
+                    "individual": {
+                        "first_name": "Patricia",
+                        "last_name": "Martinez",
+                    },
+                    "address": {
+                        "street1": "1500 Pennsylvania Avenue",
+                        "city": "Washington",
+                        "state": "DC: District of Columbia",
+                        "zip_code": "20004",
+                    },
+                },
+                "individual_performing_service": {
+                    "individual": {
+                        "name": {
+                            "first_name": "David",
+                            "last_name": "Lee",
+                        },
+                        "address": {
+                            "street1": "800 Connecticut Avenue",
+                            "city": "Washington",
+                            "state": "DC: District of Columbia",
+                            "zip_code": "20006",
+                        },
+                    },
+                },
+                "signature_block": {
+                    "name": {
+                        "first_name": "Jennifer",
+                        "last_name": "Brown",
+                    },
+                    "title": "CEO",
+                    "telephone": "617-555-4321",
+                    "signed_date": "2025-01-20",
+                    "signature": "Jennifer Brown Signature",
+                },
+            },
+        )
+
+        # Create submission
+        application_submission = ApplicationSubmissionFactory.create(
+            application=application,
+            legacy_tracking_number=66666666,
+        )
+
+        # Generate complete submission XML
+        assembler = SubmissionXMLAssembler(application, application_submission)
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        assert xml_string is not None
+
+        # Parse complete XML
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        forms_element = root.find(".//Forms")
+        assert forms_element is not None
+
+        # Extract SF-LLL element
+        sflll_ns = "{http://apply.grants.gov/forms/SFLLL_2_0-V2.0}"
+        sflll_elements = forms_element.findall(f".//{sflll_ns}LobbyingActivitiesDisclosure_2_0")
+        assert len(sflll_elements) == 1, "Expected exactly one SF-LLL element"
+
+        # Validate against XSD
+        sflll_xml = lxml_etree.tostring(sflll_elements[0], encoding="unicode")
+        sflll_xsd_path = self._get_xsd_file_path(
+            xsd_validator, "https://apply07.grants.gov/apply/forms/schemas/SFLLL_2_0-V2.0.xsd"
+        )
+        sflll_validation = xsd_validator.validate_xml(sflll_xml, sflll_xsd_path)
+        assert sflll_validation[
+            "valid"
+        ], f"SF-LLL subawardee validation failed: {sflll_validation['error_message']}"

@@ -430,6 +430,18 @@ class XMLGenerationService:
                     item_element.text = str(item)
 
         elif isinstance(value, dict):
+            # Check if value contains __attributes metadata
+            # nested_object transforms with an "attributes" config. This allows the transform
+            # configuration to specify which source fields should become XML attributes on the
+            # parent element. For example, in SF-LLL, entity_type becomes the ReportEntityType
+            # attribute on the ReportEntity element.
+            #
+            # We only use embedded attributes if none were passed as a parameter, giving
+            # explicit parameters precedence over metadata.
+            value_attributes = value.get("__attributes")
+            if value_attributes and not attributes:
+                attributes = value_attributes
+
             # Create nested element for dictionary values
             if field_name in namespace_fields:
                 # Use configured namespace
@@ -460,7 +472,27 @@ class XMLGenerationService:
                         else:
                             nested_element.set(attr_name, str(attr_value))
                     else:
-                        nested_element.set(attr_name, str(attr_value))
+                        # Attribute without explicit namespace prefix
+                        # Use the same namespace as the parent element
+                        if field_name in namespace_fields:
+                            # Element has explicit namespace - use it for the attribute
+                            namespace_prefix = namespace_fields[field_name]
+                            namespace_uri = nsmap.get(namespace_prefix, "")
+                            if namespace_uri:
+                                attr_qname = f"{{{namespace_uri}}}{attr_name}"
+                                nested_element.set(attr_qname, str(attr_value))
+                            else:
+                                nested_element.set(attr_name, str(attr_value))
+                        else:
+                            # Use default namespace if available
+                            default_namespace_uri = (
+                                nsmap.get(root_element_name or "", "") if root_element_name else ""
+                            )
+                            if default_namespace_uri:
+                                attr_qname = f"{{{default_namespace_uri}}}{attr_name}"
+                                nested_element.set(attr_qname, str(attr_value))
+                            else:
+                                nested_element.set(attr_name, str(attr_value))
 
             # Special handling for Applicant address to ensure correct sequence order
             if field_name == "Applicant":
