@@ -25,6 +25,7 @@ export function SimplerModal({
   children,
   onKeyDown,
   onClose,
+  onBlur,
 }: {
   modalRef: RefObject<ModalRef | null>;
   titleText?: string;
@@ -33,6 +34,7 @@ export function SimplerModal({
   children: ReactNode;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   onClose?: () => void;
+  onBlur?: () => void;
 }) {
   // The Modal component throws an error during SSR unless we specify that it should not "render to portal"
   // this hook allows us to opt out of that rendering behavior on the server
@@ -56,6 +58,7 @@ export function SimplerModal({
           onClose();
         }
       }}
+      onBlur={() => onBlur && onBlur()}
       onKeyDown={(keyEvent) => {
         if (onClose && keyEvent.key === "Escape") {
           onClose();
