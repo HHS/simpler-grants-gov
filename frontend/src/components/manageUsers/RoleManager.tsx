@@ -1,6 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useClientFetch } from "src/hooks/useClientFetch";
+
+import { useTranslations } from "next-intl";
+import { useRef, useState, type ChangeEvent } from "react";
+import {
+  FormGroup,
+  Label,
+  Select,
+  type ModalRef,
+} from "@trussworks/react-uswds";
+
+import { RoleChangeModal } from "./RoleChangeModal";
 
 interface RoleOption {
   value: string;
@@ -20,132 +31,109 @@ export function RoleManager({
   currentRoleId,
   roleOptions,
 }: RoleManagerProps) {
+  const t = useTranslations("ManageUsers.roleManager");
   const [selectedRoleId, setSelectedRoleId] = useState(currentRoleId);
   const [pendingRoleId, setPendingRoleId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const currentRoleLabel =
-    roleOptions.find((r) => r.value === currentRoleId)?.label ?? currentRoleId;
+  const { clientFetch } = useClientFetch("Unable to update user role");
 
-  const pendingRoleLabel =
-    pendingRoleId &&
-    (roleOptions.find((r) => r.value === pendingRoleId)?.label ?? pendingRoleId);
+  const modalRef = useRef<ModalRef | null>(null);
 
-  const handleSelectChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const getRoleLabel = (roleId: string | null) =>
+    roleId
+      ? (roleOptions.find((r) => r.value === roleId)?.label ?? roleId)
+      : "";
+
+  const openModal = () => {
+    modalRef.current?.toggleModal(undefined, true);
+  };
+
+  const closeModal = () => {
+    modalRef.current?.toggleModal(undefined, false);
+  };
+
+  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextRoleId = event.target.value;
 
-    // no-op if same role
     if (nextRoleId === selectedRoleId) return;
 
     setPendingRoleId(nextRoleId);
-    setIsModalOpen(true);
-    setError(null);
+    openModal();
   };
 
   const handleCancel = () => {
     setPendingRoleId(null);
-    setIsModalOpen(false);
-    setError(null);
+    closeModal();
   };
 
   const handleConfirm = async () => {
-    if (!pendingRoleId) return;
+    if (!pendingRoleId) {
+      closeModal();
+      return;
+    }
 
     setIsSubmitting(true);
-    setError(null);
 
     try {
-      // 🔧 Swap this for your real API route / server action
-      const response = await fetch(
-        `/api/organizations/${organizationId}/users/${userId}/role`,
+      await clientFetch(
+        `/api/user/organizations/${organizationId}/users/${userId}`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roleId: pendingRoleId }),
+          method: "PUT",
+          body: JSON.stringify({ role_ids: [pendingRoleId] }),
         },
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to update role");
-      }
-
+      // If we got here without throwing an error,
+      // we trust the role change
       setSelectedRoleId(pendingRoleId);
-      setIsModalOpen(false);
       setPendingRoleId(null);
-    } catch (err) {
-      console.error(err);
-      setError("We couldn't update this user's role. Please try again.");
+      closeModal();
+    } catch (error) {
+      console.error("Failed to update user role", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleConfirmClick = () => {
+    // We intentionally do not `await` here because this is an event handler;
+    // the async work is handled internally by `handleConfirm`.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    handleConfirm();
+  };
+
+  const selectValue = pendingRoleId ?? selectedRoleId;
+  const selectId = `role-select-${userId}`;
+
   return (
     <>
-      <select
-        className="usa-select width-full"
-        value={selectedRoleId}
-        onChange={handleSelectChange}
-        aria-label={`Change role for this user`}
-      >
-        {roleOptions.map((role) => (
-          <option key={role.value} value={role.value}>
-            {role.label}
-          </option>
-        ))}
-      </select>
-
-      {isModalOpen && (
-        <div
-          className="usa-modal is-visible"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={`role-change-heading-${userId}`}
+      <FormGroup className="margin-y-0">
+        <Label htmlFor={selectId} className="usa-sr-only">
+          {t("changeUserRole")}
+        </Label>
+        <Select
+          id={selectId}
+          name={selectId}
+          value={selectValue}
+          onChange={handleSelectChange}
+          aria-label={t("changeUserRole")}
         >
-          <div className="usa-modal__content">
-            <h3
-              id={`role-change-heading-${userId}`}
-              className="usa-modal__heading"
-            >
-              Confirm role change
-            </h3>
+          {roleOptions.map((role) => (
+            <option key={role.value} value={role.value}>
+              {role.label}
+            </option>
+          ))}
+        </Select>
+      </FormGroup>
 
-            <div className="usa-prose">
-              <p>
-                Are you sure you want to change this user&apos;s role from{" "}
-                <strong>{currentRoleLabel}</strong> to{" "}
-                <strong>{pendingRoleLabel}</strong>?
-              </p>
-              {error && (
-                <p className="usa-error-message margin-top-1">{error}</p>
-              )}
-            </div>
-
-            <div className="usa-modal__footer display-flex flex-justify-end">
-              <button
-                type="button"
-                className="usa-button usa-button--unstyled margin-right-2"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="usa-button"
-                onClick={handleConfirm}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Saving…" : "Confirm"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RoleChangeModal
+        isSubmitting={isSubmitting}
+        modalRef={modalRef}
+        nextRoleName={getRoleLabel(pendingRoleId)}
+        onConfirm={handleConfirmClick}
+        onCancel={handleCancel}
+      />
     </>
   );
 }

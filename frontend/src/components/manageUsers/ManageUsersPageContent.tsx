@@ -1,6 +1,6 @@
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
-import { AuthorizedData } from "src/types/authTypes";
+import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 
 import { GridContainer } from "@trussworks/react-uswds";
 
@@ -18,6 +18,22 @@ export async function ManageUsersPageContent({
   authorizedData?: AuthorizedData;
 }) {
   let userOrganizations: Organization | undefined;
+
+  if (!authorizedData) {
+    throw new Error(
+      "ManageUsersPageContent must be wrapped in AuthorizationGate",
+    );
+  }
+
+  const { fetchedResources } = authorizedData;
+
+  const { activeUsersList, organizationRolesList, invitedUsersList } =
+    fetchedResources as {
+      activeUsersList: FetchedResource;
+      organizationRolesList: FetchedResource;
+      invitedUsersList: FetchedResource;
+    };
+
   try {
     userOrganizations = await getOrganizationDetails(organizationId);
   } catch (error) {
@@ -45,8 +61,12 @@ export async function ManageUsersPageContent({
       />
       <PageHeader organizationName={name} />
       <UserOrganizationInvite organizationId={organizationId} />
-      <ActiveUsersSection authorizedData={authorizedData} organizationId={organizationId} />
-      <InvitedUsersSection authorizedData={authorizedData} />
+      <ActiveUsersSection
+        organizationId={organizationId}
+        activeUsers={activeUsersList}
+        roles={organizationRolesList}
+      />
+      <InvitedUsersSection invitedUsers={invitedUsersList} />
     </GridContainer>
   );
 }

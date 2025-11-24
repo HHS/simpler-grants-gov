@@ -78,7 +78,7 @@ export const getOrganizationUsers = async (
 export const getOrganizationRoles = async (
   organizationId: string,
 ): Promise<UserRole[]> => {
-    const session = await getSession();
+  const session = await getSession();
 
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session");
@@ -164,7 +164,7 @@ export const updateOrganizationUserRoles = async (
   userId: string,
   roleIds: string[],
 ): Promise<UserDetail> => {
-    const session = await getSession();
+  const session = await getSession();
 
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session");
