@@ -25,41 +25,85 @@ def get_webhook_url() -> str:
         raise
 
 
-def format_slack_message(message: str) -> Dict[str, Any]:
+def format_slack_message(event_detail: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Format the SNS message into a Slack-friendly format.
+    Format the EventBridge event into a Slack-friendly format.
 
     Args:
-        message: The formatted message from EventBridge
+        event_detail: The EventBridge event detail containing findings
 
     Returns:
         Slack message payload
     """
-    # Parse the message to extract key information
-    lines = message.strip().strip('"').split('\\n')
+    # Extract the finding
+    finding = event_detail.get('findings', [{}])[0]
 
-    # Determine severity emoji
-    if '🚨' in message or 'CRITICAL' in message:
-        color = '#FF0000'  # Red
-        severity = 'CRITICAL'
+    severity = finding.get('Severity', {}).get('Label', 'UNKNOWN')
+    title = finding.get('Title', 'Unknown Finding')
+    description = finding.get('Description', 'No description available')
+    compliance_status = finding.get('Compliance', {}).get('Status', 'N/A')
+    resource = finding.get('Resources', [{}])[0].get('Id', 'Unknown')
+    account = finding.get('AwsAccountId', 'Unknown')
+    region = finding.get('Resources', [{}])[0].get('Region', 'us-east-1')
+    remediation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', 'No remediation available')
+
+    # Determine severity emoji and color
+    if severity == 'CRITICAL':
+        color = 'danger'  # Red
         emoji = '🚨'
-    elif '⚠️' in message or 'HIGH' in message:
-        color = '#FFA500'  # Orange
-        severity = 'HIGH'
+    elif severity == 'HIGH':
+        color = 'warning'  # Orange
         emoji = '⚠️'
     else:
         color = '#FFFF00'  # Yellow
-        severity = 'MEDIUM'
         emoji = '⚠️'
 
-    # Build Slack attachment
+    # Build Slack message with attachments
     return {
         "text": f"{emoji} *{severity} Security Hub Finding*",
         "attachments": [
             {
                 "color": color,
-                "text": message.replace('\\n', '\n').strip('"'),
-                "mrkdwn_in": ["text"]
+                "title": title,
+                "fields": [
+                    {
+                        "title": "Severity",
+                        "value": severity,
+                        "short": True
+                    },
+                    {
+                        "title": "Compliance Status",
+                        "value": compliance_status,
+                        "short": True
+                    },
+                    {
+                        "title": "Account",
+                        "value": account,
+                        "short": True
+                    },
+                    {
+                        "title": "Region",
+                        "value": region,
+                        "short": True
+                    },
+                    {
+                        "title": "Description",
+                        "value": description,
+                        "short": False
+                    },
+                    {
+                        "title": "Affected Resource",
+                        "value": resource,
+                        "short": False
+                    },
+                    {
+                        "title": "Remediation",
+                        "value": remediation,
+                        "short": False
+                    }
+                ],
+                "footer": f"<https://console.aws.amazon.com/securityhub/home?region={region}#/findings|View in AWS Console>",
+                "mrkdwn_in": ["fields"]
             }
         ]
     }
@@ -117,8 +161,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if record['EventSource'] == 'aws:sns':
                 sns_message = record['Sns']['Message']
 
+                # Parse the EventBridge event from SNS
+                event_data = json.loads(sns_message)
+                event_detail = event_data.get('detail', {})
+
                 # Format for Slack
-                slack_message = format_slack_message(sns_message)
+                slack_message = format_slack_message(event_detail)
 
                 # Post to Slack
                 post_to_slack(webhook_url, slack_message)
