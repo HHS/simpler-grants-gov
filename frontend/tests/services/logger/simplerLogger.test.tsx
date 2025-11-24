@@ -4,7 +4,7 @@
 
 import { logRequest } from "src/services/logger/simplerLogger";
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const infoMock = jest.fn();
 
@@ -30,6 +30,9 @@ describe("logRequest", () => {
           "sec-fetch-dest": "empty",
         }),
       }),
+      new NextResponse(null, {
+        status: 200,
+      }),
     );
     expect(infoMock).not.toHaveBeenCalled();
   });
@@ -45,6 +48,9 @@ describe("logRequest", () => {
           "X-Amz-Cf-Id": "a trace id",
         }),
       }),
+      new NextResponse(null, {
+        status: 200,
+      }),
     );
     expect(infoMock).toHaveBeenCalledTimes(1);
     expect(infoMock).toHaveBeenCalledWith({
@@ -53,6 +59,39 @@ describe("logRequest", () => {
       userAgent: "sure",
       acceptLanguage: "ES",
       awsTraceId: "a trace id",
+      statusCode: 200,
+      cacheControl: null,
+      hasSessionCookie: false,
+    });
+  });
+  it("logs correct header values", () => {
+    logRequest(
+      new NextRequest("http://anywhere.com", {
+        headers: new Headers({
+          "next-url": "",
+          "sec-fetch-mode": "bors",
+          "sec-fetch-dest": "empties",
+          "user-agent": "sure",
+          "accept-language": "ES",
+          "X-Amz-Cf-Id": "a trace id",
+          Cookies: "session=abc;",
+        }),
+      }),
+      new NextResponse(null, {
+        status: 200,
+        headers: new Headers({ "cache-control": "no-store" }),
+      }),
+    );
+    expect(infoMock).toHaveBeenCalledTimes(1);
+    expect(infoMock).toHaveBeenCalledWith({
+      url: "http://anywhere.com/",
+      method: "GET",
+      userAgent: "sure",
+      acceptLanguage: "ES",
+      awsTraceId: "a trace id",
+      statusCode: 200,
+      cacheControl: "no-store",
+      hasSessionCookie: false,
     });
   });
 });
