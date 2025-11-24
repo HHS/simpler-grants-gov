@@ -38,6 +38,7 @@ export function RoleChangeModal({
       modalRef={modalRef}
       titleText={modalTitle}
       className="text-wrap"
+      onClose={onCancel}
     >
       <p className="font-sans-2xs margin-y-4">{modalDescription}</p>
       <ModalFooter>
