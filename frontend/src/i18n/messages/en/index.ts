@@ -1538,18 +1538,21 @@ export const messages = {
   ManageUsers: {
     pageTitle: "Manage Users | Simpler.Grants.gov",
     pageHeading: "Manage Users",
-    activeUsersHeading: "Active Users",
+    activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
+    activeUsersFetchError:
+      "We have encountered an error retrieving the Active Users roster, please try again later.",
+    activeUsersTableZeroState: "There are no active users.",
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
     invitedUsersHeading: "Invited users",
     invitedUsersTableDescription:
-      "These users have been invited to join your organization but haven’t accepted yet. Once they accept, they’ll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+      "These users have been invited to join your organization but haven't accepted yet. Once they accept, the'll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
     invitedUsersFetchError:
-      "We have encountered an error retrieving the Pending Users list, please try again later.",
-    invitedUsersTableZeroState: "There are no pending users",
+      "We have encountered an error retrieving the Invited Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no invited users.",
     usersTable: {
       admin: "Administrator",
       emailHeading: "Email",
