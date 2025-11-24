@@ -82,3 +82,20 @@ INSERT INTO api.form_instruction(
 
 If you want to update a file, if the name of it isn't changing, you only need to re-upload it to s3.
 If you want to change the file, you'll need to delete the file from s3 and the DB, and change the information accordingly.
+
+# Creating opportunities for a form in an environment (non-prod)
+If you have created a brand new form in an environment and want it easily
+attached to an opportunity, we have an ECS task that can be run (requires AWS access)
+by running this with the appropriate environment:
+```shell
+bin/run-command api staging '["poetry", "run", "flask", "task", "build-automatic-opportunities"]'
+```
+
+What it will do is for each form will see if an opportunity already exists and if not
+create a new opportunity+competition with just that form on it.
+
+It will also always make a new opportunity with every form on its competition.
+
+These won't immediately be viewable in search, but can be found after the search data
+gets loaded by searching `SGG`. For example in our staging environment, you
+can see forms this script previously created at https://staging.simpler.grants.gov/search?query=SGG
