@@ -177,24 +177,6 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
         return presign_or_s3_cdnify_url(self.file_location)
 
 
-class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "competition_assistance_listing"
-
-    competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Competition.competition_id), primary_key=True
-    )
-    competition: Mapped[Competition] = relationship(Competition)
-
-    opportunity_assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
-        UUID,
-        ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id),
-        primary_key=True,
-    )
-    opportunity_assistance_listing: Mapped[OpportunityAssistanceListing] = relationship(
-        OpportunityAssistanceListing
-    )
-
-
 class Form(ApiSchemaTable, TimestampMixin):
     __tablename__ = "form"
 
