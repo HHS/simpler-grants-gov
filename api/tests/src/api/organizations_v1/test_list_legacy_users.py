@@ -125,8 +125,8 @@ class TestListLegacyUsers:
         assert len(data["data"]) == 1
         assert data["data"][0]["email"] == "available@example.com"
         assert data["data"][0]["status"] == LegacyUserStatus.AVAILABLE
-        # Note: total_records is 2 (before filtering) since status filter is applied in Python
-        assert data["pagination_info"]["total_records"] == 2
+        # Pagination counts now reflect filtered results (1 available user out of 2 total)
+        assert data["pagination_info"]["total_records"] == 1
 
     def test_list_legacy_users_200_success_with_status_filter_multiple(
         self, client, db_session, enable_factory_create

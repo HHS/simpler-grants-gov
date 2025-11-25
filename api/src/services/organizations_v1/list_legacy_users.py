@@ -1,4 +1,6 @@
 import logging
+import math
+from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
@@ -12,9 +14,7 @@ from src.constants.lookup_constants import LegacyProfileType, LegacyUserStatus
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
-from src.services.service_utils import apply_sorting
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from src.services.organizations_v1.list_organization_invitations import (
     get_organization_and_verify_access,
 )
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class LegacyUserListParams(BaseModel):
-    """Pydantic model for parsing request parameters"""
+    """Model for parsing request parameters"""
 
     pagination: PaginationParams
     filters: dict | None = None  # Optional filters from request schema
@@ -85,6 +85,87 @@ def compute_user_status(
         return LegacyUserStatus.AVAILABLE
 
 
+def filter_and_paginate_users(
+    all_users: Sequence[VuserAccount],
+    member_emails: set[str],
+    invitation_emails: set[str],
+    status_filters: set[LegacyUserStatus] | None,
+    pagination_params: PaginationParams,
+) -> tuple[list[dict], PaginationInfo]:
+    """
+    Filter users by computed status and apply pagination in Python.
+
+    Computes status for each user, filters by status if requested, sorts, and paginates
+    manually to ensure accurate pagination counts.
+
+    Cannot use Paginator here because:
+    - Status is computed in Python after fetching users from the database
+    - Filtering must happen before pagination for accurate counts
+    - Paginating first would give incorrect total_records
+
+    Given the scale (typical orgs: 1-5 users, large orgs: 50-100 users, rare outliers: 500+),
+    fetching all and filtering in Python performs well.
+
+    Args:
+        all_users: All legacy users for the organization
+        member_emails: Set of emails for existing organization members
+        invitation_emails: Set of emails with pending invitations
+        status_filters: Optional set of statuses to filter by
+        pagination_params: Pagination parameters (page size, offset, sorting)
+
+    Returns:
+        Tuple of (paginated results list, pagination info with accurate counts)
+    """
+    # Compute status for all users and apply status filtering
+    users_with_status = []
+    for user_account in all_users:
+        if not user_account.email:
+            continue
+
+        status = compute_user_status(user_account.email, member_emails, invitation_emails)
+
+        # Apply status filter if provided
+        if status_filters and status not in status_filters:
+            continue
+
+        users_with_status.append(
+            {
+                "email": user_account.email,
+                "first_name": user_account.first_name,
+                "last_name": user_account.last_name,
+                "status": status,
+            }
+        )
+
+    # Sort results based on requested sort order
+    if pagination_params.sort_order:
+        # Apply sorts in reverse so the first sort takes priority
+        for sort_param in reversed(pagination_params.sort_order):
+            reverse = sort_param.sort_direction == "descending"
+            # Use empty string as fallback for None values
+            users_with_status.sort(key=lambda u: u[sort_param.order_by] or "", reverse=reverse)
+
+    # Calculate pagination info based on filtered results
+    total_records = len(users_with_status)
+    total_pages = math.ceil(total_records / pagination_params.page_size) if total_records > 0 else 0
+
+    # Apply pagination by slicing the list
+    start_idx = (pagination_params.page_offset - 1) * pagination_params.page_size
+    end_idx = start_idx + pagination_params.page_size
+    page_results = users_with_status[start_idx:end_idx]
+
+    # Build pagination info with accurate counts
+    pagination_info = PaginationInfo(
+        page_offset=pagination_params.page_offset,
+        page_size=pagination_params.page_size,
+        total_records=total_records,
+        total_pages=total_pages,
+        sort_order=[SortOrder(p.order_by, p.sort_direction) for p in pagination_params.sort_order],
+    )
+
+    return page_results, pagination_info
+
+
 def build_deduplicated_legacy_user_ids_query(
     db_session: db.Session, organization_id: UUID, uei: str
 ) -> Select[Any]:
@@ -140,11 +221,11 @@ def list_legacy_users_and_verify_access(
     """
     List legacy users from Oracle staging tables that can be invited to the organization.
 
-    Hybrid approach:
+    Approach:
     - Uses SQL window function for efficient deduplication by email
     - Fetches member/invitation data separately (small datasets)
     - Computes status in Python for maintainability
-    - Uses standard Paginator for pagination
+    - Applies manual pagination after filtering for accurate counts
 
     Args:
         db_session: Database session
@@ -174,7 +255,7 @@ def list_legacy_users_and_verify_access(
     if params.filters and params.filters.get("status") and params.filters["status"].get("one_of"):
         status_filters = set(params.filters["status"]["one_of"])
 
-    # Fetch member and invitation emails (small datasets, queried once)
+    # Fetch member and invitation emails (these are small datasets, queried once)
     member_emails = get_member_emails_for_organization(db_session, organization_id)
     invitation_emails = get_pending_invitation_emails_for_organization(db_session, organization_id)
 
@@ -183,54 +264,30 @@ def list_legacy_users_and_verify_access(
         db_session, organization_id, uei
     )
 
-    # Build main query selecting full VuserAccount model
-    stmt = select(VuserAccount).where(VuserAccount.user_account_id.in_(deduplicated_ids_subquery))
-
-    # Apply sorting using standard helper
-    stmt = apply_sorting(stmt, VuserAccount, params.pagination.sort_order)
-
-    # Use Paginator for automatic pagination and counting
-    paginator: Paginator[VuserAccount] = Paginator(
-        VuserAccount, stmt, db_session, page_size=params.pagination.page_size
+    # Fetch all users and apply manual pagination with status filtering
+    # Note: Cannot use Paginator because status is computed in Python after fetch.
+    # See filter_and_paginate_users() docstring for detailed explanation.
+    all_users = (
+        db_session.execute(
+            select(VuserAccount).where(VuserAccount.user_account_id.in_(deduplicated_ids_subquery))
+        )
+        .scalars()
+        .all()
     )
-
-    paginated_users = paginator.page_at(page_offset=params.pagination.page_offset)
-
-    # Compute status for each user (Python, easy to understand)
-    users_with_status = []
-    for user_account in paginated_users:
-        # Skip users without email (shouldn't happen but be defensive)
-        if not user_account.email:
-            continue
-
-        status = compute_user_status(user_account.email, member_emails, invitation_emails)
-
-        # Apply status filter if provided
-        if status_filters and status not in status_filters:
-            continue
-
-        users_with_status.append({
-            "email": user_account.email,
-            "first_name": user_account.first_name,
-            "last_name": user_account.last_name,
-            "status": status,
-        })
-
-    # Build pagination info using Paginator's attributes
-    # Note: total_records and total_pages don't account for status filtering,
-    # but this is acceptable since status filtering is done in Python
-    pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
+    page_results, pagination_info = filter_and_paginate_users(
+        all_users, member_emails, invitation_emails, status_filters, params.pagination
+    )
 
     logger.info(
         "Listed legacy users",
         extra={
             "organization_id": organization_id,
-            "total_records": paginator.total_records,
-            "page_offset": params.pagination.page_offset,
-            "page_size": params.pagination.page_size,
+            "total_records": pagination_info.total_records,
+            "page_offset": pagination_info.page_offset,
+            "page_size": pagination_info.page_size,
             "status_filters": status_filters,
-            "results_after_status_filter": len(users_with_status),
+            "results_on_page": len(page_results),
         },
     )
 
-    return users_with_status, pagination_info
+    return page_results, pagination_info
