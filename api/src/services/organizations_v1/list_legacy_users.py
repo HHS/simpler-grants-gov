@@ -221,12 +221,6 @@ def list_legacy_users_and_verify_access(
     """
     List legacy users from Oracle staging tables that can be invited to the organization.
 
-    Approach:
-    - Uses SQL window function for efficient deduplication by email
-    - Fetches member/invitation data separately (small datasets)
-    - Computes status in Python for maintainability
-    - Applies manual pagination after filtering for accurate counts
-
     Args:
         db_session: Database session
         user: Authenticated user making the request
@@ -266,7 +260,6 @@ def list_legacy_users_and_verify_access(
 
     # Fetch all users and apply manual pagination with status filtering
     # Note: Cannot use Paginator because status is computed in Python after fetch.
-    # See filter_and_paginate_users() docstring for detailed explanation.
     all_users = (
         db_session.execute(
             select(VuserAccount).where(VuserAccount.user_account_id.in_(deduplicated_ids_subquery))
