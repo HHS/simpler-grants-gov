@@ -1,6 +1,7 @@
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getOrganizationPendingInvitations,
+  getOrganizationRoles,
   getOrganizationUsers,
 } from "src/services/fetch/fetchers/organizationsFetcher";
 
@@ -37,6 +38,7 @@ async function ManageUsersPage({ params }: ManageUsersPageProps) {
       resourcePromises={{
         invitedUsersList: getOrganizationPendingInvitations(organizationId),
         activeUsersList: getOrganizationUsers(organizationId),
+        organizationRolesList: getOrganizationRoles(organizationId),
       }}
       requiredPrivileges={[
         {
