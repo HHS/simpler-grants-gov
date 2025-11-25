@@ -6,7 +6,7 @@ WITH -- get project_id
  sprint_data AS
   (SELECT gh_sprint.id AS sprint_id,
           gh_sprint.start_date AS sprint_start_date,
-          gh_sprint.end_date AS sprint_end_date
+          gh_sprint.end_date-1 AS sprint_end_date
    FROM project_data,
         gh_sprint
    WHERE gh_sprint.project_id = project_data.project_id
@@ -18,7 +18,7 @@ WITH -- get project_id
         sprint_data
    WHERE gh_issue_history.sprint_id = sprint_data.sprint_id
      AND (gh_issue_history.d_effective >= sprint_data.sprint_start_date
-          AND gh_issue_history.d_effective <= sprint_data.sprint_end_date + 1)
+          AND gh_issue_history.d_effective <= sprint_data.sprint_end_date)
    GROUP BY DAY
    ORDER BY DAY), -- calculate points closed in the sprint
  closed AS
@@ -29,7 +29,7 @@ WITH -- get project_id
    WHERE gh_issue_history.sprint_id = sprint_data.sprint_id
      AND gh_issue_history.is_closed = 1
      AND (gh_issue_history.d_effective >= sprint_data.sprint_start_date
-          AND gh_issue_history.d_effective <= sprint_data.sprint_end_date + 1)
+          AND gh_issue_history.d_effective <= sprint_data.sprint_end_date)
    GROUP BY DAY
    ORDER BY DAY), -- aggregate points opened and closed by day
  totals AS
