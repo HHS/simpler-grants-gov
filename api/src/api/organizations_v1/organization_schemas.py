@@ -374,14 +374,6 @@ class LegacyUserFilterSchema(Schema):
     )
 
 
-# Generate pagination schema with defaults for sort order
-LegacyUserPaginationSchema = generate_pagination_schema(
-    "LegacyUserPaginationSchema",
-    ["email", "first_name", "last_name", "created_date"],
-    default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
-)
-
-
 class LegacyUsersListRequestSchema(Schema):
     """Schema for POST /organizations/:organization_id/legacy-users request"""
 
@@ -392,7 +384,11 @@ class LegacyUsersListRequestSchema(Schema):
     )
 
     pagination = fields.Nested(
-        LegacyUserPaginationSchema(),
+        generate_pagination_schema(
+            "LegacyUserPaginationSchema",
+            ["email", "first_name", "last_name", "created_date"],
+            default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
+        ),
         required=True,
         metadata={
             "description": "Pagination parameters for legacy user list (default sort: email ascending)"
