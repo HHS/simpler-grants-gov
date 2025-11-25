@@ -1,9 +1,10 @@
 import logging
+import math
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import asc, desc, func, select
+from sqlalchemy import func, inspect, select
 from sqlalchemy.sql import Select
 
 from src.adapters import db
@@ -13,6 +14,7 @@ from src.db.models.entity_models import IgnoredLegacyOrganizationUser, Organizat
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.services.service_utils import apply_sorting
 from src.services.organizations_v1.list_organization_invitations import (
     get_organization_and_verify_access,
 )
@@ -83,18 +85,18 @@ def compute_user_status(
         return LegacyUserStatus.AVAILABLE
 
 
-def build_deduplicated_legacy_user_query(
+def build_deduplicated_legacy_user_ids_query(
     db_session: db.Session, organization_id: UUID, uei: str
-) -> tuple[Select[Any], dict[str, Any]]:
+) -> Select[Any]:
     """
-    Build a query for deduplicated legacy users.
+    Build a scalar subquery that returns deduplicated user_account_ids.
 
     Uses window function to deduplicate by email (case-insensitive),
     keeping the most recent record based on created_date.
     Excludes inactive, deleted, and ignored users.
 
     Returns:
-        Tuple of (query, column_map) where column_map maps field names to CTE columns
+        Scalar subquery of user_account_ids for use in WHERE IN clause
     """
     # Build subquery with ignored user emails for exclusion
     ignored_emails_subquery = (
@@ -107,10 +109,6 @@ def build_deduplicated_legacy_user_query(
     deduplicated_cte = (
         select(
             VuserAccount.user_account_id,
-            VuserAccount.email,
-            VuserAccount.first_name,
-            VuserAccount.last_name,
-            VuserAccount.created_date,
             func.row_number()
             .over(
                 partition_by=func.lower(VuserAccount.email),
@@ -129,24 +127,8 @@ def build_deduplicated_legacy_user_query(
         )
     ).cte("deduplicated_users")
 
-    # Select from CTE where row_num = 1 (most recent for each email)
-    query = select(
-        deduplicated_cte.c.user_account_id,
-        deduplicated_cte.c.email,
-        deduplicated_cte.c.first_name,
-        deduplicated_cte.c.last_name,
-        deduplicated_cte.c.created_date,
-    ).where(deduplicated_cte.c.row_num == 1)
-
-    # Map of field names to CTE columns for sorting
-    column_map = {
-        "email": deduplicated_cte.c.email,
-        "first_name": deduplicated_cte.c.first_name,
-        "last_name": deduplicated_cte.c.last_name,
-        "created_date": deduplicated_cte.c.created_date,
-    }
-
-    return query, column_map
+    # Return scalar subquery of user_account_ids where row_num = 1
+    return select(deduplicated_cte.c.user_account_id).where(deduplicated_cte.c.row_num == 1)
 
 
 def list_legacy_users_and_verify_access(
@@ -196,57 +178,69 @@ def list_legacy_users_and_verify_access(
     member_emails = get_member_emails_for_organization(db_session, organization_id)
     invitation_emails = get_pending_invitation_emails_for_organization(db_session, organization_id)
 
-    # Build deduplicated query using CTE with window function
-    base_query: Select[Any]
-    base_query, column_map = build_deduplicated_legacy_user_query(db_session, organization_id, uei)
+    # Build deduplicated user IDs as scalar subquery
+    deduplicated_ids_subquery = build_deduplicated_legacy_user_ids_query(
+        db_session, organization_id, uei
+    )
 
-    # Apply sorting
-    first_sort = params.pagination.sort_order[0]
-    order_by_column = column_map.get(first_sort.order_by, column_map["email"])
-    if first_sort.sort_direction == "descending":
-        base_query = base_query.order_by(desc(order_by_column))
+    # Build main query selecting full VuserAccount model
+    stmt = select(VuserAccount).where(VuserAccount.user_account_id.in_(deduplicated_ids_subquery))
+
+    # Apply sorting using standard helper
+    stmt = apply_sorting(stmt, VuserAccount, params.pagination.sort_order)
+
+    # Manual pagination (Paginator doesn't support staging models that inherit from StagingBase)
+    # Following the same pattern as Paginator for consistency
+    page_size = params.pagination.page_size
+    page_offset = params.pagination.page_offset
+
+    # Get total count using same approach as Paginator._get_record_count
+    primary_key = inspect(VuserAccount).primary_key[0]
+    count_stmt = stmt.order_by(None).with_only_columns(
+        func.count(primary_key.distinct()), maintain_column_froms=True
+    )
+    total_records = db_session.execute(count_stmt).scalar_one()
+    total_pages = int(math.ceil(total_records / page_size))
+
+    # Get paginated results using same approach as Paginator.page_at
+    paginated_users: list[VuserAccount]
+    if page_offset <= 0 or page_offset > total_pages:
+        paginated_users = []
     else:
-        base_query = base_query.order_by(asc(order_by_column))
-
-    # Execute query with pagination
-    total_count_query = select(func.count()).select_from(base_query.subquery())
-    total_records = db_session.execute(total_count_query).scalar_one()
-
-    offset = (params.pagination.page_offset - 1) * params.pagination.page_size
-    paginated_query = base_query.offset(offset).limit(params.pagination.page_size)
-    users = db_session.execute(paginated_query).all()
+        offset = page_size * (page_offset - 1)
+        paginated_users = list(
+            db_session.execute(stmt.offset(offset).limit(page_size)).unique().scalars().all()
+        )
 
     # Compute status for each user (Python, easy to understand)
     users_with_status = []
-    for user_record in users:
-        status = compute_user_status(user_record.email, member_emails, invitation_emails)
+    for user_account in paginated_users:
+        # Skip users without email (shouldn't happen but be defensive)
+        if not user_account.email:
+            continue
+
+        status = compute_user_status(user_account.email, member_emails, invitation_emails)
 
         # Apply status filter if provided
         if status_filters and status not in status_filters:
             continue
 
-        users_with_status.append(
-            {
-                "email": user_record.email,
-                "first_name": user_record.first_name,
-                "last_name": user_record.last_name,
-                "status": status,
-            }
-        )
+        users_with_status.append({
+            "email": user_account.email,
+            "first_name": user_account.first_name,
+            "last_name": user_account.last_name,
+            "status": status,
+        })
 
     # Build pagination info
     # Note: total_records and total_pages don't account for status filtering,
     # but this is acceptable since status filtering is done in Python
-    total_pages = (total_records + params.pagination.page_size - 1) // params.pagination.page_size
     pagination_info = PaginationInfo(
-        page_offset=params.pagination.page_offset,
-        page_size=params.pagination.page_size,
-        total_pages=total_pages,
+        page_offset=page_offset,
+        page_size=page_size,
         total_records=total_records,
-        sort_order=[
-            SortOrder(order_by=sort_param.order_by, sort_direction=sort_param.sort_direction)
-            for sort_param in params.pagination.sort_order
-        ],
+        total_pages=total_pages,
+        sort_order=[SortOrder(p.order_by, p.sort_direction) for p in params.pagination.sort_order],
     )
 
     logger.info(
@@ -254,8 +248,8 @@ def list_legacy_users_and_verify_access(
         extra={
             "organization_id": organization_id,
             "total_records": total_records,
-            "page_offset": params.pagination.page_offset,
-            "page_size": params.pagination.page_size,
+            "page_offset": page_offset,
+            "page_size": page_size,
             "status_filters": status_filters,
             "results_after_status_filter": len(users_with_status),
         },
