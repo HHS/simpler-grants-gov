@@ -178,3 +178,21 @@ export const updateOrganizationUserRoles = async (
   const json = (await resp.json()) as { data: UserDetail };
   return json.data;
 };
+
+export const removeOrganizationUser = async (
+  organizationId: string,
+  userId: string,
+): Promise<UserDetail> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};

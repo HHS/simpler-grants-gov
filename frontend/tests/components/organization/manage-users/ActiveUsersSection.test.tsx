@@ -83,7 +83,7 @@ describe("ActiveUsersSection", () => {
     expect(await screen.findByText("activeUsersFetchError")).toBeVisible();
   });
 
-  it("renders a table with formatted name, email, and roles when active users exist", async () => {
+  it("renders a table with formatted name, email, roles, and actions when active users exist", async () => {
     const roles: UserRole[] = [
       {
         role_id: "role-1",
@@ -108,6 +108,7 @@ describe("ActiveUsersSection", () => {
       statusCode: 200,
     });
 
+    // Roles fetch fails, so roles are rendered as read-only text.
     const rolesResource = makeResource({
       data: [] as UserRole[],
       error: "failed to load roles",
@@ -129,16 +130,28 @@ describe("ActiveUsersSection", () => {
       tableRowData: { cellData: unknown }[][];
     };
 
-    expect(tableProps.headerContent.map((h) => h.cellData)).toEqual([
+    expect(tableProps.headerContent.map((header) => header.cellData)).toEqual([
       "usersTable.nameHeading",
       "usersTable.emailHeading",
       "usersTable.roleHeading",
+      "usersTable.actionsHeading",
     ]);
 
-    const row = tableProps.tableRowData[0];
+    const firstRow = tableProps.tableRowData[0];
 
-    expect(row[0].cellData).toBe("Ada Lovelace");
-    expect(row[1].cellData).toBe("ada@example.com");
-    expect(row[2].cellData).toBe("Admin");
+    expect(firstRow[0].cellData).toBe("Ada Lovelace");
+    expect(firstRow[1].cellData).toBe("ada@example.com");
+    expect(firstRow[2].cellData).toBe("Admin");
+
+    const actionsCellElement = firstRow[3].cellData as React.ReactElement<{
+      organizationId: string;
+      userId: string;
+      userName: string;
+    }>;
+
+    expect(actionsCellElement).toBeTruthy();
+    expect(actionsCellElement.props.organizationId).toBe("org-123");
+    expect(actionsCellElement.props.userId).toBe("user-1");
+    expect(actionsCellElement.props.userName).toBe("Ada Lovelace");
   });
 });
