@@ -631,7 +631,10 @@ class TestCreateOrganizationInvitation:
 
         # Verify exact subject
         subject = email_config["Subject"]["Data"]
-        assert subject == f"You've been invited to join {organization.organization_name} in SimplerGrants"
+        assert (
+            subject
+            == f"You've been invited to join {organization.organization_name} in SimplerGrants"
+        )
 
         # Verify exact HTML content
         html_content = email_config["HtmlPart"]["Data"]
