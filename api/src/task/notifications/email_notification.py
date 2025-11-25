@@ -18,11 +18,13 @@ from src.task.task_blueprint import task_blueprint
 @task_blueprint.cli.command(
     "email-notifications", help="Send email notifications for opportunity and search changes"
 )
-@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job)
+@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
 @ecs_background_task("email-notifications")
 @flask_opensearch.with_search_client()
 @flask_db.with_db_session()
-def run_email_notification_task(db_session: db.Session, search_client: search.SearchClient, scheduled_job_name: str | None) -> None:
+def run_email_notification_task(
+    db_session: db.Session, search_client: search.SearchClient, scheduled_job_name: str | None
+) -> None:
     """Run the daily notification task"""
     task = EmailNotificationTask(db_session, search_client)
     task.run()

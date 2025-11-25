@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--cleanup-old-files/--no-cleanup-old-files", default=True, help="run CleanupOldSamExtractsTask"
 )
-@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job)
+@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
 @ecs_background_task("sam-extracts")
 @flask_db.with_db_session()
 def run_sam_extracts(

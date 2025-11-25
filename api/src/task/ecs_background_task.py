@@ -50,7 +50,10 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # Extract scheduled_job_name from kwargs if present
-            scheduled_job_name = kwargs.pop("scheduled_job_name", None)
+            scheduled_job_name: str | None = kwargs.pop(
+                "scheduled_job_name",
+                None,
+            )  # type: ignore[assignment]
 
             # Wrap with New Relic instrumentation
             application = newrelic.agent.register_application(timeout=10.0)
@@ -66,7 +69,9 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
 
 
 @contextlib.contextmanager
-def _ecs_background_task_impl(task_name: str, scheduled_job_name: str | None = None) -> Generator[None]:
+def _ecs_background_task_impl(
+    task_name: str, scheduled_job_name: str | None = None
+) -> Generator[None]:
     # The actual implementation, see the docs on the
     # decorator method above for details on usage
     start = time.perf_counter()
