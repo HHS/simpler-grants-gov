@@ -629,21 +629,37 @@ class TestCreateOrganizationInvitation:
             "SimpleEmail"
         ]
 
-        # Verify subject contains required text
+        # Verify exact subject
         subject = email_config["Subject"]["Data"]
-        assert "invited to join" in subject.lower()
-        assert "simplergrants" in subject.lower()
+        assert subject == f"You've been invited to join {organization.organization_name} in SimplerGrants"
 
-        # Verify HTML content contains required information
+        # Verify exact HTML content
         html_content = email_config["HtmlPart"]["Data"]
-        assert "invited" in html_content.lower()
-        assert "simpler.grants.gov" in html_content.lower()
-        assert "activity dashboard" in html_content.lower()
-        assert "login.gov" in html_content.lower()
-        assert "ebizpoc" in html_content.lower()
-        assert "simplergrants team" in html_content.lower()
-        # Verify link to frontend
-        assert "http://localhost:3000" in html_content
+        expected_html = f"""
+<html>
+<body>
+<p>Hello,</p>
+
+<p>You've been invited to join <strong>{organization.organization_name}</strong> in SimplerGrants, we're glad you're here.</p>
+
+<p>Here's how to get started:</p>
+<ol>
+<li>Go to <a href="http://localhost:3000" target="_blank">Simpler.Grants.gov</a> and sign in (top right) using your Login.gov email and password. If you don't have an account yet, you'll be guided to create one.</li>
+<li>After signing in, open your "Activity dashboard" under Workspace in the navigation.</li>
+<li>A message will be waiting for you, select "Accept" to join your organization. Once you accept, you'll have access to your team, organization details, and more.</li>
+</ol>
+
+<p>If you run into anything unexpected, you can always reach out to your organization's eBizPOC.</p>
+
+<p>Welcome aboard!</p>
+
+<p>The SimplerGrants Team</p>
+
+<p><a href="http://localhost:3000" target="_blank">SimplerGrants.gov</a></p>
+</body>
+</html>
+"""
+        assert html_content == expected_html
 
     def test_create_invitation_email_failure_does_not_block_creation(
         self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
