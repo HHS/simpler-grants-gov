@@ -1,10 +1,9 @@
 import logging
-import math
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import func, inspect, select
+from sqlalchemy import func, select
 from sqlalchemy.sql import Select
 
 from src.adapters import db
@@ -13,7 +12,8 @@ from src.constants.lookup_constants import LegacyProfileType, LegacyUserStatus
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
+from src.pagination.paginator import Paginator
 from src.services.service_utils import apply_sorting
 from src.services.organizations_v1.list_organization_invitations import (
     get_organization_and_verify_access,
@@ -189,28 +189,12 @@ def list_legacy_users_and_verify_access(
     # Apply sorting using standard helper
     stmt = apply_sorting(stmt, VuserAccount, params.pagination.sort_order)
 
-    # Manual pagination (Paginator doesn't support staging models that inherit from StagingBase)
-    # Following the same pattern as Paginator for consistency
-    page_size = params.pagination.page_size
-    page_offset = params.pagination.page_offset
-
-    # Get total count using same approach as Paginator._get_record_count
-    primary_key = inspect(VuserAccount).primary_key[0]
-    count_stmt = stmt.order_by(None).with_only_columns(
-        func.count(primary_key.distinct()), maintain_column_froms=True
+    # Use Paginator for automatic pagination and counting
+    paginator: Paginator[VuserAccount] = Paginator(
+        VuserAccount, stmt, db_session, page_size=params.pagination.page_size
     )
-    total_records = db_session.execute(count_stmt).scalar_one()
-    total_pages = int(math.ceil(total_records / page_size))
 
-    # Get paginated results using same approach as Paginator.page_at
-    paginated_users: list[VuserAccount]
-    if page_offset <= 0 or page_offset > total_pages:
-        paginated_users = []
-    else:
-        offset = page_size * (page_offset - 1)
-        paginated_users = list(
-            db_session.execute(stmt.offset(offset).limit(page_size)).unique().scalars().all()
-        )
+    paginated_users = paginator.page_at(page_offset=params.pagination.page_offset)
 
     # Compute status for each user (Python, easy to understand)
     users_with_status = []
@@ -232,24 +216,18 @@ def list_legacy_users_and_verify_access(
             "status": status,
         })
 
-    # Build pagination info
+    # Build pagination info using Paginator's attributes
     # Note: total_records and total_pages don't account for status filtering,
     # but this is acceptable since status filtering is done in Python
-    pagination_info = PaginationInfo(
-        page_offset=page_offset,
-        page_size=page_size,
-        total_records=total_records,
-        total_pages=total_pages,
-        sort_order=[SortOrder(p.order_by, p.sort_direction) for p in params.pagination.sort_order],
-    )
+    pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
 
     logger.info(
         "Listed legacy users",
         extra={
             "organization_id": organization_id,
-            "total_records": total_records,
-            "page_offset": page_offset,
-            "page_size": page_size,
+            "total_records": paginator.total_records,
+            "page_offset": params.pagination.page_offset,
+            "page_size": params.pagination.page_size,
             "status_filters": status_filters,
             "results_after_status_filter": len(users_with_status),
         },
