@@ -24,6 +24,7 @@ describe("getNextRoutes", () => {
       "/(base)/opportunity/1",
       "/(base)/organization/1/manage-users",
       "/(base)/organization/1",
+      "/(base)/organizations",
       "/(base)",
       "/(base)/roadmap",
       "/(base)/saved-opportunities",

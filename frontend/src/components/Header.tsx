@@ -134,6 +134,12 @@ const NavLinks = ({
       text: t("applications"),
       href: "/applications",
     });
+    if (showUserAdminNavItems) {
+      workspaceSubNavs.push({
+        text: t("organizations"),
+        href: "/organizations",
+      });
+    }
     if (showSavedOpportunities) {
       workspaceSubNavs.push({
         text: t("savedOpportunities"),
