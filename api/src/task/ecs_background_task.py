@@ -50,7 +50,7 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # Extract scheduled_job_name from kwargs if present
-            scheduled_job_name: str | None = kwargs.pop(
+            scheduled_job_name: str | None = kwargs.get(
                 "scheduled_job_name",
                 None,
             )  # type: ignore[assignment]
@@ -124,12 +124,10 @@ def _get_ecs_metadata(scheduled_job_name: str | None = None) -> dict:
 
     ecs_task_name = metadata_json["Name"]
     ecs_task_id = metadata_json["Labels"]["com.amazonaws.ecs.task-arn"].split("/")[-1]
-    ecs_taskdef = ":".join(
-        [
-            metadata_json["Labels"]["com.amazonaws.ecs.task-definition-family"],
-            metadata_json["Labels"]["com.amazonaws.ecs.task-definition-version"],
-        ]
-    )
+    ecs_taskdef = ":".join([
+        metadata_json["Labels"]["com.amazonaws.ecs.task-definition-family"],
+        metadata_json["Labels"]["com.amazonaws.ecs.task-definition-version"],
+    ])
     # We don't currently send logs to Cloudwatch, and just send directly
     # to NewRelic, so these error if we try to use them right now.
     # cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
