@@ -60,6 +60,7 @@ export const getOrganizationUsers = async (
     subPath: `${organizationId}/users`,
     additionalHeaders: ssgToken,
   });
+
   const json = (await resp.json()) as { data: UserDetail[] };
 
   // Sort by email, this will be temp until we get the results from the backend with sorting applied
@@ -75,11 +76,16 @@ export const getOrganizationUsers = async (
 };
 
 export const getOrganizationRoles = async (
-  token: string,
   organizationId: string,
 ): Promise<UserRole[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/roles/list`,
@@ -151,4 +157,24 @@ export const getOrganizationPendingInvitations = async (
   });
 
   return sorted;
+};
+
+export const updateOrganizationUserRoles = async (
+  organizationId: string,
+  userId: string,
+  roleIds: string[],
+): Promise<UserDetail> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationWithMethod("PUT")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    body: { role_ids: roleIds },
+  });
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
 };

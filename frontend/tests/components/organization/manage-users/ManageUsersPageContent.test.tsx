@@ -11,11 +11,11 @@ import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPa
 type TranslationFn = (key: string) => string;
 
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_ns: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) => Promise.resolve((key: string) => key),
 );
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: (ns: string) => getTranslationsMock(ns),
+  getTranslations: (namespace: string) => getTranslationsMock(namespace),
 }));
 
 type GetOrgDetailsFn = (orgId: string) => Promise<unknown>;
@@ -73,6 +73,10 @@ const authorizedDataStub: AuthorizedData = {
       statusCode: 200,
     },
     invitedUsersList: {
+      data: [],
+      statusCode: 200,
+    },
+    organizationRolesList: {
       data: [],
       statusCode: 200,
     },

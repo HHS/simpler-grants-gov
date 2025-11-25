@@ -4,7 +4,7 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
-import type { AuthorizedData, FetchedResource } from "src/types/authTypes";
+import type { FetchedResource } from "src/types/authTypes";
 import type { UserDetail, UserRole } from "src/types/userTypes";
 
 import { ActiveUsersSection } from "src/components/manageUsers/ActiveUsersSection";
@@ -12,11 +12,11 @@ import { ActiveUsersSection } from "src/components/manageUsers/ActiveUsersSectio
 type TranslationFn = (key: string) => string;
 
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_ns: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) => Promise.resolve((key: string) => key),
 );
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: (ns: string) => getTranslationsMock(ns),
+  getTranslations: (namespace: string) => getTranslationsMock(namespace),
 }));
 
 const tableWithResponsiveHeaderMock = jest.fn<void, [unknown]>();
@@ -28,33 +28,33 @@ jest.mock("src/components/TableWithResponsiveHeader", () => ({
   },
 }));
 
-describe("ActiveUsersSection", () => {
-  const makeAuthorizedData = (
-    activeUsersList: FetchedResource,
-  ): AuthorizedData => ({
-    fetchedResources: {
-      activeUsersList,
-    },
-    confirmedPrivileges: [],
-  });
+const makeResource = (
+  overrides: Partial<FetchedResource> = {},
+): FetchedResource => ({
+  data: [],
+  statusCode: 200,
+  ...overrides,
+});
 
+describe("ActiveUsersSection", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("throws if authorizedData is missing", async () => {
-    await expect(ActiveUsersSection({})).rejects.toThrow(
-      "ActiveUsersList must be wrapped in AuthorizationGate",
-    );
-  });
-
   it("renders zero-state text when there are no active users", async () => {
-    const authorizedData = makeAuthorizedData({
+    const activeUsers = makeResource({
       data: [] as UserDetail[],
-      statusCode: 200,
     });
 
-    const component = await ActiveUsersSection({ authorizedData });
+    const roles = makeResource({
+      data: [] as UserRole[],
+    });
+
+    const component = await ActiveUsersSection({
+      organizationId: "org-123",
+      activeUsers,
+      roles,
+    });
     render(component);
 
     expect(await screen.findByTestId("active-users-empty")).toHaveTextContent(
@@ -63,13 +63,21 @@ describe("ActiveUsersSection", () => {
   });
 
   it("renders an error message when there is an error or no data", async () => {
-    const authorizedData = makeAuthorizedData({
+    const activeUsers = makeResource({
       data: undefined,
       statusCode: 500,
       error: "something went wrong",
     });
 
-    const component = await ActiveUsersSection({ authorizedData });
+    const roles = makeResource({
+      data: [] as UserRole[],
+    });
+
+    const component = await ActiveUsersSection({
+      organizationId: "org-123",
+      activeUsers,
+      roles,
+    });
     render(component);
 
     expect(await screen.findByText("activeUsersFetchError")).toBeVisible();
@@ -95,16 +103,25 @@ describe("ActiveUsersSection", () => {
       },
     ];
 
-    const authorizedData = makeAuthorizedData({
+    const activeUsers = makeResource({
       data: users,
       statusCode: 200,
     });
 
-    const component = await ActiveUsersSection({ authorizedData });
+    const rolesResource = makeResource({
+      data: [] as UserRole[],
+      error: "failed to load roles",
+      statusCode: 500,
+    });
+
+    const component = await ActiveUsersSection({
+      organizationId: "org-123",
+      activeUsers,
+      roles: rolesResource,
+    });
     render(component);
 
     expect(await screen.findByTestId("active-users-table")).toBeVisible();
-
     expect(tableWithResponsiveHeaderMock).toHaveBeenCalledTimes(1);
 
     const tableProps = tableWithResponsiveHeaderMock.mock.calls[0][0] as {
