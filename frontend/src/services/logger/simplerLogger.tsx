@@ -12,7 +12,7 @@
 import pino from "pino";
 import { environment } from "src/constants/environments";
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const levelFormatter = (label: string) => ({ level: label });
 
@@ -38,7 +38,7 @@ const pinoConfig =
 
 export const logger = pino(pinoConfig);
 
-export const logRequest = (request: NextRequest) => {
+export const logRequest = (request: NextRequest, response?: NextResponse) => {
   // note that we can't use lodash in middleware, so some of this is being done extra manually
   const { url, method, headers } = request;
 
@@ -57,6 +57,9 @@ export const logRequest = (request: NextRequest) => {
         userAgent: headers.get("user-agent"),
         acceptLanguage: headers.get("accept-language"),
         awsTraceId: headers.get("X-Amz-Cf-Id"),
+        statusCode: response?.status,
+        cacheControl: response?.headers?.get("cache-control"),
+        hasSessionCookie: request.cookies.get("session") !== undefined,
       });
     }
   }
