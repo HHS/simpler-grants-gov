@@ -4,7 +4,7 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
-import type { AuthorizedData } from "src/types/authTypes";
+import type { FetchedResource } from "src/types/authTypes";
 import {
   OrganizationInvitationStatus,
   type OrganizationPendingInvitation,
@@ -15,7 +15,7 @@ import { InvitedUsersSection } from "src/components/manageUsers/InvitedUsersSect
 type TranslationFn = (key: string) => string;
 
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_ns: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) => Promise.resolve((key: string) => key),
 );
 
 jest.mock("next-intl/server", () => ({
@@ -31,33 +31,25 @@ jest.mock("src/components/TableWithResponsiveHeader", () => ({
   },
 }));
 
-describe("InvitedUsersSection", () => {
-  const makeAuthorizedData = (
-    invitedUsersList: AuthorizedData["fetchedResources"]["invitedUsersList"],
-  ): AuthorizedData => ({
-    fetchedResources: {
-      invitedUsersList,
-    },
-    confirmedPrivileges: [],
-  });
+const makeInvitedUsersResource = (
+  overrides: Partial<FetchedResource> = {},
+): FetchedResource => ({
+  data: [] as OrganizationPendingInvitation[],
+  statusCode: 200,
+  ...overrides,
+});
 
+describe("InvitedUsersSection", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("throws if authorizedData is missing", async () => {
-    await expect(InvitedUsersSection({})).rejects.toThrow(
-      "ActiveUsersList must be wrapped in AuthorizationGate",
-    );
-  });
-
   it("renders zero-state text when there are no pending invitations", async () => {
-    const authorizedData: AuthorizedData = makeAuthorizedData({
+    const invitedUsers = makeInvitedUsersResource({
       data: [] as OrganizationPendingInvitation[],
-      statusCode: 200,
     });
 
-    const component = await InvitedUsersSection({ authorizedData });
+    const component = await InvitedUsersSection({ invitedUsers });
     render(component);
 
     expect(await screen.findByTestId("pending-users-empty")).toHaveTextContent(
@@ -66,13 +58,13 @@ describe("InvitedUsersSection", () => {
   });
 
   it("renders an error message when there is an error or no data", async () => {
-    const authorizedData: AuthorizedData = makeAuthorizedData({
+    const invitedUsers = makeInvitedUsersResource({
       data: undefined,
       statusCode: 500,
       error: "something went wrong",
     });
 
-    const component = await InvitedUsersSection({ authorizedData });
+    const component = await InvitedUsersSection({ invitedUsers });
     render(component);
 
     expect(await screen.findByText("invitedUsersFetchError")).toBeVisible();
@@ -104,12 +96,11 @@ describe("InvitedUsersSection", () => {
       },
     ];
 
-    const authorizedData: AuthorizedData = makeAuthorizedData({
+    const invitedUsers = makeInvitedUsersResource({
       data: pending,
-      statusCode: 200,
     });
 
-    const component = await InvitedUsersSection({ authorizedData });
+    const component = await InvitedUsersSection({ invitedUsers });
     render(component);
 
     expect(await screen.findByTestId("invited-users-table")).toBeVisible();

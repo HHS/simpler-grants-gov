@@ -136,12 +136,14 @@ describe("getOrganizationRoles", () => {
   afterEach(() => jest.resetAllMocks());
 
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
     fetchOrganizationMock.mockReturnValue({
       json: () => ({ data: [{ fake: "role" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
 
-    const result = await getOrganizationRoles("faketoken", "org-123");
+    const result = await getOrganizationRoles("org-123");
 
     expect(result).toEqual([{ fake: "role" }]);
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
@@ -151,6 +153,14 @@ describe("getOrganizationRoles", () => {
         "X-SGG-Token": "faketoken",
       },
     });
+  });
+
+  it("throws UnauthorizedError when session is missing or has no token", async () => {
+    mockGetSession.mockResolvedValue(null);
+
+    await expect(getOrganizationRoles("org-123")).rejects.toBeInstanceOf(
+      UnauthorizedError,
+    );
   });
 });
 
