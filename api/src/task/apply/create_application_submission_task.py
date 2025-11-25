@@ -451,8 +451,8 @@ def build_s3_application_submission_path(
     help="Create application submissions for all submitted apps",
 )
 @click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
-@flask_db.with_db_session()
 @ecs_background_task(task_name="create-application-submission")
+@flask_db.with_db_session()
 def create_application_submission(db_session: db.Session, scheduled_job_name: str | None) -> None:
     CreateApplicationSubmissionTask(db_session).run()
 

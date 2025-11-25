@@ -119,8 +119,8 @@ TABLES_TO_EXTRACT = {
 )
 @click.option("--tables-to-extract", "-t", help="Tables to extract to a CSV file", multiple=True)
 @click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
-@flask_db.with_db_session()
 @ecs_background_task(task_name="create-analytics-db-csvs")
+@flask_db.with_db_session()
 def create_analytics_db_csvs(
     db_session: db.Session, tables_to_extract: list[str], scheduled_job_name: str | None
 ) -> None:
