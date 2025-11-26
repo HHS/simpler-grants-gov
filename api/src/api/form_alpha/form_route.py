@@ -2,12 +2,15 @@ import logging
 import uuid
 from typing import cast
 
+from flask import request
+
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.api.form_alpha.form_schema as form_schema
 import src.api.response as response
 from src.api.form_alpha.form_blueprint import form_blueprint
 from src.api.route_utils import raise_flask_error
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_key_auth import ApiKeyUser
 from src.auth.endpoint_access_util import verify_access
 from src.auth.multi_auth import AuthType, api_key_multi_auth, api_key_multi_auth_security_schemes
@@ -67,3 +70,43 @@ def form_update(
         form = update_form(db_session, form_id, json_data)
 
     return response.ApiResponse(message="Success", data=form)
+
+
+@form_blueprint.put("/forms/<uuid:form_id>/form_instructions/<uuid:form_instruction_id>")
+@form_blueprint.output(AbstractResponseSchema)
+@api_key_multi_auth.login_required
+@flask_db.with_db_session()
+@form_blueprint.doc(security=api_key_multi_auth_security_schemes)
+def form_instruction_upsert(
+    db_session: db.Session, form_id: uuid.UUID, form_instruction_id: uuid.UUID
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {"form_id": form_id, "form_instruction_id": form_instruction_id}
+    )
+    logger.info("PUT /alpha/forms/:form_id/form_instructions/:form_instruction_id")
+
+    # Get the file from the request
+    # The request should be multipart/form-data
+    if "file" not in request.files:
+        raise_flask_error(400, "No file part in the request")
+
+    file_obj = request.files["file"]
+
+    with db_session.begin():
+        # Check auth
+        multi_auth_user = api_key_multi_auth.get_user()
+        if multi_auth_user.auth_type == AuthType.API_KEY_AUTH:
+            # Check if user is the internal admin user (auth_token_0)
+            if cast(ApiKeyUser, multi_auth_user.user).username != "auth_token_0":
+                raise_flask_error(403, "Only internal admin users can update form instructions")
+        else:
+            # Temporary auth check until legacy auth is removed
+            user = cast(UserApiKey, multi_auth_user.user).user
+            db_session.add(user)
+            verify_access(user, {Privilege.UPDATE_FORM}, None)
+
+        from src.services.form_alpha.upsert_form_instruction import upsert_form_instruction
+
+        upsert_form_instruction(db_session, form_id, form_instruction_id, file_obj)
+
+    return response.ApiResponse(message="Success")
