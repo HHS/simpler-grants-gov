@@ -248,6 +248,18 @@ class OrganizationInvitationStatus(StrEnum):
     PENDING = "pending"
 
 
+class LegacyUserStatus(StrEnum):
+    MEMBER = "member"
+    PENDING_INVITATION = "pending_invitation"
+    AVAILABLE = "available"
+
+
+class LegacyProfileType(StrEnum):
+    """Legacy Oracle profile types from tuser_profile table"""
+
+    ORGANIZATION_APPLICANT = "4"
+
+
 class ApplicationAuditEvent(StrEnum):
     APPLICATION_CREATED = "application_created"
     APPLICATION_NAME_CHANGED = "application_name_changed"
