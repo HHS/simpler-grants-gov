@@ -185,11 +185,9 @@ FORM_JSON_SCHEMA = {
             "readOnly": True,
         },
         "organization_name": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Legal Name",
             "description": "Enter the legal name of the applicant that will undertake the assistance activity.",
-            "minLength": 1,
-            "maxLength": 60,
         },
         "employer_taxpayer_identification_number": {
             "type": "string",
@@ -199,11 +197,9 @@ FORM_JSON_SCHEMA = {
             "maxLength": 30,
         },
         "sam_uei": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
             "title": "SAM UEI",
             "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
-            "minLength": 12,
-            "maxLength": 12,
         },
         "applicant": {
             "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
@@ -252,10 +248,9 @@ FORM_JSON_SCHEMA = {
             "description": "Enter the fax Number.",
         },
         "email": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
             "title": "Email",
             "description": "Enter a valid email Address.",
-            "format": "email",
         },
         "applicant_type_code": {
             # NOTE: In the xml model, this is 3 separate fields, we joined them together
@@ -896,6 +891,20 @@ FORM_XML_TRANSFORM_RULES = {
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
     "fax_number": {"xml_transform": {"target": "Fax"}},
     "email": {"xml_transform": {"target": "Email"}},
+    # One-to-many mapping - applicant type codes (must come before agency_name per XSD)
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "target": "ApplicantTypeCode",  # Not used for one-to-many
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+            },
+        }
+    },
+    "applicant_type_other_specify": {"xml_transform": {"target": "ApplicantTypeOtherSpecify"}},
     # Opportunity information - direct field mappings
     "agency_name": {"xml_transform": {"target": "AgencyName"}},
     "assistance_listing_number": {"xml_transform": {"target": "CFDANumber"}},
@@ -1014,19 +1023,6 @@ FORM_XML_TRANSFORM_RULES = {
     },
     "aor_signature": {"xml_transform": {"target": "AORSignature"}},
     "date_signed": {"xml_transform": {"target": "DateSigned"}},
-    # One-to-many mapping example - applicant type codes
-    "applicant_type_code_mapping": {
-        "xml_transform": {
-            "target": "ApplicantTypeCode",  # Not used for one-to-many
-            "type": "conditional",
-            "conditional_transform": {
-                "type": "one_to_many",
-                "source_field": "applicant_type_code",
-                "target_pattern": "ApplicantTypeCode{index}",
-                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
-            },
-        }
-    },
 }
 
 

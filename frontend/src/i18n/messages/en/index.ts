@@ -616,6 +616,8 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      activityDashboard: "Activity Dashboard",
+      applications: "Applications",
       community: "Community",
       developer: "Developer Portal",
       developers: "Developers",
@@ -1450,9 +1452,9 @@ export const messages = {
     errorHeading: "Error",
     successHeading: "Account updated",
   },
-  UserWorkspace: {
-    pageTitle: "User Workspace | Simpler.Grants.gov",
-    title: "<color>Welcome</color> to your workspace.",
+  ActivityDashboard: {
+    pageTitle: "Activity Dashboard | Simpler.Grants.gov",
+    title: "Welcome to your activity dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
     organizations: "Your organizations",
     noOrganizations: {
@@ -1542,13 +1544,12 @@ export const messages = {
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
-    pendingUsersHeading: "Pending Users",
-    pendingUsersTableDescription:
-      "Any users waiting to join your organization will appear below.",
-    errors: {
-      fetchError: "Failed to get Users",
-      notLoggedInMessage: "You are not logged in",
-    },
+    invitedUsersHeading: "Invited users",
+    invitedUsersTableDescription:
+      "These users have been invited to join your organization but haven’t accepted yet. Once they accept, they’ll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+    invitedUsersFetchError:
+      "We have encountered an error retrieving the Pending Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no pending users",
     usersTable: {
       admin: "Administrator",
       emailHeading: "Email",
@@ -1591,13 +1592,29 @@ export const messages = {
     },
   },
   Applications: {
-    pageTitle: "Applications",
+    numApplications: "{num, plural, =1 {1 application} other {# applications}}",
+    errorMessage:
+      "We have encountered an error loading your applications, please try again later.",
     metaDescription: "View your saved applications",
-    pageHeading: "Applications",
     noApplicationsMessage: {
       primary: "You have not started any applications yet.",
       secondary:
         "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Applications",
+    pageTitle: "Applications",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      closeDate: "Close date",
+      status: "Status",
+      applicationName: "Application filing name",
+      type: "Type",
+      opportunity: "Opportunity",
     },
   },
 };

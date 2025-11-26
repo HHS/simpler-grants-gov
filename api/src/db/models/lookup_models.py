@@ -21,6 +21,7 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+    UserType,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
@@ -160,6 +161,12 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.BUDGET_NARRATIVE_ATTACHMENT, 6),
         LookupStr(FormType.PROJECT_ABSTRACT_SUMMARY, 7),
         LookupStr(FormType.CD511, 8),
+        LookupStr(FormType.SF424D, 9),
+        LookupStr(FormType.OTHER_NARRATIVE_ATTACHMENT, 10),
+        LookupStr(FormType.PROJECT_ABSTRACT, 11),
+        LookupStr(FormType.SUPPLEMENTARY_NEH_COVER_SHEET, 12),
+        LookupStr(FormType.GG_LOBBYING_FORM, 13),
+        LookupStr(FormType.EPA_FORM_4700_4, 14),
     ]
 )
 
@@ -244,6 +251,14 @@ APPLICATION_AUDIT_EVENT_CONFIG: LookupConfig[ApplicationAuditEvent] = LookupConf
         LookupStr(ApplicationAuditEvent.USER_UPDATED, 10),
         LookupStr(ApplicationAuditEvent.USER_REMOVED, 11),
         LookupStr(ApplicationAuditEvent.FORM_UPDATED, 12),
+        LookupStr(ApplicationAuditEvent.ORGANIZATION_ADDED, 13),
+    ]
+)
+USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
+    [
+        LookupStr(UserType.STANDARD, 1),
+        LookupStr(UserType.INTERNAL_FRONTEND, 2),
+        LookupStr(UserType.LEGACY_CERTIFICATE, 3),
     ]
 )
 
@@ -517,3 +532,15 @@ class LkApplicationAuditEvent(LookupTable, TimestampMixin):
         return LkApplicationAuditEvent(
             application_audit_event_id=lookup.lookup_val, description=lookup.get_description()
         )
+
+
+@LookupRegistry.register_lookup(USER_TYPE_CONFIG)
+class LkUserType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_user_type"
+
+    user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> "LkUserType":
+        return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())

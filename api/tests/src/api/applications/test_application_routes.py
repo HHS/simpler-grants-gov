@@ -8,6 +8,7 @@ from sqlalchemy import select
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
     ApplicationFormStatus,
     CompetitionOpenToApplicant,
     Privilege,
@@ -86,6 +87,16 @@ def test_application_start_success(
     assert application is not None
     assert str(application.competition_id) == competition_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
+    assert len(application.application_audits) == 2
+    assert {a.application_audit_event for a in application.application_audits} == {
+        ApplicationAuditEvent.APPLICATION_CREATED,
+        ApplicationAuditEvent.USER_ADDED,
+    }
+
+    for app_audit in application.application_audits:
+        assert app_audit.user_id == user.user_id
+        if app_audit.application_audit_event == ApplicationAuditEvent.USER_ADDED:
+            assert app_audit.target_user_id == user.user_id
 
 
 def test_application_start_logging_enhancement(
@@ -428,7 +439,7 @@ def test_application_form_update_success_create(
 ):
     """Test successful creation of an application form response"""
     # Create application
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     competition_form = CompetitionFormFactory.create(competition=application.competition)
@@ -458,6 +469,18 @@ def test_application_form_update_success_create(
     assert application_form is not None
     assert application_form.application_response == {"name": "John Doe"}
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
+
 
 def test_application_form_update_success_update(
     client,
@@ -466,7 +489,7 @@ def test_application_form_update_success_update(
 ):
     """Test successful update of an existing application form response"""
     # Create application
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
@@ -497,6 +520,18 @@ def test_application_form_update_success_update(
     # Verify application form was updated in the database
     db_session.refresh(existing_form)
     assert existing_form.application_response == {"name": "Updated Name"}
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == existing_form.application_form_id
+    )
 
 
 @pytest.mark.parametrize(
@@ -540,7 +575,7 @@ def test_application_form_update_with_validation_warnings(
     expected_warnings,
     expected_form_status,
 ):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
@@ -573,11 +608,23 @@ def test_application_form_update_with_validation_warnings(
     db_session.refresh(existing_application_form)
     assert existing_application_form.application_response == application_response
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == existing_application_form.application_form_id
+    )
+
 
 def test_application_form_update_with_rule_validation_issues(
     client, enable_factory_create, db_session
 ):
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(
@@ -621,6 +668,18 @@ def test_application_form_update_with_rule_validation_issues(
     db_session.refresh(existing_application_form)
     assert existing_application_form.application_response == application_response
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == existing_application_form.application_form_id
+    )
+
 
 def test_application_form_update_with_invalid_schema_500(
     client,
@@ -657,6 +716,9 @@ def test_application_form_update_with_invalid_schema_500(
     # Verify the response was not updated
     db_session.refresh(existing_application_form)
     assert existing_application_form.application_response == {"name": "Original Name"}
+
+    # Verify no audit event added
+    assert len(application.application_audits) == 0
 
 
 def test_application_form_update_application_not_found(
@@ -1782,6 +1844,14 @@ def test_application_submit_success(
     db_session.refresh(application)
     assert application.application_status == ApplicationStatus.SUBMITTED
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMITTED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+
 
 def test_application_submit_logging_enhancement(
     client, enable_factory_create, db_session, user, user_auth_token, caplog
@@ -1856,6 +1926,14 @@ def test_application_submit_logging_enhancement(
 
     assert found_metadata, "Application metadata should be added to logs for New Relic dashboards"
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMITTED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+
 
 def test_application_submit_validation_issues(
     client, enable_factory_create, db_session, user, user_auth_token
@@ -1914,6 +1992,13 @@ def test_application_submit_validation_issues(
             "value": str(application_form.application_form_id),
         }
     ]
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+    )
 
 
 def test_application_submit_rule_validation_issue(
@@ -1982,6 +2067,14 @@ def test_application_submit_rule_validation_issue(
         }
     ]
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+
 
 def test_application_submit_invalid_required_form(
     client, enable_factory_create, db_session, user, user_auth_token
@@ -2030,6 +2123,13 @@ def test_application_submit_invalid_required_form(
         }
     ]
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+    )
+
 
 @pytest.mark.parametrize(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
@@ -2067,6 +2167,9 @@ def test_application_form_update_forbidden_not_in_progress(
         == "Cannot modify application, not currently in progress"
     )
 
+    # No audit events as submission issue isn't added for a 403
+    assert len(application.application_audits) == 0
+
 
 @pytest.mark.parametrize(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
@@ -2102,6 +2205,9 @@ def test_application_submit_forbidden_not_in_progress(
     # Verify application status remains unchanged
     db_session.refresh(application)
     assert application.application_status == initial_status
+
+    # No audit events as submission issue isn't added for a 403
+    assert len(application.application_audits) == 0
 
 
 def test_application_start_associates_user(
@@ -2330,7 +2436,7 @@ def test_application_form_update_success_when_associated(
     db_session,
 ):
     """Test application form update succeeds when user is associated with the application"""
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
 
@@ -2356,6 +2462,18 @@ def test_application_form_update_success_when_associated(
 
     assert application_form is not None
     assert application_form.application_response == {"name": "John Doe"}
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_submit_success_when_associated(
@@ -2606,6 +2724,13 @@ def test_application_start_with_organization_success(
 
     # Assert it does create an application user
     assert not application.application_users
+
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_CREATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
 
 
 def test_application_start_with_organization_and_custom_name(
@@ -3187,14 +3312,14 @@ def test_application_form_inclusion_update_success_true(
 ):
     """Test successfully setting form inclusion to true"""
     # Create application with a form
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with some data but no inclusion flag set
-    ApplicationFormFactory.create(
+    application_form = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3213,6 +3338,18 @@ def test_application_form_inclusion_update_success_true(
 
     assert response.status_code == 200
     assert response.json["message"] == "Success"
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_start_organization_no_sam_gov_entity(
@@ -3407,14 +3544,14 @@ def test_application_form_inclusion_update_success_false(
 ):
     """Test successfully setting form inclusion to false"""
     # Create application with a form
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     form = FormFactory.create(form_json_schema=SIMPLE_JSON_SCHEMA)
     competition_form = CompetitionFormFactory.create(competition=application.competition, form=form)
 
     # Create an application form with inclusion initially set to true
-    ApplicationFormFactory.create(
+    application_form = ApplicationFormFactory.create(
         application=application,
         competition_form=competition_form,
         application_response={"name": "John Doe"},
@@ -3448,6 +3585,18 @@ def test_application_form_inclusion_update_success_false(
     assert str(application.competition_id) == competition_id
     assert str(application.organization_id) == organization_id
     assert application.application_status == ApplicationStatus.IN_PROGRESS
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_start_organization_entity_expiring_today(
@@ -3640,7 +3789,7 @@ def test_application_form_update_with_pre_population(
         opportunity_number="UPDATE-OPP-456", opportunity_title="Updated Opportunity Title"
     )
 
-    _, application, token = create_user_in_app(
+    user, application, token = create_user_in_app(
         db_session, privileges=[Privilege.MODIFY_APPLICATION]
     )
     application.competition.opportunity = opportunity
@@ -3689,6 +3838,18 @@ def test_application_form_update_with_pre_population(
     assert application_form.application_response["user_input_field"] == "User provided data"
     # Should also have pre-populated data
     assert application_form.application_response["opportunity_number_field"] == "UPDATE-OPP-456"
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.FORM_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_application_form_id
+        == application_form.application_form_id
+    )
 
 
 def test_application_form_update_overwrites_user_changes_with_pre_population(
@@ -3912,9 +4073,7 @@ def test_get_application_form_access_with_organization(
 ):
     """Test that user can access the application if organization member"""
     # Associate user with organization
-    _, org, token = create_user_in_org(
-        db_session, is_organization_owner=True, privileges=[Privilege.VIEW_APPLICATION]
-    )
+    _, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
     # Create application owned by org
     application = ApplicationFactory.create(organization=org)
     application_form = ApplicationFormFactory.create(
@@ -3956,6 +4115,12 @@ def test_add_organization_to_application_success(
         role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
     )
 
+    # Add a second user to the app that will also be removed
+    second_user = ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    ).application_user
+
     # Create organization and give user START_APPLICATION privilege
     organization = OrganizationFactory.create()
     OrganizationUserRoleFactory.create(
@@ -3976,6 +4141,20 @@ def test_add_organization_to_application_success(
     # Verify the organization was added in the database
     db_session.refresh(application)
     assert application.organization_id == organization.organization_id
+
+    # Application users were removed
+    assert application.application_users == []
+
+    assert len(application.application_audits) == 3
+    assert {a.application_audit_event for a in application.application_audits} == {
+        ApplicationAuditEvent.ORGANIZATION_ADDED,
+        ApplicationAuditEvent.USER_REMOVED,
+    }
+
+    for app_audit in application.application_audits:
+        assert app_audit.user_id == user.user_id
+        if app_audit.application_audit_event == ApplicationAuditEvent.USER_REMOVED:
+            assert app_audit.target_user_id in (user.user_id, second_user.user_id)
 
 
 def test_add_organization_to_application_not_found(

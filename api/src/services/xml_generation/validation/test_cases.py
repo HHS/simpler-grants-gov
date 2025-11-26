@@ -451,6 +451,318 @@ SF424_TEST_CASES = [
     },
 ]
 
+# Sample test cases for SF-424A validation
+SF424A_TEST_CASES = [
+    {
+        "name": "sf424a_minimal_non_federal_resources_only",
+        "json_input": {
+            # Minimal required fields for XSD validation
+            "program_type": "Non-Construction",
+            "form_version_identifier": "1.0",
+            # Just the NonFederalResources section to validate
+            "activity_line_items": [
+                {
+                    "activity_title": "Line 1",
+                    "non_federal_resources": {
+                        "applicant_amount": "10.00",
+                        "state_amount": "20.00",
+                        "other_amount": "30.00",
+                        "total_amount": "60.00",
+                    },
+                },
+            ],
+            "total_non_federal_resources": {
+                "applicant_amount": "120.00",
+                "state_amount": "150.00",
+                "other_amount": "180.00",
+                "total_amount": "450.00",
+            },
+        },
+        "form_name": "SF424A",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424a_budget_sections_with_array_decomposition",
+        "json_input": {
+            # Required fields
+            "program_type": "Non-Construction",
+            "form_version_identifier": "1.0",
+            "activity_line_items": [
+                {
+                    "activity_title": "Line 1",
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "10.00",
+                        "total_new_or_revised_amount": "60.00",
+                    },
+                    "budget_categories": {
+                        "personnel_amount": "20.00",
+                    },
+                    "non_federal_resources": {
+                        "applicant_amount": "10.00",
+                        "state_amount": "20.00",
+                        "other_amount": "30.00",
+                        "total_amount": "60.00",
+                    },
+                    "federal_fund_estimates": {
+                        "first_year_amount": "60.00",
+                    },
+                },
+                {
+                    "activity_title": "Line 2",
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "30.00",
+                        "total_new_or_revised_amount": "90.00",
+                    },
+                    "budget_categories": {
+                        "personnel_amount": "40.00",
+                    },
+                    "non_federal_resources": {
+                        "applicant_amount": "30.00",
+                        "state_amount": "40.00",
+                        "other_amount": "20.00",
+                        "total_amount": "90.00",
+                    },
+                    "federal_fund_estimates": {
+                        "first_year_amount": "90.00",
+                    },
+                },
+            ],
+            "total_budget_summary": {
+                "federal_estimated_unobligated_amount": "40.00",
+                "total_new_or_revised_amount": "150.00",
+            },
+            "total_budget_categories": {
+                "personnel_amount": "60.00",
+            },
+            "total_non_federal_resources": {
+                "applicant_amount": "120.00",
+                "state_amount": "150.00",
+                "other_amount": "180.00",
+                "total_amount": "450.00",
+            },
+            "total_federal_fund_estimates": {
+                "first_year_amount": "150.00",
+            },
+        },
+        "form_name": "SF424A",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424a_with_forecasted_cash_needs",
+        "json_input": {
+            # Required fields
+            "program_type": "Non-Construction",
+            "form_version_identifier": "1.0",
+            "forecasted_cash_needs": {
+                "federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "25000.00",
+                    "second_quarter_amount": "25000.00",
+                    "third_quarter_amount": "25000.00",
+                    "fourth_quarter_amount": "25000.00",
+                    "total_amount": "100000.00",
+                },
+                "non_federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "5000.00",
+                    "second_quarter_amount": "5000.00",
+                    "third_quarter_amount": "5000.00",
+                    "fourth_quarter_amount": "5000.00",
+                    "total_amount": "20000.00",
+                },
+                "total_forecasted_cash_needs": {
+                    "first_quarter_amount": "30000.00",
+                    "second_quarter_amount": "30000.00",
+                    "third_quarter_amount": "30000.00",
+                    "fourth_quarter_amount": "30000.00",
+                    "total_amount": "120000.00",
+                },
+            },
+            "activity_line_items": [
+                {
+                    "activity_title": "Research Activities",
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "5000.00",
+                        "total_new_or_revised_amount": "50000.00",
+                    },
+                    "budget_categories": {
+                        "personnel_amount": "30000.00",
+                        "fringe_benefits_amount": "10000.00",
+                        "travel_amount": "5000.00",
+                        "equipment_amount": "0.00",
+                        "supplies_amount": "3000.00",
+                        "contractual_amount": "2000.00",
+                        "construction_amount": "0.00",
+                        # Note: other_amount omitted - would need BudgetOtherRequestedAmount (not BudgetOtherContributionAmount)
+                        # Note: total_amount not valid for CategorySet line items per XSD
+                    },
+                    "non_federal_resources": {
+                        "applicant_amount": "10000.00",
+                        "state_amount": "5000.00",
+                        "other_amount": "5000.00",
+                        "total_amount": "20000.00",
+                    },
+                    "federal_fund_estimates": {
+                        "first_year_amount": "50000.00",
+                        "second_year_amount": "0.00",
+                        "third_year_amount": "0.00",
+                        "fourth_year_amount": "0.00",
+                    },
+                },
+            ],
+            "total_budget_summary": {
+                "federal_estimated_unobligated_amount": "5000.00",
+                "total_new_or_revised_amount": "50000.00",
+            },
+            "total_budget_categories": {
+                "personnel_amount": "30000.00",
+                "fringe_benefits_amount": "10000.00",
+                "travel_amount": "5000.00",
+                "equipment_amount": "0.00",
+                "supplies_amount": "3000.00",
+                "contractual_amount": "2000.00",
+                "construction_amount": "0.00",
+                # Note: other_amount omitted - would need BudgetOtherRequestedAmount
+                # Note: total_amount not valid for CategoryTotals per XSD
+            },
+            "total_non_federal_resources": {
+                "applicant_amount": "10000.00",
+                "state_amount": "5000.00",
+                "other_amount": "5000.00",
+                "total_amount": "20000.00",
+            },
+            "total_federal_fund_estimates": {
+                "first_year_amount": "50000.00",
+                "second_year_amount": "0.00",
+                "third_year_amount": "0.00",
+                "fourth_year_amount": "0.00",
+            },
+        },
+        "form_name": "SF424A",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424a_complete_all_sections",
+        "json_input": {
+            # Required fields
+            "program_type": "Non-Construction",
+            "form_version_identifier": "1.0",
+            # Activity line items with all sections
+            "activity_line_items": [
+                {
+                    "activity_title": "Personnel and Training",
+                    # Section A - Budget Summary
+                    "budget_summary": {
+                        "assistance_listing_number": "93.001",  # CFDANumber - child element per XSD
+                        "federal_estimated_unobligated_amount": "1000.00",
+                        "non_federal_estimated_unobligated_amount": "500.00",
+                        "federal_new_or_revised_amount": "50000.00",
+                        "non_federal_new_or_revised_amount": "10000.00",
+                        "total_new_or_revised_amount": "61500.00",
+                    },
+                    # Section B - Budget Categories
+                    "budget_categories": {
+                        "personnel_amount": "30000.00",
+                        "fringe_benefits_amount": "8000.00",
+                        "travel_amount": "5000.00",
+                        "equipment_amount": "3000.00",
+                        "supplies_amount": "2000.00",
+                        "contractual_amount": "0.00",
+                        "construction_amount": "0.00",
+                        # Note: other_amount omitted - would need BudgetOtherRequestedAmount
+                        "total_direct_charge_amount": "49000.00",
+                        "total_indirect_charge_amount": "2000.00",
+                        # Note: total_amount not valid for CategorySet per XSD
+                        "program_income_amount": "500.00",
+                    },
+                    # Section C - Non-Federal Resources
+                    "non_federal_resources": {
+                        "applicant_amount": "5000.00",
+                        "state_amount": "3000.00",
+                        "other_amount": "2000.00",
+                        "total_amount": "10000.00",
+                    },
+                    # Section E - Federal Funds Needed
+                    "federal_fund_estimates": {
+                        "first_year_amount": "50000.00",
+                        "second_year_amount": "0.00",
+                        "third_year_amount": "0.00",
+                        "fourth_year_amount": "0.00",
+                    },
+                },
+            ],
+            # Totals
+            "total_budget_summary": {
+                "federal_estimated_unobligated_amount": "1000.00",
+                "non_federal_estimated_unobligated_amount": "500.00",
+                "federal_new_or_revised_amount": "50000.00",
+                "non_federal_new_or_revised_amount": "10000.00",
+                "total_new_or_revised_amount": "61500.00",
+            },
+            "total_budget_categories": {
+                "personnel_amount": "30000.00",
+                "fringe_benefits_amount": "8000.00",
+                "travel_amount": "5000.00",
+                "equipment_amount": "3000.00",
+                "supplies_amount": "2000.00",
+                "contractual_amount": "0.00",
+                "construction_amount": "0.00",
+                # Note: other_amount omitted - would need BudgetOtherRequestedAmount
+                "total_direct_charge_amount": "49000.00",
+                "total_indirect_charge_amount": "2000.00",
+                # Note: total_amount not valid for CategoryTotals per XSD
+                "program_income_amount": "500.00",
+            },
+            "total_non_federal_resources": {
+                "applicant_amount": "5000.00",
+                "state_amount": "3000.00",
+                "other_amount": "2000.00",
+                "total_amount": "10000.00",
+            },
+            # Section D - Forecasted Cash Needs
+            "forecasted_cash_needs": {
+                "federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "12500.00",
+                    "second_quarter_amount": "12500.00",
+                    "third_quarter_amount": "12500.00",
+                    "fourth_quarter_amount": "12500.00",
+                    "total_amount": "50000.00",
+                },
+                "non_federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "2500.00",
+                    "second_quarter_amount": "2500.00",
+                    "third_quarter_amount": "2500.00",
+                    "fourth_quarter_amount": "2500.00",
+                    "total_amount": "10000.00",
+                },
+                "total_forecasted_cash_needs": {
+                    "first_quarter_amount": "15000.00",
+                    "second_quarter_amount": "15000.00",
+                    "third_quarter_amount": "15000.00",
+                    "fourth_quarter_amount": "15000.00",
+                    "total_amount": "60000.00",
+                },
+            },
+            "total_federal_fund_estimates": {
+                "first_year_amount": "50000.00",
+                "second_year_amount": "0.00",
+                "third_year_amount": "0.00",
+                "fourth_year_amount": "0.00",
+            },
+            # Section F - Other Information
+            "other_information": {
+                "direct_charges_explanation": "Equipment costs for lab instruments",
+                "indirect_charges_explanation": "10% indirect rate on direct costs",
+                "remarks": "This budget supports a 12-month research project",
+            },
+        },
+        "form_name": "SF424A",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "pretty_print": True,
+    },
+]
+
 
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
@@ -458,7 +770,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
     Returns:
         List of all test case dictionaries
     """
-    return SF424_TEST_CASES
+    return SF424_TEST_CASES + SF424A_TEST_CASES
 
 
 def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:

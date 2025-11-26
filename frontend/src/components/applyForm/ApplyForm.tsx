@@ -71,7 +71,7 @@ const ApplyForm = ({
   const { pending } = useFormStatus();
   const t = useTranslations("Application.applyForm");
   const translate = t as unknown as Translator;
-  const isFormLocked = applicationStatus !== "in_progress";
+  const isFormLocked = applicationStatus !== "in_progress" || true;
   const required = translate.rich("required", {
     abr: (content) => (
       <abbr

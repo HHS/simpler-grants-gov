@@ -1,17 +1,3 @@
----
-layout:
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
----
-
 # Logo
 
 The logo is our primary identifier. It contains both the star symbol and our name in the wordmark. It should be used most often to represent our brand, positioning Grants.gov as a trusted and innovative organization dedicated to increasing access to grants and improving the grants experience for everyone.

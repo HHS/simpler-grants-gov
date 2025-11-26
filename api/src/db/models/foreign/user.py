@@ -29,3 +29,11 @@ class TsubscriptionOpportunityMixin(
     foreignbase.ForeignBase, user_mixin.TsubscriptionOpportunityMixin
 ):
     __tablename__ = "tsubscription_opportunity"
+
+
+class VuserAccount(foreignbase.ForeignBase, user_mixin.VuserAccountMixin):
+    __tablename__ = "vuser_account"
+
+
+class TuserProfile(foreignbase.ForeignBase, user_mixin.TuserProfileMixin):
+    __tablename__ = "tuser_profile"

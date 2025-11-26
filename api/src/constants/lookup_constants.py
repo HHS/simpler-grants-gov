@@ -145,12 +145,20 @@ class FormType(StrEnum):
     SF424 = "SF424"
     SF424A = "SF424A"
     SF424B = "SF424B"
+    SF424D = "SF424D"
     SFLLL = "SFLLL"
     PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
     BUDGET_NARRATIVE_ATTACHMENT = "BudgetNarrativeAttachment"
+    OTHER_NARRATIVE_ATTACHMENT = "OtherNarrativeAttachment"
     PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
-
+    PROJECT_ABSTRACT = "ProjectAbstract"
     CD511 = "CD511"
+
+    SUPPLEMENTARY_NEH_COVER_SHEET = "SupplementaryNEHCoverSheet"
+
+    GG_LOBBYING_FORM = "GGLobbyingForm"
+
+    EPA_FORM_4700_4 = "EPAForm4700-4"
 
 
 class CompetitionOpenToApplicant(StrEnum):
@@ -253,3 +261,16 @@ class ApplicationAuditEvent(StrEnum):
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
     FORM_UPDATED = "form_updated"
+    ORGANIZATION_ADDED = "organization_added"
+
+
+class CommonGrantsEvent(StrEnum):
+
+    URL_VALIDATION_ERROR = "url_validation_error"
+    OPPORTUNITY_VALIDATION_ERROR = "opportunity_validation_error"
+
+
+class UserType(StrEnum):
+    STANDARD = "standard"
+    INTERNAL_FRONTEND = "internal_frontend"
+    LEGACY_CERTIFICATE = "legacy_certificate"

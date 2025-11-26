@@ -19,7 +19,6 @@ class TestRemoveUserFromOrganization:
         admin_user, organization, admin_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create target user to be removed
@@ -27,7 +26,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Verify user exists in organization before removal
@@ -69,7 +67,6 @@ class TestRemoveUserFromOrganization:
         admin_user, organization, admin_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create target user with roles
@@ -77,7 +74,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Get the organization user record
@@ -122,7 +118,6 @@ class TestRemoveUserFromOrganization:
         requesting_user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],  # Not MANAGE_ORG_MEMBERS
             db_session=db_session,
-            is_organization_owner=False,
         )
 
         # Create target user
@@ -130,7 +125,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Make request
@@ -147,7 +141,6 @@ class TestRemoveUserFromOrganization:
         admin_user, organization, admin_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Try to remove the only user with MANAGE_ORG_MEMBERS privilege (themselves)
@@ -168,7 +161,6 @@ class TestRemoveUserFromOrganization:
         admin1, organization, admin1_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create second admin user with manage privileges
@@ -176,7 +168,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Remove one admin (should succeed since there's another admin)
@@ -210,7 +201,6 @@ class TestRemoveUserFromOrganization:
         admin_user, organization, admin_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create user not in the organization
@@ -232,7 +222,6 @@ class TestRemoveUserFromOrganization:
         user, user_org, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create different organization with its own member
@@ -241,7 +230,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=other_organization,
-            is_organization_owner=False,
         )
 
         # User from first organization tries to remove user from second organization
@@ -273,7 +261,6 @@ class TestRemoveUserFromOrganization:
         admin_user, organization, admin_token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
-            is_organization_owner=True,
         )
 
         # Create regular member
@@ -281,7 +268,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Remove member (should succeed)
@@ -309,7 +295,6 @@ class TestRemoveUserFromOrganization:
         requesting_user, organization, token = create_user_in_org(
             privileges=privilege_set,
             db_session=db_session,
-            is_organization_owner=False,
         )
 
         # Create target user to remove
@@ -317,7 +302,6 @@ class TestRemoveUserFromOrganization:
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
             db_session=db_session,
             organization=organization,
-            is_organization_owner=False,
         )
 
         # Make request

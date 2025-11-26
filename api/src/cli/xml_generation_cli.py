@@ -7,6 +7,8 @@ from pathlib import Path
 
 import click
 
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
+from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -16,6 +18,12 @@ from src.services.xml_generation.validation.test_cases import (
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
+
+# Map form names to their transform rules
+FORM_TRANSFORM_RULES_MAP = {
+    "SF424_4_0": SF424_TRANSFORM_RULES,
+    "SF424A": SF424A_TRANSFORM_RULES,
+}
 
 
 @task_blueprint.cli.command("generate-xml")
@@ -33,7 +41,7 @@ from src.task.task_blueprint import task_blueprint
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0). Default: SF424_4_0",
+    help="Form name/version (e.g., SF424_4_0, SF424A). Default: SF424_4_0",
 )
 @click.option(
     "--compact",
@@ -59,11 +67,11 @@ def generate_xml_command(
 
     Examples:
 
-        # Generate XML from JSON string
+        # Generate XML from JSON string (SF-424)
         flask task generate-xml --json '{"field": "value"}' --form SF424_4_0
 
-        # Generate from file
-        flask task generate-xml --file input.json --form SF424_4_0
+        # Generate SF-424A from file
+        flask task generate-xml --file input.json --form SF424A
 
         # Generate compact XML and save to file
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml
@@ -79,11 +87,20 @@ def generate_xml_command(
             click.echo("Error: Must provide either --json or --file", err=True)
             sys.exit(1)
 
+        # Get transform config for the specified form
+        transform_config = FORM_TRANSFORM_RULES_MAP.get(form)
+        if not transform_config:
+            click.echo(
+                f"Error: Unknown form '{form}'. Available forms: {', '.join(FORM_TRANSFORM_RULES_MAP.keys())}",
+                err=True,
+            )
+            sys.exit(1)
+
         # Create service and generate XML
         service = XMLGenerationService()
         request = XMLGenerationRequest(
             application_data=application_data,
-            form_name=form,
+            transform_config=transform_config,
             pretty_print=not compact,
         )
 

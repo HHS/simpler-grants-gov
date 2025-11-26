@@ -6,7 +6,7 @@ from sqlalchemy import select
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.api.users.user_schemas import ResourceSchema
-from src.auth.endpoint_access_util import can_access
+from src.auth.endpoint_access_util import check_user_access
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
@@ -36,5 +36,9 @@ def _get_resource(
 
 def check_user_can_access(db_session: db.Session, user: User, json_data: dict) -> None:
     resource = _get_resource(db_session, json_data["resource_type"], json_data["resource_id"])
-    if not can_access(user, set(json_data["privileges"]), resource):
-        raise_flask_error(403, "Forbidden")
+    check_user_access(
+        db_session,
+        user,
+        set(json_data["privileges"]),
+        resource,
+    )

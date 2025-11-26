@@ -1,12 +1,14 @@
 import logging
 from typing import Any
 
+from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import Role, User
+from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 
 logger = logging.getLogger(__name__)
 
@@ -113,3 +115,16 @@ def get_log_info_for_resource(resource: Organization | Application | Agency | No
         log_info["agency_code"] = resource.agency_code
 
     return log_info
+
+
+def check_user_access(
+    db_session: db.Session,
+    user: User,
+    allowed_privileges: set[Privilege],
+    resource: Organization | Application | Agency | None,
+) -> None:
+    """Wrapper function to preload all roles and privileges for the given user
+    then checks access using the in-memory data."""
+    user_with_role = get_roles_and_privileges(db_session, user.user_id)
+    if not user_with_role or not can_access(user_with_role, allowed_privileges, resource):
+        raise_flask_error(403, "Forbidden")
