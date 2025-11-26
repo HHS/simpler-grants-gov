@@ -20,25 +20,38 @@ def _transform_nested_field_names(
         return data
 
     result = {}
-    for field_name, field_value in data.items():
-        # Skip metadata fields
-        if field_name.startswith("__"):
-            result[field_name] = field_value
+    processed_fields = set()
+
+    # First, iterate over transform config to maintain correct order per XSD
+    for field_name, field_config in transform_config_root.items():
+        # Skip metadata config fields (both single and double underscore)
+        if field_name.startswith("_"):
             continue
 
-        # Look up transform rule for this field
-        if field_name in transform_config_root:
-            field_config = transform_config_root[field_name]
-            if isinstance(field_config, dict):
-                xml_transform = field_config.get("xml_transform", {})
-                target_name = xml_transform.get("target")
-                if target_name and xml_transform.get("type") != "attribute":
-                    # Use transformed name
-                    result[target_name] = field_value
-                    continue
+        # Check if this field exists in data
+        if field_name not in data:
+            continue
+
+        field_value = data[field_name]
+
+        # Transform field name if configured
+        if isinstance(field_config, dict):
+            xml_transform = field_config.get("xml_transform", {})
+            target_name = xml_transform.get("target")
+            if target_name and xml_transform.get("type") != "attribute":
+                # Use transformed name
+                result[target_name] = field_value
+                processed_fields.add(field_name)
+                continue
 
         # Keep original name if no transformation found
         result[field_name] = field_value
+        processed_fields.add(field_name)
+
+    # Add any remaining fields from data that weren't in config (preserve as-is)
+    for field_name, field_value in data.items():
+        if field_name not in processed_fields:
+            result[field_name] = field_value
 
     return result
 

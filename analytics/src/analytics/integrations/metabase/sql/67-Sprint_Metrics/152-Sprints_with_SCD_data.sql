@@ -8,7 +8,7 @@ WITH project_data AS {{#168-project-DATA}}, oldest_data AS {{#159-DATA-availabil
    WHERE {{project_id}}
      AND gh_sprint.start_date >= oldest_data.minimum_date
      AND gh_sprint.start_date <= newest_data.maximum_date
-   ORDER BY sprint_name)
+   ORDER BY sprint_name DESC)
 SELECT *
 FROM sprint_data
-ORDER BY start_date DESC
+LIMIT 16

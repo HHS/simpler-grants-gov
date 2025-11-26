@@ -20,10 +20,7 @@ export async function UserOrganizationInvite({
   }
   let organizationRoles: UserRole[] = [];
   try {
-    organizationRoles = await getOrganizationRoles(
-      session.token,
-      organizationId,
-    );
+    organizationRoles = await getOrganizationRoles(organizationId);
   } catch (e) {
     console.error("unable to fetch organization roles", e);
   }

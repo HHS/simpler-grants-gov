@@ -197,11 +197,9 @@ FORM_JSON_SCHEMA = {
             "maxLength": 30,
         },
         "sam_uei": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
             "title": "SAM UEI",
             "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
-            "minLength": 12,
-            "maxLength": 12,
         },
         "applicant": {
             "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
@@ -250,10 +248,9 @@ FORM_JSON_SCHEMA = {
             "description": "Enter the fax Number.",
         },
         "email": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
             "title": "Email",
             "description": "Enter a valid email Address.",
-            "format": "email",
         },
         "applicant_type_code": {
             # NOTE: In the xml model, this is 3 separate fields, we joined them together

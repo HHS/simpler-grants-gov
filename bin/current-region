@@ -3,7 +3,6 @@
 set -euo pipefail
 
 region=$(aws configure list | grep region | awk '{print $2}')
-region=":"
 if [ "$region" = ":" ]; then
     echo "Newer AWS CLI adds : in the region output" >&2
     # Newer AWS CLI has added : to the output of this command so if we see that in position 2, adjust
