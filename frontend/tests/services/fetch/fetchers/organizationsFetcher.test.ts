@@ -358,7 +358,7 @@ describe("removeOrganizationUser", () => {
     ).rejects.toBeInstanceOf(UnauthorizedError);
   });
 
-  it("throws a generic Error when API responds 403", async () => {
+  it("attaches status to the thrown Error when API responds 403", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
 
     fetchOrganizationMock.mockReturnValue({
@@ -368,25 +368,39 @@ describe("removeOrganizationUser", () => {
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
 
-    await expect(
-      removeOrganizationUser("org-123", "user-1"),
-    ).rejects.toThrowError(
-      "We couldn't remove this user due to an unexpected error. Please check your connection and try again.",
-    );
+    await removeOrganizationUser("org-123", "user-1").catch((error) => {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as { status?: number }).status).toBe(403);
+    });
   });
 
-  it("throws a generic Error when fetchOrganizationWithMethod throws unexpectedly", async () => {
+  [400, 403, 500].forEach((statusCode) => {
+    it(`throws an Error with status ${statusCode} for non-401 responses`, async () => {
+      mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+      fetchOrganizationMock.mockReturnValue({
+        ok: false,
+        status: statusCode,
+        json: () => ({ message: "Simulated error" }),
+      });
+      fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+      await removeOrganizationUser("org-123", "user-1").catch((error) => {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as { status?: number }).status).toBe(statusCode);
+      });
+    });
+  });
+
+  it("bubbles up unexpected errors from fetchOrganizationWithMethod", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
 
-    // Simulate network/low-level error
     fetchOrganizationWithMethodMock.mockImplementation(() => {
       throw new Error("Network error");
     });
 
     await expect(
       removeOrganizationUser("org-123", "user-1"),
-    ).rejects.toThrowError(
-      "We couldn't remove this user due to an unexpected error. Please check your connection and try again.",
-    );
+    ).rejects.toThrowError("Network error");
   });
 });

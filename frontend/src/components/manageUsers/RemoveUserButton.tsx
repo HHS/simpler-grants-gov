@@ -53,14 +53,7 @@ export function RemoveUserButton({
       router.refresh();
     } catch (error) {
       console.error("Failed to remove user", error);
-
-      const message =
-        error instanceof Error
-          ? error.message
-          : "We couldn't remove this user. Please try again.";
-      setErrorMessage(message);
-      // TODO: discuss with design
-      // Modal stays open so the error is visible
+      setErrorMessage(t("errorState"));
     } finally {
       setIsSubmitting(false);
     }

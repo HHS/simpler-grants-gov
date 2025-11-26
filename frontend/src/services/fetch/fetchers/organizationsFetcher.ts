@@ -8,6 +8,7 @@ import {
   UserDetail,
   UserRole,
 } from "src/types/userTypes";
+import { getBackendMessage } from "src/utils/apiUtils";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
@@ -189,54 +190,38 @@ export const removeOrganizationUser = async (
     throw new UnauthorizedError("No active session");
   }
 
-  try {
-    const resp = await fetchOrganizationWithMethod("DELETE")({
-      subPath: `${organizationId}/users/${userId}`,
-      additionalHeaders: { "X-SGG-TOKEN": session.token },
-    });
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
 
-    if (!resp.ok) {
-      let error: string | undefined;
+  if (!resp.ok) {
+    let backendMessage: string | undefined;
 
-      try {
-        const body: unknown = await resp.json();
+    try {
+      const body: unknown = await resp.json();
+      backendMessage = getBackendMessage(body);
+    } catch {
+      console.warn("Failed to parse error body when removing org user");
+    }
 
-        if (
-          body &&
-          typeof body === "object" &&
-          "message" in body &&
-          typeof (body as { message?: unknown }).message === "string"
-        ) {
-          error = (body as { message: string }).message;
-        }
-      } catch {
-        console.warn("Failed to parse error body when removing org user");
-      }
-
-      if (resp.status === 401) {
-        throw new UnauthorizedError(
-          error ?? "No active session for removing users.",
-        );
-      }
-
-      throw new Error(
-        error ??
-          (resp.status === 403
-            ? "You cannot remove this user. At least one admin is required for the organization."
-            : "Unable to remove this user right now. Please try again."),
+    if (resp.status === 401) {
+      throw new UnauthorizedError(
+        backendMessage ?? "No active session for removing users.",
       );
     }
 
-    const json = (await resp.json()) as { data: UserDetail };
-    return json.data;
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      throw error;
-    }
-
-    // any unexpected failure
-    throw new Error(
-      "We couldn't remove this user due to an unexpected error. Please check your connection and try again.",
+    const error = new Error(
+      `removeOrganizationUser failed with status ${resp.status}${
+        backendMessage ? `: ${backendMessage}` : ""
+      }`,
     );
+
+    (error as { status?: number }).status = resp.status;
+
+    throw error;
   }
+
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
 };

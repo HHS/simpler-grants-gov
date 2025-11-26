@@ -26,3 +26,14 @@ export const respondWithTraceAndLogs =
     logResponse(response);
     return response;
   };
+
+// Safely returns the backend's message field from a
+// parsed error response, or undefined if unavailable.
+export function getBackendMessage(body: unknown): string | undefined {
+  if (!body || typeof body !== "object") {
+    return undefined;
+  }
+
+  const maybe = body as { message?: unknown };
+  return typeof maybe.message === "string" ? maybe.message : undefined;
+}
