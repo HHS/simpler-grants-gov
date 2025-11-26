@@ -14,7 +14,7 @@ export const removeOrganizationUserHandler = async (
 
   try {
     const removedUser = await removeOrganizationUser(organizationId, userId);
-    return NextResponse.json({ data: removedUser }, { status: 200 });
+    return NextResponse.json({ data: removedUser });
   } catch (error) {
     const { status, message } = readError(error as Error, 500);
     return NextResponse.json({ message }, { status });
