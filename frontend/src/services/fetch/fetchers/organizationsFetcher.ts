@@ -170,11 +170,51 @@ export const updateOrganizationUserRoles = async (
     throw new UnauthorizedError("No active session");
   }
 
-  const resp = await fetchOrganizationWithMethod("PUT")({
-    subPath: `${organizationId}/users/${userId}`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
-    body: { role_ids: roleIds },
-  });
-  const json = (await resp.json()) as { data: UserDetail };
-  return json.data;
+  try {
+    const resp = await fetchOrganizationWithMethod("PUT")({
+      subPath: `${organizationId}/users/${userId}`,
+      additionalHeaders: { "X-SGG-TOKEN": session.token },
+      body: { role_ids: roleIds },
+    });
+
+    if (!resp.ok) {
+      let error: string | undefined;
+
+      try {
+        const body: unknown = await resp.json();
+        if (
+          body &&
+          typeof body === "object" &&
+          "message" in body &&
+          typeof (body as { message?: unknown }).message === "string"
+        ) {
+          error = (body as { message: string }).message;
+        }
+      } catch {
+        console.warn("Failed to parse error body when updating org user roles");
+      }
+
+      if (resp.status === 401) {
+        throw new UnauthorizedError(
+          error ?? "No active session for updating user roles.",
+        );
+      }
+
+      throw new Error(
+        error ??
+          "Unable to update this user's roles right now. Please try again.",
+      );
+    }
+
+    const json = (await resp.json()) as { data: UserDetail };
+    return json.data;
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      throw error;
+    }
+
+    throw new Error(
+      "We couldn't update this user's roles due to an unexpected error. Please check your connection and try again.",
+    );
+  }
 };

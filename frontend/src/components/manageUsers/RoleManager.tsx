@@ -35,6 +35,7 @@ export function RoleManager({
   const [selectedRoleId, setSelectedRoleId] = useState(currentRoleId);
   const [pendingRoleId, setPendingRoleId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { clientFetch } = useClientFetch("Unable to update user role");
 
@@ -46,6 +47,7 @@ export function RoleManager({
       : "";
 
   const openModal = () => {
+    setErrorMessage(null);
     modalRef.current?.toggleModal(undefined, true);
   };
 
@@ -64,6 +66,7 @@ export function RoleManager({
 
   const handleCancel = () => {
     setPendingRoleId(null);
+    setErrorMessage(null);
     closeModal();
   };
 
@@ -74,6 +77,7 @@ export function RoleManager({
     }
 
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
       await clientFetch(
@@ -84,13 +88,19 @@ export function RoleManager({
         },
       );
 
-      // If we got here without throwing an error,
-      // we trust the role change
       setSelectedRoleId(pendingRoleId);
       setPendingRoleId(null);
       closeModal();
     } catch (error) {
       console.error("Failed to update user role", error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "We couldn’t update this user’s role. Please try again.";
+
+      setErrorMessage(message);
+      // Modal stays open so the error is visible
     } finally {
       setIsSubmitting(false);
     }
@@ -130,6 +140,7 @@ export function RoleManager({
           });
         }}
         onCancel={handleCancel}
+        errorMessage={errorMessage}
       />
     </>
   );

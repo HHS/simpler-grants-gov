@@ -15,14 +15,20 @@ type FetchArgs = {
   body?: unknown;
 };
 
-type FetchImpl = (args: FetchArgs) => { json: () => unknown };
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => unknown;
+};
+
+type FetchImpl = (args: FetchArgs) => FetchResponse;
 
 type FetchWithMethodFn = (type: string) => FetchImpl;
 
-const fetchOrganizationMock = jest.fn<ReturnType<FetchImpl>, [FetchArgs]>();
+const fetchOrganizationMock = jest.fn<FetchResponse, [FetchArgs]>();
 const fetchOrganizationWithMethodMock = jest.fn<FetchImpl, [string]>();
 
-const fetchUserMock = jest.fn<ReturnType<FetchImpl>, [FetchArgs]>();
+const fetchUserMock = jest.fn<FetchResponse, [FetchArgs]>();
 const fetchUserWithMethodMock = jest.fn<FetchImpl, [string]>();
 
 type GetSessionFn = () => Promise<unknown>;
@@ -54,6 +60,8 @@ describe("getOrganizationDetails", () => {
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: { fake: "org" } }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -84,6 +92,8 @@ describe("getUserOrganizations", () => {
 
   it("calls fetchUserWithMethod as expected and returns json result", async () => {
     fetchUserMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "org" }] }),
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
@@ -107,6 +117,8 @@ describe("getOrganizationUsers", () => {
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "user" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -121,6 +133,31 @@ describe("getOrganizationUsers", () => {
         "X-SGG-Token": "faketoken",
       },
     });
+  });
+
+  // TODO remove once we get it presorted from BE
+  it("sorts returned users by email ascending and case-insensitive", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+    fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
+      json: () => ({
+        data: [
+          { email: "zeta@example.com" },
+          { email: "Alpha@example.com" },
+          { email: "beta@example.com" },
+        ],
+      }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    const result = await getOrganizationUsers("org-123");
+
+    expect(result).toEqual([
+      { email: "Alpha@example.com" },
+      { email: "beta@example.com" },
+      { email: "zeta@example.com" },
+    ]);
   });
 
   it("throws UnauthorizedError when session is missing or has no token", async () => {
@@ -139,6 +176,8 @@ describe("getOrganizationRoles", () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
 
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "role" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -169,6 +208,8 @@ describe("inviteUserToOrganization", () => {
 
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: { fake: "invite-record" } }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -200,6 +241,8 @@ describe("getOrganizationPendingInvitations", () => {
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "pending-invite" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -221,6 +264,30 @@ describe("getOrganizationPendingInvitations", () => {
         },
       },
     });
+  });
+
+  it("sorts returned pending invitations by invitee_email ascending and case-insensitive", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+    fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
+      json: () => ({
+        data: [
+          { invitee_email: "zeta@example.com" },
+          { invitee_email: "Alpha@example.com" },
+          { invitee_email: "beta@example.com" },
+        ],
+      }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    const result = await getOrganizationPendingInvitations("org-123");
+
+    expect(result).toEqual([
+      { invitee_email: "Alpha@example.com" },
+      { invitee_email: "beta@example.com" },
+      { invitee_email: "zeta@example.com" },
+    ]);
   });
 
   it("throws UnauthorizedError when session is missing or has no token", async () => {
