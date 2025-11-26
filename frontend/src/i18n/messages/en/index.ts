@@ -627,6 +627,7 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
+      organizations: "Organizations",
       research: "Research",
       roadmap: "Product roadmap",
       savedOpportunities: "Saved opportunities",
@@ -1463,7 +1464,7 @@ export const messages = {
         "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
     },
     organizationButtons: {
-      view: "View organization details",
+      view: "View details",
       manage: "Manage users",
     },
     linksSection: {
@@ -1538,18 +1539,26 @@ export const messages = {
   ManageUsers: {
     pageTitle: "Manage Users | Simpler.Grants.gov",
     pageHeading: "Manage Users",
-    activeUsersHeading: "Active Users",
+    activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
+    activeUsersFetchError:
+      "We have encountered an error retrieving the Active Users roster, please try again later.",
+    activeUsersTableZeroState: "There are no active users.",
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
     invitedUsersHeading: "Invited users",
     invitedUsersTableDescription:
-      "These users have been invited to join your organization but haven’t accepted yet. Once they accept, they’ll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+      "These users have been invited to join your organization but haven't accepted yet. Once they accept, the'll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
     invitedUsersFetchError:
-      "We have encountered an error retrieving the Pending Users list, please try again later.",
-    invitedUsersTableZeroState: "There are no pending users",
+      "We have encountered an error retrieving the Invited Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no invited users.",
+    roleManager: {
+      errorState: "Unable to fetch roles",
+      cancel: "Cancel",
+      changeUserRole: "Change user role",
+    },
     usersTable: {
       admin: "Administrator",
       emailHeading: "Email",
@@ -1616,5 +1625,13 @@ export const messages = {
       type: "Type",
       opportunity: "Opportunity",
     },
+  },
+  Organizations: {
+    errorMessage:
+      "We have encountered an error loading your organizations, please try again later.",
+    manageUsers: "Manage Users",
+    metaDescription: "View your organizations",
+    pageHeading: "Organizations",
+    pageTitle: "Organizations",
   },
 };

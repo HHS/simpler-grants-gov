@@ -1254,19 +1254,6 @@ class FormInstructionFactory(BaseFactory):
         return obj
 
 
-class CompetitionAssistanceListingFactory(BaseFactory):
-    class Meta:
-        model = competition_models.CompetitionAssistanceListing
-
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-
-    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
-    opportunity_assistance_listing_id = factory.LazyAttribute(
-        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
-    )
-
-
 class LinkCompetitionOpenToApplicantFactory(BaseFactory):
     class Meta:
         model = competition_models.LinkCompetitionOpenToApplicant
