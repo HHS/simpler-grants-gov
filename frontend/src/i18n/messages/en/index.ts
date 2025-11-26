@@ -627,6 +627,7 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
+      organizations: "Organizations",
       research: "Research",
       roadmap: "Product roadmap",
       savedOpportunities: "Saved opportunities",
@@ -1463,7 +1464,7 @@ export const messages = {
         "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
     },
     organizationButtons: {
-      view: "View organization details",
+      view: "View details",
       manage: "Manage users",
     },
     linksSection: {
@@ -1624,5 +1625,13 @@ export const messages = {
       type: "Type",
       opportunity: "Opportunity",
     },
+  },
+  Organizations: {
+    errorMessage:
+      "We have encountered an error loading your organizations, please try again later.",
+    manageUsers: "Manage Users",
+    metaDescription: "View your organizations",
+    pageHeading: "Organizations",
+    pageTitle: "Organizations",
   },
 };
