@@ -1795,6 +1795,61 @@ paths:
               $ref: '#/components/schemas/OrganizationCreateInvitationRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/legacy-users:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyUsersListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: List legacy users that can be invited to the organization.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacyUsersListRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
     post:
       parameters:
@@ -6885,6 +6940,148 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OrganizationInvitationResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    LegacyUserStatusFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: available
+            enum:
+            - member
+            - pending_invitation
+            - available
+            type:
+            - string
+    LegacyUserFilter:
+      type: object
+      properties:
+        status:
+          description: Filter legacy users by status
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/LegacyUserStatusFilter'
+          - type: 'null'
+    SortOrderLegacyUserPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - email
+          - first_name
+          - last_name
+          - created_date
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    LegacyUserPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: email
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderLegacyUserPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    LegacyUsersListRequest:
+      type: object
+      properties:
+        filters:
+          description: Filters to apply to the legacy user list
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/LegacyUserFilter'
+          - type: 'null'
+        pagination:
+          description: 'Pagination parameters for legacy user list (default sort:
+            email ascending)'
+          type:
+          - object
+          $ref: '#/components/schemas/LegacyUserPagination'
+      required:
+      - pagination
+    LegacyUserData:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Legacy user email address
+          example: user@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Legacy user first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Legacy user last name
+          example: Doe
+        status:
+          type: string
+          description: Status of the legacy user relative to the organization
+          example: available
+      required:
+      - email
+      - status
+    LegacyUsersListResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of legacy users
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/LegacyUserData'
         status_code:
           type: integer
           description: The HTTP status code
