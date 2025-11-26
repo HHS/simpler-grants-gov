@@ -12,6 +12,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
+import { LoadingButton } from "src/components/LoadingButton";
 
 export interface RemoveUserModalProps {
   isSubmitting: boolean;
@@ -60,25 +61,16 @@ export function RemoveUserModal({
 
       <ModalFooter>
         <ButtonGroup>
-          <Button
-            type="button"
-            onClick={onConfirm}
-            disabled={isSubmitting}
-            aria-busy={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="display-inline-flex flex-align-center">
-                <span>{t("removing")}</span>
-                <span
-                  className="margin-left-1 usa-spinner usa-spinner--small"
-                  role="status"
-                  aria-hidden
-                />
-              </span>
-            ) : (
-              t("removeUser")
-            )}
-          </Button>
+          {isSubmitting ? (
+            <LoadingButton
+              id="role-change-confirm-button"
+              message={t("removing")}
+            />
+          ) : (
+            <Button type="button" onClick={onConfirm}>
+              {t("removeUser")}
+            </Button>
+          )}
           <ModalToggleButton
             modalRef={modalRef}
             closer
