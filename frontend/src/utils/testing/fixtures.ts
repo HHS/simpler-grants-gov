@@ -2,6 +2,7 @@ import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { Organization } from "src/types/applicationResponseTypes";
+import { UserProfile } from "src/types/authTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -19,6 +20,7 @@ import {
 } from "src/types/search/searchRequestTypes";
 import {
   OrganizationInvitation,
+  TestUser,
   UserDetail,
   UserDetailWithProfile,
   UserOrganization,
@@ -695,4 +697,18 @@ export const fakeOrganizationInvitation: OrganizationInvitation = {
       privileges: ["view_org_membership", "start_application"],
     },
   ],
+};
+
+export const fakeTestUser: TestUser = {
+  first_name: "hi",
+  last_name: "there",
+  oauth_id: "id",
+  user_api_key: "key",
+  user_id: "user",
+  user_jwt: "jwt",
+};
+
+export const fakeUserProfile: UserProfile = {
+  token: "a token",
+  user_id: "an id",
 };

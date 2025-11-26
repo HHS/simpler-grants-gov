@@ -6,6 +6,7 @@ import {
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
@@ -132,3 +133,5 @@ export const searchAgencies = requesterForEndpoint(searchAgenciesEndpoint);
 export const fetchOrganizationWithMethod = (
   type: "POST" | "DELETE" | "PUT" | "GET",
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
+
+export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);

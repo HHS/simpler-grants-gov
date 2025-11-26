@@ -638,6 +638,7 @@ export const messages = {
       wiki: "Public wiki",
       workspace: "Workspace",
       account: "My account",
+      testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
