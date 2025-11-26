@@ -8,7 +8,7 @@ import {
   UserDetail,
   UserRole,
 } from "src/types/userTypes";
-import { getBackendMessage } from "src/utils/apiUtils";
+import { throwOnApiError } from "src/utils/apiUtils";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
@@ -178,30 +178,36 @@ export const updateOrganizationUserRoles = async (
   });
 
   if (!resp.ok) {
-    let backendMessage: string | undefined;
+    await throwOnApiError(resp, {
+      operationName: "updateOrganizationUserRoles",
+      unauthorizedMessage: "No active session for updating user roles.",
+    });
+  }
 
-    try {
-      const body: unknown = await resp.json();
-      backendMessage = getBackendMessage(body);
-    } catch {
-      console.warn("Failed to parse error body when updating org user roles");
-    }
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
 
-    if (resp.status === 401) {
-      throw new UnauthorizedError(
-        backendMessage ?? "No active session for updating user roles.",
-      );
-    }
+export const removeOrganizationUser = async (
+  organizationId: string,
+  userId: string,
+): Promise<UserDetail> => {
+  const session = await getSession();
 
-    const error = new Error(
-      `updateOrganizationUserRoles failed with status ${resp.status}${
-        backendMessage ? `: ${backendMessage}` : ""
-      }`,
-    );
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
 
-    (error as { status?: number }).status = resp.status;
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
 
-    throw error;
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "removeOrganizationUser",
+      unauthorizedMessage: "No active session for removing users.",
+    });
   }
 
   const json = (await resp.json()) as { data: UserDetail };

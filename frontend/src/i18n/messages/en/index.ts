@@ -1560,7 +1560,17 @@ export const messages = {
       cancel: "Cancel",
       changeUserRole: "Change user role",
     },
+    removeUserModal: {
+      header: "Are you sure you want to remove this user?",
+      description:
+        "Removing them will revoke their access and may impact any work they have not yet submitted. If they need access again, an administrator will have to add them back.",
+      errorState: "We couldn't remove this user. Please try again.",
+      cancel: "Cancel",
+      removeUser: "Remove User",
+      removing: "Removing...",
+    },
     usersTable: {
+      actionsHeading: "Actions",
       admin: "Administrator",
       emailHeading: "Email",
       member: "Member",

@@ -6,6 +6,8 @@ import {
   getOrganizationUsers,
   getUserOrganizations,
   inviteUserToOrganization,
+  removeOrganizationUser,
+  updateOrganizationUserRoles,
 } from "src/services/fetch/fetchers/organizationsFetcher";
 import { OrganizationInvitationStatus } from "src/types/userTypes";
 
@@ -135,7 +137,6 @@ describe("getOrganizationUsers", () => {
     });
   });
 
-  // TODO remove once we get it presorted from BE
   it("sorts returned users by email ascending and case-insensitive", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
@@ -296,5 +297,110 @@ describe("getOrganizationPendingInvitations", () => {
     await expect(
       getOrganizationPendingInvitations("org-123"),
     ).rejects.toBeInstanceOf(UnauthorizedError);
+  });
+});
+
+describe("updateOrganizationUserRoles", () => {
+  afterEach(() => jest.resetAllMocks());
+
+  it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+    fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
+      json: () => ({ data: { fake: "updated-user" } }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    const result = await updateOrganizationUserRoles("org-123", "user-1", [
+      "role-1",
+      "role-2",
+    ]);
+
+    expect(result).toEqual({ fake: "updated-user" });
+    expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("PUT");
+    expect(fetchOrganizationMock).toHaveBeenCalledWith({
+      subPath: "org-123/users/user-1",
+      additionalHeaders: {
+        "X-SGG-TOKEN": "faketoken",
+      },
+      body: {
+        role_ids: ["role-1", "role-2"],
+      },
+    });
+  });
+
+  it("throws UnauthorizedError when session is missing or has no token", async () => {
+    mockGetSession.mockResolvedValue(null);
+
+    await expect(
+      updateOrganizationUserRoles("org-123", "user-1", ["role-1"]),
+    ).rejects.toBeInstanceOf(UnauthorizedError);
+  });
+});
+
+describe("removeOrganizationUser", () => {
+  afterEach(() => jest.resetAllMocks());
+
+  it("throws UnauthorizedError when API responds 401", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+    fetchOrganizationMock.mockReturnValue({
+      ok: false,
+      status: 401,
+      json: () => ({ message: "No active session for removing users." }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    await expect(
+      removeOrganizationUser("org-123", "user-1"),
+    ).rejects.toBeInstanceOf(UnauthorizedError);
+  });
+
+  it("attaches status to the thrown Error when API responds 403", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+    fetchOrganizationMock.mockReturnValue({
+      ok: false,
+      status: 403,
+      json: () => ({ message: "You cannot remove this user (simulated)." }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    await removeOrganizationUser("org-123", "user-1").catch((error) => {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as { status?: number }).status).toBe(403);
+    });
+  });
+
+  [400, 403, 500].forEach((statusCode) => {
+    it(`throws an Error with status ${statusCode} for non-401 responses`, async () => {
+      mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+      fetchOrganizationMock.mockReturnValue({
+        ok: false,
+        status: statusCode,
+        json: () => ({ message: "Simulated error" }),
+      });
+      fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+      await removeOrganizationUser("org-123", "user-1").catch((error) => {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as { status?: number }).status).toBe(statusCode);
+      });
+    });
+  });
+
+  it("bubbles up unexpected errors from fetchOrganizationWithMethod", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+    fetchOrganizationWithMethodMock.mockImplementation(() => {
+      throw new Error("Network error");
+    });
+
+    await expect(
+      removeOrganizationUser("org-123", "user-1"),
+    ).rejects.toThrowError("Network error");
   });
 });
