@@ -1,7 +1,7 @@
+import { UnauthorizedError } from "src/errors";
 import { logResponse } from "src/services/logger/simplerLogger";
 
 import { NextRequest } from "next/server";
-import { UnauthorizedError } from "src/errors";
 
 const AWSTraceIDHeader = "X-Amz-Cf-Id";
 
@@ -47,7 +47,9 @@ export function getBackendErrorMessage(body: unknown): string | undefined {
   }
 
   const typedErrorBody = body as { message?: unknown };
-  return typeof typedErrorBody.message === "string" ? typedErrorBody.message : undefined;
+  return typeof typedErrorBody.message === "string"
+    ? typedErrorBody.message
+    : undefined;
 }
 
 export async function throwOnApiError(
