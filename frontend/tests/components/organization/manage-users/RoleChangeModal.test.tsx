@@ -67,9 +67,7 @@ jest.mock("@trussworks/react-uswds", () => {
 
   const Alert = ({ children, ...rest }: AlertProps) => {
     const testId =
-      typeof rest["data-testid"] === "string"
-        ? (rest["data-testid"])
-        : "alert";
+      typeof rest["data-testid"] === "string" ? rest["data-testid"] : "alert";
     return (
       <div data-testid={testId} {...rest}>
         {children}
