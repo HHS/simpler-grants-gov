@@ -87,7 +87,7 @@ export const InformationCard = ({
 
   const ApplicationInstructionsDownload = () => {
     return (
-      <div className="margin-top-4">
+      <div className="margin-top-5">
         <dt className="usa-sr-only">
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
