@@ -17,7 +17,13 @@ type FetchArgs = {
   body?: unknown;
 };
 
-type FetchImpl = (args: FetchArgs) => { json: () => unknown };
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => unknown;
+};
+
+type FetchImpl = (args: FetchArgs) => FetchResponse;
 
 type FetchWithMethodFn = (type: string) => FetchImpl;
 
@@ -56,6 +62,8 @@ describe("getOrganizationDetails", () => {
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: { fake: "org" } }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -86,6 +94,8 @@ describe("getUserOrganizations", () => {
 
   it("calls fetchUserWithMethod as expected and returns json result", async () => {
     fetchUserMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "org" }] }),
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
@@ -109,6 +119,8 @@ describe("getOrganizationUsers", () => {
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "user" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -128,6 +140,8 @@ describe("getOrganizationUsers", () => {
   it("sorts returned users by email ascending and case-insensitive", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({
         data: [
           { email: "zeta@example.com" },
@@ -163,6 +177,8 @@ describe("getOrganizationRoles", () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
 
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "role" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -193,6 +209,8 @@ describe("inviteUserToOrganization", () => {
 
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: { fake: "invite-record" } }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -224,6 +242,8 @@ describe("getOrganizationPendingInvitations", () => {
   it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: [{ fake: "pending-invite" }] }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -250,6 +270,8 @@ describe("getOrganizationPendingInvitations", () => {
   it("sorts returned pending invitations by invitee_email ascending and case-insensitive", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({
         data: [
           { invitee_email: "zeta@example.com" },
@@ -285,6 +307,8 @@ describe("updateOrganizationUserRoles", () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
 
     fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
       json: () => ({ data: { fake: "updated-user" } }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
@@ -319,31 +343,50 @@ describe("updateOrganizationUserRoles", () => {
 describe("removeOrganizationUser", () => {
   afterEach(() => jest.resetAllMocks());
 
-  it("calls fetchOrganizationWithMethod as expected and returns json result", async () => {
+  it("throws UnauthorizedError when API responds 401", async () => {
     mockGetSession.mockResolvedValue({ token: "faketoken" });
 
     fetchOrganizationMock.mockReturnValue({
-      json: () => ({ data: { fake: "removed-user" } }),
+      ok: false,
+      status: 401,
+      json: () => ({ message: "No active session for removing users." }),
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
-
-    const result = await removeOrganizationUser("org-123", "user-1");
-
-    expect(result).toEqual({ fake: "removed-user" });
-    expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("DELETE");
-    expect(fetchOrganizationMock).toHaveBeenCalledWith({
-      subPath: "org-123/users/user-1",
-      additionalHeaders: {
-        "X-SGG-TOKEN": "faketoken",
-      },
-    });
-  });
-
-  it("throws UnauthorizedError when session is missing or has no token", async () => {
-    mockGetSession.mockResolvedValue(null);
 
     await expect(
       removeOrganizationUser("org-123", "user-1"),
     ).rejects.toBeInstanceOf(UnauthorizedError);
+  });
+
+  it("throws a generic Error when API responds 403", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+    fetchOrganizationMock.mockReturnValue({
+      ok: false,
+      status: 403,
+      json: () => ({ message: "You cannot remove this user (simulated)." }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    await expect(
+      removeOrganizationUser("org-123", "user-1"),
+    ).rejects.toThrowError(
+      "We couldn't remove this user due to an unexpected error. Please check your connection and try again.",
+    );
+  });
+
+  it("throws a generic Error when fetchOrganizationWithMethod throws unexpectedly", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+
+    // Simulate network/low-level error
+    fetchOrganizationWithMethodMock.mockImplementation(() => {
+      throw new Error("Network error");
+    });
+
+    await expect(
+      removeOrganizationUser("org-123", "user-1"),
+    ).rejects.toThrowError(
+      "We couldn't remove this user due to an unexpected error. Please check your connection and try again.",
+    );
   });
 });

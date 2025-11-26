@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import React, { RefObject } from "react";
 import {
+  Alert,
   Button,
   ButtonGroup,
   ModalFooter,
@@ -18,6 +19,7 @@ export interface RemoveUserModalProps {
   userName: string;
   onConfirm: () => void;
   onCancel: () => void;
+  errorMessage?: string | null;
 }
 
 export function RemoveUserModal({
@@ -26,6 +28,7 @@ export function RemoveUserModal({
   userName,
   onConfirm,
   onCancel,
+  errorMessage,
 }: RemoveUserModalProps) {
   const t = useTranslations("ManageUsers.removeUserModal");
   const modalTitle = t("header");
@@ -39,6 +42,22 @@ export function RemoveUserModal({
       className="text-wrap"
     >
       <p className="font-sans-2xs margin-y-4">{modalDescription}</p>
+
+      {errorMessage && (
+        <div className="margin-bottom-2">
+          <Alert
+            slim
+            type="error"
+            noIcon
+            headingLevel="h6"
+            role="alert"
+            data-testid="remove-user-error"
+          >
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+
       <ModalFooter>
         <ButtonGroup>
           <Button
