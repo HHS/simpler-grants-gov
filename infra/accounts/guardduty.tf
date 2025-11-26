@@ -4,7 +4,8 @@
 
 # Import existing GuardDuty detector
 # To import: terraform import aws_guardduty_detector.main 94c62cc0d4fe7b2eb627a33e8273238c
-resource "aws_guardduty_detector" "main" { #checkov:skip=CKV2_AWS_3:Member account in AWS Organization - org-level GuardDuty managed by administrator account 215331682793
+resource "aws_guardduty_detector" "main" {
+  #checkov:skip=CKV2_AWS_3:Member account in AWS Organization - org-level GuardDuty managed by administrator account 215331682793
   enable                       = true
   finding_publishing_frequency = "SIX_HOURS"
 
