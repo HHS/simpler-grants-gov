@@ -37,7 +37,7 @@ export function RoleManager({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { clientFetch } = useClientFetch("Unable to update user role");
+  const { clientFetch } = useClientFetch(t("errorState"));
 
   const modalRef = useRef<ModalRef | null>(null);
 
@@ -93,14 +93,7 @@ export function RoleManager({
       closeModal();
     } catch (error) {
       console.error("Failed to update user role", error);
-
-      const message =
-        error instanceof Error
-          ? error.message
-          : "We couldn’t update this user’s role. Please try again.";
-
-      setErrorMessage(message);
-      // Modal stays open so the error is visible
+      setErrorMessage(t("errorState"));
     } finally {
       setIsSubmitting(false);
     }

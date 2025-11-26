@@ -181,6 +181,9 @@ describe("RoleManager", () => {
       expect(clientFetchMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(lastModalProps.errorMessage).toBe("Server said no");
+    // frontend - message
+    expect(lastModalProps.errorMessage).toBe("errorState");
+    // backend message - should not be surfaced
+    expect(lastModalProps.errorMessage).not.toBe("Server said no");
   });
 });
