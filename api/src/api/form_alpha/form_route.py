@@ -105,7 +105,6 @@ def form_instruction_upsert(
             db_session.add(user)
             verify_access(user, {Privilege.UPDATE_FORM}, None)
 
-        from src.services.form_alpha.upsert_form_instruction import upsert_form_instruction
 
         upsert_form_instruction(db_session, form_id, form_instruction_id, file_obj)
 
