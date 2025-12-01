@@ -497,12 +497,6 @@ FORM_RULE_SCHEMA = {
     },
 }
 
-# NOTE: This is an initial implementation that provides the basic structure for XML generation.
-# Some complex structures require further refinement once we have example legacy XML to validate against:
-#
-# TODO:
-# - Validate XML output against actual legacy Grants.gov XML examples
-#
 FORM_XML_TRANSFORM_RULES = {
     # Metadata
     "_xml_config": {
