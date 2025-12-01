@@ -3,27 +3,29 @@
 import logging
 from typing import Any
 
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_RULES
+from src.form_schema.forms import get_active_forms
 
 logger = logging.getLogger(__name__)
+
+
+def _build_xml_form_map() -> dict[str, dict[str, Any]]:
+    """Build a dynamic map of form names to their XML transformation rules."""
+    xml_form_map: dict[str, dict[str, Any]] = {}
+    for form in get_active_forms():
+        if form.json_to_xml_schema is not None:
+            xml_form_map[form.short_form_name] = form.json_to_xml_schema
+    return xml_form_map
 
 
 def load_xml_transform_config(form_name: str) -> dict[str, Any]:
     """Load XML transformation rules for a given form."""
     try:
+        xml_form_map = _build_xml_form_map()
         form_name_upper = form_name.upper()
 
-        if form_name_upper == "SF424_4_0":
+        if form_name_upper in xml_form_map:
             logger.info(f"Loaded transformation config for {form_name}")
-            return SF424_RULES
-        elif form_name_upper == "SF424A":
-            logger.info(f"Loaded transformation config for {form_name}")
-            return SF424A_RULES
-        elif form_name_upper == "SFLLL_2_0":
-            logger.info(f"Loaded transformation config for {form_name}")
-            return SFLLL_RULES
+            return xml_form_map[form_name_upper]
         else:
             logger.warning(f"No transformation config found for {form_name}")
             return {}
