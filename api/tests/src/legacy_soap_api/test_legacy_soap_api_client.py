@@ -9,6 +9,7 @@ from apiflask import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import update
 
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import AgencyUser, LegacyCertificate
@@ -23,11 +24,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import (
-    ENDPOINT_PRIVILEGES,
-    SimplerSoapAPI,
-    SOAPOperationConfig,
-)
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
@@ -381,7 +378,7 @@ class TestSimplerSOAPGetApplicationZip:
     ):
         agency = AgencyFactory.create()
         user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
-            agency, ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         submission = ApplicationSubmissionFactory.create()
         application_user = ApplicationUserFactory.create(
@@ -451,7 +448,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         agency = AgencyFactory.create()
-        wrong_privileges = ENDPOINT_PRIVILEGES["GetSubmissionListExpandedRequest"]
+        wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
         user, legacy_certificate, _, soap_client_certificate = setup_cert_user(
             agency, wrong_privileges
         )
@@ -476,7 +473,7 @@ class TestSimplerSOAPGetApplicationZip:
         submission = ApplicationSubmissionFactory.create()
         agency = AgencyFactory()
         user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
-            agency, ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         application_user = ApplicationUserFactory.create(
             application=submission.application, user=user
