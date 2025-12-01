@@ -40,7 +40,6 @@ def upsert_form_instruction(
         form_instruction = FormInstruction(
             form_instruction_id=form_instruction_id,
             file_name=file_util.get_file_name(file_obj.filename),
-            file_location="",  # Will be set below
         )
         db_session.add(form_instruction)
 
