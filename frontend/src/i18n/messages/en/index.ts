@@ -1556,7 +1556,8 @@ export const messages = {
       "We have encountered an error retrieving the Invited Users list, please try again later.",
     invitedUsersTableZeroState: "There are no invited users.",
     roleManager: {
-      errorState: "Unable to fetch roles",
+      errorState:
+        "We were unable to make the change requested at this time. Please try again.",
       cancel: "Cancel",
       changeUserRole: "Change user role",
     },
