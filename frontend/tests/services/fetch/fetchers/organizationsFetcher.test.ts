@@ -27,10 +27,10 @@ type FetchImpl = (args: FetchArgs) => FetchResponse;
 
 type FetchWithMethodFn = (type: string) => FetchImpl;
 
-const fetchOrganizationMock = jest.fn<ReturnType<FetchImpl>, [FetchArgs]>();
+const fetchOrganizationMock = jest.fn<FetchResponse, [FetchArgs]>();
 const fetchOrganizationWithMethodMock = jest.fn<FetchImpl, [string]>();
 
-const fetchUserMock = jest.fn<ReturnType<FetchImpl>, [FetchArgs]>();
+const fetchUserMock = jest.fn<FetchResponse, [FetchArgs]>();
 const fetchUserWithMethodMock = jest.fn<FetchImpl, [string]>();
 
 type GetSessionFn = () => Promise<unknown>;

@@ -153,4 +153,37 @@ describe("RoleManager", () => {
 
     expect((select as HTMLSelectElement).value).toBe("role-2");
   });
+
+  it("sets errorMessage on the modal when clientFetch rejects", async () => {
+    clientFetchMock.mockRejectedValueOnce(new Error("Server said no"));
+
+    render(
+      <RoleManager
+        organizationId={organizationId}
+        userId={userId}
+        currentRoleId="role-1"
+        roleOptions={roleOptions}
+      />,
+    );
+
+    const select = screen.getByTestId("Select");
+
+    fireEvent.change(select, { target: { value: "role-2" } });
+
+    expect(lastModalProps).not.toBeNull();
+    if (!lastModalProps) {
+      throw new Error("Modal props not set");
+    }
+
+    lastModalProps.onConfirm();
+
+    await waitFor(() => {
+      expect(clientFetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    // frontend - message
+    expect(lastModalProps.errorMessage).toBe("errorState");
+    // backend message - should not be surfaced
+    expect(lastModalProps.errorMessage).not.toBe("Server said no");
+  });
 });
