@@ -65,8 +65,8 @@ class Competition(ApiSchemaTable, TimestampMixin):
         uselist=False
     )
 
-    link_competition_open_to_applicant: Mapped[list[LinkCompetitionOpenToApplicant]] = (
-        relationship(back_populates="competition", uselist=True, cascade="all, delete-orphan")
+    link_competition_open_to_applicant: Mapped[list[LinkCompetitionOpenToApplicant]] = relationship(
+        back_populates="competition", uselist=True, cascade="all, delete-orphan"
     )
     open_to_applicants: AssociationProxy[set[CompetitionOpenToApplicant]] = association_proxy(
         "link_competition_open_to_applicant",

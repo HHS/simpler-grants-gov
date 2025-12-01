@@ -85,8 +85,8 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    all_opportunity_notification_logs: Mapped[list[UserOpportunityNotificationLog]] = (
-        relationship(back_populates="opportunity", uselist=True, cascade="all, delete-orphan")
+    all_opportunity_notification_logs: Mapped[list[UserOpportunityNotificationLog]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
     saved_opportunities_by_users: Mapped[list[UserSavedOpportunity]] = relationship(
@@ -234,10 +234,8 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     agency_code: Mapped[str | None]
     agency_name: Mapped[str | None]
 
-    link_funding_instruments: Mapped[list[LinkOpportunitySummaryFundingInstrument]] = (
-        relationship(
-            back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
-        )
+    link_funding_instruments: Mapped[list[LinkOpportunitySummaryFundingInstrument]] = relationship(
+        back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
     link_funding_categories: Mapped[list[LinkOpportunitySummaryFundingCategory]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
