@@ -13,11 +13,6 @@ resource "aws_guardduty_detector" "main" {
     s3_logs {
       enable = true
     }
-    kubernetes {
-      audit_logs {
-        enable = true
-      }
-    }
     malware_protection {
       scan_ec2_instance_with_findings {
         ebs_volumes {
@@ -28,21 +23,8 @@ resource "aws_guardduty_detector" "main" {
   }
 }
 
-# GuardDuty.7: Enable EKS Runtime Monitoring
-# This enables GuardDuty to monitor EKS runtime activity
-resource "aws_guardduty_detector_feature" "eks_runtime_monitoring" {
-  detector_id = aws_guardduty_detector.main.id
-  name        = "EKS_RUNTIME_MONITORING"
-  status      = "ENABLED"
-
-  additional_configuration {
-    name   = "EKS_ADDON_MANAGEMENT"
-    status = "ENABLED"
-  }
-}
-
 # GuardDuty.11: Enable Runtime Monitoring
-# This enables GuardDuty to monitor ECS Fargate, EKS, and EC2 runtime activity
+# This enables GuardDuty to monitor ECS Fargate and EC2 runtime activity
 resource "aws_guardduty_detector_feature" "runtime_monitoring" {
   detector_id = aws_guardduty_detector.main.id
   name        = "RUNTIME_MONITORING"
@@ -50,11 +32,6 @@ resource "aws_guardduty_detector_feature" "runtime_monitoring" {
 
   additional_configuration {
     name   = "ECS_FARGATE_AGENT_MANAGEMENT"
-    status = "ENABLED"
-  }
-
-  additional_configuration {
-    name   = "EKS_ADDON_MANAGEMENT"
     status = "ENABLED"
   }
 
