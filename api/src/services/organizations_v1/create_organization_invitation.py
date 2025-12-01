@@ -44,7 +44,7 @@ def _send_invitation_email(
         invitee_email: Email address of the invitee
     """
     config = get_email_config()
-    subject, content = build_invitation_email(invitation, organization)
+    subject, content = build_invitation_email(invitation, organization, config)
 
     # Generate a trace ID for correlating logs with Pinpoint email delivery
     trace_id = str(uuid4())

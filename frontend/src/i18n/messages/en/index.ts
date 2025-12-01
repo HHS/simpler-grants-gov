@@ -627,6 +627,7 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
+      organizations: "Organizations",
       research: "Research",
       roadmap: "Product roadmap",
       savedOpportunities: "Saved opportunities",
@@ -637,6 +638,7 @@ export const messages = {
       wiki: "Public wiki",
       workspace: "Workspace",
       account: "My account",
+      testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -1463,7 +1465,7 @@ export const messages = {
         "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
     },
     organizationButtons: {
-      view: "View organization details",
+      view: "View details",
       manage: "Manage users",
     },
     linksSection: {
@@ -1558,7 +1560,17 @@ export const messages = {
       cancel: "Cancel",
       changeUserRole: "Change user role",
     },
+    removeUserModal: {
+      header: "Are you sure you want to remove this user?",
+      description:
+        "Removing them will revoke their access and may impact any work they have not yet submitted. If they need access again, an administrator will have to add them back.",
+      errorState: "We couldn't remove this user. Please try again.",
+      cancel: "Cancel",
+      removeUser: "Remove User",
+      removing: "Removing...",
+    },
     usersTable: {
+      actionsHeading: "Actions",
       admin: "Administrator",
       emailHeading: "Email",
       member: "Member",
@@ -1624,5 +1636,13 @@ export const messages = {
       type: "Type",
       opportunity: "Opportunity",
     },
+  },
+  Organizations: {
+    errorMessage:
+      "We have encountered an error loading your organizations, please try again later.",
+    manageUsers: "Manage Users",
+    metaDescription: "View your organizations",
+    pageHeading: "Organizations",
+    pageTitle: "Organizations",
   },
 };

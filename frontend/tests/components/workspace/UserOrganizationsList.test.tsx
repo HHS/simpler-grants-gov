@@ -67,35 +67,69 @@ describe("UserOrganizationsList", () => {
     expect(listItems[0].textContent).toBeTruthy();
   });
 
-  it("renders an organization item for each provided organization with role, name and link", () => {
-    render(
-      <UserOrganizationsList
-        userOrganizations={[
-          fakeOrganizationDetailsResponse,
-          makeOrg("another", "another fake org"),
-        ]}
-        userRoles={fakeUserPrivilegesResponse}
-      />,
-    );
+  describe("renders an organization item for each provided organization with role, name and link", () => {
+    it("should have two items", () => {
+      render(
+        <UserOrganizationsList
+          userOrganizations={[
+            makeOrg("1", "fake org where I am an admin"),
+            makeOrg("4", "fake org where I am a member"),
+          ]}
+          userRoles={fakeUserPrivilegesResponse}
+        />,
+      );
+      const listItems = screen.getAllByRole("listitem");
+      expect(listItems).toHaveLength(2);
+    });
 
-    const listItems = screen.getAllByRole("listitem");
-    expect(listItems).toHaveLength(2);
+    it("first org is admin, has appropriate title and two buttons", () => {
+      render(
+        <UserOrganizationsList
+          userOrganizations={[
+            makeOrg("1", "fake org where I am an admin"),
+            makeOrg("4", "fake org where I am a member"),
+          ]}
+          userRoles={fakeUserPrivilegesResponse}
+        />,
+      );
+      const listItems = screen.getAllByRole("listitem");
+      const firstItem = listItems[0];
 
-    // Check name and role for first item
-    expect(
-      within(listItems[0]).getByText(
-        fakeOrganizationDetailsResponse.sam_gov_entity.legal_business_name,
-      ),
-    ).toBeInTheDocument();
-    expect(within(listItems[0]).getByText("Admin")).toBeInTheDocument();
+      // Check name and role for first item
+      expect(
+        within(firstItem).getByText("fake org where I am an admin"),
+      ).toBeInTheDocument();
+      expect(within(firstItem).getByText("Admin")).toBeInTheDocument();
 
-    // Link should point to organization page
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(2);
-    expect(links[0]).toHaveAttribute(
-      "href",
-      `/organization/${fakeOrganizationDetailsResponse.organization_id}`,
-    );
-    expect(links[1]).toHaveAttribute("href", "/organization/another");
+      // check it has both buttons
+      const links = within(firstItem).getAllByRole("link");
+      expect(links).toHaveLength(2);
+      expect(links[0]).toHaveAttribute("href", "/organization/1");
+      expect(links[1]).toHaveAttribute("href", "/organization/1/manage-users");
+    });
+
+    it("second org is member, should only have view details button", () => {
+      render(
+        <UserOrganizationsList
+          userOrganizations={[
+            makeOrg("1", "fake org where I am an admin"),
+            makeOrg("4", "fake org where I am a member"),
+          ]}
+          userRoles={fakeUserPrivilegesResponse}
+        />,
+      );
+      const listItems = screen.getAllByRole("listitem");
+      const secondItem = listItems[1];
+
+      // Check name for second item (role is mocked above so it will come back incorrect)
+      expect(
+        within(secondItem).getByText("fake org where I am a member"),
+      ).toBeInTheDocument();
+
+      // check it has only the view details buttons
+      const links = within(secondItem).getAllByRole("link");
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAttribute("href", "/organization/4");
+    });
   });
 });

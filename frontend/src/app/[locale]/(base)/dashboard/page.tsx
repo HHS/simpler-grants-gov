@@ -77,10 +77,13 @@ async function ActivityDashboard() {
       )}
       <ActivityDashboardLinksSection />
       {userRoles && userOrganizations ? (
-        <UserOrganizationsList
-          userOrganizations={userOrganizations}
-          userRoles={userRoles}
-        />
+        <div className="margin-top-4">
+          <h2>{t("organizations")}</h2>
+          <UserOrganizationsList
+            userOrganizations={userOrganizations}
+            userRoles={userRoles}
+          />
+        </div>
       ) : (
         <ErrorMessage>{t("fetchError")}</ErrorMessage>
       )}
