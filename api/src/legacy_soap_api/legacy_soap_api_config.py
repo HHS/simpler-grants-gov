@@ -77,12 +77,12 @@ class SOAPOperationConfig:
     is_mtom: bool = False
     always_call_simpler: bool = False
 
-    # ENDPOINT_PRIVILEGES:
-    # GetSubmissionListExpandedRequest={Privilege.LEGACY_AGENCY_VIEWER},
-    # GetApplicationRequest={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
-    # GetApplicationZipRequest={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
-    # ConfirmApplicationDeliveryRequest={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
-    # UpdateApplicationInfoReqest={Privilege.LEGACY_AGENCY_ASSIGNER},
+    # These are the privileges needed for these endpoints:
+    # GetSubmissionListExpandedRequest = {Privilege.LEGACY_AGENCY_VIEWER}
+    # GetApplicationRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    # GetApplicationZipRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    # ConfirmApplicationDeliveryRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    # UpdateApplicationInfoReqest = {Privilege.LEGACY_AGENCY_ASSIGNER}
     privileges: set[Privilege] | None = None
 
     # Some SOAP XML payloads will not force a list of objects when converting to
