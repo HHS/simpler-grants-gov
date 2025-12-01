@@ -96,6 +96,7 @@ FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
         LookupStr(FundingCategory.TRANSPORTATION, 24),
         LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
         LookupStr(FundingCategory.OTHER, 26),
+        LookupStr(FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS, 27),
     ]
 )
 
