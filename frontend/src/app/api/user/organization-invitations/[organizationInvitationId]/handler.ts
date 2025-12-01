@@ -15,7 +15,7 @@ export const updateOrganizationInvitation = async (
     try {
       const requestBody = (await request.json()) as { accepted: boolean };
       const invitationResponse = await fetchUserWithMethod("POST")({
-        subPath: `${currentSession.user_id}/invitations/${organizationInvitationId}`,
+        subPath: `${currentSession.user_id}/invitations/${organizationInvitationId}/organizations`,
         additionalHeaders: {
           "X-SGG-TOKEN": currentSession.token,
         },
