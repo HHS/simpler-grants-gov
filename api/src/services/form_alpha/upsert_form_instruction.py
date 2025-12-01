@@ -28,7 +28,6 @@ def upsert_form_instruction(
     if file_obj.filename is None:
         logger.info(
             "Invalid file name, cannot parse",
-            extra={"submission_issue": SubmissionIssue.INVALID_FILE_NAME},
         )
         raise_flask_error(422, "Invalid file name, cannot parse")
 
