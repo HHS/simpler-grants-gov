@@ -1,13 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserDetail } from "src/types/userTypes";
-
-import React, { JSX } from "react";
-
 import {
   checkFeatureFlagRedirect,
   getFeatureFlagMockedPage,
-} from "../../utils/featureFlagUtils";
+} from "tests/utils/featureFlagUtils";
+
+import React from "react";
 
 jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,

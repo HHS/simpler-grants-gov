@@ -43,19 +43,19 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-let userAdminOffFlag = jest.fn().mockReturnValue(true);
+const userAdminOffFlag = jest.fn().mockReturnValue(true);
 
 const mockCheckFeatureFlag = jest.fn().mockImplementation((flagName) => {
   if (flagName === "userAdminOff") {
-    return userAdminOffFlag();
-  } else {
-    return true;
+    return userAdminOffFlag() as boolean;
   }
+  return true;
 });
 
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => ({
-    checkFeatureFlag: (flagName: string) => mockCheckFeatureFlag(flagName),
+    checkFeatureFlag: (flagName: string) =>
+      mockCheckFeatureFlag(flagName) as boolean,
   }),
 }));
 

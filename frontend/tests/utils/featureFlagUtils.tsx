@@ -1,10 +1,11 @@
-import React, { JSX } from "react";
+import { JSX } from "react";
 
 import "@testing-library/jest-dom";
 
 type Params = { locale: string };
 type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
 type WithFeatureFlagArgs = [unknown, string, () => void];
+type ModuleWithDefault = { default: PageFn };
 
 // mock the feature flag module
 jest.mock("src/services/featureFlags/withFeatureFlag");
@@ -29,7 +30,7 @@ export const getFeatureFlagMockedPage = async (pageLocation: string) => {
       wrappedComponent,
   );
 
-  const pageModule = await import(pageLocation);
+  const pageModule = await (import(pageLocation) as Promise<ModuleWithDefault>);
   const Page = pageModule.default as unknown as PageFn;
 
   const params: Promise<Params> = Promise.resolve({ locale: "en" });
@@ -64,7 +65,7 @@ export const checkFeatureFlagRedirect = async (
   >;
 
   // Importing the page calls the withFeatureFlag(...)
-  const pageModule = await import(pageLocation);
+  const pageModule = await (import(pageLocation) as Promise<ModuleWithDefault>);
   const Page = pageModule.default as unknown as PageFn;
 
   expect(typeof Page).toBe("function");
