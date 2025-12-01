@@ -7,6 +7,12 @@ from pathlib import Path
 
 import click
 
+from src.form_schema.forms.budget_narrative_attachment import (
+    FORM_XML_TRANSFORM_RULES as BUDGET_NARRATIVE_TRANSFORM_RULES,
+)
+from src.form_schema.forms.project_narrative_attachment import (
+    FORM_XML_TRANSFORM_RULES as PROJECT_NARRATIVE_TRANSFORM_RULES,
+)
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
@@ -23,6 +29,8 @@ from src.task.task_blueprint import task_blueprint
 FORM_TRANSFORM_RULES_MAP = {
     "SF424_4_0": SF424_TRANSFORM_RULES,
     "SF424A": SF424A_TRANSFORM_RULES,
+    "ProjectNarrativeAttachments_1_2": PROJECT_NARRATIVE_TRANSFORM_RULES,
+    "BudgetNarrativeAttachments_1_2": BUDGET_NARRATIVE_TRANSFORM_RULES,
 }
 
 
@@ -72,6 +80,12 @@ def generate_xml_command(
 
         # Generate SF-424A from file
         flask task generate-xml --file input.json --form SF424A
+
+        # Generate Project Narrative Attachments XML
+        flask task generate-xml --file input.json --form ProjectNarrativeAttachments_1_2
+
+        # Generate Budget Narrative Attachments XML
+        flask task generate-xml --file input.json --form BudgetNarrativeAttachments_1_2
 
         # Generate compact XML and save to file
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml
