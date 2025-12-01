@@ -1,20 +1,13 @@
 import io
 import uuid
-from unittest.mock import MagicMock, patch
 
 import pytest
 from werkzeug.datastructures import FileStorage
 
 import src.adapters.db as db
-from src.constants.lookup_constants import Privilege
+import src.util.file_util as file_util
 from src.db.models.competition_models import FormInstruction
-from tests.src.db.models.factories import (
-    FormFactory,
-    FormInstructionFactory,
-    InternalUserRoleFactory,
-    UserApiKeyFactory,
-    UserFactory,
-)
+from tests.src.db.models.factories import FormFactory, FormInstructionFactory
 
 
 @pytest.fixture
@@ -27,85 +20,83 @@ def form_instruction_file():
 
 
 def test_form_instruction_upsert_create_new(
-    client, db_session: db.Session, form_instruction_file, enable_factory_create
+    client,
+    db_session: db.Session,
+    form_instruction_file,
+    enable_factory_create,
+    internal_admin_user_api_key,
+    mock_s3_bucket,
 ):
-    # Setup user with privilege
-    user = UserFactory.create()
-    InternalUserRoleFactory.create(user=user, role__privileges=[Privilege.UPDATE_FORM])
-    api_key = UserApiKeyFactory.create(user=user)
-
     form = FormFactory.create()
     form_instruction_id = uuid.uuid4()
 
-    # Mock S3
-    with patch("src.util.file_util.open_stream") as mock_open_stream:
-        mock_file = MagicMock(spec=io.BytesIO)
-        mock_open_stream.return_value.__enter__.return_value = mock_file
+    # Execute
+    resp = client.put(
+        f"/alpha/forms/{form.form_id}/form_instructions/{form_instruction_id}",
+        data={"file": form_instruction_file},
+        content_type="multipart/form-data",
+        headers={"X-API-Key": internal_admin_user_api_key},
+    )
 
-        # Execute
-        resp = client.put(
-            f"/alpha/forms/{form.form_id}/form_instructions/{form_instruction_id}",
-            data={"file": form_instruction_file},
-            content_type="multipart/form-data",
-            headers={"X-API-Key": api_key.key_id},
-        )
+    # Verify
+    assert resp.status_code == 200
 
-        # Verify
-        assert resp.status_code == 200
+    # Check DB
+    instruction = db_session.get(FormInstruction, form_instruction_id)
+    assert instruction is not None
+    assert instruction.file_name == "instructions.pdf"
+    assert f"forms/{form.form_id}/instructions/instructions.pdf" in instruction.file_location
 
-        # Check DB
-        instruction = db_session.get(FormInstruction, form_instruction_id)
-        assert instruction is not None
-        assert instruction.file_name == "instructions.pdf"
-        assert f"forms/{form.form_id}/instructions/instructions.pdf" in instruction.file_location
-
-        # Check S3 upload
-        mock_open_stream.assert_called()
+    # Verify file was actually written to S3
+    assert file_util.file_exists(instruction.file_location)
+    file_content = file_util.read_file(instruction.file_location)
+    assert file_content == "test content"
 
 
 def test_form_instruction_upsert_update_existing(
-    client, db_session: db.Session, form_instruction_file, enable_factory_create
+    client,
+    db_session: db.Session,
+    form_instruction_file,
+    enable_factory_create,
+    internal_admin_user_api_key,
+    mock_s3_bucket,
 ):
-    # Setup user with privilege
-    user = UserFactory.create()
-    InternalUserRoleFactory.create(user=user, role__privileges=[Privilege.UPDATE_FORM])
-    api_key = UserApiKeyFactory.create(user=user)
-
     form = FormFactory.create()
     existing_instruction = FormInstructionFactory.create()
-    existing_instruction.file_location = "s3://bucket/old/path/file.pdf"
+    old_location = f"s3://{mock_s3_bucket}/old/path/file.pdf"
+    existing_instruction.file_location = old_location
     db_session.add(existing_instruction)
     db_session.commit()
 
-    # Mock S3 and delete_file
-    with patch("src.util.file_util.open_stream") as mock_open_stream, patch(
-        "src.util.file_util.delete_file"
-    ) as mock_delete_file:
+    # Create the old file in S3 so we can verify it gets deleted
+    file_util.write_to_file(old_location, "old content")
+    assert file_util.file_exists(old_location)
 
-        mock_file = MagicMock(spec=io.BytesIO)
-        mock_open_stream.return_value.__enter__.return_value = mock_file
+    # Execute
+    resp = client.put(
+        f"/alpha/forms/{form.form_id}/form_instructions/{existing_instruction.form_instruction_id}",
+        data={"file": form_instruction_file},
+        content_type="multipart/form-data",
+        headers={"X-API-Key": internal_admin_user_api_key},
+    )
 
-        # Execute
-        resp = client.put(
-            f"/alpha/forms/{form.form_id}/form_instructions/{existing_instruction.form_instruction_id}",
-            data={"file": form_instruction_file},
-            content_type="multipart/form-data",
-            headers={"X-API-Key": api_key.key_id},
-        )
+    # Verify
+    assert resp.status_code == 200
 
-        # Verify
-        assert resp.status_code == 200
+    # Check DB
+    db_session.refresh(existing_instruction)
+    assert existing_instruction.file_name == "instructions.pdf"
+    assert (
+        f"forms/{form.form_id}/instructions/instructions.pdf" in existing_instruction.file_location
+    )
 
-        # Check DB
-        db_session.refresh(existing_instruction)
-        assert existing_instruction.file_name == "instructions.pdf"
-        assert (
-            f"forms/{form.form_id}/instructions/instructions.pdf"
-            in existing_instruction.file_location
-        )
+    # Verify new file was written to S3
+    assert file_util.file_exists(existing_instruction.file_location)
+    new_content = file_util.read_file(existing_instruction.file_location)
+    assert new_content == "test content"
 
-        # Check old file deleted
-        mock_delete_file.assert_called_with("s3://bucket/old/path/file.pdf")
+    # Verify old file was deleted from S3
+    assert not file_util.file_exists(old_location)
 
 
 def test_form_instruction_upsert_no_auth(client, db_session: db.Session, form_instruction_file):
@@ -122,14 +113,9 @@ def test_form_instruction_upsert_no_auth(client, db_session: db.Session, form_in
 
 
 def test_form_instruction_upsert_wrong_privilege(
-    client, db_session: db.Session, form_instruction_file, enable_factory_create
+    client, db_session: db.Session, form_instruction_file, enable_factory_create, user_api_key
 ):
-    # User without UPDATE_FORM
-    user = UserFactory.create()
-    # Give some other privilege
-    InternalUserRoleFactory.create(user=user, role__privileges=[Privilege.VIEW_APPLICATION])
-    api_key = UserApiKeyFactory.create(user=user)
-
+    # user_api_key fixture creates a user without UPDATE_FORM privilege
     form_id = uuid.uuid4()
     form_instruction_id = uuid.uuid4()
 
@@ -137,7 +123,7 @@ def test_form_instruction_upsert_wrong_privilege(
         f"/alpha/forms/{form_id}/form_instructions/{form_instruction_id}",
         data={"file": form_instruction_file},
         content_type="multipart/form-data",
-        headers={"X-API-Key": api_key.key_id},
+        headers={"X-API-Key": user_api_key.key_id},
     )
 
     assert resp.status_code == 403

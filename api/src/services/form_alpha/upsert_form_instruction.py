@@ -7,8 +7,10 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import SubmissionIssue
+from src.auth.endpoint_access_util import verify_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import FormInstruction
+from src.db.models.user_models import User
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,7 @@ def upsert_form_instruction(
     form_id: uuid.UUID,
     form_instruction_id: uuid.UUID,
     file_obj: FileStorage,
+    user: User,
 ) -> FormInstruction:
     """
     Upsert a form instruction.
@@ -25,6 +28,9 @@ def upsert_form_instruction(
     If not, create it.
     Upload the file to S3.
     """
+    # Verify user has permission to update forms
+    verify_access(user, {Privilege.UPDATE_FORM}, None)
+
     if file_obj.filename is None:
         logger.info(
             "Invalid file name, cannot parse",
