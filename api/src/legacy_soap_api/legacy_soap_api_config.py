@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 ENDPOINT_PRIVILEGES = dict(
-    GetSubmissionListExpandedRequest=Privilege.LEGACY_AGENCY_VIEWER,
-    GetApplicationRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
-    GetApplicationZipRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
-    ConfirmApplicationDeliveryRequest=Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
-    UpdateApplicationInfoReqest=Privilege.LEGACY_AGENCY_ASSIGNER,
+    GetSubmissionListExpandedRequest={Privilege.LEGACY_AGENCY_VIEWER},
+    GetApplicationRequest={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+    GetApplicationZipRequest={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+    ConfirmApplicationDeliveryRequest={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+    UpdateApplicationInfoReqest={Privilege.LEGACY_AGENCY_ASSIGNER},
 )
 
 
@@ -85,7 +85,7 @@ class SOAPOperationConfig:
     compare_endpoints: bool = False
     is_mtom: bool = False
     always_call_simpler: bool = False
-    privileges: list[Privilege] | None = None
+    privileges: set[Privilege] | None = None
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -134,7 +134,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
                 "PackageID": None,  # No namespace prefix
                 "SchemaURL": None,  # No namespace prefix
             },
-            privileges=[],
+            privileges=set(),
         )
     },
     SimplerSoapAPI.GRANTORS: {
@@ -142,7 +142,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
             is_mtom=True,
-            privileges=[ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]],
+            privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         )
     },
 }

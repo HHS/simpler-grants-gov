@@ -381,7 +381,7 @@ class TestSimplerSOAPGetApplicationZip:
     ):
         agency = AgencyFactory.create()
         user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
-            agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]]
+            agency, ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]
         )
         submission = ApplicationSubmissionFactory.create()
         application_user = ApplicationUserFactory.create(
@@ -451,9 +451,9 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         agency = AgencyFactory.create()
-        wrong_privilege = ENDPOINT_PRIVILEGES["GetSubmissionListExpandedRequest"]
+        wrong_privileges = ENDPOINT_PRIVILEGES["GetSubmissionListExpandedRequest"]
         user, legacy_certificate, _, soap_client_certificate = setup_cert_user(
-            agency, [wrong_privilege]
+            agency, wrong_privileges
         )
         soap_request = SOAPRequest(
             data=request_xml_bytes,
@@ -476,7 +476,7 @@ class TestSimplerSOAPGetApplicationZip:
         submission = ApplicationSubmissionFactory.create()
         agency = AgencyFactory()
         user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
-            agency, [ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]]
+            agency, ENDPOINT_PRIVILEGES["GetApplicationZipRequest"]
         )
         application_user = ApplicationUserFactory.create(
             application=submission.application, user=user

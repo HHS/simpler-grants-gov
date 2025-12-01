@@ -229,6 +229,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             get_application_zip_request=grantors_schemas.GetApplicationZipRequest(
                 **self.get_soap_request_dict()
             ),
+            soap_config=self.operation_config,
         )
 
     def _gen_response_data(

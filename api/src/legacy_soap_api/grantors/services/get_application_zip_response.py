@@ -10,7 +10,7 @@ from src.auth.endpoint_access_util import verify_access
 from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate
-from src.legacy_soap_api.legacy_soap_api_config import get_soap_operation_config
+from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 from src.util import file_util
@@ -22,6 +22,7 @@ def get_application_zip_response(
     db_session: db.Session,
     soap_request: SOAPRequest,
     get_application_zip_request: grantor_schemas.GetApplicationZipRequest,
+    soap_config: SOAPOperationConfig,
 ) -> grantor_schemas.GetApplicationZipResponseSOAPEnvelope:
     xop_data_instance = grantor_schemas.XOPIncludeData(
         **{"@href": f"cid:{uuid.uuid4()}-0001@apply.grants.gov"}
@@ -40,36 +41,35 @@ def get_application_zip_response(
         return schema
     if legacy_tracking_number.startswith("GRANT"):
         legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
-    application = db_session.execute(
+    application_submission = db_session.execute(
         select(ApplicationSubmission).where(
             ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number),
         )
     ).scalar()
-    if application:
-        soap_config = get_soap_operation_config(soap_request.api_name, soap_request.operation_name)
+    if application_submission:
         certificate = validate_certificate(
             db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
         )
-        if soap_config and soap_config.privileges is not None:
+        if soap_config.privileges is not None:
             try:
                 verify_access(
                     certificate.user,
-                    set(soap_config.privileges),
-                    application.application,
+                    soap_config.privileges,
+                    application_submission.application,
                 )
             except HTTPError as e:
                 logger.info(
                     "User did not have permission to access this application",
                     extra={
                         "user_id": certificate.user.user_id,
-                        "application_submission_id": application.application_submission_id,
-                        "priviliges": soap_config.privileges,
+                        "application_submission_id": application_submission.application_submission_id,
+                        "privileges": soap_config.privileges,
                     },
                 )
                 raise e
 
         try:
-            filestream = file_util.open_stream(application.download_path, mode="rb")
+            filestream = file_util.open_stream(application_submission.download_path, mode="rb")
             schema._mtom_file_stream = filestream
         except ClientError:
             logger.info(
