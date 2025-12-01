@@ -1,0 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+environment="$1"
+
+echo "Input parameters:"
+echo "  environment=${environment}"
+echo
+
+cloudfront_distribution_id=$(terraform -chdir="infra/frontend/service" output -raw cloudfront_distribution_id)
+
+echo "CloudFront distribution ID: ${cloudfront_distribution_id}"
+echo "Creating invalidation for all paths (/*)"
+
+invalidation_id=$(aws cloudfront create-invalidation \
+  --distribution-id "${cloudfront_distribution_id}" \
+  --paths "/*" \
+  --query 'Invalidation.Id' \
+  --output text)
+
+echo "Invalidation created with ID: ${invalidation_id}"
+echo "Completed CloudFront cache invalidation for ${environment}"

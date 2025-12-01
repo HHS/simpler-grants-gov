@@ -4,39 +4,28 @@ import React from "react";
 
 import "@testing-library/jest-dom";
 
-import type { OrganizationPendingInvitation } from "src/types/userTypes";
+import type { AuthorizedData } from "src/types/authTypes";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
 type TranslationFn = (key: string) => string;
 
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_ns: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) => Promise.resolve((key: string) => key),
 );
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: (ns: string) => getTranslationsMock(ns),
+  getTranslations: (namespace: string) => getTranslationsMock(namespace),
 }));
 
 type GetOrgDetailsFn = (orgId: string) => Promise<unknown>;
-type GetPendingInvitationsFn = (
-  organizationId: string,
-) => Promise<OrganizationPendingInvitation[]>;
 
 const getOrganizationDetailsMock: jest.MockedFunction<GetOrgDetailsFn> =
   jest.fn<Promise<unknown>, [string]>();
 
-const getOrganizationPendingInvitationsMock: jest.MockedFunction<GetPendingInvitationsFn> =
-  jest.fn<Promise<OrganizationPendingInvitation[]>, [string]>(
-    (_orgId: string) => Promise.resolve([] as OrganizationPendingInvitation[]),
-  );
-
 jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
   getOrganizationDetails: (...args: Parameters<GetOrgDetailsFn>) =>
     getOrganizationDetailsMock(...args),
-  getOrganizationPendingInvitations: (
-    ...args: Parameters<GetPendingInvitationsFn>
-  ) => getOrganizationPendingInvitationsMock(...args),
 }));
 
 type Breadcrumb = { title: string; path: string };
@@ -77,6 +66,24 @@ jest.mock("src/components/manageUsers/UserOrganizationInvite", () => ({
   },
 }));
 
+const authorizedDataStub: AuthorizedData = {
+  fetchedResources: {
+    activeUsersList: {
+      data: [],
+      statusCode: 200,
+    },
+    invitedUsersList: {
+      data: [],
+      statusCode: 200,
+    },
+    organizationRolesList: {
+      data: [],
+      statusCode: 200,
+    },
+  },
+  confirmedPrivileges: [],
+};
+
 // --- tests ---
 
 describe("ManageUsersPageContent", () => {
@@ -85,9 +92,6 @@ describe("ManageUsersPageContent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getOrganizationDetailsMock.mockResolvedValue({});
-    getOrganizationPendingInvitationsMock.mockResolvedValue(
-      [] as OrganizationPendingInvitation[],
-    );
   });
 
   it("renders breadcrumbs and header with the organization name when fetch succeeds", async () => {
@@ -95,7 +99,10 @@ describe("ManageUsersPageContent", () => {
       sam_gov_entity: { legal_business_name: "Cool Org Inc" },
     });
 
-    const component = await ManageUsersPageContent({ organizationId });
+    const component = await ManageUsersPageContent({
+      organizationId,
+      authorizedData: authorizedDataStub,
+    });
     render(component);
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
@@ -120,7 +127,10 @@ describe("ManageUsersPageContent", () => {
       new Error("Unable to fetch org"),
     );
 
-    const component = await ManageUsersPageContent({ organizationId });
+    const component = await ManageUsersPageContent({
+      organizationId,
+      authorizedData: authorizedDataStub,
+    });
     render(component);
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
