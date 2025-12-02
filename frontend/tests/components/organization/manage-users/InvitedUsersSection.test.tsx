@@ -1,41 +1,25 @@
-/**
- * @jest-environment jsdom
- */
-
 import { render, screen } from "@testing-library/react";
 
 import React from "react";
 
 import "@testing-library/jest-dom";
 
-import { UnauthorizedError } from "src/errors";
-import type { OrganizationPendingInvitation } from "src/types/userTypes";
+import type { FetchedResource } from "src/types/authTypes";
+import {
+  OrganizationInvitationStatus,
+  type OrganizationPendingInvitation,
+} from "src/types/userTypes";
 
 import { InvitedUsersSection } from "src/components/manageUsers/InvitedUsersSection";
 
 type TranslationFn = (key: string) => string;
 
 const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_ns: string) => Promise.resolve((key: string) => key),
+  (_namespace: string) => Promise.resolve((key: string) => key),
 );
 
 jest.mock("next-intl/server", () => ({
   getTranslations: (ns: string) => getTranslationsMock(ns),
-}));
-
-type GetPendingInvitationsFn = (
-  organizationId: string,
-) => Promise<OrganizationPendingInvitation[]>;
-
-const getOrganizationPendingInvitationsMock: jest.MockedFunction<GetPendingInvitationsFn> =
-  jest.fn<Promise<OrganizationPendingInvitation[]>, [string]>(
-    (_orgId: string) => Promise.resolve([] as OrganizationPendingInvitation[]),
-  );
-
-jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
-  getOrganizationPendingInvitations: (
-    ...args: Parameters<GetPendingInvitationsFn>
-  ) => getOrganizationPendingInvitationsMock(...args),
 }));
 
 const tableWithResponsiveHeaderMock = jest.fn<void, [unknown]>();
@@ -47,22 +31,25 @@ jest.mock("src/components/TableWithResponsiveHeader", () => ({
   },
 }));
 
-describe("InvitedUsersSection", () => {
-  const organizationId = "org-123";
+const makeInvitedUsersResource = (
+  overrides: Partial<FetchedResource> = {},
+): FetchedResource => ({
+  data: [] as OrganizationPendingInvitation[],
+  statusCode: 200,
+  ...overrides,
+});
 
+describe("InvitedUsersSection", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getOrganizationPendingInvitationsMock.mockResolvedValue(
-      [] as OrganizationPendingInvitation[],
-    );
   });
 
   it("renders zero-state text when there are no pending invitations", async () => {
-    getOrganizationPendingInvitationsMock.mockResolvedValueOnce(
-      [] as OrganizationPendingInvitation[],
-    );
+    const invitedUsers = makeInvitedUsersResource({
+      data: [] as OrganizationPendingInvitation[],
+    });
 
-    const component = await InvitedUsersSection({ organizationId });
+    const component = await InvitedUsersSection({ invitedUsers });
     render(component);
 
     expect(await screen.findByTestId("pending-users-empty")).toHaveTextContent(
@@ -70,46 +57,53 @@ describe("InvitedUsersSection", () => {
     );
   });
 
-  it("renders an error alert when there is a non-UnauthorizedError", async () => {
-    getOrganizationPendingInvitationsMock.mockRejectedValueOnce(
-      new Error("some failure"),
-    );
+  it("renders an error message when there is an error or no data", async () => {
+    const invitedUsers = makeInvitedUsersResource({
+      data: undefined,
+      statusCode: 500,
+      error: "something went wrong",
+    });
 
-    const component = await InvitedUsersSection({ organizationId });
+    const component = await InvitedUsersSection({ invitedUsers });
     render(component);
 
     expect(await screen.findByText("invitedUsersFetchError")).toBeVisible();
   });
 
-  it("rethrows UnauthorizedError so it can be handled upstream", async () => {
-    getOrganizationPendingInvitationsMock.mockRejectedValueOnce(
-      new UnauthorizedError("No active session"),
-    );
-
-    await expect(
-      InvitedUsersSection({ organizationId }),
-    ).rejects.toBeInstanceOf(UnauthorizedError);
-  });
-
   it("renders a table with formatted name, email, and roles when pending invitations exist", async () => {
-    const pending = [
+    const pending: OrganizationPendingInvitation[] = [
       {
-        invitation_id: "inv-1",
+        organization_invitation_id: "inv-1",
+        status: OrganizationInvitationStatus.Pending,
+        created_at: "2025-01-01T00:00:00Z",
+        expires_at: "2025-02-01T00:00:00Z",
+        accepted_at: null,
+        rejected_at: null,
         invitee_email: "ada@example.com",
-        invitee_user: { first_name: "Ada", last_name: "Lovelace" },
-        roles: [{ role_name: "Admin" }],
+        invitee_user: {
+          user_id: "user-1",
+          email: "ada@example.com",
+          first_name: "Ada",
+          last_name: "Lovelace",
+        },
+        inviter_user: {
+          user_id: "inviter-1",
+          email: "inviter@example.com",
+          first_name: "Grace",
+          last_name: "Hopper",
+        },
+        roles: [{ role_id: "role-1", role_name: "Admin", privileges: [] }],
       },
     ];
 
-    getOrganizationPendingInvitationsMock.mockResolvedValueOnce(
-      pending as unknown as OrganizationPendingInvitation[],
-    );
+    const invitedUsers = makeInvitedUsersResource({
+      data: pending,
+    });
 
-    const component = await InvitedUsersSection({ organizationId });
+    const component = await InvitedUsersSection({ invitedUsers });
     render(component);
 
     expect(await screen.findByTestId("invited-users-table")).toBeVisible();
-
     expect(tableWithResponsiveHeaderMock).toHaveBeenCalledTimes(1);
 
     const tableProps = tableWithResponsiveHeaderMock.mock.calls[0][0] as {

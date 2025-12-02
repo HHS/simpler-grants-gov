@@ -137,3 +137,10 @@ export interface OrganizationPendingInvitation {
   inviter_user: InvitationUser;
   roles: UserRole[];
 }
+
+export interface TestUser extends UserDetailProfile {
+  oauth_id: string;
+  user_api_key: string;
+  user_id: string;
+  user_jwt: string;
+}

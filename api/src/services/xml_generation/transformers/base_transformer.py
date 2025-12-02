@@ -277,10 +277,6 @@ class RecursiveXMLTransformer:
                 target_field = transform_rule["target"]
                 result[target_field] = transformed_value
 
-                # Handle attributes for nested objects only
-                if transform_type == "nested_object" and "attributes" in transform_rule:
-                    result[f"__{target_field}__attributes"] = transform_rule["attributes"]
-
                 logger.debug(
                     f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
                 )
@@ -330,11 +326,35 @@ class RecursiveXMLTransformer:
                 return None
 
         elif transform_type == "nested_object":
-            # For nested objects, we need to process the child rules
+            # For nested objects, we need to process the child rules recursively
             if not isinstance(source_value, dict):
                 return None
 
             nested_result = {}
+
+            # Process attributes if specified
+            if "attributes" in transform_rule:
+                attributes = {}
+                for attr_name, attr_source_path in transform_rule["attributes"].items():
+                    # attr_source_path can be a simple field name, a dotted path, or a static/literal value
+                    if "." in attr_source_path:
+                        # It's a dotted path - not supported yet for parent attributes
+                        # For now, just get from current source_value
+                        path_parts = attr_source_path.split(".")
+                        if path_parts[0] in source_value:
+                            attributes[attr_name] = source_value[path_parts[0]]
+                    elif (
+                        attr_source_path in source_value
+                        and source_value[attr_source_path] is not None
+                    ):
+                        # It's a field name in source data - use its value
+                        attributes[attr_name] = source_value[attr_source_path]
+                    else:
+                        # Not a field in source data - treat as static/literal value
+                        attributes[attr_name] = attr_source_path
+
+                if attributes:
+                    nested_result["__attributes"] = attributes
 
             # Check if nested_fields is defined in the transform_rule
             nested_fields = transform_rule.get("nested_fields")
@@ -345,7 +365,15 @@ class RecursiveXMLTransformer:
                     if isinstance(child_config, dict) and "xml_transform" in child_config:
                         child_transform = child_config["xml_transform"]
                         if child_key in source_value and source_value[child_key] is not None:
-                            nested_result[child_transform["target"]] = source_value[child_key]
+                            child_value = source_value[child_key]
+
+                            # Recursively process nested transformations
+                            transformed_child = self._apply_transform_rule(
+                                child_value, child_transform, child_config, path + [child_key]
+                            )
+
+                            if transformed_child is not None:
+                                nested_result[child_transform["target"]] = transformed_child
             else:
                 # Nested fields may be siblings of xml_transform in full_rule_config
                 for child_key, child_config in full_rule_config.items():
@@ -354,7 +382,15 @@ class RecursiveXMLTransformer:
                     if isinstance(child_config, dict) and "xml_transform" in child_config:
                         child_transform = child_config["xml_transform"]
                         if child_key in source_value and source_value[child_key] is not None:
-                            nested_result[child_transform["target"]] = source_value[child_key]
+                            child_value = source_value[child_key]
+
+                            # Recursively process nested transformations
+                            transformed_child = self._apply_transform_rule(
+                                child_value, child_transform, child_config, path + [child_key]
+                            )
+
+                            if transformed_child is not None:
+                                nested_result[child_transform["target"]] = transformed_child
 
             return nested_result if nested_result else None
         else:

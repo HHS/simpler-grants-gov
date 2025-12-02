@@ -3,13 +3,15 @@ sprint_data AS
   (SELECT gh_sprint.id AS sprint_id,
           gh_sprint.project_id,
           gh_sprint.name AS sprint_name,
-          gh_sprint.end_date AS sprint_end_date
+          gh_sprint.start_date AS sprint_start_date,
+          gh_sprint.end_date-1 AS sprint_end_date
    FROM gh_sprint
    INNER JOIN gh_project ON gh_project.id = gh_sprint.project_id
    WHERE {{sprint_name}}
      AND {{project_ghid}}), -- get each issue_id in sprint
 issue_id_list AS
   (SELECT DISTINCT issue_id AS issue_id,
+                   s.sprint_start_date,
                    s.sprint_end_date
    FROM gh_issue_sprint_map m
    INNER JOIN sprint_data s ON s.sprint_id = m.sprint_id), -- get metadata for each issue
@@ -17,6 +19,7 @@ issue_data AS
   (SELECT i.id AS issue_id,
           i.title AS issue_title,
           i.ghid AS issue_ghid,
+          issue_id_list.sprint_start_date,
           issue_id_list.sprint_end_date
    FROM gh_issue i
    INNER JOIN issue_id_list ON issue_id_list.issue_id = i.id
@@ -33,6 +36,7 @@ issue_state AS
           i.issue_ghid,
           h.status,
           h.points,
+          i.sprint_start_date,
           i.sprint_end_date
    FROM history_partition h
    INNER JOIN issue_data i ON i.issue_id = h.issue_id
@@ -67,7 +71,9 @@ all_lead_times AS
    FROM issue_state i
    LEFT JOIN in_progress_dates ipd ON i.issue_id = ipd.issue_id
    LEFT JOIN done_dates dd ON i.issue_id = dd.issue_id
-   WHERE i.status = 'Done'), -- calculate average lead time
+   WHERE i.status = 'Done'
+     AND (dd.done_date IS NULL
+          OR dd.done_date >= i.sprint_start_date)), -- calculate average lead time
 average_lead_time AS
   (SELECT AVG(lead_time_days) AS avg_lead_time_days,
           COUNT(*) AS issues_with_lead_time
