@@ -15,7 +15,8 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 type CompetitionDetails = { competition: Competition };
 
-export type ApplicationDetailsCardProps = ApplicationDetail & CompetitionDetails;
+export type ApplicationDetailsCardProps = ApplicationDetail &
+  CompetitionDetails;
 
 const OrganizationDetailsDisplay = ({
   samGovEntity,
@@ -92,7 +93,7 @@ export const InformationCard = ({
     return (
       <div className={hasOrganization ? "margin-top-auto" : "margin-top-5"}>
         <dt className="usa-sr-only">
-          {t("applicationDownloadInstructionsLabel")}: {" "}
+          {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
         <dd>
           {instructionsDownloadPath && (
@@ -116,7 +117,7 @@ export const InformationCard = ({
     return (
       <div className="margin-bottom-1">
         <dt className="margin-right-1 text-bold">
-          {t("applicationDownloadInstructionsLabel")}: {" "}
+          {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
         <dd>-</dd>
       </div>
@@ -178,7 +179,9 @@ export const InformationCard = ({
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
             />
             {applicationDetails.competition.competition_instructions.length ? (
-              <ApplicationInstructionsDownload hasOrganization={hasOrganization} />
+              <ApplicationInstructionsDownload
+                hasOrganization={hasOrganization}
+              />
             ) : (
               <NoApplicationInstructionsDownload />
             )}
@@ -192,7 +195,7 @@ export const InformationCard = ({
                 {applicationDetails.competition.is_open
                   ? t("closeDate")
                   : t("closed")}
-                : {" "}
+                :{" "}
               </dt>
               <dd className="margin-right-1">
                 <span className="text-bold text-orange">
@@ -227,7 +230,9 @@ export const InformationCard = ({
       className="border radius-md border-base-lighter padding-x-2 margin-y-4"
     >
       <Grid row gap>
-        <InformationCardDetails applicationSubmitHandler={applicationSubmitHandler} />
+        <InformationCardDetails
+          applicationSubmitHandler={applicationSubmitHandler}
+        />
       </Grid>
     </GridContainer>
   );
