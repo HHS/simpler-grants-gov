@@ -168,11 +168,7 @@ To add XML generation support for a new form:
    - Map JSON field names to XML element names
    - Configure attachment fields if applicable
 
-3. **Update config.py**: Add the form to `load_xml_transform_config()`
-   ```python
-   elif form_name_upper == "FORMNAME":
-       return FORM_NAME_TRANSFORM_RULES
-   ```
+3. **Set json_to_xml_schema on the Form**: In the form's Python module, set `json_to_xml_schema=FORM_XML_TRANSFORM_RULES` on the Form object. The config is automatically loaded for any form that has this field set.
 
 4. **Add Tests**: Create test cases in `tests/src/services/xml_generation/`
    - Test configuration loading
