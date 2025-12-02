@@ -173,7 +173,7 @@ export const InformationCard = ({
           </h3>
         </Grid>
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-          <dl className={hasOrganization ? "margin-top-auto" : "margin-top-5"}>
+          <dl>
             <ApplicantDetails
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
