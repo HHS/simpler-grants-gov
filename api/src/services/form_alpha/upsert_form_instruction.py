@@ -59,7 +59,7 @@ def upsert_form_instruction(
     )
 
     # If updating, check if we need to delete old file
-    if form_instruction.file_location and form_instruction.file_location != new_s3_location:
+    if form_instruction.file_location != new_s3_location:
         # Delete old file
         logger.info(
             "Deleting old form instruction file",
