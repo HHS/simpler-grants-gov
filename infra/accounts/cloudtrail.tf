@@ -78,6 +78,7 @@ resource "aws_iam_role_policy" "cloudtrail_cloudwatch" {
 resource "aws_cloudtrail" "management_events" {
   #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
   #checkov:skip=CKV_AWS_35:Existing trail - KMS encryption to be added in future update
+  #checkov:skip=CKV_AWS_36:Existing trail - log file validation to be added in future update
   name                          = "management-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-e0de0810"
   include_global_service_events = true
@@ -92,6 +93,7 @@ resource "aws_cloudtrail" "management_events" {
 resource "aws_cloudtrail" "pinpoint_events" {
   #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
   #checkov:skip=CKV_AWS_35:Existing trail - KMS encryption to be added in future update
+  #checkov:skip=CKV_AWS_36:Existing trail - log file validation to be added in future update
   name                          = "pinpoint-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-c2cbd385"
   include_global_service_events = true
