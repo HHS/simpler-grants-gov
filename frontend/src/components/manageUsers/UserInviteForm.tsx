@@ -113,23 +113,18 @@ export function UserInviteForm({
   const previousInvitation = usePrevious(formState.invitationCreated);
 
   useEffect(() => {
-    console.log("!!! formState", formState.success, formState.errorMessage);
     if (
       formState.invitationCreated &&
-      formState.invitationCreated === previousInvitation
+      formState.invitationCreated !== previousInvitation
     ) {
-      console.log("!! success");
       setShowSuccess(true);
       setSelectedRole(undefined);
       setTimeout(() => setShowSuccess(false), 3000);
     }
     if (formState.errorMessage) {
-      console.log("!! error");
       setSelectedRole(undefined);
     }
-  }, [formState.invitationCreated, formState.errorMessage]);
-
-  console.log("!!! formstate", formState);
+  }, [formState.invitationCreated, formState.errorMessage, previousInvitation]);
 
   return (
     <>
