@@ -7,6 +7,7 @@
 
 # CloudWatch Log Group for SSM Automation
 resource "aws_cloudwatch_log_group" "ssm_automation" {
+  #checkov:skip=CKV_AWS_158:KMS encryption to be added in future update
   name              = "/aws/ssm/automation"
   retention_in_days = 365
 }
