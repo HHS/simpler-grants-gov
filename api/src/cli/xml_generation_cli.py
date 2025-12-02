@@ -15,6 +15,7 @@ from src.form_schema.forms.project_narrative_attachment import (
 )
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
+from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -31,6 +32,7 @@ FORM_TRANSFORM_RULES_MAP = {
     "SF424A": SF424A_TRANSFORM_RULES,
     "ProjectNarrativeAttachments_1_2": PROJECT_NARRATIVE_TRANSFORM_RULES,
     "BudgetNarrativeAttachments_1_2": BUDGET_NARRATIVE_TRANSFORM_RULES,
+    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
 }
 
 
@@ -49,7 +51,7 @@ FORM_TRANSFORM_RULES_MAP = {
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0, SF424A). Default: SF424_4_0",
+    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0). Default: SF424_4_0",
 )
 @click.option(
     "--compact",
@@ -86,6 +88,8 @@ def generate_xml_command(
 
         # Generate Budget Narrative Attachments XML
         flask task generate-xml --file input.json --form BudgetNarrativeAttachments_1_2
+        # Generate SF-LLL from file
+        flask task generate-xml --file sflll.json --form SFLLL_2_0
 
         # Generate compact XML and save to file
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml

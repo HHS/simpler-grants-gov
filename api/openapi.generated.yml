@@ -3380,6 +3380,7 @@ components:
             - transportation
             - affordable_care_act
             - other
+            - energy_infrastructure_and_critical_mineral_and_materials
             type:
             - string
     ApplicantTypeFilterV1:
@@ -3961,6 +3962,7 @@ components:
             - transportation
             - affordable_care_act
             - other
+            - energy_infrastructure_and_critical_mineral_and_materials
             type:
             - string
         applicant_types:
@@ -4414,6 +4416,7 @@ components:
           - SupplementaryNEHCoverSheet
           - GGLobbyingForm
           - EPAForm4700-4
+          - EPAKeyContacts
           type:
           - string
           - 'null'
@@ -4568,6 +4571,7 @@ components:
           - SupplementaryNEHCoverSheet
           - GGLobbyingForm
           - EPAForm4700-4
+          - EPAKeyContacts
           type:
           - string
           - 'null'
