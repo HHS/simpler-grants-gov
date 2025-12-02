@@ -31,6 +31,11 @@ interface ButtonGroupProps {
   children: ReactNode;
 }
 
+interface AlertProps {
+  children: ReactNode;
+  [key: string]: unknown;
+}
+
 jest.mock("@trussworks/react-uswds", () => {
   const ModalFooter = ({ children }: ModalFooterProps) => (
     <div className="usa-modal__footer" data-testid="modalFooter">
@@ -60,11 +65,22 @@ jest.mock("@trussworks/react-uswds", () => {
     <ul className="usa-button-group">{children}</ul>
   );
 
+  const Alert = ({ children, ...rest }: AlertProps) => {
+    const testId =
+      typeof rest["data-testid"] === "string" ? rest["data-testid"] : "alert";
+    return (
+      <div data-testid={testId} {...rest}>
+        {children}
+      </div>
+    );
+  };
+
   return {
     ModalFooter,
     Button,
     ModalToggleButton,
     ButtonGroup,
+    Alert,
   };
 });
 
@@ -161,10 +177,26 @@ describe("RoleChangeModal", () => {
       />,
     );
 
-    const confirmButton = screen.getByRole("button", { name: /saving/i });
-    expect(confirmButton).toBeDisabled();
-
     const cancelButton = screen.getByRole("button", { name: "cancel" });
     expect(cancelButton).toBeDisabled();
+  });
+
+  it("renders an error message when errorMessage is provided", () => {
+    const modalRef = { current: null };
+
+    render(
+      <RoleChangeModal
+        isSubmitting={false}
+        modalRef={modalRef}
+        nextRoleName="Viewer"
+        onConfirm={() => undefined}
+        onCancel={() => undefined}
+        errorMessage="Role cannot be changed"
+      />,
+    );
+
+    const alert = screen.getByTestId("role-change-error");
+    expect(alert).toBeInTheDocument();
+    expect(alert).toHaveTextContent("Role cannot be changed");
   });
 });

@@ -8,6 +8,7 @@ from src.services.xml_generation.value_transformers import (
     apply_value_transformation,
     transform_boolean_to_yes_no,
     transform_currency_format,
+    transform_map_values,
     transform_string_case,
     transform_truncate_string,
 )
@@ -188,3 +189,64 @@ class TestApplyValueTransformation:
         # This should raise an error, not return the original value
         with pytest.raises(ValueTransformationError):
             apply_value_transformation("not-a-boolean", config)
+
+
+class TestMapValues:
+    """Test map_values transformation."""
+
+    def test_map_values_basic(self):
+        """Test basic value mapping."""
+        mappings = {"Prime": "Y: Yes", "SubAwardee": "N: No"}
+        assert transform_map_values("Prime", mappings) == "Y: Yes"
+        assert transform_map_values("SubAwardee", mappings) == "N: No"
+
+    def test_map_values_string_conversion(self):
+        """Test that values are converted to strings for lookup."""
+        mappings = {"1": "One", "2": "Two", "3": "Three"}
+        assert transform_map_values(1, mappings) == "One"
+        assert transform_map_values("2", mappings) == "Two"
+
+    def test_map_values_with_default(self):
+        """Test mapping with default value for unmapped inputs."""
+        mappings = {"A": "Alpha", "B": "Beta"}
+        assert transform_map_values("C", mappings, default="Unknown") == "Unknown"
+
+    def test_map_values_no_match_no_default(self):
+        """Test error when value not in mappings and no default provided."""
+        mappings = {"Prime": "Y: Yes"}
+        with pytest.raises(ValueTransformationError) as exc_info:
+            transform_map_values("SubAwardee", mappings)
+        assert "not found in mappings" in str(exc_info.value)
+        assert "Prime" in str(exc_info.value)
+
+    def test_map_values_none_handling(self):
+        """Test handling of None values."""
+        mappings = {"None": "No Value", "Something": "Has Value"}
+        assert transform_map_values(None, mappings) == "No Value"
+
+    def test_map_values_via_apply_value_transformation(self):
+        """Test map_values through the apply_value_transformation interface."""
+        config = {
+            "type": "map_values",
+            "params": {"mappings": {"Prime": YES_VALUE, "SubAwardee": NO_VALUE}},
+        }
+        assert apply_value_transformation("Prime", config) == YES_VALUE
+        assert apply_value_transformation("SubAwardee", config) == NO_VALUE
+
+    def test_map_values_complex_mappings(self):
+        """Test mapping to complex output values."""
+        mappings = {
+            "Grant": "a. Grant",
+            "Cooperative Agreement": "b. Cooperative Agreement",
+            "Contract": "c. Contract",
+            "Loan": "d. Loan",
+            "Loan Guarantee": "e. Loan Guarantee",
+        }
+        assert transform_map_values("Grant", mappings) == "a. Grant"
+        assert transform_map_values("Loan Guarantee", mappings) == "e. Loan Guarantee"
+
+    def test_map_values_numeric_output(self):
+        """Test mapping to numeric output values."""
+        mappings = {"low": 1, "medium": 5, "high": 10}
+        assert transform_map_values("low", mappings) == 1
+        assert transform_map_values("high", mappings) == 10

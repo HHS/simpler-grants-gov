@@ -14,34 +14,33 @@ import {
 import { LoadingButton } from "src/components/LoadingButton";
 import { SimplerModal } from "src/components/SimplerModal";
 
-export interface RoleChangeModalProps {
+export interface RemoveUserModalProps {
   isSubmitting: boolean;
   modalRef: RefObject<ModalRef | null>;
-  nextRoleName: string;
+  userName: string;
   onConfirm: () => void;
   onCancel: () => void;
   errorMessage?: string | null;
 }
 
-export function RoleChangeModal({
+export function RemoveUserModal({
   isSubmitting,
   modalRef,
-  nextRoleName,
+  userName,
   onConfirm,
   onCancel,
   errorMessage,
-}: RoleChangeModalProps) {
-  const t = useTranslations("ManageUsers.confirmationModal");
+}: RemoveUserModalProps) {
+  const t = useTranslations("ManageUsers.removeUserModal");
   const modalTitle = t("header");
-  const modalDescription = `${t("description")} ${nextRoleName}?`;
+  const modalDescription = t("description", { name: userName });
 
   return (
     <SimplerModal
-      modalId="confirmation-role-change-modal"
+      modalId="confirmation-remove-user-modal"
       modalRef={modalRef}
       titleText={modalTitle}
       className="text-wrap"
-      onClose={onCancel}
     >
       <p className="font-sans-2xs margin-y-4">{modalDescription}</p>
 
@@ -53,7 +52,7 @@ export function RoleChangeModal({
             noIcon
             headingLevel="h6"
             role="alert"
-            data-testid="role-change-error"
+            data-testid="remove-user-error"
           >
             {errorMessage}
           </Alert>
@@ -65,11 +64,11 @@ export function RoleChangeModal({
           {isSubmitting ? (
             <LoadingButton
               id="role-change-confirm-button"
-              message={t("saving")}
+              message={t("removing")}
             />
           ) : (
             <Button type="button" onClick={onConfirm}>
-              {t("confirm")}
+              {t("removeUser")}
             </Button>
           )}
           <ModalToggleButton

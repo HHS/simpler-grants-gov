@@ -9,6 +9,7 @@ import click
 
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
+from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -23,6 +24,7 @@ from src.task.task_blueprint import task_blueprint
 FORM_TRANSFORM_RULES_MAP = {
     "SF424_4_0": SF424_TRANSFORM_RULES,
     "SF424A": SF424A_TRANSFORM_RULES,
+    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
 }
 
 
@@ -41,7 +43,7 @@ FORM_TRANSFORM_RULES_MAP = {
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0, SF424A). Default: SF424_4_0",
+    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0). Default: SF424_4_0",
 )
 @click.option(
     "--compact",
@@ -72,6 +74,9 @@ def generate_xml_command(
 
         # Generate SF-424A from file
         flask task generate-xml --file input.json --form SF424A
+
+        # Generate SF-LLL from file
+        flask task generate-xml --file sflll.json --form SFLLL_2_0
 
         # Generate compact XML and save to file
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml

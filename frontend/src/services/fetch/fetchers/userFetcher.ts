@@ -2,11 +2,13 @@
 
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
+  fetchLocalUsers,
   fetchUserWithMethod,
   postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import {
   OrganizationInvitation,
+  TestUser,
   UserDetailProfile,
   UserDetailWithProfile,
   UserPrivilegeDefinition,
@@ -103,4 +105,12 @@ export const getUserInvitations = async (
   // const json = (await resp.json()) as { data: OrganizationInvitation[] };
 
   // return json.data;
+};
+
+export const getTestUsers = async (): Promise<TestUser[]> => {
+  const resp = await fetchLocalUsers();
+
+  const json = (await resp.json()) as { data: TestUser[] };
+
+  return json.data;
 };
