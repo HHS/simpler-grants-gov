@@ -86,6 +86,7 @@ export const getSession = async (): Promise<UserSession | null> => {
   }
   const { token, exp } = payload;
   const session = await decryptLoginGovToken(token);
+  console.log(token);
   return session
     ? {
         ...session,
