@@ -50,13 +50,16 @@ class TestProjectNarrativeAttachmentXML:
         xml_data = response.xml_data
         assert "ProjectNarrativeAttachments_1_2" in xml_data
         assert "http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2" in xml_data
-        
+
         # Parse XML to verify root element
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_data.encode("utf-8"), parser=parser)
-        
+
         # Verify root element matches expected namespace
-        assert root.tag == "{http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2}ProjectNarrativeAttachments_1_2"
+        assert (
+            root.tag
+            == "{http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2}ProjectNarrativeAttachments_1_2"
+        )
 
     def test_generate_xml_with_multiple_attachments(self):
         """Test XML generation with multiple attachments."""
@@ -94,7 +97,7 @@ class TestProjectNarrativeAttachmentXML:
         # Verify response success
         assert response.success is True
         assert response.xml_data is not None
-        
+
         # Verify XML contains the form structure
         xml_data = response.xml_data
         assert "ProjectNarrativeAttachments_1_2" in xml_data
@@ -138,13 +141,16 @@ class TestBudgetNarrativeAttachmentXML:
         xml_data = response.xml_data
         assert "BudgetNarrativeAttachments_1_2" in xml_data
         assert "http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2" in xml_data
-        
+
         # Parse XML to verify root element
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_data.encode("utf-8"), parser=parser)
-        
+
         # Verify root element matches expected namespace
-        assert root.tag == "{http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2}BudgetNarrativeAttachments_1_2"
+        assert (
+            root.tag
+            == "{http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2}BudgetNarrativeAttachments_1_2"
+        )
 
     def test_generate_xml_structure_matches_xsd(self):
         """Test that generated XML structure matches the XSD schema requirements."""
@@ -178,4 +184,3 @@ class TestBudgetNarrativeAttachmentXML:
         assert "http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2" in xml_data
         assert 'FormVersion="1.2"' in xml_data
         assert "BudgetNarrativeAttachments_1_2" in xml_data
-

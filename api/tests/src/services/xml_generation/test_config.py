@@ -89,7 +89,10 @@ class TestXMLTransformConfig:
 
         # Verify namespace config
         namespace_config = xml_config.get("namespaces", {})
-        assert namespace_config.get("default") == "http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2"
+        assert (
+            namespace_config.get("default")
+            == "http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2"
+        )
 
         # Verify attachment field configuration
         attachment_fields = xml_config.get("attachment_fields", {})
@@ -117,7 +120,10 @@ class TestXMLTransformConfig:
 
         # Verify namespace config
         namespace_config = xml_config.get("namespaces", {})
-        assert namespace_config.get("default") == "http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2"
+        assert (
+            namespace_config.get("default")
+            == "http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2"
+        )
 
         # Verify attachment field configuration
         attachment_fields = xml_config.get("attachment_fields", {})
