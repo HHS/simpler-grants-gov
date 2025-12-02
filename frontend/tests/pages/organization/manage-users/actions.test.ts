@@ -48,7 +48,7 @@ describe("user profile form action", () => {
   it("returns result of update on success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     mockCreateInvitation.mockImplementation((_token, data) => {
-      return data as unknown;
+      return { ...data, organization_invitation_id: "fun_id" } as unknown;
     });
 
     const inviteFormData = new FormData();
@@ -59,8 +59,10 @@ describe("user profile form action", () => {
     expect(result.data).toEqual({
       email: "an email",
       roleId: ["smith"],
+      organization_invitation_id: "fun_id",
       organizationId: "1",
     });
+    expect(result.invitationCreated).toEqual("fun_id");
   });
   it("returns API error when applicable", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
