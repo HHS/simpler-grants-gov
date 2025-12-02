@@ -3,11 +3,8 @@
  */
 
 import { updateOrganizationInvitation } from "src/app/api/user/organization-invitations/[organizationInvitationId]/handler";
-import { OrganizationInvitation, UserOrganization } from "src/types/userTypes";
-import {
-  fakeOrganizationInvitation,
-  fakeUserOrganization,
-} from "src/utils/testing/fixtures";
+import { OrganizationInvitation } from "src/types/userTypes";
+import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 
 const mockUpdateOrganizationInvitation = jest.fn();
 const getSessionMock = jest.fn();
