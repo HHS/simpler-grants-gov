@@ -85,9 +85,9 @@ export const InformationCard = ({
   const hasOrganization = Boolean(applicationDetails.organization);
   const { is_open } = applicationDetails.competition;
 
-  const ApplicationInstructionsDownload = () => {
+  const ApplicationInstructionsDownload = ({ hasOrganization }: { hasOrganization: boolean }) => {
     return (
-      <div className="margin-top-5">
+      <div className={hasOrganization ? "margin-top-auto" : "margin-top-5"}>
         <dt className="usa-sr-only">
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
@@ -175,7 +175,7 @@ export const InformationCard = ({
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
             />
             {applicationDetails.competition.competition_instructions.length ? (
-              <ApplicationInstructionsDownload />
+              <ApplicationInstructionsDownload hasOrganization={hasOrganization}/>
             ) : (
               <NoApplicationInstructionsDownload />
             )}
