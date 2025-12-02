@@ -90,7 +90,7 @@ def form_instruction_upsert(
     # Get the file from the validated form data
     file_obj = form_and_files_data["file"]
 
-    user = cast(UserApiKey, api_user_key_auth.current_user).user
+    user = api_user_key_auth.get_user()
 
     with db_session.begin():
         db_session.add(user)
