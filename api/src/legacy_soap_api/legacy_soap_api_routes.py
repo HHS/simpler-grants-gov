@@ -64,7 +64,7 @@ def simpler_soap_api_route(
         if alternate_proxy_response := get_alternate_proxy_response(soap_request):
             soap_proxy_response = alternate_proxy_response
         else:
-            soap_proxy_response = get_proxy_response(soap_request)
+            soap_proxy_response = get_proxy_response(soap_request, db_session=db_session)
     except Exception:
         logger.exception(
             msg="Error getting soap proxy response",

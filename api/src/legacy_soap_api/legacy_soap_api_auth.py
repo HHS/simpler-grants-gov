@@ -34,17 +34,26 @@ class SOAPClientCertificate(BaseModel):
     serial_number: int
     fingerprint: str
 
-    def get_pem(self, key_map: dict) -> tuple[str, str]:
+    def get_pem(self, key_map: dict, db_session: db.Session) -> str:
         """Note that this auth mechanism will only be configured in lower environments
 
         There will be no prod configurations for this auth mechanism.
         TODO - is the above true? I think this happens for prod as well?
         """
+
+        legacy_certificate_id = db_session.execute(
+            select(LegacyCertificate.legacy_certificate_id).where(
+                LegacyCertificate.serial_number == str(self.serial_number)
+            )
+        ).scalar_one_or_none()
+        if not legacy_certificate_id:
+            raise SOAPClientCertificateLookupError(
+                "could not retrieve legacy cert for serial number"
+            ) from None
+
         try:
-            value = key_map[self.fingerprint]
-            pem = f"{value['cert']}\n\n{self.cert}"
-            pem_id = value.get("id", "unknown")
-            return pem, pem_id
+            value = key_map[str(legacy_certificate_id)]
+            return f"{value}\n\n{self.cert}"
         except KeyError:
             raise SOAPClientCertificateNotConfigured("cert is not configured") from None
         except Exception:

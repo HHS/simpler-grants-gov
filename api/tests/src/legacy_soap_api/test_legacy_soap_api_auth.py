@@ -25,6 +25,14 @@ MOCK_CLIENT_CERT = SOAPClientCertificate(
 )
 
 
+class AlternateErrorDict(dict):
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except KeyError as e:
+            raise Exception("Not a KeyError") from e
+
+
 @patch("src.legacy_soap_api.legacy_soap_api_auth.get_soap_client_certificate")
 def test_get_soap_auth(mock_get_soap_client_certificate):
     mock_get_soap_client_certificate.return_value = MOCK_CLIENT_CERT
@@ -32,25 +40,40 @@ def test_get_soap_auth(mock_get_soap_client_certificate):
     assert get_soap_auth(None) is None
 
 
-def test_client_auth():
+def test_client_auth(db_session, enable_factory_create):
+    legacy_certificate = LegacyAgencyCertificateFactory.create(
+        serial_number=MOCK_CLIENT_CERT.serial_number
+    )
+    MOCK_SOAP_PRIVATE_KEYS = {f"{legacy_certificate.legacy_certificate_id}": MOCK_CERT}
     auth = SOAPAuth(certificate=MOCK_CLIENT_CERT)
-    cert, id = auth.certificate.get_pem(MOCK_KEYMAP)
+    cert = auth.certificate.get_pem(MOCK_SOAP_PRIVATE_KEYS, db_session)
     assert cert == f"{MOCK_CERT}\n\n{MOCK_CERT_STR}"
-    assert id == "XYZ"
 
 
-def test_client_auth_exceptions():
+def test_client_auth_exceptions(db_session):
     auth = SOAPAuth(certificate=MOCK_CLIENT_CERT)
     with pytest.raises(SOAPClientCertificateNotConfigured, match="cert is not configured"):
-        auth.certificate.get_pem({})
+        auth.certificate.get_pem({}, db_session)
     with pytest.raises(SOAPClientCertificateNotConfigured, match="cert is not configured"):
-        auth.certificate.get_pem({"dne": "dne"})
+        auth.certificate.get_pem({"dne": "dne"}, db_session)
     with pytest.raises(SOAPClientCertificateNotConfigured, match="cert is not configured"):
-        auth.certificate.get_pem({MOCK_FINGERPRINT: {"id": "abc"}})
+        auth.certificate.get_pem({MOCK_FINGERPRINT: {"id": "abc"}}, db_session)
     with pytest.raises(
         SOAPClientCertificateLookupError, match="could not retrieve client cert for serial number"
     ):
-        auth.certificate.get_pem({MOCK_FINGERPRINT: "not-an-object"})
+        auth.certificate.get_pem(
+            AlternateErrorDict({MOCK_FINGERPRINT: "not-an-object"}), db_session
+        )
+    alt_mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number=456,
+    )
+    auth = SOAPAuth(certificate=alt_mock_client_cert)
+    with pytest.raises(
+        SOAPClientCertificateLookupError, match="could not retrieve legacy cert for serial number"
+    ):
+        auth.certificate.get_pem({MOCK_FINGERPRINT: "not-an-object"}, db_session)
 
 
 def test_validate_certificate_raies_error_when_no_legacy_certificate_found(

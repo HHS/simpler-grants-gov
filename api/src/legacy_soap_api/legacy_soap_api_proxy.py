@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 
 from requests import Request, Session
 
+from src.adapters import db
 from src.legacy_soap_api.legacy_soap_api_auth import (
     MTLS_CERT_HEADER_KEY,
     SessionResumptionAdapter,
@@ -18,7 +19,6 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_soap_error_response,
     get_streamed_soap_response,
 )
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,9 @@ logger = logging.getLogger(__name__)
 PROXY_TIMEOUT = 3600
 
 
-def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
+def get_proxy_response(
+    soap_request: SOAPRequest, db_session: db.Session, timeout: int = PROXY_TIMEOUT
+) -> SOAPResponse:
     config = get_soap_config()
 
     # Use X-Gg-S2S-Uri header locally if passed, otherwise default to GRANTS_GOV_URI:GRANTS_GOV_PORT.
@@ -54,12 +56,13 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
         temp_file_path = temp_cert_file.name
         try:
-            cert, cert_id = soap_request.auth.certificate.get_pem(config.soap_auth_map)
+            cert = soap_request.auth.certificate.get_pem(
+                config.soap_auth_map, db_session=db_session
+            )
         except SOAPClientCertificateLookupError:
             # This exception handles invalid client certs. We will continue to return the response
             # from GG.
             cert = ""
-            cert_id = "unknown"
             logger.info(
                 "soap_client_certificate: Unknown or invalid client certificate",
                 exc_info=True,
@@ -80,7 +83,6 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
         temp_cert_file.write(cert)
         temp_cert_file.flush()
 
-        add_extra_data_to_current_request_logs({"cert_id": cert_id})
         logger.info(
             "soap_client_certificate: Sending soap request with client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_CERT},
