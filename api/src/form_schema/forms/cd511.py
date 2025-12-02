@@ -64,7 +64,7 @@ FORM_JSON_SCHEMA = {
         "applicant_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Name of Applicant",
-            "description": "Enter legal name of applicant, which will undertake the assistance activity."
+            "description": "Enter legal name of applicant, which will undertake the assistance activity.",
         },
         "award_number": {
             "type": "string",
