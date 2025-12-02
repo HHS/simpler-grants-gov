@@ -16,7 +16,7 @@ export type OrganizationInviteResponse = {
   data?: OrganizationInviteRecord;
   errorMessage?: string;
   validationErrors?: OrganizationInviteValidationErrors;
-  success?: boolean;
+  invitationCreated?: string; // organization invitation id of created invitation
 };
 
 const validateInviteUserAction = async (formData: FormData) => {
@@ -70,7 +70,10 @@ export const inviteUserAction = async (
       requestData,
     );
 
-    return { data: inviteUserResponse, success: true };
+    return {
+      data: inviteUserResponse,
+      invitationCreated: inviteUserResponse.organization_invitation_id,
+    };
   } catch (e) {
     const error = e as Error;
     console.error(

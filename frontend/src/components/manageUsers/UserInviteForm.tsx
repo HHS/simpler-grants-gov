@@ -4,10 +4,17 @@ import {
   inviteUserAction,
   OrganizationInviteValidationErrors,
 } from "src/app/[locale]/(base)/organization/[id]/manage-users/actions";
+import { usePrevious } from "src/hooks/usePrevious";
 import { UserRole } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Alert,
   Button,
@@ -85,6 +92,7 @@ export function UserInviteForm({
   const t = useTranslations("ManageUsers.inviteUser");
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string | undefined>();
 
   const inviteUser = useMemo(
     () => inviteUserActionForOrganization(organizationId),
@@ -92,15 +100,36 @@ export function UserInviteForm({
   );
 
   const [formState, formAction, isPending] = useActionState(inviteUser, {
-    success: false,
+    invitationCreated: "",
   });
 
+  const onRoleChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedRole(e.target.value);
+    },
+    [],
+  );
+
+  const previousInvitation = usePrevious(formState.invitationCreated);
+
   useEffect(() => {
-    if (formState.success) {
+    console.log("!!! formState", formState.success, formState.errorMessage);
+    if (
+      formState.invitationCreated &&
+      formState.invitationCreated === previousInvitation
+    ) {
+      console.log("!! success");
       setShowSuccess(true);
+      setSelectedRole(undefined);
       setTimeout(() => setShowSuccess(false), 3000);
     }
-  }, [formState.success]);
+    if (formState.errorMessage) {
+      console.log("!! error");
+      setSelectedRole(undefined);
+    }
+  }, [formState.invitationCreated, formState.errorMessage]);
+
+  console.log("!!! formstate", formState);
 
   return (
     <>
@@ -139,7 +168,6 @@ export function UserInviteForm({
             <FormGroup error={!!formState.validationErrors?.role}>
               <Label htmlFor="email">
                 {t("inputs.role.label")}
-
                 <RequiredFieldIndicator> *</RequiredFieldIndicator>
               </Label>
               <OrganizationInviteValidationError
@@ -150,7 +178,8 @@ export function UserInviteForm({
                 name="role"
                 id="inviteUser-role"
                 disabled={isPending || showSuccess}
-                value={formState.data?.roles[0].role_name}
+                onChange={onRoleChange}
+                value={selectedRole}
               >
                 <RoleOptions roles={roles} />
               </Select>
