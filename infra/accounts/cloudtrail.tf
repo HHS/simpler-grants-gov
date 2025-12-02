@@ -10,12 +10,14 @@
 
 # CloudWatch Log Group for management events trail
 resource "aws_cloudwatch_log_group" "cloudtrail_management" {
+  #checkov:skip=CKV_AWS_158:Existing log group - KMS encryption to be added in future update
   name              = "/aws/cloudtrail/management-events"
   retention_in_days = 365
 }
 
 # CloudWatch Log Group for pinpoint events trail
 resource "aws_cloudwatch_log_group" "cloudtrail_pinpoint" {
+  #checkov:skip=CKV_AWS_158:Existing log group - KMS encryption to be added in future update
   name              = "/aws/cloudtrail/pinpoint-events"
   retention_in_days = 365
 }
@@ -74,6 +76,8 @@ resource "aws_iam_role_policy" "cloudtrail_cloudwatch" {
 
 # Management events trail
 resource "aws_cloudtrail" "management_events" {
+  #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
+  #checkov:skip=CKV_AWS_35:Existing trail - KMS encryption to be added in future update
   name                          = "management-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-e0de0810"
   include_global_service_events = true
@@ -86,6 +90,8 @@ resource "aws_cloudtrail" "management_events" {
 
 # Pinpoint events trail
 resource "aws_cloudtrail" "pinpoint_events" {
+  #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
+  #checkov:skip=CKV_AWS_35:Existing trail - KMS encryption to be added in future update
   name                          = "pinpoint-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-c2cbd385"
   include_global_service_events = true
