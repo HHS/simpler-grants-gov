@@ -1,3 +1,144 @@
+locals {
+  # Root level paths, and their method types. If the method is an empty list, this has sub-paths, which will be defined
+  # in another variable
+  root_endpoints = var.enable_api_gateway ? {
+    ".well-known"        = [],
+    "docs"               = [{ "method" : "GET" }],
+    "grantsws-agency"    = [],
+    "grantsws-applicant" = [],
+    "health"             = [{ "method" : "GET" }],
+    "openapi.json"       = [{ "method" : "GET" }],
+    "robots.txt"         = [{ "method" : "GET" }],
+    "static"             = [],
+    "v1"                 = [],
+    "{proxy+}" = [
+      {
+        "method" : "ANY",
+        "api_key_required" : true,
+        "method_parameters" : {
+          "method.request.path.proxy" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.proxy" : "method.request.path.proxy",
+        }
+      }
+    ]
+  } : null
+
+  first_level_endpoints = var.enable_api_gateway ? {
+    ".well-known/pki-validation"  = [],
+    "grantsws-agency/services"    = [],
+    "grantsws-applicant/services" = [],
+    "static/{proxy+}" = [{
+      "method" : "ANY",
+      "method_parameters" : {
+        "method.request.path.proxy" = true
+      },
+      "request_parameters" : {
+        "integration.request.path.proxy" : "method.request.path.proxy",
+      }
+    }],
+    "v1/users" = [],
+  } : null
+
+  second_level_endpoints = var.enable_api_gateway ? {
+    ".well-known/pki-validation/{proxy+}" = [{
+      "method" : "ANY",
+      "method_parameters" : {
+        "method.request.path.proxy" = true
+      },
+      "request_parameters" : {
+        "integration.request.path.proxy" : "method.request.path.proxy",
+      }
+    }],
+    "grantsws-agency/services/v2"    = [],
+    "grantsws-applicant/services/v2" = [],
+    "v1/users/login"                 = [{ "method" : "GET" }],
+    "v1/users/token"                 = [],
+  } : null
+
+  third_level_endpoints = var.enable_api_gateway ? {
+    "grantsws-agency/services/v2/{service_port_name}" = [{
+      "method" : "POST",
+      "method_parameters" : {
+        "method.request.path.service_port_name" = true
+      },
+      "request_parameters" : {
+        "integration.request.path.service_port_name" : "method.request.path.service_port_name",
+      }
+    }],
+    "grantsws-applicant/services/v2/{service_port_name}" = [{
+      "method" : "POST",
+      "method_parameters" : {
+        "method.request.path.service_port_name" = true
+      },
+      "request_parameters" : {
+        "integration.request.path.service_port_name" : "method.request.path.service_port_name",
+      }
+    }],
+    "v1/users/login/callback" = [{ "method" : "GET" }],
+    "v1/users/login/result"   = [{ "method" : "GET" }],
+    "v1/users/token/logout"   = [{ "method" : "GET" }],
+    "v1/users/token/refresh"  = [{ "method" : "GET" }],
+  } : null
+
+  # In order to support multiple request methods, we need to be able to loop on all method types
+  # the path might have
+  flattened_root_endpoints = flatten([
+    for endpoint, config_list in local.root_endpoints : [
+      for config in config_list : {
+        "id" : "${endpoint}-${config.method}",
+        "endpoint" : endpoint,
+        "method" : config.method,
+        "api_key_required" : lookup(config, "api_key_required", false),
+        "method_parameters" : lookup(config, "method_parameters", {}),
+        "request_parameters" : lookup(config, "request_parameters", {})
+      }
+    ]
+  ])
+  flattened_first_level_endpoints = flatten([
+    for endpoint, config_list in local.first_level_endpoints : [
+      for config in config_list : {
+        "id" : "${endpoint}-${config.method}",
+        "endpoint" : endpoint,
+        "method" : config.method,
+        "api_key_required" : lookup(config, "api_key_required", false),
+        "method_parameters" : lookup(config, "method_parameters", {}),
+        "request_parameters" : lookup(config, "request_parameters", {})
+      }
+    ]
+  ])
+  flattened_second_level_endpoints = flatten([
+    for endpoint, config_list in local.second_level_endpoints : [
+      for config in config_list : {
+        "id" : "${endpoint}-${config.method}",
+        "endpoint" : endpoint,
+        "method" : config.method,
+        "api_key_required" : lookup(config, "api_key_required", false),
+        "method_parameters" : lookup(config, "method_parameters", {}),
+        "request_parameters" : lookup(config, "request_parameters", {})
+      }
+    ]
+  ])
+  flattened_third_level_endpoints = flatten([
+    for endpoint, config_list in local.third_level_endpoints : [
+      for config in config_list : {
+        "id" : "${endpoint}-${config.method}",
+        "endpoint" : endpoint,
+        "method" : config.method,
+        "api_key_required" : lookup(config, "api_key_required", false),
+        "method_parameters" : lookup(config, "method_parameters", {}),
+        "request_parameters" : lookup(config, "request_parameters", {})
+      }
+    ]
+  ])
+
+  root_endpoint_methods         = { for config in local.flattened_root_endpoints : config.id => config }
+  first_level_endpoint_methods  = { for config in local.flattened_first_level_endpoints : config.id => config }
+  second_level_endpoint_methods = { for config in local.flattened_second_level_endpoints : config.id => config }
+  third_level_endpoint_methods  = { for config in local.flattened_third_level_endpoints : config.id => config }
+}
+
 resource "aws_api_gateway_rest_api" "api" {
   count = var.enable_api_gateway ? 1 : 0
   name  = var.service_name
@@ -5,237 +146,179 @@ resource "aws_api_gateway_rest_api" "api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+}
 
-  body = jsonencode({
-    "openapi" : "3.0.1",
-    "paths" : {
-      "/" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/health" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/health",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      # Login flow endpoints
-      "/v1/users/login" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/v1/users/login/callback" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/callback",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/v1/users/login/result" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/login/result",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/v1/users/token/logout" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/token/logout",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/v1/users/token/refresh" : {
-        "post" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "POST",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/v1/users/token/refresh",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      # Swagger
-      "/docs" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/docs",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/static/{proxy+}" : {
-        "get" : {
-          "parameters" : [
-            {
-              "name" : "proxy",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          ],
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/static/{proxy}",
-            "requestParameters" : {
-              "integration.request.path.proxy" : "method.request.path.proxy"
-            },
-            "passthroughBehavior" : "when_no_match",
-            "cacheKeyParameters" : [
-              "method.request.path.proxy"
-            ]
-          }
-        }
-      },
-      # DNS
-      "/.well-known/pki-validation/{proxy+}" : {
-        "get" : {
-          "parameters" : [
-            {
-              "name" : "proxy",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          ],
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/.well-known/pki-validation/{proxy}",
-            "requestParameters" : {
-              "integration.request.path.proxy" : "method.request.path.proxy"
-            },
-            "passthroughBehavior" : "when_no_match",
-            "cacheKeyParameters" : [
-              "method.request.path.proxy"
-            ]
-          }
-        }
-      },
-      # Bots
-      "/robots.txt" : {
-        "get" : {
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "GET",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/robots.txt",
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      # Legacy SOAP endpoints
-      "/grantsws-agency/services/v2/{service_port_name}" : {
-        "post" : {
-          "parameters" : [
-            {
-              "name" : "service_port_name",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          ],
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "POST",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/grantsws-agency/services/v2/{service_port_name}",
-            "requestParameters" : {
-              "integration.request.path.service_port_name" : "method.request.path.service_port_name",
-            },
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      "/grantsws-applicant/services/v2/{service_port_name}" : {
-        "post" : {
-          "parameters" : [
-            {
-              "name" : "service_port_name",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          ],
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "POST",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/grantsws-applicant/services/v2/{service_port_name}",
-            "requestParameters" : {
-              "integration.request.path.service_port_name" : "method.request.path.service_port_name",
-            },
-            "passthroughBehavior" : "when_no_match"
-          }
-        }
-      },
-      # Else, proxy and require API token auth
-      "/{proxy+}" : {
-        "x-amazon-apigateway-any-method" : {
-          "parameters" : [
-            {
-              "name" : "proxy",
-              "in" : "path",
-              "required" : true,
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          ],
-          "security" : [
-            {
-              "api_key" : []
-            }
-          ],
-          "x-amazon-apigateway-integration" : {
-            "type" : "http_proxy",
-            "httpMethod" : "ANY",
-            "uri" : "https://${var.optional_extra_alb_domains[0]}/{proxy}",
-            "requestParameters" : {
-              "integration.request.path.proxy" : "method.request.path.proxy",
-            },
-            "passthroughBehavior" : "when_no_match",
-            "timeoutInMillis" : 29000
-          }
-        }
-      },
-    }
-  })
-  # checkov:skip=CKV_AWS_237: Create before destroy is defined in deployment below
-  put_rest_api_mode = "merge"
+resource "aws_api_gateway_method" "root" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  rest_api_id   = aws_api_gateway_rest_api.api[0].id
+  resource_id   = aws_api_gateway_rest_api.api[0].root_resource_id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "root" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  http_method             = "GET"
+  integration_http_method = "GET"
+
+  resource_id = aws_api_gateway_rest_api.api[0].root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+  type        = "HTTP_PROXY"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 29000
+
+  uri = "https://${var.optional_extra_alb_domains[0]}/"
+}
+
+resource "aws_api_gateway_resource" "root_endpoints" {
+  for_each = local.root_endpoints
+
+  parent_id   = aws_api_gateway_rest_api.api[0].root_resource_id
+  path_part   = each.key
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+}
+
+resource "aws_api_gateway_method" "root_endpoints" {
+  for_each = local.root_endpoint_methods
+
+  rest_api_id   = aws_api_gateway_rest_api.api[0].id
+  resource_id   = aws_api_gateway_resource.root_endpoints[each.value.endpoint].id
+  http_method   = each.value.method
+  authorization = "NONE"
+
+  request_parameters = each.value.method_parameters
+  api_key_required   = each.value.api_key_required
+}
+
+resource "aws_api_gateway_integration" "root_endpoints" {
+  for_each = local.root_endpoint_methods
+
+  http_method             = each.value.method
+  integration_http_method = each.value.method
+
+  resource_id = aws_api_gateway_resource.root_endpoints[each.value.endpoint].id
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+  type        = "HTTP_PROXY"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 29000
+
+  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  request_parameters = each.value.request_parameters
+}
+
+resource "aws_api_gateway_resource" "first_level_endpoints" {
+  for_each = local.first_level_endpoints
+
+  parent_id   = aws_api_gateway_resource.root_endpoints[split("/", each.key)[0]].id
+  path_part   = split("/", each.key)[1]
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+}
+
+resource "aws_api_gateway_method" "first_level_endpoints" {
+  for_each = local.first_level_endpoint_methods
+
+  rest_api_id   = aws_api_gateway_rest_api.api[0].id
+  resource_id   = aws_api_gateway_resource.first_level_endpoints[each.value.endpoint].id
+  http_method   = each.value.method
+  authorization = "NONE"
+
+  request_parameters = each.value.method_parameters
+  api_key_required   = each.value.api_key_required
+}
+
+resource "aws_api_gateway_integration" "first_level_endpoints" {
+  for_each = local.first_level_endpoint_methods
+
+  http_method             = each.value.method
+  integration_http_method = each.value.method
+
+  resource_id = aws_api_gateway_resource.first_level_endpoints[each.value.endpoint].id
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+  type        = "HTTP_PROXY"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 29000
+
+  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  request_parameters = each.value.request_parameters
+}
+
+resource "aws_api_gateway_resource" "second_level_endpoints" {
+  for_each = local.second_level_endpoints
+
+  parent_id   = aws_api_gateway_resource.first_level_endpoints[join("/", slice(split("/", each.key), 0, 2))].id
+  path_part   = split("/", each.key)[2]
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+}
+
+resource "aws_api_gateway_method" "second_level_endpoints" {
+  for_each = local.second_level_endpoint_methods
+
+  rest_api_id   = aws_api_gateway_rest_api.api[0].id
+  resource_id   = aws_api_gateway_resource.second_level_endpoints[each.value.endpoint].id
+  http_method   = each.value.method
+  authorization = "NONE"
+
+  request_parameters = each.value.method_parameters
+  api_key_required   = each.value.api_key_required
+}
+
+resource "aws_api_gateway_integration" "second_level_endpoints" {
+  for_each = local.second_level_endpoint_methods
+
+  http_method             = each.value.method
+  integration_http_method = each.value.method
+
+  resource_id = aws_api_gateway_resource.second_level_endpoints[each.value.endpoint].id
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+  type        = "HTTP_PROXY"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 29000
+
+  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  request_parameters = each.value.request_parameters
+}
+
+resource "aws_api_gateway_resource" "third_level_endpoints" {
+  for_each = local.third_level_endpoints
+
+  parent_id   = aws_api_gateway_resource.second_level_endpoints[join("/", slice(split("/", each.key), 0, 3))].id
+  path_part   = split("/", each.key)[3]
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+}
+
+resource "aws_api_gateway_method" "third_level_endpoints" {
+  for_each = local.third_level_endpoint_methods
+
+  rest_api_id   = aws_api_gateway_rest_api.api[0].id
+  resource_id   = aws_api_gateway_resource.third_level_endpoints[each.value.endpoint].id
+  http_method   = each.value.method
+  authorization = "NONE"
+
+  request_parameters = each.value.method_parameters
+  api_key_required   = each.value.api_key_required
+}
+
+resource "aws_api_gateway_integration" "third_level_endpoints" {
+  for_each = local.third_level_endpoint_methods
+
+  http_method             = each.value.method
+  integration_http_method = each.value.method
+
+  resource_id = aws_api_gateway_resource.third_level_endpoints[each.value.endpoint].id
+  rest_api_id = aws_api_gateway_rest_api.api[0].id
+  type        = "HTTP_PROXY"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
+  timeout_milliseconds = 29000
+
+  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  request_parameters = each.value.request_parameters
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
@@ -243,8 +326,9 @@ resource "aws_api_gateway_deployment" "api_deployment" {
 
   rest_api_id = aws_api_gateway_rest_api.api[0].id
 
+  # Redeploys on any change to this file
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.api[0].body))
+    redeployment = filesha1("${path.module}/api_gateway.tf")
   }
 
   lifecycle {
@@ -406,4 +490,12 @@ resource "aws_api_gateway_api_key" "frontend_api_access" {
   # Because we can't automatically save the value of the token via terraform, we have to manually
   # save it to SSM. That parameter is created below
   description = "Frontend key for access the ${var.service_name} ECS service via the API Gateway"
+}
+
+resource "aws_api_gateway_usage_plan_key" "frontend_api_access" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  key_id        = aws_api_gateway_api_key.frontend_api_access[0].id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.api_internal_usage_plan[0].id
 }
