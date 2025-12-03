@@ -7,15 +7,7 @@ from pathlib import Path
 
 import click
 
-from src.form_schema.forms.budget_narrative_attachment import (
-    FORM_XML_TRANSFORM_RULES as BUDGET_NARRATIVE_TRANSFORM_RULES,
-)
-from src.form_schema.forms.project_narrative_attachment import (
-    FORM_XML_TRANSFORM_RULES as PROJECT_NARRATIVE_TRANSFORM_RULES,
-)
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
+from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -25,15 +17,6 @@ from src.services.xml_generation.validation.test_cases import (
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
-
-# Map form names to their transform rules
-FORM_TRANSFORM_RULES_MAP = {
-    "SF424_4_0": SF424_TRANSFORM_RULES,
-    "SF424A": SF424A_TRANSFORM_RULES,
-    "ProjectNarrativeAttachments_1_2": PROJECT_NARRATIVE_TRANSFORM_RULES,
-    "BudgetNarrativeAttachments_1_2": BUDGET_NARRATIVE_TRANSFORM_RULES,
-    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
-}
 
 
 @task_blueprint.cli.command("generate-xml")
@@ -106,10 +89,11 @@ def generate_xml_command(
             sys.exit(1)
 
         # Get transform config for the specified form
-        transform_config = FORM_TRANSFORM_RULES_MAP.get(form)
+        form_transform_rules_map = _build_xml_form_map()
+        transform_config = form_transform_rules_map.get(form.upper())
         if not transform_config:
             click.echo(
-                f"Error: Unknown form '{form}'. Available forms: {', '.join(FORM_TRANSFORM_RULES_MAP.keys())}",
+                f"Error: Unknown form '{form}'. Available forms: {', '.join(form_transform_rules_map.keys())}",
                 err=True,
             )
             sys.exit(1)
