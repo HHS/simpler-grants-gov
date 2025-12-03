@@ -58,13 +58,13 @@ def simpler_soap_api_route(
             full_path=request.full_path,
             headers=dict(request.headers),
             data=request.data,
-            auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY)),
+            auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY), db_session=db_session),
             operation_name=operation_name,
         )
         if alternate_proxy_response := get_alternate_proxy_response(soap_request):
             soap_proxy_response = alternate_proxy_response
         else:
-            soap_proxy_response = get_proxy_response(soap_request, db_session=db_session)
+            soap_proxy_response = get_proxy_response(soap_request)
     except Exception:
         logger.exception(
             msg="Error getting soap proxy response",

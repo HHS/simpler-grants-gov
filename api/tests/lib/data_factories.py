@@ -134,5 +134,6 @@ def setup_cert_user(
         serial_number=legacy_certificate.serial_number,
         cert="123",
         fingerprint="456",
+        legacy_certificate_id=str(legacy_certificate.legacy_certificate_id),
     )
     return legacy_certificate.user, legacy_certificate, role, soap_client_certificate

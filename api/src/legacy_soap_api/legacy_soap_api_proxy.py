@@ -4,7 +4,6 @@ from tempfile import NamedTemporaryFile
 
 from requests import Request, Session
 
-from src.adapters import db
 from src.legacy_soap_api.legacy_soap_api_auth import (
     MTLS_CERT_HEADER_KEY,
     SessionResumptionAdapter,
@@ -26,9 +25,7 @@ logger = logging.getLogger(__name__)
 PROXY_TIMEOUT = 3600
 
 
-def get_proxy_response(
-    soap_request: SOAPRequest, db_session: db.Session, timeout: int = PROXY_TIMEOUT
-) -> SOAPResponse:
+def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
     config = get_soap_config()
 
     # Use X-Gg-S2S-Uri header locally if passed, otherwise default to GRANTS_GOV_URI:GRANTS_GOV_PORT.
@@ -56,9 +53,7 @@ def get_proxy_response(
     with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
         temp_file_path = temp_cert_file.name
         try:
-            cert = soap_request.auth.certificate.get_pem(
-                config.soap_auth_map, db_session=db_session
-            )
+            cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
         except SOAPClientCertificateLookupError:
             # This exception handles invalid client certs. We will continue to return the response
             # from GG.

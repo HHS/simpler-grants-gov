@@ -14,6 +14,7 @@ import src.adapters.db as db
 from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
@@ -33,26 +34,17 @@ class SOAPClientCertificate(BaseModel):
     cert: str
     serial_number: int
     fingerprint: str
+    legacy_certificate_id: str
 
-    def get_pem(self, key_map: dict, db_session: db.Session) -> str:
+    def get_pem(self, key_map: dict) -> str:
         """Note that this auth mechanism will only be configured in lower environments
 
         There will be no prod configurations for this auth mechanism.
         TODO - is the above true? I think this happens for prod as well?
         """
 
-        legacy_certificate_id = db_session.execute(
-            select(LegacyCertificate.legacy_certificate_id).where(
-                LegacyCertificate.serial_number == str(self.serial_number)
-            )
-        ).scalar_one_or_none()
-        if not legacy_certificate_id:
-            raise SOAPClientCertificateLookupError(
-                "could not retrieve legacy cert for serial number"
-            ) from None
-
         try:
-            value = key_map[str(legacy_certificate_id)]
+            value = key_map[self.legacy_certificate_id]
             return f"{value}\n\n{self.cert}"
         except KeyError:
             raise SOAPClientCertificateNotConfigured("cert is not configured") from None
@@ -80,7 +72,7 @@ class SessionResumptionAdapter(HTTPAdapter):
         super().init_poolmanager(*args, **kwargs)
 
 
-def get_soap_auth(mtls_cert: str | None) -> SOAPAuth | None:
+def get_soap_auth(mtls_cert: str | None, db_session: db.Session) -> SOAPAuth | None:
     if not mtls_cert:
         logger.info(
             "soap_client_certificate: no certificate received from header",
@@ -91,7 +83,7 @@ def get_soap_auth(mtls_cert: str | None) -> SOAPAuth | None:
     logger.info("soap_client_certificate: certificate received header")
     auth = None
     try:
-        auth = SOAPAuth(certificate=get_soap_client_certificate(mtls_cert))
+        auth = SOAPAuth(certificate=get_soap_client_certificate(mtls_cert, db_session))
         logger.info(
             "soap_client_certificate: successfully extracted certificate and serial number",
             extra={"soap_api_event": LegacySoapApiEvent.PARSED_CERT},
@@ -105,14 +97,37 @@ def get_soap_auth(mtls_cert: str | None) -> SOAPAuth | None:
     return auth
 
 
-def get_soap_client_certificate(urlencoded_cert: str) -> SOAPClientCertificate:
+def get_soap_client_certificate(
+    urlencoded_cert: str, db_session: db.Session
+) -> SOAPClientCertificate:
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
+
+    legacy_certificate = db_session.execute(
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
+    ).scalar_one_or_none()
+    if not legacy_certificate:
+        raise SOAPClientCertificateLookupError(
+            "could not retrieve legacy cert for serial number"
+        ) from None
+    add_extra_data_to_current_request_logs(
+        {
+            "legacy_certificate_id": legacy_certificate.legacy_certificate_id,
+        }
+    )
+    if legacy_certificate.agency:
+        add_extra_data_to_current_request_logs(
+            {
+                "agency_code": legacy_certificate.agency.agency_code,
+            }
+        )
+
     return SOAPClientCertificate(
         cert=cert_str,
         fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
         issuer=cert.issuer.rfc4514_string(),
         serial_number=cert.serial_number,
+        legacy_certificate_id=legacy_certificate.legacy_certificate_id,
     )
 
 
