@@ -1,9 +1,15 @@
+from dataclasses import dataclass
+from typing import Any
+
+from marshmallow import pre_dump
+
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Email, Length, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
 from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
+from src.db.models.user_models import OrganizationUser
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -55,14 +61,22 @@ class OrganizationDataSchema(Schema):
     )
 
 
-class OrganizationMemberSchema(Schema):
+@dataclass
+class EnrichedOrganizationUser:
+    """OrganizationUser enriched with computed fields for serialization."""
+
+    org_user: OrganizationUser
+    is_ebiz_poc: bool
+
+
+class OrganizationUserSchema(Schema):
     """Schema for organization member information"""
 
     user_id = fields.UUID(
         metadata={
             "description": "User unique identifier",
             "example": "123e4567-e89b-12d3-a456-426614174000",
-        }
+        },
     )
     email = fields.String(
         allow_none=True,
@@ -73,17 +87,42 @@ class OrganizationMemberSchema(Schema):
         metadata={"description": "User roles in this organization"},
     )
     first_name = fields.String(
-        allow_none=True, metadata={"description": "User first name", "example": "John"}
+        allow_none=True,
+        metadata={"description": "User first name", "example": "John"},
     )
     last_name = fields.String(
-        allow_none=True, metadata={"description": "User last name", "example": "Smith"}
+        allow_none=True,
+        metadata={"description": "User last name", "example": "Smith"},
     )
     is_ebiz_poc = fields.Boolean(
         metadata={
             "description": "Whether the user is the EBiz POC (Electronic Business Point of Contact) for the organization in SAM.gov",
             "example": False,
-        }
+        },
     )
+
+    @pre_dump
+    def flatten_organization_user(
+        self, enriched_user: EnrichedOrganizationUser, **kwargs: Any
+    ) -> dict:
+
+        org_user = enriched_user.org_user
+
+        return {
+            "user_id": org_user.user.user_id,
+            "email": org_user.user.email,
+            "roles": [
+                {
+                    "role_id": org_user_role.role_id,
+                    "role_name": org_user_role.role.role_name,
+                    "privileges": org_user_role.role.privileges,
+                }
+                for org_user_role in org_user.organization_user_roles
+            ],
+            "first_name": org_user.user.profile.first_name if org_user.user.profile else None,
+            "last_name": org_user.user.profile.last_name if org_user.user.profile else None,
+            "is_ebiz_poc": enriched_user.is_ebiz_poc,
+        }
 
 
 class OrganizationGetResponseSchema(AbstractResponseSchema):
@@ -114,7 +153,7 @@ class OrganizationUsersResponseSchema(AbstractResponseSchema, PaginationMixinSch
     """Schema for POST /organizations/:organization_id/users response"""
 
     data = fields.List(
-        fields.Nested(OrganizationMemberSchema),
+        fields.Nested(OrganizationUserSchema),
         metadata={"description": "List of organization members"},
     )
 

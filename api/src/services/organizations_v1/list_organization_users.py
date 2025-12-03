@@ -1,12 +1,13 @@
-from typing import Any, Sequence
+from collections.abc import Sequence
 from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import and_, asc, desc, select
-from sqlalchemy.sql.selectable import Select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql.selectable import Select
 
 import src.adapters.db as db
+from src.api.organizations_v1.organization_schemas import EnrichedOrganizationUser
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import (
@@ -48,8 +49,9 @@ def _build_organization_users_query(organization_id: UUID) -> Select:
         )
         .outerjoin(UserProfile, UserProfile.user_id == User.user_id)
         .options(
-            # Keep selectinload for eager loading data
+            # Eager load user and related data
             selectinload(OrganizationUser.user).selectinload(User.linked_login_gov_external_user),
+            selectinload(OrganizationUser.user).selectinload(User.profile),
             selectinload(OrganizationUser.organization_user_roles).selectinload(
                 OrganizationUserRole.role
             ),
@@ -93,9 +95,46 @@ def _apply_organization_users_sorting(stmt: Select, sort_order: list) -> Select:
     return stmt.order_by(*order_cols)
 
 
+def _enrich_org_users_with_ebiz_poc(
+    org_users: Sequence[OrganizationUser], organization: Organization
+) -> list[EnrichedOrganizationUser]:
+    """Enrich OrganizationUser objects with is_ebiz_poc computed field.
+
+    Wraps each OrganizationUser in an EnrichedOrganizationUser dataclass that
+    includes is_ebiz_poc=True for the user whose email matches the organization's
+    SAM.gov entity ebiz_poc_email (case-insensitive).
+
+    Args:
+        org_users: List of OrganizationUser objects to enrich
+        organization: Organization with sam_gov_entity eagerly loaded
+
+    Returns:
+        List of EnrichedOrganizationUser objects ready for serialization
+    """
+    # Get ebiz_poc_email for comparison
+    ebiz_poc_email = (
+        organization.sam_gov_entity.ebiz_poc_email.lower()
+        if organization.sam_gov_entity and organization.sam_gov_entity.ebiz_poc_email
+        else None
+    )
+
+    # Wrap each OrganizationUser with is_ebiz_poc flag
+    return [
+        EnrichedOrganizationUser(
+            org_user=org_user,
+            is_ebiz_poc=(
+                ebiz_poc_email is not None
+                and org_user.user.email is not None
+                and org_user.user.email.lower() == ebiz_poc_email
+            ),
+        )
+        for org_user in org_users
+    ]
+
+
 def get_organization_users_and_verify_access(
     db_session: db.Session, user: User, organization_id: UUID, request_data: dict
-) -> tuple[list[dict[str, Any]], PaginationInfo]:
+) -> tuple[list[EnrichedOrganizationUser], PaginationInfo]:
     """Get organization users with pagination and verify user has access.
 
     Args:
@@ -105,7 +144,7 @@ def get_organization_users_and_verify_access(
         request_data: Request data containing pagination params
 
     Returns:
-        tuple: (list of user dicts, pagination info)
+        tuple: (list of EnrichedOrganizationUser objects, pagination info)
 
     Raises:
         FlaskError: 404 if organization not found, 403 if access denied
@@ -119,11 +158,11 @@ def get_organization_users_and_verify_access(
     # Build base query with joins for sorting
     stmt = _build_organization_users_query(organization_id)
 
-    # Apply sorting with NULLS LAST handling
+    # Apply sorting
     stmt = _apply_organization_users_sorting(stmt, params.pagination.sort_order)
 
     # Paginate
-    paginator = Paginator(
+    paginator: Paginator[OrganizationUser] = Paginator(
         OrganizationUser, stmt, db_session, page_size=params.pagination.page_size
     )
 
@@ -132,51 +171,7 @@ def get_organization_users_and_verify_access(
     # Build pagination info
     pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
 
-    # Transform to response format
-    users_data = get_organization_users(db_session, organization, org_users)
+    # Enrich organization users with is_ebiz_poc computed field
+    enriched_users = _enrich_org_users_with_ebiz_poc(org_users, organization)
 
-    return users_data, pagination_info
-
-
-def get_organization_users(
-    db_session: db.Session, organization: Organization, org_users: Sequence[OrganizationUser]
-) -> list[dict[str, Any]]:
-    """Transform organization users to response format.
-
-    Args:
-        db_session: Database session
-        organization: Organization object with sam_gov_entity eagerly loaded
-        org_users: Already-fetched OrganizationUser objects
-
-    Returns:
-        list[dict]: List of user data with roles and privileges
-    """
-    # Get ebiz_poc_email once for comparison
-    ebiz_poc_email = (
-        organization.sam_gov_entity.ebiz_poc_email.lower()
-        if organization.sam_gov_entity and organization.sam_gov_entity.ebiz_poc_email
-        else None
-    )
-
-    return [
-        {
-            "user_id": org_user.user.user_id,
-            "email": org_user.user.email,
-            "roles": [
-                {
-                    "role_id": org_user_role.role.role_id,
-                    "role_name": org_user_role.role.role_name,
-                    "privileges": [priv.value for priv in org_user_role.role.privileges],
-                }
-                for org_user_role in org_user.organization_user_roles
-            ],
-            "first_name": org_user.user.profile.first_name if org_user.user.profile else None,
-            "last_name": org_user.user.profile.last_name if org_user.user.profile else None,
-            "is_ebiz_poc": (
-                ebiz_poc_email is not None
-                and org_user.user.email is not None
-                and org_user.user.email.lower() == ebiz_poc_email
-            ),
-        }
-        for org_user in org_users
-    ]
+    return enriched_users, pagination_info

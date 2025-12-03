@@ -99,11 +99,11 @@ def organization_users_list(
         db_session.add(user_token_session)
 
         # Get organization users using service layer with pagination
-        users, pagination_info = get_organization_users_and_verify_access(
+        org_users, pagination_info = get_organization_users_and_verify_access(
             db_session, user_token_session.user, organization_id, json_data
         )
 
-    return response.ApiResponse(message="Success", data=users, pagination_info=pagination_info)
+    return response.ApiResponse(message="Success", data=org_users, pagination_info=pagination_info)
 
 
 @organization_blueprint.post("/<uuid:organization_id>/roles/list")
