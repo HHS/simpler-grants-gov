@@ -7,6 +7,19 @@ from tests.lib.organization_test_utils import create_user_in_org, create_user_no
 from tests.src.db.models.factories import OrganizationFactory, UserProfileFactory
 
 
+def _default_pagination_request(
+    page_offset=1, page_size=10, order_by="email", sort_direction="ascending"
+):
+    """Helper to create default pagination request body."""
+    return {
+        "pagination": {
+            "page_offset": page_offset,
+            "page_size": page_size,
+            "sort_order": [{"order_by": order_by, "sort_direction": sort_direction}],
+        }
+    }
+
+
 class TestListOrganizationUsers:
     """Test POST /v1/organizations/:organization_id/users endpoint"""
 
@@ -31,6 +44,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -38,6 +52,12 @@ class TestListOrganizationUsers:
 
         assert data["message"] == "Success"
         assert len(data["data"]) == 2
+
+        # Verify pagination info
+        assert data["pagination_info"]["page_offset"] == 1
+        assert data["pagination_info"]["page_size"] == 10
+        assert data["pagination_info"]["total_records"] == 2
+        assert data["pagination_info"]["total_pages"] == 1
 
         # Verify correct users are returned
         returned_user_ids = {user["user_id"] for user in data["data"]}
@@ -77,6 +97,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -111,6 +132,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         # This should return 403 because user is not a member of other_organization
@@ -130,6 +152,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 403
@@ -151,6 +174,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 403
@@ -169,6 +193,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 403
@@ -185,6 +210,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{non_existent_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 404
@@ -193,7 +219,9 @@ class TestListOrganizationUsers:
         """Test that accessing organization users without auth token returns 401"""
         random_org_id = str(uuid.uuid4())
 
-        resp = client.post(f"/v1/organizations/{random_org_id}/users")
+        resp = client.post(
+            f"/v1/organizations/{random_org_id}/users", json=_default_pagination_request()
+        )
 
         assert resp.status_code == 401
 
@@ -204,6 +232,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{random_org_id}/users",
             headers={"X-SGG-Token": "invalid-token"},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 401
@@ -222,6 +251,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -251,6 +281,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -287,6 +318,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
         assert resp.status_code == expected_status
 
@@ -334,6 +366,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": ebiz_token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -373,6 +406,7 @@ class TestListOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
