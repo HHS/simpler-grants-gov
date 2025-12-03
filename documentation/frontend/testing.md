@@ -26,7 +26,7 @@ Using this function, tests should work automatically in CI, but they will requir
 
 ### Helpful common patterns
 
-Before writing tests, familiarize yourself with the testing utilities that we have written to deal with common testing scenarios
+Before writing tests, familiarize yourself with the [testing utilities](https://github.com/HHS/simpler-grants-gov/tree/main/frontend/src/utils/testing) that we have written to deal with common or complex testing scenarios
 
 #### Async components
 
