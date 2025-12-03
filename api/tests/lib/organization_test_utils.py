@@ -19,6 +19,7 @@ def create_user_in_org(
     sam_gov_entity=None,
     role=None,
     privileges: list[Privilege] = None,
+    email=None,
     **kwargs
 ) -> tuple:
     """Create a user in an organization with specified privileges.
@@ -32,6 +33,7 @@ def create_user_in_org(
         organization: Existing organization to use (creates new one if None)
         sam_gov_entity: SAM.gov entity to associate with organization
         role: Role to assign to user
+        email: Optional email address for the user
         **kwargs: Additional arguments passed to factory creation
 
     Returns:
@@ -39,7 +41,10 @@ def create_user_in_org(
     """
     # Create user with external login
     user = UserFactory.create()
-    LinkExternalUserFactory.create(user=user)
+    link_kwargs = {"user": user}
+    if email is not None:
+        link_kwargs["email"] = email
+    LinkExternalUserFactory.create(**link_kwargs)
 
     # Create organization if not provided
     if organization is None:
