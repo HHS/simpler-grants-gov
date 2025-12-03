@@ -1,12 +1,9 @@
 import { render, screen } from "@testing-library/react";
+import { OrganizationsPage } from "src/app/[locale]/(base)/organizations/page";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserDetail } from "src/types/userTypes";
-import {
-  checkFeatureFlagRedirect,
-  getFeatureFlagMockedPage,
-} from "tests/utils/featureFlagUtils";
-
-import React from "react";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
+import { checkFeatureFlagRedirect } from "tests/utils/featureFlagUtils";
 
 jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,
@@ -64,10 +61,10 @@ describe("Organizations page feature flag wiring", () => {
   });
 
   it("the happy path page should have a table and heading", async () => {
-    const organizationsPage = await getFeatureFlagMockedPage(
-      organizationsPageLocation,
-    );
-    render(organizationsPage);
+    const component = await OrganizationsPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(component);
 
     expect(await screen.findByText("pageTitle")).toBeVisible();
     expect(await screen.findByTestId("user-org-list")).toBeVisible();
@@ -75,11 +72,10 @@ describe("Organizations page feature flag wiring", () => {
 
   it("errors fetching data show an error message", async () => {
     organizations.mockRejectedValue(new Error("failure"));
-    const organizationsPage = await getFeatureFlagMockedPage(
-      organizationsPageLocation,
-    );
-    render(organizationsPage);
-
+    const component = await OrganizationsPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(component);
     expect(await screen.findByTestId("alert")).toBeVisible();
     expect(await screen.findByText("errorMessage")).toBeVisible();
   });
@@ -89,8 +85,13 @@ describe("Organizations page feature flag wiring", () => {
       token: undefined,
       user_id: undefined,
     });
-    await expect(
-      getFeatureFlagMockedPage(organizationsPageLocation),
-    ).rejects.toThrow();
+
+    const error = await wrapForExpectedError(() =>
+      OrganizationsPage({
+        params: Promise.resolve({ locale: "en" }),
+      }),
+    );
+
+    expect(error).toBeInstanceOf(Error);
   });
 });
