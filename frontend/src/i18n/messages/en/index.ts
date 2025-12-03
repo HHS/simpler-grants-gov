@@ -485,20 +485,18 @@ export const messages = {
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You're subscribed",
-    intro:
-      "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "We'll keep you informed of our progress and every opportunity to get involved.",
   },
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
-    title: "You have unsubscribed",
-    intro:
-      "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    title: "You've been unsubscribed",
+    paragraph:
+      "You'll no longer receive project updates from Simpler.Grants.gov.",
+    cta: "Change your mind?",
     buttonResub: "Re-subscribe",
+  },
+  SendyDisclaimer: {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -618,6 +616,8 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      activityDashboard: "Activity Dashboard",
+      applications: "Applications",
       community: "Community",
       developer: "Developer Portal",
       developers: "Developers",
@@ -627,6 +627,7 @@ export const messages = {
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
+      organizations: "Organizations",
       research: "Research",
       roadmap: "Product roadmap",
       savedOpportunities: "Saved opportunities",
@@ -637,6 +638,7 @@ export const messages = {
       wiki: "Public wiki",
       workspace: "Workspace",
       account: "My account",
+      testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -699,6 +701,7 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    unauthorizedExplanation: "This content is not available",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
@@ -1425,13 +1428,6 @@ export const messages = {
   returnToGrants: {
     message: "Return to Grants.gov",
   },
-  BookmarkBanner: {
-    title: "Bookmark this page",
-    message:
-      "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
-    technicalSupportMessage:
-      "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
-  },
   UserAccount: {
     pageTitle: "User Account | Simpler.Grants.gov",
     title: "User Account",
@@ -1451,9 +1447,9 @@ export const messages = {
     errorHeading: "Error",
     successHeading: "Account updated",
   },
-  UserWorkspace: {
-    pageTitle: "User Workspace | Simpler.Grants.gov",
-    title: "<color>Welcome</color> to your workspace.",
+  ActivityDashboard: {
+    pageTitle: "Activity Dashboard | Simpler.Grants.gov",
+    title: "Welcome to your activity dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
     organizations: "Your organizations",
     noOrganizations: {
@@ -1462,7 +1458,7 @@ export const messages = {
         "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
     },
     organizationButtons: {
-      view: "View organization details",
+      view: "View details",
       manage: "Manage users",
     },
     linksSection: {
@@ -1482,6 +1478,33 @@ export const messages = {
         description: "Keep track of oppportunities you're interested in.",
         linkText: "View saved opportunities",
       },
+    },
+    invitationReply: {
+      ctaTitle: "would like to add you to their team.",
+      description:
+        "Click Accept to join and gain access to your team, organization details and available applications.",
+      accept: "Accept",
+      reject: "Reject",
+      dismiss: "Dismiss",
+      accepted: {
+        ctaTitle: "Congrats, you've been added to {orgName}!",
+        description:
+          "Join your team by collaborating on applications and searching for the right opportunities.",
+      },
+      rejected: {
+        ctaTitle: "The invitation has been rejected.",
+        description:
+          "If you change your mind, an organization admin can add you again.",
+      },
+      rejectConfirmation: {
+        ctaTitle:
+          "Are you sure you want to reject this organization's invitation?",
+        description:
+          "You'll need to be re-added by an organization admin if you change your mind later.",
+        confirm: "Reject invitation",
+        cancel: "Cancel",
+      },
+      apiError: "Unable to update user organization invitation.",
     },
   },
   OrganizationDetail: {
@@ -1510,20 +1533,38 @@ export const messages = {
   ManageUsers: {
     pageTitle: "Manage Users | Simpler.Grants.gov",
     pageHeading: "Manage Users",
-    activeUsersHeading: "Active Users",
+    activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
+    activeUsersFetchError:
+      "We have encountered an error retrieving the Active Users roster, please try again later.",
+    activeUsersTableZeroState: "There are no active users.",
     grantsGovUsersHeading: "Grants.gov Users",
     grantsGovUsersTableDescription:
       "Manage users from your Grants.gov organization here in Simpler.",
-    pendingUsersHeading: "Pending Users",
-    pendingUsersTableDescription:
-      "Any users waiting to join your organization will appear below.",
-    errors: {
-      fetchError: "Failed to get Users",
-      notLoggedInMessage: "You are not logged in",
+    invitedUsersHeading: "Invited users",
+    invitedUsersTableDescription:
+      "These users have been invited to join your organization but haven't accepted yet. Once they accept, the'll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+    invitedUsersFetchError:
+      "We have encountered an error retrieving the Invited Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no invited users.",
+    roleManager: {
+      errorState:
+        "We were unable to make the change requested at this time. Please try again.",
+      cancel: "Cancel",
+      changeUserRole: "Change user role",
+    },
+    removeUserModal: {
+      header: "Are you sure you want to remove this user?",
+      description:
+        "Removing them will revoke their access and may impact any work they have not yet submitted. If they need access again, an administrator will have to add them back.",
+      errorState: "We couldn't remove this user. Please try again.",
+      cancel: "Cancel",
+      removeUser: "Remove User",
+      removing: "Removing...",
     },
     usersTable: {
+      actionsHeading: "Actions",
       admin: "Administrator",
       emailHeading: "Email",
       member: "Member",
@@ -1563,5 +1604,39 @@ export const messages = {
         role: "Role is required",
       },
     },
+  },
+  Applications: {
+    numApplications: "{num, plural, =1 {1 application} other {# applications}}",
+    errorMessage:
+      "We have encountered an error loading your applications, please try again later.",
+    metaDescription: "View your saved applications",
+    noApplicationsMessage: {
+      primary: "You have not started any applications yet.",
+      secondary:
+        "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Applications",
+    pageTitle: "Applications",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      closeDate: "Close date",
+      status: "Status",
+      applicationName: "Application filing name",
+      type: "Type",
+      opportunity: "Opportunity",
+    },
+  },
+  Organizations: {
+    errorMessage:
+      "We have encountered an error loading your organizations, please try again later.",
+    manageUsers: "Manage Users",
+    metaDescription: "View your organizations",
+    pageHeading: "Organizations",
+    pageTitle: "Organizations",
   },
 };

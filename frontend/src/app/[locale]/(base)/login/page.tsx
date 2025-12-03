@@ -24,7 +24,9 @@ export default function Login() {
         router.push("/");
       }
       router.push(redirectURL || "/");
-      return () => SessionStorage.removeItem("login-redirect");
+      return () => {
+        return SessionStorage.removeItem("login-redirect");
+      };
     } else {
       console.error("window is undefined");
     }

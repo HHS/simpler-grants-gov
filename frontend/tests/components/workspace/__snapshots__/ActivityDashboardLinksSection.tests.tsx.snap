@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActivityDashboardLinksSection matches snapshot 1`] = `
+<div>
+  <div
+    class="margin-top-4"
+  >
+    <h2>
+      heading
+    </h2>
+    <div
+      class="grid-row grid-gap"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-6"
+        data-testid="grid"
+      >
+        <div
+          class="border-base-lighter border-1px padding-2 margin-top-2"
+        >
+          <h3>
+            savedQueries.heading
+          </h3>
+          <p>
+            savedQueries.description
+          </p>
+          <a
+            href="/saved-search-queries"
+          >
+            <button
+              class="usa-button margin-top-2"
+              data-testid="button"
+              type="button"
+            >
+              savedQueries.linkText
+            </button>
+          </a>
+        </div>
+      </div>
+      <div
+        class="tablet:grid-col-6"
+        data-testid="grid"
+      >
+        <div
+          class="border-base-lighter border-1px padding-2 margin-top-2"
+        >
+          <h3>
+            savedOpportunities.heading
+          </h3>
+          <p>
+            savedOpportunities.description
+          </p>
+          <a
+            href="/saved-opportunities"
+          >
+            <button
+              class="usa-button margin-top-2"
+              data-testid="button"
+              type="button"
+            >
+              savedOpportunities.linkText
+            </button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

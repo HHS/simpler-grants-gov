@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -177,24 +177,6 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
         return presign_or_s3_cdnify_url(self.file_location)
 
 
-class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "competition_assistance_listing"
-
-    competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Competition.competition_id), primary_key=True
-    )
-    competition: Mapped[Competition] = relationship(Competition)
-
-    opportunity_assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
-        UUID,
-        ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id),
-        primary_key=True,
-    )
-    opportunity_assistance_listing: Mapped[OpportunityAssistanceListing] = relationship(
-        OpportunityAssistanceListing
-    )
-
-
 class Form(ApiSchemaTable, TimestampMixin):
     __tablename__ = "form"
 
@@ -294,12 +276,35 @@ class Application(ApiSchemaTable, TimestampMixin):
     application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
         "ApplicationAttachment",
         uselist=True,
+        primaryjoin=lambda: and_(
+            Application.application_id == ApplicationAttachment.application_id,
+            ApplicationAttachment.is_deleted.isnot(True),
+        ),
+        # This version of the application attachment relationship is view-only
+        # For the one that can be used to modify, use the _all_application_attachments below.
+        viewonly=True,
+    )
+
+    # Relationship that gets all application attachments INCLUDING DELETED
+    # We likely don't want to use this in most cases, preferring the above
+    # one which has only non-deleted ones.
+    _all_application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+        "ApplicationAttachment",
+        uselist=True,
         back_populates="application",
+        # This mostly exists so that if the app gets deleted, all attachments do as well.
         cascade="all, delete-orphan",
     )
 
     application_submissions: Mapped[list["ApplicationSubmission"]] = relationship(
         "ApplicationSubmission",
+        uselist=True,
+        back_populates="application",
+        cascade="all, delete-orphan",
+    )
+
+    application_audits: Mapped[list["ApplicationAudit"]] = relationship(
+        "ApplicationAudit",
         uselist=True,
         back_populates="application",
         cascade="all, delete-orphan",
@@ -371,6 +376,9 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
     mime_type: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
+
+    # Soft delete flag
+    is_deleted: Mapped[bool | None] = mapped_column(index=True, default=False)
 
     @property
     def download_path(self) -> str:

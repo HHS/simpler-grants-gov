@@ -6,10 +6,23 @@ export interface UserOrganization extends Organization {
 
 export type GatedResourceTypes = "application" | "organization" | "agency";
 
+export type Privileges =
+  | "manage_org_members"
+  | "manage_org_admin_members"
+  | "view_org_membership"
+  | "start_application"
+  | "list_application"
+  | "view_application"
+  | "modify_application"
+  | "submit_application"
+  | "update_form"
+  | "manage_agency_members"
+  | "get_submitted_applications";
+
 export interface UserPrivilegeDefinition {
   resourceId?: string;
   resourceType: GatedResourceTypes;
-  privilege: string; // we can narrow this later
+  privilege: Privileges;
 }
 
 export interface UserPrivilegeResult extends UserPrivilegeDefinition {
@@ -22,7 +35,7 @@ export interface RoleDefinition {
   role_name: string;
 }
 export interface UserRole extends RoleDefinition {
-  privileges: string[];
+  privileges: Privileges[];
 }
 export type OrganizationPrivilegesResponse = {
   organization: {
@@ -81,4 +94,53 @@ export interface UserProfileResponse {
   errorMessage?: string;
   data?: UserDetailProfile;
   success?: boolean;
+}
+
+export type OrganizationInvitation = {
+  organization_invitation_id: string;
+  organization: {
+    organization_id: string;
+    organization_name: string;
+  };
+  status: string; // can enum later
+  created_at: string;
+  expires_at: string;
+  inviter: UserDetail;
+  roles: UserRole[];
+};
+
+export const completeStatuses = ["rejected", "accepted", "expired"];
+
+export interface InvitationUser {
+  user_id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+export enum OrganizationInvitationStatus {
+  Pending = "pending",
+  Accepted = "accepted",
+  Rejected = "rejected",
+  Expired = "expired",
+}
+
+export interface OrganizationPendingInvitation {
+  organization_invitation_id: string;
+  status: OrganizationInvitationStatus;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  rejected_at: string | null;
+  invitee_email: string;
+  invitee_user: InvitationUser | null;
+  inviter_user: InvitationUser;
+  roles: UserRole[];
+}
+
+export interface TestUser extends UserDetailProfile {
+  oauth_id: string;
+  user_api_key: string;
+  user_id: string;
+  user_jwt: string;
 }

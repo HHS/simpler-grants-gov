@@ -1,9 +1,10 @@
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.extension.field_validators import Email, Length
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.extension.field_validators import Email, Length, validators
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
-from src.constants.lookup_constants import OrganizationInvitationStatus
+from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class SamGovEntityResponseSchema(Schema):
@@ -320,4 +321,85 @@ class OrganizationInvitationListResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(OrganizationInvitationDataSchema),
         metadata={"description": "List of organization invitations"},
+    )
+
+
+class OrganizationIgnoreLegacyUserRequestSchema(Schema):
+    """Schema for handling requests to ignore a legacy user within an organization."""
+
+    email = fields.String(
+        required=True,
+        metadata={"description": "Email address of the legacy user to ignore"},
+        validate=[validators.Email()],
+    )
+
+
+class OrganizationIgnoreLegacyUserResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
+class LegacyUserDataSchema(Schema):
+    """Schema for individual legacy user data"""
+
+    email = fields.String(
+        required=True,
+        metadata={"description": "Legacy user email address", "example": "user@example.com"},
+    )
+    first_name = fields.String(
+        allow_none=True,
+        metadata={"description": "Legacy user first name", "example": "John"},
+    )
+    last_name = fields.String(
+        allow_none=True,
+        metadata={"description": "Legacy user last name", "example": "Doe"},
+    )
+    status = fields.String(
+        required=True,
+        metadata={
+            "description": "Status of the legacy user relative to the organization",
+            "example": "available",
+        },
+    )
+
+
+class LegacyUserFilterSchema(Schema):
+    """Schema for filtering legacy users by various criteria"""
+
+    status = fields.Nested(
+        StrSearchSchemaBuilder("LegacyUserStatusFilterSchema")
+        .with_one_of(allowed_values=LegacyUserStatus, example="available")
+        .build(),
+        allow_none=True,
+        metadata={"description": "Filter legacy users by status"},
+    )
+
+
+class LegacyUsersListRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/legacy-users request"""
+
+    filters = fields.Nested(
+        LegacyUserFilterSchema,
+        allow_none=True,
+        metadata={"description": "Filters to apply to the legacy user list"},
+    )
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "LegacyUserPaginationSchema",
+            ["email", "first_name", "last_name", "created_date"],
+            default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
+        ),
+        required=True,
+        metadata={
+            "description": "Pagination parameters for legacy user list (default sort: email ascending)"
+        },
+    )
+
+
+class LegacyUsersListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for list legacy users response"""
+
+    data = fields.List(
+        fields.Nested(LegacyUserDataSchema),
+        metadata={"description": "List of legacy users"},
     )

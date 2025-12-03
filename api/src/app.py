@@ -23,6 +23,7 @@ from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.local import local_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
@@ -38,6 +39,7 @@ from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +61,10 @@ class EndpointConfig(PydanticBaseEnvConfig):
     enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
+
+    # Do not ever change this to True, this controls endpoints we only
+    # want to exist for local development.
+    enable_local_endpoints: bool = Field(False, alias="ENABLE_LOCAL_ENDPOINTS")
 
     def model_post_init(self, _context: Any) -> None:
         self.domain_verification_map = {}
@@ -181,6 +187,12 @@ def register_blueprints(app: APIFlask) -> None:
     # CommonGrants Protocol endpoints
     if endpoint_config.enable_common_grants_endpoints:
         app.register_blueprint(common_grants_blueprint)
+
+    # Local endpoints for development, will error
+    # if this is ever enabled non-locally.
+    if endpoint_config.enable_local_endpoints:
+        error_if_not_local()
+        app.register_blueprint(local_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)

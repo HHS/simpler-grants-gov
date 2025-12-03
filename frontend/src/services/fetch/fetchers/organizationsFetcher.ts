@@ -1,16 +1,26 @@
+import { UnauthorizedError } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
-import { UserDetail, UserRole } from "src/types/userTypes";
-import { fakeOrganizationInviteRecord } from "src/utils/testing/fixtures";
+import {
+  OrganizationInvitationStatus,
+  OrganizationPendingInvitation,
+  UserDetail,
+  UserRole,
+} from "src/types/userTypes";
+import { throwOnApiError } from "src/utils/apiUtils";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
 export const getOrganizationDetails = async (
-  token: string,
   organizationId: string,
 ): Promise<Organization> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const resp = await fetchOrganizationWithMethod("GET")({
     subPath: organizationId,
@@ -36,26 +46,47 @@ export const getUserOrganizations = async (
 };
 
 export const getOrganizationUsers = async (
-  token: string,
   organizationId: string,
 ): Promise<UserDetail[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/users`,
     additionalHeaders: ssgToken,
   });
+
   const json = (await resp.json()) as { data: UserDetail[] };
-  return json.data;
+
+  // Sort by email, this will be temp until we get the results from the backend with sorting applied
+  const sorted = [...json.data].sort((first, second) => {
+    const a = (first.email ?? "").toLowerCase();
+    const b = (second.email ?? "").toLowerCase();
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  });
+
+  return sorted;
 };
 
 export const getOrganizationRoles = async (
-  token: string,
   organizationId: string,
 ): Promise<UserRole[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
   const ssgToken = {
-    "X-SGG-Token": token,
+    "X-SGG-Token": session.token,
   };
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/roles/list`,
@@ -66,28 +97,119 @@ export const getOrganizationRoles = async (
 };
 
 export const inviteUserToOrganization = async (
-  _token: string,
+  token: string,
   requestData: {
     organizationId: string;
-    roleId: string;
+    roleId: string[];
     email: string;
   },
 ): Promise<OrganizationInviteRecord> => {
   const { organizationId, roleId, email } = requestData;
-  // eslint-disable-next-line
-  console.log("!!! updating", organizationId, roleId, email);
-  return Promise.resolve(fakeOrganizationInviteRecord);
-  //   const ssgToken = {
-  //     "X-SGG-Token": token,
-  //   };
-  //   const resp = await fetchOrganizationWithMethod("POST")({
-  //     subPath: `${organizationId}/invitations`,
-  //     additionalHeaders: ssgToken,
-  //     body: {
-  //       invitee_email: email,
-  //       role_ids: roleId,
-  //     },
-  //   });
-  //   const json = (await resp.json()) as { data: OrganizationInviteRecord };
-  //   return json.data;
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/invitations`,
+    additionalHeaders: ssgToken,
+    body: {
+      invitee_email: email,
+      role_ids: roleId,
+    },
+  });
+  const json = (await response.json()) as { data: OrganizationInviteRecord };
+  return json.data;
+};
+
+export const getOrganizationPendingInvitations = async (
+  organizationId: string,
+): Promise<OrganizationPendingInvitation[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const ssgToken = {
+    "X-SGG-Token": session.token,
+  };
+  const response = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/invitations/list`,
+    additionalHeaders: ssgToken,
+    body: {
+      filters: {
+        status: {
+          one_of: [OrganizationInvitationStatus.Pending],
+        },
+      },
+    },
+  });
+
+  const json = (await response.json()) as {
+    data: OrganizationPendingInvitation[];
+  };
+
+  // Sort by email, this will be temp until we get the results from the backend with sorting applied
+  const sorted = [...json.data].sort((first, second) => {
+    const a = (first.invitee_email ?? "").toLowerCase();
+    const b = (second.invitee_email ?? "").toLowerCase();
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  });
+
+  return sorted;
+};
+
+export const updateOrganizationUserRoles = async (
+  organizationId: string,
+  userId: string,
+  roleIds: string[],
+): Promise<UserDetail> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationWithMethod("PUT")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    body: { role_ids: roleIds },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "updateOrganizationUserRoles",
+      unauthorizedMessage: "No active session for updating user roles.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const removeOrganizationUser = async (
+  organizationId: string,
+  userId: string,
+): Promise<UserDetail> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "removeOrganizationUser",
+      unauthorizedMessage: "No active session for removing users.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
 };

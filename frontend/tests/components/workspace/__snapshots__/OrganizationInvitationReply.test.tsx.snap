@@ -1,0 +1,196 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InvitationAcceptedNotice matches snapshot 1`] = `
+<div>
+  <li
+    class="border-primary border-2px padding-2 margin-top-2 radius-md"
+  >
+    <div
+      class="grid-row"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-8"
+        data-testid="grid"
+      >
+        <h3>
+          accepted.ctaTitle
+        </h3>
+        <p>
+          accepted.description
+        </p>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`InvitationRejectedNotice matches snapshot 1`] = `
+<div>
+  <li
+    class="border-primary border-2px padding-2 margin-top-2 radius-md"
+  >
+    <div
+      class="grid-row"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-8"
+        data-testid="grid"
+      >
+        <h3>
+          rejected.ctaTitle
+        </h3>
+        <p>
+          rejected.description
+        </p>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`InvitationRejectionConfirmation matches snapshot 1`] = `
+<div>
+  <li
+    class="border-primary border-2px padding-2 margin-top-2 radius-md"
+  >
+    <div
+      class="grid-row"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-8"
+        data-testid="grid"
+      >
+        <h3>
+          rejectConfirmation.ctaTitle
+        </h3>
+        <p>
+          rejectConfirmation.description
+        </p>
+      </div>
+      <div
+        class="tablet:grid-col-4 text-right flex-align-self-center"
+        data-testid="grid"
+      >
+        <button
+          class="usa-button usa-button--accent-warm margin-left-2"
+          data-testid="button"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="usa-icon usa-icon usa-icon--size-4"
+            role="img"
+          >
+            <use
+              href="/img.jpg#do_not_disturb"
+            />
+          </svg>
+          rejectConfirmation.confirm
+        </button>
+        <button
+          class="usa-button usa-button--unstyled margin-left-2"
+          data-testid="button"
+          type="button"
+        >
+          rejectConfirmation.cancel
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`InvitationReplyForm matches snapshot 1`] = `
+<div>
+  <li
+    class="border-primary border-2px padding-2 margin-top-2 radius-md"
+  >
+    <div
+      class="grid-row"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-8"
+        data-testid="grid"
+      >
+        <h3>
+          hi
+           
+          ctaTitle
+        </h3>
+        <p>
+          description
+        </p>
+      </div>
+      <div
+        class="tablet:grid-col-4 text-right flex-align-self-center"
+        data-testid="grid"
+      >
+        <button
+          class="usa-button margin-left-2"
+          data-testid="button"
+          type="button"
+        >
+          accept
+        </button>
+        <button
+          class="usa-button usa-button--secondary margin-left-2"
+          data-testid="button"
+          type="button"
+        >
+          reject
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
+exports[`OrganizationInvitationReply matches snapshot 1`] = `
+<div>
+  <li
+    class="border-primary border-2px padding-2 margin-top-2 radius-md"
+  >
+    <div
+      class="grid-row"
+      data-testid="grid"
+    >
+      <div
+        class="tablet:grid-col-8"
+        data-testid="grid"
+      >
+        <h3>
+          Example Organization
+           
+          ctaTitle
+        </h3>
+        <p>
+          description
+        </p>
+      </div>
+      <div
+        class="tablet:grid-col-4 text-right flex-align-self-center"
+        data-testid="grid"
+      >
+        <button
+          class="usa-button margin-left-2"
+          data-testid="button"
+          type="button"
+        >
+          accept
+        </button>
+        <button
+          class="usa-button usa-button--secondary margin-left-2"
+          data-testid="button"
+          type="button"
+        >
+          reject
+        </button>
+      </div>
+    </div>
+  </li>
+</div>
+`;

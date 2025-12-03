@@ -5,6 +5,7 @@ from typing import Self
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
+from src.auth.api_jwt_auth import ApiJwtConfig, create_jwt_for_user
 from src.db.models.competition_models import Competition, Form
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import OrganizationUserRole, Role, User
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class CompetitionContainer:
+    static_competition_with_all_forms: Competition
     competition_with_all_forms: Competition
 
     form_specific_competitions: dict[uuid.UUID, tuple[Form, Competition]] = dataclasses.field(
@@ -37,6 +39,7 @@ class UserBuilder:
 
         self.link_external_id = None
         self.api_key_id = None
+        self.jwt_token = None
 
     def with_oauth_login(self, external_user_id: str) -> Self:
         """Add an oauth login record that you can use to login as a user
@@ -74,6 +77,15 @@ class UserBuilder:
         self.api_key_id = key_id
         return self
 
+    def with_jwt_auth(self, token_expiration_minutes: int = 60 * 24 * 365 * 30) -> Self:
+        """Add API jwt auth to the user. By default it will expire 30 years in the future for easier development."""
+        config = ApiJwtConfig(API_JWT_TOKEN_EXPIRATION_MINUTES=token_expiration_minutes)
+        token, _ = create_jwt_for_user(
+            self.user, self.db_session, config=config, email=self.user.email
+        )
+        self.jwt_token = token
+        return self
+
     def with_organization(self, organization: Organization, roles: list[Role]) -> Self:
         """Add a user to an organization with a specified set of roles"""
         # First see if this user is already a member of the organization provided
@@ -105,5 +117,7 @@ class UserBuilder:
             log_msg += f" '{self.link_external_id}'"
         if self.api_key_id:
             log_msg += f" with X-API-Key: '{self.api_key_id}'"
+        if self.jwt_token:
+            log_msg += f" with X-SGG-Token: '{self.jwt_token}'"
         logger.info(log_msg)
         return self.user

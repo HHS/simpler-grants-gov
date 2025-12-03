@@ -484,6 +484,17 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
+                  href="/applications"
+                >
+                  <div>
+                    Applications
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
                   href="/saved-opportunities"
                 >
                   <div>
@@ -991,6 +1002,17 @@ exports[`Header About renders Community submenu 1`] = `
               hidden=""
               id="Workspace"
             >
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/applications"
+                >
+                  <div>
+                    Applications
+                  </div>
+                </a>
+              </li>
               <li
                 class="usa-nav__submenu-item"
               >
@@ -1503,6 +1525,17 @@ exports[`Header renders Header navbar menu 1`] = `
               hidden=""
               id="Workspace"
             >
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/applications"
+                >
+                  <div>
+                    Applications
+                  </div>
+                </a>
+              </li>
               <li
                 class="usa-nav__submenu-item"
               >

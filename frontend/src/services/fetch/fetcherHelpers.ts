@@ -30,6 +30,10 @@ export interface HeadersDict {
 export function getDefaultHeaders(): HeadersDict {
   const headers: HeadersDict = {};
 
+  if (environment.API_GW_AUTH) {
+    headers["X-API-KEY"] = environment.API_GW_AUTH;
+  }
+
   if (environment.API_AUTH_TOKEN) {
     headers["X-AUTH"] = environment.API_AUTH_TOKEN;
   }
@@ -46,10 +50,8 @@ export function createRequestUrl(
   body?: JSONRequestBody,
 ) {
   // Remove leading slash
-  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
-    removeLeadingSlash,
-  );
-  let url = [...cleanedPaths].join("/");
+  const cleanedPaths = compact([basePath, version, namespace, subPath]);
+  let url = [...cleanedPaths].map(removeRedundantSlashes).join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
     const newBody: { [key: string]: string } = {};
@@ -66,10 +68,10 @@ export function createRequestUrl(
 }
 
 /**
- * Remove leading slash
+ * Remove leading slash and double slashes (in case a segment such a version is not provided)
  */
-function removeLeadingSlash(path: string) {
-  return path.replace(/^\//, "");
+function removeRedundantSlashes(path: string) {
+  return path.replace(/^\//, "").replace(/\/\//g, "/");
 }
 
 /**

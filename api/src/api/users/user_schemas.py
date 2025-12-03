@@ -10,7 +10,13 @@ from src.api.opportunities_v1.opportunity_schemas import (
 from src.api.organizations_v1.organization_schemas import SamGovEntityResponseSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
-from src.constants.lookup_constants import ApplicationStatus, ExternalUserType, Privilege
+from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSchemaBuilder
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    ExternalUserType,
+    OrganizationInvitationStatus,
+    Privilege,
+)
 from src.db.models.user_models import (
     AgencyUserRole,
     ApplicationUserRole,
@@ -230,12 +236,6 @@ class UserOrganizationSchema(Schema):
             "example": "123e4567-e89b-12d3-a456-426614174000",
         }
     )
-    is_organization_owner = fields.Boolean(
-        metadata={
-            "description": "Whether the user is an owner of this organization",
-            "example": True,
-        }
-    )
     sam_gov_entity = fields.Nested(
         SamGovEntityResponseSchema,
         allow_none=True,
@@ -250,10 +250,37 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
     )
 
 
+class UserApplicationFilterSchema(Schema):
+    application_status = fields.Nested(
+        StrSearchSchemaBuilder("UserApplicationApplicationStatusFiilterSchema")
+        .with_one_of(allowed_values=ApplicationStatus)
+        .build()
+    )
+    organization_id = fields.Nested(
+        UuidSearchSchemaBuilder("UserApplicationApplicationOrganizationIDFilterSchema")
+        .with_one_of()
+        .build()
+    )
+    competition_id = fields.Nested(
+        UuidSearchSchemaBuilder("UserApplicationApplicationCompetitionIDFilterSchema")
+        .with_one_of()
+        .build()
+    )
+
+
 class UserApplicationListRequestSchema(Schema):
     """Schema for application list request - currently empty but provided for future filtering"""
 
-    pass
+    filters = fields.Nested(UserApplicationFilterSchema(), allow_none=True)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "UserApplicationPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
 
 
 class UserApplicationOpportunitySchema(Schema):
@@ -681,3 +708,57 @@ class UserInvitationListResponseSchema(AbstractResponseSchema):
         fields.Nested(UserInvitationItemSchema),
         metadata={"description": "List of user invitations"},
     )
+
+
+class UserResponseOrgInvitationRequestSchema(Schema):
+    status = fields.Enum(
+        OrganizationInvitationStatus,
+        validate=validators.OneOf(
+            [
+                OrganizationInvitationStatus.ACCEPTED,
+                OrganizationInvitationStatus.REJECTED,
+            ]
+        ),
+        metadata={"description": "User response to invitation"},
+    )
+
+
+class OrganizationSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the organization",
+            "example": "456e7890-e12c-34f5-b678-901234567890",
+        }
+    )
+    organization_name = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Organization name",
+            "example": "Legal business name of the corresponding Sam Gov Entity",
+        },
+    )
+
+
+class InvitationRoleSchema(Schema):
+    role_id = fields.UUID(metadata={"description": "Role unique identifier"})
+    role_name = fields.String(metadata={"description": "Role name"})
+
+
+class OrganizationInvitationSchema(Schema):
+    organization_invitation_id = fields.UUID(metadata={"description": "Organization invitation ID"})
+    status = fields.Enum(
+        OrganizationInvitationStatus, metadata={"description": "User response to invitation"}
+    )
+    responded_at = fields.DateTime(metadata={"description": "Time User responded to invitation"})
+    organization = fields.Nested(
+        OrganizationSchema, metadata={"description": "Organization information"}
+    )
+    roles_granted = fields.List(
+        fields.Nested(InvitationRoleSchema),
+        metadata={"description": "Roles granted"},
+        attribute="roles",
+    )
+
+
+class UserResponseOrgInvitationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(OrganizationInvitationSchema)

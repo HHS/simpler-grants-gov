@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OrganizationInvitationReplies matches snapshot with multiple invitations 1`] = `
+<div>
+  <ul
+    class="usa-list--unstyled"
+  >
+    <li
+      data-testid="invite-uuid"
+    >
+      uuid
+       - 
+      pending
+    </li>
+    <li
+      data-testid="invite-inv-2"
+    >
+      inv-2
+       - 
+      awaiting_response
+    </li>
+  </ul>
+</div>
+`;

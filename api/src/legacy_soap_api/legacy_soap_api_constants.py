@@ -18,6 +18,7 @@ class LegacySoapApiEvent(StrEnum):
     INVALID_REQUEST_RESPONSE_DATA = "invalid_request_response_data"
 
     INVALID_SOAP_AUTH_CONTENT_CONFIG = "invalid_soap_auth_content_config"
+    INVALID_SOAP_OPERATION_CONFIG = "invalid_soap_operation_config"
 
     SOAP_DIFF_FAILED = "soap_diff_failed"
 

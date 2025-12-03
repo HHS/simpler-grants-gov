@@ -32,6 +32,7 @@ tags:
 - name: CommonGrants Protocol
   description: CommonGrants-compliant API routes for searching opportunities to promote
     interoperability across grant systems. Learn more by visiting CommonGrants.org
+- name: LOCAL ONLY
 servers: .
 paths:
   /health:
@@ -165,6 +166,19 @@ paths:
         with endpoints.
 
         '
+  /local/local-users:
+    get:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalUserTokenResponse'
+          description: Successful response
+      tags:
+      - LOCAL ONLY
+      summary: Local Users Get
   /v1/agencies/search:
     post:
       parameters: []
@@ -1781,6 +1795,61 @@ paths:
               $ref: '#/components/schemas/OrganizationCreateInvitationRequest'
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/legacy-users:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegacyUsersListResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: List legacy users that can be invited to the organization.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegacyUsersListRequest'
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments:
     post:
       parameters:
@@ -1822,6 +1891,49 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
+      security:
+      - ApiJwtAuth: []
+  /alpha/applications/{application_id}/audit_history:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAuditResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Application Alpha
+      summary: Application Audit List
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationAuditRequest'
       security:
       - ApiJwtAuth: []
   /v1/organizations/{organization_id}/invitations/list:
@@ -1877,6 +1989,61 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrganizationInvitationListRequest'
+      security:
+      - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/legacy-users/ignore:
+    post:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationIgnoreLegacyUserResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Organization Ignore Legacy User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationIgnoreLegacyUserRequest'
       security:
       - ApiJwtAuth: []
   /v1/organizations/{organization_id}/users/{user_id}:
@@ -2162,6 +2329,60 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/invitations/{invitation_id}/organizations:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: invitation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseOrgInvitationResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Response Org Invitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponseOrgInvitationRequest'
+      security:
+      - ApiJwtAuth: []
   /v1/users/{user_id}/saved-opportunities/{legacy_opportunity_id}:
     delete:
       parameters:
@@ -2247,6 +2468,46 @@ paths:
               $ref: '#/components/schemas/ApplicationFormInclusionUpdateRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/forms/{form_id}/form_instructions/{form_instruction_id}:
+    put:
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_instruction_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormInstructionUploadResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Form Alpha
+      summary: Form Instruction Upsert
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FormInstructionUploadRequest'
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -2285,6 +2546,55 @@ paths:
       security:
       - ApiJwtAuth: []
       - InternalApiJwtAuth: []
+  /alpha/applications/{application_id}/organizations/{organization_id}:
+    put:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationAddOrganizationResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity
+      tags:
+      - Application Alpha
+      summary: Add an organization to an application
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments/{application_attachment_id}:
     get:
       parameters:
@@ -2802,6 +3112,52 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    LocalUserToken:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: The ID of the user
+          example: 123e4567-e89b-12d3-a456-426614174000
+        first_name:
+          type: string
+          description: The first name of the user
+          example: Bob
+        last_name:
+          type: string
+          description: The last name of the user
+          example: Smith
+        oauth_id:
+          type: string
+          description: The OAuth id of the user - can be used to login locally via
+            our mock OAuth server
+          example: my_example_user
+        user_jwt:
+          type: string
+          description: The JWT of the user, can be used with our X-SGG-Token auth
+          example: abc123
+        user_api_key:
+          type: string
+          description: The API key of the user, can be used with our X-API-Key auth
+          example: my_example_user_token
+    LocalUserTokenResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/LocalUserToken'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     HasActiveOpportunityFilterV1:
       type: object
       properties:
@@ -3064,6 +3420,7 @@ components:
             - transportation
             - affordable_care_act
             - other
+            - energy_infrastructure_and_critical_mineral_and_materials
             type:
             - string
     ApplicantTypeFilterV1:
@@ -3645,6 +4002,7 @@ components:
             - transportation
             - affordable_care_act
             - other
+            - energy_infrastructure_and_critical_mineral_and_materials
             type:
             - string
         applicant_types:
@@ -4087,10 +4445,18 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
+          - OtherNarrativeAttachment
           - ProjectAbstractSummary
+          - ProjectAbstract
+          - CD511
+          - SupplementaryNEHCoverSheet
+          - GGLobbyingForm
+          - EPAForm4700-4
+          - EPAKeyContacts
           type:
           - string
           - 'null'
@@ -4234,10 +4600,18 @@ components:
           - SF424
           - SF424A
           - SF424B
+          - SF424D
           - SFLLL
           - ProjectNarrativeAttachment
           - BudgetNarrativeAttachment
+          - OtherNarrativeAttachment
           - ProjectAbstractSummary
+          - ProjectAbstract
+          - CD511
+          - SupplementaryNEHCoverSheet
+          - GGLobbyingForm
+          - EPAForm4700-4
+          - EPAKeyContacts
           type:
           - string
           - 'null'
@@ -4665,6 +5039,9 @@ components:
             - update_form
             - manage_agency_members
             - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
             type:
             - string
     UserOrganization:
@@ -4809,6 +5186,9 @@ components:
             - update_form
             - manage_agency_members
             - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
             type:
             - string
     UserCanAccessResponse:
@@ -5089,9 +5469,119 @@ components:
       - paginationInfo
       - sortInfo
       - status
+    UserApplicationApplicationStatusFiilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - in_progress
+            - submitted
+            - accepted
+            type:
+            - string
+    UserApplicationApplicationOrganizationIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationApplicationCompetitionIDFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
+    UserApplicationFilter:
+      type: object
+      properties:
+        application_status:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationStatusFiilter'
+        organization_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationOrganizationIDFilter'
+        competition_id:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationApplicationCompetitionIDFilter'
+    SortOrderUserApplicationPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    UserApplicationPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderUserApplicationPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
     UserApplicationListRequest:
       type: object
-      properties: {}
+      properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserApplicationFilter'
+          - type: 'null'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/UserApplicationPagination'
+      required:
+      - pagination
     SamGovEntityResponse:
       type: object
       properties:
@@ -5127,10 +5617,6 @@ components:
           type: string
           description: The internal ID of the organization
           example: 123e4567-e89b-12d3-a456-426614174000
-        is_organization_owner:
-          type: boolean
-          description: Whether the user is an owner of this organization
-          example: true
         sam_gov_entity:
           description: SAM.gov entity information for the organization
           type:
@@ -5638,7 +6124,7 @@ components:
           - 'null'
           description: Organization name
           example: Example Organization
-    UserInvitationInviter:
+    UserInvitationInviterUser:
       type: object
       properties:
         user_id:
@@ -5692,6 +6178,9 @@ components:
             - update_form
             - manage_agency_members
             - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
             type:
             - string
     UserInvitationItem:
@@ -5721,11 +6210,11 @@ components:
           format: date-time
           description: When the invitation expires
           example: '2024-01-15T10:30:00Z'
-        inviter:
+        inviter_user:
           description: Information about who sent the invitation
           type:
           - object
-          $ref: '#/components/schemas/UserInvitationInviter'
+          $ref: '#/components/schemas/UserInvitationInviterUser'
         roles:
           type: array
           description: Roles that would be assigned if invitation is accepted
@@ -6172,6 +6661,9 @@ components:
             - update_form
             - manage_agency_members
             - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
             type:
             - string
     OrganizationMember:
@@ -6498,6 +6990,148 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    LegacyUserStatusFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: available
+            enum:
+            - member
+            - pending_invitation
+            - available
+            type:
+            - string
+    LegacyUserFilter:
+      type: object
+      properties:
+        status:
+          description: Filter legacy users by status
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/LegacyUserStatusFilter'
+          - type: 'null'
+    SortOrderLegacyUserPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - email
+          - first_name
+          - last_name
+          - created_date
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    LegacyUserPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: email
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderLegacyUserPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    LegacyUsersListRequest:
+      type: object
+      properties:
+        filters:
+          description: Filters to apply to the legacy user list
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/LegacyUserFilter'
+          - type: 'null'
+        pagination:
+          description: 'Pagination parameters for legacy user list (default sort:
+            email ascending)'
+          type:
+          - object
+          $ref: '#/components/schemas/LegacyUserPagination'
+      required:
+      - pagination
+    LegacyUserData:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Legacy user email address
+          example: user@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Legacy user first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Legacy user last name
+          example: Doe
+        status:
+          type: string
+          description: Status of the legacy user relative to the organization
+          example: available
+      required:
+      - email
+      - status
+    LegacyUsersListResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of legacy users
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/LegacyUserData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAttachmentCreateRequest:
       type: object
       properties:
@@ -6526,6 +7160,193 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationAttachmentCreate'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderApplicationAuditRequestPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    ApplicationAuditRequestPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderApplicationAuditRequestPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    ApplicationAuditRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditRequestPagination'
+      required:
+      - pagination
+    SimpleUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: ID of the user
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          description: Email address of the user
+          example: example@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: Users first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: Users last name
+          example: Smith
+    ApplicationAuditAppForm:
+      type: object
+      properties:
+        application_form_id:
+          type: string
+          format: uuid
+          description: The ID of the application form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_form_id:
+          type: string
+          format: uuid
+          description: The ID of the competition form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_id:
+          type: string
+          format: uuid
+          description: The ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        form_name:
+          type: string
+          description: The name of the form
+    ApplicationAuditAttachment:
+      type: object
+      properties:
+        application_attachment_id:
+          type: string
+          format: uuid
+          description: The ID of the application attachment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        file_name:
+          type: string
+          description: The file name of the application attachment
+          example: my_example.pdf
+        is_deleted:
+          type: boolean
+          description: Whether the attachment has been deleted
+    ApplicationAuditData:
+      type: object
+      properties:
+        application_audit_id:
+          type: string
+          format: uuid
+          description: The ID of the application audit event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_audit_event:
+          description: The type of application audit event recorded
+          enum:
+          - application_created
+          - application_name_changed
+          - application_submitted
+          - application_submit_rejected
+          - attachment_added
+          - attachment_deleted
+          - attachment_updated
+          - submission_created
+          - user_added
+          - user_updated
+          - user_removed
+          - form_updated
+          - organization_added
+          type:
+          - string
+        user:
+          description: The user who did the event that was audited
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        target_user:
+          description: The user the audit event affected (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        target_application_form:
+          description: The application form modified (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditAppForm'
+        target_attachment:
+          description: The application attachment modified (if applicable)
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditAttachment'
+        created_at:
+          type: string
+          format: date-time
+          description: When the audit event was created
+    ApplicationAuditResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationAuditData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -6659,12 +7480,12 @@ components:
           format: date-time
           description: When the invitation was rejected
           example: null
-        inviter:
+        inviter_user:
           description: Information about the user who sent the invitation
           type:
           - object
           $ref: '#/components/schemas/InviterData'
-        invitee:
+        invitee_user:
           description: Information about the invited user (null if not registered)
           type:
           - object
@@ -6693,6 +7514,27 @@ components:
             type:
             - object
             $ref: '#/components/schemas/OrganizationInvitationData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationIgnoreLegacyUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email address of the legacy user to ignore
+      required:
+      - email
+    OrganizationIgnoreLegacyUserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
@@ -6825,6 +7667,91 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserResponseOrgInvitationRequest:
+      type: object
+      properties:
+        status:
+          enum:
+          - accepted
+          - rejected
+          - expired
+          - pending
+          description: User response to invitation
+          type:
+          - string
+    Organization1:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: The unique identifier of the organization
+          example: 456e7890-e12c-34f5-b678-901234567890
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: Organization name
+          example: Legal business name of the corresponding Sam Gov Entity
+    InvitationRole:
+      type: object
+      properties:
+        role_id:
+          type: string
+          format: uuid
+          description: Role unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        role_name:
+          type: string
+          description: Role name
+    OrganizationInvitation:
+      type: object
+      properties:
+        organization_invitation_id:
+          type: string
+          format: uuid
+          description: Organization invitation ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          description: User response to invitation
+          enum:
+          - accepted
+          - rejected
+          - expired
+          - pending
+          type:
+          - string
+        responded_at:
+          type: string
+          format: date-time
+          description: Time User responded to invitation
+        organization:
+          description: Organization information
+          type:
+          - object
+          $ref: '#/components/schemas/Organization1'
+        roles_granted:
+          type: array
+          description: Roles granted
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/InvitationRole'
+    UserResponseOrgInvitationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitation'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationFormInclusionUpdateRequest:
       type: object
       properties:
@@ -6848,6 +7775,28 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    FormInstructionUploadRequest:
+      type: object
+      properties:
+        file:
+          description: The form instruction file to upload
+          type: string
+          format: binary
+      required:
+      - file
+    FormInstructionUploadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationFormGetResponse:
       type: object
       properties:
@@ -6866,6 +7815,21 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    ApplicationAddOrganizationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationUpdateResponseData'
         status_code:
           type: integer
           description: The HTTP status code

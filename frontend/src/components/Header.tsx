@@ -7,6 +7,7 @@ import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
+import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
@@ -25,16 +26,13 @@ import {
 import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
+import { TestUserSelect } from "./TestUserSelect";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
   href?: string;
   children?: PrimaryLink[];
-};
-
-type Props = {
-  locale?: string;
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
@@ -92,6 +90,7 @@ const NavLinks = ({
   const showSavedSearch = checkFeatureFlag("savedSearchesOn");
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
   const showDeveloperPortal = !checkFeatureFlag("developerPageOff");
+  const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -122,6 +121,23 @@ const NavLinks = ({
     }
 
     const workspaceSubNavs = [];
+
+    if (showUserAdminNavItems) {
+      workspaceSubNavs.push({
+        text: t("activityDashboard"),
+        href: "/dashboard",
+      });
+    }
+    workspaceSubNavs.push({
+      text: t("applications"),
+      href: "/applications",
+    });
+    if (showUserAdminNavItems) {
+      workspaceSubNavs.push({
+        text: t("organizations"),
+        href: "/organizations",
+      });
+    }
     if (showSavedOpportunities) {
       workspaceSubNavs.push({
         text: t("savedOpportunities"),
@@ -147,6 +163,7 @@ const NavLinks = ({
     showSavedOpportunities,
     showSavedSearch,
     showDeveloperPortal,
+    showUserAdminNavItems,
   ]);
 
   const getCurrentNavItemIndex = useCallback(
@@ -256,7 +273,15 @@ const NavLinks = ({
   );
 };
 
-const Header = ({ locale }: Props) => {
+const Header = ({
+  locale,
+  localDev = false,
+  testUsers = [],
+}: {
+  locale?: string;
+  localDev?: boolean;
+  testUsers?: TestUser[];
+}) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
@@ -334,6 +359,7 @@ const Header = ({ locale }: Props) => {
               </div>
             </Title>
           </div>
+          {localDev && testUsers && <TestUserSelect testUsers={testUsers} />}
           <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
@@ -343,7 +369,7 @@ const Header = ({ locale }: Props) => {
           </div>
           {!!showLoginLink && (
             <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
-              <UserControl />
+              <UserControl localDev={localDev} />
             </div>
           )}
           <NavLinks

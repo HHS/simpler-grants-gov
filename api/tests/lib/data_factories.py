@@ -4,9 +4,15 @@ To help simplify setup when we need many factories repeatedly
 with only a few alterations.
 """
 
+from src.constants.lookup_constants import Privilege
+from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm
+from src.db.models.user_models import LegacyCertificate, Role, User
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPClientCertificate
 from tests.src.db.models.factories import (
     AgencyFactory,
+    AgencyUserFactory,
+    AgencyUserRoleFactory,
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationFormFactory,
@@ -14,10 +20,12 @@ from tests.src.db.models.factories import (
     CompetitionFactory,
     CompetitionFormFactory,
     FormFactory,
+    LegacyAgencyCertificateFactory,
     LinkExternalUserFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
     OrganizationFactory,
+    RoleFactory,
 )
 
 DEFAULT_VALUE = object()
@@ -36,6 +44,7 @@ def setup_application_for_form_validation(
     agency_code: str | None = None,
     user_email: str | None = None,
     attachment_ids: list[str] | None = None,
+    deleted_attachment_ids: list[str] | None = None,
     has_organization: bool = False,
     uei: str | None = None,
     has_assistance_listing_number: bool = True,
@@ -101,9 +110,29 @@ def setup_application_for_form_validation(
             ApplicationAttachmentFactory.create(
                 application_attachment_id=attachment_id, application=application
             )
+    if deleted_attachment_ids is not None:
+        for attachment_id in deleted_attachment_ids:
+            ApplicationAttachmentFactory.create(
+                application_attachment_id=attachment_id, application=application, is_deleted=True
+            )
 
     if user_email is not None:
         app_user = ApplicationUserFactory.create(application=application)
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
 
     return application_form
+
+
+def setup_cert_user(
+    agency: Agency, privileges: list[Privilege]
+) -> tuple[User, LegacyCertificate, Role, SOAPClientCertificate]:
+    legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
+    agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
+    role = RoleFactory.create(privileges=privileges, is_agency_role=True)
+    AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
+    soap_client_certificate = SOAPClientCertificate(
+        serial_number=legacy_certificate.serial_number,
+        cert="123",
+        fingerprint="456",
+    )
+    return legacy_certificate.user, legacy_certificate, role, soap_client_certificate

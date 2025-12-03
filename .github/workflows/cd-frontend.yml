@@ -47,14 +47,14 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || github.ref_name == 'main' && '["dev", "staging"]' || '["dev"]')  }}
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
 
   send-slack-notification:
-    if: failure()
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
     needs: [frontend-checks, vulnerability-scans, deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

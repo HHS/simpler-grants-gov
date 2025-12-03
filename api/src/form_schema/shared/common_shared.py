@@ -67,6 +67,49 @@ COMMON_SHARED_JSON_SCHEMA_V1 = {
         "minLength": 1,
         "maxLength": 25,
     },
+    "contact_person_title": {
+        "type": "string",
+        "title": "Title",
+        "description": "Enter the position title.",
+        "minLength": 1,
+        "maxLength": 45,
+    },
+    "contact_email": {
+        "type": "string",
+        "title": "Email",
+        "format": "email",
+        # We don't set a min-length for email as the format
+        # will flag an empty string as invalid format, and
+        # two errors for the same problem is confusing.
+        "maxLength": 60,
+    },
+    "signature": {
+        "type": "string",
+        "title": "Signature",
+        "description": "Completed by Grants.gov upon submission.",
+        "minLength": 1,
+        "maxLength": 144,
+    },
+    "submitted_date": {
+        "type": "string",
+        "format": "date",
+        "title": "Submitted Date",
+        "description": "Completed by Grants.gov upon submission.",
+    },
+    # This mirrors the "globLib:OrganizationNameDataType" from grants.gov
+    # Which is used for applicant / organization name and represents who is applying
+    "organization_name": {
+        "type": "string",
+        "title": "Organization Name",
+        "minLength": 1,
+        "maxLength": 60,
+    },
+    "sam_uei": {
+        "type": "string",
+        "title": "SAM UEI",
+        "minLength": 12,
+        "maxLength": 12,
+    },
 }
 
 

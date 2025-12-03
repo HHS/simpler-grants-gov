@@ -2,20 +2,9 @@
 description: >-
   Brand guidelines are rules and standards that define how a brand should be
   presented.
-layout:
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
-# Brand Guidelines
+# Brand guidelines
 
 ## Overview
 

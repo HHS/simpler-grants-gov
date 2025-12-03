@@ -9,6 +9,7 @@
     "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build -- --no-lint",
     "build": "next build",
     "dev": "NEW_RELIC_ENABLED=false next dev",
+    "local": "ENVIRONMENT=local NEW_RELIC_ENABLED=false next dev",
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
@@ -29,6 +30,7 @@
     "ts:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^14.2.1",
     "@newrelic/next": "^0.10.0",
     "@next/third-parties": "^15.1.4",
     "@opentelemetry/api": "^1.8.0",
@@ -46,9 +48,9 @@
     "isomorphic-dompurify": "^2.15.0",
     "jose": "^5.9.6",
     "js-cookie": "^3.0.5",
+    "js-yaml": "4.1.1",
     "json-pointer": "^0.6.2",
     "json-schema-merge-allof": "^0.8.1",
-    "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.21",
     "newrelic": "^12.7.0",
     "next": "^15.4.7",

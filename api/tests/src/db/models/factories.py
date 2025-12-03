@@ -10,7 +10,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 
 import random
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import factory
 import factory.fuzzy
@@ -36,6 +36,7 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationAuditEvent,
     ApplicationStatus,
     CompetitionOpenToApplicant,
     ExternalUserType,
@@ -52,6 +53,7 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+    UserType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
@@ -251,6 +253,21 @@ class CustomProvider(BaseProvider):
     YN_BOOLEAN_VALUES = ["Y", "N"]
 
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
+
+    # This is to help with the unique agency code conflicts
+    AGENCY_CODE_FORMATS = [
+        "???",
+        "????",
+        "???-??",
+        "???-???",
+        "???-???-##",
+        "???-???-???-##",
+        "???-??-##-??",
+    ]
+
+    def random_agency_code(self) -> str:
+        pattern = self.bothify(self.random_element(self.AGENCY_CODE_FORMATS)).upper()
+        return self.generator.parse(pattern)
 
     def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
@@ -896,6 +913,7 @@ class UserFactory(BaseFactory):
         model = user_models.User
 
     user_id = Generators.UuidObj
+    user_type = UserType.STANDARD
 
     class Params:
         with_profile = factory.Trait(
@@ -1251,19 +1269,6 @@ class FormInstructionFactory(BaseFactory):
         return obj
 
 
-class CompetitionAssistanceListingFactory(BaseFactory):
-    class Meta:
-        model = competition_models.CompetitionAssistanceListing
-
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-
-    opportunity_assistance_listing = factory.SubFactory(OpportunityAssistanceListingFactory)
-    opportunity_assistance_listing_id = factory.LazyAttribute(
-        lambda o: o.opportunity_assistance_listing.opportunity_assistance_listing_id
-    )
-
-
 class LinkCompetitionOpenToApplicantFactory(BaseFactory):
     class Meta:
         model = competition_models.LinkCompetitionOpenToApplicant
@@ -1440,6 +1445,11 @@ class ApplicationFactory(BaseFactory):
             organization=factory.SubFactory("tests.src.db.models.factories.OrganizationFactory")
         )
 
+        has_submitted_by_user = factory.Trait(
+            submitted_by=factory.LazyAttribute(lambda a: a.submitted_by_user.user_id),
+            submitted_by_user=factory.SubFactory(UserFactory),
+        )
+
 
 class ApplicationFormFactory(BaseFactory):
     class Meta:
@@ -1484,6 +1494,11 @@ class ApplicationAttachmentFactory(BaseFactory):
         lambda a: f"s3://local-mock-public-bucket/applications/{a.application_id}/attachments/{fake.uuid4()}/{a.file_name}"
     )
 
+    class Params:
+        setup_deleted = factory.Trait(
+            is_deleted=True, file_contents="SKIP", file_location="DELETED"
+        )
+
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents")  # Don't file for build strategy
@@ -1493,6 +1508,9 @@ class ApplicationAttachmentFactory(BaseFactory):
     def _create(cls, model_class, *args, **kwargs):
         file_contents = kwargs.pop("file_contents")
         attachment = super()._create(model_class, *args, **kwargs)
+
+        if file_contents == "SKIP":
+            return attachment
 
         try:
             with file_util.open_stream(attachment.file_location, "w") as my_file:
@@ -1605,6 +1623,78 @@ class ApplicationUserRoleFactory(BaseFactory):
     role_id = factory.LazyAttribute(lambda o: o.role.role_id)
 
 
+class ApplicationAuditFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationAudit
+
+    application_audit_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda a: a.user.user_id)
+
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda a: a.application.application_id)
+
+    application_audit_event = ApplicationAuditEvent.APPLICATION_CREATED
+
+    class Params:
+        is_create = factory.Trait(application_audit_event=ApplicationAuditEvent.APPLICATION_CREATED)
+        is_name_changed = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.APPLICATION_NAME_CHANGED
+        )
+        is_submit = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.APPLICATION_SUBMITTED
+        )
+        is_submit_rejected = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
+        )
+        is_attachment_added = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.ATTACHMENT_ADDED,
+            target_attachment=factory.SubFactory(
+                ApplicationAttachmentFactory, application=factory.SelfAttribute("..application")
+            ),
+        )
+        is_attachment_deleted = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.ATTACHMENT_DELETED,
+            target_attachment=factory.SubFactory(
+                ApplicationAttachmentFactory,
+                application=factory.SelfAttribute("..application"),
+                setup_deleted=True,
+            ),
+        )
+        is_attachment_updated = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.ATTACHMENT_UPDATED,
+            target_attachment=factory.SubFactory(
+                ApplicationAttachmentFactory, application=factory.SelfAttribute("..application")
+            ),
+        )
+        is_submission_created = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.SUBMISSION_CREATED,
+            application=factory.SubFactory(ApplicationFactory),
+        )
+        is_user_added = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.USER_ADDED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda a: a.target_user.user_id),
+        )
+        is_user_updated = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.USER_UPDATED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda a: a.target_user.user_id),
+        )
+        is_user_removed = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.USER_REMOVED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda a: a.target_user.user_id),
+        )
+        is_form_updated = factory.Trait(
+            application_audit_event=ApplicationAuditEvent.FORM_UPDATED,
+            target_application_form=factory.SubFactory(
+                ApplicationFormFactory, application=factory.SelfAttribute("..application")
+            ),
+        )
+
+
 ###################
 # Agency Factories
 ###################
@@ -1633,7 +1723,7 @@ class AgencyFactory(BaseFactory):
 
     agency_name = factory.Faker("agency_name")
 
-    agency_code = factory.Iterator(CustomProvider.AGENCIES)
+    agency_code = factory.LazyFunction(lambda: fake.unique.random_agency_code())
 
     sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
 
@@ -2534,6 +2624,105 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
         return 1
 
 
+class VuserAccountFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_account_id = factory.Sequence(lambda n: n)
+    user_id = Generators.UuidObj
+    full_name = factory.Faker("name")
+    email = factory.Faker("email")
+    phone_number = factory.Faker("phone_number")
+    first_name = factory.Faker("first_name")
+    middle_name = None
+    last_name = factory.Faker("last_name")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    is_duplicate = factory.Faker("yn_boolean")
+    is_active = factory.Faker("yn_boolean")
+    is_email_confirm_pending = factory.Faker("yn_boolean")
+    deactivated_date = None
+    mobile_number = factory.Faker("phone_number")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    last_upd_id = Generators.UuidObj
+
+
+class ForeignVuserAccountFactory(VuserAccountFactory):
+    class Meta:
+        model = foreign.user.VuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.VuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class StagingVuserAccountFactory(VuserAccountFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.VuserAccount
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.VuserAccount.user_account_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class TuserProfileFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    user_profile_id = factory.Sequence(lambda n: n)
+    profile_name = factory.Faker("name")
+    profile_duns = factory.Sequence(lambda n: f"UEI{n:09d}")
+    profile_agency_code = None
+    title = factory.Faker("sentence")
+    is_ebiz_poc = factory.Faker("yn_boolean")
+    is_validate_mpin = factory.Faker("yn_boolean")
+    is_hidden = factory.Faker("yn_boolean")
+    is_deleted_legacy = factory.Faker("yn_boolean")
+    is_default = factory.Faker("yn_boolean")
+    email_preference = None
+    profile_type_id = factory.Faker("random_int", min=1, max=3)
+    user_account_id = factory.Sequence(lambda n: n)
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
+    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
+    last_upd_id = Generators.UuidObj
+
+
+class ForeignTuserProfileFactory(TuserProfileFactory):
+    class Meta:
+        model = foreign.user.TuserProfile
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(foreign.user.TuserProfile.user_profile_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
+class StagingTuserProfileFactory(TuserProfileFactory, AbstractStagingFactory):
+    class Meta:
+        model = staging.user.TuserProfile
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        if _db_session is not None:
+            value = _db_session.query(func.max(staging.user.TuserProfile.user_profile_id)).scalar()
+            if value is not None:
+                return value + 1
+        return 1
+
+
 class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
     class Meta:
         model = staging.user.TuserAccount
@@ -2753,6 +2942,24 @@ class StagingTinstructionsFactory(AbstractStagingFactory):
     created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 
 
+class StagingTcertificatesFactory(AbstractStagingFactory):
+    class Meta:
+        model = staging.certificates.Tcertificates
+
+    tcertificates_id = Generators.UuidObj
+    previouscertid = factory.Sequence(lambda n: f"{n}")
+    currentcertid = factory.Sequence(lambda n: f"{1000 + n}")
+    orgduns = None
+    orgname = None
+    expirationdate = factory.Faker("date_between", start_date="+3d", end_date="+1y")
+    agencyid = factory.Faker("agency_code")
+    serial_num = factory.Faker("pystr", min_chars=15, max_chars=15)
+    created_date = factory.Faker("date_between", start_date="-2y", end_date="-1y")
+    certemail = factory.Faker("email")
+    creator_id = factory.Faker("email")
+    is_selfsigned = "Y"
+
+
 ###################
 # Extract Factories
 ###################
@@ -2829,12 +3036,9 @@ class OrganizationUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda o: o.user.user_id)
 
-    is_organization_owner = True  # Keep for now, will be removed later
-
     class Params:
         # New traits for role assignment
         as_admin = factory.Trait(
-            is_organization_owner=True,
             organization_user_roles=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.OrganizationUserRoleFactory",
                 factory_related_name="organization_user",
@@ -2844,7 +3048,6 @@ class OrganizationUserFactory(BaseFactory):
         )
 
         as_member = factory.Trait(
-            is_organization_owner=False,
             organization_user_roles=factory.RelatedFactoryList(
                 "tests.src.db.models.factories.OrganizationUserRoleFactory",
                 factory_related_name="organization_user",
@@ -2873,22 +3076,26 @@ class OrganizationInvitationFactory(BaseFactory):
     organization = factory.SubFactory(OrganizationFactory)
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     inviter_user = factory.SubFactory(UserFactory)
-    inviter_user_id = factory.LazyAttribute(lambda u: u.inviter_user.user_id)
 
+    inviter_user_id = factory.lazy_attribute(lambda u: u.inviter_user.user_id)
+
+    expires_at = factory.LazyAttribute(lambda o: o.created_at + timedelta(weeks=1))
     invitee_email = factory.Faker("email")
-    expires_at = factory.Faker("date_time_between", start_date="+1d", end_date="+7d")
-    created_at = factory.Faker("date_time_between", start_date="-1y", end_date="now")
-
-    invitee_user = factory.SubFactory(UserFactory)
-    invitee_user_id = factory.LazyAttribute(lambda u: u.invitee_user.user_id)
+    created_at = factory.LazyFunction(
+        lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
+    )
 
     class Params:
         response_date = factory.LazyAttribute(
-            lambda o: fake.date_time_between(start_date=o.created_at, end_date="+1m")
+            lambda o: fake.date_time_between(
+                start_date=o.created_at, end_date="+1m", tzinfo=timezone.utc
+            )
         )
         is_accepted = factory.Trait(accepted_at=response_date)
         is_rejected = factory.Trait(rejected_at=response_date)
-        is_expired = factory.Trait(expires_at=response_date)
+        is_expired = factory.Trait(
+            expires_at=factory.LazyFunction(lambda: datetime_util.utcnow() - timedelta(days=1))
+        )
 
 
 class LinkOrganizationInvitationToRoleFactory(BaseFactory):
@@ -2902,6 +3109,18 @@ class LinkOrganizationInvitationToRoleFactory(BaseFactory):
     organization_invitation_id = factory.LazyAttribute(
         lambda o: o.organization_invitation.organization_invitation_id
     )
+
+
+class IgnoredLegacyOrganizationUserFactory(BaseFactory):
+    class Meta:
+        model = entity_models.IgnoredLegacyOrganizationUser
+
+    ignored_legacy_organization_user_id = Generators.UuidObj
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+    email = factory.Faker("email")
+    user = factory.SubFactory(UserFactory)
+    ignored_by_user_id = factory.LazyAttribute(lambda o: o.user.user_id)
 
 
 class SuppressedEmailFactory(BaseFactory):
@@ -2924,3 +3143,31 @@ class ExcludedOpportunityReviewFactory(BaseFactory):
     omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
     omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
     last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
+
+
+class BaseLegacyCertificateFactory(BaseFactory):
+    class Meta:
+        abstract = True
+
+    legacy_certificate_id = Generators.UuidObj
+    cert_id = factory.Faker("random_int", min=1000, max=10000000)
+    serial_number = factory.Sequence(lambda n: f"{n}")
+    expiration_date = factory.Faker("future_date", end_date="+2y")
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    user = factory.SubFactory(UserFactory)
+
+
+class LegacyAgencyCertificateFactory(BaseLegacyCertificateFactory):
+    class Meta:
+        model = user_models.LegacyCertificate
+
+    agency_id = factory.LazyAttribute(lambda a: a.agency.agency_id)
+    agency = factory.SubFactory(AgencyFactory)
+
+
+class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
+    class Meta:
+        model = user_models.LegacyCertificate
+
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+    organization = factory.SubFactory(OrganizationFactory)

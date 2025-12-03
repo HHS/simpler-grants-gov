@@ -123,12 +123,36 @@ def transform_truncate_string(value: Any, max_length: int) -> str:
     return value[:max_length] if len(value) > max_length else value
 
 
+def transform_map_values(value: Any, mappings: dict[str, Any], default: Any = None) -> Any:
+    """Map input values to output values based on a configuration dictionary.
+
+    This is a generic value mapper that allows form-specific value transformations
+    to be configured rather than hardcoded.
+
+    Example:
+        transform_map_values("Prime", {"Prime": "Y: Yes", "SubAwardee": "N: No"})
+        # Returns: "Y: Yes"
+    """
+    # Convert value to string for mapping lookup
+    lookup_value = str(value)
+
+    if lookup_value in mappings:
+        return mappings[lookup_value]
+    elif default is not None:
+        return default
+    else:
+        raise ValueTransformationError(
+            f"Value '{value}' not found in mappings. Valid values: {list(mappings.keys())}"
+        )
+
+
 # Registry of available transformations
 TRANSFORMATION_REGISTRY: dict[str, Callable[..., Any]] = {
     "boolean_to_yes_no": transform_boolean_to_yes_no,
     "currency_format": transform_currency_format,
     "string_case": transform_string_case,
     "truncate_string": transform_truncate_string,
+    "map_values": transform_map_values,
 }
 
 

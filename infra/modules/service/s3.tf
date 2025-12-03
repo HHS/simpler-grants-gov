@@ -6,6 +6,7 @@ resource "aws_s3_bucket" "general_purpose" {
   # checkov:skip=CKV_AWS_144:Not considered critical to the point of cross region replication
   # checkov:skip=CKV_AWS_300:Known issue where Checkov gets confused by multiple rules
   # checkov:skip=CKV_AWS_21:Bucket versioning is not worth it in this use case
+  # checkov:skip=CKV_AWS_145: Instead of using KMS by default we are using AES256 to enable cloudfront access
 }
 
 resource "aws_s3_bucket_public_access_block" "general_purpose" {
@@ -71,9 +72,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "general_purpose_e
   bucket = aws_s3_bucket.general_purpose.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
+      sse_algorithm = "AES256"
     }
-    bucket_key_enabled = true
   }
 }
 

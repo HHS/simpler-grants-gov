@@ -115,7 +115,7 @@ stop:
 
 check: format-check lint db-check-migrations test
 
-remake-backend: volume-recreate db-seed-local populate-search-opportunities populate-search-agencies ## Completely recreate API services, load data into the DB and search index
+remake-backend: volume-recreate setup-api-data ## Completely recreate API services, load data into the DB and search index
 ##################################################
 # DB & migrations
 ##################################################
@@ -179,7 +179,7 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 create-erds: # Create ERD diagrams for our DB schema
-	$(PY_RUN_CMD) create-erds
+	docker compose run --rm openapi-tools poetry run create-erds
 	mv bin/*.png ../documentation/api/database/erds
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
@@ -282,11 +282,8 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
 	$(FLASK_CMD) $(args)
 
-# Set init-db as pre-requisite since there seems to be a race condition
-# where the DB can't yet receive connections if it's starting from a
-# clean state (e.g. after make stop, make clean-volumes, make openapi-spec)
-openapi-spec: init-db ## Generate OpenAPI spec
-	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
+openapi-spec: ## Generate OpenAPI spec
+	docker compose run --rm openapi-tools poetry run flask --app src.app spec --format yaml --output openapi.generated.yml
 
 openapi-spec-common-grants:
 	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
@@ -320,6 +317,8 @@ populate-search-agencies: ## Load agencies from the DB into the search index, ru
 
 run-generate-notifications: ## Send email notifications
 	$(FLASK_CMD) generate-notifications $(args)
+
+setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 
 ##################################################
 # Miscellaneous Utilities

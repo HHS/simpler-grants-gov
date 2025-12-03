@@ -5,9 +5,16 @@ from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import (
     AbstractResponseSchema,
     FileResponseSchema,
+    PaginationMixinSchema,
     WarningMixinSchema,
 )
-from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
+from src.api.schemas.shared_schema import SimpleUserSchema
+from src.constants.lookup_constants import (
+    ApplicationAuditEvent,
+    ApplicationFormStatus,
+    ApplicationStatus,
+)
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class ApplicationStartRequestSchema(Schema):
@@ -367,3 +374,76 @@ class ApplicationFormInclusionUpdateRequestSchema(Schema):
 
 class ApplicationFormInclusionUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationFormGetResponseDataSchema())
+
+
+class ApplicationAddOrganizationResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(ApplicationUpdateResponseDataSchema())
+
+
+class ApplicationAuditRequestSchema(Schema):
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "ApplicationAuditRequestPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
+class ApplicationAuditAppFormSchema(Schema):
+
+    application_form_id = fields.UUID(metadata={"description": "The ID of the application form"})
+    competition_form_id = fields.UUID(metadata={"description": "The ID of the competition form"})
+    form_id = fields.UUID(metadata={"description": "The ID of the form"})
+    form_name = fields.String(metadata={"description": "The name of the form"})
+
+
+class ApplicationAuditAttachmentSchema(Schema):
+
+    application_attachment_id = fields.UUID(
+        metadata={"description": "The ID of the application attachment"}
+    )
+    file_name = fields.String(
+        metadata={
+            "description": "The file name of the application attachment",
+            "example": "my_example.pdf",
+        }
+    )
+
+    is_deleted = fields.Boolean(metadata={"description": "Whether the attachment has been deleted"})
+
+
+class ApplicationAuditDataSchema(Schema):
+    application_audit_id = fields.UUID(
+        metadata={"description": "The ID of the application audit event"}
+    )
+    application_audit_event = fields.Enum(
+        ApplicationAuditEvent,
+        metadata={"description": "The type of application audit event recorded"},
+    )
+
+    user = fields.Nested(
+        SimpleUserSchema(), metadata={"description": "The user who did the event that was audited"}
+    )
+    target_user = fields.Nested(
+        SimpleUserSchema(),
+        metadata={"description": "The user the audit event affected (if applicable)"},
+    )
+
+    target_application_form = fields.Nested(
+        ApplicationAuditAppFormSchema(),
+        metadata={"description": "The application form modified (if applicable)"},
+    )
+
+    target_attachment = fields.Nested(
+        ApplicationAuditAttachmentSchema(),
+        metadata={"description": "The application attachment modified (if applicable)"},
+    )
+
+    created_at = fields.DateTime(metadata={"description": "When the audit event was created"})
+
+
+class ApplicationAuditResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    data = fields.List(fields.Nested(ApplicationAuditDataSchema()))

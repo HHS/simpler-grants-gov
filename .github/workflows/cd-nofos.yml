@@ -9,6 +9,8 @@ on:
       - ".github/workflows/*-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       environment:
@@ -40,14 +42,20 @@ jobs:
 
   deploy:
     name: Deploy
+    if: github.event_name != 'push' || inputs.environment != null
     needs: [checks, vulnerability-scans]
     uses: ./.github/workflows/deploy-nofos.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || '["dev"]')  }}
     with:
-      environment: ${{ inputs.environment || 'dev' }}
-      version: ${{ inputs.version || 'main' }}
+      environment: ${{ matrix.envs }}
+      version: ${{ inputs.version || github.ref || 'main' }}
 
   send-slack-notification:
-    if: failure()
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
     needs: [checks, deploy, vulnerability-scans]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
