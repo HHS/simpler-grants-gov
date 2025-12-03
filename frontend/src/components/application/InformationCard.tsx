@@ -85,17 +85,13 @@ export const InformationCard = ({
   const hasOrganization = Boolean(applicationDetails.organization);
   const { is_open } = applicationDetails.competition;
 
-  const ApplicationInstructionsDownload = ({
-    hasOrganization,
-  }: {
-    hasOrganization: boolean;
-  }) => {
+  const ApplicationInstructionsDownload = () => {
     return (
-      <div className={hasOrganization ? "margin-top-auto" : "margin-top-5"}>
+      <div className="margin-bottom-1 margin-left-0">
         <dt className="usa-sr-only">
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
-        <dd>
+        <dd className="margin-left-0">
           {instructionsDownloadPath && (
             <Link href={instructionsDownloadPath}>
               <Button
@@ -115,7 +111,7 @@ export const InformationCard = ({
 
   const NoApplicationInstructionsDownload = () => {
     return (
-      <div className="margin-bottom-1">
+      <div className="margin-bottom-1 margin-left-0">
         <dt className="margin-right-1 text-bold">
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
@@ -178,13 +174,6 @@ export const InformationCard = ({
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
             />
-            {applicationDetails.competition.competition_instructions.length ? (
-              <ApplicationInstructionsDownload
-                hasOrganization={hasOrganization}
-              />
-            ) : (
-              <NoApplicationInstructionsDownload />
-            )}
           </dl>
         </Grid>
 
@@ -211,14 +200,25 @@ export const InformationCard = ({
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && is_open && (
-              <SubmitApplicationButton
-                buttonText={t("submit")}
-                submitHandler={applicationSubmitHandler}
-                loading={submissionLoading}
-              />
-            )}
           </dl>
+        </Grid>
+
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          {applicationDetails.competition.competition_instructions.length ? (
+            <ApplicationInstructionsDownload />
+          ) : (
+            <NoApplicationInstructionsDownload />
+          )}
+        </Grid>
+
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          {!applicationSubmitted && is_open && (
+            <SubmitApplicationButton
+              buttonText={t("submit")}
+              submitHandler={applicationSubmitHandler}
+              loading={submissionLoading}
+            />
+          )}
         </Grid>
       </>
     );
