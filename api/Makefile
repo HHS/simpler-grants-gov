@@ -384,9 +384,6 @@ setup-soap-proxy:
 validate-simpler-endpoints:
 	$(PY_RUN_CMD) validate-simpler-endpoints
 
-setup-cert-user:
-	$(PY_RUN_CMD) flask task setup-cert-user
-
 ####################
 # XML Generation CLI
 ####################
