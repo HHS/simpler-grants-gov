@@ -50,6 +50,8 @@ class TestOrganizationUsers:
             assert "email" in user_data
             assert "roles" in user_data
             assert isinstance(user_data["roles"], list)
+            assert "is_ebiz_poc" in user_data
+            assert user_data["is_ebiz_poc"] is False
 
             # Verify role structure
             for role in user_data["roles"]:
@@ -85,6 +87,7 @@ class TestOrganizationUsers:
         assert data["data"][0]["user_id"] == str(user.user_id)
         assert data["data"][0]["first_name"] == user_profile.first_name
         assert data["data"][0]["last_name"] == user_profile.last_name
+        assert data["data"][0]["is_ebiz_poc"] is False
 
     def test_get_organization_users_403_user_not_member_of_target_organization(
         self, enable_factory_create, client, db_session
@@ -229,6 +232,7 @@ class TestOrganizationUsers:
 
         user_data = data["data"][0]
         assert len(user_data["roles"]) == 1  # User has one role with multiple privileges
+        assert user_data["is_ebiz_poc"] is False
 
         role = user_data["roles"][0]
         privileges = role["privileges"]
@@ -257,6 +261,7 @@ class TestOrganizationUsers:
 
         user_data = data["data"][0]
         assert user_data["email"] == user.email  # Validate actual email value
+        assert user_data["is_ebiz_poc"] is False
 
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
@@ -289,3 +294,89 @@ class TestOrganizationUsers:
             data = resp.get_json()
             assert data["message"] == "Success"
             assert len(data["data"]) >= 1
+            # Verify is_ebiz_poc field is present
+            assert "is_ebiz_poc" in data["data"][0]
+            assert data["data"][0]["is_ebiz_poc"] is False
+
+    def test_get_organization_users_200_with_ebiz_poc(
+        self, enable_factory_create, client, db_session
+    ):
+        """Test that user matching SAM.gov Ebiz PoC email has is_ebiz_poc=True"""
+        from tests.src.db.models.factories import OrganizationFactory, SamGovEntityFactory
+
+        # Create SAM.gov entity with Ebiz PoC email
+        sam_entity = SamGovEntityFactory.create(
+            ebiz_poc_email="ebiz@example.com",
+            ebiz_poc_first_name="John",
+            ebiz_poc_last_name="Doe",
+        )
+
+        # Create organization linked to SAM.gov entity
+        organization = OrganizationFactory.create(sam_gov_entity=sam_entity)
+
+        # Create user with matching email
+        ebiz_user, _, ebiz_token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            organization=organization,
+            email="ebiz@example.com",  # Matches SAM.gov entity
+        )
+
+        # Create another user without matching email
+        regular_user, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+            email="other@example.com",
+        )
+
+        # Make request
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": ebiz_token},
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+
+        assert len(data["data"]) == 2
+
+        # Find users in response
+        ebiz_user_data = next(u for u in data["data"] if u["user_id"] == str(ebiz_user.user_id))
+        regular_user_data = next(
+            u for u in data["data"] if u["user_id"] == str(regular_user.user_id)
+        )
+
+        # Verify Ebiz PoC user has flag set
+        assert ebiz_user_data["is_ebiz_poc"] is True
+        assert ebiz_user_data["email"] == "ebiz@example.com"
+
+        # Verify regular user does not have flag set
+        assert regular_user_data["is_ebiz_poc"] is False
+        assert regular_user_data["email"] == "other@example.com"
+
+    def test_get_organization_users_200_no_sam_entity(
+        self, enable_factory_create, client, db_session
+    ):
+        """Test that users in org without SAM.gov entity have is_ebiz_poc=False"""
+        # Create organization WITHOUT SAM.gov entity
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            without_sam_gov_entity=True,
+        )
+
+        # Explicitly ensure no SAM entity
+        assert organization.sam_gov_entity is None
+
+        # Make request
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+
+        assert len(data["data"]) == 1
+        assert data["data"][0]["is_ebiz_poc"] is False

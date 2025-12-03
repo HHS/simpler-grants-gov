@@ -9,11 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 def _build_xml_form_map() -> dict[str, dict[str, Any]]:
-    """Build a dynamic map of form names to their XML transformation rules."""
+    """Build a dynamic map of form names (uppercase) to their XML transformation rules."""
     xml_form_map: dict[str, dict[str, Any]] = {}
     for form in get_active_forms():
         if form.json_to_xml_schema is not None:
-            xml_form_map[form.short_form_name] = form.json_to_xml_schema
+            xml_form_map[form.short_form_name.upper()] = form.json_to_xml_schema
     return xml_form_map
 
 

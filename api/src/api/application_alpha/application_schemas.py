@@ -8,6 +8,7 @@ from src.api.schemas.response_schema import (
     PaginationMixinSchema,
     WarningMixinSchema,
 )
+from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApplicationAuditEvent,
@@ -380,7 +381,20 @@ class ApplicationAddOrganizationResponseSchema(AbstractResponseSchema):
     data = fields.Nested(ApplicationUpdateResponseDataSchema())
 
 
+class ApplicationAuditFilterSchema(Schema):
+
+    application_audit_event = fields.Nested(
+        StrSearchSchemaBuilder("ApplicationAuditEventFieldFilterSchema")
+        .with_one_of(
+            allowed_values=ApplicationAuditEvent, example=ApplicationAuditEvent.APPLICATION_CREATED
+        )
+        .build()
+    )
+
+
 class ApplicationAuditRequestSchema(Schema):
+
+    filters = fields.Nested(ApplicationAuditFilterSchema(), required=False, allow_none=True)
 
     pagination = fields.Nested(
         generate_pagination_schema(
