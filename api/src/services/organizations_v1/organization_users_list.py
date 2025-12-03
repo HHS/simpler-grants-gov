@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
+from src.db.models.entity_models import Organization
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
@@ -45,22 +46,32 @@ def get_organization_users_and_verify_access(
     """
 
     # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
-    get_organization_and_verify_access(db_session, user, organization_id)
+    organization = get_organization_and_verify_access(db_session, user, organization_id)
 
-    return get_organization_users(db_session, organization_id)
+    return get_organization_users(db_session, organization)
 
 
-def get_organization_users(db_session: db.Session, organization_id: UUID) -> list[dict[str, Any]]:
+def get_organization_users(
+    db_session: db.Session, organization: Organization
+) -> list[dict[str, Any]]:
     """Get all users in an organization with their roles and privileges.
 
     Args:
         db_session: Database session
-        organization_id: UUID of the organization
+        organization: Organization object with sam_gov_entity eagerly loaded
 
     Returns:
         list[dict]: List of user data with roles and privileges
     """
-    org_users = _fetch_organization_users(db_session, organization_id)
+    org_users = _fetch_organization_users(db_session, organization.organization_id)
+
+    # Get ebiz_poc_email once for comparison
+    ebiz_poc_email = (
+        organization.sam_gov_entity.ebiz_poc_email.lower()
+        if organization.sam_gov_entity and organization.sam_gov_entity.ebiz_poc_email
+        else None
+    )
+
     return [
         {
             "user_id": org_user.user.user_id,
@@ -75,6 +86,11 @@ def get_organization_users(db_session: db.Session, organization_id: UUID) -> lis
             ],
             "first_name": org_user.user.profile.first_name if org_user.user.profile else None,
             "last_name": org_user.user.profile.last_name if org_user.user.profile else None,
+            "is_ebiz_poc": (
+                ebiz_poc_email is not None
+                and org_user.user.email is not None
+                and org_user.user.email.lower() == ebiz_poc_email
+            ),
         }
         for org_user in org_users
     ]
