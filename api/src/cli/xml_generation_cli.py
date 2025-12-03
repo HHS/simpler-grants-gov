@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from src.form_schema.forms.cd511 import FORM_XML_TRANSFORM_RULES as CD511_TRANSFORM_RULES
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
 from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
@@ -25,6 +26,7 @@ FORM_TRANSFORM_RULES_MAP = {
     "SF424_4_0": SF424_TRANSFORM_RULES,
     "SF424A": SF424A_TRANSFORM_RULES,
     "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
+    "CD511": CD511_TRANSFORM_RULES,
 }
 
 
@@ -43,7 +45,7 @@ FORM_TRANSFORM_RULES_MAP = {
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0). Default: SF424_4_0",
+    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0, CD511). Default: SF424_4_0",
 )
 @click.option(
     "--compact",

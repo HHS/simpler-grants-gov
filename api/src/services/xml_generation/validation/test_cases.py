@@ -1065,13 +1065,73 @@ SFLLL_TEST_CASES = [
 ]
 
 
+# Sample test cases for CD511 validation
+CD511_TEST_CASES = [
+    {
+        "name": "minimal_valid_cd511_with_project_name",
+        "json_input": {
+            "applicant_name": "Test Research Organization",
+            "project_name": "Research Study on Climate Change",
+            "contact_person": {
+                "first_name": "John",
+                "last_name": "Smith",
+            },
+            "contact_person_title": "Principal Investigator",
+            "signature": "John Smith",
+            "submitted_date": "2025-01-15",
+        },
+        "form_name": "CD511",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "cd511_with_award_number",
+        "json_input": {
+            "applicant_name": "University of Testing",
+            "award_number": "1R01GM123456-01",
+            "contact_person": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+            },
+            "contact_person_title": "Research Director",
+            "signature": "Jane Doe",
+            "submitted_date": "2025-02-20",
+        },
+        "form_name": "CD511",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "cd511_with_full_contact_name",
+        "json_input": {
+            "applicant_name": "National Institute of Science",
+            "award_number": "AWD-2025-001",
+            "project_name": "Advanced Research Project",
+            "contact_person": {
+                "prefix": "Dr.",
+                "first_name": "Robert",
+                "middle_name": "James",
+                "last_name": "Williams",
+                "suffix": "Jr.",
+            },
+            "contact_person_title": "Senior Scientist",
+            "signature": "Robert J. Williams Jr.",
+            "submitted_date": "2025-03-01",
+        },
+        "form_name": "CD511",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
     Returns:
         List of all test case dictionaries
     """
-    return SF424_TEST_CASES + SF424A_TEST_CASES + SFLLL_TEST_CASES
+    return SF424_TEST_CASES + SF424A_TEST_CASES + SFLLL_TEST_CASES + CD511_TEST_CASES
 
 
 def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:
