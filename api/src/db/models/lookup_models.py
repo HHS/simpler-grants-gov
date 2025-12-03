@@ -96,6 +96,7 @@ FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
         LookupStr(FundingCategory.TRANSPORTATION, 24),
         LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
         LookupStr(FundingCategory.OTHER, 26),
+        LookupStr(FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS, 27),
     ]
 )
 
@@ -167,6 +168,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.SUPPLEMENTARY_NEH_COVER_SHEET, 12),
         LookupStr(FormType.GG_LOBBYING_FORM, 13),
         LookupStr(FormType.EPA_FORM_4700_4, 14),
+        LookupStr(FormType.EPA_KEY_CONTACTS, 15),
     ]
 )
 

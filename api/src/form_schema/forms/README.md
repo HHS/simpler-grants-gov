@@ -68,7 +68,7 @@ Ask other engineers for the latest copy of this information.
 Our forms require the following information to create:
 * `form_id` - a static UUID, generate a new one for the form
 * `legacy_form_id` - Integer, pulled from legacy system, can get from the end of the URL of the FID page.
-* `form_name` - String, the `formname` from the form information.
+* `form_name` - String, the `description` from the form information. While it also has a `formname` in grants.gov, that's not usually as human-friendly as the grants.gov.
 * `short_form_name` - String, the `shortformname` from the form information
 * `form_version` - String, the `version` from the form information, can also see it in the FID page.
 * `agency_code` - `SGG` - At the moment, we say all forms are owned by our own `Simpler Grants.gov` agency

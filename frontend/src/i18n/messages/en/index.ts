@@ -638,6 +638,7 @@ export const messages = {
       wiki: "Public wiki",
       workspace: "Workspace",
       account: "My account",
+      testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -1427,13 +1428,6 @@ export const messages = {
   returnToGrants: {
     message: "Return to Grants.gov",
   },
-  BookmarkBanner: {
-    title: "Bookmark this page",
-    message:
-      "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
-    technicalSupportMessage:
-      "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
-  },
   UserAccount: {
     pageTitle: "User Account | Simpler.Grants.gov",
     title: "User Account",
@@ -1555,11 +1549,22 @@ export const messages = {
       "We have encountered an error retrieving the Invited Users list, please try again later.",
     invitedUsersTableZeroState: "There are no invited users.",
     roleManager: {
-      errorState: "Unable to fetch roles",
+      errorState:
+        "We were unable to make the change requested at this time. Please try again.",
       cancel: "Cancel",
       changeUserRole: "Change user role",
     },
+    removeUserModal: {
+      header: "Are you sure you want to remove this user?",
+      description:
+        "Removing them will revoke their access and may impact any work they have not yet submitted. If they need access again, an administrator will have to add them back.",
+      errorState: "We couldn't remove this user. Please try again.",
+      cancel: "Cancel",
+      removeUser: "Remove User",
+      removing: "Removing...",
+    },
     usersTable: {
+      actionsHeading: "Actions",
       admin: "Administrator",
       emailHeading: "Email",
       member: "Member",

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import React, { RefObject } from "react";
 import {
+  Alert,
   Button,
   ButtonGroup,
   ModalFooter,
@@ -19,6 +20,7 @@ export interface RoleChangeModalProps {
   nextRoleName: string;
   onConfirm: () => void;
   onCancel: () => void;
+  errorMessage?: string | null;
 }
 
 export function RoleChangeModal({
@@ -27,6 +29,7 @@ export function RoleChangeModal({
   nextRoleName,
   onConfirm,
   onCancel,
+  errorMessage,
 }: RoleChangeModalProps) {
   const t = useTranslations("ManageUsers.confirmationModal");
   const modalTitle = t("header");
@@ -41,6 +44,22 @@ export function RoleChangeModal({
       onClose={onCancel}
     >
       <p className="font-sans-2xs margin-y-4">{modalDescription}</p>
+
+      {errorMessage && (
+        <div className="margin-bottom-2">
+          <Alert
+            slim
+            type="error"
+            noIcon
+            headingLevel="h6"
+            role="alert"
+            data-testid="role-change-error"
+          >
+            {errorMessage}
+          </Alert>
+        </div>
+      )}
+
       <ModalFooter>
         <ButtonGroup>
           {isSubmitting ? (

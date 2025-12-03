@@ -8,6 +8,7 @@ import {
   UserDetail,
   UserRole,
 } from "src/types/userTypes";
+import { throwOnApiError } from "src/utils/apiUtils";
 
 import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
@@ -175,6 +176,40 @@ export const updateOrganizationUserRoles = async (
     additionalHeaders: { "X-SGG-TOKEN": session.token },
     body: { role_ids: roleIds },
   });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "updateOrganizationUserRoles",
+      unauthorizedMessage: "No active session for updating user roles.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const removeOrganizationUser = async (
+  organizationId: string,
+  userId: string,
+): Promise<UserDetail> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationWithMethod("DELETE")({
+    subPath: `${organizationId}/users/${userId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "removeOrganizationUser",
+      unauthorizedMessage: "No active session for removing users.",
+    });
+  }
+
   const json = (await resp.json()) as { data: UserDetail };
   return json.data;
 };
