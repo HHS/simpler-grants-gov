@@ -2468,6 +2468,46 @@ paths:
               $ref: '#/components/schemas/ApplicationFormInclusionUpdateRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/forms/{form_id}/form_instructions/{form_instruction_id}:
+    put:
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_instruction_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormInstructionUploadResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Form Alpha
+      summary: Form Instruction Upsert
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FormInstructionUploadRequest'
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -7731,6 +7771,28 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    FormInstructionUploadRequest:
+      type: object
+      properties:
+        file:
+          description: The form instruction file to upload
+          type: string
+          format: binary
+      required:
+      - file
+    FormInstructionUploadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
         status_code:
           type: integer
           description: The HTTP status code
