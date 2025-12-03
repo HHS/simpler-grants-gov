@@ -38,7 +38,7 @@ from src.services.organizations_v1.list_organization_invitations import (
 from src.services.organizations_v1.list_organization_roles import (
     get_organization_roles_and_verify_access,
 )
-from src.services.organizations_v1.organization_users_list import (
+from src.services.organizations_v1.list_organization_users import (
     get_organization_users_and_verify_access,
 )
 from src.services.organizations_v1.remove_user_from_organization import (

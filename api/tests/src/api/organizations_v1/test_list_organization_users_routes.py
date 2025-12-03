@@ -7,7 +7,7 @@ from tests.lib.organization_test_utils import create_user_in_org, create_user_no
 from tests.src.db.models.factories import OrganizationFactory, UserProfileFactory
 
 
-class TestOrganizationUsers:
+class TestListOrganizationUsers:
     """Test POST /v1/organizations/:organization_id/users endpoint"""
 
     def test_get_organization_users_200_with_multiple_members(
