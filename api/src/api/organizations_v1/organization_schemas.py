@@ -78,6 +78,12 @@ class OrganizationMemberSchema(Schema):
     last_name = fields.String(
         allow_none=True, metadata={"description": "User last name", "example": "Smith"}
     )
+    is_ebiz_poc = fields.Boolean(
+        metadata={
+            "description": "Whether the user is the EBiz POC (Electronic Business Point of Contact) for the organization in SAM.gov",
+            "example": False,
+        }
+    )
 
 
 class OrganizationGetResponseSchema(AbstractResponseSchema):
