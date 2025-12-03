@@ -94,7 +94,23 @@ class OrganizationGetResponseSchema(AbstractResponseSchema):
     )
 
 
-class OrganizationUsersResponseSchema(AbstractResponseSchema):
+class OrganizationUsersListRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/users request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OrganizationUsersPaginationSchema",
+            ["email", "first_name", "last_name", "created_at"],  # Allowed sort fields
+            default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
+        ),
+        required=True,
+        metadata={
+            "description": "Pagination parameters for organization users list (default page size: 10, default sort: email ascending)"
+        },
+    )
+
+
+class OrganizationUsersResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for POST /organizations/:organization_id/users response"""
 
     data = fields.List(
