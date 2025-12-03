@@ -10,6 +10,7 @@ from tests.src.db.models.factories import (
     RoleFactory,
     SamGovEntityFactory,
     UserFactory,
+    UserProfileFactory,
 )
 
 
@@ -20,6 +21,8 @@ def create_user_in_org(
     role=None,
     privileges: list[Privilege] = None,
     email=None,
+    first_name=None,
+    last_name=None,
     **kwargs
 ) -> tuple:
     """Create a user in an organization with specified privileges.
@@ -34,6 +37,8 @@ def create_user_in_org(
         sam_gov_entity: SAM.gov entity to associate with organization
         role: Role to assign to user
         email: Optional email address for the user
+        first_name: Optional first name for user profile (creates profile if provided)
+        last_name: Optional last name for user profile (creates profile if provided)
         **kwargs: Additional arguments passed to factory creation
 
     Returns:
@@ -45,6 +50,15 @@ def create_user_in_org(
     if email is not None:
         link_kwargs["email"] = email
     LinkExternalUserFactory.create(**link_kwargs)
+
+    # Create user profile if first_name or last_name provided
+    if first_name is not None or last_name is not None:
+        profile_kwargs = {"user": user}
+        if first_name is not None:
+            profile_kwargs["first_name"] = first_name
+        if last_name is not None:
+            profile_kwargs["last_name"] = last_name
+        UserProfileFactory.create(**profile_kwargs)
 
     # Create organization if not provided
     if organization is None:
