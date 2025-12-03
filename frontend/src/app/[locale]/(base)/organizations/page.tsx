@@ -39,7 +39,7 @@ const OrganizationsErrorPage = () => {
   );
 };
 
-async function OrganizationsPage({ params }: LocalizedPageProps) {
+export async function OrganizationsPage({ params }: LocalizedPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
