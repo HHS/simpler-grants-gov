@@ -201,6 +201,8 @@ The following forms currently have XML generation support:
 
 - **SF-424 (v4.0)**: Application for Federal Assistance
 - **SF-424A (v1.0)**: Budget Information - Non-Construction Programs
+- **SF-LLL (v2.0)**: Disclosure of Lobbying Activities
+- **CD-511 (v1.1)**: Certification Regarding Lobbying
 - **Project Narrative Attachments (v1.2)**: Project narrative file attachments
 - **Budget Narrative Attachments (v1.2)**: Budget narrative file attachments
 
