@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from dataclasses import dataclass
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -7,8 +8,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.selectable import Select
 
 import src.adapters.db as db
-from src.api.organizations_v1.organization_schemas import EnrichedOrganizationUser
-from src.constants.lookup_constants import ExternalUserType
+from src.constants.lookup_constants import ExternalUserType, Privilege
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import (
     LinkExternalUser,
@@ -21,6 +21,32 @@ from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
 from src.pagination.sorting_util import apply_sorting
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+
+
+@dataclass
+class RoleDict:
+    """Role information for EnrichedOrganizationUser."""
+
+    role_id: UUID
+    role_name: str
+    privileges: set[Privilege]
+
+
+@dataclass
+class EnrichedOrganizationUser:
+    """OrganizationUser enriched with computed fields for serialization.
+
+    This dataclass provides a simple data container that Marshmallow can
+    serialize automatically. All transformation logic is handled in the
+    service layer when constructing instances.
+    """
+
+    user_id: UUID
+    email: str | None
+    roles: list[RoleDict]
+    first_name: str | None
+    last_name: str | None
+    is_ebiz_poc: bool
 
 
 class OrganizationUsersListParams(BaseModel):
@@ -86,11 +112,11 @@ def _enrich_org_users_with_ebiz_poc(
             user_id=org_user.user.user_id,
             email=org_user.user.email,
             roles=[
-                {
-                    "role_id": org_user_role.role_id,
-                    "role_name": org_user_role.role.role_name,
-                    "privileges": org_user_role.role.privileges,
-                }
+                RoleDict(
+                    role_id=org_user_role.role_id,
+                    role_name=org_user_role.role.role_name,
+                    privileges=org_user_role.role.privileges,
+                )
                 for org_user_role in org_user.organization_user_roles
             ],
             first_name=org_user.user.profile.first_name if org_user.user.profile else None,

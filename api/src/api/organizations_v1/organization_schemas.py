@@ -1,13 +1,9 @@
-from dataclasses import dataclass
-from typing import TypedDict
-from uuid import UUID
-
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Email, Length, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import RoleSchema
-from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus, Privilege
+from src.constants.lookup_constants import LegacyUserStatus, OrganizationInvitationStatus
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
@@ -57,31 +53,6 @@ class OrganizationDataSchema(Schema):
         allow_none=True,
         metadata={"description": "SAM.gov entity information"},
     )
-
-
-class RoleDict(TypedDict):
-    """Type definition for role dictionary in EnrichedOrganizationUser."""
-
-    role_id: UUID
-    role_name: str
-    privileges: set[Privilege]
-
-
-@dataclass
-class EnrichedOrganizationUser:
-    """OrganizationUser enriched with computed fields for serialization.
-
-    This dataclass provides a simple data container that Marshmallow can
-    serialize automatically. All transformation logic is handled in the
-    service layer when constructing instances.
-    """
-
-    user_id: UUID
-    email: str | None
-    roles: list[RoleDict]
-    first_name: str | None
-    last_name: str | None
-    is_ebiz_poc: bool
 
 
 class OrganizationUserSchema(Schema):
