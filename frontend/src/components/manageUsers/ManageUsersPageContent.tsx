@@ -2,10 +2,13 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 
-import { GridContainer } from "@trussworks/react-uswds";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { ActiveUsersSection } from "./ActiveUsersSection";
 import { InvitedUsersSection } from "./InvitedUsersSection";
 import { UserOrganizationInvite } from "./UserOrganizationInvite";
@@ -17,6 +20,7 @@ export async function ManageUsersPageContent({
   organizationId: string;
   authorizedData?: AuthorizedData;
 }) {
+  const t = useTranslations("ManageUsers");
   let userOrganizations: Organization | undefined;
 
   if (!authorizedData) {
@@ -40,26 +44,47 @@ export async function ManageUsersPageContent({
     console.error("Unable to fetch organization information", error);
   }
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
+
+  const InviteLegacyUsersButton = ({
+    organizationId,
+  }: {
+    organizationId: string;
+  }) => {
+    return (
+      <Link href={`/organization/${organizationId}/manage-users/legacy`}>
+        <Button type="button">
+          <USWDSIcon name="groups" />
+          {t("inviteLegacyUsers")}
+        </Button>
+      </Link>
+    );
+  };
+
   return (
     <GridContainer className="padding-top-1">
       <Breadcrumbs
         breadcrumbList={[
-          { title: "home", path: "/" },
-          {
-            title: "Workspace",
-            path: `/dashboard`,
-          },
           {
             title: name ?? "Organization",
             path: `/organization/${organizationId}`,
           },
           {
-            title: "Manage Users",
+            title: `${t("pageHeading")}`,
             path: `/organization/${organizationId}/manage-users`,
           },
         ]}
       />
-      <PageHeader organizationName={name} />
+      <Grid row>
+        <Grid tablet={{ col: "fill" }}>
+          <PageHeader organizationName={name} />
+        </Grid>
+        <Grid
+          className="margin-top-auto margin-bottom-6"
+          tablet={{ col: "auto" }}
+        >
+          <InviteLegacyUsersButton organizationId={organizationId} />
+        </Grid>
+      </Grid>
       <UserOrganizationInvite organizationId={organizationId} />
       <ActiveUsersSection
         organizationId={organizationId}

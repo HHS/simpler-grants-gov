@@ -8,14 +8,16 @@ import type { AuthorizedData } from "src/types/authTypes";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
-type TranslationFn = (key: string) => string;
+type TranslationFunction = (key: string, values?: { name?: string }) => string;
 
-const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_namespace: string) => Promise.resolve((key: string) => key),
+const useTranslationsMock = jest.fn<TranslationFunction, [string]>(
+  (_namespace: string) => (key: string) => {
+    return key;
+  },
 );
 
-jest.mock("next-intl/server", () => ({
-  getTranslations: (namespace: string) => getTranslationsMock(namespace),
+jest.mock("next-intl", () => ({
+  useTranslations: (namespace: string) => useTranslationsMock(namespace),
 }));
 
 type GetOrgDetailsFn = (orgId: string) => Promise<unknown>;
@@ -107,8 +109,8 @@ describe("ManageUsersPageContent", () => {
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
-    expect(breadcrumbsProps.breadcrumbList).toHaveLength(4);
-    expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
+    expect(breadcrumbsProps.breadcrumbList).toHaveLength(2);
+    expect(breadcrumbsProps.breadcrumbList[0]).toEqual({
       title: "Cool Org Inc",
       path: `/organization/${organizationId}`,
     });
@@ -135,7 +137,7 @@ describe("ManageUsersPageContent", () => {
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
-    expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
+    expect(breadcrumbsProps.breadcrumbList[0]).toEqual({
       title: "Organization",
       path: `/organization/${organizationId}`,
     });
