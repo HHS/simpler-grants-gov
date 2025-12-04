@@ -13,11 +13,7 @@ import src.db.models.foreign
 import src.db.models.staging
 from src.data_migration.load import load_oracle_data_task
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import (
-    ForeignTopportunityFactory,
-    ForeignTuserAccountFactory,
-    StagingTopportunityFactory,
-)
+from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory
 
 
 def validate_copied_value(
@@ -264,7 +260,9 @@ class TestLoadOracleData(BaseTestClass):
         assert source_record.oppcategory == "D"
 
         # Test UPDATE with excluded columns - update the source record with a newer timestamp
-        time4 = datetime.datetime(2024, 4, 10, 23, 0, 0, tzinfo=datetime.timezone.utc)  # Later time to trigger update
+        time4 = datetime.datetime(
+            2024, 4, 10, 23, 0, 0, tzinfo=datetime.timezone.utc
+        )  # Later time to trigger update
         db_session.execute(
             sqlalchemy.update(source_table)
             .where(source_table.c.opportunity_id == 10)
