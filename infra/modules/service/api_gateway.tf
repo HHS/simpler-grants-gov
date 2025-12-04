@@ -140,6 +140,7 @@ locals {
 }
 
 resource "aws_api_gateway_rest_api" "api" {
+  # checkov:skip=CKV_AWS_237: Create before destroy is defined in deployment below
   count = var.enable_api_gateway ? 1 : 0
   name  = var.service_name
 
@@ -149,6 +150,8 @@ resource "aws_api_gateway_rest_api" "api" {
 }
 
 resource "aws_api_gateway_method" "root" {
+  # checkov:skip=CKV_AWS_59: Public endpoints or endpoint that is used as part of a flow don't need auth. Auth is enforced on greedy proxy
+  # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicitive work
   count = var.enable_api_gateway ? 1 : 0
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
@@ -159,6 +162,8 @@ resource "aws_api_gateway_method" "root" {
 
 resource "aws_api_gateway_integration" "root" {
   count = var.enable_api_gateway ? 1 : 0
+
+  depends_on = [aws_api_gateway_method.root]
 
   http_method             = "GET"
   integration_http_method = "GET"
@@ -182,6 +187,7 @@ resource "aws_api_gateway_resource" "root_endpoints" {
 }
 
 resource "aws_api_gateway_method" "root_endpoints" {
+  # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicitive work
   for_each = local.root_endpoint_methods
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
@@ -195,6 +201,8 @@ resource "aws_api_gateway_method" "root_endpoints" {
 
 resource "aws_api_gateway_integration" "root_endpoints" {
   for_each = local.root_endpoint_methods
+
+  depends_on = [aws_api_gateway_method.root_endpoints]
 
   http_method             = each.value.method
   integration_http_method = each.value.method
@@ -219,6 +227,7 @@ resource "aws_api_gateway_resource" "first_level_endpoints" {
 }
 
 resource "aws_api_gateway_method" "first_level_endpoints" {
+  # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicitive work
   for_each = local.first_level_endpoint_methods
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
@@ -232,6 +241,8 @@ resource "aws_api_gateway_method" "first_level_endpoints" {
 
 resource "aws_api_gateway_integration" "first_level_endpoints" {
   for_each = local.first_level_endpoint_methods
+
+  depends_on = [aws_api_gateway_method.first_level_endpoints]
 
   http_method             = each.value.method
   integration_http_method = each.value.method
@@ -256,6 +267,7 @@ resource "aws_api_gateway_resource" "second_level_endpoints" {
 }
 
 resource "aws_api_gateway_method" "second_level_endpoints" {
+  # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicitive work
   for_each = local.second_level_endpoint_methods
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
@@ -269,6 +281,8 @@ resource "aws_api_gateway_method" "second_level_endpoints" {
 
 resource "aws_api_gateway_integration" "second_level_endpoints" {
   for_each = local.second_level_endpoint_methods
+
+  depends_on = [aws_api_gateway_method.second_level_endpoints]
 
   http_method             = each.value.method
   integration_http_method = each.value.method
@@ -293,6 +307,7 @@ resource "aws_api_gateway_resource" "third_level_endpoints" {
 }
 
 resource "aws_api_gateway_method" "third_level_endpoints" {
+  # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicitive work
   for_each = local.third_level_endpoint_methods
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
@@ -306,6 +321,8 @@ resource "aws_api_gateway_method" "third_level_endpoints" {
 
 resource "aws_api_gateway_integration" "third_level_endpoints" {
   for_each = local.third_level_endpoint_methods
+
+  depends_on = [aws_api_gateway_method.third_level_endpoints]
 
   http_method             = each.value.method
   integration_http_method = each.value.method
