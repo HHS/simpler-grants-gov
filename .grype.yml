@@ -63,3 +63,15 @@ ignore:
   # or premature CVE. We are running the latest stable Python 3.13.x version.
   # Last checked: November 12th, 2025
   - vulnerability: CVE-2025-6075
+
+  # CVE-2025-13836: Python vulnerability (Medium severity)
+  # technically possible to hit, but the only HTTP calls we’re doing are against login.gov,
+  # sam.gov and grants.gov. We will resolve this when upgrading to the latest
+  # python 3.14.x version.
+  # Last checked: December 4th, 2025
+  - vulnerability: CVE-2025-13836
+
+  # CVE-2025-13837: Python vulnerability (Low severity)
+  # we are not using the plist file
+  # Last checked: December 4th, 2025
+  - vulnerability: CVE-2025-13837
