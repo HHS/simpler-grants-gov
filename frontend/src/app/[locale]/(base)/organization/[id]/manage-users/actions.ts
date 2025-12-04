@@ -41,6 +41,7 @@ export const inviteUserAction = async (
   _prevState: unknown,
   formData: FormData,
   organizationId: string,
+  genericErrorMessage: string,
 ): Promise<OrganizationInviteResponse> => {
   const session = await getSession();
 
@@ -80,7 +81,7 @@ export const inviteUserAction = async (
       `Error inviting user to org - ${error.message} ${error.cause?.toString() || ""}`,
     );
     return {
-      errorMessage: error.message,
+      errorMessage: `${genericErrorMessage}: ${error.message}`,
     };
   }
 };

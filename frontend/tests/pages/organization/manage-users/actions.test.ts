@@ -25,7 +25,12 @@ describe("user profile form action", () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     const inviteFormData = new FormData();
     inviteFormData.append("role", "populated");
-    const result = await inviteUserAction(null, inviteFormData, "1");
+    const result = await inviteUserAction(
+      null,
+      inviteFormData,
+      "1",
+      "generic error message",
+    );
     expect(result.validationErrors).toEqual({
       email: ["Expected string, received null"],
     });
@@ -34,7 +39,12 @@ describe("user profile form action", () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
     const inviteFormData = new FormData();
     inviteFormData.append("email", "populated");
-    const result = await inviteUserAction(null, inviteFormData, "1");
+    const result = await inviteUserAction(
+      null,
+      inviteFormData,
+      "1",
+      "generic error message",
+    );
     expect(result.validationErrors).toEqual({
       role: ["Expected string, received null"],
     });
@@ -42,7 +52,12 @@ describe("user profile form action", () => {
   it("returns error if not logged in", async () => {
     getSessionMock.mockResolvedValue({ token: null });
     const inviteFormData = new FormData();
-    const result = await inviteUserAction(null, inviteFormData, "1");
+    const result = await inviteUserAction(
+      null,
+      inviteFormData,
+      "1",
+      "generic error message",
+    );
     expect(result.errorMessage).toEqual("Not logged in");
   });
   it("returns result of update on success", async () => {
@@ -55,7 +70,12 @@ describe("user profile form action", () => {
     inviteFormData.append("email", "an email");
     inviteFormData.append("role", "smith");
 
-    const result = await inviteUserAction(null, inviteFormData, "1");
+    const result = await inviteUserAction(
+      null,
+      inviteFormData,
+      "1",
+      "generic error message",
+    );
     expect(result.data).toEqual({
       email: "an email",
       roleId: ["smith"],
@@ -72,7 +92,12 @@ describe("user profile form action", () => {
     inviteFormData.append("email", "an email");
     inviteFormData.append("role", "smith");
 
-    const result = await inviteUserAction(null, inviteFormData, "1");
-    expect(result.errorMessage).toEqual("fake error");
+    const result = await inviteUserAction(
+      null,
+      inviteFormData,
+      "1",
+      "generic error message",
+    );
+    expect(result.errorMessage).toEqual("generic error message: fake error");
   });
 });

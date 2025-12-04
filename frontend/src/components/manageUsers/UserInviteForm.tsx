@@ -34,8 +34,9 @@ const OrganizationInviteValidationError =
 
 // in order to pass the organizationId into the form action call
 export const inviteUserActionForOrganization =
-  (organizationId: string) => (_prevState: unknown, formData: FormData) =>
-    inviteUserAction(_prevState, formData, organizationId);
+  (organizationId: string, errorMessage: string) =>
+  (_prevState: unknown, formData: FormData) =>
+    inviteUserAction(_prevState, formData, organizationId, errorMessage);
 
 export const RoleOptions = ({ roles }: { roles: UserRole[] }) => {
   const t = useTranslations("ManageUsers.inviteUser.inputs.role");
@@ -95,13 +96,11 @@ export function UserInviteForm({
   const [selectedRole, setSelectedRole] = useState<string | undefined>();
 
   const inviteUser = useMemo(
-    () => inviteUserActionForOrganization(organizationId),
-    [organizationId],
+    () => inviteUserActionForOrganization(organizationId, t("errorMessage")),
+    [organizationId, t],
   );
 
-  const [formState, formAction, isPending] = useActionState(inviteUser, {
-    invitationCreated: "",
-  });
+  const [formState, formAction, isPending] = useActionState(inviteUser, {});
 
   const onRoleChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
