@@ -398,11 +398,11 @@ def validate_matching_fields(
     # but randomness in the factories might cause some overlap
     if expect_all_to_match:
         assert (
-            len(mismatched_fields) == 0
+            len(mismatched_fields) == 0 or len(fields) == 0
         ), f"Expected all fields to match between {source.__class__} and {destination.__class__}, but found mismatched fields: {','.join(mismatched_fields)}"
     else:
         assert (
-            len(mismatched_fields) != 0
+            len(mismatched_fields) != 0 or len(fields) == 0
         ), f"Did not expect all fields to match between {source.__class__} and {destination.__class__}, but they did which means an unexpected update occurred"
 
 
@@ -434,8 +434,6 @@ def validate_opportunity(
             ("category_explanation", "category_explanation"),
             ("revision_number", "revision_number"),
             ("modified_comments", "modified_comments"),
-            ("publisheruid", "publisher_user_id"),
-            ("publisher_profile_id", "publisher_profile_id"),
         ],
         expect_values_to_match,
     )
@@ -519,10 +517,6 @@ def validate_opportunity_summary(
         ("ac_name", "agency_name"),
         ("ac_email_addr", "agency_email_address"),
         ("ac_email_desc", "agency_email_address_description"),
-        ("publisher_profile_id", "publisher_profile_id"),
-        ("publisheruid", "publisher_user_id"),
-        ("last_upd_id", "updated_by"),
-        ("creator_id", "created_by"),
     ]
 
     if isinstance(source_summary, (staging.synopsis.Tsynopsis, staging.synopsis.TsynopsisHist)):
@@ -615,7 +609,7 @@ def validate_applicant_type(
     validate_matching_fields(
         source_applicant_type,
         link_applicant_type,
-        [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
+        [],
         expect_values_to_match,
     )
 
@@ -662,7 +656,7 @@ def validate_funding_instrument(
     validate_matching_fields(
         source_funding_instrument,
         link_funding_instrument,
-        [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
+        [],
         expect_values_to_match,
     )
 
@@ -708,7 +702,7 @@ def validate_funding_category(
     validate_matching_fields(
         source_funding_category,
         link_funding_category,
-        [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
+        [],
         expect_values_to_match,
     )
 
@@ -808,8 +802,6 @@ def validate_opportunity_attachment(
             ("file_name", "file_name"),
             ("file_desc", "file_description"),
             ("file_lob_size", "file_size_bytes"),
-            ("creator_id", "created_by"),
-            ("last_upd_id", "updated_by"),
             ("syn_att_folder_id", "legacy_folder_id"),
         ],
         expect_values_to_match,

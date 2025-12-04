@@ -302,8 +302,6 @@ def convert_opportunity_summary_applicant_type(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_applicant_type_id=source_applicant_type.legacy_applicant_type_id,
         applicant_type=applicant_type,
-        updated_by=source_applicant_type.last_upd_id,
-        created_by=source_applicant_type.creator_id,
     )
     transform_update_create_timestamp(
         source_applicant_type, target_applicant_type, log_extra=log_extra
@@ -332,8 +330,6 @@ def convert_opportunity_summary_funding_instrument(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_instrument_id=source_funding_instrument.legacy_funding_instrument_id,
         funding_instrument=funding_instrument,
-        updated_by=source_funding_instrument.last_upd_id,
-        created_by=source_funding_instrument.creator_id,
     )
 
     transform_update_create_timestamp(
@@ -363,8 +359,6 @@ def convert_opportunity_summary_funding_category(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_category_id=source_funding_category.legacy_funding_category_id,
         funding_category=funding_category,
-        updated_by=source_funding_category.last_upd_id,
-        created_by=source_funding_category.creator_id,
     )
 
     transform_update_create_timestamp(
