@@ -6,7 +6,7 @@ from urllib.parse import unquote
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from requests.adapters import HTTPAdapter
 from sqlalchemy import select
 
@@ -34,7 +34,9 @@ class SOAPClientCertificate(BaseModel):
     cert: str
     serial_number: int
     fingerprint: str
-    legacy_certificate_id: str
+    legacy_certificate: LegacyCertificate | None = None
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def get_pem(self, key_map: dict) -> str:
         """Note that this auth mechanism will only be configured in lower environments
@@ -42,9 +44,12 @@ class SOAPClientCertificate(BaseModel):
         There will be no prod configurations for this auth mechanism.
         TODO - is the above true? I think this happens for prod as well?
         """
-
+        if not self.legacy_certificate:
+            raise SOAPClientCertificateLookupError(
+                "could not retrieve legacy cert for serial number"
+            ) from None
         try:
-            value = key_map[self.legacy_certificate_id]
+            value = key_map[str(self.legacy_certificate.legacy_certificate_id)]
             return f"{value}\n\n{self.cert}"
         except KeyError:
             raise SOAPClientCertificateNotConfigured("cert is not configured") from None
@@ -106,28 +111,25 @@ def get_soap_client_certificate(
     legacy_certificate = db_session.execute(
         select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
     ).scalar_one_or_none()
-    if not legacy_certificate:
-        raise SOAPClientCertificateLookupError(
-            "could not retrieve legacy cert for serial number"
-        ) from None
-    add_extra_data_to_current_request_logs(
-        {
-            "legacy_certificate_id": legacy_certificate.legacy_certificate_id,
-        }
-    )
-    if legacy_certificate.agency:
+    if legacy_certificate:
         add_extra_data_to_current_request_logs(
             {
-                "agency_code": legacy_certificate.agency.agency_code,
+                "legacy_certificate_id": legacy_certificate.legacy_certificate_id,
             }
         )
+        if legacy_certificate.agency:
+            add_extra_data_to_current_request_logs(
+                {
+                    "agency_code": legacy_certificate.agency.agency_code,
+                }
+            )
 
     return SOAPClientCertificate(
         cert=cert_str,
         fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
         issuer=cert.issuer.rfc4514_string(),
         serial_number=cert.serial_number,
-        legacy_certificate_id=legacy_certificate.legacy_certificate_id,
+        legacy_certificate=legacy_certificate,
     )
 
 
@@ -140,10 +142,7 @@ def validate_certificate(
         )
         raise SOAPClientCertificateLookupError("no soap auth")
 
-    serial_number_str = str(soap_auth.certificate.serial_number)
-    legacy_certificate = db_session.execute(
-        select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number_str)
-    ).scalar_one_or_none()
+    legacy_certificate = soap_auth.certificate.legacy_certificate
 
     if not legacy_certificate:
         logger.warning(
