@@ -398,11 +398,11 @@ def validate_matching_fields(
     # but randomness in the factories might cause some overlap
     if expect_all_to_match:
         assert (
-            len(mismatched_fields) == 0 or len(fields) == 0
+            len(mismatched_fields) == 0
         ), f"Expected all fields to match between {source.__class__} and {destination.__class__}, but found mismatched fields: {','.join(mismatched_fields)}"
     else:
         assert (
-            len(mismatched_fields) != 0 or len(fields) == 0
+            len(mismatched_fields) != 0
         ), f"Did not expect all fields to match between {source.__class__} and {destination.__class__}, but they did which means an unexpected update occurred"
 
 
@@ -606,13 +606,6 @@ def validate_applicant_type(
     assert link_applicant_type is not None
     assert link_applicant_type.applicant_type == expected_applicant_type
 
-    validate_matching_fields(
-        source_applicant_type,
-        link_applicant_type,
-        [],
-        expect_values_to_match,
-    )
-
 
 def validate_funding_instrument(
     db_session,
@@ -653,13 +646,6 @@ def validate_funding_instrument(
     assert link_funding_instrument is not None
     assert link_funding_instrument.funding_instrument == expected_funding_instrument
 
-    validate_matching_fields(
-        source_funding_instrument,
-        link_funding_instrument,
-        [],
-        expect_values_to_match,
-    )
-
 
 def validate_funding_category(
     db_session,
@@ -698,13 +684,6 @@ def validate_funding_category(
 
     assert link_funding_category is not None
     assert link_funding_category.funding_category == expected_funding_category
-
-    validate_matching_fields(
-        source_funding_category,
-        link_funding_category,
-        [],
-        expect_values_to_match,
-    )
 
 
 AGENCY_FIELD_MAPPING = [
