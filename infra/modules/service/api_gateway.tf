@@ -352,6 +352,13 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
 resource "aws_api_gateway_deployment" "api_deployment" {
   count = var.enable_api_gateway ? 1 : 0
 
+  depends_on = [
+    aws_api_gateway_integration.root,
+    aws_api_gateway_integration.first_level_endpoints,
+    aws_api_gateway_integration.second_level_endpoints,
+    aws_api_gateway_integration.third_level_endpoints,
+  ]
+
   rest_api_id = aws_api_gateway_rest_api.api[0].id
 
   # Redeploys on any change to this file
