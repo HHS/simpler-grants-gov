@@ -382,7 +382,7 @@ FORM_JSON_SCHEMA = {
         "additional_congressional_districts": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
             "title": "Additional Congressional Districts",
-            "description": "Additional Congressional Districts.",
+            "description": "Attach an additional list of Program/Project Congressional Districts if needed.",
         },
         "project_start_date": {
             "type": "string",
