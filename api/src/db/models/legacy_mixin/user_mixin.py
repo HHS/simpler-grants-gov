@@ -96,7 +96,7 @@ class VuserAccountMixin:
     mobile_number: Mapped[str | None]
     created_date: Mapped[datetime] = mapped_column(nullable=False)
     creator_id: Mapped[str | None]
-    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime | None]
     last_upd_id: Mapped[str | None]
 
 
