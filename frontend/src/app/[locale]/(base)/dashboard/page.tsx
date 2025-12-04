@@ -72,8 +72,10 @@ async function ActivityDashboard() {
           ),
         })}
       </h1>
-      {userInvitations?.length && (
+      {userInvitations?.length ? (
         <OrganizationInvitationReplies userInvitations={userInvitations} />
+      ) : (
+        <></>
       )}
       <ActivityDashboardLinksSection />
       {userRoles && userOrganizations ? (
