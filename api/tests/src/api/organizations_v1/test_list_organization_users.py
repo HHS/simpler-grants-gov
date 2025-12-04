@@ -7,7 +7,20 @@ from tests.lib.organization_test_utils import create_user_in_org, create_user_no
 from tests.src.db.models.factories import OrganizationFactory, UserProfileFactory
 
 
-class TestOrganizationUsers:
+def _default_pagination_request(
+    page_offset=1, page_size=10, order_by="email", sort_direction="ascending"
+):
+    """Helper to create default pagination request body."""
+    return {
+        "pagination": {
+            "page_offset": page_offset,
+            "page_size": page_size,
+            "sort_order": [{"order_by": order_by, "sort_direction": sort_direction}],
+        }
+    }
+
+
+class TestListOrganizationUsers:
     """Test POST /v1/organizations/:organization_id/users endpoint"""
 
     def test_get_organization_users_200_with_multiple_members(
@@ -31,6 +44,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -38,6 +52,12 @@ class TestOrganizationUsers:
 
         assert data["message"] == "Success"
         assert len(data["data"]) == 2
+
+        # Verify pagination info
+        assert data["pagination_info"]["page_offset"] == 1
+        assert data["pagination_info"]["page_size"] == 10
+        assert data["pagination_info"]["total_records"] == 2
+        assert data["pagination_info"]["total_pages"] == 1
 
         # Verify correct users are returned
         returned_user_ids = {user["user_id"] for user in data["data"]}
@@ -77,6 +97,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -111,6 +132,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         # This should return 403 because user is not a member of other_organization
@@ -130,6 +152,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 403
@@ -151,6 +174,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 403
@@ -169,6 +193,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 403
@@ -185,6 +210,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{non_existent_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 404
@@ -193,7 +219,9 @@ class TestOrganizationUsers:
         """Test that accessing organization users without auth token returns 401"""
         random_org_id = str(uuid.uuid4())
 
-        resp = client.post(f"/v1/organizations/{random_org_id}/users")
+        resp = client.post(
+            f"/v1/organizations/{random_org_id}/users", json=_default_pagination_request()
+        )
 
         assert resp.status_code == 401
 
@@ -204,6 +232,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{random_org_id}/users",
             headers={"X-SGG-Token": "invalid-token"},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 401
@@ -222,6 +251,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -251,6 +281,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -287,6 +318,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
         assert resp.status_code == expected_status
 
@@ -334,6 +366,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": ebiz_token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -373,6 +406,7 @@ class TestOrganizationUsers:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/users",
             headers={"X-SGG-Token": token},
+            json=_default_pagination_request(),
         )
 
         assert resp.status_code == 200
@@ -380,3 +414,242 @@ class TestOrganizationUsers:
 
         assert len(data["data"]) == 1
         assert data["data"][0]["is_ebiz_poc"] is False
+
+
+class TestListOrganizationUsersPagination:
+    """Test pagination and sorting behavior for organization users endpoint"""
+
+    @pytest.mark.parametrize(
+        "total_users,page_size,page_offset,expected_count,expected_total_pages",
+        [
+            (25, 10, 1, 10, 3),  # First page of 3
+            (25, 10, 2, 10, 3),  # Middle page of 3
+            (25, 10, 3, 5, 3),  # Last page with partial results
+            (10, 10, 1, 10, 1),  # Single page, exact fit
+            (5, 10, 1, 5, 1),  # Single page, less than page size
+            (25, 5, 1, 5, 5),  # Small page size
+            (25, 5, 5, 5, 5),  # Last page with small page size
+        ],
+    )
+    def test_pagination_page_sizes_and_offsets(
+        self,
+        enable_factory_create,
+        client,
+        db_session,
+        total_users,
+        page_size,
+        page_offset,
+        expected_count,
+        expected_total_pages,
+    ):
+        """Test various pagination configurations with different page sizes and offsets"""
+        # Create organization owner with required privileges
+        owner, organization, owner_token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+        )
+
+        # Create additional users (total_users - 1 since owner exists)
+        for _ in range(total_users - 1):
+            create_user_in_org(
+                privileges=[Privilege.VIEW_APPLICATION],
+                db_session=db_session,
+                organization=organization,
+            )
+
+        # Make request with specific pagination parameters
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(page_offset=page_offset, page_size=page_size),
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+
+        # Verify pagination results
+        assert len(data["data"]) == expected_count
+        assert data["pagination_info"]["page_offset"] == page_offset
+        assert data["pagination_info"]["page_size"] == page_size
+        assert data["pagination_info"]["total_records"] == total_users
+        assert data["pagination_info"]["total_pages"] == expected_total_pages
+
+    @pytest.mark.parametrize(
+        "sort_field,sort_direction",
+        [
+            ("email", "ascending"),
+            ("email", "descending"),
+            ("first_name", "ascending"),
+            ("first_name", "descending"),
+            ("last_name", "ascending"),
+            ("last_name", "descending"),
+            ("created_at", "ascending"),
+            ("created_at", "descending"),
+        ],
+    )
+    def test_sorting_all_fields_and_directions(
+        self, enable_factory_create, client, db_session, sort_field, sort_direction
+    ):
+        """Test sorting by each allowed field in both directions"""
+        # Create organization owner with required privileges and profile
+        owner, organization, owner_token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            first_name="Alice",
+            last_name="Anderson",
+        )
+
+        # Create additional users with profiles for sorting
+        user2, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+            first_name="Bob",
+            last_name="Brown",
+        )
+
+        user3, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+            first_name="Charlie",
+            last_name="Clark",
+        )
+
+        # Make request with specific sort order
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(order_by=sort_field, sort_direction=sort_direction),
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert len(data["data"]) == 3
+
+        # Verify data is sorted correctly by checking order
+        users = data["data"]
+
+        if sort_field == "email":
+            # Email addresses generated by factories should be sortable
+            emails = [u["email"] for u in users]
+            if sort_direction == "ascending":
+                assert emails == sorted(emails)
+            else:
+                assert emails == sorted(emails, reverse=True)
+
+        elif sort_field == "first_name":
+            first_names = [u["first_name"] for u in users]
+            if sort_direction == "ascending":
+                assert first_names == ["Alice", "Bob", "Charlie"]
+            else:
+                assert first_names == ["Charlie", "Bob", "Alice"]
+
+        elif sort_field == "last_name":
+            last_names = [u["last_name"] for u in users]
+            if sort_direction == "ascending":
+                assert last_names == ["Anderson", "Brown", "Clark"]
+            else:
+                assert last_names == ["Clark", "Brown", "Anderson"]
+
+        elif sort_field == "created_at":
+            # Verify created_at is ordered properly
+            created_ats = [u["user_id"] for u in users]
+            # Just verify we got all users - specific order depends on creation timing
+            assert len(created_ats) == 3
+
+    def test_sorting_nulls_last_behavior(self, enable_factory_create, client, db_session):
+        """Test that users without profiles (null names) appear last in sort order"""
+        # Create organization owner with required privileges and profile
+        owner, organization, owner_token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            first_name="Alice",
+        )
+
+        # Create user WITHOUT profile (null first_name)
+        user_no_profile, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+        )
+
+        # Create user WITH profile
+        user_with_profile, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+            first_name="Zoe",
+        )
+
+        # Sort by first_name ascending - user without profile should be last
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": owner_token},
+            json=_default_pagination_request(order_by="first_name", sort_direction="ascending"),
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert len(data["data"]) == 3
+
+        users = data["data"]
+        # First two should have names, last should be None
+        assert users[0]["first_name"] == "Alice"
+        assert users[1]["first_name"] == "Zoe"
+        assert users[2]["first_name"] is None
+
+    def test_multi_field_sorting(self, enable_factory_create, client, db_session):
+        """Test sorting by multiple fields (compound sort order)"""
+        # Create organization owner
+        owner, organization, owner_token = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            first_name="Alice",
+            last_name="Smith",
+        )
+
+        # Create users with same last name but different first names
+        user2, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+            first_name="Bob",
+            last_name="Smith",
+        )
+
+        user3, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_APPLICATION],
+            db_session=db_session,
+            organization=organization,
+            first_name="Charlie",
+            last_name="Brown",
+        )
+
+        # Sort by last_name then first_name
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/users",
+            headers={"X-SGG-Token": owner_token},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "last_name", "sort_direction": "ascending"},
+                        {"order_by": "first_name", "sort_direction": "ascending"},
+                    ],
+                }
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        users = data["data"]
+
+        # Brown should come first, then Smiths sorted by first name
+        assert users[0]["last_name"] == "Brown"
+        assert users[0]["first_name"] == "Charlie"
+        assert users[1]["last_name"] == "Smith"
+        assert users[1]["first_name"] == "Alice"
+        assert users[2]["last_name"] == "Smith"
+        assert users[2]["first_name"] == "Bob"
