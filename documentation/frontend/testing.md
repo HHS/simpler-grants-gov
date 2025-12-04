@@ -22,7 +22,7 @@ Using this function, tests should work automatically in CI, but they will requir
 - We strive for high unit test coverage (but not 100%)
 - We expect engineers to write unit tests for any changes they make in the same PR that contains the code changes
 - We use data fixtures when relevant (see https://github.com/HHS/simpler-grants-gov/blob/main/frontend/src/utils/testing/fixtures.ts)
-- We strive to include snapshot tests and axe tests on all components
+- We strive to include axe tests on all components
 
 ### Helpful common patterns
 
