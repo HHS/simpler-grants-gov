@@ -40,7 +40,6 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--sync-status/--no-sync-status", default=False, help="run SyncOpportunityReviewStatus"
 )
-@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
 @flask_db.with_db_session()
 @ecs_background_task(task_name="load-transform")
 def load_transform(
@@ -52,7 +51,6 @@ def load_transform(
     sync_status: bool,
     insert_chunk_size: int,
     tables_to_load: list[str],
-    scheduled_job_name: str | None,
 ) -> None:
     logger.info("load and transform start")
 
