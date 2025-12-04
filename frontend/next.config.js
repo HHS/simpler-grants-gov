@@ -54,7 +54,7 @@ const headers = [
   {
     // static pages are stored for 6 hours, refreshed in the background for
     // up to 10 minutes, and up to 12 hours if there is an error
-    source: "/:path([A-Za-z0-9-_/?=]*)",
+    source: "/:path*",
     headers: [
       {
         key: "Cache-Control",
