@@ -54,7 +54,7 @@ const headers = [
   {
     // static pages are stored for 6 hours, refreshed in the background for
     // up to 10 minutes, and up to 12 hours if there is an error
-    source: "/:path([A-Za-z0-9-_]+)",
+    source: "/:path([A-Za-z0-9-_/]*)",
     headers: [
       {
         key: "Cache-Control",
@@ -89,7 +89,7 @@ const headers = [
   },
   // don't cache the form
   {
-    source: "/subscribe/:path([A-Za-z0-9-_]+)",
+    source: "/subscribe/:path([A-Za-z0-9-_/]*)",
     headers: [
       {
         key: "Cache-Control",
@@ -99,7 +99,7 @@ const headers = [
   },
   // don't cache the api
   {
-    source: "/api/:path([A-Za-z0-9-_]+)",
+    source: "/api/:path([A-Za-z0-9-_/]*)",
     headers: [
       {
         key: "Cache-Control",
@@ -109,7 +109,7 @@ const headers = [
   },
   // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved:path([A-Za-z0-9-_]+)",
+    source: "/saved:path([A-Za-z0-9-_/]*)",
     headers: [
       {
         key: "Cache-Control",
@@ -129,7 +129,7 @@ const headers = [
   },
   // don't cache if users has a session cookie
   {
-    source: "/:path([A-Za-z0-9-_]+)",
+    source: "/:path([A-Za-z0-9-_/]*)",
     has: [{ type: "cookie", key: "session" }],
     headers: [
       {
