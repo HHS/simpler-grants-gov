@@ -1,8 +1,8 @@
-from collections.abc import Sequence
+from typing import Sequence
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import and_, asc, desc, select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.selectable import Select
 
@@ -17,8 +17,9 @@ from src.db.models.user_models import (
     User,
     UserProfile,
 )
-from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
+from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.pagination.sorting_util import apply_sorting
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 
@@ -62,66 +63,38 @@ def _build_organization_users_query(organization_id: UUID) -> Select:
     return stmt
 
 
-def _apply_organization_users_sorting(stmt: Select, sort_order: list) -> Select:
-    """Apply sorting to organization users query with support for joined table columns.
-
-    Args:
-        stmt: The SQLAlchemy query statement
-        sort_order: List of SortOrderParams describing the sorting order
-
-    Returns:
-        The modified query statement with applied sorting
-    """
-    # Map sort field names to actual column objects
-    sort_mappings = {
-        "email": LinkExternalUser.email,
-        "first_name": UserProfile.first_name,
-        "last_name": UserProfile.last_name,
-        "created_at": OrganizationUser.created_at,
-    }
-
-    order_cols = []
-    for order in sort_order:
-        column = sort_mappings.get(order.order_by)
-        if column is None:
-            # This shouldn't happen due to schema validation, but handle gracefully
-            continue
-
-        if order.sort_direction == SortDirection.ASCENDING:
-            order_cols.append(asc(column).nulls_last())
-        elif order.sort_direction == SortDirection.DESCENDING:
-            order_cols.append(desc(column).nulls_last())
-
-    return stmt.order_by(*order_cols)
-
-
 def _enrich_org_users_with_ebiz_poc(
     org_users: Sequence[OrganizationUser], organization: Organization
 ) -> list[EnrichedOrganizationUser]:
-    """Enrich OrganizationUser objects with is_ebiz_poc computed field.
-
-    Wraps each OrganizationUser in an EnrichedOrganizationUser dataclass that
-    includes is_ebiz_poc=True for the user whose email matches the organization's
-    SAM.gov entity ebiz_poc_email (case-insensitive).
+    """Enrich organization users with computed fields for serialization.
 
     Args:
-        org_users: List of OrganizationUser objects to enrich
-        organization: Organization with sam_gov_entity eagerly loaded
+        org_users: Sequence of OrganizationUser objects from database
+        organization: Organization object containing SAM.gov entity data
 
     Returns:
-        List of EnrichedOrganizationUser objects ready for serialization
+        List of EnrichedOrganizationUser dataclass instances ready for serialization
     """
-    # Get ebiz_poc_email for comparison
     ebiz_poc_email = (
         organization.sam_gov_entity.ebiz_poc_email.lower()
         if organization.sam_gov_entity and organization.sam_gov_entity.ebiz_poc_email
         else None
     )
 
-    # Wrap each OrganizationUser with is_ebiz_poc flag
     return [
         EnrichedOrganizationUser(
-            org_user=org_user,
+            user_id=org_user.user.user_id,
+            email=org_user.user.email,
+            roles=[
+                {
+                    "role_id": org_user_role.role_id,
+                    "role_name": org_user_role.role.role_name,
+                    "privileges": org_user_role.role.privileges,
+                }
+                for org_user_role in org_user.organization_user_roles
+            ],
+            first_name=org_user.user.profile.first_name if org_user.user.profile else None,
+            last_name=org_user.user.profile.last_name if org_user.user.profile else None,
             is_ebiz_poc=(
                 ebiz_poc_email is not None
                 and org_user.user.email is not None
@@ -158,8 +131,17 @@ def get_organization_users_and_verify_access(
     # Build base query with joins for sorting
     stmt = _build_organization_users_query(organization_id)
 
-    # Apply sorting
-    stmt = _apply_organization_users_sorting(stmt, params.pagination.sort_order)
+    # Apply sorting using custom column mapping
+    stmt = apply_sorting(
+        stmt,
+        params.pagination.sort_order,
+        {
+            "email": LinkExternalUser.email,
+            "first_name": UserProfile.first_name,
+            "last_name": UserProfile.last_name,
+            "created_at": OrganizationUser.created_at,
+        },
+    )
 
     # Paginate
     paginator: Paginator[OrganizationUser] = Paginator(
@@ -171,7 +153,7 @@ def get_organization_users_and_verify_access(
     # Build pagination info
     pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
 
-    # Enrich organization users with is_ebiz_poc computed field
+    # Enrich organization users with computed fields
     enriched_users = _enrich_org_users_with_ebiz_poc(org_users, organization)
 
     return enriched_users, pagination_info
