@@ -19,22 +19,23 @@ export const checkFeatureFlagRedirect = async (
   pageLocation: string,
   featureFlagName: string,
   redirectDestination: string,
+  withFeatureFlagMock: jest.Mock,
 ) => {
   // Configure the mocked withFeatureFlag as a passthrough and
   // capture how it is called by the page module.
-  const withFeatureFlagModule = await import(
-    "src/services/featureFlags/withFeatureFlag"
-  );
-  const withFeatureFlagMock =
-    withFeatureFlagModule.default as unknown as jest.Mock<
-      unknown,
-      WithFeatureFlagArgs
-    >;
+  // const withFeatureFlagModule = await import(
+  //   "src/services/featureFlags/withFeatureFlag"
+  // );
+  // const withFeatureFlagMock =
+  //   withFeatureFlagModule.default as unknown as jest.Mock<
+  //     unknown,
+  //     WithFeatureFlagArgs
+  //   >;
 
-  withFeatureFlagMock.mockImplementation(
-    (wrappedComponent: unknown, _flagName: string, _onDisabled: () => void) =>
-      wrappedComponent,
-  );
+  // withFeatureFlagMock.mockImplementation(
+  //   (wrappedComponent: unknown, _flagName: string, _onDisabled: () => void) =>
+  //     wrappedComponent,
+  // );
 
   const navigationModule = await import("next/navigation");
   const redirectMock = navigationModule.redirect;
