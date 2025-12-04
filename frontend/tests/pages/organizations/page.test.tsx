@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import { OrganizationsPage } from "src/app/[locale]/(base)/organizations/page";
+import OrganizationsPage from "src/app/[locale]/(base)/organizations/page";
 import { Organization } from "src/types/applicationResponseTypes";
+import { LocalizedPageProps } from "src/types/intl";
 import { UserDetail } from "src/types/userTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
-import { checkFeatureFlagRedirect } from "tests/utils/featureFlagUtils";
+
+import { FunctionComponent } from "react";
+
+const withFeatureFlagMock = jest.fn();
+const redirectMock = jest.fn();
 
 jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,
@@ -35,7 +40,25 @@ jest.mock("src/components/workspace/UserOrganizationsList", () => ({
   UserOrganizationsList: () => <div data-testid="user-org-list" />,
 }));
 
-const organizationsPageLocation = "src/app/[locale]/(base)/organizations/page";
+jest.mock("next/navigation", () => ({
+  redirect: (location: string) => redirectMock(location) as unknown,
+}));
+
+jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+  __esModule: true,
+  default:
+    (
+      WrappedComponent: FunctionComponent<LocalizedPageProps>,
+      featureFlagName: string,
+      onEnabled: () => void,
+    ) =>
+    (props) =>
+      withFeatureFlagMock(
+        WrappedComponent,
+        featureFlagName,
+        onEnabled,
+      )(props) as unknown,
+}));
 
 describe("Organizations page feature flag wiring", () => {
   beforeEach(() => {
@@ -48,16 +71,35 @@ describe("Organizations page feature flag wiring", () => {
       user_id: "user-1",
     });
     organizations.mockResolvedValue([]);
+    withFeatureFlagMock.mockImplementation(
+      (
+        WrappedComponent: FunctionComponent<LocalizedPageProps>,
+        _featureFlagName,
+        _onEnabled,
+      ) =>
+        (props: { params: Promise<{ locale: string }> }) =>
+          WrappedComponent(props) as unknown,
+    );
   });
 
   it("check OrganizationsPage redirects to maintenance if manageUsersOff is enabled", async () => {
-    expect(
-      await checkFeatureFlagRedirect(
-        organizationsPageLocation,
-        "manageUsersOff",
-        "/maintenance",
-      ),
-    ).toBe(true);
+    const component = await OrganizationsPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(component);
+
+    expect(withFeatureFlagMock).toHaveBeenCalledTimes(1);
+
+    const [wrappedComponent, flagName, onEnabled] =
+      withFeatureFlagMock.mock.calls[0];
+
+    expect(flagName).toBe("manageUsersOff");
+    expect(typeof wrappedComponent).toBe("function");
+    expect(typeof onEnabled).toBe("function");
+
+    (onEnabled as () => void)();
+    expect(redirectMock).toHaveBeenCalledTimes(1);
+    expect(redirectMock).toHaveBeenCalledWith("/maintenance");
   });
 
   it("the happy path page should have a table and heading", async () => {
