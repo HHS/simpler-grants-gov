@@ -18,15 +18,11 @@ from src.task.ecs_background_task import ecs_background_task
     default=True,
     help="Whether to run a full refresh, or only incrementally update opportunities",
 )
-@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
 @ecs_background_task(task_name="load-opportunity-data-opensearch")
 def load_opportunity_data(
-    search_client: search.SearchClient,
-    db_session: db.Session,
-    full_refresh: bool,
-    scheduled_job_name: str | None,
+    search_client: search.SearchClient, db_session: db.Session, full_refresh: bool
 ) -> None:
     LoadOpportunitiesToIndex(db_session, search_client, full_refresh).run()
 
@@ -34,13 +30,11 @@ def load_opportunity_data(
 @load_search_data_blueprint.cli.command(
     "load-agency-data", help="Load agency data from our database to the search index"
 )
-@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
 @ecs_background_task(task_name="load-agency-data-opensearch")
 def load_agency_data(
     search_client: search.SearchClient,
     db_session: db.Session,
-    scheduled_job_name: str | None,
 ) -> None:
     LoadAgenciesToIndex(db_session, search_client).run()
