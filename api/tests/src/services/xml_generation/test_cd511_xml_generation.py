@@ -7,6 +7,7 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd
 """
 
 from datetime import date
+from pathlib import Path
 
 import pytest
 from lxml import etree as lxml_etree
@@ -69,9 +70,7 @@ class TestCD511XMLGeneration:
             "<CD511:OrganizationName>Test Research Organization</CD511:OrganizationName>"
             in xml_data
         )
-        assert (
-            "<CD511:ProjectName>Research Study on Climate Change</CD511:ProjectName>" in xml_data
-        )
+        assert "<CD511:ProjectName>Research Study on Climate Change</CD511:ProjectName>" in xml_data
         assert "<CD511:Title>Principal Investigator</CD511:Title>" in xml_data
         assert "<CD511:Signature>John Smith</CD511:Signature>" in xml_data
         assert "<CD511:SubmittedDate>2025-01-15</CD511:SubmittedDate>" in xml_data
@@ -248,8 +247,6 @@ class TestCD511XSDValidation:
     @pytest.fixture
     def xsd_validator(self):
         """Create XSD validator with cache directory."""
-        from pathlib import Path
-
         xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
         if not xsd_cache_dir.exists():
             pytest.skip(
@@ -459,4 +456,3 @@ class TestCD511XSDValidation:
             f"Error: {validation_result['error_message']}\n"
             f"Generated XML:\n{cd511_xml}"
         )
-
