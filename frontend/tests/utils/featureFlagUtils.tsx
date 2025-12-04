@@ -15,28 +15,6 @@ jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
 }));
 
-export const getFeatureFlagMockedPage = async (pageLocation: string) => {
-  const withFeatureFlagModule = await import(
-    "src/services/featureFlags/withFeatureFlag"
-  );
-  const withFeatureFlagMock =
-    withFeatureFlagModule.default as unknown as jest.Mock<
-      unknown,
-      WithFeatureFlagArgs
-    >;
-
-  withFeatureFlagMock.mockImplementation(
-    (wrappedComponent: unknown, _flagName: string, _onDisabled: () => void) =>
-      wrappedComponent,
-  );
-
-  const pageModule = await (import(pageLocation) as Promise<ModuleWithDefault>);
-  const Page = pageModule.default as unknown as PageFn;
-
-  const params: Promise<Params> = Promise.resolve({ locale: "en" });
-  return Page({ params });
-};
-
 export const checkFeatureFlagRedirect = async (
   pageLocation: string,
   featureFlagName: string,
@@ -59,10 +37,7 @@ export const checkFeatureFlagRedirect = async (
   );
 
   const navigationModule = await import("next/navigation");
-  const redirectMock = navigationModule.redirect as unknown as jest.Mock<
-    void,
-    [string]
-  >;
+  const redirectMock = navigationModule.redirect;
 
   // Importing the page calls the withFeatureFlag(...)
   const pageModule = await (import(pageLocation) as Promise<ModuleWithDefault>);
