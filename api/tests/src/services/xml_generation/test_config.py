@@ -1,6 +1,6 @@
 """Tests for XML generation configuration."""
 
-from src.services.xml_generation.config import load_xml_transform_config
+from src.services.xml_generation.config import is_form_xml_supported, load_xml_transform_config
 
 
 class TestXMLTransformConfig:
@@ -68,3 +68,75 @@ class TestXMLTransformConfig:
 
         # Both should load the same configuration
         assert config_upper == config_lower
+
+    def test_load_project_narrative_attachment_config(self):
+        """Test loading Project Narrative Attachment transformation configuration."""
+        config = load_xml_transform_config("ProjectNarrativeAttachments_1_2")
+
+        # Verify config is loaded as dict
+        assert isinstance(config, dict)
+        assert len(config) > 0
+
+        # Verify XML config metadata
+        xml_config = config.get("_xml_config", {})
+        assert xml_config.get("form_name") == "ProjectNarrativeAttachments_1_2"
+        assert xml_config.get("version") == "1.0"
+
+        # Verify XML structure
+        xml_structure = xml_config.get("xml_structure", {})
+        assert xml_structure.get("root_element") == "ProjectNarrativeAttachments_1_2"
+        assert xml_structure.get("root_attributes", {}).get("FormVersion") == "1.2"
+
+        # Verify namespace config
+        namespace_config = xml_config.get("namespaces", {})
+        assert (
+            namespace_config.get("default")
+            == "http://apply.grants.gov/forms/ProjectNarrativeAttachments_1_2-V1.2"
+        )
+
+        # Verify attachment field configuration
+        attachment_fields = xml_config.get("attachment_fields", {})
+        assert "attachments" in attachment_fields
+        assert attachment_fields["attachments"]["xml_element"] == "Attachments"
+        assert attachment_fields["attachments"]["type"] == "multiple"
+
+    def test_load_budget_narrative_attachment_config(self):
+        """Test loading Budget Narrative Attachment transformation configuration."""
+        config = load_xml_transform_config("BudgetNarrativeAttachments_1_2")
+
+        # Verify config is loaded as dict
+        assert isinstance(config, dict)
+        assert len(config) > 0
+
+        # Verify XML config metadata
+        xml_config = config.get("_xml_config", {})
+        assert xml_config.get("form_name") == "BudgetNarrativeAttachments_1_2"
+        assert xml_config.get("version") == "1.0"
+
+        # Verify XML structure
+        xml_structure = xml_config.get("xml_structure", {})
+        assert xml_structure.get("root_element") == "BudgetNarrativeAttachments_1_2"
+        assert xml_structure.get("root_attributes", {}).get("FormVersion") == "1.2"
+
+        # Verify namespace config
+        namespace_config = xml_config.get("namespaces", {})
+        assert (
+            namespace_config.get("default")
+            == "http://apply.grants.gov/forms/BudgetNarrativeAttachments_1_2-V1.2"
+        )
+
+        # Verify attachment field configuration
+        attachment_fields = xml_config.get("attachment_fields", {})
+        assert "attachments" in attachment_fields
+        assert attachment_fields["attachments"]["xml_element"] == "Attachments"
+        assert attachment_fields["attachments"]["type"] == "multiple"
+
+    def test_is_form_xml_supported(self):
+        """Test checking if forms are supported for XML generation."""
+        # Supported forms
+        assert is_form_xml_supported("SF424_4_0") is True
+        assert is_form_xml_supported("ProjectNarrativeAttachments_1_2") is True
+        assert is_form_xml_supported("BudgetNarrativeAttachments_1_2") is True
+
+        # Unsupported form
+        assert is_form_xml_supported("UNKNOWN_FORM") is False

@@ -39,12 +39,12 @@ class SetupCertUserTaskStatus(StrEnum):
 
 
 @task_blueprint.cli.command("setup-cert-user", help="Setup the LegacyCertificate and User")
-@click.option("--tcertficates-id", "-t", help="tcertificates_id on Staging Tcertificate")
+@click.option("--tcertificates-id", "-t", help="tcertificates_id on Staging Tcertificate")
 @click.option("--role-ids", "-t", help="role_id of role that needs to be added", multiple=True)
 @flask_db.with_db_session()
 @ecs_background_task(task_name="setup-cert-user")
-def setup_cert_user(db_session: db.Session, cert_id: str, role_ids: list[str]) -> None:
-    SetupCertUserTask(db_session, cert_id, role_ids).run_task()
+def setup_cert_user(db_session: db.Session, tcertificates_id: str, role_ids: list[str]) -> None:
+    SetupCertUserTask(db_session, tcertificates_id, role_ids).run_task()
 
 
 class SetupCertUserTask(Task):

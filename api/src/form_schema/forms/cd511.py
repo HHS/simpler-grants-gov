@@ -32,7 +32,9 @@ In any funds have been paid or will be paid to any person for influencing or att
 Submission of this statement is a prerequisite for making or entering into this transaction imposed by section 1352, title 31, U.S. Code. Any person who fails to file the required statement shall be subject to a civil penalty of not less than $10,000 and not more than $100,000 for each such failure occurring on or before October 23, 1996, and of not less than $11,000 and not more than $110,000 for each such failure occurring after October 23, 1996.
 """
 
-DIRECTIONS_COMPLY_TITLE = "As the duly authorized representative of the applicant, I hereby certify that the applicant will comply with the above applicable certification."
+DIRECTIONS_COMPLY_TITLE = "Acknowledgement"
+
+DIRECTIONS_COMPLY_BODY = "As the duly authorized representative of the applicant, I hereby certify that the applicant will comply with the above applicable certification."
 
 FORM_JSON_SCHEMA = {
     "type": "object",
@@ -62,18 +64,19 @@ FORM_JSON_SCHEMA = {
         "applicant_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Name of Applicant",
+            "description": "Enter legal name of applicant, which will undertake the assistance activity.",
         },
         "award_number": {
             "type": "string",
             "title": "Award Number",
-            "description": "Required if Project Name is blank",
+            "description": "Required if Project Name is blank.",
             "minLength": 1,
             "maxLength": 25,
         },
         "project_name": {
             "type": "string",
             "title": "Project Name",
-            "description": "Required if Award Number is blank",
+            "description": "Required if Award Number is blank.",
             "minLength": 1,
             "maxLength": 60,
         },
@@ -119,13 +122,13 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": DIRECTIONS_COMPLY_TITLE,
         "name": "directions4",
-        "description": "",
+        "description": DIRECTIONS_COMPLY_BODY,
         "children": [],
     },
     {
         "type": "section",
         "name": "award",
-        "label": "1. Award",
+        "label": "1. Applicant Information",
         "children": [
             {"type": "field", "definition": "/properties/applicant_name"},
             {"type": "field", "definition": "/properties/award_number"},

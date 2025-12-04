@@ -6,7 +6,7 @@ WITH -- get project_id
  sprint_data AS
   (SELECT gh_sprint.id AS sprint_id,
           gh_sprint.name AS sprint_name,
-          gh_sprint.end_date AS sprint_last_day
+          gh_sprint.end_date-1 AS sprint_last_day
    FROM project_data,
         gh_sprint
    WHERE gh_sprint.project_id = project_data.project_id

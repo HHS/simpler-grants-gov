@@ -10,10 +10,12 @@ from src.db.models.legacy_mixin.user_mixin import TuserProfileMixin, VuserAccoun
 from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 
 
+# TODO(#7340): Evaluate removing TuserAccount/TuserAccountMapper - no longer synced from Oracle
 class TuserAccountMapper(StagingBase, user_mixin.TuserAccountMapperMixin, StagingParamMixin):
     __tablename__ = "tuser_account_mapper"
 
 
+# TODO(#7340): Evaluate removing TuserAccount/TuserAccountMapper - no longer synced from Oracle
 class TuserAccount(StagingBase, user_mixin.TuserAccountMixin, StagingParamMixin):
     __tablename__ = "tuser_account"
 

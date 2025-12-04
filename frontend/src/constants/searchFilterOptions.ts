@@ -95,6 +95,11 @@ export const categoryOptions: FilterOption[] = [
     value: "employment_labor_and_training",
   },
   { id: "category-energy", label: "Energy", value: "energy" },
+  {
+    id: "category-energy_infrastructure_and_critical_mineral_and_materials",
+    label: "Energy Infrastructure and Critical Mineral and Materials (EICMM)",
+    value: "energy_infrastructure_and_critical_mineral_and_materials",
+  },
   { id: "category-environment", label: "Environment", value: "environment" },
   {
     id: "category-food_and_nutrition",

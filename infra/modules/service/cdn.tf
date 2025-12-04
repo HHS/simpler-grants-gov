@@ -160,7 +160,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     cached_methods           = ["GET", "HEAD"]
     target_origin_id         = local.default_origin_id
     cache_policy_id          = aws_cloudfront_cache_policy.api_no_cache[0].id
-    origin_request_policy_id = aws_cloudfront_origin_request_policy.forward_all_cookies[0].id
+    origin_request_policy_id = var.enable_alb_cdn ? aws_cloudfront_origin_request_policy.forward_all_cookies[0].id : null
     compress                 = true
     viewer_protocol_policy   = "redirect-to-https"
   }
@@ -170,7 +170,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     cached_methods           = ["GET", "HEAD", "OPTIONS"]
     target_origin_id         = local.default_origin_id
     cache_policy_id          = aws_cloudfront_cache_policy.default[0].id
-    origin_request_policy_id = aws_cloudfront_origin_request_policy.forward_all_cookies[0].id
+    origin_request_policy_id = var.enable_alb_cdn ? aws_cloudfront_origin_request_policy.forward_all_cookies[0].id : null
     compress                 = true
     viewer_protocol_policy   = "redirect-to-https"
   }
