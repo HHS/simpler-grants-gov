@@ -412,4 +412,3 @@ class TestGGLobbyingFormXSDValidation:
             f"Error: {validation_result['error_message']}\n"
             f"Generated XML:\n{gg_lobbying_xml}"
         )
-
