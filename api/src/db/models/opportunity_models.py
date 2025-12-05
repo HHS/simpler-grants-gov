@@ -60,7 +60,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None]
 
-    opportunity_attachments: Mapped[list["OpportunityAttachment"]] = relationship(
+    opportunity_attachments: Mapped[list[OpportunityAttachment]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
