@@ -37,7 +37,7 @@ class AttachmentFile(BaseModel):
         file_path: str | Path,
         file_location: str | None = None,
         mime_type: str | None = None,
-    ) -> "AttachmentFile":
+    ) -> AttachmentFile:
         """Create AttachmentFile from a file path.
 
         Args:

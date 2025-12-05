@@ -38,10 +38,10 @@ class SamGovEntity(ApiSchemaTable, TimestampMixin):
     inactivated_at: Mapped[date | None]
 
     # Relationships
-    import_records: Mapped[list["SamGovEntityImportType"]] = relationship(
+    import_records: Mapped[list[SamGovEntityImportType]] = relationship(
         back_populates="sam_gov_entity", cascade="all, delete-orphan"
     )
-    organization: Mapped["Organization | None"] = relationship(
+    organization: Mapped[Organization | None] = relationship(
         back_populates="sam_gov_entity", uselist=False
     )
 
@@ -81,14 +81,14 @@ class Organization(ApiSchemaTable, TimestampMixin):
         SamGovEntity, back_populates="organization"
     )
 
-    organization_users: Mapped[list["OrganizationUser"]] = relationship(
+    organization_users: Mapped[list[OrganizationUser]] = relationship(
         "OrganizationUser",
         uselist=True,
         back_populates="organization",
         cascade="all, delete-orphan",
     )
 
-    applications: Mapped[list["Application"]] = relationship(
+    applications: Mapped[list[Application]] = relationship(
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )
 
@@ -109,7 +109,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     organization: Mapped[Organization] = relationship(Organization)
 
     inviter_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
-    inviter_user: Mapped["User"] = relationship("User", foreign_keys=[inviter_user_id])
+    inviter_user: Mapped[User] = relationship("User", foreign_keys=[inviter_user_id])
     invitee_email: Mapped[str]
     accepted_at: Mapped[datetime | None]
     rejected_at: Mapped[datetime | None]
@@ -117,8 +117,8 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     invitee_user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey("api.user.user_id"), nullable=True
     )
-    invitee_user: Mapped["User | None"] = relationship("User", foreign_keys=[invitee_user_id])
-    linked_roles: Mapped[list["LinkOrganizationInvitationToRole"]] = relationship(
+    invitee_user: Mapped[User | None] = relationship("User", foreign_keys=[invitee_user_id])
+    linked_roles: Mapped[list[LinkOrganizationInvitationToRole]] = relationship(
         "LinkOrganizationInvitationToRole",
         back_populates="organization_invitation",
         uselist=True,
@@ -126,7 +126,7 @@ class OrganizationInvitation(ApiSchemaTable, TimestampMixin):
     )
 
     @property
-    def roles(self) -> list["Role"]:
+    def roles(self) -> list[Role]:
         """Get the roles associated with this invitation"""
         return [link.role for link in self.linked_roles]
 
@@ -166,7 +166,7 @@ class LinkOrganizationInvitationToRole(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_organization_invitation_to_role"
 
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("api.role.role_id"), primary_key=True)
-    role: Mapped["Role"] = relationship("Role")
+    role: Mapped[Role] = relationship("Role")
 
     organization_invitation_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(OrganizationInvitation.organization_invitation_id), primary_key=True
@@ -188,9 +188,9 @@ class IgnoredLegacyOrganizationUser(ApiSchemaTable, TimestampMixin):
         primary_key=True, default=uuid.uuid4
     )
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Organization.organization_id))
-    organization: Mapped["Organization"] = relationship(Organization)
+    organization: Mapped[Organization] = relationship(Organization)
     email: Mapped[str] = mapped_column(index=True)
     ignored_by_user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("api.user.user_id"), index=True
     )
-    user: Mapped["User"] = relationship("User")
+    user: Mapped[User] = relationship("User")

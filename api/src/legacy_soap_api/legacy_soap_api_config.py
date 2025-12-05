@@ -58,7 +58,7 @@ class SimplerSoapAPI(StrEnum):
     APPLICANTS = "applicants"
 
     @staticmethod
-    def get_soap_api(service_name: str, service_port_name: str) -> "SimplerSoapAPI | None":
+    def get_soap_api(service_name: str, service_port_name: str) -> SimplerSoapAPI | None:
         if service_name == "grantsws-agency" and service_port_name == "AgencyWebServicesSoapPort":
             return SimplerSoapAPI.GRANTORS
         elif (

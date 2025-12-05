@@ -33,7 +33,7 @@ class LkTmp(LookupTable):
     tmp_id: int = Column(Integer, primary_key=True)
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LookupTable":
+    def from_lookup(cls, lookup: Lookup) -> LookupTable:
         pass
 
 
