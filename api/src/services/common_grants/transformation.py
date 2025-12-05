@@ -208,6 +208,8 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "award_ceiling": v1_opportunity.summary.award_ceiling,
             "award_floor": v1_opportunity.summary.award_floor,
             "additional_info_url": v1_opportunity.summary.additional_info_url,
+            "created_at": v1_opportunity.summary.created_at,
+            "updated_at": v1_opportunity.summary.updated_at
         }
 
     return transform_search_result_to_cg(opp_data)
@@ -293,8 +295,8 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
             ),
             source=validate_url(summary.get("additional_info_url")),
             custom_fields={},
-            createdAt=opp_data.get("created_at") or datetime.now(timezone.utc),
-            lastModifiedAt=opp_data.get("updated_at") or datetime.now(timezone.utc),
+            createdAt=summary.get("created_at") or datetime.now(timezone.utc),
+            lastModifiedAt=summary.get("updated_at") or datetime.now(timezone.utc),
         )
     except Exception as e:
         logger.warning(

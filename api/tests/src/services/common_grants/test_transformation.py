@@ -85,6 +85,8 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "https://example.com/opportunity",
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 2, 12, 0, 0)
                             },
                         )()
                     },
@@ -178,6 +180,8 @@ class TestTransformation:
                                     "award_ceiling": None,
                                     "award_floor": None,
                                     "additional_info_url": None,
+                                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                    "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                                 },
                             )()
                         },
@@ -213,8 +217,8 @@ class TestTransformation:
         assert result.title == "Untitled Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
-        assert result.created_at == datetime(2024, 1, 1, 12, 0, 0)
-        assert result.last_modified_at == datetime(2024, 1, 1, 12, 0, 0)
+        assert result.created_at.date() == datetime.now().date()
+        assert result.last_modified_at.date() == datetime.now().date()
 
         # Check that timeline and funding are None when summary is None
         assert result.key_dates.post_date is None
@@ -249,6 +253,8 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": 10000,
                                 "additional_info_url": None,
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
                         )()
                     },
@@ -290,6 +296,8 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": None,
                                 "additional_info_url": None,
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
                         )()
                     },
@@ -325,7 +333,9 @@ class TestTransformation:
                                 "estimated_total_program_funding": 1000000,
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
-                                "additional_info_url": "sam.gov",  # URL without protocol
+                                "additional_info_url": "sam.gov",
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),  # URL without protocol
                             },
                         )()
                     },
@@ -436,8 +446,8 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
-        assert result.created_at == datetime(2024, 1, 1, 12, 0, 0)
-        assert result.last_modified_at == datetime(2024, 1, 2, 12, 0, 0)
+        assert result.created_at.date() == datetime.now().date()
+        assert result.last_modified_at.date() == datetime.now().date()
 
         # Check that timeline and funding are None when summary is empty
         assert result.key_dates.post_date is None
