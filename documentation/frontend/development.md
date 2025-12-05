@@ -4,13 +4,14 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 **Running locally is the default**, but it can be useful to run the built Docker images in order to more closely simulate our deployed environment, troubleshoot production issues, and to connect directly with the local API application for development.
 
-## Local (non-Docker Mac)
+## Local (non-Docker)
 
 ### 🏗️ Development version
 
 For version 0.1.0, please install and use node <= v22.13.0.
 
-Run `npm install && npm run local` to install and start the application.
+* **For Mac** - Run `npm install && npm run local` to install and start the application.
+* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx run dev` afterwards to start the application.
 
 Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 
@@ -22,7 +23,9 @@ npx next telemetry disable
 
 Create a local enviornment file in the frontend directory to hold your frontend application overrides.  To allows you to make specializations to your local setup outside of GitHub.
 
-`touch .env.local`
+On Mac, run `touch .env.local`
+
+On Windows, run `ni .env.local` in PowerShell.
 
 For more information about environments, take a look at [environments.md](./environments.md).
 
@@ -32,7 +35,8 @@ Running authentication locally requires running the API and sharing the correct 
 
 1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
 2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
-3. Restart the API (if necessary reseed the database, then `make start`) and frontend (`npm run local`) for development
+3. Restart the API (if necessary reseed the database, then `make start`)
+4. Restart the frontend (on Mac, `npm run local`, and on Windows, `npx run dev`) for development
 
 ### 🏛️ "Built" version
 
@@ -40,41 +44,6 @@ The Next.js frontend application is exported for production using [next build](h
 
 - `npm run build` - Builds the production Next.js bundle
 - `npm start` - Runs the Next.js server, after building the production bundle
-
-## Local (non-Docker Windows)
-
-1. Follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows)
-
-For version 0.1.0, please install and use node <= v22.13.0.
-
-2. In Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application
-
-Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
-
-```bash
-npx next telemetry disable
-```
-
-3. Ensure Configuration/Authentication is set up properly (See below)
-
-4. After installation, run `npx run dev` to start the application
-5. Verify application is running on http://localhost:3000/ (requires backend API running in Docker)
-
-### Configuration
-
-Create a local enviornment file in the frontend directory to hold your frontend application overrides.  To allows you to make specializations to your local setup outside of GitHub.
-
-`ni .env.local`
-
-For more information about environments, take a look at [environments.md](./environments.md).
-
-### Authentication
-
-Running authentication locally requires running the API and sharing the correct JWT keys.
-
-1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
-2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
-3. Restart the API (if necessary reseed the database, then `make start`) and frontend (`npx run dev`) for development
 
 ## Docker
 
