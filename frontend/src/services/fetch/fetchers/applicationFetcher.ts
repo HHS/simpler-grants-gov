@@ -5,6 +5,7 @@ import {
   ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
   ApplicationFormDetailApiResponse,
+  ApplicationHistoryApiResponse,
   ApplicationResponseDetail,
   ApplicationStartApiResponse,
   ApplicationSubmitApiResponse,
@@ -77,6 +78,28 @@ export const getApplicationDetails = async (
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;
+};
+
+export const getApplicationHistory = async (
+  applicationId: string,
+  token: string,
+): Promise<ApplicationHistoryApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchApplicationWithMethod("POST")({
+    subPath: `${applicationId}/audit_history`,
+    additionalHeaders: ssgToken,
+    body: {
+      pagination: {
+        page_offset: 1,
+        page_size: 500,
+        sort_order: [{ order_by: "created_at", sort_direction: "descending" }],
+      },
+    },
+  });
+
+  return (await response.json()) as ApplicationHistoryApiResponse;
 };
 
 export const updateApplicationFilingName = async (

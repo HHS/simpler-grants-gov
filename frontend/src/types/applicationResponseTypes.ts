@@ -64,6 +64,44 @@ export interface ApplicationDetail {
     user_id: string;
   };
 }
+export interface ApplicationHistoryUserData {
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  email: string;
+}
+
+export type ApplicationActivityEvent =
+  | "application_created"
+  | "application_name_changed"
+  | "attachment_added"
+  | "attachment_deleted"
+  | "attachment_updated"
+  | "application_submitted"
+  | "form_updated"
+  | "user_added"
+  | "user_updated"
+  | "user_removed"
+  | "organization_added"
+  | "application_submission_rejected"
+  | "submission_created";
+
+export interface ApplicationHistory {
+  application_audit_event: ApplicationActivityEvent;
+  user: ApplicationHistoryUserData;
+  target_user?: ApplicationHistoryUserData;
+  target_application_form?: {
+    application_form_id: string;
+    competition_form_id: string;
+    form_id: string;
+    form_name: string;
+  };
+  target_attachment?: {
+    application_attachment_id: string;
+    file_name: string;
+  };
+  created_at: string;
+}
 
 export interface ApplicationAttachmentUploadResponse extends APIResponse {
   data: {
@@ -96,4 +134,8 @@ export interface ApplicationFormDetailApiResponse
 
 export interface ApplicationDetailApiResponse extends APIResponse {
   data: ApplicationDetail;
+}
+
+export interface ApplicationHistoryApiResponse extends APIResponse {
+  data: ApplicationHistory[];
 }
