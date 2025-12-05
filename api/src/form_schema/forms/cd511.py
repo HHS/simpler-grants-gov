@@ -166,6 +166,111 @@ FORM_RULE_SCHEMA = {
     "signature": {"gg_post_population": {"rule": "signature"}},
 }
 
+# XML Transformation Rules for CD511 v1.1
+# XSD: https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting CD511 JSON to Grants.gov XML format",
+        "version": "1.0",
+        "form_name": "CD511",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/CD511-V1.1",
+            "CD511": "http://apply.grants.gov/forms/CD511-V1.1",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "xml_structure": {
+            "root_element": "CD511",
+            "root_namespace_prefix": "CD511",
+            "root_attributes": {
+                "FormVersion": "1.1",
+            },
+        },
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+            "include_null": "Include empty XML element: <Field></Field>",
+            "default_value": "Use configured default value when field is None",
+        },
+    },
+    # Field mappings - order matches XSD sequence
+    # OrganizationName (required) - maps from applicant_name
+    "applicant_name": {
+        "xml_transform": {
+            "target": "OrganizationName",
+        }
+    },
+    # AwardNumber (optional)
+    "award_number": {
+        "xml_transform": {
+            "target": "AwardNumber",
+        }
+    },
+    # ProjectName (optional)
+    "project_name": {
+        "xml_transform": {
+            "target": "ProjectName",
+        }
+    },
+    # ContactName (optional) - HumanNameDataType nested structure
+    "contact_person": {
+        "xml_transform": {
+            "target": "ContactName",
+            "type": "nested_object",
+        },
+        "prefix": {
+            "xml_transform": {
+                "target": "PrefixName",
+                "namespace": "globLib",
+            }
+        },
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+            }
+        },
+        "middle_name": {
+            "xml_transform": {
+                "target": "MiddleName",
+                "namespace": "globLib",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+            }
+        },
+        "suffix": {
+            "xml_transform": {
+                "target": "SuffixName",
+                "namespace": "globLib",
+            }
+        },
+    },
+    # Title (required) - HumanTitleDataType
+    "contact_person_title": {
+        "xml_transform": {
+            "target": "Title",
+        }
+    },
+    # Signature (required) - SignatureDataType
+    "signature": {
+        "xml_transform": {
+            "target": "Signature",
+        }
+    },
+    # SubmittedDate (required) - xs:date
+    "submitted_date": {
+        "xml_transform": {
+            "target": "SubmittedDate",
+        }
+    },
+}
+
 CD511_v1_1 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/276
     form_id=uuid.UUID("7057eaee-f043-4029-b7f2-c932f11ce900"),
@@ -178,7 +283,7 @@ CD511_v1_1 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    json_to_xml_schema=None,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # CD511 does not have any instructions
     form_type=FormType.CD511,
     sgg_version="1.0",

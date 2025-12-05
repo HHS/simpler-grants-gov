@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-LLL, CD-511, GG_LobbyingForm, Project Narrative Attachments, and Budget Narrative Attachments.
+This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-LLL, CD-511, Project Narrative Attachments, and Budget Narrative Attachments.
 
 ## Architecture
 

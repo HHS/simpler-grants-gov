@@ -198,7 +198,7 @@ class CreateApplicationSubmissionTask(Task):
 
     def get_pdf_for_app_form(
         self, application_id: uuid.UUID, application_form_id: uuid.UUID
-    ) -> "PdfGenerationResponse":
+    ) -> PdfGenerationResponse:
         """Get PDF for an application form, handling errors appropriately.
 
         If PDF generation fails, we raise an error as we cannot create a submission

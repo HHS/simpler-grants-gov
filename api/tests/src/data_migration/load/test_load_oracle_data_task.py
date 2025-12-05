@@ -13,7 +13,11 @@ import src.db.models.foreign
 import src.db.models.staging
 from src.data_migration.load import load_oracle_data_task
 from tests.conftest import BaseTestClass
-from tests.src.db.models.factories import ForeignTopportunityFactory, StagingTopportunityFactory
+from tests.src.db.models.factories import (
+    ForeignTcertificatesFactory,
+    ForeignTopportunityFactory,
+    StagingTopportunityFactory,
+)
 
 
 def validate_copied_value(
@@ -286,3 +290,46 @@ class TestLoadOracleData(BaseTestClass):
         assert updated_record.last_upd_date == time4
         # Verify excluded column was still not copied (should still be None)
         assert updated_record.oppcategory is None
+
+    def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        """Test that excluded columns are not copied from foreign to staging tables."""
+        source_table = foreign_tables["tcertificates"]
+        destination_table = staging_tables["tcertificates"]
+
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        # Create a record in the foreign table with specific values
+        # 'is_selfsigned' should be excluded
+        source_record = ForeignTcertificatesFactory.create(is_selfsigned="Y")
+
+        # Run the task with column exclusions
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session,
+            foreign_tables,
+            staging_tables,
+            ["tcertificates"],
+        )
+        task.run()
+
+        # Force the data to be fetched from the DB and not a cache
+        db_session.expire_all()
+
+        # Retrieve the inserted staging record
+        inserted_record = (
+            db_session.query(destination_table)
+            .filter(destination_table.c.currentcertid == source_record.currentcertid)
+            .first()
+        )
+
+        # Verify regular columns were inserted
+        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.creator_id == source_record.creator_id
+        assert inserted_record.created_date == source_record.created_date
+        assert inserted_record.serial_num == source_record.serial_num
+        assert inserted_record.agencyid == source_record.agencyid
+
+        # Verify excluded column was not copied (should be None)
+        assert inserted_record.is_selfsigned is None
