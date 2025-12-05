@@ -35,7 +35,7 @@
     "@next/third-parties": "^15.1.4",
     "@opentelemetry/api": "^1.8.0",
     "@rjsf/utils": "^5.24.8",
-    "@trussworks/react-uswds": "github:trussworks/react-uswds#58f3089739ac5ee415c11cfbe179daad7a62597",
+    "@trussworks/react-uswds": "^10.2.0",
     "@uswds/uswds": "^3.7.1",
     "@zip.js/zip.js": "^2.7.60",
     "ajv": "^8.17.1",
