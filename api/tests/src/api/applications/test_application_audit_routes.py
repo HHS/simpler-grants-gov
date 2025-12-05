@@ -1,9 +1,10 @@
+import random
 import uuid
 from datetime import datetime, timezone
 
 import pytest
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
@@ -220,8 +221,136 @@ def test_list_application_audit_200(client, enable_factory_create, db_session, h
     }
 
 
+def test_list_application_audit_filter_event_200(client, enable_factory_create, db_session):
+    user, application, token = create_user_in_app(
+        db_session=db_session, privileges=[Privilege.VIEW_APPLICATION]
+    )
+
+    # For every event type, add a variable number of events
+    # except for SUBMISSION_CREATED which we'll hold back to verify it doesn't get returned
+    events_map = {}
+    for event_type in ApplicationAuditEvent:
+        if event_type != ApplicationAuditEvent.SUBMISSION_CREATED:
+            # We aren't worrying about the various additional fields being logical
+            # since we've tested those in other tests, just want to verify the filter
+            application_audit_events = ApplicationAuditFactory.create_batch(
+                size=random.randint(1, 3),
+                application=application,
+                application_audit_event=event_type,
+            )
+            events_map[event_type] = application_audit_events
+
+    # call the endpoint with various groups of events and verify just those
+    # event types get returned. We don't have this be several tests because
+    # the setup above is pretty costly in time.
+    event_groups = [
+        # All events
+        [e for e in ApplicationAuditEvent],
+        [ApplicationAuditEvent.APPLICATION_NAME_CHANGED, ApplicationAuditEvent.APPLICATION_CREATED],
+        [ApplicationAuditEvent.ATTACHMENT_DELETED, ApplicationAuditEvent.USER_ADDED],
+        [
+            ApplicationAuditEvent.ORGANIZATION_ADDED,
+            ApplicationAuditEvent.USER_REMOVED,
+            ApplicationAuditEvent.USER_UPDATED,
+        ],
+        # No results expected
+        [ApplicationAuditEvent.SUBMISSION_CREATED],
+    ]
+
+    for event_group in event_groups:
+        response = client.post(
+            f"/alpha/applications/{application.application_id}/audit_history",
+            json={
+                "pagination": {"page_offset": 1, "page_size": 250},
+                "filters": {"application_audit_event": {"one_of": event_group}},
+            },
+            headers={"X-SGG-Token": token},
+        )
+
+        assert response.status_code == 200
+        results = response.json["data"]
+
+        audit_events = {audit_event["application_audit_id"] for audit_event in results}
+
+        expected_audit_ids = set()
+        for event_type in event_group:
+            expected_audit_ids.update(
+                str(audit_event.application_audit_id)
+                for audit_event in events_map.get(event_type, [])
+            )
+
+        assert len(audit_events) == len(expected_audit_ids)
+        assert audit_events == expected_audit_ids
+
+
+def test_list_application_audit_pagination_200(client, enable_factory_create, db_session):
+    user, application, token = create_user_in_app(
+        db_session=db_session, privileges=[Privilege.VIEW_APPLICATION]
+    )
+
+    audit_events = []
+    # Count down so it matches the order of the default sorting
+    for i in range(10, 1, -1):
+        audit_events.append(
+            ApplicationAuditFactory.create(
+                application=application,
+                created_at=_make_datetime(hour=i),
+            )
+        )
+
+    # Each scenario is a tuple of the pagination object + expected results
+    scenarios = [
+        # Fetch everything
+        ({"page_offset": 1, "page_size": 25}, audit_events),
+        # Fetch everything, reversed
+        (
+            {
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_order": [{"order_by": "created_at", "sort_direction": "ascending"}],
+            },
+            audit_events[::-1],
+        ),
+        # Second page, starting from 4th item (index 3)
+        ({"page_offset": 2, "page_size": 3}, audit_events[3:6]),
+        # Past all events
+        ({"page_offset": 10, "page_size": 10}, []),
+        # Reversed middle page
+        (
+            {
+                "page_offset": 3,
+                "page_size": 2,
+                "sort_order": [{"order_by": "created_at", "sort_direction": "ascending"}],
+            },
+            audit_events[-5:-7:-1],
+        ),
+    ]
+
+    for pagination, expected_audit_events in scenarios:
+
+        response = client.post(
+            f"/alpha/applications/{application.application_id}/audit_history",
+            json={"pagination": pagination},
+            headers={"X-SGG-Token": token},
+        )
+
+        assert response.status_code == 200
+        results = response.json["data"]
+
+        audit_ids = [audit_event["application_audit_id"] for audit_event in results]
+        expected_audit_ids = [
+            str(audit_event.application_audit_id) for audit_event in expected_audit_events
+        ]
+        assert len(audit_ids) == len(
+            expected_audit_ids
+        ), f"Mismatch for scenario with pagination {pagination}"
+        assert (
+            audit_ids == expected_audit_ids
+        ), f"Mismatch for scenario with pagination {pagination}"
+
+
 @pytest.mark.parametrize("has_organization", [True, False])
-def test_list_application_empty_result_200(
+def test_list_application_audit_empty_result_200(
     client, enable_factory_create, db_session, has_organization
 ):
     app_params = {}

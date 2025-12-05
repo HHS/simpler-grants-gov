@@ -29,8 +29,6 @@ TABLES_TO_EXTRACT = {
         "is_draft",
         "revision_number",
         "modified_comments",
-        "publisher_user_id",
-        "publisher_profile_id",
         "created_at",
         "updated_at",
     ],
@@ -67,10 +65,6 @@ TABLES_TO_EXTRACT = {
         "agency_email_address_description",
         "version_number",
         "can_send_mail",
-        "publisher_profile_id",
-        "publisher_user_id",
-        "updated_by",
-        "created_by",
         "agency_code",
         "agency_name",
         "created_at",
@@ -118,12 +112,9 @@ TABLES_TO_EXTRACT = {
     help="Create extract CSVs of our database tables that analytics can use",
 )
 @click.option("--tables-to-extract", "-t", help="Tables to extract to a CSV file", multiple=True)
-@click.option("--scheduled-job-name", default=None, help="Name of the scheduled job")
-@ecs_background_task(task_name="create-analytics-db-csvs")
 @flask_db.with_db_session()
-def create_analytics_db_csvs(
-    db_session: db.Session, tables_to_extract: list[str], scheduled_job_name: str | None
-) -> None:
+@ecs_background_task(task_name="create-analytics-db-csvs")
+def create_analytics_db_csvs(db_session: db.Session, tables_to_extract: list[str]) -> None:
     logger.info("Create extract CSV file start")
 
     CreateAnalyticsDbCsvsTask(db_session, tables_to_extract).run()
