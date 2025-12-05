@@ -434,8 +434,6 @@ def validate_opportunity(
             ("category_explanation", "category_explanation"),
             ("revision_number", "revision_number"),
             ("modified_comments", "modified_comments"),
-            ("publisheruid", "publisher_user_id"),
-            ("publisher_profile_id", "publisher_profile_id"),
         ],
         expect_values_to_match,
     )
@@ -519,10 +517,6 @@ def validate_opportunity_summary(
         ("ac_name", "agency_name"),
         ("ac_email_addr", "agency_email_address"),
         ("ac_email_desc", "agency_email_address_description"),
-        ("publisher_profile_id", "publisher_profile_id"),
-        ("publisheruid", "publisher_user_id"),
-        ("last_upd_id", "updated_by"),
-        ("creator_id", "created_by"),
     ]
 
     if isinstance(source_summary, (staging.synopsis.Tsynopsis, staging.synopsis.TsynopsisHist)):
@@ -612,13 +606,6 @@ def validate_applicant_type(
     assert link_applicant_type is not None
     assert link_applicant_type.applicant_type == expected_applicant_type
 
-    validate_matching_fields(
-        source_applicant_type,
-        link_applicant_type,
-        [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
-        expect_values_to_match,
-    )
-
 
 def validate_funding_instrument(
     db_session,
@@ -659,13 +646,6 @@ def validate_funding_instrument(
     assert link_funding_instrument is not None
     assert link_funding_instrument.funding_instrument == expected_funding_instrument
 
-    validate_matching_fields(
-        source_funding_instrument,
-        link_funding_instrument,
-        [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
-        expect_values_to_match,
-    )
-
 
 def validate_funding_category(
     db_session,
@@ -704,13 +684,6 @@ def validate_funding_category(
 
     assert link_funding_category is not None
     assert link_funding_category.funding_category == expected_funding_category
-
-    validate_matching_fields(
-        source_funding_category,
-        link_funding_category,
-        [("creator_id", "created_by"), ("last_upd_id", "updated_by")],
-        expect_values_to_match,
-    )
 
 
 AGENCY_FIELD_MAPPING = [
@@ -808,8 +781,6 @@ def validate_opportunity_attachment(
             ("file_name", "file_name"),
             ("file_desc", "file_description"),
             ("file_lob_size", "file_size_bytes"),
-            ("creator_id", "created_by"),
-            ("last_upd_id", "updated_by"),
             ("syn_att_folder_id", "legacy_folder_id"),
         ],
         expect_values_to_match,

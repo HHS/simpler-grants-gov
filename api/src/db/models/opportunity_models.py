@@ -60,11 +60,6 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None]
 
-    # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
-    # although the legacy DB does not have them setup as foreign keys
-    publisher_user_id: Mapped[str | None]
-    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
-
     opportunity_attachments: Mapped[list["OpportunityAttachment"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
@@ -223,10 +218,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 
     version_number: Mapped[int | None]
     can_send_mail: Mapped[bool | None]
-    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
-    publisher_user_id: Mapped[str | None]
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
 
     # Do not use these agency fields, they're kept for now, but
     # are simply copying behavior from the legacy system - prefer
@@ -318,9 +309,6 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     assistance_listing_number: Mapped[str | None]
     program_title: Mapped[str | None]
 
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
-
 
 class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_instrument"
@@ -346,9 +334,6 @@ class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     )
 
     legacy_funding_instrument_id: Mapped[int | None]
-
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
 
 
 class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
@@ -380,9 +365,6 @@ class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
 
     legacy_funding_category_id: Mapped[int | None]
 
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
-
 
 class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_applicant_type"
@@ -412,9 +394,6 @@ class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     )
 
     legacy_applicant_type_id: Mapped[int | None]
-
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
 
 
 class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
@@ -458,8 +437,6 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
     file_description: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
-    created_by: Mapped[str | None]
-    updated_by: Mapped[str | None]
     legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
 
     @property
