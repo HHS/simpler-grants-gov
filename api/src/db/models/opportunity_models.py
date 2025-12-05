@@ -60,12 +60,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None]
 
-    # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
-    # although the legacy DB does not have them setup as foreign keys
-    publisher_user_id: Mapped[str | None]
-    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
-
-    opportunity_attachments: Mapped[list[OpportunityAttachment]] = relationship(
+    opportunity_attachments: Mapped[list["OpportunityAttachment"]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
