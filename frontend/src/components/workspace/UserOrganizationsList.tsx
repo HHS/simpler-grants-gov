@@ -69,12 +69,12 @@ const OrganizationItem = ({
           tablet={{ col: "auto" }}
           className="flex-align-self-end text-right"
         >
-          <ViewDetailsButton organization={organization} />
           {canManageUsers ? (
             <ManageUsersButton organization={organization} />
           ) : (
             ""
           )}
+          <ViewDetailsButton organization={organization} />
         </Grid>
       </Grid>
     </li>

@@ -2,12 +2,14 @@ import { getOrganizationDetails } from "src/services/fetch/fetchers/organization
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 
-import { GridContainer } from "@trussworks/react-uswds";
+import { getTranslations } from "next-intl/server";
+import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
 import { ActiveUsersSection } from "./ActiveUsersSection";
 import { InvitedUsersSection } from "./InvitedUsersSection";
+import { InviteLegacyUsersButton } from "./InviteLegacyUsersButton";
 import { UserOrganizationInvite } from "./UserOrganizationInvite";
 
 export async function ManageUsersPageContent({
@@ -17,6 +19,7 @@ export async function ManageUsersPageContent({
   organizationId: string;
   authorizedData?: AuthorizedData;
 }) {
+  const t = await getTranslations("ManageUsers");
   let userOrganizations: Organization | undefined;
 
   if (!authorizedData) {
@@ -40,26 +43,32 @@ export async function ManageUsersPageContent({
     console.error("Unable to fetch organization information", error);
   }
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
+
   return (
     <GridContainer className="padding-top-1">
       <Breadcrumbs
         breadcrumbList={[
-          { title: "home", path: "/" },
-          {
-            title: "Workspace",
-            path: `/dashboard`,
-          },
           {
             title: name ?? "Organization",
             path: `/organization/${organizationId}`,
           },
           {
-            title: "Manage Users",
+            title: `${t("pageHeading")}`,
             path: `/organization/${organizationId}/manage-users`,
           },
         ]}
       />
-      <PageHeader organizationName={name} />
+      <Grid row>
+        <Grid tablet={{ col: "fill" }}>
+          <PageHeader organizationName={name} />
+        </Grid>
+        <Grid
+          className="margin-top-auto margin-bottom-6"
+          tablet={{ col: "auto" }}
+        >
+          <InviteLegacyUsersButton organizationId={organizationId} />
+        </Grid>
+      </Grid>
       <UserOrganizationInvite organizationId={organizationId} />
       <ActiveUsersSection
         organizationId={organizationId}
