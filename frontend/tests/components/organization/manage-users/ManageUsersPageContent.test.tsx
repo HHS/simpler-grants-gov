@@ -5,19 +5,12 @@ import React from "react";
 import "@testing-library/jest-dom";
 
 import type { AuthorizedData } from "src/types/authTypes";
+import { mockUseTranslations } from "src/utils/testing/intlMocks";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
-type TranslationFunction = (key: string, values?: { name?: string }) => string;
-
-const useTranslationsMock = jest.fn<TranslationFunction, [string]>(
-  (_namespace: string) => (key: string) => {
-    return key;
-  },
-);
-
-jest.mock("next-intl", () => ({
-  useTranslations: (namespace: string) => useTranslationsMock(namespace),
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => mockUseTranslations,
 }));
 
 type GetOrgDetailsFn = (orgId: string) => Promise<unknown>;
@@ -52,6 +45,10 @@ jest.mock("src/components/manageUsers/PageHeader", () => ({
     PageHeaderMock(props as PageHeaderProps);
     return <div data-testid="page-header" />;
   },
+}));
+
+jest.mock("src/components/manageUsers/InviteLegacyUsersButton", () => ({
+  InviteLegacyUsersButton: () => <button>InviteLegacyUsersButton</button>,
 }));
 
 type UserOrganizationInviteProps = { organizationId: string };
