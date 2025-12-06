@@ -1428,13 +1428,6 @@ export const messages = {
   returnToGrants: {
     message: "Return to Grants.gov",
   },
-  BookmarkBanner: {
-    title: "Bookmark this page",
-    message:
-      "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
-    technicalSupportMessage:
-      "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
-  },
   UserAccount: {
     pageTitle: "User Account | Simpler.Grants.gov",
     title: "User Account",
@@ -1590,6 +1583,7 @@ export const messages = {
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
       errorHeading: "Error",
+      errorMessage: "Error inviting user, please try again",
       description:
         "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
       inputs: {
@@ -1604,7 +1598,7 @@ export const messages = {
       },
       button: {
         label: "Add to organization",
-        success: "User added to pending",
+        success: "User invited to organization",
       },
       validationErrors: {
         email: "Email is required",

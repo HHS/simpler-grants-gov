@@ -9,6 +9,7 @@ import click
 
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
 from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
+from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 FORM_TRANSFORM_RULES = {
     "SF424_4_0": SF424_TRANSFORM_RULES,
     "SF424A": SF424A_TRANSFORM_RULES,
+    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
 }
 
 

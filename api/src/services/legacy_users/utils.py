@@ -4,6 +4,7 @@ from src.adapters import db
 from src.db.models.staging.user import TuserAccount, TuserAccountMapper
 
 
+# TODO(#7340): Evaluate removing TuserAccount/TuserAccountMapper - no longer synced from Oracle
 def get_legacy_user_for_login_gov_id(
     login_gov_id: str, db_session: db.Session
 ) -> TuserAccount | None:

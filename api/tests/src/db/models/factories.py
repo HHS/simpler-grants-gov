@@ -254,6 +254,21 @@ class CustomProvider(BaseProvider):
 
     YN_YESNO_BOOLEAN_VALUES = ["Y", "N", "Yes", "No"]
 
+    # This is to help with the unique agency code conflicts
+    AGENCY_CODE_FORMATS = [
+        "???",
+        "????",
+        "???-??",
+        "???-???",
+        "???-???-##",
+        "???-???-???-##",
+        "???-??-##-??",
+    ]
+
+    def random_agency_code(self) -> str:
+        pattern = self.bothify(self.random_element(self.AGENCY_CODE_FORMATS)).upper()
+        return self.generator.parse(pattern)
+
     def agency_code(self) -> str:
         return self.random_element(self.AGENCIES)
 
@@ -1708,7 +1723,7 @@ class AgencyFactory(BaseFactory):
 
     agency_name = factory.Faker("agency_name")
 
-    agency_code = factory.Iterator(CustomProvider.AGENCIES)
+    agency_code = factory.LazyFunction(lambda: fake.unique.random_agency_code())
 
     sub_agency_code = factory.LazyAttribute(lambda a: a.agency_code.split("-")[0])
 
@@ -2609,6 +2624,19 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
         return 1
 
 
+class ForeignTcertificatesFactory(BaseFactory):
+    class Meta:
+        model = foreign.certificates.Tcertificates
+
+    currentcertid = factory.Sequence(lambda n: f"{1000 + n}")
+    certemail = factory.Faker("email")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
+    agencyid = factory.Faker("agency_code")
+    serial_num = factory.Faker("pystr", min_chars=15, max_chars=15)
+    is_selfsigned = "Y"
+
+
 class VuserAccountFactory(BaseFactory):
     class Meta:
         abstract = True
@@ -2942,7 +2970,7 @@ class StagingTcertificatesFactory(AbstractStagingFactory):
     created_date = factory.Faker("date_between", start_date="-2y", end_date="-1y")
     certemail = factory.Faker("email")
     creator_id = factory.Faker("email")
-    is_selfsigned = "Y"
+    is_selfsigned = None
 
 
 ###################
@@ -3136,7 +3164,7 @@ class BaseLegacyCertificateFactory(BaseFactory):
 
     legacy_certificate_id = Generators.UuidObj
     cert_id = factory.Faker("random_int", min=1000, max=10000000)
-    serial_number = factory.Faker("random_int", min=1000, max=10000000)
+    serial_number = factory.Sequence(lambda n: f"{n}")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)
     user = factory.SubFactory(UserFactory)

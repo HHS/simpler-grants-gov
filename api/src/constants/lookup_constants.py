@@ -95,6 +95,9 @@ class FundingCategory(StrEnum):
     TRANSPORTATION = "transportation"  # T
     AFFORDABLE_CARE_ACT = "affordable_care_act"  # ACA
     OTHER = "other"  # O
+    ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
+        "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
+    )
 
 
 class FundingInstrument(StrEnum):

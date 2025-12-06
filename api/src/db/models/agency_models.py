@@ -88,7 +88,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
     is_image_workspace_enabled: Mapped[bool] = mapped_column(default=False)
     is_validation_workspace_enabled: Mapped[bool] = mapped_column(default=False)
 
-    link_agency_download_file_types: Mapped[list["LinkAgencyDownloadFileType"]] = relationship(
+    link_agency_download_file_types: Mapped[list[LinkAgencyDownloadFileType]] = relationship(
         back_populates="agency", uselist=True, cascade="all, delete-orphan"
     )
 
@@ -103,7 +103,7 @@ class Agency(ApiSchemaTable, TimestampMixin):
         ForeignKey(agency_id),
         nullable=True,
     )
-    top_level_agency: Mapped["Agency | None"] = relationship(
+    top_level_agency: Mapped[Agency | None] = relationship(
         lambda: Agency,
         remote_side=[agency_id],
     )

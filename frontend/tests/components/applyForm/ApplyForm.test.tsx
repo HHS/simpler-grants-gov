@@ -195,6 +195,14 @@ describe("ApplyForm", () => {
     );
     const button = screen.queryByTestId("apply-form-save");
     expect(button).not.toBeInTheDocument();
+    const nameField = screen.getByTestId("name");
+    expect(nameField).toBeDisabled();
+
+    const dobField = screen.getByTestId("dob");
+    expect(dobField).toBeDisabled();
+
+    const selectField = screen.getByTestId("Select");
+    expect(selectField).toBeDisabled();
   });
 
   it("calls handleFormAction action on save", () => {

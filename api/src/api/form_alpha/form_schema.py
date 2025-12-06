@@ -256,3 +256,15 @@ class FormUpdateRequestSchema(Schema):
 
 class FormUpdateResponseSchema(AbstractResponseSchema):
     data = fields.Nested(FormAlphaSchema)
+
+
+class FormInstructionUploadRequestSchema(Schema):
+    file = fields.File(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The form instruction file to upload"},
+    )
+
+
+class FormInstructionUploadResponseSchema(AbstractResponseSchema):
+    pass
