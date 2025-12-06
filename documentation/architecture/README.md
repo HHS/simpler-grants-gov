@@ -93,9 +93,16 @@ The "analytics" component of the application is the parts composed of the analyt
 
 Currently a single AWS Project houses all of the environments.
 
+- [Layers](#layers)
+- [Traffic Flow](#traffic-flow)
+  - [Front End Requests](#front-end-requests)
+  - [API Requests](#api-requests)
+  - [File Requests](#file-requests)
+- [SOAP S2S Replacement](#soap-s2s-replacement)
+
 ### Layers
 
-AWS Cloudfront and API Gateway are deployed in front of public facing HTTPs services including the Front End and Back End services.
+AWS Cloudfront and API Gateway are deployed in front of public facing HTTPs services including the Front End and Back End Services. Access to Services is via AWS ALBs mapping to origins hosted on ECS.
 
 Services, including FE NextJS service, BE Python API service, Metabase service, Python Analytics Service, and Simpler NOFOs Python service are all hosted as containers running on ECS clusters. These services are set to auto scale as needed to handle increases in traffic. AWS Parameter Store is used to adjust Environment Variables being passed to the services to control behavior by environment and to support feature flags defaults for the NextJS and Python API services.
 
@@ -116,3 +123,7 @@ Public exposure of the API enters via the AWS API Gateway, publicly exposed on [
 #### File Requests
 
 Publicly available files such as files attached to Opportunities, Application Instructions, etc. are accessed via a separate Cloudfront CDN which provides access to the S3 bucket where those files are stored.
+
+### SOAP S2S Replacement
+
+To allow for a smooth migration to the Simpler Grants system we have implemented a SOAP intermediary service that will allow data to be retrieved from both Simpler Grants and the existing Grants.gov in a backwards compatible way. This functionality is called the SOAP Notary. It is primarily expected that this functionality will be utilized by Federal Agencies who retrieve Applications for funding from Grants.gov into Grants Management systems. [More details about migrating from SOAP S2S to modernized REST APIs](./soap-notary.md#migrating-to-rest).
