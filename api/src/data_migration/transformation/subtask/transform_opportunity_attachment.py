@@ -232,8 +232,6 @@ def transform_opportunity_attachment(
         file_name=file_name,
         file_description=source_attachment.file_desc,
         file_size_bytes=source_attachment.file_lob_size,
-        created_by=source_attachment.creator_id,
-        updated_by=source_attachment.last_upd_id,
         legacy_folder_id=source_attachment.syn_att_folder_id,
     )
 

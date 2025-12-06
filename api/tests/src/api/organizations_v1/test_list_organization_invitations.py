@@ -14,7 +14,7 @@ from tests.src.db.models.factories import (
 )
 
 
-class TestOrganizationInvitationsList:
+class TestListOrganizationInvitations:
     """Test POST /v1/organizations/:organization_id/invitations/list endpoint"""
 
     def test_list_invitations_200_success_no_filters(

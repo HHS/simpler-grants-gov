@@ -7,7 +7,7 @@ from src.db.models.staging.staging_base import StagingBase, StagingParamMixin
 class Topportunity(StagingBase, opportunity_mixin.TopportunityMixin, StagingParamMixin):
     __tablename__ = "topportunity"
 
-    cfdas: Mapped[list["TopportunityCfda"]] = relationship(
+    cfdas: Mapped[list[TopportunityCfda]] = relationship(
         primaryjoin="Topportunity.opportunity_id == foreign(TopportunityCfda.opportunity_id)",
         uselist=True,
     )

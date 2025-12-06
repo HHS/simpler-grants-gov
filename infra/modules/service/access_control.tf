@@ -79,6 +79,17 @@ data "aws_iam_policy_document" "task_executor" {
     resources = [local.fluent_bit_repo_arn]
   }
 
+  # Allow ECS to download images for GuardDuty agent
+  statement {
+    sid = "ECRPullAccessGuardDuty"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+    ]
+    resources = ["arn:aws:ecr:us-east-1:593207742271:repository/aws-guardduty-agent-fargate"]
+  }
+
   statement {
     sid = "PullSharedNewRelicKey"
     actions = [

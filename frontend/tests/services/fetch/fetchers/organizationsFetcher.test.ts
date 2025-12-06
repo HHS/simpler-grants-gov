@@ -134,31 +134,19 @@ describe("getOrganizationUsers", () => {
       additionalHeaders: {
         "X-SGG-Token": "faketoken",
       },
+      body: {
+        pagination: {
+          page_offset: 1,
+          page_size: 5000,
+          sort_order: [
+            {
+              order_by: "email",
+              sort_direction: "ascending",
+            },
+          ],
+        },
+      },
     });
-  });
-
-  it("sorts returned users by email ascending and case-insensitive", async () => {
-    mockGetSession.mockResolvedValue({ token: "faketoken" });
-    fetchOrganizationMock.mockReturnValue({
-      ok: true,
-      status: 200,
-      json: () => ({
-        data: [
-          { email: "zeta@example.com" },
-          { email: "Alpha@example.com" },
-          { email: "beta@example.com" },
-        ],
-      }),
-    });
-    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
-
-    const result = await getOrganizationUsers("org-123");
-
-    expect(result).toEqual([
-      { email: "Alpha@example.com" },
-      { email: "beta@example.com" },
-      { email: "zeta@example.com" },
-    ]);
   });
 
   it("throws UnauthorizedError when session is missing or has no token", async () => {
