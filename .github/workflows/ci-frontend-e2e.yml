@@ -30,13 +30,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.sha }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-commit-hash
         run: |
-          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.ref}} "../api")
-          COMMIT_HASH=$(git rev-parse ${{ github.ref }})
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.sha}} "../api")
+          COMMIT_HASH=$(git rev-parse ${{ github.sha }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
   e2e-tests:
