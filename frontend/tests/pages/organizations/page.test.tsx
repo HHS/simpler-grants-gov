@@ -7,7 +7,6 @@ import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 import { FunctionComponent } from "react";
 
-const withFeatureFlagMock = jest.fn();
 const redirectMock = jest.fn();
 
 jest.mock("next-intl/server", () => ({
@@ -44,6 +43,18 @@ jest.mock("next/navigation", () => ({
   redirect: (location: string) => redirectMock(location) as unknown,
 }));
 
+const withFeatureFlagMock = jest
+  .fn()
+  .mockImplementation(
+    (
+      WrappedComponent: FunctionComponent<LocalizedPageProps>,
+      _featureFlagName,
+      _onEnabled,
+    ) =>
+      (props: { params: Promise<{ locale: string }> }) =>
+        WrappedComponent(props) as unknown,
+  );
+
 jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   __esModule: true,
   default:
@@ -52,12 +63,13 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       featureFlagName: string,
       onEnabled: () => void,
     ) =>
-    (props) =>
+    (props: LocalizedPageProps) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       withFeatureFlagMock(
         WrappedComponent,
         featureFlagName,
         onEnabled,
-      )(props) as unknown,
+      )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
 describe("Organizations page feature flag wiring", () => {
@@ -71,15 +83,6 @@ describe("Organizations page feature flag wiring", () => {
       user_id: "user-1",
     });
     organizations.mockResolvedValue([]);
-    withFeatureFlagMock.mockImplementation(
-      (
-        WrappedComponent: FunctionComponent<LocalizedPageProps>,
-        _featureFlagName,
-        _onEnabled,
-      ) =>
-        (props: { params: Promise<{ locale: string }> }) =>
-          WrappedComponent(props) as unknown,
-    );
   });
 
   it("check OrganizationsPage redirects to maintenance if manageUsersOff is enabled", async () => {
@@ -90,8 +93,12 @@ describe("Organizations page feature flag wiring", () => {
 
     expect(withFeatureFlagMock).toHaveBeenCalledTimes(1);
 
-    const [wrappedComponent, flagName, onEnabled] =
-      withFeatureFlagMock.mock.calls[0];
+    const [wrappedComponent, flagName, onEnabled] = withFeatureFlagMock.mock
+      .calls[0] as [
+      wrappedComponent: FunctionComponent<LocalizedPageProps>,
+      flagName: string,
+      onEnabled: () => void,
+    ];
 
     expect(flagName).toBe("manageUsersOff");
     expect(typeof wrappedComponent).toBe("function");
