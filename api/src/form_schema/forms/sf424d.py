@@ -133,7 +133,6 @@ FORM_XML_TRANSFORM_RULES = {
     },
     # Field mappings - order matches XSD sequence
     # FormVersionIdentifier is handled by the framework
-
     # AuthorizedRepresentative (optional) - complex type containing RepresentativeName and RepresentativeTitle
     # Uses compose_object to wrap flat fields (signature, title) into nested XML element
     # Note: Key cannot start with underscore as those are treated as metadata
