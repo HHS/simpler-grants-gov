@@ -103,6 +103,66 @@ FORM_RULE_SCHEMA = {
     "date_signed": {"gg_post_population": {"rule": "current_date"}},
 }
 
+# XML Transformation Rules for SF-424B v1.1 (Assurances for Non-Construction Programs)
+# XSD: https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for SF-424B Assurances for Non-Construction Programs",
+        "version": "1.0",
+        "form_name": "SF424B",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424B-V1.1",
+            "SF424B": "http://apply.grants.gov/forms/SF424B-V1.1",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "xml_structure": {
+            "root_element": "Assurances",
+            "root_namespace_prefix": "SF424B",
+            "root_attributes": {
+                "programType": "Non-Construction",
+                "{http://apply.grants.gov/system/Global-V1.0}coreSchemaVersion": "1.1",
+            },
+        },
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+        },
+    },
+    # Field mappings - order matches XSD sequence
+    # FormVersionIdentifier is handled by the framework
+
+    # AuthorizedRepresentative (optional) - complex type containing RepresentativeName and RepresentativeTitle
+    # Uses compose_object to wrap flat fields (signature, title) into nested XML element
+    # Note: Key cannot start with underscore as those are treated as metadata
+    "authorized_representative_wrapper": {
+        "xml_transform": {
+            "target": "AuthorizedRepresentative",
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "compose_object",
+                "field_mapping": {
+                    "RepresentativeName": "signature",
+                    "RepresentativeTitle": "title",
+                },
+            },
+        }
+    },
+    # ApplicantOrganizationName (optional) - OrganizationNameDataType
+    "applicant_organization": {
+        "xml_transform": {
+            "target": "ApplicantOrganizationName",
+        }
+    },
+    # SubmittedDate (optional) - xs:date
+    "date_signed": {
+        "xml_transform": {
+            "target": "SubmittedDate",
+        }
+    },
+}
+
 SF424b_v1_1 = Form(
     # https://grants.gov/forms/form-items-description/fid/240
     form_id=uuid.UUID("1d0681f8-26f9-4ff1-a75e-e33477668f73"),
@@ -115,6 +175,7 @@ SF424b_v1_1 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=uuid.UUID("9db8ab35-f677-482c-93ea-9fb3eb86d7c7"),
     form_type=FormType.SF424B,
     sgg_version="1.0",
