@@ -14,8 +14,8 @@ import src.db.models.staging
 from src.data_migration.load import load_oracle_data_task
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
+    ForeignTcertificatesFactory,
     ForeignTopportunityFactory,
-    ForeignTuserAccountFactory,
     StagingTopportunityFactory,
 )
 
@@ -216,20 +216,21 @@ class TestLoadOracleData(BaseTestClass):
         self, db_session, foreign_tables, staging_tables, enable_factory_create
     ):
         """Test that excluded columns are not copied from foreign to staging tables."""
-        time3 = datetime.datetime(2024, 4, 10, 22, 0, 1)
+        time3 = datetime.datetime(2024, 4, 10, 22, 0, 1, tzinfo=datetime.timezone.utc)
 
-        source_table = foreign_tables["tuser_account"]
-        destination_table = staging_tables["tuser_account"]
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
 
         db_session.execute(sqlalchemy.delete(source_table))
         db_session.execute(sqlalchemy.delete(destination_table))
 
         # Create a record in the foreign table with specific values
-        source_record = ForeignTuserAccountFactory.create(
-            user_account_id=10,
-            user_id="10",
-            full_name="test user1",
-            email_address="test1@example.com",
+        # We'll exclude the 'oppcategory' column to test exclusion
+        source_record = ForeignTopportunityFactory.create(
+            opportunity_id=10,
+            oppnumber="TEST-001",
+            oppcategory="D",  # Discretionary
+            cfdas=[],
             last_upd_date=time3,
         )
 
@@ -238,48 +239,97 @@ class TestLoadOracleData(BaseTestClass):
             db_session,
             foreign_tables,
             staging_tables,
-            ["tuser_account"],
+            ["topportunity"],
+        )
+        # Configure column exclusions for testing
+        task.columns_to_exclude = {"topportunity": ["oppcategory"]}
+        task.run()
+
+        # Force the data to be fetched from the DB and not a cache
+        db_session.expire_all()
+
+        # Retrieve the inserted staging record
+        inserted_record = (
+            db_session.query(destination_table)
+            .filter(destination_table.c.opportunity_id == 10)
+            .first()
+        )
+
+        # Verify regular columns were inserted
+        assert inserted_record.oppnumber == source_record.oppnumber
+        assert inserted_record.last_upd_date == source_record.last_upd_date
+
+        # Verify excluded column was not copied (should be None)
+        assert inserted_record.oppcategory is None
+        assert source_record.oppcategory == "D"
+
+        # Test UPDATE with excluded columns - update the source record with a newer timestamp
+        time4 = datetime.datetime(
+            2024, 4, 10, 23, 0, 0, tzinfo=datetime.timezone.utc
+        )  # Later time to trigger update
+        db_session.execute(
+            sqlalchemy.update(source_table)
+            .where(source_table.c.opportunity_id == 10)
+            .values(oppnumber="TEST-001-UPDATED", oppcategory="M", last_upd_date=time4)  # Mandatory
+        )
+        db_session.commit()
+
+        # Run the task again to process the update
+        task.run()
+        db_session.expire_all()
+
+        # Retrieve the updated record
+        updated_record = (
+            db_session.query(destination_table)
+            .filter(destination_table.c.opportunity_id == 10)
+            .first()
+        )
+
+        # Verify regular columns were updated
+        assert updated_record.oppnumber == "TEST-001-UPDATED"
+        assert updated_record.last_upd_date == time4
+        # Verify excluded column was still not copied (should still be None)
+        assert updated_record.oppcategory is None
+
+    def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        """Test that excluded columns are not copied from foreign to staging tables."""
+        source_table = foreign_tables["tcertificates"]
+        destination_table = staging_tables["tcertificates"]
+
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        # Create a record in the foreign table with specific values
+        # 'is_selfsigned' should be excluded
+        source_record = ForeignTcertificatesFactory.create(is_selfsigned="Y")
+
+        # Run the task with column exclusions
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session,
+            foreign_tables,
+            staging_tables,
+            ["tcertificates"],
         )
         task.run()
 
         # Force the data to be fetched from the DB and not a cache
         db_session.expire_all()
 
-        # Retrieve the updated staging record
-        updated_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.user_account_id == 10)
-            .first()
-        )
-
-        # Verify regular columns were updated
-        assert updated_record.full_name == source_record.full_name
-        assert updated_record.last_upd_date == source_record.last_upd_date
-
-        # Verify excluded columns retained their original values
-        assert source_record.email_address != updated_record.email_address
-        assert updated_record.email_address is None
-
-        # Test INSERT with excluded columns
-        source_record2 = ForeignTuserAccountFactory.create(
-            user_account_id=11,
-            full_name="test user2",
-            user_id="11",
-            email_address="test2@example.com",
-            last_upd_date=time3,
-        )
-
-        # Run the task again to process the new record
-        task.run()
-        db_session.expire_all()
-
-        # Retrieve the newly inserted record
+        # Retrieve the inserted staging record
         inserted_record = (
             db_session.query(destination_table)
-            .filter(destination_table.c.user_account_id == 11)
+            .filter(destination_table.c.currentcertid == source_record.currentcertid)
             .first()
         )
 
         # Verify regular columns were inserted
-        assert inserted_record.full_name == source_record2.full_name
-        assert inserted_record.email_address is None
+        assert inserted_record.certemail == source_record.certemail
+        assert inserted_record.creator_id == source_record.creator_id
+        assert inserted_record.created_date == source_record.created_date
+        assert inserted_record.serial_num == source_record.serial_num
+        assert inserted_record.agencyid == source_record.agencyid
+
+        # Verify excluded column was not copied (should be None)
+        assert inserted_record.is_selfsigned is None

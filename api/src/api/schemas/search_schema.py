@@ -90,7 +90,7 @@ class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
         pattern: str | Pattern | None = None,
         example: str | None = None,
         minimum_length: int | None = None
-    ) -> "StrSearchSchemaBuilder":
+    ) -> StrSearchSchemaBuilder:
         if pattern is not None and allowed_values is not None:
             raise Exception("Cannot specify both a pattern and allowed_values")
 
@@ -160,7 +160,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         min_example: int | None = None,
         max_example: int | None = None,
         positive_only: bool = True,
-    ) -> "IntegerSearchSchemaBuilder":
+    ) -> IntegerSearchSchemaBuilder:
         self._with_minimum_value(min_example, positive_only)
         self._with_maximum_value(max_example, positive_only)
         self._with_int_range_validator()
@@ -168,7 +168,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
     def _with_minimum_value(
         self, example: int | None = None, positive_only: bool = True
-    ) -> "IntegerSearchSchemaBuilder":
+    ) -> IntegerSearchSchemaBuilder:
         metadata = {}
         if example is not None:
             metadata["example"] = example
@@ -184,7 +184,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
     def _with_maximum_value(
         self, example: int | None = None, positive_only: bool = True
-    ) -> "IntegerSearchSchemaBuilder":
+    ) -> IntegerSearchSchemaBuilder:
         metadata = {}
         if example is not None:
             metadata["example"] = example
@@ -198,7 +198,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         )
         return self
 
-    def _with_int_range_validator(self) -> "IntegerSearchSchemaBuilder":
+    def _with_int_range_validator(self) -> IntegerSearchSchemaBuilder:
         # Define a schema validator function that we'll use to define any
         # rules that go across fields in the validation
         @validates_schema
@@ -254,7 +254,7 @@ class BoolSearchSchemaBuilder(BaseSearchSchemaBuilder):
             )
     """
 
-    def with_one_of(self, example: bool | None = None) -> "BoolSearchSchemaBuilder":
+    def with_one_of(self, example: bool | None = None) -> BoolSearchSchemaBuilder:
         metadata = {}
         if example is not None:
             metadata["example"] = example
@@ -291,7 +291,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
         )
     """
 
-    def with_date_range(self) -> "DateSearchSchemaBuilder":
+    def with_date_range(self) -> DateSearchSchemaBuilder:
         self.schema_fields["start_date"] = fields.Date(allow_none=True)
         self.schema_fields["end_date"] = fields.Date(allow_none=True)
 
@@ -306,7 +306,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
         return self
 
-    def _with_date_range_validator(self) -> "DateSearchSchemaBuilder":
+    def _with_date_range_validator(self) -> DateSearchSchemaBuilder:
         # Define a schema validator function that we'll use to define any
         # rules that go across fields in the validation
         @validates_schema
@@ -376,6 +376,6 @@ class UuidSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
     def with_one_of(
         self,
-    ) -> "UuidSearchSchemaBuilder":
+    ) -> UuidSearchSchemaBuilder:
         self.schema_fields["one_of"] = fields.List(fields.UUID(), allow_none=True)
         return self

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, Project Narrative Attachments, and Budget Narrative Attachments.
+This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-LLL, CD-511, Project Narrative Attachments, and Budget Narrative Attachments.
 
 ## Architecture
 
@@ -17,7 +17,11 @@ api/src/services/xml_generation/
     └── base_transformer.py    # BaseTransformer - field mapping logic
 
 api/src/form_schema/forms/
-└── sf424.py                   # SF-424 schema + basic XML transformation rules
+├── sf424.py                   # SF-424 schema + XML transformation rules
+├── sf424a.py                  # SF-424A Budget schema + XML transformation rules
+├── sflll.py                   # SF-LLL Lobbying Disclosure + XML transformation rules
+├── cd511.py                   # CD511 Certification Regarding Lobbying + XML transformation rules
+└── gg_lobbying_form.py        # GG_LobbyingForm Grants.gov Lobbying Form + XML transformation rules
 ```
 
 ## Usage
@@ -114,6 +118,93 @@ FORM_XML_TRANSFORM_RULES = {
 }
 ```
 
+### Example: CD-511 (Certification Regarding Lobbying)
+
+The CD-511 form uses nested `HumanNameDataType` structure with GlobalLibrary namespace for contact names:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for CD511",
+        "form_name": "CD511",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/CD511-V1.1",
+            "CD511": "http://apply.grants.gov/forms/CD511-V1.1",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "xml_structure": {
+            "root_element": "CD511",
+            "root_namespace_prefix": "CD511",
+            "root_attributes": {"FormVersion": "1.1"},
+        },
+    },
+    # Field mappings (order matches XSD sequence)
+    "applicant_name": {"xml_transform": {"target": "OrganizationName"}},
+    "award_number": {"xml_transform": {"target": "AwardNumber"}},
+    "project_name": {"xml_transform": {"target": "ProjectName"}},
+    "contact_person": {
+        "xml_transform": {"target": "ContactName", "type": "nested_object"},
+        "prefix": {"xml_transform": {"target": "PrefixName", "namespace": "globLib"}},
+        "first_name": {"xml_transform": {"target": "FirstName", "namespace": "globLib"}},
+        "middle_name": {"xml_transform": {"target": "MiddleName", "namespace": "globLib"}},
+        "last_name": {"xml_transform": {"target": "LastName", "namespace": "globLib"}},
+        "suffix": {"xml_transform": {"target": "SuffixName", "namespace": "globLib"}},
+    },
+    "contact_person_title": {"xml_transform": {"target": "Title"}},
+    "signature": {"xml_transform": {"target": "Signature"}},
+    "submitted_date": {"xml_transform": {"target": "SubmittedDate"}},
+}
+```
+
+**CD-511 Field Mapping Notes:**
+- `applicant_name` → `OrganizationName` (XSD uses OrganizationName, form displays "Name of Applicant")
+- `contact_person` → `ContactName` with nested `HumanNameDataType` structure using GlobalLibrary namespace
+- Either `award_number` or `project_name` (or both) should be provided per form validation
+- `signature` and `submitted_date` are auto-populated during submission
+
+### Example: GG_LobbyingForm (Grants.gov Lobbying Form)
+
+The GG_LobbyingForm is similar to CD-511 but with different field names. It uses nested `HumanNameDataType` structure with GlobalLibrary namespace for authorized representative names:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for GG_LobbyingForm",
+        "form_name": "GG_LobbyingForm",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/GG_LobbyingForm-V1.1",
+            "GG_LobbyingForm": "http://apply.grants.gov/forms/GG_LobbyingForm-V1.1",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "xml_structure": {
+            "root_element": "LobbyingForm",
+            "root_namespace_prefix": "GG_LobbyingForm",
+            "root_attributes": {"FormVersion": "1.1"},
+        },
+    },
+    # Field mappings (order matches XSD sequence)
+    "organization_name": {"xml_transform": {"target": "ApplicantName"}},
+    "authorized_representative_name": {
+        "xml_transform": {"target": "AuthorizedRepresentativeName", "type": "nested_object"},
+        "prefix": {"xml_transform": {"target": "PrefixName", "namespace": "globLib"}},
+        "first_name": {"xml_transform": {"target": "FirstName", "namespace": "globLib"}},
+        "middle_name": {"xml_transform": {"target": "MiddleName", "namespace": "globLib"}},
+        "last_name": {"xml_transform": {"target": "LastName", "namespace": "globLib"}},
+        "suffix": {"xml_transform": {"target": "SuffixName", "namespace": "globLib"}},
+    },
+    "authorized_representative_title": {"xml_transform": {"target": "AuthorizedRepresentativeTitle"}},
+    "authorized_representative_signature": {"xml_transform": {"target": "AuthorizedRepresentativeSignature"}},
+    "submitted_date": {"xml_transform": {"target": "SubmittedDate"}},
+}
+```
+
+**GG_LobbyingForm Field Mapping Notes:**
+- `organization_name` → `ApplicantName`
+- `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
+- `authorized_representative_signature` and `submitted_date` are auto-populated during submission
+
 ### Example: Attachment Forms
 
 For attachment-only forms (Project Narrative, Budget Narrative), the configuration is simpler:
@@ -153,6 +244,9 @@ The following forms currently have XML generation support:
 
 - **SF-424 (v4.0)**: Application for Federal Assistance
 - **SF-424A (v1.0)**: Budget Information - Non-Construction Programs
+- **SF-LLL (v2.0)**: Disclosure of Lobbying Activities
+- **CD-511 (v1.1)**: Certification Regarding Lobbying
+- **GG_LobbyingForm (v1.1)**: Grants.gov Lobbying Form
 - **Project Narrative Attachments (v1.2)**: Project narrative file attachments
 - **Budget Narrative Attachments (v1.2)**: Budget narrative file attachments
 
