@@ -7,7 +7,7 @@ with only a few alterations.
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm
-from src.db.models.user_models import LegacyCertificate, Role, User
+from src.db.models.user_models import Role, User
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPClientCertificate
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -125,7 +125,7 @@ def setup_application_for_form_validation(
 
 def setup_cert_user(
     agency: Agency, privileges: list[Privilege]
-) -> tuple[User, LegacyCertificate, Role, SOAPClientCertificate]:
+) -> tuple[User, Role, SOAPClientCertificate]:
     legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
     agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
     role = RoleFactory.create(privileges=privileges, is_agency_role=True)
@@ -134,5 +134,6 @@ def setup_cert_user(
         serial_number=legacy_certificate.serial_number,
         cert="123",
         fingerprint="456",
+        legacy_certificate=legacy_certificate,
     )
-    return legacy_certificate.user, legacy_certificate, role, soap_client_certificate
+    return legacy_certificate.user, role, soap_client_certificate

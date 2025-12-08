@@ -203,7 +203,7 @@ class JsonSchemaBuilder:
         self,
         field_name: str,
         is_required: bool,
-        builder: "JsonSchemaBuilder",
+        builder: JsonSchemaBuilder,
         *,
         title: str | None = None,
     ) -> Self:

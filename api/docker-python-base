@@ -3,8 +3,8 @@
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.13.9
-ARG PY_MM=3.13
+ARG PYTHON_VERSION=3.14.0
+ARG PY_MM=3.14
 ARG POETRY_VERSION=2.2.1
 ARG PIP_VERSION=25.3
 
@@ -33,7 +33,9 @@ RUN dnf install -y \
       gdbm-devel \
       ca-certificates \
       findutils \
-      shadow-utils && \
+      shadow-utils \
+      libxml2-devel \
+      libxslt-devel && \
     dnf clean all
 
 # Build Python from source
@@ -60,6 +62,8 @@ RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
 # Ensure virtualenv embeds patched pip (25.3) for offline venv creation
 RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
 
+# Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
+RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
 
 # Remove pip from runtime (keep Poetry)
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
@@ -93,10 +97,11 @@ RUN strip --strip-unneeded /usr/local/bin/python${PY_MM} || true; \
 # Stage 2: Runtime base on Amazon Linux
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS python-base
-ARG PY_MM=3.13
+ARG PY_MM=3.14
 LABEL org.opencontainers.image.source="https://github.com/HHS/simpler-grants-gov"
 
-# Install runtime dependencies only
+# Install runtime dependencies and build tools for compiling Python packages
+# Build tools are needed because Python 3.14 is new and many packages lack prebuilt wheels
 RUN dnf install -y \
       ca-certificates \
       openssl \
@@ -110,7 +115,16 @@ RUN dnf install -y \
       zlib \
       shadow-utils \
       findutils \
-      wget && \
+      wget \
+      libxml2 \
+      libxslt \
+      gcc \
+      gcc-c++ \
+      make \
+      libxml2-devel \
+      libxslt-devel \
+      openssl-devel \
+      libffi-devel && \
     # Update packages with security vulnerabilities
     dnf update -y \
       libcap-2.73-1.amzn2023.0.4 \
@@ -123,13 +137,14 @@ RUN dnf install -y \
 # Copy python-version.txt for downstream stages to use
 COPY --from=amazonlinux-builder /python-version.txt /python-version.txt
 
-# Copy Python runtime
+# Copy Python runtime and development headers
 COPY --from=amazonlinux-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
 COPY --from=amazonlinux-builder /usr/local/bin/python3 /usr/local/bin/python3
 COPY --from=amazonlinux-builder /usr/local/bin/python /usr/local/bin/python
 COPY --from=amazonlinux-builder /usr/local/bin/poetry /usr/local/bin/poetry
 COPY --from=amazonlinux-builder /usr/local/lib/python${PY_MM}/ /usr/local/lib/python${PY_MM}/
 COPY --from=amazonlinux-builder /usr/local/lib/libpython${PY_MM}.so* /usr/local/lib/
+COPY --from=amazonlinux-builder /usr/local/include/python${PY_MM}/ /usr/local/include/python${PY_MM}/
 
 ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
     PYTHONUNBUFFERED=1 \

@@ -112,6 +112,98 @@ FORM_RULE_SCHEMA = {
     "submitted_date": {"gg_post_population": {"rule": "current_date"}},
 }
 
+# XML Transformation Rules for GG_LobbyingForm v1.1
+# XSD: https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting GG_LobbyingForm JSON to Grants.gov XML format",
+        "version": "1.0",
+        "form_name": "GG_LobbyingForm",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/GG_LobbyingForm-V1.1",
+            "GG_LobbyingForm": "http://apply.grants.gov/forms/GG_LobbyingForm-V1.1",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "xml_structure": {
+            "root_element": "LobbyingForm",
+            "root_namespace_prefix": "GG_LobbyingForm",
+            "root_attributes": {
+                "FormVersion": "1.1",
+            },
+        },
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+            "include_null": "Include empty XML element: <Field></Field>",
+            "default_value": "Use configured default value when field is None",
+        },
+    },
+    # Field mappings - order matches XSD sequence
+    # ApplicantName (required) - OrganizationNameDataType
+    "organization_name": {
+        "xml_transform": {
+            "target": "ApplicantName",
+        }
+    },
+    # AuthorizedRepresentativeName (required) - HumanNameDataType nested structure
+    "authorized_representative_name": {
+        "xml_transform": {
+            "target": "AuthorizedRepresentativeName",
+            "type": "nested_object",
+        },
+        "prefix": {
+            "xml_transform": {
+                "target": "PrefixName",
+                "namespace": "globLib",
+            }
+        },
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+            }
+        },
+        "middle_name": {
+            "xml_transform": {
+                "target": "MiddleName",
+                "namespace": "globLib",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+            }
+        },
+        "suffix": {
+            "xml_transform": {
+                "target": "SuffixName",
+                "namespace": "globLib",
+            }
+        },
+    },
+    # AuthorizedRepresentativeTitle (required) - HumanTitleDataType
+    "authorized_representative_title": {
+        "xml_transform": {
+            "target": "AuthorizedRepresentativeTitle",
+        }
+    },
+    # AuthorizedRepresentativeSignature (required) - SignatureDataType
+    "authorized_representative_signature": {
+        "xml_transform": {
+            "target": "AuthorizedRepresentativeSignature",
+        }
+    },
+    # SubmittedDate (required) - xs:date
+    "submitted_date": {
+        "xml_transform": {
+            "target": "SubmittedDate",
+        }
+    },
+}
+
 GG_LobbyingForm_v1_1 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/255
     form_id=uuid.UUID("295d60a6-a3d1-4413-88fe-f4e5ee43b409"),
@@ -124,6 +216,7 @@ GG_LobbyingForm_v1_1 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=uuid.UUID("ef1102b5-64af-47a5-b23e-e8d699032027"),
     form_type=FormType.GG_LOBBYING_FORM,
     sgg_version="1.0",

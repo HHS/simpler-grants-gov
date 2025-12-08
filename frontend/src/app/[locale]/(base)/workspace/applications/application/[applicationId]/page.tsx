@@ -82,7 +82,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   return (
     <>
       <GridContainer>
-        <h1>{t("title")}</h1>
+        <h1 className="margin-top-9 margin-bottom-7">{t("title")}</h1>
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}
