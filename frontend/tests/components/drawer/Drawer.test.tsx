@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { RefObject } from "react";
-import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
+import { ModalRef } from "@trussworks/react-uswds";
 
 import { Drawer } from "src/components/drawer/Drawer";
 
