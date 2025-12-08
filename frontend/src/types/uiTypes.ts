@@ -1,5 +1,7 @@
 import { OptionalStringDict } from "src/types/generalTypes";
 
+import { FunctionComponent, ReactNode } from "react";
+
 export enum Breakpoints {
   CARD = "card",
   CARD_LG = "card-lg",
@@ -22,3 +24,11 @@ export interface ErrorProps {
   error: Error & { digest?: string };
   reset?: () => unknown;
 }
+
+export type FeatureFlaggedPageWrapper<P, R extends ReactNode> = (
+  WrappedComponent: FunctionComponent<P>,
+  featureFlagName: string,
+  onEnabled: (props: P) => R,
+) => (
+  props: P & WithFeatureFlagProps,
+) => (props: P & WithFeatureFlagProps) => R | React.JSX.Element;
