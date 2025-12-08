@@ -32,25 +32,30 @@ ENV VIRTUALENV_APP_DATA="/tmp"
 
 COPY src /analytics/src
 COPY newrelic.ini /analytics/newrelic.ini
+COPY README.md /analytics/README.md
+COPY config.py /analytics/config.py
 
-# Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
+# Install dependencies and build the application wheel
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN PY_MM=$(cat /tmp/py_version.txt) && \
+    /usr/local/bin/python"${PY_MM}" -m poetry install --only main --no-root && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
-    /analytics/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_analytics-0.1.0-py3-none-any.whl && \
+    /analytics/.venv/bin/pip install --no-cache-dir dist/simpler_grants_gov_analytics-0.1.0-py3-none-any.whl && \
     /analytics/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/analytics/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     cp "/analytics/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
     cp "/analytics/newrelic.ini" "${SITE_BASE}/newrelic.ini" && \
     chmod 0644 "${SITE_BASE}/src/newrelic.ini" "${SITE_BASE}/newrelic.ini" && \
+    cp "/analytics/config.py" "${SITE_BASE}/config.py" && \
+    chmod 0644 "${SITE_BASE}/config.py" && \
     if [ ! -f "${SITE_BASE}/src/newrelic.ini" ]; then \
       echo "ERROR: newrelic.ini missing at ${SITE_BASE}/src/newrelic.ini" >&2; \
       ls -la "${SITE_BASE}/src" || true; \
       exit 1; \
     fi; \
     (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
-    (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /analytics/dist /analytics/src || true)
+    (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /analytics/dist /analytics/src /analytics/config.py /analytics/README.md || true)
 
 #-----------
 # Dev image
@@ -80,6 +85,7 @@ COPY . /analytics
 # Release
 #---------
 FROM base AS release
+ARG RUN_USER
 
 # Working directory already set in base stage
 # User already created in base stage
