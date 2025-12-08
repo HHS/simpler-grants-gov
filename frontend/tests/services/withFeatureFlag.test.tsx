@@ -47,7 +47,9 @@ describe("WithFeatureFlag", () => {
     const component = await WrappedComponent({
       searchParams: searchPromise(searchParams),
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(OriginalComponent).toHaveBeenCalledTimes(1);
     expect(OriginalComponent).toHaveBeenCalledWith(
@@ -71,7 +73,9 @@ describe("WithFeatureFlag", () => {
     const component = await WrappedComponent({
       searchParams: searchPromise(searchParams),
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(1);
   });
@@ -90,7 +94,9 @@ describe("WithFeatureFlag", () => {
     const component = await WrappedComponent({
       searchParams: searchPromise(searchParams),
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(0);
   });
@@ -109,7 +115,9 @@ describe("WithFeatureFlag", () => {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const component = await WrappedComponent({});
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(1);
   });
