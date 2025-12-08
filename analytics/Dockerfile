@@ -99,6 +99,10 @@ COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
 COPY Makefile /analytics/Makefile
 COPY config /analytics/config
 
+# Copy pyproject.toml and src for poetry run support
+COPY pyproject.toml /analytics/pyproject.toml
+COPY src /analytics/src
+
 ENV PATH="/analytics/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
     TMPDIR="/tmp" \
