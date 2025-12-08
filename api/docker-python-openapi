@@ -7,7 +7,7 @@ RUN dnf -y install cpio && \
     for rpm in /tmp/rpms/*.rpm; do rpm2cpio "$rpm" | cpio -idmv; done && \
     rm -rf /tmp/rpms
 
-FROM ghcr.io/hhs/python-base-image:72ba391@sha256:1e2d72700ecfbff3a65435a64ca321d65c7bb82128e91c5825d69997cb54c8cd
+FROM ghcr.io/hhs/python-base-image:b8b6289@sha256:fadc641c704cc98386246e531be93c35162ea6a56f1f92489d4ea71e016c65f0
 
 ARG RUN_USER
 ARG RUN_UID
