@@ -24,27 +24,9 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
             },
         ],
         "properties": {
-            "street1": {
-                "type": "string",
-                "title": "Street 1",
-                "description": "Enter the first line of the Street Address.",
-                "minLength": 1,
-                "maxLength": 55,
-            },
-            "street2": {
-                "type": "string",
-                "title": "Street 2",
-                "description": "Enter the second line of the Street Address.",
-                "minLength": 1,
-                "maxLength": 55,
-            },
-            "city": {
-                "type": "string",
-                "title": "City",
-                "description": "Enter the city.",
-                "minLength": 1,
-                "maxLength": 35,
-            },
+            "street1": {"$ref": "#/street1"},
+            "street2": {"$ref": "#/street2"},
+            "city": {"$ref": "#/city"},
             "county": {
                 "type": "string",
                 "title": "County/Parish",
@@ -52,11 +34,7 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
                 "minLength": 1,
                 "maxLength": 30,
             },
-            "state": {
-                "allOf": [{"$ref": "#/state_code"}],
-                "title": "State",
-                "description": "Enter the state.",
-            },
+            "state": {"$ref": "#/state"},
             "province": {
                 "type": "string",
                 "title": "Province",
@@ -70,13 +48,7 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
                 "title": "Country",
                 "description": "Enter the country.",
             },
-            "zip_code": {
-                "type": "string",
-                "title": "Zip / Postal Code",
-                "description": "Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United states.",
-                "minLength": 1,
-                "maxLength": 30,
-            },
+            "zip_code": {"$ref": "#/zip_code"},
         },
     },
     # An address containing the core address fields
@@ -89,40 +61,69 @@ ADDRESS_SHARED_JSON_SCHEMA_V1 = {
             "city",
         ],
         "properties": {
-            "street1": {
-                "type": "string",
-                "title": "Street 1",
-                "description": "Enter the first line of the Street Address.",
-                "minLength": 1,
-                "maxLength": 55,
-            },
-            "street2": {
-                "type": "string",
-                "title": "Street 2",
-                "description": "Enter the second line of the Street Address.",
-                "minLength": 1,
-                "maxLength": 55,
-            },
-            "city": {
-                "type": "string",
-                "title": "City",
-                "description": "Enter the city.",
-                "minLength": 1,
-                "maxLength": 35,
-            },
-            "state": {
-                "allOf": [{"$ref": "#/state_code"}],
-                "title": "State",
-                "description": "Enter the state.",
-            },
-            "zip_code": {
-                "type": "string",
-                "title": "Zip / Postal Code",
-                "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
-                "minLength": 1,
-                "maxLength": 30,
-            },
+            "street1": {"$ref": "#/street1"},
+            "street2": {"$ref": "#/street2"},
+            "city": {"$ref": "#/city"},
+            "state": {"$ref": "#/state"},
+            "zip_code": {"$ref": "#/zip_code"},
         },
+    },
+    "simple_address_with_country": {
+        "type": "object",
+        "title": "Address",
+        "description": "Enter an address.",
+        "required": ["street1", "city", "country"],
+        "allOf": [
+            # If country is United States, state and zip_code are required
+            {
+                "if": {
+                    "properties": {"country": {"const": "USA: UNITED STATES"}},
+                    "required": ["country"],  # Only run rule if country is set
+                },
+                "then": {"required": ["state", "zip_code"]},
+            },
+        ],
+        "properties": {
+            "street1": {"$ref": "#/street1"},
+            "street2": {"$ref": "#/street2"},
+            "city": {"$ref": "#/city"},
+            "state": {"$ref": "#/state"},
+            "zip_code": {"$ref": "#/zip_code"},
+            "country": {"$ref": "#/country_code"},
+        },
+    },
+    "street1": {
+        "type": "string",
+        "title": "Street 1",
+        "description": "Enter the first line of the Street Address.",
+        "minLength": 1,
+        "maxLength": 55,
+    },
+    "street2": {
+        "type": "string",
+        "title": "Street 2",
+        "description": "Enter the second line of the Street Address.",
+        "minLength": 1,
+        "maxLength": 55,
+    },
+    "city": {
+        "type": "string",
+        "title": "City",
+        "description": "Enter the city.",
+        "minLength": 1,
+        "maxLength": 35,
+    },
+    "state": {
+        "allOf": [{"$ref": "#/state_code"}],
+        "title": "State",
+        "description": "Enter the state.",
+    },
+    "zip_code": {
+        "type": "string",
+        "title": "Zip / Postal Code",
+        "description": "Enter the nine-digit Postal Code (e.g., ZIP code).",
+        "minLength": 1,
+        "maxLength": 30,
     },
     "state_code": {
         "type": "string",

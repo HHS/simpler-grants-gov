@@ -1,5 +1,7 @@
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import Privilege
+from src.db.models.competition_models import Application
+from src.db.models.user_models import User
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationUserFactory,
@@ -19,7 +21,7 @@ def create_user_in_app(
     role=None,
     privileges: list[Privilege] = None,
     **kwargs
-) -> tuple:
+) -> tuple[User, Application, str]:
     """
     Create a user and associates them with an application, optionally creating related roles and privileges.
 

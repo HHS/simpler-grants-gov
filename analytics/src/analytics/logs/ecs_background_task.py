@@ -133,12 +133,8 @@ def _get_ecs_metadata() -> dict:
         ],
     )
 
-    # Step function only
-    step_function_name = os.environ.get("SCHEDULED_JOB_NAME", None)
-
     return {
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        "scheduled_job_name": step_function_name,
     }

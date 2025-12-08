@@ -65,8 +65,8 @@ class Competition(ApiSchemaTable, TimestampMixin):
         uselist=False
     )
 
-    link_competition_open_to_applicant: Mapped[list["LinkCompetitionOpenToApplicant"]] = (
-        relationship(back_populates="competition", uselist=True, cascade="all, delete-orphan")
+    link_competition_open_to_applicant: Mapped[list[LinkCompetitionOpenToApplicant]] = relationship(
+        back_populates="competition", uselist=True, cascade="all, delete-orphan"
     )
     open_to_applicants: AssociationProxy[set[CompetitionOpenToApplicant]] = association_proxy(
         "link_competition_open_to_applicant",
@@ -82,15 +82,15 @@ class Competition(ApiSchemaTable, TimestampMixin):
     can_send_mail: Mapped[bool | None]
     is_simpler_grants_enabled: Mapped[bool | None] = mapped_column(default=False)
 
-    competition_forms: Mapped[list["CompetitionForm"]] = relationship(
+    competition_forms: Mapped[list[CompetitionForm]] = relationship(
         "CompetitionForm", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
 
-    applications: Mapped[list["Application"]] = relationship(
+    applications: Mapped[list[Application]] = relationship(
         "Application", uselist=True, back_populates="competition", cascade="all, delete-orphan"
     )
 
-    competition_instructions: Mapped[list["CompetitionInstruction"]] = relationship(
+    competition_instructions: Mapped[list[CompetitionInstruction]] = relationship(
         "CompetitionInstruction",
         uselist=True,
         back_populates="competition",
@@ -177,24 +177,6 @@ class FormInstruction(ApiSchemaTable, TimestampMixin):
         return presign_or_s3_cdnify_url(self.file_location)
 
 
-class CompetitionAssistanceListing(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "competition_assistance_listing"
-
-    competition_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Competition.competition_id), primary_key=True
-    )
-    competition: Mapped[Competition] = relationship(Competition)
-
-    opportunity_assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
-        UUID,
-        ForeignKey(OpportunityAssistanceListing.opportunity_assistance_listing_id),
-        primary_key=True,
-    )
-    opportunity_assistance_listing: Mapped[OpportunityAssistanceListing] = relationship(
-        OpportunityAssistanceListing
-    )
-
-
 class Form(ApiSchemaTable, TimestampMixin):
     __tablename__ = "form"
 
@@ -272,7 +254,7 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     submitted_at: Mapped[datetime | None]
     submitted_by: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey("api.user.user_id"))
-    submitted_by_user: Mapped["User | None"] = relationship(
+    submitted_by_user: Mapped[User | None] = relationship(
         "User", foreign_keys=[submitted_by], uselist=False
     )
 
@@ -283,15 +265,15 @@ class Application(ApiSchemaTable, TimestampMixin):
         Organization, uselist=False, back_populates="applications"
     )
 
-    application_forms: Mapped[list["ApplicationForm"]] = relationship(
+    application_forms: Mapped[list[ApplicationForm]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
     )
 
-    application_users: Mapped[list["ApplicationUser"]] = relationship(
+    application_users: Mapped[list[ApplicationUser]] = relationship(
         "ApplicationUser", back_populates="application", uselist=True, cascade="all, delete-orphan"
     )
 
-    application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+    application_attachments: Mapped[list[ApplicationAttachment]] = relationship(
         "ApplicationAttachment",
         uselist=True,
         primaryjoin=lambda: and_(
@@ -306,7 +288,7 @@ class Application(ApiSchemaTable, TimestampMixin):
     # Relationship that gets all application attachments INCLUDING DELETED
     # We likely don't want to use this in most cases, preferring the above
     # one which has only non-deleted ones.
-    _all_application_attachments: Mapped[list["ApplicationAttachment"]] = relationship(
+    _all_application_attachments: Mapped[list[ApplicationAttachment]] = relationship(
         "ApplicationAttachment",
         uselist=True,
         back_populates="application",
@@ -314,14 +296,14 @@ class Application(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
-    application_submissions: Mapped[list["ApplicationSubmission"]] = relationship(
+    application_submissions: Mapped[list[ApplicationSubmission]] = relationship(
         "ApplicationSubmission",
         uselist=True,
         back_populates="application",
         cascade="all, delete-orphan",
     )
 
-    application_audits: Mapped[list["ApplicationAudit"]] = relationship(
+    application_audits: Mapped[list[ApplicationAudit]] = relationship(
         "ApplicationAudit",
         uselist=True,
         back_populates="application",
@@ -329,7 +311,7 @@ class Application(ApiSchemaTable, TimestampMixin):
     )
 
     @property
-    def users(self) -> list["User"]:
+    def users(self) -> list[User]:
         """Return the list of User objects associated with this application"""
         return [app_user.user for app_user in self.application_users]
 
@@ -364,7 +346,7 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
         return self.competition_form.form_id
 
     @property
-    def application_attachments(self) -> list["ApplicationAttachment"]:
+    def application_attachments(self) -> list[ApplicationAttachment]:
         """Property function to access application attachments"""
         return self.application.application_attachments
 
@@ -373,7 +355,7 @@ class ApplicationForm(ApiSchemaTable, TimestampMixin):
         return self.application.application_name
 
     @property
-    def application_status(self) -> "ApplicationStatus | None":
+    def application_status(self) -> ApplicationStatus | None:
         return self.application.application_status
 
 
@@ -388,7 +370,7 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
     application: Mapped[Application] = relationship(Application)
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"), nullable=False)
-    user: Mapped["User"] = relationship("User")
+    user: Mapped[User] = relationship("User")
 
     file_location: Mapped[str]
     file_name: Mapped[str]
@@ -480,7 +462,7 @@ class ApplicationAudit(ApiSchemaTable, TimestampMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
     )
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped[User] = relationship("User", foreign_keys=[user_id])
 
     application_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Application.application_id), nullable=False, index=True
@@ -497,7 +479,7 @@ class ApplicationAudit(ApiSchemaTable, TimestampMixin):
     target_user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey("api.user.user_id"), index=True
     )
-    target_user: Mapped["User | None"] = relationship("User", foreign_keys=[target_user_id])
+    target_user: Mapped[User | None] = relationship("User", foreign_keys=[target_user_id])
 
     target_application_form_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(ApplicationForm.application_form_id)

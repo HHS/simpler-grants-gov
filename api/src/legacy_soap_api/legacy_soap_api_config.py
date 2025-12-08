@@ -7,10 +7,15 @@ from typing import Any
 
 from pydantic import Field
 
+from src.constants.lookup_constants import Privilege
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+class SOAPOperationConfigError(Exception):
+    pass
 
 
 class LegacySoapAPIConfig(PydanticBaseEnvConfig):
@@ -19,7 +24,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_api_enabled: bool = Field(default=False, alias="ENABLE_SOAP_API")
     inject_uuid_data: bool = Field(default=False, alias="INJECT_UUID_SOAP_RESPONSE")
     gg_s2s_proxy_header_key: str = Field(default="", alias="GG_S2S_PROXY_HEADER_KEY")
-    soap_auth_content: str | None = Field(None, alias="SOAP_AUTH_CONTENT")
+    soap_private_keys: str | None = Field(None, alias="SOAP_PRIVATE_KEYS")
     soap_auth_map: dict = Field(default_factory=dict)
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
     use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
@@ -31,13 +36,13 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
 
     def model_post_init(self, _context: Any) -> None:
         self.soap_auth_map = {}
-        if self.soap_auth_content is not None:
+        if self.soap_private_keys is not None:
             try:
-                self.soap_auth_map = json.loads(self.soap_auth_content.replace("\n", "\\n"))
+                self.soap_auth_map = json.loads(self.soap_private_keys.replace("\n", "\\n"))
             except Exception:
                 # This except is to make sure the API still starts up, even if the value is malformed
                 logger.exception(
-                    "Could not load soap auth content",
+                    "Could not load soap private keys",
                     extra={"soap_api_event": LegacySoapApiEvent.INVALID_SOAP_AUTH_CONTENT_CONFIG},
                 )
 
@@ -53,7 +58,7 @@ class SimplerSoapAPI(StrEnum):
     APPLICANTS = "applicants"
 
     @staticmethod
-    def get_soap_api(service_name: str, service_port_name: str) -> "SimplerSoapAPI | None":
+    def get_soap_api(service_name: str, service_port_name: str) -> SimplerSoapAPI | None:
         if service_name == "grantsws-agency" and service_port_name == "AgencyWebServicesSoapPort":
             return SimplerSoapAPI.GRANTORS
         elif (
@@ -71,6 +76,14 @@ class SOAPOperationConfig:
     compare_endpoints: bool = False
     is_mtom: bool = False
     always_call_simpler: bool = False
+
+    # These are the privileges needed for these endpoints:
+    # GetSubmissionListExpandedRequest = {Privilege.LEGACY_AGENCY_VIEWER}
+    # GetApplicationRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    # GetApplicationZipRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    # ConfirmApplicationDeliveryRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    # UpdateApplicationInfoReqest = {Privilege.LEGACY_AGENCY_ASSIGNER}
+    privileges: set[Privilege] | None = None
 
     # Some SOAP XML payloads will not force a list of objects when converting to
     # dicts if there is only one child element entry in the sequence. This config
@@ -119,6 +132,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
                 "PackageID": None,  # No namespace prefix
                 "SchemaURL": None,  # No namespace prefix
             },
+            privileges=set(),
         )
     },
     SimplerSoapAPI.GRANTORS: {
@@ -126,6 +140,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
             is_mtom=True,
+            privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         )
     },
 }

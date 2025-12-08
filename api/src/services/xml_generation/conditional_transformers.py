@@ -12,6 +12,50 @@ from src.util.dict_util import get_nested_value
 logger = logging.getLogger(__name__)
 
 
+def _transform_nested_field_names(
+    data: dict[str, Any], transform_config_root: dict[str, Any]
+) -> dict[str, Any]:
+    """Transform field names in a nested object based on transform rules."""
+    if not isinstance(data, dict) or not transform_config_root:
+        return data
+
+    result = {}
+    processed_fields = set()
+
+    # First, iterate over transform config to maintain correct order per XSD
+    for field_name, field_config in transform_config_root.items():
+        # Skip metadata config fields (both single and double underscore)
+        if field_name.startswith("_"):
+            continue
+
+        # Check if this field exists in data
+        if field_name not in data:
+            continue
+
+        field_value = data[field_name]
+
+        # Transform field name if configured
+        if isinstance(field_config, dict):
+            xml_transform = field_config.get("xml_transform", {})
+            target_name = xml_transform.get("target")
+            if target_name and xml_transform.get("type") != "attribute":
+                # Use transformed name
+                result[target_name] = field_value
+                processed_fields.add(field_name)
+                continue
+
+        # Keep original name if no transformation found
+        result[field_name] = field_value
+        processed_fields.add(field_name)
+
+    # Add any remaining fields from data that weren't in config (preserve as-is)
+    for field_name, field_value in data.items():
+        if field_name not in processed_fields:
+            result[field_name] = field_value
+
+    return result
+
+
 def _apply_pivot_object_transform(
     transform_config: dict[str, Any], source_data: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -60,6 +104,142 @@ def _apply_pivot_object_transform(
         # Only add target field if we got at least one value
         if nested_result:
             result[target_field] = nested_result
+
+    return result if result else None
+
+
+def _apply_array_decomposition_transform(
+    transform_config: dict[str, Any],
+    source_data: dict[str, Any],
+    transform_config_root: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Apply array decomposition transformation.
+
+    Transforms row-oriented array data into column-oriented structure by extracting
+    specific fields from each array element and grouping them by field type. Supports
+    XML wrapper elements and attributes for proper XML generation.
+
+    Configuration options per field mapping:
+    - item_field: Field to extract from each array item (required)
+    - item_wrapper: XML wrapper element name for line items (optional)
+    - item_attributes: List of attribute names to extract from source items (optional)
+    - total_field: Field containing the total/summary (optional)
+    - total_wrapper: XML wrapper element name for totals (optional)
+
+    Args:
+        transform_config: Array decomposition configuration
+        source_data: Source data to transform
+        transform_config_root: Root transform configuration for field name lookups
+    """
+    source_array_field = transform_config.get("source_array_field")
+    field_mappings = transform_config.get("field_mappings", {})
+
+    # Validate configuration
+    if not source_array_field or not isinstance(source_array_field, str):
+        raise ConditionalTransformationError(
+            "array_decomposition requires 'source_array_field' to be a non-empty string"
+        )
+
+    if not field_mappings or not isinstance(field_mappings, dict):
+        raise ConditionalTransformationError(
+            "array_decomposition requires 'field_mappings' to be a non-empty dictionary"
+        )
+
+    # Get the source array
+    source_path = source_array_field.split(".")
+    source_array = get_nested_value(source_data, source_path)
+
+    # If source array doesn't exist or is empty, return None
+    if not source_array or not isinstance(source_array, list):
+        return None
+
+    result = {}
+
+    # Process each field mapping
+    for output_field_name, mapping_config in field_mappings.items():
+        if not isinstance(mapping_config, dict):
+            continue
+
+        item_field = mapping_config.get("item_field")
+        item_wrapper = mapping_config.get("item_wrapper")
+        item_attributes = mapping_config.get("item_attributes", [])
+        total_field = mapping_config.get("total_field")
+        total_wrapper = mapping_config.get("total_wrapper")
+
+        if not item_field:
+            logger.warning(f"Skipping field mapping '{output_field_name}': missing 'item_field'")
+            continue
+
+        # Extract the field from each item in the array
+        extracted_values = []
+        for item in source_array:
+            if isinstance(item, dict) and item_field in item:
+                value = item[item_field]
+                if value is not None:
+                    # Wrap value with metadata if configured
+                    if item_wrapper or item_attributes:
+                        wrapped_value = {}
+
+                        # Add wrapper element name
+                        if item_wrapper:
+                            wrapped_value["__wrapper"] = item_wrapper
+
+                        # Extract attributes from source item
+                        if item_attributes:
+                            attrs = {}
+                            for attr_name in item_attributes:
+                                if attr_name in item and item[attr_name] is not None:
+                                    # Transform attribute name if transform config is provided
+                                    transformed_attr_name = attr_name
+                                    if transform_config_root and attr_name in transform_config_root:
+                                        attr_config = transform_config_root[attr_name]
+                                        if isinstance(attr_config, dict):
+                                            xml_transform = attr_config.get("xml_transform", {})
+                                            if xml_transform.get("type") == "attribute":
+                                                target_name = xml_transform.get("target")
+                                                if target_name:
+                                                    transformed_attr_name = target_name
+                                    attrs[transformed_attr_name] = item[attr_name]
+                            if attrs:
+                                wrapped_value["__attributes"] = attrs
+
+                        # Add the actual data
+                        if isinstance(value, dict):
+                            # Transform field names if transform config is provided
+                            if transform_config_root:
+                                value = _transform_nested_field_names(value, transform_config_root)
+                            wrapped_value.update(value)
+                        else:
+                            wrapped_value["value"] = value
+
+                        extracted_values.append(wrapped_value)
+                    else:
+                        extracted_values.append(value)
+
+        # Add total field if configured and available
+        if total_field:
+            total_path = total_field.split(".")
+            total_value = get_nested_value(source_data, total_path)
+            if total_value is not None:
+                # Wrap total value with metadata if configured
+                if total_wrapper:
+                    wrapped_total = {"__wrapper": total_wrapper}
+                    if isinstance(total_value, dict):
+                        # Transform field names if transform config is provided
+                        if transform_config_root:
+                            total_value = _transform_nested_field_names(
+                                total_value, transform_config_root
+                            )
+                        wrapped_total.update(total_value)
+                    else:
+                        wrapped_total["value"] = total_value
+                    extracted_values.append(wrapped_total)
+                else:
+                    extracted_values.append(total_value)
+
+        # Add to result if we have any values
+        if extracted_values:
+            result[output_field_name] = extracted_values
 
     return result if result else None
 
@@ -147,19 +327,24 @@ def evaluate_condition(condition: dict[str, Any], source_data: dict[str, Any]) -
 
 
 def apply_conditional_transform(
-    transform_config: dict[str, Any], source_data: dict[str, Any], field_path: list[str]
+    transform_config: dict[str, Any],
+    source_data: dict[str, Any],
+    field_path: list[str],
+    transform_config_root: dict[str, Any] | None = None,
 ) -> Any:
     """Apply conditional transformation logic.
 
     Supports:
     - one_to_many: Map array field to multiple XML elements
     - pivot_object: Restructure nested objects by pivoting dimensions
+    - array_decomposition: Transform row-oriented arrays to column-oriented structure
     - conditional_structure: Select different structures based on data conditions
 
     Args:
         transform_config: Conditional transformation configuration
         source_data: Source data for evaluation
         field_path: Current field path for context
+        transform_config_root: Root transform configuration for field name lookups
 
     Returns:
         Transformed value or None if conditions not met
@@ -229,6 +414,11 @@ def apply_conditional_transform(
 
     elif transform_type == "pivot_object":
         return _apply_pivot_object_transform(transform_config, source_data)
+
+    elif transform_type == "array_decomposition":
+        return _apply_array_decomposition_transform(
+            transform_config, source_data, transform_config_root
+        )
 
     else:
         raise ConditionalTransformationError(

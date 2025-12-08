@@ -87,11 +87,11 @@ export const InformationCard = ({
 
   const ApplicationInstructionsDownload = () => {
     return (
-      <div className="margin-top-4">
+      <div className="margin-bottom-1 margin-left-0">
         <dt className="usa-sr-only">
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
-        <dd>
+        <dd className="margin-left-0">
           {instructionsDownloadPath && (
             <Link href={instructionsDownloadPath}>
               <Button
@@ -111,7 +111,7 @@ export const InformationCard = ({
 
   const NoApplicationInstructionsDownload = () => {
     return (
-      <div className="margin-bottom-1">
+      <div className="margin-bottom-1 margin-left-0">
         <dt className="margin-right-1 text-bold">
           {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
@@ -123,7 +123,7 @@ export const InformationCard = ({
   const SpecialInstructions = () => {
     return (
       <div>
-        <dt className="usa-sr-only">{t("specialInstructionsLabel")}: </dt>
+        <dt className="usa-sr-only">{t("specialInstructionsLabel")}:</dt>
         <dd className="margin-right-1 text-bold text-orange">
           {t("specialInstructions")}
         </dd>
@@ -174,11 +174,6 @@ export const InformationCard = ({
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
             />
-            {applicationDetails.competition.competition_instructions.length ? (
-              <ApplicationInstructionsDownload />
-            ) : (
-              <NoApplicationInstructionsDownload />
-            )}
           </dl>
         </Grid>
 
@@ -200,19 +195,30 @@ export const InformationCard = ({
             </div>
             {!is_open ? <SpecialInstructions /> : null}
             <div className="margin-bottom-1">
-              <dt className="margin-right-1 text-bold">{t("statusLabel")}: </dt>
+              <dt className="margin-right-1 text-bold">{t("statusLabel")}:</dt>
               <dd className="margin-right-1 text-bold text-orange">
                 {applicationStatus()}
               </dd>
             </div>
-            {!applicationSubmitted && is_open && (
-              <SubmitApplicationButton
-                buttonText={t("submit")}
-                submitHandler={applicationSubmitHandler}
-                loading={submissionLoading}
-              />
-            )}
           </dl>
+        </Grid>
+
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          {applicationDetails.competition.competition_instructions.length ? (
+            <ApplicationInstructionsDownload />
+          ) : (
+            <NoApplicationInstructionsDownload />
+          )}
+        </Grid>
+
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          {!applicationSubmitted && is_open && (
+            <SubmitApplicationButton
+              buttonText={t("submit")}
+              submitHandler={applicationSubmitHandler}
+              loading={submissionLoading}
+            />
+          )}
         </Grid>
       </>
     );

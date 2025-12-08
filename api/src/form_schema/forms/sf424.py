@@ -185,11 +185,9 @@ FORM_JSON_SCHEMA = {
             "readOnly": True,
         },
         "organization_name": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Legal Name",
-            "description": "Enter the legal name of the applicant that will undertake the assistance activity.",
-            "minLength": 1,
-            "maxLength": 60,
+            "description": "Enter the legal name of the applicant that will undertake the assistance activity. This is the organization that has registered with the System for Award Management (SAM). Information on registering with SAM may be obtained by visiting SAM.gov.",
         },
         "employer_taxpayer_identification_number": {
             "type": "string",
@@ -199,11 +197,9 @@ FORM_JSON_SCHEMA = {
             "maxLength": 30,
         },
         "sam_uei": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
             "title": "SAM UEI",
             "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
-            "minLength": 12,
-            "maxLength": 12,
         },
         "applicant": {
             "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
@@ -252,10 +248,9 @@ FORM_JSON_SCHEMA = {
             "description": "Enter the fax Number.",
         },
         "email": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
             "title": "Email",
             "description": "Enter a valid email Address.",
-            "format": "email",
         },
         "applicant_type_code": {
             # NOTE: In the xml model, this is 3 separate fields, we joined them together
@@ -387,7 +382,7 @@ FORM_JSON_SCHEMA = {
         "additional_congressional_districts": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
             "title": "Additional Congressional Districts",
-            "description": "Additional Congressional Districts.",
+            "description": "Attach an additional list of Program/Project Congressional Districts if needed.",
         },
         "project_start_date": {
             "type": "string",

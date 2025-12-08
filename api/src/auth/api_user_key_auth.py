@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from apiflask import HTTPTokenAuth
 from sqlalchemy import select
@@ -8,15 +9,36 @@ import src.util.datetime_util as datetime_util
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
-from src.db.models.user_models import UserApiKey
+from src.db.models.user_models import User, UserApiKey
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
+
+class ApiUserKeyHttpTokenAuth(HTTPTokenAuth):
+    """Custom HTTPTokenAuth that provides typed access to the current user API key and user."""
+
+    def get_user_api_key(self) -> UserApiKey:
+        """Wrapper method around the current_user value to handle type issues.
+
+        Note that this value gets set based on whatever is returned from the method
+        you configure for @<your ApiUserKeyHttpTokenAuth obj>.verify_token
+        """
+        return cast(UserApiKey, self.current_user)
+
+    def get_user(self) -> User:
+        """Get the User associated with the current API key.
+
+        This is a convenience method since we typically only care about
+        the user, not the API key itself.
+        """
+        return self.get_user_api_key().user
+
+
 # Initialize the authorization context for API Gateway key authentication
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
-api_user_key_auth = HTTPTokenAuth(
+api_user_key_auth = ApiUserKeyHttpTokenAuth(
     "ApiKey", header="X-API-Key", security_scheme_name="ApiUserKeyAuth"
 )
 

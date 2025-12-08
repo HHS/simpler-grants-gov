@@ -96,6 +96,7 @@ FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
         LookupStr(FundingCategory.TRANSPORTATION, 24),
         LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
         LookupStr(FundingCategory.OTHER, 26),
+        LookupStr(FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS, 27),
     ]
 )
 
@@ -164,6 +165,10 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.SF424D, 9),
         LookupStr(FormType.OTHER_NARRATIVE_ATTACHMENT, 10),
         LookupStr(FormType.PROJECT_ABSTRACT, 11),
+        LookupStr(FormType.SUPPLEMENTARY_NEH_COVER_SHEET, 12),
+        LookupStr(FormType.GG_LOBBYING_FORM, 13),
+        LookupStr(FormType.EPA_FORM_4700_4, 14),
+        LookupStr(FormType.EPA_KEY_CONTACTS, 15),
     ]
 )
 
@@ -268,7 +273,7 @@ class LkOpportunityCategory(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkOpportunityCategory":
+    def from_lookup(cls, lookup: Lookup) -> LkOpportunityCategory:
         return LkOpportunityCategory(
             opportunity_category_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -282,7 +287,7 @@ class LkApplicantType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkApplicantType":
+    def from_lookup(cls, lookup: Lookup) -> LkApplicantType:
         return LkApplicantType(
             applicant_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -296,7 +301,7 @@ class LkFundingCategory(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFundingCategory":
+    def from_lookup(cls, lookup: Lookup) -> LkFundingCategory:
         return LkFundingCategory(
             funding_category_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -310,7 +315,7 @@ class LkFundingInstrument(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFundingInstrument":
+    def from_lookup(cls, lookup: Lookup) -> LkFundingInstrument:
         return LkFundingInstrument(
             funding_instrument_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -324,7 +329,7 @@ class LkOpportunityStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkOpportunityStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkOpportunityStatus:
         return LkOpportunityStatus(
             opportunity_status_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -338,7 +343,7 @@ class LkAgencyDownloadFileType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAgencyDownloadFileType":
+    def from_lookup(cls, lookup: Lookup) -> LkAgencyDownloadFileType:
         return LkAgencyDownloadFileType(
             agency_download_file_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -352,7 +357,7 @@ class LkAgencySubmissionNotificationSetting(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAgencySubmissionNotificationSetting":
+    def from_lookup(cls, lookup: Lookup) -> LkAgencySubmissionNotificationSetting:
         return LkAgencySubmissionNotificationSetting(
             agency_submission_notification_setting_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -367,7 +372,7 @@ class LkExternalUserType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkExternalUserType":
+    def from_lookup(cls, lookup: Lookup) -> LkExternalUserType:
         return LkExternalUserType(
             external_user_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -381,7 +386,7 @@ class LkExtractType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkExtractType":
+    def from_lookup(cls, lookup: Lookup) -> LkExtractType:
         return LkExtractType(
             extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -395,7 +400,7 @@ class LkJobStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkJobStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkJobStatus:
         return LkJobStatus(job_status_id=lookup.lookup_val, description=lookup.get_description())
 
 
@@ -407,7 +412,7 @@ class LkFormFamily(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFormFamily":
+    def from_lookup(cls, lookup: Lookup) -> LkFormFamily:
         return LkFormFamily(form_family_id=lookup.lookup_val, description=lookup.get_description())
 
 
@@ -419,7 +424,7 @@ class LkFormType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFormType":
+    def from_lookup(cls, lookup: Lookup) -> LkFormType:
         return LkFormType(form_type_id=lookup.lookup_val, description=lookup.get_description())
 
 
@@ -431,7 +436,7 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkCompetitionOpenToApplicant":
+    def from_lookup(cls, lookup: Lookup) -> LkCompetitionOpenToApplicant:
         return LkCompetitionOpenToApplicant(
             competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -445,7 +450,7 @@ class LkSamGovProcessingStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkSamGovProcessingStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkSamGovProcessingStatus:
         return LkSamGovProcessingStatus(
             sam_gov_processing_status_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -459,7 +464,7 @@ class LkSamGovExtractType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkSamGovExtractType":
+    def from_lookup(cls, lookup: Lookup) -> LkSamGovExtractType:
         return LkSamGovExtractType(
             sam_gov_extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -473,7 +478,7 @@ class LkSamGovImportType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkSamGovImportType":
+    def from_lookup(cls, lookup: Lookup) -> LkSamGovImportType:
         return LkSamGovImportType(
             sam_gov_import_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -487,7 +492,7 @@ class LkApplicationStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkApplicationStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkApplicationStatus:
         return LkApplicationStatus(
             application_status_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -501,7 +506,7 @@ class LkPrivilege(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkPrivilege":
+    def from_lookup(cls, lookup: Lookup) -> LkPrivilege:
         return LkPrivilege(privilege_id=lookup.lookup_val, description=lookup.get_description())
 
 
@@ -513,7 +518,7 @@ class LkRoleType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkRoleType":
+    def from_lookup(cls, lookup: Lookup) -> LkRoleType:
         return LkRoleType(role_type_id=lookup.lookup_val, description=lookup.get_description())
 
 
@@ -525,7 +530,7 @@ class LkApplicationAuditEvent(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkApplicationAuditEvent":
+    def from_lookup(cls, lookup: Lookup) -> LkApplicationAuditEvent:
         return LkApplicationAuditEvent(
             application_audit_event_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -539,5 +544,5 @@ class LkUserType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkUserType":
+    def from_lookup(cls, lookup: Lookup) -> LkUserType:
         return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())

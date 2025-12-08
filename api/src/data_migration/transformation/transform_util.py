@@ -84,6 +84,7 @@ FUNDING_CATEGORY_MAP = {
     "T": FundingCategory.TRANSPORTATION,
     "ACA": FundingCategory.AFFORDABLE_CARE_ACT,
     "O": FundingCategory.OTHER,
+    "EIC": FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS,
 }
 
 FUNDING_INSTRUMENT_MAP = {
@@ -124,8 +125,6 @@ def transform_opportunity(
     target_opportunity.category_explanation = source_opportunity.category_explanation
     target_opportunity.revision_number = source_opportunity.revision_number
     target_opportunity.modified_comments = source_opportunity.modified_comments
-    target_opportunity.publisher_user_id = source_opportunity.publisheruid
-    target_opportunity.publisher_profile_id = source_opportunity.publisher_profile_id
 
     # The legacy system doesn't actually have this value as a boolean. There are several
     # different letter codes. However, their API implementation also does this for their draft flag.
@@ -256,10 +255,6 @@ def transform_opportunity_summary(
     target_summary.agency_email_address = source_summary.ac_email_addr
     target_summary.agency_email_address_description = source_summary.ac_email_desc
     target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
-    target_summary.publisher_profile_id = source_summary.publisher_profile_id
-    target_summary.publisher_user_id = source_summary.publisheruid
-    target_summary.updated_by = source_summary.last_upd_id
-    target_summary.created_by = source_summary.creator_id
 
     target_summary.summary_description = source_summary.description
     target_summary.agency_code = source_summary.agency_code
@@ -308,8 +303,6 @@ def convert_opportunity_summary_applicant_type(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_applicant_type_id=source_applicant_type.legacy_applicant_type_id,
         applicant_type=applicant_type,
-        updated_by=source_applicant_type.last_upd_id,
-        created_by=source_applicant_type.creator_id,
     )
     transform_update_create_timestamp(
         source_applicant_type, target_applicant_type, log_extra=log_extra
@@ -338,8 +331,6 @@ def convert_opportunity_summary_funding_instrument(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_instrument_id=source_funding_instrument.legacy_funding_instrument_id,
         funding_instrument=funding_instrument,
-        updated_by=source_funding_instrument.last_upd_id,
-        created_by=source_funding_instrument.creator_id,
     )
 
     transform_update_create_timestamp(
@@ -369,8 +360,6 @@ def convert_opportunity_summary_funding_category(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_category_id=source_funding_category.legacy_funding_category_id,
         funding_category=funding_category,
-        updated_by=source_funding_category.last_upd_id,
-        created_by=source_funding_category.creator_id,
     )
 
     transform_update_create_timestamp(

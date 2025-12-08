@@ -94,9 +94,9 @@ class VuserAccountMixin:
     is_email_confirm_pending: Mapped[str | None]
     deactivated_date: Mapped[date | None]
     mobile_number: Mapped[str | None]
-    created_date: Mapped[datetime] = mapped_column(nullable=False)
+    created_date: Mapped[datetime | None]
     creator_id: Mapped[str | None]
-    last_upd_date: Mapped[datetime] = mapped_column(nullable=False)
+    last_upd_date: Mapped[datetime | None]
     last_upd_id: Mapped[str | None]
 
 

@@ -3,7 +3,7 @@ sprint_data AS
   (SELECT gh_sprint.id AS sprint_id,
           gh_sprint.project_id,
           gh_sprint.name AS sprint_name,
-          gh_sprint.end_date AS sprint_end_date
+          gh_sprint.end_date-1 AS sprint_end_date
    FROM gh_sprint
    INNER JOIN gh_project ON gh_project.id = gh_sprint.project_id
    WHERE {{sprint_name}}

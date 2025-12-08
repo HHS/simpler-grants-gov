@@ -15,8 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 def _is_attribute_metadata_key(field_name: str) -> bool:
-    """Check if a field name is an attribute metadata key."""
-    return field_name.startswith("__") and field_name.endswith("__attributes")
+    """Check if a field name is an attribute or other metadata key.
+
+    Metadata keys start with double underscores and include:
+    - __field__attributes: Field-specific attributes
+    - __root_attributes__: Root element attributes
+    - __wrapper: Wrapper element name for array items
+    """
+    return field_name.startswith("__")
 
 
 class XMLGenerationService:
@@ -74,11 +80,7 @@ class XMLGenerationService:
         xml_structure = xml_config.get("xml_structure", {})
         root_element_name = xml_structure.get("root_element", "SF424_4_0")
 
-        # Validate that version is present in xml_structure
-        if "version" not in xml_structure:
-            raise ValueError(
-                f"Missing required 'version' in xml_structure configuration for root element '{root_element_name}'"
-            )
+        # Version is optional (SF-424 uses it, SF-424A does not)
 
         # Get namespace configuration
         namespace_config = xml_config.get("namespaces", {})
@@ -115,15 +117,16 @@ class XMLGenerationService:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
 
-        # Get version from config
+        # Get version and namespace prefix from config
         xml_config = (transform_config or {}).get("_xml_config", {})
         xml_structure = xml_config.get("xml_structure", {})
         form_version = xml_structure.get("version")
+        root_namespace_prefix = xml_structure.get("root_namespace_prefix", root_element_name)
 
         # Create namespace map for lxml with all required namespaces
-        # Use root element name as the default namespace prefix (makes it generic for any form)
+        # Use configured namespace prefix for root element (or fall back to root element name)
         nsmap = {
-            root_element_name: default_namespace,
+            root_namespace_prefix: default_namespace,
         }
 
         # Add additional namespaces
@@ -140,10 +143,31 @@ class XMLGenerationService:
             root_element_with_namespace = f"{{{default_namespace}}}{root_element_name}"
             root = lxml_etree.Element(root_element_with_namespace, nsmap=nsmap)
 
-            # Add FormVersion attribute with proper namespace prefix
-            root.set(f"{{{default_namespace}}}FormVersion", form_version)
+            # Add FormVersion attribute if present (SF-424 uses this, SF-424A does not)
+            if form_version:
+                root.set(f"{{{default_namespace}}}FormVersion", form_version)
         else:
             root = lxml_etree.Element(root_element_name, nsmap=nsmap)
+
+        # Add root attributes from transformed data (preserved by transformer)
+        # Root attributes are stored in a special key by the transformer
+        root_attr_values = data.get("__root_attributes__", {})
+        if root_attr_values:
+            for attr_name, attr_value in root_attr_values.items():
+                # Determine namespace for the attribute
+                if ":" in attr_name:
+                    # Attribute has explicit namespace prefix (e.g., "glob:coreSchemaVersion")
+                    namespace_prefix, attr_local_name = attr_name.split(":", 1)
+                    if namespace_prefix in nsmap:
+                        attr_qualified_name = f"{{{nsmap[namespace_prefix]}}}{attr_local_name}"
+                    else:
+                        attr_qualified_name = attr_name
+                else:
+                    # Use default namespace for the attribute
+                    attr_qualified_name = f"{{{default_namespace}}}{attr_name}"
+
+                if attr_value is not None:
+                    root.set(attr_qualified_name, str(attr_value))
 
         # Add data elements with namespace support in correct order
         # Get XSD URL from config for dynamic ordering
@@ -165,7 +189,7 @@ class XMLGenerationService:
             transform_config or {},
             xsd_url,
             attachment_field_names,
-            root_element_name,
+            root_namespace_prefix,  # Use namespace prefix for lookups in nsmap
         )
 
         # Add attachment elements if present in data
@@ -266,7 +290,9 @@ class XMLGenerationService:
                 # Handle conditional transforms (e.g., one-to-many)
                 if xml_transform.get("type") == "conditional":
                     conditional_transform = xml_transform.get("conditional_transform", {})
-                    if conditional_transform.get("type") == "one_to_many":
+                    conditional_type = conditional_transform.get("type")
+
+                    if conditional_type == "one_to_many":
                         # Expand one-to-many pattern into actual field names
                         target_pattern = conditional_transform.get("target_pattern")
                         max_count = conditional_transform.get("max_count", 10)
@@ -274,6 +300,13 @@ class XMLGenerationService:
                             for i in range(1, max_count + 1):
                                 field_name = target_pattern.format(index=i)
                                 element_order.append(field_name)
+                    elif conditional_type == "array_decomposition" and not xml_transform.get(
+                        "target"
+                    ):
+                        # Array decomposition without target spreads fields - add output field names
+                        field_mappings = conditional_transform.get("field_mappings", {})
+                        for output_field_name in field_mappings.keys():
+                            element_order.append(output_field_name)
                     else:
                         # Other conditional types - use target if available
                         target = xml_transform.get("target")
@@ -300,7 +333,115 @@ class XMLGenerationService:
         attributes: dict[str, str] | None = None,
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
-        if isinstance(value, dict):
+        if isinstance(value, list):
+            # Handle arrays - create wrapper element first, then add items
+            if field_name in namespace_fields:
+                namespace_prefix = namespace_fields[field_name]
+                namespace_uri = nsmap.get(namespace_prefix, "")
+                element_name = f"{{{namespace_uri}}}{field_name}"
+                wrapper_element = lxml_etree.SubElement(parent, element_name)
+            else:
+                default_namespace_uri = (
+                    nsmap.get(root_element_name or "", "") if root_element_name else ""
+                )
+                if default_namespace_uri:
+                    element_name = f"{{{default_namespace_uri}}}{field_name}"
+                    wrapper_element = lxml_etree.SubElement(parent, element_name)
+                else:
+                    wrapper_element = lxml_etree.SubElement(parent, field_name)
+
+            # Add each item in the array
+            for item in value:
+                if isinstance(item, dict):
+                    # Check for __wrapper and __attributes metadata
+                    item_wrapper = item.get("__wrapper")
+                    item_attributes = item.get("__attributes", {})
+
+                    # Create a copy of item without metadata keys
+                    item_data = {k: v for k, v in item.items() if not k.startswith("__")}
+
+                    # Use wrapper as element name, or default to field_name
+                    item_element_name = item_wrapper if item_wrapper else field_name
+
+                    # Create the item element
+                    if item_element_name in namespace_fields:
+                        namespace_prefix = namespace_fields[item_element_name]
+                        namespace_uri = nsmap.get(namespace_prefix, "")
+                        full_element_name = f"{{{namespace_uri}}}{item_element_name}"
+                        item_element = lxml_etree.SubElement(wrapper_element, full_element_name)
+                    else:
+                        default_namespace_uri = (
+                            nsmap.get(root_element_name or "", "") if root_element_name else ""
+                        )
+                        if default_namespace_uri:
+                            full_element_name = f"{{{default_namespace_uri}}}{item_element_name}"
+                            item_element = lxml_etree.SubElement(wrapper_element, full_element_name)
+                        else:
+                            item_element = lxml_etree.SubElement(wrapper_element, item_element_name)
+
+                    # Add attributes to the item element
+                    if item_attributes:
+                        for attr_name, attr_value in item_attributes.items():
+                            # Handle namespaced attributes
+                            if ":" in attr_name:
+                                prefix, local_name = attr_name.split(":", 1)
+                                if prefix in nsmap:
+                                    attr_qname = f"{{{nsmap[prefix]}}}{local_name}"
+                                    item_element.set(attr_qname, str(attr_value))
+                                else:
+                                    item_element.set(attr_name, str(attr_value))
+                            else:
+                                # For non-namespaced attributes, add namespace prefix
+                                if root_element_name and root_element_name in nsmap:
+                                    attr_qname = f"{{{nsmap[root_element_name]}}}{attr_name}"
+                                    item_element.set(attr_qname, str(attr_value))
+                                else:
+                                    item_element.set(attr_name, str(attr_value))
+
+                    # Add the data fields as child elements
+                    for data_field, data_value in item_data.items():
+                        if data_value is not None:
+                            self._add_lxml_element_to_parent(
+                                item_element,
+                                data_field,
+                                data_value,
+                                nsmap,
+                                namespace_fields,
+                                xsd_url,
+                                transform_config,
+                                root_element_name,
+                            )
+                else:
+                    # Simple value in array - create element with field_name
+                    if field_name in namespace_fields:
+                        namespace_prefix = namespace_fields[field_name]
+                        namespace_uri = nsmap.get(namespace_prefix, "")
+                        element_name = f"{{{namespace_uri}}}{field_name}"
+                        item_element = lxml_etree.SubElement(wrapper_element, element_name)
+                    else:
+                        default_namespace_uri = (
+                            nsmap.get(root_element_name or "", "") if root_element_name else ""
+                        )
+                        if default_namespace_uri:
+                            element_name = f"{{{default_namespace_uri}}}{field_name}"
+                            item_element = lxml_etree.SubElement(wrapper_element, element_name)
+                        else:
+                            item_element = lxml_etree.SubElement(wrapper_element, field_name)
+                    item_element.text = str(item)
+
+        elif isinstance(value, dict):
+            # Check if value contains __attributes metadata
+            # nested_object transforms with an "attributes" config. This allows the transform
+            # configuration to specify which source fields should become XML attributes on the
+            # parent element. For example, in SF-LLL, entity_type becomes the ReportEntityType
+            # attribute on the ReportEntity element.
+            #
+            # We only use embedded attributes if none were passed as a parameter, giving
+            # explicit parameters precedence over metadata.
+            value_attributes = value.get("__attributes")
+            if value_attributes and not attributes:
+                attributes = value_attributes
+
             # Create nested element for dictionary values
             if field_name in namespace_fields:
                 # Use configured namespace
@@ -331,7 +472,27 @@ class XMLGenerationService:
                         else:
                             nested_element.set(attr_name, str(attr_value))
                     else:
-                        nested_element.set(attr_name, str(attr_value))
+                        # Attribute without explicit namespace prefix
+                        # Use the same namespace as the parent element
+                        if field_name in namespace_fields:
+                            # Element has explicit namespace - use it for the attribute
+                            namespace_prefix = namespace_fields[field_name]
+                            namespace_uri = nsmap.get(namespace_prefix, "")
+                            if namespace_uri:
+                                attr_qname = f"{{{namespace_uri}}}{attr_name}"
+                                nested_element.set(attr_qname, str(attr_value))
+                            else:
+                                nested_element.set(attr_name, str(attr_value))
+                        else:
+                            # Use default namespace if available
+                            default_namespace_uri = (
+                                nsmap.get(root_element_name or "", "") if root_element_name else ""
+                            )
+                            if default_namespace_uri:
+                                attr_qname = f"{{{default_namespace_uri}}}{attr_name}"
+                                nested_element.set(attr_qname, str(attr_value))
+                            else:
+                                nested_element.set(attr_name, str(attr_value))
 
             # Special handling for Applicant address to ensure correct sequence order
             if field_name == "Applicant":
@@ -348,6 +509,10 @@ class XMLGenerationService:
                 )
             else:
                 for nested_field, nested_value in value.items():
+                    # Skip special metadata keys (like __wrapper, __attributes, etc.)
+                    if nested_field.startswith("__"):
+                        continue
+
                     if nested_value is not None or nested_value == "INCLUDE_NULL_MARKER":
                         # Check for attributes for nested fields
                         nested_attr_key = f"__{nested_field}__attributes"
@@ -488,8 +653,12 @@ class XMLGenerationService:
         # Get element order from transform configuration
         sf424_order = self._get_element_order_from_config(transform_config)
 
-        # Add elements in the correct order (skip attachment fields)
+        # Add elements in the correct order (skip attachment fields and special keys)
         for field_name in sf424_order:
+            # Skip special metadata keys (like __root_attributes__)
+            if field_name.startswith("__"):
+                continue
+
             if field_name in data and field_name not in attachment_fields:
                 field_value = data[field_name]
                 if field_value is not None:

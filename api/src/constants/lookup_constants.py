@@ -95,6 +95,9 @@ class FundingCategory(StrEnum):
     TRANSPORTATION = "transportation"  # T
     AFFORDABLE_CARE_ACT = "affordable_care_act"  # ACA
     OTHER = "other"  # O
+    ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
+        "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
+    )
 
 
 class FundingInstrument(StrEnum):
@@ -153,6 +156,13 @@ class FormType(StrEnum):
     PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
     PROJECT_ABSTRACT = "ProjectAbstract"
     CD511 = "CD511"
+
+    SUPPLEMENTARY_NEH_COVER_SHEET = "SupplementaryNEHCoverSheet"
+
+    GG_LOBBYING_FORM = "GGLobbyingForm"
+
+    EPA_FORM_4700_4 = "EPAForm4700-4"
+    EPA_KEY_CONTACTS = "EPAKeyContacts"
 
 
 class CompetitionOpenToApplicant(StrEnum):
@@ -240,6 +250,18 @@ class OrganizationInvitationStatus(StrEnum):
     REJECTED = "rejected"
     EXPIRED = "expired"
     PENDING = "pending"
+
+
+class LegacyUserStatus(StrEnum):
+    MEMBER = "member"
+    PENDING_INVITATION = "pending_invitation"
+    AVAILABLE = "available"
+
+
+class LegacyProfileType(StrEnum):
+    """Legacy Oracle profile types from tuser_profile table"""
+
+    ORGANIZATION_APPLICANT = "4"
 
 
 class ApplicationAuditEvent(StrEnum):

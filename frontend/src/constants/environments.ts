@@ -21,6 +21,7 @@ const {
   FEATURE_USER_ADMIN_OFF,
   FEATURE_MANAGE_USERS_OFF,
   AUTH_LOGIN_URL,
+  AUTH_EXPIRATION_TIME,
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
   NEXT_RUNTIME,
@@ -65,6 +66,7 @@ export const environment: { [key: string]: string } = {
   API_URL: API_URL || "",
   AUTH_LOGIN_URL: AUTH_LOGIN_URL || "",
   API_AUTH_TOKEN: API_AUTH_TOKEN || "",
+  AUTH_EXPIRATION_TIME: AUTH_EXPIRATION_TIME || "0",
   API_GW_AUTH: API_GW_AUTH || "",
   GOOGLE_TAG_MANAGER_ID: "GTM-MV57HMHS",
   ENVIRONMENT,
@@ -75,4 +77,6 @@ export const environment: { [key: string]: string } = {
   NEW_RELIC_ENABLED: NEW_RELIC_ENABLED || "false",
   NEXT_RUNTIME: NEXT_RUNTIME || "",
   IS_CI: CI || "false",
+  LOCAL_DEV:
+    ENVIRONMENT === "local" && API_URL?.includes("localhost") ? "true" : "",
 };

@@ -31,7 +31,6 @@ TABLES_TO_LOAD = [
     "tfundinstr_synopsis",
     "tgroups",
     "tsynopsisattachment",
-    "tuser_account",
     "tuser_account_mapper",
     "tsubscription",
     "tsubscription_search",
@@ -39,6 +38,8 @@ TABLES_TO_LOAD = [
     "tcompetition",
     "tinstructions",
     "tcertificates",
+    "vuser_account",
+    "tuser_profile",
 ]
 
 
@@ -58,9 +59,7 @@ class LoadOracleDataTask(src.task.task.Task):
             tables_to_load = TABLES_TO_LOAD
 
         # Initialize columns_to_exclude if None
-        self.columns_to_exclude = {
-            "tuser_account": ["email_address"],
-        }
+        self.columns_to_exclude: dict[str, list[str]] = {"tcertificates": ["is_selfsigned"]}
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
         staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}

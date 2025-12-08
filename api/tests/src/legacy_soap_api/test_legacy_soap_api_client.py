@@ -5,15 +5,20 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from apiflask import HTTPError
 from botocore.exceptions import ClientError
+from sqlalchemy import update
 
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.user_models import AgencyUser, LegacyCertificate
 from src.legacy_soap_api.applicants.schemas import (
     CFDADetails,
     GetOpportunityListResponse,
     OpportunityDetails,
 )
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
@@ -22,9 +27,13 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.util.datetime_util import parse_grants_gov_date
+from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
+    AgencyFactory,
     ApplicationSubmissionFactory,
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
     CompetitionFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -37,6 +46,13 @@ from tests.util.minifiers import minify_xml
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
+
+
+@pytest.fixture(autouse=True)
+def cleanup_agencies(db_session):
+    cascade_delete_from_db_table(db_session, AgencyUser)
+    db_session.execute(update(LegacyCertificate).values(agency_id=None))
+    db_session.commit()
 
 
 def get_simpler_applicants_soap_client(request_data, db_session):
@@ -360,7 +376,15 @@ class TestSimplerSOAPGetApplicationZip:
     def test_get_simpler_soap_response_returns_mtom_xml(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
         submission = ApplicationSubmissionFactory.create()
+        application_user = ApplicationUserFactory.create(
+            application=submission.application, user=user
+        )
+        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
@@ -382,6 +406,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
@@ -406,11 +431,52 @@ class TestSimplerSOAPGetApplicationZip:
                 "MIME-Version": "1.0",
             }
 
+    def test_get_simpler_soap_response_returns_error_if_certificate_user_does_not_have_permissions(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        submission = ApplicationSubmissionFactory.create()
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        agency = AgencyFactory.create()
+        wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
+        user, _, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
+        soap_request = SOAPRequest(
+            data=request_xml_bytes,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        with pytest.raises(HTTPError):
+            client.get_simpler_soap_response(mock_proxy_response)
+
     def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
         submission = ApplicationSubmissionFactory.create()
+        agency = AgencyFactory()
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        application_user = ApplicationUserFactory.create(
+            application=submission.application, user=user
+        )
+        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -430,6 +496,7 @@ class TestSimplerSOAPGetApplicationZip:
             method="POST",
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
         )
         mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)

@@ -19,6 +19,9 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Prasanthreddy Arikatla
 * Jakob Pederson
 * Erin Pattison
+* Glen Blosser
+* Dao Nguyen
+* Nathan Stricker
 
 ## Content and Design
 
@@ -47,5 +50,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Chris Kuryak
 * Eric Serrato
 * Glenn Grieves
+* Brian Lee
+* Kevin Lyu
 
 

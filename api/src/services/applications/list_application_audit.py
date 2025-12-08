@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import Select
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
@@ -12,12 +13,34 @@ from src.db.models.competition_models import ApplicationAudit, ApplicationForm, 
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
+from src.search.search_models import StrSearchFilter
 from src.services.applications.get_application import get_application
 from src.services.service_utils import apply_sorting
 
 
+class ApplicationAuditFilters(BaseModel):
+    application_audit_event: StrSearchFilter | None
+
+
 class ApplicationAuditRequest(BaseModel):
+    filters: ApplicationAuditFilters | None = None
     pagination: PaginationParams
+
+
+def apply_filters(stmt: Select, filters: ApplicationAuditFilters | None) -> Select:
+    """Apply filters from the request to the DB query for application audit events"""
+    if filters is None:
+        return stmt
+
+    if (
+        filters.application_audit_event is not None
+        and filters.application_audit_event.one_of is not None
+    ):
+        stmt = stmt.where(
+            ApplicationAudit.application_audit_event.in_(filters.application_audit_event.one_of)
+        )
+
+    return stmt
 
 
 def list_application_audit(
@@ -53,6 +76,7 @@ def list_application_audit(
             selectinload(ApplicationAudit.target_attachment),
         )
     )
+    stmt = apply_filters(stmt, params.filters)
     stmt = apply_sorting(stmt, ApplicationAudit, params.pagination.sort_order)
 
     # Paginate the results

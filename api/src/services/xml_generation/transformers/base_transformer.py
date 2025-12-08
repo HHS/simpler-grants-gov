@@ -1,6 +1,7 @@
 """Recursive transformer for converting JSON data to XML-ready format."""
 
 import logging
+import re
 from typing import Any
 
 from src.util.dict_util import get_nested_value
@@ -9,6 +10,9 @@ from ..conditional_transformers import apply_conditional_transform
 from ..value_transformers import apply_value_transformation
 
 logger = logging.getLogger(__name__)
+
+# Pattern for field references: snake_case identifiers (lowercase letters, digits, underscores)
+FIELD_REFERENCE_PATTERN = re.compile(r"^[a-z_][a-z0-9_]*$")
 
 
 class RecursiveXMLTransformer:
@@ -32,6 +36,38 @@ class RecursiveXMLTransformer:
 
         # Start recursive transformation from root
         result = self._process_transform_rules(source_data, self.transform_config, [])
+
+        # Preserve root attribute values for XML generation
+        # Root attributes are defined in _xml_config.xml_structure.root_attributes
+        # and map attribute names to source field names or static values
+        xml_config = self.transform_config.get("_xml_config", {})
+        xml_structure = xml_config.get("xml_structure", {})
+        root_attributes = xml_structure.get("root_attributes", {})
+
+        if root_attributes:
+            # Extract attribute values from source data
+            root_attr_values = {}
+            for attr_name, source_field_or_value in root_attributes.items():
+                if isinstance(source_field_or_value, str):
+                    # Determine if it's a field reference or static value
+                    # Field references are snake_case identifiers (only lowercase, digits, underscores)
+                    # Static values can have dots, hyphens, uppercase, or other characters
+                    is_field_reference = bool(FIELD_REFERENCE_PATTERN.match(source_field_or_value))
+
+                    if is_field_reference and source_field_or_value in source_data:
+                        # It's a field reference and exists - get value from source data
+                        root_attr_values[attr_name] = source_data[source_field_or_value]
+                    elif not is_field_reference:
+                        # It's a static value - always include it
+                        root_attr_values[attr_name] = source_field_or_value
+                    # else: It's a field reference but doesn't exist in data - skip it
+                else:
+                    # Non-string values are static values
+                    root_attr_values[attr_name] = source_field_or_value
+
+            # Store root attributes in result with special key
+            if root_attr_values:
+                result["__root_attributes__"] = root_attr_values
 
         logger.info(
             f"Transformed {len(result)} fields from {len(source_data)} input fields using recursive pattern"
@@ -204,16 +240,24 @@ class RecursiveXMLTransformer:
             conditional_transform = transform_rule.get("conditional_transform", {})
             conditional_type = conditional_transform.get("type")
 
-            # Handle one-to-many mappings that return dictionaries
+            # Handle transforms that return dictionaries to be spread at current level
+            # - one_to_many: Always spreads (never has a target)
+            # - array_decomposition: Spreads only when no target is specified (for XSD compliance)
             if (
                 isinstance(transformed_value, dict)
                 and transform_type == "conditional"
-                and conditional_type == "one_to_many"
+                and (
+                    conditional_type == "one_to_many"
+                    or (
+                        conditional_type == "array_decomposition"
+                        and not transform_rule.get("target")
+                    )
+                )
             ):
-                # Add all key-value pairs from one-to-many result
+                # Add all key-value pairs from the result (spread them at current level)
                 result.update(transformed_value)
                 logger.debug(
-                    f"One-to-many transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
+                    f"{conditional_type} transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
                 )
             # Handle conditional_structure that returns nested objects
             elif (
@@ -233,10 +277,6 @@ class RecursiveXMLTransformer:
                 target_field = transform_rule["target"]
                 result[target_field] = transformed_value
 
-                # Handle attributes for nested objects only
-                if transform_type == "nested_object" and "attributes" in transform_rule:
-                    result[f"__{target_field}__attributes"] = transform_rule["attributes"]
-
                 logger.debug(
                     f"Transformed {'.'.join(current_path)} -> {target_field}: {source_value}"
                 )
@@ -252,8 +292,9 @@ class RecursiveXMLTransformer:
             conditional_config = transform_rule.get("conditional_transform")
             if conditional_config:
                 # Use the stored root source data for condition evaluation
+                # Pass root transform config for nested field name transformations
                 conditional_result = apply_conditional_transform(
-                    conditional_config, self.root_source_data, path
+                    conditional_config, self.root_source_data, path, self.transform_config
                 )
 
                 # Check if this is a conditional_structure result
@@ -275,11 +316,35 @@ class RecursiveXMLTransformer:
                 return None
 
         elif transform_type == "nested_object":
-            # For nested objects, we need to process the child rules
+            # For nested objects, we need to process the child rules recursively
             if not isinstance(source_value, dict):
                 return None
 
             nested_result = {}
+
+            # Process attributes if specified
+            if "attributes" in transform_rule:
+                attributes = {}
+                for attr_name, attr_source_path in transform_rule["attributes"].items():
+                    # attr_source_path can be a simple field name, a dotted path, or a static/literal value
+                    if "." in attr_source_path:
+                        # It's a dotted path - not supported yet for parent attributes
+                        # For now, just get from current source_value
+                        path_parts = attr_source_path.split(".")
+                        if path_parts[0] in source_value:
+                            attributes[attr_name] = source_value[path_parts[0]]
+                    elif (
+                        attr_source_path in source_value
+                        and source_value[attr_source_path] is not None
+                    ):
+                        # It's a field name in source data - use its value
+                        attributes[attr_name] = source_value[attr_source_path]
+                    else:
+                        # Not a field in source data - treat as static/literal value
+                        attributes[attr_name] = attr_source_path
+
+                if attributes:
+                    nested_result["__attributes"] = attributes
 
             # Check if nested_fields is defined in the transform_rule
             nested_fields = transform_rule.get("nested_fields")
@@ -290,7 +355,15 @@ class RecursiveXMLTransformer:
                     if isinstance(child_config, dict) and "xml_transform" in child_config:
                         child_transform = child_config["xml_transform"]
                         if child_key in source_value and source_value[child_key] is not None:
-                            nested_result[child_transform["target"]] = source_value[child_key]
+                            child_value = source_value[child_key]
+
+                            # Recursively process nested transformations
+                            transformed_child = self._apply_transform_rule(
+                                child_value, child_transform, child_config, path + [child_key]
+                            )
+
+                            if transformed_child is not None:
+                                nested_result[child_transform["target"]] = transformed_child
             else:
                 # Nested fields may be siblings of xml_transform in full_rule_config
                 for child_key, child_config in full_rule_config.items():
@@ -299,7 +372,15 @@ class RecursiveXMLTransformer:
                     if isinstance(child_config, dict) and "xml_transform" in child_config:
                         child_transform = child_config["xml_transform"]
                         if child_key in source_value and source_value[child_key] is not None:
-                            nested_result[child_transform["target"]] = source_value[child_key]
+                            child_value = source_value[child_key]
+
+                            # Recursively process nested transformations
+                            transformed_child = self._apply_transform_rule(
+                                child_value, child_transform, child_config, path + [child_key]
+                            )
+
+                            if transformed_child is not None:
+                                nested_result[child_transform["target"]] = transformed_child
 
             return nested_result if nested_result else None
         else:
