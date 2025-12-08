@@ -63,4 +63,4 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
   ]);
 };
 
-initializeSessionSecrets();
+// initializeSessionSecrets();
