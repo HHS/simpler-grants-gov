@@ -60,20 +60,23 @@ export const getOrganizationUsers = async (
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/users`,
     additionalHeaders: ssgToken,
+    body: {
+      pagination: {
+        page_offset: 1,
+        page_size: 5000,
+        sort_order: [
+          {
+            order_by: "email",
+            sort_direction: "ascending",
+          },
+        ],
+      },
+    },
   });
 
   const json = (await resp.json()) as { data: UserDetail[] };
 
-  // Sort by email, this will be temp until we get the results from the backend with sorting applied
-  const sorted = [...json.data].sort((first, second) => {
-    const a = (first.email ?? "").toLowerCase();
-    const b = (second.email ?? "").toLowerCase();
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
-  });
-
-  return sorted;
+  return json.data;
 };
 
 export const getOrganizationRoles = async (
