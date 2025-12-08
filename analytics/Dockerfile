@@ -95,6 +95,10 @@ COPY --from=base /analytics/.venv /analytics/.venv
 COPY --from=base /analytics/newrelic.ini /analytics/newrelic.ini
 COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
 
+# Copy Makefile and config directory for scheduled jobs that use make targets
+COPY Makefile /analytics/Makefile
+COPY config /analytics/config
+
 ENV PATH="/analytics/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
     TMPDIR="/tmp" \
