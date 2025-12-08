@@ -1,14 +1,13 @@
-import { Metadata } from "next";
-import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
-import { LocalizedPageProps } from "src/types/intl";
-
-import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
+import { LocalizedPageProps } from "src/types/intl";
+import { Metadata } from "next";
 import { UserProfileForm } from "src/components/user/UserProfileForm";
+import { getSession } from "src/services/auth/session";
+import { getTranslations } from "next-intl/server";
+import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
+import { redirect } from "next/navigation";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
 export async function generateMetadata({
   params,
@@ -16,14 +15,14 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("UserAccount.pageTitle"),
+    title: t("Settings.pageTitle"),
     description: t("Index.metaDescription"),
   };
   return meta;
 }
 
-async function UserAccount() {
-  const t = await getTranslations("UserAccount");
+async function Settings() {
+  const t = await getTranslations("Settings");
 
   const session = await getSession();
   if (!session?.email) {
@@ -40,7 +39,7 @@ async function UserAccount() {
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>{t("title")}</h1>
+      <h1 className="margin-bottom-6">{t("title")}</h1>
       {userDetails ? (
         <UserProfileForm userDetails={userDetails} />
       ) : (
@@ -50,6 +49,6 @@ async function UserAccount() {
   );
 }
 
-export default withFeatureFlag<object, never>(UserAccount, "userAdminOff", () =>
+export default withFeatureFlag<object, never>(Settings, "userAdminOff", () =>
   redirect("/maintenance"),
 );
