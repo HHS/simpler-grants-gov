@@ -2,10 +2,17 @@ import { render, screen } from "@testing-library/react";
 import OrganizationsPage from "src/app/[locale]/(base)/organizations/page";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
+import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { UserDetail } from "src/types/userTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-import { FunctionComponent } from "react";
+import { FunctionComponent, ReactNode } from "react";
+
+type onEnabled = (props: LocalizedPageProps) => ReactNode;
+
+// const withFeatureFlagMock = jest.fn() as jest.Mock<
+//   FeatureFlaggedPageWrapper<LocalizedPageProps, ReactNode>
+// >;
 
 const withFeatureFlagMock = jest.fn();
 const redirectMock = jest.fn();
@@ -50,10 +57,15 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
     (
       WrappedComponent: FunctionComponent<LocalizedPageProps>,
       featureFlagName: string,
-      onEnabled: () => void,
+      onEnabled: onEnabled,
     ) =>
-    (props) =>
-      withFeatureFlagMock(
+    (props: LocalizedPageProps) =>
+      (
+        withFeatureFlagMock as FeatureFlaggedPageWrapper<
+          LocalizedPageProps,
+          ReactNode
+        >
+      )(
         WrappedComponent,
         featureFlagName,
         onEnabled,
@@ -74,8 +86,8 @@ describe("Organizations page feature flag wiring", () => {
     withFeatureFlagMock.mockImplementation(
       (
         WrappedComponent: FunctionComponent<LocalizedPageProps>,
-        _featureFlagName,
-        _onEnabled,
+        _featureFlagName: "",
+        _onEnabled: () => void,
       ) =>
         (props: { params: Promise<{ locale: string }> }) =>
           WrappedComponent(props) as unknown,
@@ -90,8 +102,12 @@ describe("Organizations page feature flag wiring", () => {
 
     expect(withFeatureFlagMock).toHaveBeenCalledTimes(1);
 
-    const [wrappedComponent, flagName, onEnabled] =
-      withFeatureFlagMock.mock.calls[0];
+    const [wrappedComponent, flagName, onEnabled] = withFeatureFlagMock.mock
+      .calls[0] as [
+      FunctionComponent<LocalizedPageProps>,
+      string,
+      (props: LocalizedPageProps) => ReactNode,
+    ];
 
     expect(flagName).toBe("manageUsersOff");
     expect(typeof wrappedComponent).toBe("function");
