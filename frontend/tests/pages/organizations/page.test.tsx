@@ -2,10 +2,13 @@ import { render, screen } from "@testing-library/react";
 import OrganizationsPage from "src/app/[locale]/(base)/organizations/page";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
+import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { UserDetail } from "src/types/userTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-import { FunctionComponent } from "react";
+import { FunctionComponent, ReactNode } from "react";
+
+type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 const redirectMock = jest.fn();
 
@@ -61,11 +64,15 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
     (
       WrappedComponent: FunctionComponent<LocalizedPageProps>,
       featureFlagName: string,
-      onEnabled: () => void,
+      onEnabled: onEnabled,
     ) =>
     (props: LocalizedPageProps) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      withFeatureFlagMock(
+      (
+        withFeatureFlagMock as FeatureFlaggedPageWrapper<
+          LocalizedPageProps,
+          ReactNode
+        >
+      )(
         WrappedComponent,
         featureFlagName,
         onEnabled,
@@ -83,6 +90,15 @@ describe("Organizations page feature flag wiring", () => {
       user_id: "user-1",
     });
     organizations.mockResolvedValue([]);
+    withFeatureFlagMock.mockImplementation(
+      (
+        WrappedComponent: FunctionComponent<LocalizedPageProps>,
+        _featureFlagName: "",
+        _onEnabled: () => void,
+      ) =>
+        (props: { params: Promise<{ locale: string }> }) =>
+          WrappedComponent(props) as unknown,
+    );
   });
 
   it("check OrganizationsPage redirects to maintenance if manageUsersOff is enabled", async () => {
@@ -95,9 +111,9 @@ describe("Organizations page feature flag wiring", () => {
 
     const [wrappedComponent, flagName, onEnabled] = withFeatureFlagMock.mock
       .calls[0] as [
-      wrappedComponent: FunctionComponent<LocalizedPageProps>,
-      flagName: string,
-      onEnabled: () => void,
+      FunctionComponent<LocalizedPageProps>,
+      string,
+      (props: LocalizedPageProps) => ReactNode,
     ];
 
     expect(flagName).toBe("manageUsersOff");
