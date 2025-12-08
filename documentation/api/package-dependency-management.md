@@ -146,12 +146,19 @@ for any breaking changes of features you may use
 ## Upgrade Steps
 To upgrade the Python version, make changes in the following places:
 1. Local Python version (see more about managing local Python versions in [development](./development.md))
-2. [Dockerfile](/api/Dockerfile)
-    search for the line `FROM python:3.12-slim as base` - supported versions can be found on [Dockerhub](https://hub.docker.com/_/python)
-3. [pyproject.toml](/api/pyproject.toml)
+2. [Dockerfile](/api/docker-python-base)
+    search for the line `ARG PYTHON_VERSION` and `ARG PY_MM` - supported versions can be found on the official python: [releases page](https://www.python.org/downloads/) The PYTHON_VERSION should include the full version number <major.minor.patch> and the PY_MM should only include the <major.minor> format. 
+3. Build the new python base image from [github actions](https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-python-base-image.yml) and retrieve the new image tag from the [github packages](https://github.com/HHS/simpler-grants-gov/pkgs/container/python-base-image) The image tag should have the github branch name and the commit hash associated with it. 
+2. Update the [Dockerfile](api/Dockerfile) base image tag on line #1. 
+4. [pyproject.toml](/api/pyproject.toml)
     search for the line
     ```toml
     [tool.poetry.dependencies]
     python = "~3.12"
     ```
    Then run `poetry lock --no-update` to update the [poetry.lock](/api/poetry.lock) file.
+5. Ensure linters and formatters are passing by running the commands below in the `api` directory. 
+```
+make format 
+make lint
+```

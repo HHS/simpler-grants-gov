@@ -1583,6 +1583,7 @@ export const messages = {
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
       errorHeading: "Error",
+      errorMessage: "Error inviting user, please try again",
       description:
         "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
       inputs: {
@@ -1597,7 +1598,7 @@ export const messages = {
       },
       button: {
         label: "Add to organization",
-        success: "User added to pending",
+        success: "User invited to organization",
       },
       validationErrors: {
         email: "Email is required",

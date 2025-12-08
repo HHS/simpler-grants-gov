@@ -2624,6 +2624,19 @@ class ForeignTuserAccountFactory(TuserAccountFactory):
         return 1
 
 
+class ForeignTcertificatesFactory(BaseFactory):
+    class Meta:
+        model = foreign.certificates.Tcertificates
+
+    currentcertid = factory.Sequence(lambda n: f"{1000 + n}")
+    certemail = factory.Faker("email")
+    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
+    creator_id = Generators.UuidObj
+    agencyid = factory.Faker("agency_code")
+    serial_num = factory.Faker("pystr", min_chars=15, max_chars=15)
+    is_selfsigned = "Y"
+
+
 class VuserAccountFactory(BaseFactory):
     class Meta:
         abstract = True
@@ -2957,7 +2970,7 @@ class StagingTcertificatesFactory(AbstractStagingFactory):
     created_date = factory.Faker("date_between", start_date="-2y", end_date="-1y")
     certemail = factory.Faker("email")
     creator_id = factory.Faker("email")
-    is_selfsigned = "Y"
+    is_selfsigned = None
 
 
 ###################
