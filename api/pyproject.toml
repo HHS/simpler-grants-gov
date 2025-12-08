@@ -9,7 +9,7 @@ include = ["newrelic.ini"]
 [tool.poetry.dependencies]
 # See /documentation/api/package-depedency-management.md#Upgrading Python
 # for details on upgrading your Python version
-python = "~3.13"
+python = "~3.14"
 SQLAlchemy = { version = "^2.0.21", extras = ["mypy"] }
 alembic = "^1.12.0"
 python-dotenv = "^1.0.0"
@@ -108,7 +108,7 @@ line-length = 100
 preview = true
 
 
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules

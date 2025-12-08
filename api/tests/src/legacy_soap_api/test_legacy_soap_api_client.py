@@ -377,7 +377,7 @@ class TestSimplerSOAPGetApplicationZip:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         submission = ApplicationSubmissionFactory.create()
@@ -449,9 +449,7 @@ class TestSimplerSOAPGetApplicationZip:
         ).encode("utf-8")
         agency = AgencyFactory.create()
         wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
-        user, legacy_certificate, _, soap_client_certificate = setup_cert_user(
-            agency, wrong_privileges
-        )
+        user, _, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
         soap_request = SOAPRequest(
             data=request_xml_bytes,
             full_path="x",
@@ -472,7 +470,7 @@ class TestSimplerSOAPGetApplicationZip:
         caplog.set_level(logging.INFO)
         submission = ApplicationSubmissionFactory.create()
         agency = AgencyFactory()
-        user, legacy_certificate, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         application_user = ApplicationUserFactory.create(

@@ -68,7 +68,7 @@ class FieldInfo:
         return [item for item in items if item]
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "FieldInfo":
+    def from_dict(cls, data: dict[str, Any]) -> FieldInfo:
         """Create a FieldInfo instance from a dictionary."""
         id = data.get("Agency FieldName", "") or data.get("Agency Field Name", "")
         return cls(

@@ -34,7 +34,7 @@ from src.task.task_blueprint import task_blueprint
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0). Default: SF424_4_0",
+    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0, CD511). Default: SF424_4_0",
 )
 @click.option(
     "--compact",
