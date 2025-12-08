@@ -1,6 +1,11 @@
 name: Dynamic E2E Tests
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "the name of the application environment (e.g. dev, staging, prod)"
+        required: true
+        type: string
 
 defaults:
   run:
