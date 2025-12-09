@@ -4,6 +4,11 @@ on:
     branches: ["e2e-staging"]
 
   workflow_dispatch:
+    inputs:
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
 
 defaults:
   run:
@@ -32,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
