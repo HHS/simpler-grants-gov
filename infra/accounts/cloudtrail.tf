@@ -77,29 +77,70 @@ resource "aws_iam_role_policy" "cloudtrail_cloudwatch" {
 # Management events trail
 resource "aws_cloudtrail" "management_events" {
   #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
-  #checkov:skip=CKV_AWS_35:Existing trail - KMS encryption to be added in future update
-  #checkov:skip=CKV_AWS_36:Existing trail - log file validation to be added in future update
   name                          = "management-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-e0de0810"
   include_global_service_events = true
   is_multi_region_trail         = true
   enable_logging                = true
+  enable_log_file_validation    = true
+  kms_key_id                    = "arn:aws:kms:us-east-1:315341936575:key/a90ab1e1-6284-4354-aa7c-dd65db579f03"
 
   cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.cloudtrail_management.arn}:*"
   cloud_watch_logs_role_arn  = aws_iam_role.cloudtrail_cloudwatch.arn
+
+  advanced_event_selector {
+    name = "Management events selector"
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Management"]
+    }
+  }
 }
 
 # Pinpoint events trail
 resource "aws_cloudtrail" "pinpoint_events" {
   #checkov:skip=CKV_AWS_252:Existing trail - SNS topic not currently configured
-  #checkov:skip=CKV_AWS_35:Existing trail - KMS encryption to be added in future update
-  #checkov:skip=CKV_AWS_36:Existing trail - log file validation to be added in future update
   name                          = "pinpoint-events"
   s3_bucket_name                = "aws-cloudtrail-logs-315341936575-c2cbd385"
   include_global_service_events = true
   is_multi_region_trail         = true
   enable_logging                = true
+  enable_log_file_validation    = true
+  kms_key_id                    = "arn:aws:kms:us-east-1:315341936575:key/b915a86b-0266-4ca7-aeb6-d1fa9884cd67"
 
   cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.cloudtrail_pinpoint.arn}:*"
   cloud_watch_logs_role_arn  = aws_iam_role.cloudtrail_cloudwatch.arn
+
+  advanced_event_selector {
+    field_selector {
+      field  = "resources.type"
+      equals = ["AWS::Pinpoint::App"]
+    }
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Data"]
+    }
+  }
+
+  advanced_event_selector {
+    field_selector {
+      field  = "resources.type"
+      equals = ["AWS::SES::EmailIdentity"]
+    }
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Data"]
+    }
+  }
+
+  advanced_event_selector {
+    field_selector {
+      field  = "resources.type"
+      equals = ["AWS::SES::ConfigurationSet"]
+    }
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Data"]
+    }
+  }
 }
