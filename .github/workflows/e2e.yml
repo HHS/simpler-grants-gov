@@ -1,5 +1,6 @@
 name: Dynamic E2E Tests
 on:
+  push:
   workflow_dispatch:
     inputs:
       version:
