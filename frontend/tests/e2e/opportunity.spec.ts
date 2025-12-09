@@ -17,8 +17,8 @@ const testOpportunityIdMap: {
   [key: string]: { simpler: string; legacy: string };
 } = {
   staging: {
-    simpler: "8b3e553b-f805-4890-bb9e-3183b4c33fbb",
-    legacy: "50280",
+    simpler: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+    legacy: "42315",
   },
   local: { simpler: "c3c59562-a54f-4203-b0f6-98f2f0383481", legacy: "93" },
 };
