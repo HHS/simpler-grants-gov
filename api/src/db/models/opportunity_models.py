@@ -40,7 +40,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
-    agency_id: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey(Agency.agency_id), index=True)
+    agency_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Agency.agency_id), index=True
+    )
     agency_code: Mapped[str | None] = mapped_column(index=True)
 
     @property
