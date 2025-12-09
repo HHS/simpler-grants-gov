@@ -1,6 +1,6 @@
 """Tests for the transformation utility."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -17,6 +17,7 @@ from common_grants_sdk.schemas.pydantic import (
     RangeOperator,
     StringArrayFilter,
 )
+from freezegun import freeze_time
 
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
@@ -192,6 +193,7 @@ class TestTransformation:
             result = transform_opportunity_to_cg(opportunity)
             assert result.status.value == expected_status
 
+    @freeze_time("2024-01-03 12:00:00")
     def test_missing_optional_data(self):
         """Test transformation with missing optional data."""
 
@@ -219,8 +221,8 @@ class TestTransformation:
         assert result.status.value == "open"
 
         # If summary is missing created and modified should be today
-        assert result.created_at.date() == datetime.now().date()
-        assert result.last_modified_at.date() == datetime.now().date()
+        assert result.created_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
+        assert result.last_modified_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
 
         # Check that timeline and funding are None when summary is None
         assert result.key_dates.post_date is None
@@ -430,6 +432,7 @@ class TestTransformation:
         assert result.key_dates.close_date.date == date(2024, 12, 31)
         assert str(result.source) == "https://example.com/opportunity"
 
+    @freeze_time("2024-01-03 12:00:00")
     def test_transform_search_result_to_cg_with_missing_data(self):
         """Test transformation of search result with missing data."""
         # Test with minimal data
@@ -437,7 +440,7 @@ class TestTransformation:
             "opportunity_id": uuid4(),
             "opportunity_title": "Test Opportunity",
             "opportunity_status": "posted",
-            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "created_at": datetime(2024, 1, 2, 12, 0, 0),
             "updated_at": datetime(2024, 1, 2, 12, 0, 0),
             "summary": {},
         }
@@ -450,8 +453,8 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
-        assert result.created_at.date() == datetime.now().date()
-        assert result.last_modified_at.date() == datetime.now().date()
+        assert result.created_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
+        assert result.last_modified_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
 
         # Check that timeline and funding are None when summary is empty
         assert result.key_dates.post_date is None
