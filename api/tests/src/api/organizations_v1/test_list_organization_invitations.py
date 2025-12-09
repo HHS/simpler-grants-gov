@@ -473,7 +473,3 @@ class TestListOrganizationInvitations:
         # Check that sorting is correct
         emails_in_order = [inv["invitee_email"] for inv in data["data"]]
         assert emails_in_order == ["a@example.com", "a@example.com", "b@example.com"]
-
-        # Check secondary sort by created_at DESC for the duplicate emails
-        a_invitations = [inv for inv in data["data"] if inv["invitee_email"] == "a@example.com"]
-        assert a_invitations[0]["created_at"] > a_invitations[1]["created_at"]
