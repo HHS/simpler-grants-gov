@@ -121,9 +121,9 @@ def list_organization_invitations_and_verify_access(
         db_session: Database session
         user: User requesting the invitations
         organization_id: Organization ID to list invitations for
-        filters: Optional filters dict from request (already validated by schema)
+        json_data: Raw request payload containing pagination, sorting, and filters.
     """
-    # Validate query parameters
+    # Validate parameters
     params = ListOrganizationsParams.model_validate(json_data)
 
     # First verify the user has access to manage organization members

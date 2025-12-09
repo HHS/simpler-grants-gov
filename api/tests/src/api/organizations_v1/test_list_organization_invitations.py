@@ -383,8 +383,8 @@ class TestListOrganizationInvitations:
 
         assert resp.status_code == expected_status
 
-    def test_list_invitations_sorting(self, client, db_session, enable_factory_create):
-        """Test that invitations can be sorted by email and created_at"""
+    def test_list_invitations_default_sorting(self, client, db_session, enable_factory_create):
+        """Test default sorting: email ASC, and created_at DESC for ties"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
@@ -418,10 +418,6 @@ class TestListOrganizationInvitations:
                 "pagination": {
                     "page_offset": 1,
                     "page_size": 10,
-                    "sort_order": [
-                        {"order_by": "invitee_email", "sort_direction": "ascending"},
-                        {"order_by": "created_at", "sort_direction": "descending"},
-                    ],
                 },
             },
         )
