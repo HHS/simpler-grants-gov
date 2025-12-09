@@ -4,16 +4,30 @@ type TestWithOpportunityId = {
   testOpportunityId: string;
 };
 
-const testOpportunityIdMap: { [key: string]: string } = {
-  staging: "fa5703d3-a358-4969-9c1e-c5cc0ce21f63",
-  local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+/*
+
+  each opportunity must have:
+
+  * sufficiently long description to hide
+  * sufficiently long close date description to hide
+
+*/
+
+const testOpportunityIdMap: {
+  [key: string]: { simpler: string; legacy: string };
+} = {
+  staging: {
+    simpler: "8b3e553b-f805-4890-bb9e-3183b4c33fbb",
+    legacy: "50280",
+  },
+  local: { simpler: "c3c59562-a54f-4203-b0f6-98f2f0383481", legacy: "93" },
 };
 
-const targetEnv = process.env.TEST_TARGET_ENV || "local";
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 // either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
 // note that this staging id may be subject to change
-const testOpportunityId = testOpportunityIdMap[targetEnv];
+const testOpportunityId = testOpportunityIdMap[targetEnv].simpler;
 
 const test = base.extend<TestWithOpportunityId>({
   testOpportunityId,
@@ -126,8 +140,7 @@ test("can navigate to grants.gov", async ({ page, context }) => {
   await page.getByRole("button", { name: "View on Grants.gov" }).click();
 
   const newPage = await newTabPromise;
-  // await waitForURLChange(page, (url) => !!url.match(/grants\.gov/));
   await expect(newPage).toHaveURL(
-    "https://test.grants.gov/search-results-detail/33",
+    `https://test.grants.gov/search-results-detail/${testOpportunityIdMap[targetEnv].legacy}`,
   );
 });

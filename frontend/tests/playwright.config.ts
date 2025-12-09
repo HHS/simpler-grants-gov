@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 // Load environment variables from .env.local if it exists
 const envPath = path.resolve(__dirname, "..", ".env.local");
 if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
+  dotenv.config({ path: envPath, quiet: true });
 }
 
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
@@ -18,7 +18,7 @@ const BASE_URLS: Record<string, string> = {
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
-const baseUrl = BASE_URLS[ENV] || BASE_URLS.local;
+export const baseUrl = BASE_URLS[ENV] || BASE_URLS.local;
 
 // Environment for web server
 const webServerEnv: Record<string, string> = Object.fromEntries(
@@ -38,10 +38,6 @@ const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 // either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
 // note that this staging id may be subject to change
 const testOpportunityId = testOpportunityIdMap[targetEnv];
-
-// oddly, this value is not available to tests via config, need to export it for use in individual tests
-export const baseURL =
-  process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
