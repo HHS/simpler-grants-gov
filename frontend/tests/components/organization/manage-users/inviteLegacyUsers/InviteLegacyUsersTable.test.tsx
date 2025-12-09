@@ -43,7 +43,7 @@ describe("InviteLegacyUsersTable", () => {
     expect(screen.getByText("keyInformationDetails")).toBeVisible();
   });
 
-  it.only("has a table with two columns", () => {
+  it("has a table with two columns", () => {
     const component = InviteLegacyUsersTable({
       organizationLegacyUsers: legacyUsers,
     });
