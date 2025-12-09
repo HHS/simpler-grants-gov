@@ -35,7 +35,7 @@ const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 // either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
 // note that this staging id may be subject to change
-const testOpportunityId = testOpportunityIdMap[targetEnv];
+const testOpportunityId = testOpportunityIdMap[targetEnv].simpler;
 
 const test = base.extend<TestWithOpportunityId>({
   testOpportunityId,
@@ -148,7 +148,12 @@ test("can navigate to grants.gov", async ({ page, context }) => {
   await page.getByRole("button", { name: "View on Grants.gov" }).click();
 
   const newPage = await newTabPromise;
+<<<<<<< HEAD
   expect(newPage.url()).toContain(
     "https://test.grants.gov/search-results-detail/",
+=======
+  await expect(newPage).toHaveURL(
+    `https://test.grants.gov/search-results-detail/${testOpportunityIdMap[targetEnv].legacy}`,
+>>>>>>> 1727bf55f (further refinements for broken tests)
   );
 });
