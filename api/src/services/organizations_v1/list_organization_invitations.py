@@ -1,6 +1,7 @@
 import uuid
 from collections.abc import Sequence
 
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -14,19 +15,18 @@ from src.db.models.entity_models import (
     OrganizationInvitation,
 )
 from src.db.models.user_models import User
-
-from pydantic import BaseModel, Field
-
 from src.pagination.pagination_models import PaginationParams
 from src.search.search_models import StrSearchFilter
 
 
 class OrganizationInvitationFilters(BaseModel):
-    status : StrSearchFilter | None = None
+    status: StrSearchFilter | None = None
+
 
 class ListOrganizationsParams(BaseModel):
     pagination: PaginationParams
-    filters: OrganizationInvitationFilters | None =  Field(default=None)
+    filters: OrganizationInvitationFilters | None = Field(default=None)
+
 
 def get_organization_and_verify_access(
     db_session: db.Session, user: User, organization_id: uuid.UUID

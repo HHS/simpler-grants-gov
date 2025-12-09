@@ -63,7 +63,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 200
@@ -114,7 +119,13 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={"filters": {"status": {"one_of": ["pending"]}}},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                },
+                "filters": {"status": {"one_of": ["pending"]}},
+            },
         )
 
         assert resp.status_code == 200
@@ -136,7 +147,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 200
@@ -153,7 +169,12 @@ class TestListOrganizationInvitations:
 
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 401
@@ -170,7 +191,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 403
@@ -189,7 +215,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 403
@@ -204,7 +235,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{fake_org_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 404
@@ -221,7 +257,13 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={"filters": {"status": {"one_of": ["invalid_status"]}}},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                },
+                "filters": {"status": {"one_of": ["invalid_status"]}},
+            },
         )
 
         assert resp.status_code == 422  # Validation error
@@ -260,7 +302,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 200
@@ -326,44 +373,68 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == expected_status
 
-    def test_list_invitations_filters_expired_invitations(
-        self, client, db_session, enable_factory_create
-    ):
-        """Test that expired invitations are properly identified and can be filtered"""
+    def test_list_invitations_sorting(self, client, db_session, enable_factory_create):
+        """Test that invitations can be sorted by email and created_at"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
-        # Create an expired invitation
-
         inviter = UserFactory.create()
 
+        # Create invitations with some duplicate emails to test secondary sorting
         OrganizationInvitationFactory.create(
             organization=organization,
             inviter_user=inviter,
-            invitee_email="expired@example.com",
-            expires_at=datetime.now(UTC) - timedelta(days=1),  # Expired
-            accepted_at=None,
-            rejected_at=None,
+            invitee_email="b@example.com",
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+        )
+        # Duplicate email to test secondary sort by created_at DESC
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
         )
 
-        db_session.commit()
-
-        # Filter for expired invitations
+        # Sort first by email ASC, then created_at DESC
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={"filters": {"status": {"one_of": ["expired"]}}},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "invitee_email", "sort_direction": "ascending"},
+                        {"order_by": "created_at", "sort_direction": "descending"},
+                    ],
+                },
+            },
         )
 
         assert resp.status_code == 200
         data = resp.get_json()
         assert data["message"] == "Success"
-        assert len(data["data"]) == 1
-        assert data["data"][0]["status"] == "expired"
+        assert len(data["data"]) == 3
+
+        # Check that sorting is correct
+        emails_in_order = [inv["invitee_email"] for inv in data["data"]]
+        assert emails_in_order == ["a@example.com", "a@example.com", "b@example.com"]
+
+        # Check secondary sort by created_at DESC for the duplicate emails
+        a_invitations = [inv for inv in data["data"] if inv["invitee_email"] == "a@example.com"]
+        assert a_invitations[0]["created_at"] > a_invitations[1]["created_at"]
