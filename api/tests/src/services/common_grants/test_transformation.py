@@ -86,7 +86,7 @@ class TestTransformation:
                                 "award_floor": 10000,
                                 "additional_info_url": "https://example.com/opportunity",
                                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
-                                "updated_at": datetime(2024, 1, 4, 12, 0, 0)
+                                "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
                         )()
                     },
@@ -217,8 +217,8 @@ class TestTransformation:
         assert result.title == "Untitled Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
-        
-        #If summary is missing created and modified should be today
+
+        # If summary is missing created and modified should be today
         assert result.created_at.date() == datetime.now().date()
         assert result.last_modified_at.date() == datetime.now().date()
 
@@ -335,9 +335,9 @@ class TestTransformation:
                                 "estimated_total_program_funding": 1000000,
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
-                                "additional_info_url": "sam.gov",# URL without protocol
+                                "additional_info_url": "sam.gov",  # URL without protocol
                                 "created_at": datetime(2024, 1, 1, 12, 0, 0),
-                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),  
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
                         )()
                     },
@@ -411,7 +411,7 @@ class TestTransformation:
                 "award_floor": 10000,
                 "additional_info_url": "https://example.com/opportunity",
                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
-                "updated_at": datetime(2024, 1, 4, 12, 0, 0),  
+                "updated_at": datetime(2024, 1, 4, 12, 0, 0),
             },
         }
 

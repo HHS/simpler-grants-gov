@@ -209,7 +209,7 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "award_floor": v1_opportunity.summary.award_floor,
             "additional_info_url": v1_opportunity.summary.additional_info_url,
             "created_at": v1_opportunity.summary.created_at,
-            "updated_at": v1_opportunity.summary.updated_at
+            "updated_at": v1_opportunity.summary.updated_at,
         }
 
     return transform_search_result_to_cg(opp_data)
