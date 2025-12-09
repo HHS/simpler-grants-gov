@@ -61,14 +61,15 @@ class BaseFormTask(abc.ABC):
 
         Note: Content-Type is not set here because requests will automatically
         set the correct Content-Type with boundary for multipart/form-data.
+
+        Note: X-Auth is not included here because the form instruction endpoint
+        only supports X-API-Key authentication.
         """
         headers = {
             "Accept": "application/json",
         }
         if self.config.form_x_api_key_id is not None:
             headers["X-API-Key"] = self.config.form_x_api_key_id
-        if self.config.non_local_api_auth_token is not None:
-            headers["X-Auth"] = self.config.non_local_api_auth_token
 
         return headers
 

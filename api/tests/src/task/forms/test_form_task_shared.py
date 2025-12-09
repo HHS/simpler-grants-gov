@@ -105,10 +105,11 @@ def test_build_headers():
 def test_build_file_upload_headers():
     dummy_form_task = DummyFormTask()
 
+    # X-Auth is not included because the form instruction endpoint
+    # only supports X-API-Key authentication
     assert dummy_form_task.build_file_upload_headers() == {
         "Accept": "application/json",
         "X-API-Key": "fake-x-api-key",
-        "X-Auth": "fake-auth-token",
     }
 
 
