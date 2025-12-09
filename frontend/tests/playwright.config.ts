@@ -4,6 +4,17 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: path.resolve(__dirname, "..", ".env.local") });
 
+const testOpportunityIdMap: { [key: string]: string } = {
+  staging: "fa5703d3-a358-4969-9c1e-c5cc0ce21f63",
+  local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+};
+
+const targetEnv = process.env.TEST_TARGET_ENV || "local";
+
+// either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
+// note that this staging id may be subject to change
+const testOpportunityId = testOpportunityIdMap[targetEnv];
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -23,11 +34,11 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "on",
     video: "on-first-retry",
+    testOpportunityId,
   },
   shard: {
     // Total number of shards
