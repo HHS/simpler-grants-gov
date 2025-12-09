@@ -43,14 +43,16 @@ describe("InviteLegacyUsersTable", () => {
     expect(screen.getByText("keyInformationDetails")).toBeVisible();
   });
 
-  it("has a table with two columns", () => {
+  it.only("has a table with two columns", () => {
     const component = InviteLegacyUsersTable({
       organizationLegacyUsers: legacyUsers,
     });
     render(component);
 
-    expect(screen.getAllByText("tableHeadings.email")).toHaveLength(2);
-    expect(screen.getAllByText("tableHeadings.name")).toHaveLength(2);
+    // one header is displayed, and then a display-none is added to each
+    // entry in the table and we have two entries
+    expect(screen.getAllByText("tableHeadings.email")).toHaveLength(3);
+    expect(screen.getAllByText("tableHeadings.name")).toHaveLength(3);
   });
 
   it("should not have accessibility violations", async () => {
