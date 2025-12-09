@@ -20,6 +20,9 @@ HEALTHCHECK --timeout=5s --interval=10s --start-period=20s \
 # will overwrite any `/fluent-bit/etc/fluent-bit.yml` on the container.
 COPY fluentbit.yml /fluent-bit/etc/fluent-bit-custom.yml
 
+# Copy the Lua script for log truncation
+COPY truncate_logs.lua /fluent-bit/etc/truncate_logs.lua
+
 ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
 CMD ["-c", "/fluent-bit/etc/fluent-bit-custom.yml"]
