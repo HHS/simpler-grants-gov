@@ -1,9 +1,26 @@
-import { expect, test } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 
-// import { waitForURLChange } from "./playwrightUtils";
+type TestWithOpportunityId = {
+  testOpportunityId: string;
+};
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("/opportunity/33");
+const testOpportunityIdMap: { [key: string]: string } = {
+  staging: "fa5703d3-a358-4969-9c1e-c5cc0ce21f63",
+  local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+};
+
+const targetEnv = process.env.TEST_TARGET_ENV || "local";
+
+// either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
+// note that this staging id may be subject to change
+const testOpportunityId = testOpportunityIdMap[targetEnv];
+
+const test = base.extend<TestWithOpportunityId>({
+  testOpportunityId,
+});
+
+test.beforeEach(async ({ page, testOpportunityId }) => {
+  await page.goto(`/opportunity/${testOpportunityId}`);
 });
 
 test.afterEach(async ({ context }) => {
