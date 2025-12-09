@@ -2,8 +2,8 @@ name: Dynamic E2E Tests
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: "the name of the application environment (e.g. dev, staging, prod)"
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
         required: true
         type: string
 
@@ -34,6 +34,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
