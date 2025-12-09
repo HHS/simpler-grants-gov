@@ -18,6 +18,15 @@ ENV_URL_MAP = {
     "prod": "https://api.simpler.grants.gov/alpha/forms/{}",
 }
 
+# URLs for form instruction endpoint
+ENV_FORM_INSTRUCTION_URL_MAP = {
+    "local": "http://localhost:8080/alpha/forms/{}/form_instructions/{}",
+    "dev": "https://api.dev.simpler.grants.gov/alpha/forms/{}/form_instructions/{}",
+    "staging": "https://api.staging.simpler.grants.gov/alpha/forms/{}/form_instructions/{}",
+    "training": "https://api.training.simpler.grants.gov/alpha/forms/{}/form_instructions/{}",
+    "prod": "https://api.simpler.grants.gov/alpha/forms/{}/form_instructions/{}",
+}
+
 
 class FormTaskConfig(PydanticBaseEnvConfig):
     # This is the legacy API key approach
@@ -38,6 +47,22 @@ class BaseFormTask(abc.ABC):
 
         headers = {
             "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        if self.config.form_x_api_key_id is not None:
+            headers["X-API-Key"] = self.config.form_x_api_key_id
+        if self.config.non_local_api_auth_token is not None:
+            headers["X-Auth"] = self.config.non_local_api_auth_token
+
+        return headers
+
+    def build_file_upload_headers(self) -> dict:
+        """Build headers for file upload requests (multipart/form-data).
+
+        Note: Content-Type is not set here because requests will automatically
+        set the correct Content-Type with boundary for multipart/form-data.
+        """
+        headers = {
             "Accept": "application/json",
         }
         if self.config.form_x_api_key_id is not None:
@@ -88,3 +113,8 @@ def build_form_json(form: Form) -> dict:
 def get_form_url(environment: str, form_id: str) -> str:
     base_url = ENV_URL_MAP[environment]
     return base_url.format(form_id)
+
+
+def get_form_instruction_url(environment: str, form_id: str, form_instruction_id: str) -> str:
+    base_url = ENV_FORM_INSTRUCTION_URL_MAP[environment]
+    return base_url.format(form_id, form_instruction_id)

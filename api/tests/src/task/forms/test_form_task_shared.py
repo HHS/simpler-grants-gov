@@ -1,7 +1,12 @@
 import jsonschema
 import pytest
 
-from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
+from src.task.forms.form_task_shared import (
+    BaseFormTask,
+    build_form_json,
+    get_form_instruction_url,
+    get_form_url,
+)
 from tests.src.db.models.factories import FormFactory
 
 
@@ -95,3 +100,42 @@ def test_build_headers():
         "X-API-Key": "fake-x-api-key",
         "X-Auth": "fake-auth-token",
     }
+
+
+def test_build_file_upload_headers():
+    dummy_form_task = DummyFormTask()
+
+    assert dummy_form_task.build_file_upload_headers() == {
+        "Accept": "application/json",
+        "X-API-Key": "fake-x-api-key",
+        "X-Auth": "fake-auth-token",
+    }
+
+
+@pytest.mark.parametrize(
+    "environment,expected_url",
+    [
+        (
+            "local",
+            "http://localhost:8080/alpha/forms/my-form-id/form_instructions/my-instruction-id",
+        ),
+        (
+            "dev",
+            "https://api.dev.simpler.grants.gov/alpha/forms/my-form-id/form_instructions/my-instruction-id",
+        ),
+        (
+            "staging",
+            "https://api.staging.simpler.grants.gov/alpha/forms/my-form-id/form_instructions/my-instruction-id",
+        ),
+        (
+            "training",
+            "https://api.training.simpler.grants.gov/alpha/forms/my-form-id/form_instructions/my-instruction-id",
+        ),
+        (
+            "prod",
+            "https://api.simpler.grants.gov/alpha/forms/my-form-id/form_instructions/my-instruction-id",
+        ),
+    ],
+)
+def test_get_form_instruction_url(environment, expected_url):
+    assert get_form_instruction_url(environment, "my-form-id", "my-instruction-id") == expected_url
