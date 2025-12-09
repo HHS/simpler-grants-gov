@@ -1125,13 +1125,77 @@ CD511_TEST_CASES = [
 ]
 
 
+# Sample test cases for GG_LobbyingForm validation
+GG_LOBBYING_FORM_TEST_CASES = [
+    {
+        "name": "minimal_valid_gg_lobbying_form",
+        "json_input": {
+            "organization_name": "Test Research Organization",
+            "authorized_representative_name": {
+                "first_name": "John",
+                "last_name": "Smith",
+            },
+            "authorized_representative_title": "Principal Investigator",
+            "authorized_representative_signature": "John Smith",
+            "submitted_date": "2025-01-15",
+        },
+        "form_name": "GG_LobbyingForm",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "gg_lobbying_form_with_full_name",
+        "json_input": {
+            "organization_name": "National Institute of Science",
+            "authorized_representative_name": {
+                "prefix": "Dr.",
+                "first_name": "Robert",
+                "middle_name": "James",
+                "last_name": "Williams",
+                "suffix": "Jr.",
+            },
+            "authorized_representative_title": "Senior Scientist",
+            "authorized_representative_signature": "Robert J. Williams Jr.",
+            "submitted_date": "2025-03-01",
+        },
+        "form_name": "GG_LobbyingForm",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "gg_lobbying_form_university_example",
+        "json_input": {
+            "organization_name": "State University Research Foundation",
+            "authorized_representative_name": {
+                "prefix": "Ms.",
+                "first_name": "Sarah",
+                "middle_name": "Elizabeth",
+                "last_name": "Johnson",
+            },
+            "authorized_representative_title": "Director of Sponsored Programs",
+            "authorized_representative_signature": "Sarah E. Johnson",
+            "submitted_date": "2025-02-15",
+        },
+        "form_name": "GG_LobbyingForm",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
     Returns:
         List of all test case dictionaries
     """
-    return SF424_TEST_CASES + SF424A_TEST_CASES + SFLLL_TEST_CASES + CD511_TEST_CASES
+    return (
+        SF424_TEST_CASES
+        + SF424A_TEST_CASES
+        + SFLLL_TEST_CASES
+        + CD511_TEST_CASES
+        + GG_LOBBYING_FORM_TEST_CASES
+    )
 
 
 def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:

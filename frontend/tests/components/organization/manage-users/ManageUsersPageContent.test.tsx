@@ -5,17 +5,12 @@ import React from "react";
 import "@testing-library/jest-dom";
 
 import type { AuthorizedData } from "src/types/authTypes";
+import { mockUseTranslations } from "src/utils/testing/intlMocks";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 
-type TranslationFn = (key: string) => string;
-
-const getTranslationsMock = jest.fn<Promise<TranslationFn>, [string]>(
-  (_namespace: string) => Promise.resolve((key: string) => key),
-);
-
 jest.mock("next-intl/server", () => ({
-  getTranslations: (namespace: string) => getTranslationsMock(namespace),
+  getTranslations: () => mockUseTranslations,
 }));
 
 type GetOrgDetailsFn = (orgId: string) => Promise<unknown>;
@@ -50,6 +45,10 @@ jest.mock("src/components/manageUsers/PageHeader", () => ({
     PageHeaderMock(props as PageHeaderProps);
     return <div data-testid="page-header" />;
   },
+}));
+
+jest.mock("src/components/manageUsers/InviteLegacyUsersButton", () => ({
+  InviteLegacyUsersButton: () => <button>InviteLegacyUsersButton</button>,
 }));
 
 type UserOrganizationInviteProps = { organizationId: string };
@@ -107,8 +106,8 @@ describe("ManageUsersPageContent", () => {
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
-    expect(breadcrumbsProps.breadcrumbList).toHaveLength(4);
-    expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
+    expect(breadcrumbsProps.breadcrumbList).toHaveLength(2);
+    expect(breadcrumbsProps.breadcrumbList[0]).toEqual({
       title: "Cool Org Inc",
       path: `/organization/${organizationId}`,
     });
@@ -135,7 +134,7 @@ describe("ManageUsersPageContent", () => {
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
-    expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
+    expect(breadcrumbsProps.breadcrumbList[0]).toEqual({
       title: "Organization",
       path: `/organization/${organizationId}`,
     });

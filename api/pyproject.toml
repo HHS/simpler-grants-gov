@@ -51,6 +51,7 @@ common-grants-sdk = "~0.3.2"
 PyYAML = "^6.0.3"
 jsonref = "^1.1.0"
 pydantic-core = "2.41.5"
+urllib3 = "^2.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
