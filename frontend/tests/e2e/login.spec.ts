@@ -1,7 +1,7 @@
 import { expect, Page, test } from "@playwright/test";
 import { baseURL } from "tests/playwright.config";
 
-const setUpLocalLogin = async (page: Page) => {
+const setupLoginRedirectSpoof = async (page: Page) => {
   // Clear session storage before each test
   await page.goto(`/`);
   await page.evaluate(() => {
@@ -33,12 +33,11 @@ const setUpLocalLogin = async (page: Page) => {
   });
 };
 
+// these tests do not actually test logging in, but only the behavior of the /login page
 test.describe("Login Page Redirect", () => {
-  // disable login spoofing for now, can turn on for local if we want
-
-  // test.beforeEach(async ({ page }) => {
-  //   await setUpLocalLogin(page);
-  // });
+  test.beforeEach(async ({ page }) => {
+    await setupLoginRedirectSpoof(page);
+  });
 
   test("should redirect to home page when no redirect URL is stored", async ({
     page,
