@@ -27,6 +27,18 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
     NEW_RELIC_ENABLED: "false", // disable New Relic for E2E
   }).filter(([, value]) => typeof value === "string"),
 );
+
+const testOpportunityIdMap: { [key: string]: string } = {
+  staging: "fa5703d3-a358-4969-9c1e-c5cc0ce21f63",
+  local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+};
+
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+
+// either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
+// note that this staging id may be subject to change
+const testOpportunityId = testOpportunityIdMap[targetEnv];
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -45,11 +57,12 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: baseUrl,
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "on",
     video: "on-first-retry",
+    testOpportunityId,
   },
   // Enable test sharding for parallelization in CI.
   shard: {
