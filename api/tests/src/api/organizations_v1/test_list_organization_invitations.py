@@ -383,6 +383,49 @@ class TestListOrganizationInvitations:
 
         assert resp.status_code == expected_status
 
+    def test_list_invitations_filters_expired_invitations(
+        self, client, db_session, enable_factory_create
+    ):
+        """Test that expired invitations are properly identified and can be filtered"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        # Create an expired invitation
+
+        inviter = UserFactory.create()
+
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="expired@example.com",
+            expires_at=datetime.now(UTC) - timedelta(days=1),  # Expired
+            accepted_at=None,
+            rejected_at=None,
+        )
+
+        db_session.commit()
+
+        # Filter for expired invitations
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "filters": {"status": {"one_of": ["expired"]}},
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["message"] == "Success"
+        assert len(data["data"]) == 1
+        assert data["data"][0]["status"] == "expired"
+
     def test_list_invitations_default_sorting(self, client, db_session, enable_factory_create):
         """Test default sorting: email ASC, and created_at DESC for ties"""
         user, organization, token = create_user_in_org(
