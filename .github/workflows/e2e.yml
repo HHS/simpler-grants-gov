@@ -53,6 +53,7 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
           PLAYWRIGHT_BASE_URL: "https://staging.simpler.grants.gov"
+          TEST_TARGET_ENV: "staging"
         run: |
           npm run test:e2e
 
