@@ -19,6 +19,12 @@ jest.mock("src/utils/userUtils", () => ({
   userRoleForOrganization: jest.fn(() => "Admin"),
 }));
 
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => false,
+  }),
+}));
+
 const makeOrg = (id: string, name: string) => ({
   organization_id: id,
   sam_gov_entity: {
