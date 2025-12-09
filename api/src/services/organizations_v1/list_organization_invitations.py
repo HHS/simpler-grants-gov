@@ -15,6 +15,18 @@ from src.db.models.entity_models import (
 )
 from src.db.models.user_models import User
 
+from pydantic import BaseModel, Field
+
+from src.pagination.pagination_models import PaginationParams
+from src.search.search_models import StrSearchFilter
+
+
+class OrganizationInvitationFilters(BaseModel):
+    status : StrSearchFilter | None = None
+
+class ListOrganizationsParams(BaseModel):
+    pagination: PaginationParams
+    filters: OrganizationInvitationFilters | None =  Field(default=None)
 
 def get_organization_and_verify_access(
     db_session: db.Session, user: User, organization_id: uuid.UUID
@@ -100,7 +112,7 @@ def list_organization_invitations_and_verify_access(
     db_session: db.Session,
     user: User,
     organization_id: uuid.UUID,
-    filters: dict | None = None,
+    json_data: dict,
 ) -> Sequence[OrganizationInvitation]:
     """
     List organization invitations with access control and filtering.
@@ -111,14 +123,16 @@ def list_organization_invitations_and_verify_access(
         organization_id: Organization ID to list invitations for
         filters: Optional filters dict from request (already validated by schema)
     """
+    # Validate query parameters
+    params = ListOrganizationsParams.model_validate(json_data)
 
     # First verify the user has access to manage organization members
     get_organization_and_verify_access(db_session, user, organization_id)
 
     # Extract status filters if provided (already converted to enums by Marshmallow)
     status_filters = None
-    if filters and filters.get("status") and filters["status"].get("one_of"):
-        status_filters = filters["status"]["one_of"]
+    if params.filters and params.filters.status:
+        status_filters = params.filters.status.one_of
 
     # Get the raw invitations with filters
     invitations = list_organization_invitations_with_filters(

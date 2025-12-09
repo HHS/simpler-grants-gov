@@ -245,6 +245,17 @@ class OrganizationInvitationListRequestSchema(Schema):
         allow_none=True,
         metadata={"description": "Filters to apply to the invitation list"},
     )
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OrganizationInvitationPaginationSchema",
+            ["email", "created_date"],
+            default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
+        ),
+        required=True,
+        metadata={
+            "description": "Pagination parameters for organization invitation list (default sort: email ascending)"
+        },
+    )
 
 
 class InviterDataSchema(Schema):

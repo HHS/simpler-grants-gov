@@ -233,7 +233,7 @@ def organization_invitations_list(
             db_session=db_session,
             user=user_token_session.user,
             organization_id=organization_id,
-            filters=json_data.get("filters"),
+            json_data=json_data,
         )
 
     return response.ApiResponse(message="Success", data=invitations)
