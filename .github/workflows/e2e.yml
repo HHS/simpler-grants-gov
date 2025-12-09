@@ -1,11 +1,9 @@
 name: Dynamic E2E Tests
 on:
+  push:
+    branches: ["e2e-staging"]
+
   workflow_dispatch:
-    inputs:
-      version:
-        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
-        required: true
-        type: string
 
 defaults:
   run:
