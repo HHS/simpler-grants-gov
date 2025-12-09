@@ -2,7 +2,10 @@ import path from "path";
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 
-dotenv.config({ path: path.resolve(__dirname, "..", ".env.local") });
+dotenv.config({
+  path: path.resolve(__dirname, "..", ".env.local"),
+  quiet: true,
+});
 
 // oddly, this value is not available to tests via config, need to export it for use in individual tests
 export const baseURL =
