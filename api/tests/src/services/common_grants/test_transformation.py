@@ -85,8 +85,8 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "https://example.com/opportunity",
-                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
-                                "updated_at": datetime(2024, 1, 2, 12, 0, 0)
+                                "created_at": datetime(2024, 1, 3, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 4, 12, 0, 0)
                             },
                         )()
                     },
@@ -101,8 +101,8 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.description == "Test description"
         assert result.status.value == "open"  # "posted" maps to "open"
-        assert result.created_at == datetime(2024, 1, 1, 12, 0, 0)
-        assert result.last_modified_at == datetime(2024, 1, 2, 12, 0, 0)
+        assert result.created_at == datetime(2024, 1, 3, 12, 0, 0)
+        assert result.last_modified_at == datetime(2024, 1, 4, 12, 0, 0)
 
         # Check key_dates
         assert result.key_dates is not None
@@ -217,6 +217,8 @@ class TestTransformation:
         assert result.title == "Untitled Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
+        
+        #If summary is missing created and modified should be today
         assert result.created_at.date() == datetime.now().date()
         assert result.last_modified_at.date() == datetime.now().date()
 
@@ -237,7 +239,7 @@ class TestTransformation:
                 self.opportunity_title = "Test"
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
-                self.updated_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
+                self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -253,8 +255,8 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": 10000,
                                 "additional_info_url": None,
-                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
-                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "created_at": datetime(2024, 1, 3, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
                         )()
                     },
@@ -333,9 +335,9 @@ class TestTransformation:
                                 "estimated_total_program_funding": 1000000,
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
-                                "additional_info_url": "sam.gov",
+                                "additional_info_url": "sam.gov",# URL without protocol
                                 "created_at": datetime(2024, 1, 1, 12, 0, 0),
-                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),  # URL without protocol
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),  
                             },
                         )()
                     },
@@ -408,6 +410,8 @@ class TestTransformation:
                 "award_ceiling": 500000,
                 "award_floor": 10000,
                 "additional_info_url": "https://example.com/opportunity",
+                "created_at": datetime(2024, 1, 3, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 4, 12, 0, 0),  
             },
         }
 
