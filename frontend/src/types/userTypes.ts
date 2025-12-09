@@ -146,8 +146,8 @@ export enum OrganizationLegacyUserStatus {
 
 export interface OrganizationLegacyUser {
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   status: OrganizationLegacyUserStatus;
 }
 
