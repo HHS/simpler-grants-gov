@@ -8,11 +8,94 @@ resource "aws_sns_topic" "security_hub_findings" {
   # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary
 }
 
-# Email subscription for Security Hub findings
+#===================================
+# Formatted Email Alerts
+#===================================
+
+# Separate SNS topic for formatted email alerts
+resource "aws_sns_topic" "security_hub_findings_formatted" {
+  name = "security-hub-findings-formatted"
+  # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary
+}
+
+# Email subscription for formatted findings
 resource "aws_sns_topic_subscription" "security_hub_findings_email" {
-  topic_arn = aws_sns_topic.security_hub_findings.arn
+  topic_arn = aws_sns_topic.security_hub_findings_formatted.arn
   protocol  = "email"
-  endpoint  = "grantsalerts@navapbc.com"
+  endpoint  = "seanthomas@navapbc.com"
+}
+
+# Lambda function to format findings for email
+resource "aws_lambda_function" "format_security_hub_email" {
+  filename         = "${path.module}/lambda/format_security_hub_email.zip"
+  function_name    = "security-hub-email-formatter"
+  role             = aws_iam_role.security_hub_email_formatter.arn
+  handler          = "format_security_hub_email.handler"
+  source_code_hash = filebase64sha256("${path.module}/lambda/format_security_hub_email.zip")
+  runtime          = "python3.11"
+  timeout          = 30
+
+  environment {
+    variables = {
+      EMAIL_SNS_TOPIC_ARN = aws_sns_topic.security_hub_findings_formatted.arn
+    }
+  }
+}
+
+# IAM role for email formatter Lambda
+resource "aws_iam_role" "security_hub_email_formatter" {
+  name = "security-hub-email-formatter-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "formatter_lambda_basic" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.security_hub_email_formatter.name
+}
+
+resource "aws_iam_role_policy" "formatter_sns_publish" {
+  name = "sns-publish"
+  role = aws_iam_role.security_hub_email_formatter.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sns:Publish"
+        ]
+        Effect = "Allow"
+        Resource = aws_sns_topic.security_hub_findings_formatted.arn
+      }
+    ]
+  })
+}
+
+resource "aws_lambda_permission" "allow_sns_formatter" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.format_security_hub_email.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.security_hub_findings.arn
+}
+
+# SNS subscription to trigger formatter Lambda
+resource "aws_sns_topic_subscription" "security_hub_findings_formatter" {
+  topic_arn = aws_sns_topic.security_hub_findings.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.format_security_hub_email.arn
 }
 
 #===================================
