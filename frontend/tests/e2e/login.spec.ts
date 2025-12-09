@@ -1,42 +1,44 @@
-import { expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
+import { baseURL } from "tests/playwright.config";
 
-const BASE_URL = "http://127.0.0.1:3000";
+const setUpLocalLogin = async (page: Page) => {
+  // Clear session storage before each test
+  await page.goto(`/`);
+  await page.evaluate(() => {
+    if (window.sessionStorage) {
+      window.sessionStorage.clear();
+    }
+  });
+  await page.context().addCookies([
+    {
+      name: "_ff",
+      value: JSON.stringify({ authOn: true }),
+      domain: "127.0.0.1",
+      path: "/",
+    },
+  ]);
+
+  // Prevent navigation to external sites by redirecting back to base URL
+  await page.route("**/*", async (route) => {
+    const url = route.request().url();
+    if (!url.startsWith(baseURL)) {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/html",
+        body: `<html><head><meta http-equiv="refresh" content="0;url=${baseURL}/"></head></html>`,
+      });
+    } else {
+      await route.continue();
+    }
+  });
+};
 
 test.describe("Login Page Redirect", () => {
-  test.beforeEach(async ({ page }) => {
-    // Clear session storage before each test
-    await page.goto(`/`);
-    await page.evaluate(() => {
-      if (window.sessionStorage) {
-        window.sessionStorage.clear();
-      }
-    });
-    await page.context().addCookies([
-      {
-        name: "_ff",
-        value: JSON.stringify({ authOn: true }),
-        domain: "127.0.0.1",
-        path: "/",
-      },
-    ]);
+  // disable login spoofing for now, can turn on for local if we want
 
-    // Prevent navigation to external sites by redirecting back to base URL
-    await page.route("**/*", async (route) => {
-      const url = route.request().url();
-      if (
-        !url.startsWith(BASE_URL) &&
-        !url.startsWith("http://127.0.0.1:8080")
-      ) {
-        await route.fulfill({
-          status: 200,
-          contentType: "text/html",
-          body: `<html><head><meta http-equiv="refresh" content="0;url=${BASE_URL}/"></head></html>`,
-        });
-      } else {
-        await route.continue();
-      }
-    });
-  });
+  // test.beforeEach(async ({ page }) => {
+  //   await setUpLocalLogin(page);
+  // });
 
   test("should redirect to home page when no redirect URL is stored", async ({
     page,
