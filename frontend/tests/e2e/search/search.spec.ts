@@ -188,31 +188,16 @@ test.describe("Search page tests", () => {
     if (isMobile) {
       await toggleFilterDrawer(page);
     }
-    await selectSortBy(page, "opportunityTitleDesc", isMobile);
-
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-
-    await clickLastPaginationPage(page);
-
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    // somehow this is being resorted before fetching the name of the result
-    const lastSearchResultTitle = await getLastSearchResultTitle(page);
-
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-
     await selectSortBy(page, "opportunityTitleAsc", isMobile);
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-
     const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
-    console.log("$$$$", firstSearchResultTitle);
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+    await selectSortBy(page, "opportunityTitleDesc", isMobile);
+    await clickLastPaginationPage(page);
+
+    const lastSearchResultTitle = await getLastSearchResultTitle(page);
 
     expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
   });
