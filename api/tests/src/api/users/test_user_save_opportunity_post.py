@@ -137,3 +137,16 @@ def test_user_save_opportunity_post_deleted(
     assert saved_opp.user_id == user.user_id
     assert saved_opp.opportunity_id == opportunity.opportunity_id
     assert not saved_opp.is_deleted
+
+
+def test_user_save_opportunity_post_not_found(
+    client, user, user_auth_token, enable_factory_create, db_session
+):
+    """Saving a non-existent opportunity should return 404."""
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"opportunity_id": uuid.uuid4()},
+    )
+
+    assert response.status_code == 404

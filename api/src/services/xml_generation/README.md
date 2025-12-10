@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-LLL, CD-511, Project Narrative Attachments, and Budget Narrative Attachments.
+This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, and Project Abstract.
 
 ## Architecture
 
@@ -19,9 +19,15 @@ api/src/services/xml_generation/
 api/src/form_schema/forms/
 ├── sf424.py                   # SF-424 schema + XML transformation rules
 ├── sf424a.py                  # SF-424A Budget schema + XML transformation rules
+├── sf424b.py                  # SF-424B Assurances (Non-Construction) + XML transformation rules
+├── sf424d.py                  # SF-424D Assurances (Construction) + XML transformation rules
 ├── sflll.py                   # SF-LLL Lobbying Disclosure + XML transformation rules
 ├── cd511.py                   # CD511 Certification Regarding Lobbying + XML transformation rules
-└── gg_lobbying_form.py        # GG_LobbyingForm Grants.gov Lobbying Form + XML transformation rules
+├── gg_lobbying_form.py        # GG_LobbyingForm Grants.gov Lobbying Form + XML transformation rules
+├── project_narrative_attachment.py  # Project Narrative Attachments + XML transformation rules
+├── budget_narrative_attachment.py   # Budget Narrative Attachments + XML transformation rules
+├── other_narrative_attachment.py    # Other Narrative Attachments + XML transformation rules
+└── project_abstract.py        # Project Abstract + XML transformation rules
 ```
 
 ## Usage
@@ -205,6 +211,66 @@ FORM_XML_TRANSFORM_RULES = {
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
 
+### Example: SF-424B and SF-424D (Assurance Forms)
+
+The SF-424B (Non-Construction) and SF-424D (Construction) assurance forms have a similar structure with fields nested inside an `AuthorizedRepresentative` element:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for SF-424D Assurances for Construction Programs",
+        "form_name": "SF424D",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424D-V1.1",
+            "SF424D": "http://apply.grants.gov/forms/SF424D-V1.1",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424D-V1.1.xsd",
+        "xml_structure": {
+            "root_element": "Assurances",
+            "root_namespace_prefix": "SF424D",
+            "root_attributes": {
+                "programType": "Construction",  # "Non-Construction" for SF-424B
+                "{http://apply.grants.gov/system/Global-V1.0}coreSchemaVersion": "1.1",
+            },
+        },
+    },
+    # Field mappings - nested path for AuthorizedRepresentative complex type
+    "signature": {"xml_transform": {"target": "AuthorizedRepresentative/RepresentativeName"}},
+    "title": {"xml_transform": {"target": "AuthorizedRepresentative/RepresentativeTitle"}},
+    "applicant_organization": {"xml_transform": {"target": "ApplicantOrganizationName"}},
+    "date_signed": {"xml_transform": {"target": "SubmittedDate"}},
+}
+```
+
+**Assurance Forms Field Mapping Notes:**
+- Uses `compose_object` conditional transform to wrap flat fields into nested `AuthorizedRepresentative` element
+- `signature` → `AuthorizedRepresentative/RepresentativeName`
+- `title` → `AuthorizedRepresentative/RepresentativeTitle`
+- `applicant_organization` → `ApplicantOrganizationName`
+- `date_signed` → `SubmittedDate`
+- `signature` and `date_signed` are auto-populated during submission via post-population rules
+- SF-424B uses `programType="Non-Construction"`, SF-424D uses `programType="Construction"`
+
+The `compose_object` transform type creates a nested object from flat root-level fields:
+
+```python
+"authorized_representative_wrapper": {
+    "xml_transform": {
+        "target": "AuthorizedRepresentative",
+        "type": "conditional",
+        "conditional_transform": {
+            "type": "compose_object",
+            "field_mapping": {
+                "RepresentativeName": "signature",
+                "RepresentativeTitle": "title",
+            },
+        },
+    }
+},
+```
+
 ### Example: Attachment Forms
 
 For attachment-only forms (Project Narrative, Budget Narrative), the configuration is simpler:
@@ -238,17 +304,55 @@ FORM_XML_TRANSFORM_RULES = {
 }
 ```
 
+### Example: Project Abstract (Single Attachment)
+
+The Project Abstract form uses a single attachment nested within a `ProjectAbstractAddAttachment` wrapper element:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Project Abstract form",
+        "form_name": "Project_Abstract_1_2",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/Project_Abstract_1_2-V1.2",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_Abstract_1_2-V1.2.xsd",
+        "xml_structure": {
+            "root_element": "Project_Abstract_1_2",
+            "root_attributes": {"FormVersion": "1.2"},
+        },
+        "attachment_fields": {
+            "attachment": {
+                "xml_element": "ProjectAbstractAddAttachment",
+                "type": "single",
+            },
+        },
+    },
+}
+```
+
+**Attachment Forms Notes:**
+- **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
+- **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`
+
 ## Supported Forms
 
 The following forms currently have XML generation support:
 
 - **SF-424 (v4.0)**: Application for Federal Assistance
 - **SF-424A (v1.0)**: Budget Information - Non-Construction Programs
+- **SF-424B (v1.1)**: Assurances for Non-Construction Programs
+- **SF-424D (v1.1)**: Assurances for Construction Programs
 - **SF-LLL (v2.0)**: Disclosure of Lobbying Activities
 - **CD-511 (v1.1)**: Certification Regarding Lobbying
 - **GG_LobbyingForm (v1.1)**: Grants.gov Lobbying Form
 - **Project Narrative Attachments (v1.2)**: Project narrative file attachments
 - **Budget Narrative Attachments (v1.2)**: Budget narrative file attachments
+- **Other Narrative Attachments (v1.2)**: Other narrative file attachments
+- **Project Abstract (v1.2)**: Project abstract file attachment
 
 ## Adding New Forms
 
