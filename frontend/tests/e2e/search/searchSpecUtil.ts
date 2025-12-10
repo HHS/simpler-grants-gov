@@ -146,7 +146,11 @@ export async function getLastSearchResultTitle(page: Page) {
   const lastResultSelector = page.locator(
     ".simpler-responsive-table tr:last-child a",
   );
-  return await lastResultSelector.textContent();
+  const text = await lastResultSelector.textContent();
+  if (text?.includes("test")) {
+    console.log("why");
+  }
+  return text;
 }
 
 // If descending, select the ascending variant
