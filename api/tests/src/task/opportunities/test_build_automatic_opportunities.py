@@ -4,9 +4,16 @@ import pytest
 from sqlalchemy import update
 
 from src.db.models.competition_models import Form
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import (
+    BudgetNarrativeAttachment_v1_2,
+    ProjectAbstractSummary_v2_0,
+    ProjectNarrativeAttachment_v1_2,
+    SF424_v4_0,
+    SF424a_v1_0,
+    SF424b_v1_1,
+    SFLLL_v2_0,
+)
 from src.task.opportunities.build_automatic_opportunities import BuildAutomaticOpportunitiesTask
-from src.form_schema.forms import ProjectAbstractSummary_v2_0, BudgetNarrativeAttachment_v1_2, SF424_v4_0, SF424a_v1_0, ProjectNarrativeAttachment_v1_2, SF424b_v1_1, SFLLL_v2_0
 
 # These are forms that we use in the build logic
 # that we need to make sure exist for the purposes of testing
@@ -17,8 +24,9 @@ FORMS_USED = [
     SF424a_v1_0,
     ProjectNarrativeAttachment_v1_2,
     SF424b_v1_1,
-    SFLLL_v2_0
+    SFLLL_v2_0,
 ]
+
 
 @pytest.fixture
 def forms(db_session):
