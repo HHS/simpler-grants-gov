@@ -1,6 +1,6 @@
 "use client";
 
-import { userProfileAction } from "src/app/[locale]/(base)/user/account/actions";
+import { userProfileAction } from "src/app/[locale]/(base)/settings/actions";
 import {
   UserDetailWithProfile,
   UserProfileValidationErrors,
@@ -25,7 +25,7 @@ export function UserProfileForm({
 }: {
   userDetails: UserDetailWithProfile;
 }) {
-  const t = useTranslations("UserAccount");
+  const t = useTranslations("Settings");
 
   const [state, formAction, isPending] = useActionState(userProfileAction, {
     validationErrors: {},
@@ -46,6 +46,16 @@ export function UserProfileForm({
       {state?.success && (
         <Alert heading={t("successHeading")} headingLevel="h2" type="success" />
       )}
+      <h3>{t("contactInfoHeading")}</h3>
+      <p>
+        {t.rich("contactInfoBody", {
+          link: (chunk) => (
+            <a href="https://login.gov" target="_blank">
+              {chunk}
+            </a>
+          ),
+        })}
+      </p>
       <form action={formAction}>
         <Label htmlFor="firstName">
           <span>{t("inputs.firstName")}</span>

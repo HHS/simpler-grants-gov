@@ -1,5 +1,5 @@
 import { identity } from "lodash";
-import { userProfileAction } from "src/app/[locale]/(base)/user/account/actions";
+import { userProfileAction } from "src/app/[locale]/(base)/settings/actions";
 
 const getSessionMock = jest.fn();
 const mockUpdateUserDetails = jest.fn();
