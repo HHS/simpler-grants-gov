@@ -83,7 +83,7 @@ class ListFormsTask(BaseFormTask):
                     self.environment, form_id, str(form.form_instruction_id)
                 )
                 out_of_date_entries.append(form_instruction_cmd)
-            
+
             out_of_date_entries.append("\n---")
 
             self.out_of_date_forms.extend(out_of_date_entries)
