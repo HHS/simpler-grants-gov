@@ -22,7 +22,7 @@ resource "aws_sns_topic" "security_hub_findings_formatted" {
 resource "aws_sns_topic_subscription" "security_hub_findings_email" {
   topic_arn = aws_sns_topic.security_hub_findings_formatted.arn
   protocol  = "email"
-  endpoint  = "seanthomas@navapbc.com"
+  endpoint  = "grantsalerts@navapbc.com"
 }
 
 # Lambda function to format findings for email
