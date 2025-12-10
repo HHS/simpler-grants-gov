@@ -2,7 +2,6 @@ import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
-import { OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
@@ -70,7 +69,15 @@ export default async function SavedOpportunities({
   const { locale } = await params;
   const { status } = await searchParams;
   const t = await getTranslations({ locale });
-  const savedOpportunities = await fetchSavedOpportunities();
+
+  // Check if user has any saved opportunities (unfiltered count)
+  const allSavedOpportunities = await fetchSavedOpportunities();
+  const hasSavedOpportunities = allSavedOpportunities.length > 0;
+
+  // Fetch filtered saved opportunities from API
+  const savedOpportunities = await fetchSavedOpportunities(status);
+
+  // Get full opportunity details for each saved opportunity
   const opportunityPromises = savedOpportunities.map(
     async (savedOpportunity) => {
       const { data: opportunityData } = await getOpportunityDetails(
@@ -81,14 +88,6 @@ export default async function SavedOpportunities({
   );
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
-  // Filter opportunities by status if a status filter is selected
-  const filteredOpportunities = status
-    ? resolvedOpportunities.filter(
-        (opportunity) =>
-          opportunity?.opportunity_status === (status as OpportunityStatus),
-      )
-    : resolvedOpportunities;
-
   return (
     <>
       <GridContainer>
@@ -96,13 +95,13 @@ export default async function SavedOpportunities({
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
       <div className="grid-container padding-y-5">
-        {resolvedOpportunities.length > 0 ? (
+        {hasSavedOpportunities ? (
           <>
             <div className="margin-bottom-3 display-flex flex-justify-end">
               <SavedOpportunityStatusFilter status={status || null} />
             </div>
-            {filteredOpportunities.length > 0 ? (
-              <SavedOpportunitiesList opportunities={filteredOpportunities} />
+            {resolvedOpportunities.length > 0 ? (
+              <SavedOpportunitiesList opportunities={resolvedOpportunities} />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>
             )}

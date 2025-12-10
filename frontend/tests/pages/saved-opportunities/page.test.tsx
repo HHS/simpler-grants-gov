@@ -41,8 +41,8 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  fetchSavedOpportunities: () =>
-    savedOpportunities() as Promise<MinimalOpportunity[]>,
+  fetchSavedOpportunities: (statusFilter?: string) =>
+    savedOpportunities(statusFilter) as Promise<MinimalOpportunity[]>,
 }));
 
 const defaultSearchParams = Promise.resolve({});
@@ -118,7 +118,7 @@ describe("Saved Opportunities page", () => {
     expect(screen.getByText("Any opportunity status")).toBeInTheDocument();
   });
 
-  it("filters opportunities by status when status param is provided", async () => {
+  it("passes status filter to fetchSavedOpportunities when status param is provided", async () => {
     const forecastedOpportunity: BaseOpportunity = {
       ...mockOpportunity,
       opportunity_id: "forecasted-opp-id",
@@ -126,13 +126,14 @@ describe("Saved Opportunities page", () => {
       opportunity_status: "forecasted",
     };
 
-    savedOpportunities.mockResolvedValue([
-      { opportunity_id: 12345 },
-      { opportunity_id: 67890 },
-    ]);
-    opportunity
-      .mockResolvedValueOnce({ data: mockOpportunity }) // posted status
-      .mockResolvedValueOnce({ data: forecastedOpportunity }); // forecasted status
+    // First call (unfiltered) returns all, second call (filtered) returns only forecasted
+    savedOpportunities
+      .mockResolvedValueOnce([
+        { opportunity_id: 12345 },
+        { opportunity_id: 67890 },
+      ])
+      .mockResolvedValueOnce([{ opportunity_id: 67890 }]);
+    opportunity.mockResolvedValue({ data: forecastedOpportunity });
 
     const component = await SavedOpportunities({
       params: localeParams,
@@ -140,10 +141,10 @@ describe("Saved Opportunities page", () => {
     });
     render(component);
 
+    // Verify fetchSavedOpportunities was called with the status filter
+    expect(savedOpportunities).toHaveBeenCalledWith("forecasted");
     // Should show the forecasted opportunity
     expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
-    // Should not show the posted opportunity
-    expect(screen.queryByText("Test Opportunity")).not.toBeInTheDocument();
   });
 
   it("shows all opportunities when no status filter is applied", async () => {
@@ -173,9 +174,11 @@ describe("Saved Opportunities page", () => {
     expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
   });
 
-  it("shows no matching status message when filter matches no opportunities", async () => {
-    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
-    opportunity.mockResolvedValue({ data: mockOpportunity }); // posted status
+  it("shows no matching status message when API returns no opportunities for filter", async () => {
+    // First call (unfiltered) returns opportunities, second call (filtered) returns empty
+    savedOpportunities
+      .mockResolvedValueOnce([{ opportunity_id: 12345 }])
+      .mockResolvedValueOnce([]);
 
     const component = await SavedOpportunities({
       params: localeParams,
@@ -187,8 +190,6 @@ describe("Saved Opportunities page", () => {
     expect(
       screen.getByText("SavedOpportunities.noMatchingStatus"),
     ).toBeInTheDocument();
-    // Should not show the opportunity
-    expect(screen.queryByText("Test Opportunity")).not.toBeInTheDocument();
     // Should still show the filter
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
   });
