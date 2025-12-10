@@ -28,7 +28,6 @@ const cspHeader = `
     script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com/ https://fonts.googleapis.com/ https://js-agent.newrelic.com/;
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
     `;
 
 const securityHeaders = [
