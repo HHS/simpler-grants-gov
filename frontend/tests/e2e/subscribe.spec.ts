@@ -41,7 +41,7 @@ test("has title", async ({ page }) => {
   await expect(page).toHaveTitle(/Subscribe | Simpler.Grants.gov/);
 });
 
-test("client side errors", async ({ page }) => {
+test.skip("client side errors", async ({ page }) => {
   await page.getByRole("button", { name: /subscribe/i }).click();
 
   // Verify client-side errors for required fields

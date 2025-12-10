@@ -46,7 +46,7 @@ export async function expectCheckboxIDIsChecked(
   page: Page,
   idWithHash: string,
 ) {
-  const checkbox: Locator = page.locator(idWithHash);
+  const checkbox: Locator = page.locator(idWithHash).first();
   await expect(checkbox).toBeChecked();
 }
 
@@ -96,7 +96,7 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
   // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h3:has-text("Opportunities")');
+  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
   await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
 }
 
@@ -129,10 +129,17 @@ export async function clickLastPaginationPage(page: Page) {
   // must be more than 1 page
   if (count > 2) {
     const button = paginationButtons.nth(count - 1);
+    const pageNumber = await button.textContent();
+    if (!pageNumber) {
+      throw new Error("unable to click pagination button, button has no label");
+    }
     await button.click();
+    await waitForURLContainsQueryParamValue(page, "page", pageNumber);
+  } else {
+    console.error("not clicking on last page, only one page exists!");
   }
   // Delay for pagination debounce
-  await page.waitForTimeout(400);
+  // await page.waitForTimeout(400);
 }
 
 export async function getFirstSearchResultTitle(page: Page) {
