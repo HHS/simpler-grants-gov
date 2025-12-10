@@ -1,8 +1,7 @@
 import { ApplicationHistory } from "src/types/applicationResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Table } from "@trussworks/react-uswds";
-import { Alert } from "@trussworks/react-uswds";
+import { Table, Alert } from "@trussworks/react-uswds";
 
 export type ApplicationHistoryCardProps = ApplicationHistory[];
 
