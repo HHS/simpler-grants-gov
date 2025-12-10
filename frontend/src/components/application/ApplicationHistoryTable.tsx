@@ -1,7 +1,7 @@
 import { ApplicationHistory } from "src/types/applicationResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Table, Alert } from "@trussworks/react-uswds";
+import { Alert, Table } from "@trussworks/react-uswds";
 
 export type ApplicationHistoryCardProps = ApplicationHistory[];
 
@@ -29,7 +29,7 @@ const formatTimestamp = (time: string) => {
   })} ${date.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "numeric",
-    timeZoneName: "short"
+    timeZoneName: "short",
   })}`;
 };
 
@@ -65,8 +65,10 @@ const ApplicationTable = ({
 
   if (!applicationHistory.length) {
     return (
-      <Alert type="error" headingLevel="h4" noIcon>{t("error")}</Alert>
-    )
+      <Alert type="error" headingLevel="h4" noIcon>
+        {t("error")}
+      </Alert>
+    );
   }
 
   return (
