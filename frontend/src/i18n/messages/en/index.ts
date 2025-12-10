@@ -915,7 +915,12 @@ export const messages = {
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
       "Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+    noMatchingStatus:
+      "No saved opportunities match the selected status filter.",
     searchButton: "Start a new search",
+    statusFilter: {
+      label: "Filter by status",
+    },
     title: "Saved Opportunities | Simpler.Grants.gov",
   },
   Roadmap: {

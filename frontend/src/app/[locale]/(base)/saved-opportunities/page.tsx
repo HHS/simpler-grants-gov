@@ -2,6 +2,7 @@ import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
+import { OpportunityStatus } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -57,10 +59,16 @@ const SavedOpportunitiesList = ({
   return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
 };
 
+type SavedOpportunitiesPageProps = LocalizedPageProps & {
+  searchParams: Promise<{ status?: string }>;
+};
+
 export default async function SavedOpportunities({
   params,
-}: LocalizedPageProps) {
+  searchParams,
+}: SavedOpportunitiesPageProps) {
   const { locale } = await params;
+  const { status } = await searchParams;
   const t = await getTranslations({ locale });
   const savedOpportunities = await fetchSavedOpportunities();
   const opportunityPromises = savedOpportunities.map(
@@ -73,17 +81,36 @@ export default async function SavedOpportunities({
   );
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
+  // Filter opportunities by status if a status filter is selected
+  const filteredOpportunities = status
+    ? resolvedOpportunities.filter(
+        (opportunity) =>
+          opportunity?.opportunity_status === (status as OpportunityStatus),
+      )
+    : resolvedOpportunities;
+
   return (
     <>
       <GridContainer>
         <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
-      <div className="grid-container padding-y-5 display-flex">
+      <div className="grid-container padding-y-5">
         {resolvedOpportunities.length > 0 ? (
-          <SavedOpportunitiesList opportunities={resolvedOpportunities} />
+          <>
+            <div className="margin-bottom-3 display-flex flex-justify-end">
+              <SavedOpportunityStatusFilter status={status || null} />
+            </div>
+            {filteredOpportunities.length > 0 ? (
+              <SavedOpportunitiesList opportunities={filteredOpportunities} />
+            ) : (
+              <p>{t("SavedOpportunities.noMatchingStatus")}</p>
+            )}
+          </>
         ) : (
-          <NoSavedOpportunities />
+          <div className="display-flex">
+            <NoSavedOpportunities />
+          </div>
         )}
       </div>
     </>
