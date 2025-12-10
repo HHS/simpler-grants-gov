@@ -75,14 +75,16 @@ class ListFormsTask(BaseFormTask):
 
             # Add a message to the out-of-date forms list so we can make it easier
             # to update those forms by generating the command with some messages for organization
-            self.out_of_date_forms.extend(
-                [
-                    f"# {form_txt}",
-                    "# WARNING: If this form has a form_instruction record you'll need to create that"
-                    "# and add it to the command below manually.\n",
-                    update_cmd,
-                ]
-            )
+            out_of_date_entries = [f"# {form_txt}", update_cmd]
+
+            # If the form has a form_instruction_id, also include the command to update the instruction
+            if form.form_instruction_id is not None:
+                form_instruction_cmd = get_update_form_instruction_cmd(
+                    self.environment, form_id, str(form.form_instruction_id)
+                )
+                out_of_date_entries.append(form_instruction_cmd)
+
+            self.out_of_date_forms.extend(out_of_date_entries)
             return
 
         # Make the local form a dict for easier comparison
@@ -196,5 +198,18 @@ def format_timestamp(value: str | None) -> str | None:
 def get_update_cmd(environment: str, form_id: str) -> str:
     """Build a command for running the update-form script paired with this one"""
     args = f"task update-form --environment={environment} --form-id={form_id}"
+
+    return f'make cmd args="{args}"'
+
+
+def get_update_form_instruction_cmd(
+    environment: str, form_id: str, form_instruction_id: str
+) -> str:
+    """Build a command for running the update-form-instruction script"""
+    args = (
+        f"task update-form-instruction --environment={environment} "
+        f"--form-id={form_id} --form-instruction-id={form_instruction_id} "
+        f"--file-path=<PATH_TO_INSTRUCTION_FILE>"
+    )
 
     return f'make cmd args="{args}"'
