@@ -229,14 +229,16 @@ def organization_invitations_list(
         db_session.add(user_token_session)
 
         # Get organization invitations using service layer
-        invitations = list_organization_invitations_and_verify_access(
+        invitations, pagination_info = list_organization_invitations_and_verify_access(
             db_session=db_session,
             user=user_token_session.user,
             organization_id=organization_id,
             json_data=json_data,
         )
 
-    return response.ApiResponse(message="Success", data=invitations)
+    return response.ApiResponse(
+        message="Success", data=invitations, pagination_info=pagination_info
+    )
 
 
 @organization_blueprint.post("/<uuid:organization_id>/legacy-users")

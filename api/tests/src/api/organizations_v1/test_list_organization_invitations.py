@@ -427,33 +427,21 @@ class TestListOrganizationInvitations:
         assert data["data"][0]["status"] == "expired"
 
     def test_list_invitations_default_sorting(self, client, db_session, enable_factory_create):
-        """Test default sorting: email ASC, and created_at DESC for ties"""
+        """Test default sorting: email"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
         inviter = UserFactory.create()
+        for email in ["a@example.com", "b@example.com", "a@example.com"]:
+            OrganizationInvitationFactory.create(
+                organization=organization,
+                inviter_user=inviter,
+                invitee_email=email,
+            )
 
-        # Create invitations with some duplicate emails to test secondary sorting
-        OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email="b@example.com",
-        )
-        OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email="a@example.com",
-        )
-        # Duplicate email to test secondary sort by created_at DESC
-        OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email="a@example.com",
-        )
-
-        # Sort first by email ASC, then created_at DESC
+        # Default sort by email ASC
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
