@@ -16,11 +16,17 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
+from src.search.search_models import StrSearchFilter
 
 logger = logging.getLogger(__name__)
 
 
+class SavedOpportunityFilterParams(BaseModel):
+    opportunity_status: StrSearchFilter | None = None
+
+
 class SavedOpportunityListParams(BaseModel):
+    filters: SavedOpportunityFilterParams | None = None
     pagination: PaginationParams
 
 
@@ -45,6 +51,20 @@ def add_sort_order(stmt: Select, sort_order: list) -> Select:
             )
 
     return stmt.order_by(*order_cols)
+
+
+def add_opportunity_status_filter(
+    stmt: Select, filters: SavedOpportunityFilterParams | None
+) -> Select:
+    if filters is None:
+        return stmt
+
+    if filters.opportunity_status is not None and filters.opportunity_status.one_of:
+        stmt = stmt.where(
+            CurrentOpportunitySummary.opportunity_status.in_(filters.opportunity_status.one_of)
+        )
+
+    return stmt
 
 
 def get_saved_opportunities(
@@ -80,6 +100,7 @@ def get_saved_opportunities(
         )
     )
 
+    stmt = add_opportunity_status_filter(stmt, opportunity_params.filters)
     stmt = add_sort_order(stmt, opportunity_params.pagination.sort_order)
 
     paginator: Paginator[Opportunity] = Paginator(
