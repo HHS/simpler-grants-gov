@@ -1,0 +1,200 @@
+{
+  "base_url": "https://api.dev.simpler.grants.gov",
+  "timestamp": "2025-12-03 15:28:15 UTC",
+  "results": [
+    {
+      "path": "/health",
+      "method": "GET",
+      "description": "Health check endpoint",
+      "auth_type": "none",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 57.42,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/docs",
+      "method": "GET",
+      "description": "Swagger/OpenAPI documentation",
+      "auth_type": "none",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 51.79,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/openapi.json",
+      "method": "GET",
+      "description": "OpenAPI JSON specification",
+      "auth_type": "none",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 150.97,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/opportunities/search",
+      "method": "POST",
+      "description": "Search opportunities",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 117.96,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/opportunities/search",
+      "method": "POST",
+      "description": "Search opportunities with query",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 91.76,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/opportunities/search",
+      "method": "POST",
+      "description": "Search opportunities with filters",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 98.43,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/agencies",
+      "method": "POST",
+      "description": "List agencies",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 401,
+      "response_time_ms": 53.14,
+      "error": "Unexpected status code: 401",
+      "skipped": false,
+      "response_body": {
+        "data": {},
+        "errors": [],
+        "internal_request_id": "a7955f24-2ae7-4f51-a1c1-6602888c4ba9",
+        "message": "The server could not verify that you are authorized to access the URL requested",
+        "status_code": 401
+      }
+    },
+    {
+      "path": "/v1/agencies/search",
+      "method": "POST",
+      "description": "Search agencies",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 78.81,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/extracts",
+      "method": "POST",
+      "description": "Get extract metadata",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 72.05,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/common-grants/opportunities",
+      "method": "GET",
+      "description": "CommonGrants - List opportunities",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 104.67,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/common-grants/opportunities/search",
+      "method": "POST",
+      "description": "CommonGrants - Search opportunities",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 89.94,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/users/login",
+      "method": "GET",
+      "description": "User login redirect (OAuth flow start)",
+      "auth_type": "none",
+      "success": true,
+      "status_code": 302,
+      "response_time_ms": 55.41,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/users/token/logout",
+      "method": "POST",
+      "description": "User logout",
+      "auth_type": "jwt",
+      "success": false,
+      "status_code": null,
+      "response_time_ms": null,
+      "error": "Skipped: Requires valid JWT token from login flow",
+      "skipped": true
+    },
+    {
+      "path": "/v1/users/token/refresh",
+      "method": "POST",
+      "description": "Refresh user token",
+      "auth_type": "jwt",
+      "success": false,
+      "status_code": null,
+      "response_time_ms": null,
+      "error": "Skipped: Requires valid JWT token from login flow",
+      "skipped": true
+    },
+    {
+      "path": "/robots.txt",
+      "method": "GET",
+      "description": "Robots.txt for crawlers",
+      "auth_type": "none",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 44.89,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/v1/opportunities/0000591f-9f08-4952-ad4d-f5212013fb92",
+      "method": "GET",
+      "description": "Get opportunity by ID (0000591f...)",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 110.73,
+      "error": null,
+      "skipped": false
+    },
+    {
+      "path": "/common-grants/opportunities/0000591f-9f08-4952-ad4d-f5212013fb92",
+      "method": "GET",
+      "description": "CommonGrants - Get opportunity (0000591f...)",
+      "auth_type": "api_key",
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 107.72,
+      "error": null,
+      "skipped": false
+    }
+  ]
+}

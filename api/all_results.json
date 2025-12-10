@@ -1,0 +1,1226 @@
+{
+  "metadata": {
+    "base_url": "https://api.dev.simpler.grants.gov",
+    "timestamp": "2025-12-04 17:15:40 UTC",
+    "api_key_provided": true,
+    "jwt_token_provided": false
+  },
+  "tests": {
+    "auth_enforcement": [
+      {
+        "endpoint": "/v1/opportunities/search",
+        "method": "POST",
+        "status_code": 403,
+        "auth_enforced": true,
+        "expected_auth": true
+      },
+      {
+        "endpoint": "/v1/agencies",
+        "method": "POST",
+        "status_code": 403,
+        "auth_enforced": true,
+        "expected_auth": true
+      },
+      {
+        "endpoint": "/v1/agencies/search",
+        "method": "POST",
+        "status_code": 403,
+        "auth_enforced": true,
+        "expected_auth": true
+      },
+      {
+        "endpoint": "/common-grants/opportunities",
+        "method": "GET",
+        "status_code": 403,
+        "auth_enforced": true,
+        "expected_auth": true
+      },
+      {
+        "endpoint": "/common-grants/opportunities/search",
+        "method": "POST",
+        "status_code": 403,
+        "auth_enforced": true,
+        "expected_auth": true
+      },
+      {
+        "endpoint": "/health",
+        "method": "GET",
+        "status_code": 200,
+        "accessible_without_auth": true,
+        "expected_auth": false
+      },
+      {
+        "endpoint": "/docs",
+        "method": "GET",
+        "status_code": 200,
+        "accessible_without_auth": true,
+        "expected_auth": false
+      },
+      {
+        "endpoint": "/v1/users/login",
+        "method": "GET",
+        "status_code": 302,
+        "accessible_without_auth": true,
+        "expected_auth": false
+      }
+    ],
+    "soap_auth_enforcement": {
+      "base_url": "https://api.dev.simpler.grants.gov",
+      "tests": [
+        {
+          "endpoint": "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
+          "operation": "GetOpportunityList",
+          "status_code": 200,
+          "auth_enforced": false
+        },
+        {
+          "endpoint": "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+          "operation": "GetGrantOpportunities",
+          "status_code": 500,
+          "auth_enforced": null
+        }
+      ]
+    },
+    "soap_endpoints": {
+      "base_url": "https://api.dev.simpler.grants.gov",
+      "timestamp": "2025-12-04 17:15:41 UTC",
+      "tests": [
+        {
+          "endpoint": "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
+          "operation": "GetOpportunityList",
+          "description": "Applicant SOAP API - GetOpportunityList",
+          "with_api_key": false,
+          "status_code": 200,
+          "response_time_ms": 187.76,
+          "success": true,
+          "is_soap_response": true,
+          "has_soap_fault": false,
+          "response_preview": "--uuid:15a6fa3e-a4ed-45b0-b8a6-af8506678b34\r\nContent-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n\r\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ns2:GetOpportunityListResponse xmlns:ns5=\"http://apply.grants.gov/system/ApplicantCommonElements-V1.0\" xmlns:ns4=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:ns3=\"http://schemas.xmlsoap.org/wsdl/\" xmlns:ns2=\"http://apply.gran"
+        },
+        {
+          "endpoint": "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+          "operation": "GetGrantOpportunities",
+          "description": "Agency SOAP API - GetGrantOpportunities",
+          "with_api_key": false,
+          "status_code": 500,
+          "response_time_ms": 88.47,
+          "success": false,
+          "is_soap_response": true,
+          "has_soap_fault": true,
+          "response_preview": "--uuid:29489cfc-0631-4a79-900f-d63c4516dbb8\r\nContent-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n\r\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><soap:Fault><faultcode>soap:Client</faultcode><faultstring>Message part {http://apply.grants.gov/services/AgencyWebServices-V2.0}GetGrantOpportunitiesRequest was not recognized.  (Does it exist in service WSDL?)</faultstring></"
+        },
+        {
+          "endpoint": "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
+          "operation": "GetOpportunityList",
+          "description": "Applicant SOAP API - GetOpportunityList",
+          "with_api_key": true,
+          "status_code": 200,
+          "response_time_ms": 114.43,
+          "success": true,
+          "is_soap_response": true,
+          "has_soap_fault": false,
+          "response_preview": "--uuid:d5f11aac-ddd3-4da1-8608-0843d7d00930\r\nContent-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n\r\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><ns2:GetOpportunityListResponse xmlns:ns5=\"http://apply.grants.gov/system/ApplicantCommonElements-V1.0\" xmlns:ns4=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:ns3=\"http://schemas.xmlsoap.org/wsdl/\" xmlns:ns2=\"http://apply.gran"
+        },
+        {
+          "endpoint": "/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+          "operation": "GetGrantOpportunities",
+          "description": "Agency SOAP API - GetGrantOpportunities",
+          "with_api_key": true,
+          "status_code": 500,
+          "response_time_ms": 88.04,
+          "success": false,
+          "is_soap_response": true,
+          "has_soap_fault": true,
+          "response_preview": "--uuid:e9adad5c-cad7-4e84-aef9-102b64686dff\r\nContent-Type: application/xop+xml; charset=UTF-8; type=\"text/xml\"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n\r\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap:Body><soap:Fault><faultcode>soap:Client</faultcode><faultstring>Message part {http://apply.grants.gov/services/AgencyWebServices-V2.0}GetGrantOpportunitiesRequest was not recognized.  (Does it exist in service WSDL?)</faultstring></"
+        },
+        {
+          "endpoint": "/invalid-service/services/v2/InvalidPort",
+          "description": "Invalid service name",
+          "is_invalid_path_test": true,
+          "status_code": 403,
+          "auth_enforced": true
+        },
+        {
+          "endpoint": "/grantsws-applicant/services/v2/InvalidPort",
+          "description": "Invalid port name",
+          "is_invalid_path_test": true,
+          "status_code": 404,
+          "correctly_rejected": true
+        }
+      ]
+    },
+    "rate_limits": {
+      "config": {
+        "rate_limit": 10,
+        "burst_limit": 15,
+        "monthly_quota": 250000
+      },
+      "tests": {
+        "burst": {
+          "total_requests": 25,
+          "successful_requests": 25,
+          "rate_limited_requests": 0,
+          "error_requests": 0,
+          "rate_limit_triggered": false,
+          "first_rate_limit_at": null,
+          "avg_response_time_ms": 52.55,
+          "requests_per_second": 18.99,
+          "total_time_seconds": 1.32,
+          "details": [
+            {
+              "request_num": 1,
+              "status_code": 200,
+              "response_time_ms": 114.64,
+              "rate_limited": false
+            },
+            {
+              "request_num": 2,
+              "status_code": 200,
+              "response_time_ms": 41.73,
+              "rate_limited": false
+            },
+            {
+              "request_num": 3,
+              "status_code": 200,
+              "response_time_ms": 48.26,
+              "rate_limited": false
+            },
+            {
+              "request_num": 4,
+              "status_code": 200,
+              "response_time_ms": 51.63,
+              "rate_limited": false
+            },
+            {
+              "request_num": 5,
+              "status_code": 200,
+              "response_time_ms": 45.39,
+              "rate_limited": false
+            },
+            {
+              "request_num": 6,
+              "status_code": 200,
+              "response_time_ms": 45.83,
+              "rate_limited": false
+            },
+            {
+              "request_num": 7,
+              "status_code": 200,
+              "response_time_ms": 43.71,
+              "rate_limited": false
+            },
+            {
+              "request_num": 8,
+              "status_code": 200,
+              "response_time_ms": 50.31,
+              "rate_limited": false
+            },
+            {
+              "request_num": 9,
+              "status_code": 200,
+              "response_time_ms": 57.56,
+              "rate_limited": false
+            },
+            {
+              "request_num": 10,
+              "status_code": 200,
+              "response_time_ms": 61.87,
+              "rate_limited": false
+            },
+            {
+              "request_num": 11,
+              "status_code": 200,
+              "response_time_ms": 43.34,
+              "rate_limited": false
+            },
+            {
+              "request_num": 12,
+              "status_code": 200,
+              "response_time_ms": 56.91,
+              "rate_limited": false
+            },
+            {
+              "request_num": 13,
+              "status_code": 200,
+              "response_time_ms": 53.12,
+              "rate_limited": false
+            },
+            {
+              "request_num": 14,
+              "status_code": 200,
+              "response_time_ms": 59.32,
+              "rate_limited": false
+            },
+            {
+              "request_num": 15,
+              "status_code": 200,
+              "response_time_ms": 54.02,
+              "rate_limited": false
+            },
+            {
+              "request_num": 16,
+              "status_code": 200,
+              "response_time_ms": 49.4,
+              "rate_limited": false
+            },
+            {
+              "request_num": 17,
+              "status_code": 200,
+              "response_time_ms": 54.54,
+              "rate_limited": false
+            },
+            {
+              "request_num": 18,
+              "status_code": 200,
+              "response_time_ms": 47.79,
+              "rate_limited": false
+            },
+            {
+              "request_num": 19,
+              "status_code": 200,
+              "response_time_ms": 52.18,
+              "rate_limited": false
+            },
+            {
+              "request_num": 20,
+              "status_code": 200,
+              "response_time_ms": 45.73,
+              "rate_limited": false
+            },
+            {
+              "request_num": 21,
+              "status_code": 200,
+              "response_time_ms": 47.36,
+              "rate_limited": false
+            },
+            {
+              "request_num": 22,
+              "status_code": 200,
+              "response_time_ms": 49.58,
+              "rate_limited": false
+            },
+            {
+              "request_num": 23,
+              "status_code": 200,
+              "response_time_ms": 48.99,
+              "rate_limited": false
+            },
+            {
+              "request_num": 24,
+              "status_code": 200,
+              "response_time_ms": 45.84,
+              "rate_limited": false
+            },
+            {
+              "request_num": 25,
+              "status_code": 200,
+              "response_time_ms": 44.61,
+              "rate_limited": false
+            }
+          ]
+        },
+        "sustained_rate": {
+          "total_requests": 30,
+          "successful_requests": 30,
+          "rate_limited_requests": 0,
+          "error_requests": 0,
+          "rate_limit_triggered": false,
+          "first_rate_limit_at": null,
+          "avg_response_time_ms": 52.93,
+          "target_rate": 10,
+          "actual_requests_per_second": 9.61,
+          "total_time_seconds": 3.12,
+          "details": [
+            {
+              "request_num": 1,
+              "status_code": 200,
+              "response_time_ms": 53.01,
+              "rate_limited": false
+            },
+            {
+              "request_num": 2,
+              "status_code": 200,
+              "response_time_ms": 53.03,
+              "rate_limited": false
+            },
+            {
+              "request_num": 3,
+              "status_code": 200,
+              "response_time_ms": 48.99,
+              "rate_limited": false
+            },
+            {
+              "request_num": 4,
+              "status_code": 200,
+              "response_time_ms": 51.44,
+              "rate_limited": false
+            },
+            {
+              "request_num": 5,
+              "status_code": 200,
+              "response_time_ms": 53.5,
+              "rate_limited": false
+            },
+            {
+              "request_num": 6,
+              "status_code": 200,
+              "response_time_ms": 56.62,
+              "rate_limited": false
+            },
+            {
+              "request_num": 7,
+              "status_code": 200,
+              "response_time_ms": 44.09,
+              "rate_limited": false
+            },
+            {
+              "request_num": 8,
+              "status_code": 200,
+              "response_time_ms": 50.52,
+              "rate_limited": false
+            },
+            {
+              "request_num": 9,
+              "status_code": 200,
+              "response_time_ms": 46.85,
+              "rate_limited": false
+            },
+            {
+              "request_num": 10,
+              "status_code": 200,
+              "response_time_ms": 59.67,
+              "rate_limited": false
+            },
+            {
+              "request_num": 11,
+              "status_code": 200,
+              "response_time_ms": 59.78,
+              "rate_limited": false
+            },
+            {
+              "request_num": 12,
+              "status_code": 200,
+              "response_time_ms": 50.47,
+              "rate_limited": false
+            },
+            {
+              "request_num": 13,
+              "status_code": 200,
+              "response_time_ms": 47.7,
+              "rate_limited": false
+            },
+            {
+              "request_num": 14,
+              "status_code": 200,
+              "response_time_ms": 48.63,
+              "rate_limited": false
+            },
+            {
+              "request_num": 15,
+              "status_code": 200,
+              "response_time_ms": 56.6,
+              "rate_limited": false
+            },
+            {
+              "request_num": 16,
+              "status_code": 200,
+              "response_time_ms": 51.45,
+              "rate_limited": false
+            },
+            {
+              "request_num": 17,
+              "status_code": 200,
+              "response_time_ms": 52.31,
+              "rate_limited": false
+            },
+            {
+              "request_num": 18,
+              "status_code": 200,
+              "response_time_ms": 54.45,
+              "rate_limited": false
+            },
+            {
+              "request_num": 19,
+              "status_code": 200,
+              "response_time_ms": 52.79,
+              "rate_limited": false
+            },
+            {
+              "request_num": 20,
+              "status_code": 200,
+              "response_time_ms": 55.54,
+              "rate_limited": false
+            },
+            {
+              "request_num": 21,
+              "status_code": 200,
+              "response_time_ms": 60.05,
+              "rate_limited": false
+            },
+            {
+              "request_num": 22,
+              "status_code": 200,
+              "response_time_ms": 58.18,
+              "rate_limited": false
+            },
+            {
+              "request_num": 23,
+              "status_code": 200,
+              "response_time_ms": 49.91,
+              "rate_limited": false
+            },
+            {
+              "request_num": 24,
+              "status_code": 200,
+              "response_time_ms": 58.61,
+              "rate_limited": false
+            },
+            {
+              "request_num": 25,
+              "status_code": 200,
+              "response_time_ms": 50.82,
+              "rate_limited": false
+            },
+            {
+              "request_num": 26,
+              "status_code": 200,
+              "response_time_ms": 59.33,
+              "rate_limited": false
+            },
+            {
+              "request_num": 27,
+              "status_code": 200,
+              "response_time_ms": 49.77,
+              "rate_limited": false
+            },
+            {
+              "request_num": 28,
+              "status_code": 200,
+              "response_time_ms": 55.33,
+              "rate_limited": false
+            },
+            {
+              "request_num": 29,
+              "status_code": 200,
+              "response_time_ms": 45.66,
+              "rate_limited": false
+            },
+            {
+              "request_num": 30,
+              "status_code": 200,
+              "response_time_ms": 52.94,
+              "rate_limited": false
+            }
+          ]
+        },
+        "over_rate": {
+          "total_requests": 60,
+          "successful_requests": 60,
+          "rate_limited_requests": 0,
+          "error_requests": 0,
+          "rate_limit_triggered": false,
+          "first_rate_limit_at": null,
+          "avg_response_time_ms": 53.69,
+          "target_rate": 20,
+          "actual_requests_per_second": 18.24,
+          "total_time_seconds": 3.29,
+          "details": [
+            {
+              "request_num": 1,
+              "status_code": 200,
+              "response_time_ms": 46.91,
+              "rate_limited": false
+            },
+            {
+              "request_num": 2,
+              "status_code": 200,
+              "response_time_ms": 48.61,
+              "rate_limited": false
+            },
+            {
+              "request_num": 3,
+              "status_code": 200,
+              "response_time_ms": 41.77,
+              "rate_limited": false
+            },
+            {
+              "request_num": 4,
+              "status_code": 200,
+              "response_time_ms": 43.22,
+              "rate_limited": false
+            },
+            {
+              "request_num": 5,
+              "status_code": 200,
+              "response_time_ms": 53.19,
+              "rate_limited": false
+            },
+            {
+              "request_num": 6,
+              "status_code": 200,
+              "response_time_ms": 57.17,
+              "rate_limited": false
+            },
+            {
+              "request_num": 7,
+              "status_code": 200,
+              "response_time_ms": 44.81,
+              "rate_limited": false
+            },
+            {
+              "request_num": 8,
+              "status_code": 200,
+              "response_time_ms": 53.76,
+              "rate_limited": false
+            },
+            {
+              "request_num": 9,
+              "status_code": 200,
+              "response_time_ms": 53.31,
+              "rate_limited": false
+            },
+            {
+              "request_num": 10,
+              "status_code": 200,
+              "response_time_ms": 54.6,
+              "rate_limited": false
+            },
+            {
+              "request_num": 11,
+              "status_code": 200,
+              "response_time_ms": 47.95,
+              "rate_limited": false
+            },
+            {
+              "request_num": 12,
+              "status_code": 200,
+              "response_time_ms": 53.61,
+              "rate_limited": false
+            },
+            {
+              "request_num": 13,
+              "status_code": 200,
+              "response_time_ms": 56.94,
+              "rate_limited": false
+            },
+            {
+              "request_num": 14,
+              "status_code": 200,
+              "response_time_ms": 63.1,
+              "rate_limited": false
+            },
+            {
+              "request_num": 15,
+              "status_code": 200,
+              "response_time_ms": 52.11,
+              "rate_limited": false
+            },
+            {
+              "request_num": 16,
+              "status_code": 200,
+              "response_time_ms": 54.95,
+              "rate_limited": false
+            },
+            {
+              "request_num": 17,
+              "status_code": 200,
+              "response_time_ms": 55.96,
+              "rate_limited": false
+            },
+            {
+              "request_num": 18,
+              "status_code": 200,
+              "response_time_ms": 57.7,
+              "rate_limited": false
+            },
+            {
+              "request_num": 19,
+              "status_code": 200,
+              "response_time_ms": 45.92,
+              "rate_limited": false
+            },
+            {
+              "request_num": 20,
+              "status_code": 200,
+              "response_time_ms": 51.05,
+              "rate_limited": false
+            },
+            {
+              "request_num": 21,
+              "status_code": 200,
+              "response_time_ms": 48.23,
+              "rate_limited": false
+            },
+            {
+              "request_num": 22,
+              "status_code": 200,
+              "response_time_ms": 54.41,
+              "rate_limited": false
+            },
+            {
+              "request_num": 23,
+              "status_code": 200,
+              "response_time_ms": 50.58,
+              "rate_limited": false
+            },
+            {
+              "request_num": 24,
+              "status_code": 200,
+              "response_time_ms": 49.1,
+              "rate_limited": false
+            },
+            {
+              "request_num": 25,
+              "status_code": 200,
+              "response_time_ms": 51.72,
+              "rate_limited": false
+            },
+            {
+              "request_num": 26,
+              "status_code": 200,
+              "response_time_ms": 50.57,
+              "rate_limited": false
+            },
+            {
+              "request_num": 27,
+              "status_code": 200,
+              "response_time_ms": 48.45,
+              "rate_limited": false
+            },
+            {
+              "request_num": 28,
+              "status_code": 200,
+              "response_time_ms": 56.78,
+              "rate_limited": false
+            },
+            {
+              "request_num": 29,
+              "status_code": 200,
+              "response_time_ms": 46.52,
+              "rate_limited": false
+            },
+            {
+              "request_num": 30,
+              "status_code": 200,
+              "response_time_ms": 48.82,
+              "rate_limited": false
+            },
+            {
+              "request_num": 31,
+              "status_code": 200,
+              "response_time_ms": 54.94,
+              "rate_limited": false
+            },
+            {
+              "request_num": 32,
+              "status_code": 200,
+              "response_time_ms": 45.22,
+              "rate_limited": false
+            },
+            {
+              "request_num": 33,
+              "status_code": 200,
+              "response_time_ms": 52.81,
+              "rate_limited": false
+            },
+            {
+              "request_num": 34,
+              "status_code": 200,
+              "response_time_ms": 56.91,
+              "rate_limited": false
+            },
+            {
+              "request_num": 35,
+              "status_code": 200,
+              "response_time_ms": 49.52,
+              "rate_limited": false
+            },
+            {
+              "request_num": 36,
+              "status_code": 200,
+              "response_time_ms": 50.83,
+              "rate_limited": false
+            },
+            {
+              "request_num": 37,
+              "status_code": 200,
+              "response_time_ms": 53.73,
+              "rate_limited": false
+            },
+            {
+              "request_num": 38,
+              "status_code": 200,
+              "response_time_ms": 56.15,
+              "rate_limited": false
+            },
+            {
+              "request_num": 39,
+              "status_code": 200,
+              "response_time_ms": 53.13,
+              "rate_limited": false
+            },
+            {
+              "request_num": 40,
+              "status_code": 200,
+              "response_time_ms": 53.63,
+              "rate_limited": false
+            },
+            {
+              "request_num": 41,
+              "status_code": 200,
+              "response_time_ms": 54.82,
+              "rate_limited": false
+            },
+            {
+              "request_num": 42,
+              "status_code": 200,
+              "response_time_ms": 49.61,
+              "rate_limited": false
+            },
+            {
+              "request_num": 43,
+              "status_code": 200,
+              "response_time_ms": 49.72,
+              "rate_limited": false
+            },
+            {
+              "request_num": 44,
+              "status_code": 200,
+              "response_time_ms": 51.84,
+              "rate_limited": false
+            },
+            {
+              "request_num": 45,
+              "status_code": 200,
+              "response_time_ms": 50.7,
+              "rate_limited": false
+            },
+            {
+              "request_num": 46,
+              "status_code": 200,
+              "response_time_ms": 55.14,
+              "rate_limited": false
+            },
+            {
+              "request_num": 47,
+              "status_code": 200,
+              "response_time_ms": 53.57,
+              "rate_limited": false
+            },
+            {
+              "request_num": 48,
+              "status_code": 200,
+              "response_time_ms": 106.86,
+              "rate_limited": false
+            },
+            {
+              "request_num": 49,
+              "status_code": 200,
+              "response_time_ms": 61.05,
+              "rate_limited": false
+            },
+            {
+              "request_num": 50,
+              "status_code": 200,
+              "response_time_ms": 49.41,
+              "rate_limited": false
+            },
+            {
+              "request_num": 51,
+              "status_code": 200,
+              "response_time_ms": 71.35,
+              "rate_limited": false
+            },
+            {
+              "request_num": 52,
+              "status_code": 200,
+              "response_time_ms": 52.86,
+              "rate_limited": false
+            },
+            {
+              "request_num": 53,
+              "status_code": 200,
+              "response_time_ms": 58.5,
+              "rate_limited": false
+            },
+            {
+              "request_num": 54,
+              "status_code": 200,
+              "response_time_ms": 46.65,
+              "rate_limited": false
+            },
+            {
+              "request_num": 55,
+              "status_code": 200,
+              "response_time_ms": 56.17,
+              "rate_limited": false
+            },
+            {
+              "request_num": 56,
+              "status_code": 200,
+              "response_time_ms": 50.65,
+              "rate_limited": false
+            },
+            {
+              "request_num": 57,
+              "status_code": 200,
+              "response_time_ms": 54.12,
+              "rate_limited": false
+            },
+            {
+              "request_num": 58,
+              "status_code": 200,
+              "response_time_ms": 63.66,
+              "rate_limited": false
+            },
+            {
+              "request_num": 59,
+              "status_code": 200,
+              "response_time_ms": 56.91,
+              "rate_limited": false
+            },
+            {
+              "request_num": 60,
+              "status_code": 200,
+              "response_time_ms": 59.33,
+              "rate_limited": false
+            }
+          ]
+        },
+        "auth_endpoint_burst": {
+          "total_requests": 20,
+          "successful_requests": 20,
+          "rate_limited_requests": 0,
+          "error_requests": 0,
+          "rate_limit_triggered": false,
+          "first_rate_limit_at": null,
+          "avg_response_time_ms": 89.14,
+          "requests_per_second": 11.2,
+          "total_time_seconds": 1.79,
+          "details": [
+            {
+              "request_num": 1,
+              "status_code": 200,
+              "response_time_ms": 124.2,
+              "rate_limited": false
+            },
+            {
+              "request_num": 2,
+              "status_code": 200,
+              "response_time_ms": 91.15,
+              "rate_limited": false
+            },
+            {
+              "request_num": 3,
+              "status_code": 200,
+              "response_time_ms": 87.6,
+              "rate_limited": false
+            },
+            {
+              "request_num": 4,
+              "status_code": 200,
+              "response_time_ms": 84.75,
+              "rate_limited": false
+            },
+            {
+              "request_num": 5,
+              "status_code": 200,
+              "response_time_ms": 82.19,
+              "rate_limited": false
+            },
+            {
+              "request_num": 6,
+              "status_code": 200,
+              "response_time_ms": 86.36,
+              "rate_limited": false
+            },
+            {
+              "request_num": 7,
+              "status_code": 200,
+              "response_time_ms": 97.7,
+              "rate_limited": false
+            },
+            {
+              "request_num": 8,
+              "status_code": 200,
+              "response_time_ms": 84.08,
+              "rate_limited": false
+            },
+            {
+              "request_num": 9,
+              "status_code": 200,
+              "response_time_ms": 80.8,
+              "rate_limited": false
+            },
+            {
+              "request_num": 10,
+              "status_code": 200,
+              "response_time_ms": 88.86,
+              "rate_limited": false
+            },
+            {
+              "request_num": 11,
+              "status_code": 200,
+              "response_time_ms": 82.43,
+              "rate_limited": false
+            },
+            {
+              "request_num": 12,
+              "status_code": 200,
+              "response_time_ms": 87.97,
+              "rate_limited": false
+            },
+            {
+              "request_num": 13,
+              "status_code": 200,
+              "response_time_ms": 120.51,
+              "rate_limited": false
+            },
+            {
+              "request_num": 14,
+              "status_code": 200,
+              "response_time_ms": 89.25,
+              "rate_limited": false
+            },
+            {
+              "request_num": 15,
+              "status_code": 200,
+              "response_time_ms": 81.18,
+              "rate_limited": false
+            },
+            {
+              "request_num": 16,
+              "status_code": 200,
+              "response_time_ms": 81.18,
+              "rate_limited": false
+            },
+            {
+              "request_num": 17,
+              "status_code": 200,
+              "response_time_ms": 79.8,
+              "rate_limited": false
+            },
+            {
+              "request_num": 18,
+              "status_code": 200,
+              "response_time_ms": 84.64,
+              "rate_limited": false
+            },
+            {
+              "request_num": 19,
+              "status_code": 200,
+              "response_time_ms": 82.99,
+              "rate_limited": false
+            },
+            {
+              "request_num": 20,
+              "status_code": 200,
+              "response_time_ms": 85.22,
+              "rate_limited": false
+            }
+          ]
+        }
+      }
+    },
+    "endpoints": {
+      "results": [
+        {
+          "path": "/health",
+          "method": "GET",
+          "description": "Health check endpoint",
+          "auth_type": "none",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 62.02,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/docs",
+          "method": "GET",
+          "description": "Swagger/OpenAPI documentation",
+          "auth_type": "none",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 56.12,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/openapi.json",
+          "method": "GET",
+          "description": "OpenAPI JSON specification",
+          "auth_type": "none",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 152.32,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/opportunities/search",
+          "method": "POST",
+          "description": "Search opportunities",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 91.31,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/opportunities/search",
+          "method": "POST",
+          "description": "Search opportunities with query",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 90.52,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/opportunities/search",
+          "method": "POST",
+          "description": "Search opportunities with filters",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 97.1,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/agencies",
+          "method": "POST",
+          "description": "List agencies",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 401,
+          "response_time_ms": 59.55,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/agencies/search",
+          "method": "POST",
+          "description": "Search agencies",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 81.35,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/extracts",
+          "method": "POST",
+          "description": "Get extract metadata",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 85.9,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/common-grants/opportunities",
+          "method": "GET",
+          "description": "CommonGrants - List opportunities",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 89.0,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/common-grants/opportunities/search",
+          "method": "POST",
+          "description": "CommonGrants - Search opportunities",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 89.54,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/users/login",
+          "method": "GET",
+          "description": "User login redirect (OAuth flow start)",
+          "auth_type": "none",
+          "success": true,
+          "status_code": 302,
+          "response_time_ms": 55.34,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/users/token/logout",
+          "method": "POST",
+          "description": "User logout",
+          "auth_type": "jwt",
+          "success": false,
+          "status_code": null,
+          "response_time_ms": null,
+          "error": "Skipped: Requires valid JWT token from login flow",
+          "skipped": true
+        },
+        {
+          "path": "/v1/users/token/refresh",
+          "method": "POST",
+          "description": "Refresh user token",
+          "auth_type": "jwt",
+          "success": false,
+          "status_code": null,
+          "response_time_ms": null,
+          "error": "Skipped: Requires valid JWT token from login flow",
+          "skipped": true
+        },
+        {
+          "path": "/robots.txt",
+          "method": "GET",
+          "description": "Robots.txt for crawlers",
+          "auth_type": "none",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 46.7,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/v1/opportunities/0000591f-9f08-4952-ad4d-f5212013fb92",
+          "method": "GET",
+          "description": "Get opportunity by ID (0000591f...)",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 96.9,
+          "error": null,
+          "skipped": false
+        },
+        {
+          "path": "/common-grants/opportunities/0000591f-9f08-4952-ad4d-f5212013fb92",
+          "method": "GET",
+          "description": "CommonGrants - Get opportunity (0000591f...)",
+          "auth_type": "api_key",
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 102.72,
+          "error": null,
+          "skipped": false
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "skipped": 2
+    }
+  },
+  "summary": {
+    "total_test_suites": 5,
+    "passed_suites": 0,
+    "failed_suites": 0,
+    "overall_status": "PASSED"
+  }
+}
