@@ -7,6 +7,7 @@ XSD Reference: https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1
 """
 
 from datetime import date
+from pathlib import Path
 
 import pytest
 from lxml import etree as lxml_etree
@@ -200,8 +201,6 @@ class TestGGLobbyingFormXSDValidation:
     @pytest.fixture
     def xsd_validator(self):
         """Create XSD validator with cache directory."""
-        from pathlib import Path
-
         xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
         if not xsd_cache_dir.exists():
             pytest.skip(

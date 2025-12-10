@@ -138,6 +138,19 @@ export interface OrganizationPendingInvitation {
   roles: UserRole[];
 }
 
+export enum OrganizationLegacyUserStatus {
+  Available = "available",
+  Member = "member",
+  PendingInvitation = "pending_invitation",
+}
+
+export interface OrganizationLegacyUser {
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  status: OrganizationLegacyUserStatus;
+}
+
 export interface TestUser extends UserDetailProfile {
   oauth_id: string;
   user_api_key: string;

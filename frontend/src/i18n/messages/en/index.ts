@@ -1659,5 +1659,9 @@ export const messages = {
     metaDescription: "Manage users from legacy integrations",
     pageHeading: "Legacy invite",
     pageTitle: "Legacy invite | Simpler.Grants.gov",
+    tableHeadings: {
+      email: "Email",
+      name: "Name",
+    },
   },
 };
