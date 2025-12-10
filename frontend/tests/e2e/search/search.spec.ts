@@ -196,6 +196,8 @@ test.describe("Search page tests", () => {
 
     await clickLastPaginationPage(page);
 
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // somehow this is being resorted before fetching the name of the result
     const lastSearchResultTitle = await getLastSearchResultTitle(page);
 
     if (isMobile) {
@@ -203,12 +205,14 @@ test.describe("Search page tests", () => {
     }
 
     await selectSortBy(page, "opportunityTitleAsc", isMobile);
-
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
     if (isMobile) {
       await toggleFilterDrawer(page);
     }
 
     const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+
+    console.log("$$$$", firstSearchResultTitle);
 
     expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
   });
