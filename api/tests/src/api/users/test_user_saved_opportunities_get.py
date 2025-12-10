@@ -295,18 +295,18 @@ def test_user_get_saved_opportunities_filter_by_status(
     user_auth_token,
 ):
     """Test that users can filter saved opportunities by opportunity status"""
-    # Create opportunities with different statuses
+    # Create opportunities with different statuses using factory traits
     posted_opp = OpportunityFactory.create(
         opportunity_title="Posted Opportunity",
-        opportunity_status=OpportunityStatus.POSTED,
+        is_posted_summary=True,
     )
     forecasted_opp = OpportunityFactory.create(
         opportunity_title="Forecasted Opportunity",
-        opportunity_status=OpportunityStatus.FORECASTED,
+        is_forecasted_summary=True,
     )
     closed_opp = OpportunityFactory.create(
         opportunity_title="Closed Opportunity",
-        opportunity_status=OpportunityStatus.CLOSED,
+        is_closed_summary=True,
     )
 
     # Save all opportunities for the user
@@ -345,18 +345,18 @@ def test_user_get_saved_opportunities_filter_by_multiple_statuses(
     user_auth_token,
 ):
     """Test that users can filter saved opportunities by multiple statuses"""
-    # Create opportunities with different statuses
+    # Create opportunities with different statuses using factory traits
     posted_opp = OpportunityFactory.create(
         opportunity_title="Posted Opportunity",
-        opportunity_status=OpportunityStatus.POSTED,
+        is_posted_summary=True,
     )
     forecasted_opp = OpportunityFactory.create(
         opportunity_title="Forecasted Opportunity",
-        opportunity_status=OpportunityStatus.FORECASTED,
+        is_forecasted_summary=True,
     )
     closed_opp = OpportunityFactory.create(
         opportunity_title="Closed Opportunity",
-        opportunity_status=OpportunityStatus.CLOSED,
+        is_closed_summary=True,
     )
 
     # Save all opportunities for the user
@@ -397,14 +397,14 @@ def test_user_get_saved_opportunities_no_filter_returns_all(
     user_auth_token,
 ):
     """Test that without a filter, all saved opportunities are returned"""
-    # Create opportunities with different statuses
+    # Create opportunities with different statuses using factory traits
     posted_opp = OpportunityFactory.create(
         opportunity_title="Posted Opportunity",
-        opportunity_status=OpportunityStatus.POSTED,
+        is_posted_summary=True,
     )
     forecasted_opp = OpportunityFactory.create(
         opportunity_title="Forecasted Opportunity",
-        opportunity_status=OpportunityStatus.FORECASTED,
+        is_forecasted_summary=True,
     )
 
     # Save all opportunities for the user
