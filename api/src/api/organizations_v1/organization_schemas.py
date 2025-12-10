@@ -424,7 +424,7 @@ class LegacyUsersListRequestSchema(Schema):
             ["email", "first_name", "last_name", "created_date"],
             default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
             default_page_size=25,
-            default_page_offset=1
+            default_page_offset=1,
         ),
         metadata={
             "description": "Pagination parameters for legacy user list (default sort: email ascending)"
