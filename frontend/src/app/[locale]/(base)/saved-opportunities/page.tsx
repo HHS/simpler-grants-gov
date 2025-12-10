@@ -70,12 +70,14 @@ export default async function SavedOpportunities({
   const { status } = await searchParams;
   const t = await getTranslations({ locale });
 
-  // Check if user has any saved opportunities (unfiltered count)
-  const allSavedOpportunities = await fetchSavedOpportunities();
-  const hasSavedOpportunities = allSavedOpportunities.length > 0;
-
-  // Fetch filtered saved opportunities from API
+  // Fetch saved opportunities (filtered if status is provided)
   const savedOpportunities = await fetchSavedOpportunities(status);
+
+  let hasSavedOpportunities = savedOpportunities.length > 0;
+  if (!hasSavedOpportunities && status) {
+    const allSavedOpportunities = await fetchSavedOpportunities();
+    hasSavedOpportunities = allSavedOpportunities.length > 0;
+  }
 
   // Get full opportunity details for each saved opportunity
   const opportunityPromises = savedOpportunities.map(

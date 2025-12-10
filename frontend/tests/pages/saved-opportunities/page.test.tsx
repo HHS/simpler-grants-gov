@@ -126,13 +126,8 @@ describe("Saved Opportunities page", () => {
       opportunity_status: "forecasted",
     };
 
-    // First call (unfiltered) returns all, second call (filtered) returns only forecasted
-    savedOpportunities
-      .mockResolvedValueOnce([
-        { opportunity_id: 12345 },
-        { opportunity_id: 67890 },
-      ])
-      .mockResolvedValueOnce([{ opportunity_id: 67890 }]);
+    // With optimized logic: first call is filtered, returns results so no second call needed
+    savedOpportunities.mockResolvedValueOnce([{ opportunity_id: 67890 }]);
     opportunity.mockResolvedValue({ data: forecastedOpportunity });
 
     const component = await SavedOpportunities({
@@ -143,6 +138,8 @@ describe("Saved Opportunities page", () => {
 
     // Verify fetchSavedOpportunities was called with the status filter
     expect(savedOpportunities).toHaveBeenCalledWith("forecasted");
+    // Should only be called once since filtered results were found
+    expect(savedOpportunities).toHaveBeenCalledTimes(1);
     // Should show the forecasted opportunity
     expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
   });
@@ -175,10 +172,11 @@ describe("Saved Opportunities page", () => {
   });
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {
-    // First call (unfiltered) returns opportunities, second call (filtered) returns empty
+    // With optimized logic: first call is filtered (returns empty),
+    // second call is unfiltered to check if user has any saved opportunities
     savedOpportunities
-      .mockResolvedValueOnce([{ opportunity_id: 12345 }])
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce([]) // filtered call returns empty
+      .mockResolvedValueOnce([{ opportunity_id: 12345 }]); // unfiltered call returns opportunities
 
     const component = await SavedOpportunities({
       params: localeParams,
