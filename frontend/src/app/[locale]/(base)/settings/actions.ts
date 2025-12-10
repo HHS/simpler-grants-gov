@@ -1,10 +1,11 @@
 "use server";
 
-import { UserProfileResponse } from "src/types/userTypes";
 import { getSession } from "src/services/auth/session";
-import { getTranslations } from "next-intl/server";
 import { updateUserDetails } from "src/services/fetch/fetchers/userFetcher";
+import { UserProfileResponse } from "src/types/userTypes";
 import { z } from "zod";
+
+import { getTranslations } from "next-intl/server";
 
 const validateUserProfileAction = async (formData: FormData) => {
   const t = await getTranslations("Settings.validationErrors");

@@ -1,16 +1,17 @@
-import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
-import { applicationTestUserId, testApplicationId } from "src/constants/auth";
-import { useCallback, useState } from "react";
-
-import Link from "next/link";
-import { LoginButton } from "src/components/LoginButton";
-import { USWDSIcon } from "src/components/USWDSIcon";
 import clsx from "clsx";
 import { noop } from "lodash";
+import { applicationTestUserId, testApplicationId } from "src/constants/auth";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useUser } from "src/services/auth/useUser";
+
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
+
+import { LoginButton } from "src/components/LoginButton";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 // links directly to a test application, only used in local environments when logged in as specific test user
 const TestApplicationLink = () => {
@@ -97,7 +98,11 @@ const LogoutNavItem = () => {
   );
 };
 
-export const UserDropdown = ({ isApplicationTestUser }: { isApplicationTestUser: boolean }) => {
+export const UserDropdown = ({
+  isApplicationTestUser,
+}: {
+  isApplicationTestUser: boolean;
+}) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
 
   const { checkFeatureFlag } = useFeatureFlags();
@@ -160,9 +165,7 @@ export const UserControl = ({ localDev }: { localDev: boolean }) => {
     <>
       {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
       {!!user?.token && (
-        <UserDropdown
-          isApplicationTestUser={isApplicationTestUser}
-        />
+        <UserDropdown isApplicationTestUser={isApplicationTestUser} />
       )}
     </>
   );

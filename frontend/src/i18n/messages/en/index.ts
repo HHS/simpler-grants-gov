@@ -1433,7 +1433,8 @@ export const messages = {
     pageTitle: "Settings | Simpler.Grants.gov",
     title: "Settings",
     contactInfoHeading: "Contact information",
-    contactInfoBody: "Your name and email will be visible to others in your organization as you collaborate. You may update your name here at any time, but your email and password are managed by <link>login.gov</link>.",
+    contactInfoBody:
+      "Your name and email will be visible to others in your organization as you collaborate. You may update your name here at any time, but your email and password are managed by <link>login.gov</link>.",
     inputs: {
       firstName: "First name",
       middleName: "Middle name",
