@@ -3,7 +3,7 @@
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.0
+ARG PYTHON_VERSION=3.14.2
 ARG PY_MM=3.14
 ARG POETRY_VERSION=2.2.1
 ARG PIP_VERSION=25.3
@@ -128,7 +128,11 @@ RUN dnf install -y \
     # Update packages with security vulnerabilities
     dnf update -y \
       libcap-2.73-1.amzn2023.0.4 \
-      lz4-libs-1.9.4-1.amzn2023.0.3 && \
+      lz4-libs-1.9.4-1.amzn2023.0.3 \
+      binutils-2.41-50.amzn2023.0.5 \
+      glib2-2.82.2-767.amzn2023 \
+      curl-minimal-8.11.1-4.amzn2023.0.3 \
+      libcurl-minimal-8.11.1-4.amzn2023.0.3 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \
