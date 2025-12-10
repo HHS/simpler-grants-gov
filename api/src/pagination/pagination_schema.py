@@ -27,6 +27,8 @@ def generate_pagination_schema(
     order_by_fields: list[str],
     max_page_size: int = 5000,
     default_sort_order: list[dict] | None = None,
+    default_page_size: int | None = None,
+    default_page_offset: int | None = None,
 ) -> type[Schema]:
     """
     Generate a schema that describes the pagination for a pagination endpoint.
@@ -90,12 +92,12 @@ def generate_pagination_schema(
             **additional_sort_order_params,
         ),
         "page_size": fields.Integer(
-            required=True,
+            load_default=default_page_size,
             validate=[validators.Range(min=1, max=max_page_size)],
             metadata={"description": "The size of the page to fetch", "example": 25},
         ),
         "page_offset": fields.Integer(
-            required=True,
+            load_default=default_page_offset,
             validate=[validators.Range(min=1)],
             metadata={
                 "description": "The page number to fetch, starts counting from 1",
