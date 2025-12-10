@@ -365,6 +365,7 @@ export const messages = {
       timestamp: "Timestamp",
       activity: "Activity",
       performedBy: "Performed By",
+      error: "We have encountered an error loading your application activity history. Please try again later.",
       activities: {
         application_created: "Application created",
         application_name_changed: "Application name changed",

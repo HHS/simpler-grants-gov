@@ -2,6 +2,7 @@ import { ApplicationHistory } from "src/types/applicationResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { Table } from "@trussworks/react-uswds";
+import { Alert } from "@trussworks/react-uswds";
 
 export type ApplicationHistoryCardProps = ApplicationHistory[];
 
@@ -29,8 +30,8 @@ const formatTimestamp = (time: string) => {
   })} ${date.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "numeric",
-    timeZone: "America/New_York",
-  })} ET`;
+    timeZoneName: "short"
+  })}`;
 };
 
 const getActivityMessage = (activity: ApplicationHistory, message: string) => {
@@ -63,6 +64,12 @@ const ApplicationTable = ({
     "Application.historyTable.activities",
   );
 
+  if (!applicationHistory.length) {
+    return (
+      <Alert type="error" headingLevel="h4" noIcon>{t("error")}</Alert>
+    )
+  }
+
   return (
     <Table className="width-full overflow-wrap simpler-application-forms-table">
       <thead>
@@ -87,7 +94,7 @@ const ApplicationTable = ({
           <tr
             key={index}
             id={`form-history-${index}`}
-            data-testId={`form-history-${index}`}
+            data-testid={`form-history-${index}`}
           >
             <td data-label={t("timestamp")}>
               <div>{formatTimestamp(history.created_at)}</div>

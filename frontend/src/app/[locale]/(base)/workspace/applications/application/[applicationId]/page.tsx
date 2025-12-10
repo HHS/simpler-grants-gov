@@ -42,7 +42,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
   const { applicationId } = await params;
   let details = {} as ApplicationDetailsCardProps;
-  let historyDetails = {} as ApplicationHistoryCardProps;
+  let historyDetails = [] as ApplicationHistoryCardProps;
   let opportunity = {} as OpportunityDetail;
   let attachments = [] as Attachment[];
 
@@ -82,9 +82,9 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         `Error retrieving application history details for (${applicationId})`,
         response,
       );
-      return <TopLevelError />;
+    } else {
+      historyDetails = historyResponse.data;
     }
-    historyDetails = historyResponse.data;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
