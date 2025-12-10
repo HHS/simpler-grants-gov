@@ -5,7 +5,12 @@ import requests_mock
 
 from src.api.form_alpha.form_schema import FormAlphaSchema
 from src.task.forms.form_task_shared import build_form_json
-from src.task.forms.list_forms_task import ListFormsTask, diff_form, get_update_cmd
+from src.task.forms.list_forms_task import (
+    ListFormsTask,
+    diff_form,
+    get_update_cmd,
+    get_update_form_instruction_cmd,
+)
 from tests.src.db.models.factories import FormFactory
 
 
@@ -17,12 +22,21 @@ def list_forms_task():
 def test_list_forms_task(list_forms_task, enable_factory_create, monkeypatch):
     unchanged_form = FormFactory.create(form_name="Unchanged Form", with_instruction=True)
     new_form = FormFactory.create(form_name="New Form")
+    new_form_with_instruction = FormFactory.create(
+        form_name="New Form with Instruction", with_instruction=True
+    )
     modified_form = FormFactory.create(form_name="Modified Form")
     modified_form_with_instruction = FormFactory.create(
         form_name="Modified Form with Instruction", with_instruction=True
     )
 
-    forms = [unchanged_form, new_form, modified_form, modified_form_with_instruction]
+    forms = [
+        unchanged_form,
+        new_form,
+        new_form_with_instruction,
+        modified_form,
+        modified_form_with_instruction,
+    ]
     monkeypatch.setattr(list_forms_task, "get_forms", lambda: forms)
 
     unchanged_form_response = build_form_json(unchanged_form)
@@ -67,10 +81,11 @@ def test_list_forms_task(list_forms_task, enable_factory_create, monkeypatch):
 
     # Verify the table we processed has all of the forms
     # Note that we might have more forms because we don't cleanup the DB
-    assert list_forms_task.output_table.rowcount >= 4
+    assert list_forms_task.output_table.rowcount >= 5
     output_table_str = list_forms_task.output_table.get_string()
     assert modified_form.form_name in output_table_str
     assert new_form.form_name in output_table_str
+    assert new_form_with_instruction.form_name in output_table_str
     assert unchanged_form.form_name in output_table_str
 
     out_of_date_form_output = list_forms_task.out_of_date_forms
@@ -78,8 +93,20 @@ def test_list_forms_task(list_forms_task, enable_factory_create, monkeypatch):
     assert any(str(modified_form.form_id) in r for r in out_of_date_form_output)
     # We expect the new form to be in the output
     assert any(str(new_form.form_id) in r for r in out_of_date_form_output)
+    # We expect the new form with instruction to be in the output
+    assert any(str(new_form_with_instruction.form_id) in r for r in out_of_date_form_output)
     # The unmodified form should not be mentioned
     assert not any(str(unchanged_form.form_id) in r for r in out_of_date_form_output)
+
+    # Verify that form instruction command is generated for new forms with instructions
+    # The new form WITH instruction should have an update-form-instruction command
+    assert any(
+        "update-form-instruction" in r and str(new_form_with_instruction.form_instruction_id) in r
+        for r in out_of_date_form_output
+    )
+    # The new form WITHOUT instruction should NOT have an update-form-instruction command
+    new_form_output = [r for r in out_of_date_form_output if str(new_form.form_id) in r]
+    assert not any("update-form-instruction" in r for r in new_form_output)
 
 
 @pytest.mark.parametrize(
@@ -99,6 +126,36 @@ def test_list_forms_task(list_forms_task, enable_factory_create, monkeypatch):
 )
 def test_get_update_cmd(environment, form_id, expected_result):
     assert get_update_cmd(environment, form_id) == expected_result
+
+
+@pytest.mark.parametrize(
+    "environment, form_id, form_instruction_id, expected_result",
+    [
+        (
+            "dev",
+            "form-uuid-123",
+            "instruction-uuid-456",
+            'make cmd args="task update-form-instruction --environment=dev '
+            "--form-id=form-uuid-123 --form-instruction-id=instruction-uuid-456 "
+            '--file-path=<PATH_TO_INSTRUCTION_FILE>"',
+        ),
+        (
+            "staging",
+            "abc-def-ghi",
+            "xyz-123-789",
+            'make cmd args="task update-form-instruction --environment=staging '
+            "--form-id=abc-def-ghi --form-instruction-id=xyz-123-789 "
+            '--file-path=<PATH_TO_INSTRUCTION_FILE>"',
+        ),
+    ],
+)
+def test_get_update_form_instruction_cmd(
+    environment, form_id, form_instruction_id, expected_result
+):
+    assert (
+        get_update_form_instruction_cmd(environment, form_id, form_instruction_id)
+        == expected_result
+    )
 
 
 def test_do_diff_no_changes(enable_factory_create):
