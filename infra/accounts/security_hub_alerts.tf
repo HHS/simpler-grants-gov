@@ -9,6 +9,30 @@ resource "aws_sns_topic" "security_hub_findings" {
 }
 
 #===================================
+# Alerts Email Configuration
+#===================================
+
+# Store alerts email in Secrets Manager to avoid exposing in terraform
+# To set or update the email:
+# aws secretsmanager create-secret --name grants-alerts-email \
+#   --secret-string '{"email":"grants-alerts@navapbc.com"}' --region us-east-1
+# Or to update:
+# aws secretsmanager put-secret-value --secret-id grants-alerts-email \
+#   --secret-string '{"email":"grants-alerts@navapbc.com"}' --region us-east-1
+
+data "aws_secretsmanager_secret" "alerts_email" {
+  name = "grants-alerts-email"
+}
+
+data "aws_secretsmanager_secret_version" "alerts_email" {
+  secret_id = data.aws_secretsmanager_secret.alerts_email.id
+}
+
+locals {
+  alerts_email = jsondecode(data.aws_secretsmanager_secret_version.alerts_email.secret_string)["email"]
+}
+
+#===================================
 # Formatted Email Alerts
 #===================================
 
@@ -22,7 +46,7 @@ resource "aws_sns_topic" "security_hub_findings_formatted" {
 resource "aws_sns_topic_subscription" "security_hub_findings_email" {
   topic_arn = aws_sns_topic.security_hub_findings_formatted.arn
   protocol  = "email"
-  endpoint  = "grantsalerts@navapbc.com"
+  endpoint  = local.alerts_email
 }
 
 # Lambda function to format findings for email
