@@ -45,12 +45,12 @@ module "prod_config" {
   has_search = true
   # Pricing: https://aws.amazon.com/opensearch-service/pricing/
   search_master_instance_type = "m6g.large.search"
-  # 20 is the minimum volume size for the or1.medium.search instance type.
+  # 20 is the minimum volume size for the or1.medium/large.search instance type.
   # Scale the search_data_volume_size number to meet your storage needs.
   # Scale the search_data_instance_count number to meet your compute needs.
   # The search_data_instance_count should be a multiple of the number of availability zones.
   # Use the AWS Console to determine the number of availability zones in your region.
-  search_data_instance_type      = "or1.medium.search"
+  search_data_instance_type      = "or1.large.search"
   search_data_volume_size        = 20
   search_data_instance_count     = 3
   search_availability_zone_count = 3
