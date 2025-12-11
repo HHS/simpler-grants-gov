@@ -117,9 +117,7 @@ export async function clickPaginationPageNumber(
     `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
   );
   await paginationButton.first().click();
-
-  // Delay for pagination debounce
-  await page.waitForTimeout(400);
+  await waitForURLContainsQueryParamValue(page, "page", pageNumber.toString());
 }
 
 export async function clickLastPaginationPage(page: Page) {
@@ -138,8 +136,6 @@ export async function clickLastPaginationPage(page: Page) {
   } else {
     console.error("not clicking on last page, only one page exists!");
   }
-  // Delay for pagination debounce
-  // await page.waitForTimeout(400);
 }
 
 export async function getFirstSearchResultTitle(page: Page) {
@@ -153,11 +149,7 @@ export async function getLastSearchResultTitle(page: Page) {
   const lastResultSelector = page.locator(
     ".simpler-responsive-table tr:last-child a",
   );
-  const text = await lastResultSelector.textContent();
-  if (text?.includes("test")) {
-    console.log("why");
-  }
-  return text;
+  return await lastResultSelector.textContent();
 }
 
 // If descending, select the ascending variant

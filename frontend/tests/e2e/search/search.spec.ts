@@ -116,6 +116,7 @@ test.describe("Search page tests", () => {
     /***********************************************************/
 
     await refreshPageWithCurrentURL(page);
+    await waitForSearchResultsInitialLoad(page);
 
     // Expect search inputs are retained in the new tab
     await expectSortBy(page, "awardCeilingDesc", isMobile);
@@ -189,12 +190,21 @@ test.describe("Search page tests", () => {
       await toggleFilterDrawer(page);
     }
     await selectSortBy(page, "opportunityTitleAsc", isMobile);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
     const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
     if (isMobile) {
       await toggleFilterDrawer(page);
     }
     await selectSortBy(page, "opportunityTitleDesc", isMobile);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+
     await clickLastPaginationPage(page);
 
     const lastSearchResultTitle = await getLastSearchResultTitle(page);
