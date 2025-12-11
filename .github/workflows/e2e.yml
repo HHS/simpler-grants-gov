@@ -52,8 +52,8 @@ jobs:
           CI: true
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
-          PLAYWRIGHT_BASE_URL: "https://staging.simpler.grants.gov"
-          PLAYWRIGHT_TARGET_ENV: "staging"
+          PLAYWRIGHT_BASE_URL: "https://staging.simpler.grants.gov" # we can make this dynamic later
+          PLAYWRIGHT_TARGET_ENV: "staging" # we can make this dynamic later
         run: |
           npm run test:e2e
 
