@@ -100,7 +100,7 @@ resource "aws_iam_role_policy" "formatter_sns_publish" {
         Action = [
           "sns:Publish"
         ]
-        Effect = "Allow"
+        Effect   = "Allow"
         Resource = aws_sns_topic.security_hub_findings_formatted.arn
       }
     ]
@@ -179,7 +179,7 @@ resource "aws_iam_role_policy" "lambda_secrets" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Effect = "Allow"
+        Effect   = "Allow"
         Resource = data.aws_secretsmanager_secret.slack_webhook.arn
       }
     ]
