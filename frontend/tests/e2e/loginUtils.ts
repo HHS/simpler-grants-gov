@@ -63,4 +63,5 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
   ]);
 };
 
+// Turning off for now, let's revisit in https://github.com/HHS/simpler-grants-gov/issues/7256
 // initializeSessionSecrets();
