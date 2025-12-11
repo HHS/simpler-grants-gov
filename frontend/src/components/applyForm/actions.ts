@@ -101,6 +101,7 @@ const handleSave = async (
   }
 };
 
+// get and process the form schema, which is then used to determing proper typing for save form payload data
 async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   let formDetail = <FormDetail>{};
   try {

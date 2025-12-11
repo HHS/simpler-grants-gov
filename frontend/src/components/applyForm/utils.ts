@@ -776,17 +776,37 @@ export const isFieldRequired = (
 // to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
-): Promise<RJSFSchema> => {
+  retainConditionalValidation = false,
+): Promise<{
+  formSchema: RJSFSchema;
+  conditionalValidationRules: RJSFSchema;
+}> => {
+  const conditionalValidationRules = {};
+  const conditionalValidationResolver = (
+    values,
+    path,
+    mergeSchemas,
+    options,
+  ) => {
+    console.log("$$$", values, path);
+    return values[0];
+  };
+  const mergeOptions = retainConditionalValidation
+    ? { resolvers: { defaultResolver: conditionalValidationResolver } }
+    : {};
   try {
     const dereferenced = await $Refparser.dereference(formSchema);
-    const condensedProperties = mergeAllOf({
-      properties: dereferenced.properties,
-    } as JSONSchema7);
+    const condensedProperties = mergeAllOf(
+      {
+        properties: dereferenced.properties,
+      } as JSONSchema7,
+      mergeOptions,
+    );
     const condensed = {
       ...dereferenced,
       ...condensedProperties,
     };
-    return condensed as RJSFSchema;
+    return { formSchema: condensed as RJSFSchema, conditionalValidationRules };
   } catch (e) {
     console.error("Error processing schema");
     throw e;

@@ -33,6 +33,13 @@ type FormDataResult =
       };
     };
 
+/*
+  fetches application form data
+  validates ui schema
+  formats / processes form schema
+  returns all relevant data
+*/
+
 export default async function getFormData({
   applicationId,
   appFormId,
