@@ -59,7 +59,7 @@ test.skip("client side errors", async ({ page }) => {
   await expect(page.getByText("Please enter an email address.")).toBeVisible();
 });
 
-test.skip("successful signup", async ({ next, page }) => {
+test.skip("successful signup", async ({ /* next */ page }) => {
   // mockAPIEndpoints(next);
 
   await page.getByLabel("First Name (required)").fill("Apple");
@@ -76,7 +76,7 @@ test.skip("successful signup", async ({ next, page }) => {
   ).toBeVisible();
 });
 
-test.skip("error during signup", async ({ next, page }) => {
+test.skip("error during signup", async ({ /* next */ page }) => {
   // mockAPIEndpoints(next, "Error with subscribing");
 
   await page.getByLabel("First Name (required)").fill("Apple");

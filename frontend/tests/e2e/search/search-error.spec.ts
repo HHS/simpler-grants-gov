@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { waitForURLContainsQueryParamValue } from "../playwrightUtils";
 import { toggleCheckbox, toggleFilterDrawer } from "./searchSpecUtil";
 
 test.describe("Search error page", () => {
@@ -20,6 +21,7 @@ test.describe("Search error page", () => {
 
     await page.waitForURL(/closed/, {
       timeout: 5000,
+      waitUntil: "domcontentloaded",
     });
   });
 });
