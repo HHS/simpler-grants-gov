@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.beforeEach(async ({ page }) => {\
+test.beforeEach(async ({ page }) => {
   // the waitUntil change here is to work around a temporary bug with some staging assets
   await page.goto("/vision", { waitUntil: "domcontentloaded" });
 });

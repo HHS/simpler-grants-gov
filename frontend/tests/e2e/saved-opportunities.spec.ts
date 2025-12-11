@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { baseURL } from "tests/playwright.config";
 
-import { createSpoofedSessionCookie } from "./loginUtils";
+// import { createSpoofedSessionCookie } from "./loginUtils";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 
 test.afterEach(async ({ context }) => {
