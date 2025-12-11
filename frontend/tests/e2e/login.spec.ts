@@ -3,7 +3,7 @@ import { baseURL } from "tests/playwright.config";
 
 const setupLoginRedirectSpoof = async (page: Page) => {
   // Clear session storage before each test
-  await page.goto(`/`);
+  await page.goto(`/`, { waitUntil: "domcontentloaded" });
   await page.evaluate(() => {
     if (window.sessionStorage) {
       window.sessionStorage.clear();
