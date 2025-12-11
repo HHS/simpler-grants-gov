@@ -58,7 +58,7 @@ test.describe("Login Page Redirect", () => {
     page,
   }) => {
     await page.evaluate(() => {
-      sessionStorage.setItem("login-redirect", "");
+      sessionStorage.setItem("login-redirect", "/");
     });
     await page.goto(`/login`);
     await expect(page).toHaveURL(`/`);

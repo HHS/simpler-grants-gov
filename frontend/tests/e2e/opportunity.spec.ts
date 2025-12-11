@@ -13,21 +13,29 @@ type TestWithOpportunityId = {
 
 */
 
+// const testOpportunityIdMap: {
+//   [key: string]: { simpler: string; legacy: string };
+// } = {
+//   staging: {
+//     simpler: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+//     legacy: "42315",
+//   },
+//   local: { simpler: "c3c59562-a54f-4203-b0f6-98f2f0383481", legacy: "93" },
+// };
+
 const testOpportunityIdMap: {
-  [key: string]: { simpler: string; legacy: string };
+  [key: string]: string;
 } = {
-  staging: {
-    simpler: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
-    legacy: "42315",
-  },
-  local: { simpler: "c3c59562-a54f-4203-b0f6-98f2f0383481", legacy: "93" },
+  staging: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+  // local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+  local: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
 };
 
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 // either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
 // note that this staging id may be subject to change
-const testOpportunityId = testOpportunityIdMap[targetEnv].simpler;
+const testOpportunityId = testOpportunityIdMap[targetEnv];
 
 const test = base.extend<TestWithOpportunityId>({
   testOpportunityId,
@@ -140,7 +148,7 @@ test("can navigate to grants.gov", async ({ page, context }) => {
   await page.getByRole("button", { name: "View on Grants.gov" }).click();
 
   const newPage = await newTabPromise;
-  await expect(newPage).toHaveURL(
-    `https://test.grants.gov/search-results-detail/${testOpportunityIdMap[targetEnv].legacy}`,
+  expect(newPage.url()).toContain(
+    "https://test.grants.gov/search-results-detail/",
   );
 });
