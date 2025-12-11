@@ -6811,6 +6811,29 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SavedOpportunityStatusFieldFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+            - posted
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
+    UserSavedOpportunitiesFilter:
+      type: object
+      properties:
+        opportunity_status:
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunityStatusFieldFilter'
     SortOrderUserGetSavedOpportunityPaginationV1:
       type: object
       properties:
@@ -6864,6 +6887,13 @@ components:
     UserSavedOpportunitiesRequest:
       type: object
       properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserSavedOpportunitiesFilter'
+          - type: 'null'
         pagination:
           type:
           - object
