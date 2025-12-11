@@ -89,7 +89,9 @@ class TestSF424BXMLGeneration:
         # Verify AuthorizedRepresentative structure
         assert "<SF424B:AuthorizedRepresentative>" in xml_data
         assert "<SF424B:RepresentativeName>Jane Doe</SF424B:RepresentativeName>" in xml_data
-        assert "<SF424B:RepresentativeTitle>Research Director</SF424B:RepresentativeTitle>" in xml_data
+        assert (
+            "<SF424B:RepresentativeTitle>Research Director</SF424B:RepresentativeTitle>" in xml_data
+        )
         assert "</SF424B:AuthorizedRepresentative>" in xml_data
 
     def test_generate_sf424b_xml_minimal_data(self):
@@ -193,7 +195,10 @@ class TestSF424BXMLGeneration:
         xml_data = response.xml_data
 
         # Organization and date should be present
-        assert "<SF424B:ApplicantOrganizationName>Test Foundation</SF424B:ApplicantOrganizationName>" in xml_data
+        assert (
+            "<SF424B:ApplicantOrganizationName>Test Foundation</SF424B:ApplicantOrganizationName>"
+            in xml_data
+        )
         assert "<SF424B:SubmittedDate>2025-03-01</SF424B:SubmittedDate>" in xml_data
 
     def test_generate_sf424b_xml_with_only_signature(self):
@@ -215,7 +220,10 @@ class TestSF424BXMLGeneration:
         xml_data = response.xml_data
 
         # Organization and date should be present
-        assert "<SF424B:ApplicantOrganizationName>Research Institute</SF424B:ApplicantOrganizationName>" in xml_data
+        assert (
+            "<SF424B:ApplicantOrganizationName>Research Institute</SF424B:ApplicantOrganizationName>"
+            in xml_data
+        )
         assert "<SF424B:SubmittedDate>2025-04-15</SF424B:SubmittedDate>" in xml_data
 
 
@@ -419,4 +427,3 @@ class TestSF424BXSDValidation:
             f"Error: {validation_result['error_message']}\n"
             f"Generated XML:\n{sf424b_xml}"
         )
-
