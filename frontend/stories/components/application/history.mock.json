@@ -6,5 +6,133 @@
       "email": "fakeemail@navapbc.com",
       "user_id": "111e"
     }
+  },
+  {
+    "application_audit_event": "form_updated",
+    "created_at": "2025-12-05T20:06:43.583511+00:00",
+    "target_application_form": {
+      "application_form_id": "284aacf5-c6f3-4900-9d1c-6216001b708c",
+      "competition_form_id": "c0cb13ec-c17b-4658-8781-484d669ba1c2",
+      "form_id": "1623b310-85be-496a-b84b-34bdee22a68a",
+      "form_name": "Application for Federal Assistance (SF-424)"
+    },
+    "target_attachment": null,
+    "target_user": null,
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    }
+  },
+  {
+    "application_audit_event": "application_created",
+    "created_at": "2025-12-05T20:23:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    }
+  },
+  {
+    "application_audit_event": "application_submitted",
+    "created_at": "2025-12-05T20:24:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    }
+  },
+  {
+    "application_audit_event": "application_submit_rejected",
+    "created_at": "2025-12-05T20:25:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    }
+  },
+  {
+    "application_audit_event": "user_added",
+    "created_at": "2025-12-05T20:26:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    },
+    "target_user": {
+      "email": "evenfakeremail@navapbc.com",
+      "user_id": "111b"
+    }
+  },
+  {
+    "application_audit_event": "attachment_added",
+    "created_at": "2025-12-05T20:27:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    },
+    "target_attachment": {
+      "application_attachment_id": "10",
+      "file_name": "attachment.png"
+    }
+  },
+  {
+    "application_audit_event": "attachment_deleted",
+    "created_at": "2025-12-05T20:27:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    },
+    "target_attachment": {
+      "application_attachment_id": "10",
+      "file_name": "attachment.png"
+    }
+  },
+  {
+    "application_audit_event": "user_updated",
+    "created_at": "2025-12-05T20:28:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    },
+    "target_user": {
+      "email": "evenfakeremail@navapbc.com",
+      "user_id": "111b"
+    }
+  },
+  {
+    "application_audit_event": "user_removed",
+    "created_at": "2025-12-05T20:29:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    },
+    "target_user": {
+      "email": "evenfakeremail@navapbc.com",
+      "user_id": "111b"
+    }
+  },
+  {
+    "application_audit_event": "attachment_updated",
+    "created_at": "2025-12-05T20:27:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    },
+    "target_attachment": {
+      "application_attachment_id": "10",
+      "file_name": "attachment.png"
+    }
+  },
+  {
+    "application_audit_event": "submission_create",
+    "created_at": "2025-12-05T20:25:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    }
+  },
+  {
+    "application_audit_event": "organization_added",
+    "created_at": "2025-12-05T20:25:04.454618+00:00",
+    "user": {
+      "email": "fakeemail@navapbc.com",
+      "user_id": "111e"
+    }
   }
 ]
