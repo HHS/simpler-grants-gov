@@ -250,8 +250,9 @@ class OrganizationInvitationListRequestSchema(Schema):
             "OrganizationInvitationListPaginationSchema",
             ["invitee_email", "created_at", "expires_at"],
             default_sort_order=[{"order_by": "invitee_email", "sort_direction": "ascending"}],
+            default_page_size=25,
+            default_page_offset=1,
         ),
-        required=True,
         metadata={
             "description": "Pagination parameters for organization invitation list (default sort: invitee_email ascending)"
         },
@@ -423,9 +424,8 @@ class LegacyUsersListRequestSchema(Schema):
             "LegacyUserPaginationSchema",
             ["email", "first_name", "last_name", "created_date"],
             default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
-            default_page_size=25,
-            default_page_offset=1,
         ),
+        required=True,
         metadata={
             "description": "Pagination parameters for legacy user list (default sort: email ascending)"
         },

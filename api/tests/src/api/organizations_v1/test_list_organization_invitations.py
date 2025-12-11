@@ -373,12 +373,7 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={
-                "pagination": {
-                    "page_offset": 1,
-                    "page_size": 25,
-                }
-            },
+            json={},
         )
 
         assert resp.status_code == expected_status
@@ -413,10 +408,6 @@ class TestListOrganizationInvitations:
             headers={"X-SGG-Token": token},
             json={
                 "filters": {"status": {"one_of": ["expired"]}},
-                "pagination": {
-                    "page_offset": 1,
-                    "page_size": 25,
-                },
             },
         )
 
@@ -461,3 +452,8 @@ class TestListOrganizationInvitations:
         # Check that sorting is correct
         emails_in_order = [inv["invitee_email"] for inv in data["data"]]
         assert emails_in_order == ["a@example.com", "a@example.com", "b@example.com"]
+
+
+# add test with no pagination provided ensureing it still runs fine
+# add test for setting default on sorting
+# add tests for helper funcs
