@@ -52,7 +52,7 @@ module "prod_config" {
   # Use the AWS Console to determine the number of availability zones in your region.
   search_data_instance_type      = "or1.medium.search"
   search_data_volume_size        = 20
-  search_data_instance_count     = 3
+  search_data_instance_count     = 6
   search_availability_zone_count = 3
   # Versions: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html#choosing-version
   search_engine_version = "OpenSearch_2.15"
