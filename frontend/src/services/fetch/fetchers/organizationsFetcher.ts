@@ -4,6 +4,8 @@ import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import {
   OrganizationInvitationStatus,
+  OrganizationLegacyUser,
+  OrganizationLegacyUserStatus,
   OrganizationPendingInvitation,
   UserDetail,
   UserRole,
@@ -60,20 +62,23 @@ export const getOrganizationUsers = async (
   const resp = await fetchOrganizationWithMethod("POST")({
     subPath: `${organizationId}/users`,
     additionalHeaders: ssgToken,
+    body: {
+      pagination: {
+        page_offset: 1,
+        page_size: 5000,
+        sort_order: [
+          {
+            order_by: "email",
+            sort_direction: "ascending",
+          },
+        ],
+      },
+    },
   });
 
   const json = (await resp.json()) as { data: UserDetail[] };
 
-  // Sort by email, this will be temp until we get the results from the backend with sorting applied
-  const sorted = [...json.data].sort((first, second) => {
-    const a = (first.email ?? "").toLowerCase();
-    const b = (second.email ?? "").toLowerCase();
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
-  });
-
-  return sorted;
+  return json.data;
 };
 
 export const getOrganizationRoles = async (
@@ -211,5 +216,54 @@ export const removeOrganizationUser = async (
   }
 
   const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const getOrganizationLegacyUsers = async (
+  organizationId: string,
+): Promise<OrganizationLegacyUser[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const ssgToken = {
+    "X-SGG-Token": session.token,
+  };
+  const resp = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/legacy-users`,
+    additionalHeaders: ssgToken,
+    body: {
+      filters: {
+        status: {
+          one_of: [
+            OrganizationLegacyUserStatus.Available,
+            OrganizationLegacyUserStatus.Member,
+            OrganizationLegacyUserStatus.PendingInvitation,
+          ],
+        },
+      },
+      pagination: {
+        page_offset: 1,
+        page_size: 5000,
+        sort_order: [
+          {
+            order_by: "email",
+            sort_direction: "ascending",
+          },
+        ],
+      },
+    },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "getOrganizationLegacyUsers",
+      unauthorizedMessage: "No active session for managing legacy users.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: OrganizationLegacyUser[] };
   return json.data;
 };

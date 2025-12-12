@@ -9,7 +9,7 @@ include = ["newrelic.ini"]
 [tool.poetry.dependencies]
 # See /documentation/api/package-depedency-management.md#Upgrading Python
 # for details on upgrading your Python version
-python = "~3.13"
+python = "~3.14"
 SQLAlchemy = { version = "^2.0.21", extras = ["mypy"] }
 alembic = "^1.12.0"
 python-dotenv = "^1.0.0"
@@ -27,7 +27,7 @@ pydantic-settings = "^2.0.3"
 flask-cors = "^6.0.0"
 opensearch-py = "^2.5.0"
 pyjwt = { extras = ["crypto"], version = "^2.9.0" }
-newrelic = "10.17.0"
+newrelic = "11.1.0"
 jinja2 = ">=3.1.5"
 tenacity = "^8.0"
 jsonschema = { extras = ["format-nongpl"], version = "^4.23.0" }
@@ -51,6 +51,7 @@ common-grants-sdk = "~0.3.2"
 PyYAML = "^6.0.3"
 jsonref = "^1.1.0"
 pydantic-core = "2.41.5"
+urllib3 = "^2.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
@@ -108,7 +109,7 @@ line-length = 100
 preview = true
 
 
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules

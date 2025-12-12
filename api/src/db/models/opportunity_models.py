@@ -40,6 +40,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
+    agency_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Agency.agency_id), index=True
+    )
     agency_code: Mapped[str | None] = mapped_column(index=True)
 
     @property
@@ -60,36 +63,31 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     revision_number: Mapped[int | None]
     modified_comments: Mapped[str | None]
 
-    # These presumably refer to the TUSER_ACCOUNT, and TUSER_PROFILE tables
-    # although the legacy DB does not have them setup as foreign keys
-    publisher_user_id: Mapped[str | None]
-    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
-
-    opportunity_attachments: Mapped[list["OpportunityAttachment"]] = relationship(
+    opportunity_attachments: Mapped[list[OpportunityAttachment]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    opportunity_assistance_listings: Mapped[list["OpportunityAssistanceListing"]] = relationship(
+    opportunity_assistance_listings: Mapped[list[OpportunityAssistanceListing]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    opportunity_change_audit: Mapped["OpportunityChangeAudit | None"] = relationship(
+    opportunity_change_audit: Mapped[OpportunityChangeAudit | None] = relationship(
         back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
     )
 
-    current_opportunity_summary: Mapped["CurrentOpportunitySummary | None"] = relationship(
+    current_opportunity_summary: Mapped[CurrentOpportunitySummary | None] = relationship(
         back_populates="opportunity", single_parent=True, cascade="all, delete-orphan"
     )
 
-    all_opportunity_summaries: Mapped[list["OpportunitySummary"]] = relationship(
+    all_opportunity_summaries: Mapped[list[OpportunitySummary]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    all_opportunity_notification_logs: Mapped[list["UserOpportunityNotificationLog"]] = (
-        relationship(back_populates="opportunity", uselist=True, cascade="all, delete-orphan")
+    all_opportunity_notification_logs: Mapped[list[UserOpportunityNotificationLog]] = relationship(
+        back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    saved_opportunities_by_users: Mapped[list["UserSavedOpportunity"]] = relationship(
+    saved_opportunities_by_users: Mapped[list[UserSavedOpportunity]] = relationship(
         "UserSavedOpportunity",
         back_populates="opportunity",
         uselist=True,
@@ -103,11 +101,11 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         viewonly=True,
     )
 
-    competitions: Mapped[list["Competition"]] = relationship(
+    competitions: Mapped[list[Competition]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
     )
 
-    versions: Mapped[list["OpportunityVersion"]] = relationship(
+    versions: Mapped[list[OpportunityVersion]] = relationship(
         "OpportunityVersion",
         back_populates="opportunity",
         uselist=True,
@@ -130,7 +128,7 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         return None
 
     @property
-    def summary(self) -> "OpportunitySummary | None":
+    def summary(self) -> OpportunitySummary | None:
         """
         Utility getter method for converting an Opportunity in our endpoints
 
@@ -150,13 +148,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         return self.current_opportunity_summary.opportunity_status
 
     @property
-    def all_forecasts(self) -> list["OpportunitySummary"]:
+    def all_forecasts(self) -> list[OpportunitySummary]:
         # Utility method for getting all forecasted summary records attached to the opportunity
         # Note this will include historical and deleted records.
         return [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
 
     @property
-    def all_non_forecasts(self) -> list["OpportunitySummary"]:
+    def all_non_forecasts(self) -> list[OpportunitySummary]:
         # Utility method for getting all forecasted summary records attached to the opportunity
         # Note this will include historical and deleted records.
         return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
@@ -223,10 +221,6 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 
     version_number: Mapped[int | None]
     can_send_mail: Mapped[bool | None]
-    publisher_profile_id: Mapped[int | None] = mapped_column(BigInteger)
-    publisher_user_id: Mapped[str | None]
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
 
     # Do not use these agency fields, they're kept for now, but
     # are simply copying behavior from the legacy system - prefer
@@ -234,15 +228,13 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     agency_code: Mapped[str | None]
     agency_name: Mapped[str | None]
 
-    link_funding_instruments: Mapped[list["LinkOpportunitySummaryFundingInstrument"]] = (
-        relationship(
-            back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
-        )
-    )
-    link_funding_categories: Mapped[list["LinkOpportunitySummaryFundingCategory"]] = relationship(
+    link_funding_instruments: Mapped[list[LinkOpportunitySummaryFundingInstrument]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
-    link_applicant_types: Mapped[list["LinkOpportunitySummaryApplicantType"]] = relationship(
+    link_funding_categories: Mapped[list[LinkOpportunitySummaryFundingCategory]] = relationship(
+        back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
+    )
+    link_applicant_types: Mapped[list[LinkOpportunitySummaryApplicantType]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
     )
 
@@ -275,7 +267,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     # We configure a relationship from a summary to the current opportunity summary
     # Just in case we delete this record, we can cascade to deleting the current_opportunity_summary
     # record as well automatically.
-    current_opportunity_summary: Mapped["CurrentOpportunitySummary | None"] = relationship(
+    current_opportunity_summary: Mapped[CurrentOpportunitySummary | None] = relationship(
         back_populates="opportunity_summary", single_parent=True, cascade="delete"
     )
 
@@ -318,9 +310,6 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     assistance_listing_number: Mapped[str | None]
     program_title: Mapped[str | None]
 
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
-
 
 class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_funding_instrument"
@@ -346,9 +335,6 @@ class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
     )
 
     legacy_funding_instrument_id: Mapped[int | None]
-
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
 
 
 class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
@@ -380,9 +366,6 @@ class LinkOpportunitySummaryFundingCategory(ApiSchemaTable, TimestampMixin):
 
     legacy_funding_category_id: Mapped[int | None]
 
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
-
 
 class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     __tablename__ = "link_opportunity_summary_applicant_type"
@@ -412,9 +395,6 @@ class LinkOpportunitySummaryApplicantType(ApiSchemaTable, TimestampMixin):
     )
 
     legacy_applicant_type_id: Mapped[int | None]
-
-    updated_by: Mapped[str | None]
-    created_by: Mapped[str | None]
 
 
 class CurrentOpportunitySummary(ApiSchemaTable, TimestampMixin):
@@ -458,8 +438,6 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
     file_name: Mapped[str]
     file_description: Mapped[str]
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
-    created_by: Mapped[str | None]
-    updated_by: Mapped[str | None]
     legacy_folder_id: Mapped[int | None] = mapped_column(BigInteger)
 
     @property

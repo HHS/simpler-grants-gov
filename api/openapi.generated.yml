@@ -1496,6 +1496,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrganizationUsersResponse'
           description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
         '401':
           content:
             application/json:
@@ -1516,7 +1522,12 @@ paths:
           description: Forbidden
       tags:
       - Organization v1
-      summary: Get all users in an organization
+      summary: Get paginated list of users in an organization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUsersListRequest'
       security:
       - ApiJwtAuth: []
   /alpha/applications/{application_id}/submit:
@@ -2468,6 +2479,46 @@ paths:
               $ref: '#/components/schemas/ApplicationFormInclusionUpdateRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/forms/{form_id}/form_instructions/{form_instruction_id}:
+    put:
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: form_instruction_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormInstructionUploadResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Form Alpha
+      summary: Form Instruction Upsert
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FormInstructionUploadRequest'
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -6590,6 +6641,67 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SortOrderOrganizationUsersPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - email
+          - first_name
+          - last_name
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    OrganizationUsersPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: email
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderOrganizationUsersPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    OrganizationUsersListRequest:
+      type: object
+      properties:
+        pagination:
+          description: 'Pagination parameters for organization users list (default
+            page size: 10, default sort: email ascending)'
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationUsersPagination'
+      required:
+      - pagination
     Role1:
       type: object
       properties:
@@ -6626,7 +6738,7 @@ components:
             - legacy_agency_assigner
             type:
             - string
-    OrganizationMember:
+    OrganizationUser:
       type: object
       properties:
         user_id:
@@ -6659,9 +6771,18 @@ components:
           - 'null'
           description: User last name
           example: Smith
+        is_ebiz_poc:
+          type: boolean
+          description: Whether the user is the EBiz POC (Electronic Business Point
+            of Contact) for the organization in SAM.gov
+          example: false
     OrganizationUsersResponse:
       type: object
       properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
@@ -6672,7 +6793,7 @@ components:
           items:
             type:
             - object
-            $ref: '#/components/schemas/OrganizationMember'
+            $ref: '#/components/schemas/OrganizationUser'
         status_code:
           type: integer
           description: The HTTP status code
@@ -6690,6 +6811,29 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SavedOpportunityStatusFieldFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+            - posted
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
+    UserSavedOpportunitiesFilter:
+      type: object
+      properties:
+        opportunity_status:
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunityStatusFieldFilter'
     SortOrderUserGetSavedOpportunityPaginationV1:
       type: object
       properties:
@@ -6743,6 +6887,13 @@ components:
     UserSavedOpportunitiesRequest:
       type: object
       properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserSavedOpportunitiesFilter'
+          - type: 'null'
         pagination:
           type:
           - object
@@ -7124,6 +7275,38 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    ApplicationAuditEventFieldFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: !!python/object/apply:src.constants.lookup_constants.ApplicationAuditEvent
+            - application_created
+            enum:
+            - application_created
+            - application_name_changed
+            - application_submitted
+            - application_submit_rejected
+            - attachment_added
+            - attachment_deleted
+            - attachment_updated
+            - submission_created
+            - user_added
+            - user_updated
+            - user_removed
+            - form_updated
+            - organization_added
+            type:
+            - string
+    ApplicationAuditFilter:
+      type: object
+      properties:
+        application_audit_event:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationAuditEventFieldFilter'
     SortOrderApplicationAuditRequestPagination:
       type: object
       properties:
@@ -7174,6 +7357,13 @@ components:
     ApplicationAuditRequest:
       type: object
       properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/ApplicationAuditFilter'
+          - type: 'null'
         pagination:
           type:
           - object
@@ -7731,6 +7921,28 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationFormGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    FormInstructionUploadRequest:
+      type: object
+      properties:
+        file:
+          description: The form instruction file to upload
+          type: string
+          format: binary
+      required:
+      - file
+    FormInstructionUploadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
         status_code:
           type: integer
           description: The HTTP status code

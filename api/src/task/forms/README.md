@@ -83,6 +83,28 @@ INSERT INTO api.form_instruction(
 If you want to update a file, if the name of it isn't changing, you only need to re-upload it to s3.
 If you want to change the file, you'll need to delete the file from s3 and the DB, and change the information accordingly.
 
+# Update Form Instruction Task
+## Running
+The `update_form_instruction_task.py` script automates uploading form instruction files to any environment.
+This replaces the manual process of uploading files to S3 and inserting records into the database.
+
+The script takes in the following parameters:
+* `--environment` - The environment you want to run in (local, dev, staging, training, prod)
+* `--form-id` - The ID of the form the instruction belongs to
+* `--form-instruction-id` - The ID of the form instruction (generate a new UUID for new instructions)
+* `--file-path` - Path to the instruction file to upload (e.g., PDF file)
+* Auth is managed via an environment variable, see above.
+
+```sh
+make cmd args="task update-form-instruction --environment=dev --form-id=c3c5c7e9-0b24-41f8-8da3-98241fb341fe --form-instruction-id=a1b2c3d4-5e6f-7890-abcd-ef1234567890 --file-path=/path/to/EXAMPLE-V1.0-Instructions.pdf"
+```
+
+This will:
+1. Upload the file to the correct S3 location
+2. Create or update the form instruction record in the database
+
+**Note**: This script must be run locally (ENVIRONMENT=local) but can target any environment.
+
 # Creating opportunities for a form in an environment (non-prod)
 If you have created a brand new form in an environment and want it easily
 attached to an opportunity, we have an ECS task that can be run (requires AWS access)

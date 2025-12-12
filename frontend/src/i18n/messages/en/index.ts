@@ -1428,13 +1428,6 @@ export const messages = {
   returnToGrants: {
     message: "Return to Grants.gov",
   },
-  BookmarkBanner: {
-    title: "Bookmark this page",
-    message:
-      "This application is part of a pilot program. More functionality is coming soon, including easier ways to return to this application. Until then, please save this URL to revisit your application.",
-    technicalSupportMessage:
-      "For technical support or to give feedback, email <mailToGrants>simpler@grants.gov</mailToGrants>.",
-  },
   UserAccount: {
     pageTitle: "User Account | Simpler.Grants.gov",
     title: "User Account",
@@ -1538,8 +1531,8 @@ export const messages = {
     },
   },
   ManageUsers: {
-    pageTitle: "Manage Users | Simpler.Grants.gov",
-    pageHeading: "Manage Users",
+    pageTitle: "Manage users | Simpler.Grants.gov",
+    pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
@@ -1555,6 +1548,7 @@ export const messages = {
     invitedUsersFetchError:
       "We have encountered an error retrieving the Invited Users list, please try again later.",
     invitedUsersTableZeroState: "There are no invited users.",
+    inviteLegacyUsers: "Invite Grants.gov users",
     roleManager: {
       errorState:
         "We were unable to make the change requested at this time. Please try again.",
@@ -1590,6 +1584,7 @@ export const messages = {
     inviteUser: {
       heading: "Add users to collaborate on opportunities.",
       errorHeading: "Error",
+      errorMessage: "Error inviting user, please try again",
       description:
         "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
       inputs: {
@@ -1604,7 +1599,7 @@ export const messages = {
       },
       button: {
         label: "Add to organization",
-        success: "User added to pending",
+        success: "User invited to organization",
       },
       validationErrors: {
         email: "Email is required",
@@ -1645,5 +1640,24 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+  },
+  InviteLegacyUsers: {
+    dataLoadingError:
+      "We’re having trouble loading your team from Grants.gov. Please try again later.",
+    emptyLegacyUsers:
+      "It looks like there are no team members to import. Your organization does not have a legacy roster in Grants.gov, so there are no contacts available to add here. You can still invite people directly on your <manageUsersLink>Manage users page</manageUsersLink>.",
+    inviteYourTeam: "Invite your team from Grants.gov",
+    inviteYourTeamDetails:
+      "Add your team from Grants.gov to your organization in Simpler or remove anyone who’s no longer actively working with your team. Select the people to invite, and they’ll get an invitation to join you here in Simpler.",
+    keyInformation: "Key information",
+    keyInformationDetails:
+      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they’ve been added.",
+    metaDescription: "Manage users from legacy integrations",
+    pageHeading: "Legacy invite",
+    pageTitle: "Legacy invite | Simpler.Grants.gov",
+    tableHeadings: {
+      email: "Email",
+      name: "Name",
+    },
   },
 };

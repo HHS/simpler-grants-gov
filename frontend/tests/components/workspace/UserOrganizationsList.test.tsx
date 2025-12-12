@@ -19,6 +19,12 @@ jest.mock("src/utils/userUtils", () => ({
   userRoleForOrganization: jest.fn(() => "Admin"),
 }));
 
+jest.mock("src/hooks/useFeatureFlags", () => ({
+  useFeatureFlags: () => ({
+    checkFeatureFlag: () => false,
+  }),
+}));
+
 const makeOrg = (id: string, name: string) => ({
   organization_id: id,
   sam_gov_entity: {
@@ -104,8 +110,8 @@ describe("UserOrganizationsList", () => {
       // check it has both buttons
       const links = within(firstItem).getAllByRole("link");
       expect(links).toHaveLength(2);
-      expect(links[0]).toHaveAttribute("href", "/organization/1");
-      expect(links[1]).toHaveAttribute("href", "/organization/1/manage-users");
+      expect(links[0]).toHaveAttribute("href", "/organization/1/manage-users");
+      expect(links[1]).toHaveAttribute("href", "/organization/1");
     });
 
     it("second org is member, should only have view details button", () => {

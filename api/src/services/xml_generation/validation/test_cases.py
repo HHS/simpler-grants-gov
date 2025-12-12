@@ -1065,13 +1065,179 @@ SFLLL_TEST_CASES = [
 ]
 
 
+# Sample test cases for SF-424B validation
+SF424B_TEST_CASES = [
+    {
+        "name": "sf424b_complete_assurances",
+        "json_input": {
+            "signature": "John Smith",
+            "title": "Executive Director",
+            "applicant_organization": "Test Research Organization",
+            "date_signed": "2025-01-15",
+        },
+        "form_name": "SF424B",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424b_university_example",
+        "json_input": {
+            "signature": "Dr. Jane Doe",
+            "title": "Vice President for Research",
+            "applicant_organization": "State University Research Foundation",
+            "date_signed": "2025-02-20",
+        },
+        "form_name": "SF424B",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424b_nonprofit_example",
+        "json_input": {
+            "signature": "Alice Johnson",
+            "title": "Program Manager",
+            "applicant_organization": "Community Health Foundation",
+            "date_signed": "2025-03-01",
+        },
+        "form_name": "SF424B",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "pretty_print": True,
+    },
+]
+
+
+# Sample test cases for CD511 validation
+CD511_TEST_CASES = [
+    {
+        "name": "minimal_valid_cd511_with_project_name",
+        "json_input": {
+            "applicant_name": "Test Research Organization",
+            "project_name": "Research Study on Climate Change",
+            "contact_person": {
+                "first_name": "John",
+                "last_name": "Smith",
+            },
+            "contact_person_title": "Principal Investigator",
+            "signature": "John Smith",
+            "submitted_date": "2025-01-15",
+        },
+        "form_name": "CD511",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "cd511_with_award_number",
+        "json_input": {
+            "applicant_name": "University of Testing",
+            "award_number": "1R01GM123456-01",
+            "contact_person": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+            },
+            "contact_person_title": "Research Director",
+            "signature": "Jane Doe",
+            "submitted_date": "2025-02-20",
+        },
+        "form_name": "CD511",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "cd511_with_full_contact_name",
+        "json_input": {
+            "applicant_name": "National Institute of Science",
+            "award_number": "AWD-2025-001",
+            "project_name": "Advanced Research Project",
+            "contact_person": {
+                "prefix": "Dr.",
+                "first_name": "Robert",
+                "middle_name": "James",
+                "last_name": "Williams",
+                "suffix": "Jr.",
+            },
+            "contact_person_title": "Senior Scientist",
+            "signature": "Robert J. Williams Jr.",
+            "submitted_date": "2025-03-01",
+        },
+        "form_name": "CD511",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/CD511-V1.1.xsd",
+        "pretty_print": True,
+    },
+]
+
+
+# Sample test cases for GG_LobbyingForm validation
+GG_LOBBYING_FORM_TEST_CASES = [
+    {
+        "name": "minimal_valid_gg_lobbying_form",
+        "json_input": {
+            "organization_name": "Test Research Organization",
+            "authorized_representative_name": {
+                "first_name": "John",
+                "last_name": "Smith",
+            },
+            "authorized_representative_title": "Principal Investigator",
+            "authorized_representative_signature": "John Smith",
+            "submitted_date": "2025-01-15",
+        },
+        "form_name": "GG_LobbyingForm",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "gg_lobbying_form_with_full_name",
+        "json_input": {
+            "organization_name": "National Institute of Science",
+            "authorized_representative_name": {
+                "prefix": "Dr.",
+                "first_name": "Robert",
+                "middle_name": "James",
+                "last_name": "Williams",
+                "suffix": "Jr.",
+            },
+            "authorized_representative_title": "Senior Scientist",
+            "authorized_representative_signature": "Robert J. Williams Jr.",
+            "submitted_date": "2025-03-01",
+        },
+        "form_name": "GG_LobbyingForm",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "gg_lobbying_form_university_example",
+        "json_input": {
+            "organization_name": "State University Research Foundation",
+            "authorized_representative_name": {
+                "prefix": "Ms.",
+                "first_name": "Sarah",
+                "middle_name": "Elizabeth",
+                "last_name": "Johnson",
+            },
+            "authorized_representative_title": "Director of Sponsored Programs",
+            "authorized_representative_signature": "Sarah E. Johnson",
+            "submitted_date": "2025-02-15",
+        },
+        "form_name": "GG_LobbyingForm",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
     Returns:
         List of all test case dictionaries
     """
-    return SF424_TEST_CASES + SF424A_TEST_CASES + SFLLL_TEST_CASES
+    return (
+        SF424_TEST_CASES
+        + SF424A_TEST_CASES
+        + SF424B_TEST_CASES
+        + SFLLL_TEST_CASES
+        + CD511_TEST_CASES
+        + GG_LOBBYING_FORM_TEST_CASES
+    )
 
 
 def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:

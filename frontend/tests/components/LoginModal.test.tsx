@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 
 import { RefObject } from "react";
-import { ModalRef } from "@trussworks/react-uswds/lib/components/Modal/Modal";
+import { ModalRef } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
 

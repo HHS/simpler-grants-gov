@@ -72,6 +72,6 @@ def test_list_organization_roles_404_organization(client, db_session, enable_fac
 def test_list_organization_roles_401_no_token(client):
     """Test that accessing organization roles without auth token returns 401"""
     # Make request
-    resp = client.post(f"/v1/organizations/{uuid4()}/users")
+    resp = client.post(f"/v1/organizations/{uuid4()}/roles/list")
 
     assert resp.status_code == 401

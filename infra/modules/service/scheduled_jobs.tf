@@ -53,7 +53,7 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
             "ContainerOverrides" : [
               {
                 "Name" : var.service_name,
-                "Command" : concat(each.value.task_command, ["--scheduled-job-name", each.key]),
+                "Command" : each.value.task_command,
                 "Cpu" : each.value.cpu - 256,
                 "Memory" : each.value.mem - 256,
                 "Environment" : each.value.environment_vars

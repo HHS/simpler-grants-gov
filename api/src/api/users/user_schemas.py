@@ -14,6 +14,7 @@ from src.api.schemas.search_schema import StrSearchSchemaBuilder, UuidSearchSche
 from src.constants.lookup_constants import (
     ApplicationStatus,
     ExternalUserType,
+    OpportunityStatus,
     OrganizationInvitationStatus,
     Privilege,
 )
@@ -145,7 +146,17 @@ class UserDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class UserSavedOpportunitiesFilterSchema(Schema):
+    opportunity_status = fields.Nested(
+        StrSearchSchemaBuilder("SavedOpportunityStatusFieldFilterSchema")
+        .with_one_of(allowed_values=OpportunityStatus, example=OpportunityStatus.POSTED)
+        .build()
+    )
+
+
 class UserSavedOpportunitiesRequestSchema(Schema):
+    filters = fields.Nested(UserSavedOpportunitiesFilterSchema(), required=False, allow_none=True)
+
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedOpportunityPaginationV1Schema",

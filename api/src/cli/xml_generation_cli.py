@@ -7,9 +7,7 @@ from pathlib import Path
 
 import click
 
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
+from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -19,13 +17,6 @@ from src.services.xml_generation.validation.test_cases import (
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
-
-# Map form names to their transform rules
-FORM_TRANSFORM_RULES_MAP = {
-    "SF424_4_0": SF424_TRANSFORM_RULES,
-    "SF424A": SF424A_TRANSFORM_RULES,
-    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
-}
 
 
 @task_blueprint.cli.command("generate-xml")
@@ -43,7 +34,7 @@ FORM_TRANSFORM_RULES_MAP = {
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0). Default: SF424_4_0",
+    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0, CD511). Default: SF424_4_0",
 )
 @click.option(
     "--compact",
@@ -75,6 +66,11 @@ def generate_xml_command(
         # Generate SF-424A from file
         flask task generate-xml --file input.json --form SF424A
 
+        # Generate Project Narrative Attachments XML
+        flask task generate-xml --file input.json --form ProjectNarrativeAttachments_1_2
+
+        # Generate Budget Narrative Attachments XML
+        flask task generate-xml --file input.json --form BudgetNarrativeAttachments_1_2
         # Generate SF-LLL from file
         flask task generate-xml --file sflll.json --form SFLLL_2_0
 
@@ -93,10 +89,11 @@ def generate_xml_command(
             sys.exit(1)
 
         # Get transform config for the specified form
-        transform_config = FORM_TRANSFORM_RULES_MAP.get(form)
+        form_transform_rules_map = _build_xml_form_map()
+        transform_config = form_transform_rules_map.get(form.upper())
         if not transform_config:
             click.echo(
-                f"Error: Unknown form '{form}'. Available forms: {', '.join(FORM_TRANSFORM_RULES_MAP.keys())}",
+                f"Error: Unknown form '{form}'. Available forms: {', '.join(form_transform_rules_map.keys())}",
                 err=True,
             )
             sys.exit(1)
