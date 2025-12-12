@@ -10,6 +10,7 @@ import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -57,12 +58,28 @@ const SavedOpportunitiesList = ({
   return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
 };
 
+type SavedOpportunitiesPageProps = LocalizedPageProps & {
+  searchParams: Promise<{ status?: string }>;
+};
+
 export default async function SavedOpportunities({
   params,
-}: LocalizedPageProps) {
+  searchParams,
+}: SavedOpportunitiesPageProps) {
   const { locale } = await params;
+  const { status } = await searchParams;
   const t = await getTranslations({ locale });
-  const savedOpportunities = await fetchSavedOpportunities();
+
+  // Fetch saved opportunities (filtered if status is provided)
+  const savedOpportunities = await fetchSavedOpportunities(status);
+
+  let hasSavedOpportunities = savedOpportunities.length > 0;
+  if (!hasSavedOpportunities && status) {
+    const allSavedOpportunities = await fetchSavedOpportunities();
+    hasSavedOpportunities = allSavedOpportunities.length > 0;
+  }
+
+  // Get full opportunity details for each saved opportunity
   const opportunityPromises = savedOpportunities.map(
     async (savedOpportunity) => {
       const { data: opportunityData } = await getOpportunityDetails(
@@ -79,11 +96,22 @@ export default async function SavedOpportunities({
         <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
-      <div className="grid-container padding-y-5 display-flex">
-        {resolvedOpportunities.length > 0 ? (
-          <SavedOpportunitiesList opportunities={resolvedOpportunities} />
+      <div className="grid-container padding-y-5">
+        {hasSavedOpportunities ? (
+          <>
+            <div className="margin-bottom-3 display-flex flex-justify-end">
+              <SavedOpportunityStatusFilter status={status || null} />
+            </div>
+            {resolvedOpportunities.length > 0 ? (
+              <SavedOpportunitiesList opportunities={resolvedOpportunities} />
+            ) : (
+              <p>{t("SavedOpportunities.noMatchingStatus")}</p>
+            )}
+          </>
         ) : (
-          <NoSavedOpportunities />
+          <div className="display-flex">
+            <NoSavedOpportunities />
+          </div>
         )}
       </div>
     </>
