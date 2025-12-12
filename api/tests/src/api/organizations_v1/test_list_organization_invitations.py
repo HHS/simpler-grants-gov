@@ -63,7 +63,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 200
@@ -114,7 +119,13 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={"filters": {"status": {"one_of": ["pending"]}}},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                },
+                "filters": {"status": {"one_of": ["pending"]}},
+            },
         )
 
         assert resp.status_code == 200
@@ -136,7 +147,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 200
@@ -153,7 +169,12 @@ class TestListOrganizationInvitations:
 
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 401
@@ -170,7 +191,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 403
@@ -189,7 +215,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 403
@@ -204,7 +235,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{fake_org_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 404
@@ -221,7 +257,13 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={"filters": {"status": {"one_of": ["invalid_status"]}}},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                },
+                "filters": {"status": {"one_of": ["invalid_status"]}},
+            },
         )
 
         assert resp.status_code == 422  # Validation error
@@ -260,7 +302,12 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 25,
+                }
+            },
         )
 
         assert resp.status_code == 200
@@ -359,7 +406,9 @@ class TestListOrganizationInvitations:
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
-            json={"filters": {"status": {"one_of": ["expired"]}}},
+            json={
+                "filters": {"status": {"one_of": ["expired"]}},
+            },
         )
 
         assert resp.status_code == 200
@@ -367,3 +416,197 @@ class TestListOrganizationInvitations:
         assert data["message"] == "Success"
         assert len(data["data"]) == 1
         assert data["data"][0]["status"] == "expired"
+
+    def test_list_invitations_default_sorting(self, client, db_session, enable_factory_create):
+        """Test default sorting: email"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        inviter = UserFactory.create()
+        for email in ["a@example.com", "b@example.com", "a@example.com"]:
+            OrganizationInvitationFactory.create(
+                organization=organization,
+                inviter_user=inviter,
+                invitee_email=email,
+            )
+
+        # Default sort by email ASC
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["message"] == "Success"
+        assert len(data["data"]) == 3
+
+        # Check that sorting is correct
+        emails_in_order = [inv["invitee_email"] for inv in data["data"]]
+        assert emails_in_order == ["a@example.com", "a@example.com", "b@example.com"]
+
+    def test_list_invitations_sort_by_email_then_created_at(
+        self, client, db_session, enable_factory_create
+    ):
+        """Test multi-field sorting: invitee_email ASC, created_at DESC"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        inviter = UserFactory.create()
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+            created_at=datetime(2024, 1, 2, tzinfo=UTC),
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="b@example.com",
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "invitee_email", "sort_direction": "ascending"},
+                        {"order_by": "created_at", "sort_direction": "descending"},
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        emails_and_dates = [(inv["invitee_email"], inv["created_at"]) for inv in data["data"]]
+
+        assert emails_and_dates == [
+            ("a@example.com", "2024-01-02T00:00:00+00:00"),
+            ("a@example.com", "2024-01-01T00:00:00+00:00"),
+            ("b@example.com", "2024-01-01T00:00:00+00:00"),
+        ]
+
+    def test_list_invitations_sort_with_none_values(
+        self, client, db_session, enable_factory_create
+    ):
+        """Test sorting when some invitations have accepted_at as None"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        inviter = UserFactory.create()
+        inv_1 = OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+            accepted_at=None,
+        )
+        inv_2 = OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="b@example.com",
+            accepted_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+        inv_3 = OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="c@example.com",
+            accepted_at=None,
+        )
+
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "responded_at", "sort_direction": "ascending"},
+                        {"order_by": "invitee_email", "sort_direction": "ascending"},
+                    ],
+                },
+            },
+        )
+        assert resp.status_code == 200
+        data = resp.get_json()
+        accepted_at_order = [inv["organization_invitation_id"] for inv in data["data"]]
+
+        # None should go last
+        assert accepted_at_order == [
+            str(inv_2.organization_invitation_id),
+            str(inv_1.organization_invitation_id),
+            str(inv_3.organization_invitation_id),
+        ]
+
+    def test_list_invitations_pagination(self, client, db_session, enable_factory_create):
+        """Test pagination: page_offset & page_size apply correctly"""
+
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        inviter = UserFactory.create()
+
+        # Create 10 invitations
+        emails = [f"user{i}@example.com" for i in range(10)]
+        for email in emails:
+            OrganizationInvitationFactory.create(
+                organization=organization,
+                inviter_user=inviter,
+                invitee_email=email,
+            )
+
+        # Request page 2, size 3 → should return items 3–5
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 2,
+                    "page_size": 3,
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["message"] == "Success"
+
+        returned = [inv["invitee_email"] for inv in data["data"]]
+
+        # Sorting defaults to invitee_email ASC
+        sorted_emails = sorted(emails)
+
+        # Page 2: elements index 3–5
+        assert returned == sorted_emails[3:6]
+
+        # Check pagination metadata
+        pagination = data["pagination_info"]
+        assert pagination["page_offset"] == 2
+        assert pagination["page_size"] == 3
+        assert pagination["total_records"] == 10
+        assert pagination["total_pages"] == 4
