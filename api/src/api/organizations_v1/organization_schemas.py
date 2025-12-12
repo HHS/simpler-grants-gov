@@ -351,7 +351,7 @@ class OrganizationInvitationDataSchema(Schema):
     )
 
 
-class OrganizationInvitationListResponseSchema(AbstractResponseSchema):
+class OrganizationInvitationListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for POST /organizations/:organization_id/invitations/list response"""
 
     data = fields.List(

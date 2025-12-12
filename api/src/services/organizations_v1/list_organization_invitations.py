@@ -17,17 +17,13 @@ from src.db.models.entity_models import (
     OrganizationInvitation,
 )
 from src.db.models.user_models import User
-from src.pagination.pagination_models import (
-    PaginationInfo,
-    PaginationParams,
-    SortOrder,
-    SortOrderParams,
-)
+from src.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
 from src.search.search_models import StrSearchFilter
 
 
 class OrganizationInvitationFilters(BaseModel):
     status: StrSearchFilter | None = None
+
 
 class OrganizationInvitationPaginationParams(BaseModel):
     sort_order: list[SortOrderParams] = Field(
@@ -40,7 +36,9 @@ class OrganizationInvitationPaginationParams(BaseModel):
 
 
 class ListOrganizationsParams(BaseModel):
-    pagination: OrganizationInvitationPaginationParams = Field(default_factory=OrganizationInvitationPaginationParams)
+    pagination: OrganizationInvitationPaginationParams = Field(
+        default_factory=OrganizationInvitationPaginationParams
+    )
     filters: OrganizationInvitationFilters | None = Field(default=None)
 
 

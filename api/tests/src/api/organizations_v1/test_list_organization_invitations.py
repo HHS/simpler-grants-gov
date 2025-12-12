@@ -453,7 +453,153 @@ class TestListOrganizationInvitations:
         emails_in_order = [inv["invitee_email"] for inv in data["data"]]
         assert emails_in_order == ["a@example.com", "a@example.com", "b@example.com"]
 
+    def test_list_invitations_sort_by_email_then_created_at(
+        self, client, db_session, enable_factory_create
+    ):
+        """Test multi-field sorting: invitee_email ASC, created_at DESC"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
 
-# add test with no pagination provided ensureing it still runs fine
-# add test for setting default on sorting
-# add tests for helper funcs
+        inviter = UserFactory.create()
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+            created_at=datetime(2024, 1, 2, tzinfo=UTC),
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="b@example.com",
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "invitee_email", "sort_direction": "ascending"},
+                        {"order_by": "created_at", "sort_direction": "descending"},
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        emails_and_dates = [(inv["invitee_email"], inv["created_at"]) for inv in data["data"]]
+
+        assert emails_and_dates == [
+            ("a@example.com", "2024-01-02T00:00:00+00:00"),
+            ("a@example.com", "2024-01-01T00:00:00+00:00"),
+            ("b@example.com", "2024-01-01T00:00:00+00:00"),
+        ]
+
+    def test_list_invitations_sort_with_none_values(
+        self, client, db_session, enable_factory_create
+    ):
+        """Test sorting when some invitee_email values are None"""
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        inviter = UserFactory.create()
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email=None,
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="b@example.com",
+        )
+        OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="a@example.com",
+        )
+
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 1,
+                    "page_size": 10,
+                    "sort_order": [
+                        {"order_by": "invitee_email", "sort_direction": "ascending"},
+                    ],
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        emails_in_order = [inv["invitee_email"] for inv in data["data"]]
+
+        # None should go last
+        assert emails_in_order == ["a@example.com", "b@example.com", None]
+
+    def test_list_invitations_pagination(self, client, db_session, enable_factory_create):
+        """Test pagination: page_offset & page_size apply correctly"""
+
+        user, organization, token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        inviter = UserFactory.create()
+
+        # Create 10 invitations
+        emails = [f"user{i}@example.com" for i in range(10)]
+        for email in emails:
+            OrganizationInvitationFactory.create(
+                organization=organization,
+                inviter_user=inviter,
+                invitee_email=email,
+            )
+
+        # Request page 2, size 3 → should return items 3–5
+        resp = client.post(
+            f"/v1/organizations/{organization.organization_id}/invitations/list",
+            headers={"X-SGG-Token": token},
+            json={
+                "pagination": {
+                    "page_offset": 2,
+                    "page_size": 3,
+                },
+            },
+        )
+
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["message"] == "Success"
+
+        returned = [inv["invitee_email"] for inv in data["data"]]
+
+        # Sorting defaults to invitee_email ASC → emails sorted lexicographically
+        sorted_emails = sorted(emails)
+
+        # Page 2: elements index 3–5
+        assert returned == sorted_emails[3:6]
+
+        # Check pagination metadata
+        pagination = data["pagination_info"]
+        assert pagination["page_offset"] == 2
+        assert pagination["page_size"] == 3
+        assert pagination["total_records"] == 10
+        assert pagination["total_pages"] == 4
