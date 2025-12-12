@@ -64,8 +64,11 @@ Feature: Happy Path – Apply Workflow
     Then a new application is created
     And the Application landing page loads with navigation, header, and a list of required and optional forms
 
-    # ---- Completing Forms (Required or Conditionally Required) ---
-    Given the user has completed the <form_type> forms, including attachments if available
+    # ---- Completing Required Forms ---
+    Given the user has completed the Required forms
+
+    # ---- Completing Conditionally Required Forms ---  
+    Given the user has completed the conditionally Required forms
 
     # --- Confirm the Optional Form for Submission ---
     Given the user has confirmed the optional Form for Submission
@@ -85,6 +88,13 @@ Feature: Happy Path – Apply Workflow
 # =================================================================
 # --- Shared Workflow Details ---
 # =================================================================
+
+# --- Search the Opportunity ---
+When the user goes to the search page
+And the user searches for the specific Funding Opportunity number
+Then the user scrolls to the search results table
+When the user clicks the Funding Opportunity number
+Then the user is taken to the Funding Opportunity details page
 
 # ---- Completing Forms (Required or Conditionally Required) ---
 Given there are <form_type> forms in the application forms list
