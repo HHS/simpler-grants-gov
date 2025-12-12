@@ -591,7 +591,7 @@ class TestListOrganizationInvitations:
 
         returned = [inv["invitee_email"] for inv in data["data"]]
 
-        # Sorting defaults to invitee_email ASC → emails sorted lexicographically
+        # Sorting defaults to invitee_email ASC
         sorted_emails = sorted(emails)
 
         # Page 2: elements index 3–5
