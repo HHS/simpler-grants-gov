@@ -379,7 +379,7 @@ export const messages = {
         user_updated: "User updated: ",
         user_removed: "User removed: ",
         organization_added: "Organization Added",
-        application_submission_rejected: "Application submission failed",
+        application_submit_rejected: "Application submission failed",
         submission_created: "Application submission created",
       },
     },

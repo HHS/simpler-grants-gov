@@ -83,7 +83,7 @@ export type ApplicationActivityEvent =
   | "user_updated"
   | "user_removed"
   | "organization_added"
-  | "application_submission_rejected"
+  | "application_submit_rejected"
   | "submission_created";
 
 export interface ApplicationHistory {
