@@ -5,6 +5,7 @@ import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
 import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
+import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 import {
@@ -619,18 +620,6 @@ export function getFieldsForNav(
   return results;
 }
 
-const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
-  if (typeof mightBeAnObject === "boolean") {
-    return false;
-  }
-  return (
-    !!mightBeAnObject &&
-    !isArray(mightBeAnObject) &&
-    !isString(mightBeAnObject) &&
-    !isNumber(mightBeAnObject)
-  );
-};
-
 const isEmptyField = (mightBeEmpty: unknown): boolean => {
   if (mightBeEmpty === undefined) {
     return true;
@@ -776,32 +765,31 @@ export const isFieldRequired = (
 // to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
-  retainConditionalValidation = false,
+  // retainConditionalValidation = false,
 ): Promise<{
   formSchema: RJSFSchema;
   conditionalValidationRules: RJSFSchema;
 }> => {
-  const conditionalValidationRules = {};
-  const conditionalValidationResolver = (
-    values,
-    path,
-    mergeSchemas,
-    options,
-  ) => {
-    console.log("$$$", values, path);
-    return values[0];
-  };
-  const mergeOptions = retainConditionalValidation
-    ? { resolvers: { defaultResolver: conditionalValidationResolver } }
-    : {};
+  // const conditionalValidationRules = {};
+  // const conditionalValidationResolver = (
+  //   values,
+  //   path,
+  //   mergeSchemas,
+  //   options,
+  // ) => {
+  //   console.log("$$$", values, path);
+  //   return values[0];
+  // };
+  // const mergeOptions = retainConditionalValidation
+  //   ? { resolvers: { defaultResolver: conditionalValidationResolver } }
+  //   : {};
   try {
     const dereferenced = await $Refparser.dereference(formSchema);
-    const condensedProperties = mergeAllOf(
-      {
-        properties: dereferenced.properties,
-      } as JSONSchema7,
-      mergeOptions,
-    );
+    const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
+      extricateConditionalValidationRules(dereferenced as JSONSchema7);
+    const condensedProperties = mergeAllOf({
+      properties: propertiesWithoutComplexConditionals,
+    } as JSONSchema7);
     const condensed = {
       ...dereferenced,
       ...condensedProperties,
