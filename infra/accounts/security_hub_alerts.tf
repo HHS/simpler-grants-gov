@@ -51,6 +51,12 @@ resource "aws_sns_topic_subscription" "security_hub_findings_email" {
 
 # Lambda function to format findings for email
 resource "aws_lambda_function" "format_security_hub_email" {
+  # checkov:skip=CKV_AWS_117:VPC not required for simple alerting lambda that only publishes to SNS
+  # checkov:skip=CKV_AWS_116:DLQ not needed - failed alerts are not critical enough to require retry
+  # checkov:skip=CKV_AWS_115:Concurrent execution limit not needed for low-volume alerting
+  # checkov:skip=CKV_AWS_272:Code signing not required for internal alerting lambda
+  # checkov:skip=CKV_AWS_173:Environment variables contain only SNS ARN, not sensitive data
+  # checkov:skip=CKV_AWS_50:X-Ray tracing not needed for simple alerting lambda
   filename         = "${path.module}/lambda/format_security_hub_email.zip"
   function_name    = "security-hub-email-formatter"
   role             = aws_iam_role.security_hub_email_formatter.arn
@@ -188,6 +194,12 @@ resource "aws_iam_role_policy" "lambda_secrets" {
 
 # Lambda function to post to Slack
 resource "aws_lambda_function" "security_hub_slack" {
+  # checkov:skip=CKV_AWS_117:VPC not required for simple alerting lambda that only posts to Slack
+  # checkov:skip=CKV_AWS_116:DLQ not needed - failed alerts are not critical enough to require retry
+  # checkov:skip=CKV_AWS_115:Concurrent execution limit not needed for low-volume alerting
+  # checkov:skip=CKV_AWS_272:Code signing not required for internal alerting lambda
+  # checkov:skip=CKV_AWS_173:Environment variables contain only secret name reference, not the secret itself
+  # checkov:skip=CKV_AWS_50:X-Ray tracing not needed for simple alerting lambda
   filename         = "${path.module}/lambda/security_hub_slack.zip"
   function_name    = "security-hub-slack-notifier"
   role             = aws_iam_role.security_hub_slack_lambda.arn
