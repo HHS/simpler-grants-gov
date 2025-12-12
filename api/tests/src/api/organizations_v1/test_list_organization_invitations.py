@@ -510,27 +510,30 @@ class TestListOrganizationInvitations:
     def test_list_invitations_sort_with_none_values(
         self, client, db_session, enable_factory_create
     ):
-        """Test sorting when some invitee_email values are None"""
+        """Test sorting when some invitations have accepted_at as None"""
         user, organization, token = create_user_in_org(
             privileges=[Privilege.MANAGE_ORG_MEMBERS],
             db_session=db_session,
         )
 
         inviter = UserFactory.create()
-        OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email=None,
-        )
-        OrganizationInvitationFactory.create(
-            organization=organization,
-            inviter_user=inviter,
-            invitee_email="b@example.com",
-        )
-        OrganizationInvitationFactory.create(
+        inv_1 = OrganizationInvitationFactory.create(
             organization=organization,
             inviter_user=inviter,
             invitee_email="a@example.com",
+            accepted_at=None,
+        )
+        inv_2 = OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="b@example.com",
+            accepted_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+        inv_3 = OrganizationInvitationFactory.create(
+            organization=organization,
+            inviter_user=inviter,
+            invitee_email="c@example.com",
+            accepted_at=None,
         )
 
         resp = client.post(
@@ -541,18 +544,22 @@ class TestListOrganizationInvitations:
                     "page_offset": 1,
                     "page_size": 10,
                     "sort_order": [
+                        {"order_by": "responded_at", "sort_direction": "ascending"},
                         {"order_by": "invitee_email", "sort_direction": "ascending"},
                     ],
                 },
             },
         )
-
         assert resp.status_code == 200
         data = resp.get_json()
-        emails_in_order = [inv["invitee_email"] for inv in data["data"]]
+        accepted_at_order = [inv["organization_invitation_id"] for inv in data["data"]]
 
         # None should go last
-        assert emails_in_order == ["a@example.com", "b@example.com", None]
+        assert accepted_at_order == [
+            str(inv_2.organization_invitation_id),
+            str(inv_1.organization_invitation_id),
+            str(inv_3.organization_invitation_id),
+        ]
 
     def test_list_invitations_pagination(self, client, db_session, enable_factory_create):
         """Test pagination: page_offset & page_size apply correctly"""

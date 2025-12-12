@@ -31,8 +31,8 @@ class OrganizationInvitationPaginationParams(BaseModel):
             SortOrderParams(order_by="invitee_email", sort_direction="ascending")
         ]
     )
-    page_size: int = 25
-    page_offset: int = 1
+    page_size: int = Field(default=25)
+    page_offset: int = Field(default=1)
 
 
 class ListOrganizationsParams(BaseModel):

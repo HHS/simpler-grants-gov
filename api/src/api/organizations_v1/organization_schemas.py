@@ -248,7 +248,7 @@ class OrganizationInvitationListRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "OrganizationInvitationListPaginationSchema",
-            ["invitee_email", "created_at", "expires_at"],
+            ["invitee_email", "created_at", "responded_at"],
             default_sort_order=[{"order_by": "invitee_email", "sort_direction": "ascending"}],
             default_page_size=25,
             default_page_offset=1,
