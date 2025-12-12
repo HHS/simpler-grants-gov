@@ -1,5 +1,8 @@
 import { environment } from "src/constants/environments";
-import { createRequestUrl } from "src/services/fetch/fetcherHelpers";
+import {
+  createRequestUrl,
+  getDefaultHeaders,
+} from "src/services/fetch/fetcherHelpers";
 import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
 import {
   ApplicationAttachmentUploadResponse,
@@ -188,8 +191,11 @@ export const uploadAttachment = async (
   file: FormData,
 ): Promise<ApplicationAttachmentUploadResponse> => {
   const additionalHeaders = {
-    Accept: "application/json",
-    "X-SGG-Token": token,
+    ...getDefaultHeaders(),
+    ...{
+      Accept: "application/json",
+      "X-SGG-Token": token,
+    },
   };
 
   const url = createRequestUrl(
