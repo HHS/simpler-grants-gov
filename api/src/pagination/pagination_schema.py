@@ -84,6 +84,20 @@ def generate_pagination_schema(
     else:
         additional_sort_order_params["required"] = True
 
+    # page_size required unless default provided
+    page_size_params: dict = {}
+    if default_page_size is not None:
+        page_size_params["load_default"] = default_page_size
+    else:
+        page_size_params["required"] = True
+
+    # page_offset required unless default provided
+    page_offset_params: dict = {}
+    if default_page_offset is not None:
+        page_offset_params["load_default"] = default_page_offset
+    else:
+        page_offset_params["required"] = True
+
     pagination_schema_fields = {
         "sort_order": fields.List(
             fields.Nested(sort_order_schema()),
@@ -92,17 +106,17 @@ def generate_pagination_schema(
             **additional_sort_order_params,
         ),
         "page_size": fields.Integer(
-            load_default=default_page_size,
             validate=[validators.Range(min=1, max=max_page_size)],
             metadata={"description": "The size of the page to fetch", "example": 25},
+            **page_size_params,
         ),
         "page_offset": fields.Integer(
-            load_default=default_page_offset,
             validate=[validators.Range(min=1)],
             metadata={
                 "description": "The page number to fetch, starts counting from 1",
                 "example": 1,
             },
+            **page_offset_params,
         ),
     }
     return BasePaginationSchema.from_dict(pagination_schema_fields, name=cls_name)  # type: ignore
