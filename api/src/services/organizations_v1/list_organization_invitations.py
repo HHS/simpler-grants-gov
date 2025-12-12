@@ -29,9 +29,18 @@ from src.search.search_models import StrSearchFilter
 class OrganizationInvitationFilters(BaseModel):
     status: StrSearchFilter | None = None
 
+class OrganizationInvitationPaginationParams(BaseModel):
+    sort_order: list[SortOrderParams] = Field(
+        default_factory=lambda: [
+            SortOrderParams(order_by="invitee_email", sort_direction="ascending")
+        ]
+    )
+    page_size: int = 25
+    page_offset: int = 1
+
 
 class ListOrganizationsParams(BaseModel):
-    pagination: PaginationParams
+    pagination: OrganizationInvitationPaginationParams = Field(default_factory=OrganizationInvitationPaginationParams)
     filters: OrganizationInvitationFilters | None = Field(default=None)
 
 
