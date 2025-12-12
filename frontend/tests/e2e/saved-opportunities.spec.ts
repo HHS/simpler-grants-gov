@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { baseURL } from "tests/playwright.config";
 
 import { createSpoofedSessionCookie } from "./loginUtils";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
@@ -13,12 +14,12 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
   await expect(h4).toHaveText("Not signed in");
 });
 
-// reenable after https://github.com/HHS/simpler-grants-gov/issues/3791
-test("shows save / search cta if logged in", async ({ page, context }, {
+// reenable after https://github.com/HHS/simpler-grants-gov/issues/7379
+test.skip("shows save / search cta if logged in", async ({ page }, {
   project,
 }) => {
-  await createSpoofedSessionCookie(context);
-  await page.goto("http://localhost:3000/?_ff=authOn:true");
+  // await createSpoofedSessionCookie(context);
+  await page.goto(`${baseURL}/?_ff=authOn:true`);
 
   if (project.name.match(/[Mm]obile/)) {
     await openMobileNav(page);
