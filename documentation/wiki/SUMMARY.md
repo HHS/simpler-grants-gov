@@ -53,6 +53,7 @@
     * [You did it!](product/api/simpler-grants-api-tutorial/you-did-it.md)
     * [Common issues & solutions](product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md)
 * [Roadmap](product/product-roadmap.md)
+* [Release Notes](product/release-notes.md)
 * [Deliverables](product/deliverables/README.md)
   * [Static site soft launch](product/deliverables/static-site-soft-launch.md)
   * [Static site public launch](product/deliverables/static-site-public-launch.md)
