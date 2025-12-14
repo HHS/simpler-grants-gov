@@ -11,7 +11,7 @@ const isIfThenElement = (schemaNode: object) => {
 };
 
 type ConditionalValidationRules = {
-  [propertyPath: string]: { if: unknown; then: unknown };
+  [propertyPath: string]: { [key: "if" | "then"]: unknown };
 };
 
 type ExtricateConditionalValidationRulesResult = {
@@ -19,18 +19,21 @@ type ExtricateConditionalValidationRulesResult = {
   conditionalValidationRules: ConditionalValidationRules;
 };
 
+type ConditionalRuleArrayReduceResult = {
+  updatedConditionalValidationRules: ConditionalValidationRules;
+  updatedValue: unknown[];
+};
+
 /* for each node
-    is it an allOf
-      if so
-        does it contain multiple elements
-          if so
-            are they if / then conditionals
-              if so
-                remove it from properties
-                determine full path to property
-                add it to the conditional validation rules
-              if not
-                remove the allOf completely (we don't know what it is but it'll break things)
+  if it's an allOf
+    and it contains multiple elements
+      and all elements are they if / then conditionals
+        remove it from properties
+        determine full path to property
+        add it to the conditional validation rules
+    if not
+      remove the allOf completely (we don't know what it is but it'll break things)
+  if it's
 */
 export const extricateConditionalValidationRules = (
   properties: JSONSchema7,
@@ -53,7 +56,7 @@ export const extricateConditionalValidationRules = (
         }
         if (Array.isArray(value) && value.length > 1) {
           if (value.every(isIfThenElement)) {
-            conditionalValidationRules[parentPath] = conditionalRule;
+            conditionalValidationRules[parentPath] = value;
             return {
               conditionalValidationRules,
               propertiesWithoutComplexConditionals,
@@ -93,15 +96,23 @@ export const extricateConditionalValidationRules = (
       }
 
       if (Array.isArray(value)) {
-        const { updatedConditionalValidationRules, updatedValue } = (
-          value as unknown[]
-        ).reduce(
-          ({ updatedConditionalValidationRules, updatedValue }, entry) => {
-            if (isBasicallyAnObject(entry)) {
+        /*
+          for each element in the array
+            if it's an object
+              recurse and add result to the acc
+            otherwise keep going
+
+        */
+        const nestedUpdates = value.reduce(
+          (acc: ConditionalRuleArrayReduceResult, nestedEntry) => {
+            const { updatedConditionalValidationRules, updatedValue } = acc;
+            if (isBasicallyAnObject(nestedEntry)) {
               const {
                 conditionalValidationRules,
                 propertiesWithoutComplexConditionals,
-              } = extricateConditionalValidationRules(entry as JSONSchema7);
+              } = extricateConditionalValidationRules(
+                nestedEntry as JSONSchema7,
+              );
               return {
                 updatedValue: updatedValue.concat([
                   propertiesWithoutComplexConditionals,
@@ -112,24 +123,25 @@ export const extricateConditionalValidationRules = (
                 },
               };
             }
+
             return {
               updatedConditionalValidationRules,
-              updatedValue: updatedValue.concat([entry]),
+              updatedValue: updatedValue.concat([nestedEntry]),
             };
           },
-          { updatedConditionalValidationRules: {}, updatedValue: [] } as {
-            updatedConditionalValidationRules: ConditionalValidationRules;
-            updatedValue: unknown[];
-          },
+          {
+            updatedConditionalValidationRules: {},
+            updatedValue: [],
+          } as ConditionalRuleArrayReduceResult,
         );
         return {
           conditionalValidationRules: {
             ...conditionalValidationRules,
-            ...updatedConditionalValidationRules,
+            ...nestedUpdates.updatedConditionalValidationRules,
           },
           propertiesWithoutComplexConditionals: {
             ...propertiesWithoutComplexConditionals,
-            ...{ [key]: updatedValue },
+            ...{ [key]: nestedUpdates.updatedValue },
           },
         };
       }
