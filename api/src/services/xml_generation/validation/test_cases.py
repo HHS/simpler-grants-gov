@@ -1224,6 +1224,125 @@ GG_LOBBYING_FORM_TEST_CASES = [
 ]
 
 
+# Sample test cases for EPA Key Contacts validation
+EPA_KEY_CONTACTS_TEST_CASES = [
+    {
+        "name": "epa_key_contacts_single_authorized_rep",
+        "json_input": {
+            "authorized_representative": {
+                "name": {
+                    "prefix": "Dr.",
+                    "first_name": "John",
+                    "middle_name": "A",
+                    "last_name": "Smith",
+                    "suffix": "Jr.",
+                },
+                "title": "Executive Director",
+                "address": {
+                    "street1": "123 Main Street",
+                    "street2": "Suite 100",
+                    "city": "Washington",
+                    "state": "DC",
+                    "zip_code": "20001",
+                    "country": "USA",
+                },
+                "phone": "202-555-1234",
+                "fax": "202-555-5678",
+                "email": "john.smith@example.org",
+            },
+        },
+        "form_name": "EPA_KeyContacts_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "epa_key_contacts_all_contacts",
+        "json_input": {
+            "authorized_representative": {
+                "name": {
+                    "first_name": "John",
+                    "last_name": "Smith",
+                },
+                "title": "Director",
+                "address": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC",
+                    "zip_code": "20001",
+                    "country": "USA",
+                },
+                "phone": "202-555-1234",
+                "email": "john@example.org",
+            },
+            "payee": {
+                "name": {
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                },
+                "title": "CFO",
+                "address": {
+                    "street1": "456 Finance Ave",
+                    "city": "Boston",
+                    "state": "MA",
+                    "zip_code": "02101",
+                    "country": "USA",
+                },
+                "phone": "617-555-9999",
+                "email": "jane@example.org",
+            },
+            "administrative_contact": {
+                "name": {
+                    "prefix": "Ms.",
+                    "first_name": "Sarah",
+                    "last_name": "Johnson",
+                },
+                "title": "Grants Administrator",
+                "address": {
+                    "street1": "789 Admin Blvd",
+                    "city": "Chicago",
+                    "state": "IL",
+                    "zip_code": "60601",
+                    "country": "USA",
+                },
+                "phone": "312-555-4567",
+                "email": "sarah@example.org",
+            },
+            "project_manager": {
+                "name": {
+                    "prefix": "Dr.",
+                    "first_name": "Michael",
+                    "middle_name": "B",
+                    "last_name": "Chen",
+                    "suffix": "PhD",
+                },
+                "title": "Principal Investigator",
+                "address": {
+                    "street1": "101 Research Way",
+                    "street2": "Lab Building 5",
+                    "city": "San Francisco",
+                    "state": "CA",
+                    "zip_code": "94102",
+                    "country": "USA",
+                },
+                "phone": "415-555-7890",
+                "fax": "415-555-7891",
+                "email": "mchen@example.org",
+            },
+        },
+        "form_name": "EPA_KeyContacts_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "epa_key_contacts_empty_form",
+        "json_input": {},
+        "form_name": "EPA_KeyContacts_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
@@ -1237,6 +1356,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + SFLLL_TEST_CASES
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES
+        + EPA_KEY_CONTACTS_TEST_CASES
     )
 
 
