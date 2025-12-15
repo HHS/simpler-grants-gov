@@ -144,6 +144,7 @@ resource "aws_ssm_parameter" "opensearch_endpoint" {
 # IAM access policy for OpenSearch
 # Restricts access to only the specified ingest and query IAM roles
 data "aws_iam_policy_document" "iam_access_control" {
+  # checkov:skip=CKV_AWS_283:Security API statement uses "*" principal but is scoped to /_plugins/_security/* path only, domain is in private VPC, and FGAC (basic auth) provides authentication
   # Ingest role - has write access for bulk operations, index management
   statement {
     sid    = "IngestRoleAccess"
