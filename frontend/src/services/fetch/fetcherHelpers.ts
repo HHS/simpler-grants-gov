@@ -27,7 +27,7 @@ export interface HeadersDict {
 }
 
 // Configuration of headers to send with all requests
-export function getDefaultHeaders(): HeadersDict {
+export function getDefaultHeaders(addContentType = true): HeadersDict {
   const headers: HeadersDict = {};
 
   if (environment.API_GW_AUTH) {
@@ -37,7 +37,9 @@ export function getDefaultHeaders(): HeadersDict {
   if (environment.API_AUTH_TOKEN) {
     headers["X-AUTH"] = environment.API_AUTH_TOKEN;
   }
-  headers["Content-Type"] = "application/json";
+  if (addContentType) {
+    headers["Content-Type"] = "application/json";
+  }
   return headers;
 }
 
