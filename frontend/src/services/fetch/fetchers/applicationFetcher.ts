@@ -55,6 +55,7 @@ export const handleSubmitApplication = async (
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/submit`,
     additionalHeaders: ssgToken,
+    allowedErrorStatuses: [422],
   });
 
   return (await response.json()) as ApplicationSubmitApiResponse;
@@ -193,7 +194,10 @@ export const uploadAttachment = async (
   const additionalHeaders = {
     "X-SGG-Token": token,
     Accept: "application/json",
+    "Content-Type": "multipart/form-data",
   };
+
+  // this is throwing a 422, and not sure why. Maybe an issue with content type headers?
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/attachments`,
     additionalHeaders,
