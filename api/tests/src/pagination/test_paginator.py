@@ -177,7 +177,6 @@ def test_sort_order_string_returns_422(client):
     assert response.status_code == 422
 
     data = response.get_json()
-    # Following your API error response pattern
     assert "errors" in data
     assert any("sort_order" in str(err) for err in data["errors"])
 
@@ -188,7 +187,6 @@ def test_sort_order_invalid_json_returns_422(client):
 
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=invalid_json)
 
-    # Your framework should return 422 (or at least 4xx)
     assert response.status_code == 422
     data = response.get_json()
     assert "errors" in data
