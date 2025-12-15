@@ -16,7 +16,7 @@ dynaconf = "^3.2.4"
 pandas = "^2.0.3"
 pandas-stubs = "^2.0.2.230605"
 pydantic = "^2.0.3"
-python = "~3.13"
+python = "~3.14"
 slack-sdk = "^3.23.0"
 sqlparse = ">=0.5.0"
 typer = { extras = ["all"], version = "^0.20.0" }
@@ -24,10 +24,11 @@ sqlalchemy = "^2.0.30"
 pydantic-settings = "^2.3.4"
 boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
-psycopg = "^3.2.3"
+psycopg = { extras = ["binary"], version = "^3.2.3" }
 smart-open = "^7.0.5"
-newrelic = "10.17.0"
+newrelic = "11.1.0"
 requests = "^2.32.5"
+urllib3 = "2.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
@@ -46,7 +47,7 @@ build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true

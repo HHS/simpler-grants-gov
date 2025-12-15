@@ -55,14 +55,14 @@ class OrganizationDataSchema(Schema):
     )
 
 
-class OrganizationMemberSchema(Schema):
+class OrganizationUserSchema(Schema):
     """Schema for organization member information"""
 
     user_id = fields.UUID(
         metadata={
             "description": "User unique identifier",
             "example": "123e4567-e89b-12d3-a456-426614174000",
-        }
+        },
     )
     email = fields.String(
         allow_none=True,
@@ -73,10 +73,18 @@ class OrganizationMemberSchema(Schema):
         metadata={"description": "User roles in this organization"},
     )
     first_name = fields.String(
-        allow_none=True, metadata={"description": "User first name", "example": "John"}
+        allow_none=True,
+        metadata={"description": "User first name", "example": "John"},
     )
     last_name = fields.String(
-        allow_none=True, metadata={"description": "User last name", "example": "Smith"}
+        allow_none=True,
+        metadata={"description": "User last name", "example": "Smith"},
+    )
+    is_ebiz_poc = fields.Boolean(
+        metadata={
+            "description": "Whether the user is the EBiz POC (Electronic Business Point of Contact) for the organization in SAM.gov",
+            "example": False,
+        },
     )
 
 
@@ -88,11 +96,27 @@ class OrganizationGetResponseSchema(AbstractResponseSchema):
     )
 
 
-class OrganizationUsersResponseSchema(AbstractResponseSchema):
+class OrganizationUsersListRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/users request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OrganizationUsersPaginationSchema",
+            ["email", "first_name", "last_name", "created_at"],  # Allowed sort fields
+            default_sort_order=[{"order_by": "email", "sort_direction": "ascending"}],
+        ),
+        required=True,
+        metadata={
+            "description": "Pagination parameters for organization users list (default page size: 10, default sort: email ascending)"
+        },
+    )
+
+
+class OrganizationUsersResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for POST /organizations/:organization_id/users response"""
 
     data = fields.List(
-        fields.Nested(OrganizationMemberSchema),
+        fields.Nested(OrganizationUserSchema),
         metadata={"description": "List of organization members"},
     )
 
@@ -221,6 +245,18 @@ class OrganizationInvitationListRequestSchema(Schema):
         allow_none=True,
         metadata={"description": "Filters to apply to the invitation list"},
     )
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OrganizationInvitationListPaginationSchema",
+            ["invitee_email", "created_at", "responded_at"],
+            default_sort_order=[{"order_by": "invitee_email", "sort_direction": "ascending"}],
+            default_page_size=25,
+            default_page_offset=1,
+        ),
+        metadata={
+            "description": "Pagination parameters for organization invitation list (default sort: invitee_email ascending)"
+        },
+    )
 
 
 class InviterDataSchema(Schema):
@@ -315,7 +351,7 @@ class OrganizationInvitationDataSchema(Schema):
     )
 
 
-class OrganizationInvitationListResponseSchema(AbstractResponseSchema):
+class OrganizationInvitationListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for POST /organizations/:organization_id/invitations/list response"""
 
     data = fields.List(

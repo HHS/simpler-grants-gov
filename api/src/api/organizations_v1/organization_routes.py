@@ -19,6 +19,7 @@ from src.api.organizations_v1.organization_schemas import (
     OrganizationRemoveUserResponseSchema,
     OrganizationUpdateUserRolesRequestSchema,
     OrganizationUpdateUserRolesResponseSchema,
+    OrganizationUsersListRequestSchema,
     OrganizationUsersResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth
@@ -38,7 +39,7 @@ from src.services.organizations_v1.list_organization_invitations import (
 from src.services.organizations_v1.list_organization_roles import (
     get_organization_roles_and_verify_access,
 )
-from src.services.organizations_v1.organization_users_list import (
+from src.services.organizations_v1.list_organization_users import (
     get_organization_users_and_verify_access,
 )
 from src.services.organizations_v1.remove_user_from_organization import (
@@ -78,12 +79,15 @@ def organization_get(db_session: db.Session, organization_id: UUID) -> response.
 
 
 @organization_blueprint.post("/<uuid:organization_id>/users")
+@organization_blueprint.input(OrganizationUsersListRequestSchema, location="json")
 @organization_blueprint.output(OrganizationUsersResponseSchema)
 @organization_blueprint.doc(responses=[200, 401, 403, 404])
 @organization_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
-def organization_users_list(db_session: db.Session, organization_id: UUID) -> response.ApiResponse:
-    """Get all users in an organization"""
+def organization_users_list(
+    db_session: db.Session, organization_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Get paginated list of users in an organization"""
     add_extra_data_to_current_request_logs({"organization_id": organization_id})
     logger.info("POST /v1/organizations/:organization_id/users")
 
@@ -94,12 +98,12 @@ def organization_users_list(db_session: db.Session, organization_id: UUID) -> re
         # Add the user from the token session to our current session
         db_session.add(user_token_session)
 
-        # Get organization users using service layer
-        users = get_organization_users_and_verify_access(
-            db_session, user_token_session.user, organization_id
+        # Get organization users using service layer with pagination
+        org_users, pagination_info = get_organization_users_and_verify_access(
+            db_session, user_token_session.user, organization_id, json_data
         )
 
-    return response.ApiResponse(message="Success", data=users)
+    return response.ApiResponse(message="Success", data=org_users, pagination_info=pagination_info)
 
 
 @organization_blueprint.post("/<uuid:organization_id>/roles/list")
@@ -225,14 +229,16 @@ def organization_invitations_list(
         db_session.add(user_token_session)
 
         # Get organization invitations using service layer
-        invitations = list_organization_invitations_and_verify_access(
+        invitations, pagination_info = list_organization_invitations_and_verify_access(
             db_session=db_session,
             user=user_token_session.user,
             organization_id=organization_id,
-            filters=json_data.get("filters"),
+            json_data=json_data,
         )
 
-    return response.ApiResponse(message="Success", data=invitations)
+    return response.ApiResponse(
+        message="Success", data=invitations, pagination_info=pagination_info
+    )
 
 
 @organization_blueprint.post("/<uuid:organization_id>/legacy-users")

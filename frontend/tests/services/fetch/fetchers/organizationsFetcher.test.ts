@@ -1,6 +1,7 @@
 import { UnauthorizedError } from "src/errors";
 import {
   getOrganizationDetails,
+  getOrganizationLegacyUsers,
   getOrganizationPendingInvitations,
   getOrganizationRoles,
   getOrganizationUsers,
@@ -9,7 +10,10 @@ import {
   removeOrganizationUser,
   updateOrganizationUserRoles,
 } from "src/services/fetch/fetchers/organizationsFetcher";
-import { OrganizationInvitationStatus } from "src/types/userTypes";
+import {
+  OrganizationInvitationStatus,
+  OrganizationLegacyUserStatus,
+} from "src/types/userTypes";
 
 type FetchArgs = {
   subPath: string;
@@ -134,31 +138,19 @@ describe("getOrganizationUsers", () => {
       additionalHeaders: {
         "X-SGG-Token": "faketoken",
       },
+      body: {
+        pagination: {
+          page_offset: 1,
+          page_size: 5000,
+          sort_order: [
+            {
+              order_by: "email",
+              sort_direction: "ascending",
+            },
+          ],
+        },
+      },
     });
-  });
-
-  it("sorts returned users by email ascending and case-insensitive", async () => {
-    mockGetSession.mockResolvedValue({ token: "faketoken" });
-    fetchOrganizationMock.mockReturnValue({
-      ok: true,
-      status: 200,
-      json: () => ({
-        data: [
-          { email: "zeta@example.com" },
-          { email: "Alpha@example.com" },
-          { email: "beta@example.com" },
-        ],
-      }),
-    });
-    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
-
-    const result = await getOrganizationUsers("org-123");
-
-    expect(result).toEqual([
-      { email: "Alpha@example.com" },
-      { email: "beta@example.com" },
-      { email: "zeta@example.com" },
-    ]);
   });
 
   it("throws UnauthorizedError when session is missing or has no token", async () => {
@@ -402,5 +394,59 @@ describe("removeOrganizationUser", () => {
     await expect(
       removeOrganizationUser("org-123", "user-1"),
     ).rejects.toThrowError("Network error");
+  });
+});
+
+describe("getOrganizationLegacyUsers", () => {
+  afterEach(() => jest.resetAllMocks());
+
+  it("calls getOrganizationLegacyUsers as expected and returns json result", async () => {
+    mockGetSession.mockResolvedValue({ token: "faketoken" });
+    fetchOrganizationMock.mockReturnValue({
+      ok: true,
+      status: 200,
+      json: () => ({ data: [{ fake: "legacy-user" }] }),
+    });
+    fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
+
+    const result = await getOrganizationLegacyUsers("org-123");
+
+    expect(result).toEqual([{ fake: "legacy-user" }]);
+    expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
+    expect(fetchOrganizationMock).toHaveBeenCalledWith({
+      subPath: "org-123/legacy-users",
+      additionalHeaders: {
+        "X-SGG-Token": "faketoken",
+      },
+      body: {
+        filters: {
+          status: {
+            one_of: [
+              OrganizationLegacyUserStatus.Available,
+              OrganizationLegacyUserStatus.Member,
+              OrganizationLegacyUserStatus.PendingInvitation,
+            ],
+          },
+        },
+        pagination: {
+          page_offset: 1,
+          page_size: 5000,
+          sort_order: [
+            {
+              order_by: "email",
+              sort_direction: "ascending",
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it("throws UnauthorizedError when session is missing or has no token", async () => {
+    mockGetSession.mockResolvedValue(null);
+
+    await expect(getOrganizationLegacyUsers("org-123")).rejects.toBeInstanceOf(
+      UnauthorizedError,
+    );
   });
 });
