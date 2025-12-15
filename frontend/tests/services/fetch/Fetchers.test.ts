@@ -163,7 +163,7 @@ describe("requesterForEndpoint", () => {
 
     const requester = requesterForEndpoint(basicEndpoint);
 
-    const response = await requester({
+    await requester({
       subPath: "1",
       body: { key: "value" },
       additionalHeaders: { "Header-Name": "headerValue" },
