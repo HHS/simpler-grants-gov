@@ -6,6 +6,7 @@ export interface EndpointConfig {
   version: string;
   namespace: string;
   method: ApiMethod;
+  allowedErrorStatuses?: number[];
 }
 
 export const opportunitySearchEndpoint = {
