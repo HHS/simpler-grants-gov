@@ -194,7 +194,7 @@ export const uploadAttachment = async (
   const additionalHeaders = {
     "X-SGG-Token": token,
     Accept: "application/json",
-    "Content-Type": "multipart/form-data",
+    // "Content-Type": "multipart/form-data",
   };
 
   // this is throwing a 422, and not sure why. Maybe an issue with content type headers?
@@ -202,6 +202,7 @@ export const uploadAttachment = async (
     subPath: `${applicationId}/attachments`,
     additionalHeaders,
     body: file,
+    addContentType: false,
   });
 
   return (await response.json()) as ApplicationAttachmentUploadResponse;

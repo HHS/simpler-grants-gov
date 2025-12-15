@@ -44,6 +44,7 @@ export function requesterForEndpoint({
       additionalHeaders?: HeadersDict;
       nextOptions?: NextFetchRequestConfig;
       allowedErrorStatuses?: number[];
+      addContentType?: boolean;
     } = {},
   ): Promise<Response> {
     const {
@@ -52,6 +53,7 @@ export function requesterForEndpoint({
       subPath,
       nextOptions,
       allowedErrorStatuses = [],
+      addContentType = true,
     } = options;
     const url = createRequestUrl(
       method,
@@ -62,7 +64,7 @@ export function requesterForEndpoint({
       body,
     );
     const headers: HeadersDict = {
-      ...getDefaultHeaders(),
+      ...getDefaultHeaders(addContentType),
       ...additionalHeaders,
     };
 
