@@ -139,7 +139,11 @@ class CompetitionContainer:
     )
     is_simpler_grants_enabled: bool = True
 
-    # Only set this to True if the opportunity actually has one or it'll break
+    # If you set the opportunity to have no assistance listing,
+    # make sure you set this to False as the logic assumes
+    # one was created otherwise.
+    # This can be False even if the opportunity has one, competitions
+    # don't always have an assistance listing associated.
     has_assistance_listing: bool = True
 
     ### Forms
