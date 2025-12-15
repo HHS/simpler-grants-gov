@@ -1065,6 +1065,47 @@ SFLLL_TEST_CASES = [
 ]
 
 
+# Sample test cases for SF-424B validation
+SF424B_TEST_CASES = [
+    {
+        "name": "sf424b_complete_assurances",
+        "json_input": {
+            "signature": "John Smith",
+            "title": "Executive Director",
+            "applicant_organization": "Test Research Organization",
+            "date_signed": "2025-01-15",
+        },
+        "form_name": "SF424B",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424b_university_example",
+        "json_input": {
+            "signature": "Dr. Jane Doe",
+            "title": "Vice President for Research",
+            "applicant_organization": "State University Research Foundation",
+            "date_signed": "2025-02-20",
+        },
+        "form_name": "SF424B",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "sf424b_nonprofit_example",
+        "json_input": {
+            "signature": "Alice Johnson",
+            "title": "Program Manager",
+            "applicant_organization": "Community Health Foundation",
+            "date_signed": "2025-03-01",
+        },
+        "form_name": "SF424B",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424B-V1.1.xsd",
+        "pretty_print": True,
+    },
+]
+
+
 # Sample test cases for CD511 validation
 CD511_TEST_CASES = [
     {
@@ -1192,6 +1233,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
     return (
         SF424_TEST_CASES
         + SF424A_TEST_CASES
+        + SF424B_TEST_CASES
         + SFLLL_TEST_CASES
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES

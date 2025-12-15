@@ -414,6 +414,10 @@ button.usa-pagination__button.usa-button {
   }
 }
 
+.usa-pagination .usa-current {
+  background-color: color("mint-60") !important;
+}
+
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
