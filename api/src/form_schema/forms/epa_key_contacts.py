@@ -276,6 +276,157 @@ FORM_UI_SCHEMA = [
     },
 ]
 
+
+def _create_contact_person_transform(target_element: str) -> dict:
+    """Create transformation rules for a ContactPersonDataTypeV3 element."""
+    return {
+        "xml_transform": {
+            "target": target_element,
+            "type": "nested_object",
+        },
+        "name": {
+            "xml_transform": {
+                "target": "ContactName",
+                "type": "nested_object",
+            },
+            "prefix": {
+                "xml_transform": {
+                    "target": "PrefixName",
+                    "namespace": "globLib",
+                }
+            },
+            "first_name": {
+                "xml_transform": {
+                    "target": "FirstName",
+                    "namespace": "globLib",
+                }
+            },
+            "middle_name": {
+                "xml_transform": {
+                    "target": "MiddleName",
+                    "namespace": "globLib",
+                }
+            },
+            "last_name": {
+                "xml_transform": {
+                    "target": "LastName",
+                    "namespace": "globLib",
+                }
+            },
+            "suffix": {
+                "xml_transform": {
+                    "target": "SuffixName",
+                    "namespace": "globLib",
+                }
+            },
+        },
+        "title": {
+            "xml_transform": {
+                "target": "Title",
+                "namespace": "globLib",
+            }
+        },
+        "address": {
+            "xml_transform": {
+                "target": "Address",
+                "type": "nested_object",
+                "namespace": "globLib",
+            },
+            "street1": {
+                "xml_transform": {
+                    "target": "Street1",
+                    "namespace": "globLib",
+                }
+            },
+            "street2": {
+                "xml_transform": {
+                    "target": "Street2",
+                    "namespace": "globLib",
+                }
+            },
+            "city": {
+                "xml_transform": {
+                    "target": "City",
+                    "namespace": "globLib",
+                }
+            },
+            "state": {
+                "xml_transform": {
+                    "target": "State",
+                    "namespace": "globLib",
+                }
+            },
+            "zip_code": {
+                "xml_transform": {
+                    "target": "ZipPostalCode",
+                    "namespace": "globLib",
+                }
+            },
+            "country": {
+                "xml_transform": {
+                    "target": "Country",
+                    "namespace": "globLib",
+                }
+            },
+        },
+        "phone": {
+            "xml_transform": {
+                "target": "Phone",
+                "namespace": "globLib",
+            }
+        },
+        "fax": {
+            "xml_transform": {
+                "target": "Fax",
+                "namespace": "globLib",
+            }
+        },
+        "email": {
+            "xml_transform": {
+                "target": "Email",
+                "namespace": "globLib",
+            }
+        },
+    }
+
+
+# XML Transformation Rules for EPA Key Contacts v2.0
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for EPA Key Contacts form",
+        "version": "1.0",
+        "form_name": "EPA_KeyContacts_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+            "EPA_KeyContacts_2_0": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "KeyContactPersons_2_0",
+            "root_namespace_prefix": "EPA_KeyContacts_2_0",
+            "root_attributes": {
+                "FormVersion": "2.0",
+            },
+        },
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+        },
+    },
+    # Field mappings - order matches XSD sequence
+    # All contacts use ContactPersonDataTypeV3 from GlobalLibrary
+    # AuthorizedRepresentative (optional)
+    "authorized_representative": _create_contact_person_transform("AuthorizedRepresentative"),
+    # Payee (optional)
+    "payee": _create_contact_person_transform("Payee"),
+    # AdminstrativeContact (optional) - Note: XSD has typo "Adminstrative" not "Administrative"
+    "administrative_contact": _create_contact_person_transform("AdminstrativeContact"),
+    # ProjectManager (optional)
+    "project_manager": _create_contact_person_transform("ProjectManager"),
+}
+
 EPA_KEY_CONTACT_v2_0 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/674
     form_id=uuid.UUID("3c4d17c7-e10e-4087-b8ab-a5c1930d4221"),
@@ -289,6 +440,7 @@ EPA_KEY_CONTACT_v2_0 = Form(
     form_ui_schema=FORM_UI_SCHEMA,
     # No rule schema needed
     form_rule_schema=None,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # No form instructions
     form_type=FormType.EPA_KEY_CONTACTS,
     sgg_version="1.0",
