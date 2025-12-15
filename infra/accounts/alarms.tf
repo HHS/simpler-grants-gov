@@ -19,5 +19,5 @@ resource "aws_sns_topic" "log_failure" {
 resource "aws_sns_topic_subscription" "log_failure" {
   topic_arn = aws_sns_topic.log_failure.arn
   protocol  = "email"
-  endpoint  = "grantsalerts@navapbc.com"
+  endpoint  = local.alerts_email
 }
