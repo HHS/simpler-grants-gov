@@ -47,7 +47,7 @@ export function createRequestUrl(
   version: string,
   namespace: string,
   subPath = "",
-  body?: JSONRequestBody,
+  body?: JSONRequestBody | FormData,
 ) {
   // Remove leading slash
   const cleanedPaths = compact([basePath, version, namespace, subPath]);
@@ -78,7 +78,7 @@ function removeRedundantSlashes(path: string) {
  * Transform the request body into a format that fetch expects
  */
 export function createRequestBody(
-  payload?: JSONRequestBody,
+  payload?: JSONRequestBody | FormData,
 ): XMLHttpRequestBodyInit {
   if (payload instanceof FormData) {
     return payload;
