@@ -1,6 +1,6 @@
 """Tests for the transformation utility."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -17,6 +17,7 @@ from common_grants_sdk.schemas.pydantic import (
     RangeOperator,
     StringArrayFilter,
 )
+from freezegun import freeze_time
 
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
@@ -85,6 +86,8 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "https://example.com/opportunity",
+                                "created_at": datetime(2024, 1, 3, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
                         )()
                     },
@@ -99,8 +102,8 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.description == "Test description"
         assert result.status.value == "open"  # "posted" maps to "open"
-        assert result.created_at == datetime(2024, 1, 1, 12, 0, 0)
-        assert result.last_modified_at == datetime(2024, 1, 2, 12, 0, 0)
+        assert result.created_at == datetime(2024, 1, 3, 12, 0, 0)
+        assert result.last_modified_at == datetime(2024, 1, 4, 12, 0, 0)
 
         # Check key_dates
         assert result.key_dates is not None
@@ -178,6 +181,8 @@ class TestTransformation:
                                     "award_ceiling": None,
                                     "award_floor": None,
                                     "additional_info_url": None,
+                                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                    "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                                 },
                             )()
                         },
@@ -188,6 +193,7 @@ class TestTransformation:
             result = transform_opportunity_to_cg(opportunity)
             assert result.status.value == expected_status
 
+    @freeze_time("2024-01-03 12:00:00")
     def test_missing_optional_data(self):
         """Test transformation with missing optional data."""
 
@@ -213,8 +219,10 @@ class TestTransformation:
         assert result.title == "Untitled Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
-        assert result.created_at == datetime(2024, 1, 1, 12, 0, 0)
-        assert result.last_modified_at == datetime(2024, 1, 1, 12, 0, 0)
+
+        # If summary is missing created and modified should be today
+        assert result.created_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
+        assert result.last_modified_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
 
         # Check that timeline and funding are None when summary is None
         assert result.key_dates.post_date is None
@@ -233,7 +241,7 @@ class TestTransformation:
                 self.opportunity_title = "Test"
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
-                self.updated_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
+                self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -249,6 +257,8 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": 10000,
                                 "additional_info_url": None,
+                                "created_at": datetime(2024, 1, 3, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
                         )()
                     },
@@ -290,6 +300,8 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": None,
                                 "additional_info_url": None,
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
                         )()
                     },
@@ -326,6 +338,8 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "sam.gov",  # URL without protocol
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
                         )()
                     },
@@ -398,6 +412,8 @@ class TestTransformation:
                 "award_ceiling": 500000,
                 "award_floor": 10000,
                 "additional_info_url": "https://example.com/opportunity",
+                "created_at": datetime(2024, 1, 3, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 4, 12, 0, 0),
             },
         }
 
@@ -416,6 +432,7 @@ class TestTransformation:
         assert result.key_dates.close_date.date == date(2024, 12, 31)
         assert str(result.source) == "https://example.com/opportunity"
 
+    @freeze_time("2024-01-03 12:00:00")
     def test_transform_search_result_to_cg_with_missing_data(self):
         """Test transformation of search result with missing data."""
         # Test with minimal data
@@ -423,7 +440,7 @@ class TestTransformation:
             "opportunity_id": uuid4(),
             "opportunity_title": "Test Opportunity",
             "opportunity_status": "posted",
-            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "created_at": datetime(2024, 1, 2, 12, 0, 0),
             "updated_at": datetime(2024, 1, 2, 12, 0, 0),
             "summary": {},
         }
@@ -436,8 +453,8 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.description == "No description available"
         assert result.status.value == "open"
-        assert result.created_at == datetime(2024, 1, 1, 12, 0, 0)
-        assert result.last_modified_at == datetime(2024, 1, 2, 12, 0, 0)
+        assert result.created_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
+        assert result.last_modified_at == datetime(2024, 1, 3, 12, 0, 0, tzinfo=timezone.utc)
 
         # Check that timeline and funding are None when summary is empty
         assert result.key_dates.post_date is None

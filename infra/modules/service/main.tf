@@ -200,6 +200,8 @@ resource "aws_ecs_task_definition" "app" {
         type = "fluentbit",
         options = {
           enable-ecs-log-metadata = "true"
+          config-file-type        = "file"
+          config-file-value       = "/fluent-bit/etc/fluent-bit-custom.yml"
         }
       }
       logConfiguration = {

@@ -15,7 +15,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { Suspense, use } from "react";
 
-import BetaAlert from "src/components/BetaAlert";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
 import { FilterPillPanel } from "src/components/search/FilterPillPanel";
@@ -80,21 +79,7 @@ function Search({ searchParams, params }: SearchPageProps) {
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
-      <div className="bg-base-lightest">
-        <BetaAlert
-          containerClasses="padding-y-3"
-          alertMessage={t.rich("betaAlert.alert", {
-            ethnioSurveyLink: (chunks) => (
-              <a
-                href="https://ethn.io/16188"
-                target="_blank"
-                className="usa-link--external"
-              >
-                {chunks}
-              </a>
-            ),
-          })}
-        />
+      <div className="bg-base-lightest padding-top-5">
         <div className="grid-container">
           <SearchCallToAction />
           <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">
