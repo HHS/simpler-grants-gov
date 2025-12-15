@@ -969,6 +969,7 @@ export const messages = {
       milestones: {
         title: "What we've delivered",
         contentTitle: "Early 2025",
+        releaseNotesLink: "Read the latest release notes on our public wiki",
         contentItems: [
           {
             title: "Simpler application workflow prototype",
