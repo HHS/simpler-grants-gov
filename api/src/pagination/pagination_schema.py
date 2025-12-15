@@ -1,5 +1,4 @@
 from marshmallow import pre_load
-from pydantic_core._pydantic_core import ValidationError
 
 from src.api.schemas.extension import Schema, fields, validators
 from src.pagination.pagination_models import SortDirection
@@ -11,7 +10,7 @@ class BasePaginationSchema(Schema):
     def before_load(self, item: dict, many: bool, **kwargs: dict) -> dict:
         # Schema-level error: payload is not an object
         if not isinstance(item, dict):
-            raise ValidationError("Invalid pagination parameters: expected an object.", "_schema")
+            raise item
 
         # If sort_order is used, don't change anything
         # We'll assume they've migrated properly
