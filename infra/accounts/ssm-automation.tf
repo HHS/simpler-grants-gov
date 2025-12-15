@@ -15,7 +15,7 @@ resource "aws_cloudwatch_log_group" "ssm_automation" {
 # SSM Service Setting to enable CloudWatch logging for Automation
 resource "aws_ssm_service_setting" "automation_cloudwatch_logging" {
   setting_id    = "arn:aws:ssm:us-east-1:315341936575:servicesetting/ssm/automation/customer-script-log-destination"
-  setting_value = aws_cloudwatch_log_group.ssm_automation.arn
+  setting_value = "CloudWatch"
 }
 
 # Enable CloudWatch log group output for SSM Automation
