@@ -1,7 +1,12 @@
 import { ApplicationHistory } from "src/types/applicationResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Alert, Table } from "@trussworks/react-uswds";
+import { Alert } from "@trussworks/react-uswds";
+
+import {
+  TableCellData,
+  TableWithResponsiveHeader,
+} from "src/components/TableWithResponsiveHeader";
 
 export type ApplicationHistoryCardProps = ApplicationHistory[];
 
@@ -62,6 +67,25 @@ const ApplicationTable = ({
   const activityTranslations = useTranslations(
     "Application.historyTable.activities",
   );
+  const tableHeaders: TableCellData[] = [
+    { cellData: t("timestamp") },
+    { cellData: t("activity"), style: { width: "55%" } },
+    { cellData: t("performedBy") },
+  ];
+
+  const transformTableRowData = (histories: ApplicationHistoryCardProps) =>
+    histories.map((history) => {
+      return [
+        { cellData: formatTimestamp(history.created_at) },
+        {
+          cellData: getActivityMessage(
+            history,
+            activityTranslations(history.application_audit_event),
+          ),
+        },
+        { cellData: history.user.email },
+      ];
+    });
 
   if (!applicationHistory.length) {
     return (
@@ -72,48 +96,9 @@ const ApplicationTable = ({
   }
 
   return (
-    <Table className="width-full overflow-wrap simpler-application-forms-table">
-      <thead>
-        <tr>
-          <th scope="col" className="bg-base-lightest padding-y-205">
-            {t("timestamp")}
-          </th>
-          <th
-            scope="col"
-            className="bg-base-lightest padding-y-205"
-            style={{ width: "55%" }}
-          >
-            {t("activity")}
-          </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
-            {t("performedBy")}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {applicationHistory.map((history, index) => (
-          <tr
-            key={index}
-            id={`form-history-${index}`}
-            data-testid={`form-history-${index}`}
-          >
-            <td data-label={t("timestamp")}>
-              <div>{formatTimestamp(history.created_at)}</div>
-            </td>
-            <td data-label={t("activity")}>
-              <div>
-                {getActivityMessage(
-                  history,
-                  activityTranslations(history.application_audit_event),
-                )}
-              </div>
-            </td>
-            <td data-label={t("performedBy")}>
-              <div>{history.user.email}</div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+    <TableWithResponsiveHeader
+      headerContent={tableHeaders}
+      tableRowData={transformTableRowData(applicationHistory)}
+    />
   );
 };

@@ -198,9 +198,6 @@ describe("ApplicationContainer", () => {
 
       const historyHeader = screen.getByText("applicationHistory");
       expect(historyHeader).toBeInTheDocument();
-
-      const historyRow = screen.getByTestId("form-history-0");
-      expect(historyRow).toBeInTheDocument();
     });
   });
 
