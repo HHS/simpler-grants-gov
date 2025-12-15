@@ -64,6 +64,7 @@ locals {
     { name : "DB_NAME", value : var.db_vars.connection_info.db_name },
     { name : "DB_SCHEMA", value : var.db_vars.connection_info.schema_name },
   ]
+
   cdn_environment_variables = local.enable_cdn ? [
     { name : "CDN_URL", value : "https://${local.cdn_domain_name_env_var}" },
   ] : []
@@ -89,6 +90,13 @@ locals {
       ]
     ])
   )
+
+  # Environment variables for migrator task - same as app but with DB_USER="migrator"
+  # The migrator IAM role has RDS IAM auth for the "migrator" database user
+  migrator_environment_variables = [
+    for env in local.environment_variables :
+    env.name == "DB_USER" ? { name : "DB_USER", value : "migrator" } : env
+  ]
 }
 
 #-------------------
@@ -271,7 +279,7 @@ resource "aws_ecs_task_definition" "migrator" {
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = var.readonly_root_filesystem,
-      environment            = local.environment_variables,
+      environment            = local.migrator_environment_variables,
       secrets                = var.secrets,
       linuxParameters = var.drop_linux_capabilities ? {
         capabilities = {
