@@ -308,6 +308,8 @@ describe("extricateConditionalValidationRules", () => {
       extricateConditionalValidationRules({
         ...simpleProperties,
         allOf: {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           if: {
             properties: { additional_funding: { const: true } },
             required: ["additional_funding"],

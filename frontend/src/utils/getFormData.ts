@@ -127,23 +127,22 @@ export default async function getFormData({
     return { error: "TopLevelError" };
   }
 
-  let formSchema = {};
   try {
-    formSchema = await processFormSchema(form_json_schema);
+    const result = await processFormSchema(form_json_schema);
+    return {
+      data: {
+        applicationAttachments: applicationFormData.application_attachments,
+        applicationResponse,
+        applicationName: applicationFormData.application_name,
+        formId,
+        formName,
+        formSchema: result.formSchema,
+        formUiSchema,
+        formValidationWarnings,
+      },
+    };
   } catch (e) {
     console.error("Error parsing JSON schema", e);
     return { error: "TopLevelError" };
   }
-  return {
-    data: {
-      applicationAttachments: applicationFormData.application_attachments,
-      applicationResponse,
-      applicationName: applicationFormData.application_name,
-      formId,
-      formName,
-      formSchema,
-      formUiSchema,
-      formValidationWarnings,
-    },
-  };
 }

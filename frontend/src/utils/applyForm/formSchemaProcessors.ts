@@ -2,16 +2,21 @@ import { RJSFSchema } from "@rjsf/utils";
 import { JSONSchema7 } from "json-schema";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
 
-const isIfThenElement = (schemaNode: object) => {
-  return (
-    Object.hasOwn(schemaNode, "if") &&
-    Object.hasOwn(schemaNode, "then") &&
-    Object.keys(schemaNode).length === 2
-  );
-};
-
+/*
+  ex:
+  {
+    "path/to/field": [
+      {
+        if: {...},
+        then: {...}
+      },{
+        ...
+      }
+    ]
+  }
+*/
 type ConditionalValidationRules = {
-  [propertyPath: string]: { [key: "if" | "then"]: unknown };
+  [propertyPath: string]: { [key: string]: unknown }[];
 };
 
 type ExtricateConditionalValidationRulesResult = {
@@ -24,19 +29,43 @@ type ConditionalRuleArrayReduceResult = {
   updatedValue: unknown[];
 };
 
-/* for each node
-  if it's an allOf
-    and all elements are they if / then conditionals
-      remove it from properties
-      determine full path to property
-      add it to the conditional validation rules
-    if not
-      remove the allOf completely (we don't know what it is but it'll break things)
-  if it's an object
-    recurse
-  if it's an array
-    recurse over any object properties
-  otherwise, pass through
+const isIfThenElement = (schemaNode: object) => {
+  return (
+    Object.hasOwn(schemaNode, "if") &&
+    Object.hasOwn(schemaNode, "then") &&
+    Object.keys(schemaNode).length === 2
+  );
+};
+
+/*
+  Since the mergeAllOf library cannot handle merging something like complex conditionals like:
+    "allOf": [
+      {
+          "if": {"not": {"required": ["outright_funds"]}},
+          "then": {"required": ["federal_match"]},
+      },
+      {
+          "if": {"not": {"required": ["federal_match"]}},
+          "then": {"required": ["outright_funds"]},
+      },
+    ]
+  This function will remove any complex allOfs from the form schema, and preserve them in a separate
+  conditional validation object to be used later (not used anywhere yet)
+
+  logic:
+    for each node
+      if it's an allOf
+        and all elements are they if / then conditionals
+          remove it from properties
+          determine full path to property
+          add it to the conditional validation rules
+        if not
+          remove the allOf completely (we don't know what it is but it'll break things)
+      if it's an object
+        recurse
+      if it's an array
+        recurse over any object properties
+      otherwise, pass through
 
   Note that even though our current system handles single conditional allOfs fine,
   we will remove and track them here as it's easier to do and sets us up better to
@@ -49,7 +78,7 @@ export const extricateConditionalValidationRules = (
   return Object.entries(properties).reduce(
     (
       { conditionalValidationRules, propertiesWithoutComplexConditionals },
-      [key, value]: [string, unknown],
+      [key, value]: [string, { [key: string]: unknown }[]],
     ) => {
       if (key === "allOf") {
         if (Array.isArray(value) && value.length) {
@@ -59,23 +88,10 @@ export const extricateConditionalValidationRules = (
               conditionalValidationRules,
               propertiesWithoutComplexConditionals,
             };
-          } else {
-            console.log(
-              "not sure what this node might be!! but will let it slide for now",
-              key,
-              value,
-            );
-            // return {
-            //   conditionalValidationRules,
-            //   propertiesWithoutComplexConditionals: {
-            //     ...propertiesWithoutComplexConditionals,
-            //     ...{ [key]: value },
-            //   },
-            // };
           }
         } else {
           // we got an empty allOf or a non-array allOf, which shouldn't happen
-          console.log("malformed data?", key, value);
+          console.error("malformed schema data: ", key, value);
           throw new Error("malformed data?");
         }
       }
@@ -97,7 +113,6 @@ export const extricateConditionalValidationRules = (
           },
         };
       }
-      console.log("$$$", key, value);
       if (Array.isArray(value)) {
         /*
           for each element in the array

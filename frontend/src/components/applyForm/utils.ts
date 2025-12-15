@@ -3,8 +3,9 @@ import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
-import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
+import { filter, get, isArray, isObject } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
+import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
@@ -765,28 +766,16 @@ export const isFieldRequired = (
 // to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
-  // retainConditionalValidation = false,
 ): Promise<{
   formSchema: RJSFSchema;
   conditionalValidationRules: RJSFSchema;
 }> => {
-  // const conditionalValidationRules = {};
-  // const conditionalValidationResolver = (
-  //   values,
-  //   path,
-  //   mergeSchemas,
-  //   options,
-  // ) => {
-  //   console.log("$$$", values, path);
-  //   return values[0];
-  // };
-  // const mergeOptions = retainConditionalValidation
-  //   ? { resolvers: { defaultResolver: conditionalValidationResolver } }
-  //   : {};
   try {
     const dereferenced = await $Refparser.dereference(formSchema);
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
-      extricateConditionalValidationRules(dereferenced as JSONSchema7);
+      extricateConditionalValidationRules(
+        dereferenced.properties as JSONSchema7,
+      );
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
