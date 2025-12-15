@@ -309,14 +309,11 @@ class RecursiveXMLTransformer:
                     )
 
                 # Check if this is a field_grouping result
-                if (
-                    conditional_config.get("type") == "field_grouping"
-                    and isinstance(conditional_result, dict)
+                if conditional_config.get("type") == "field_grouping" and isinstance(
+                    conditional_result, dict
                 ):
                     # Handle field grouping - process the grouped fields with their transforms
-                    return self._process_field_grouping(
-                        conditional_result, full_rule_config, path
-                    )
+                    return self._process_field_grouping(conditional_result, full_rule_config, path)
 
                 return conditional_result
             else:
@@ -424,14 +421,16 @@ class RecursiveXMLTransformer:
         if not grouped_fields:
             return None
 
-        nested_result = {}
+        nested_result: dict[str, Any] = {}
         nested_fields_config = full_rule_config.get("nested_fields", {})
 
         # Process each grouped field according to its nested configuration
         for field_name, field_value in grouped_fields.items():
             if field_name not in nested_fields_config:
                 # No transform config for this field - skip it or use as-is?
-                logger.warning(f"No nested_fields config for grouped field '{field_name}' at {'.'.join(path)}")
+                logger.warning(
+                    f"No nested_fields config for grouped field '{field_name}' at {'.'.join(path)}"
+                )
                 continue
 
             field_config = nested_fields_config[field_name]
@@ -467,7 +466,7 @@ class RecursiveXMLTransformer:
                             child_target = child_xml_transform.get("target")
                             if child_key in field_value and field_value[child_key] is not None:
                                 nested_obj_result[child_target] = field_value[child_key]
-                    
+
                     if nested_obj_result:
                         nested_result[target_name] = nested_obj_result
                 else:
