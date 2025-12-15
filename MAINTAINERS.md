@@ -23,6 +23,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Dao Nguyen
 * Nathan Stricker
 * Amit Desai
+* Hao Wang
+* Kenny Krug
 
 ## Content and Design
 

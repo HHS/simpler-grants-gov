@@ -1554,8 +1554,8 @@ export const messages = {
     },
   },
   ManageUsers: {
-    pageTitle: "Manage Users | Simpler.Grants.gov",
-    pageHeading: "Manage Users",
+    pageTitle: "Manage users | Simpler.Grants.gov",
+    pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
       "Adjust permissions for active users so they have the right access for their role.",
@@ -1571,6 +1571,7 @@ export const messages = {
     invitedUsersFetchError:
       "We have encountered an error retrieving the Invited Users list, please try again later.",
     invitedUsersTableZeroState: "There are no invited users.",
+    inviteLegacyUsers: "Invite Grants.gov users",
     roleManager: {
       errorState:
         "We were unable to make the change requested at this time. Please try again.",
@@ -1662,5 +1663,24 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+  },
+  InviteLegacyUsers: {
+    dataLoadingError:
+      "We’re having trouble loading your team from Grants.gov. Please try again later.",
+    emptyLegacyUsers:
+      "It looks like there are no team members to import. Your organization does not have a legacy roster in Grants.gov, so there are no contacts available to add here. You can still invite people directly on your <manageUsersLink>Manage users page</manageUsersLink>.",
+    inviteYourTeam: "Invite your team from Grants.gov",
+    inviteYourTeamDetails:
+      "Add your team from Grants.gov to your organization in Simpler or remove anyone who’s no longer actively working with your team. Select the people to invite, and they’ll get an invitation to join you here in Simpler.",
+    keyInformation: "Key information",
+    keyInformationDetails:
+      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they’ve been added.",
+    metaDescription: "Manage users from legacy integrations",
+    pageHeading: "Legacy invite",
+    pageTitle: "Legacy invite | Simpler.Grants.gov",
+    tableHeadings: {
+      email: "Email",
+      name: "Name",
+    },
   },
 };
