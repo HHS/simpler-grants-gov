@@ -1,7 +1,8 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Accordion } from "@trussworks/react-uswds";
-import { ExternalRoutes } from "src/constants/routes";
 
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
