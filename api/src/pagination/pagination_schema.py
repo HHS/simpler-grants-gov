@@ -8,7 +8,7 @@ class BasePaginationSchema(Schema):
 
     @pre_load
     def before_load(self, item: dict, many: bool, **kwargs: dict) -> dict:
-        # Schema-level error: payload is not an object
+        # If input is not a dict, just return it; Marshmallow will raise a ValidationError
         if not isinstance(item, dict):
             raise item
 
