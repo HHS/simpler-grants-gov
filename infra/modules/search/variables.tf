@@ -62,3 +62,13 @@ variable "zone_awareness_enabled" {
   description = "Whether to enable zone awareness"
   type        = bool
 }
+
+variable "ingest_role_arn" {
+  description = "The ARN of the IAM role used for ingesting data into OpenSearch"
+  type        = string
+}
+
+variable "query_role_arn" {
+  description = "The ARN of the IAM role used for querying data from OpenSearch"
+  type        = string
+}

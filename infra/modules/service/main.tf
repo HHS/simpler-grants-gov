@@ -252,6 +252,98 @@ resource "aws_ecs_task_definition" "app" {
   ]
 }
 
+# Migrator task definition for scheduled jobs (load-opportunity-data, load-agency-data, etc.)
+# Uses the migrator_task role which has OpenSearch ingest permissions for write operations
+resource "aws_ecs_task_definition" "migrator" {
+  # checkov:skip=CKV_AWS_336:Fluentbit sidecar requires write access to filesystem for logging
+  count = var.db_vars != null ? 1 : 0
+
+  family             = "${var.service_name}-migrator"
+  execution_role_arn = aws_iam_role.task_executor.arn
+  task_role_arn      = aws_iam_role.migrator_task[0].arn
+
+  container_definitions = jsonencode([
+    {
+      name                   = local.container_name,
+      image                  = local.image_url,
+      memory                 = var.fargate_memory - var.fluent_bit_memory,
+      cpu                    = var.fargate_cpu - var.fluent_bit_cpu,
+      networkMode            = "awsvpc",
+      essential              = true,
+      readonlyRootFilesystem = var.readonly_root_filesystem,
+      environment            = local.environment_variables,
+      secrets                = var.secrets,
+      linuxParameters = var.drop_linux_capabilities ? {
+        capabilities = {
+          add  = []
+          drop = ["ALL"]
+        },
+        initProcessEnabled = true
+      } : null,
+      logConfiguration = {
+        logDriver = "awsfirelens",
+      }
+      mountPoints    = []
+      systemControls = []
+      volumesFrom    = []
+    },
+    {
+      name                   = "${local.container_name}-fluentbit"
+      image                  = local.fluent_bit_image_url,
+      memory                 = var.fluent_bit_memory,
+      cpu                    = var.fluent_bit_cpu,
+      networkMode            = "awsvpc",
+      essential              = true,
+      readonlyRootFilesystem = false,
+      healthCheck = {
+        timeout     = 5,
+        interval    = 10,
+        startPeriod = 30,
+        command     = ["CMD-SHELL", "curl http://localhost:80/api/v1/health"]
+      },
+      firelensConfiguration = {
+        type = "fluentbit",
+        options = {
+          enable-ecs-log-metadata = "true"
+          config-file-type        = "file"
+          config-file-value       = "/fluent-bit/etc/fluent-bit-custom.yml"
+        }
+      }
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          "awslogs-group"         = "${aws_cloudwatch_log_group.service_logs.name}-fluentbit",
+          "awslogs-region"        = data.aws_region.current.name,
+          "awslogs-stream-prefix" = local.log_stream_prefix
+        }
+      }
+      secrets = [
+        {
+          name      = "licenseKey",
+          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
+        }
+      ]
+      environment = [
+        { name : "aws_region", value : data.aws_region.current.name },
+        { name : "container_name", value : local.container_name },
+        { name : "log_group_name", value : local.log_group_name },
+      ],
+    },
+  ])
+
+  cpu    = var.fargate_cpu
+  memory = var.fargate_memory
+
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+
+  depends_on = [
+    aws_cloudwatch_log_group.service_logs,
+    aws_cloudwatch_log_group.fluentbit,
+    aws_iam_role_policy.task_executor,
+  ]
+}
+
 resource "aws_ecs_cluster" "cluster" {
   name = local.cluster_name
 

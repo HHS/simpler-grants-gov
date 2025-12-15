@@ -21,4 +21,8 @@ module "search" {
   instance_type                 = local.search_config.instance_type
   volume_size                   = local.search_config.volume_size
   vpc_id                        = data.aws_vpc.network.id
+
+  # IAM access control - role ARNs for OpenSearch access policies
+  ingest_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.service_name}-migrator"
+  query_role_arn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.service_name}-app"
 }
