@@ -26,17 +26,24 @@ type ConditionalRuleArrayReduceResult = {
 
 /* for each node
   if it's an allOf
-    and it contains multiple elements
-      and all elements are they if / then conditionals
-        remove it from properties
-        determine full path to property
-        add it to the conditional validation rules
+    and all elements are they if / then conditionals
+      remove it from properties
+      determine full path to property
+      add it to the conditional validation rules
     if not
       remove the allOf completely (we don't know what it is but it'll break things)
-  if it's
+  if it's an object
+    recurse
+  if it's an array
+    recurse over any object properties
+  otherwise, pass through
+
+  Note that even though our current system handles single conditional allOfs fine,
+  we will remove and track them here as it's easier to do and sets us up better to
+  use the conditional validation rules later
 */
 export const extricateConditionalValidationRules = (
-  properties: JSONSchema7,
+  properties: RJSFSchema,
   parentPath = "",
 ): ExtricateConditionalValidationRulesResult => {
   return Object.entries(properties).reduce(
@@ -45,16 +52,7 @@ export const extricateConditionalValidationRules = (
       [key, value]: [string, unknown],
     ) => {
       if (key === "allOf") {
-        if (Array.isArray(value) && value.length === 1) {
-          return {
-            conditionalValidationRules,
-            propertiesWithoutComplexConditionals: {
-              ...propertiesWithoutComplexConditionals,
-              ...{ [key]: value },
-            },
-          };
-        }
-        if (Array.isArray(value) && value.length > 1) {
+        if (Array.isArray(value) && value.length) {
           if (value.every(isIfThenElement)) {
             conditionalValidationRules[parentPath] = value;
             return {
@@ -63,25 +61,30 @@ export const extricateConditionalValidationRules = (
             };
           } else {
             console.log(
-              "not sure what this node is!! but removing it anyway",
+              "not sure what this node might be!! but will let it slide for now",
               key,
               value,
             );
-            return {
-              conditionalValidationRules,
-              propertiesWithoutComplexConditionals,
-            };
+            // return {
+            //   conditionalValidationRules,
+            //   propertiesWithoutComplexConditionals: {
+            //     ...propertiesWithoutComplexConditionals,
+            //     ...{ [key]: value },
+            //   },
+            // };
           }
         } else {
+          // we got an empty allOf or a non-array allOf, which shouldn't happen
           console.log("malformed data?", key, value);
           throw new Error("malformed data?");
         }
       }
 
       if (isBasicallyAnObject(value)) {
+        const parentPathPrefix = parentPath ? `${parentPath}/` : "";
         const nestedUpdate = extricateConditionalValidationRules(
           value as JSONSchema7,
-          `${parentPath}/${key}`,
+          `${parentPathPrefix}${key}`,
         );
         return {
           conditionalValidationRules: {
@@ -94,7 +97,7 @@ export const extricateConditionalValidationRules = (
           },
         };
       }
-
+      console.log("$$$", key, value);
       if (Array.isArray(value)) {
         /*
           for each element in the array
@@ -104,14 +107,16 @@ export const extricateConditionalValidationRules = (
 
         */
         const nestedUpdates = value.reduce(
-          (acc: ConditionalRuleArrayReduceResult, nestedEntry) => {
+          (acc: ConditionalRuleArrayReduceResult, nestedEntry, index) => {
             const { updatedConditionalValidationRules, updatedValue } = acc;
             if (isBasicallyAnObject(nestedEntry)) {
+              const fullParentPath = `${parentPath}/${key}[${index}]`;
               const {
                 conditionalValidationRules,
                 propertiesWithoutComplexConditionals,
               } = extricateConditionalValidationRules(
                 nestedEntry as JSONSchema7,
+                fullParentPath,
               );
               return {
                 updatedValue: updatedValue.concat([
