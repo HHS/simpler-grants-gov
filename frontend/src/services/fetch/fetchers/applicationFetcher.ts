@@ -191,26 +191,37 @@ export const uploadAttachment = async (
   file: FormData,
 ): Promise<ApplicationAttachmentUploadResponse> => {
   const additionalHeaders = {
-    ...getDefaultHeaders(),
-    ...{
-      Accept: "application/json",
-      "X-SGG-Token": token,
-    },
+    "X-SGG-Token": token,
+    Accept: "application/json",
   };
-
-  const url = createRequestUrl(
-    "POST",
-    `${environment.API_URL}`,
-    "alpha",
-    "applications",
-    `${applicationId}/attachments`,
-  );
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: additionalHeaders,
+  const response = await fetchApplicationWithMethod("POST")({
+    subPath: `${applicationId}/attachments`,
+    additionalHeaders,
     body: file,
   });
 
   return (await response.json()) as ApplicationAttachmentUploadResponse;
+  // const additionalHeaders = {
+  //   ...getDefaultHeaders(),
+  //   ...{
+  //     Accept: "application/json",
+  //     "X-SGG-Token": token,
+  //   },
+  // };
+
+  // const url = createRequestUrl(
+  //   "POST",
+  //   `${environment.API_URL}`,
+  //   "alpha",
+  //   "applications",
+  //   `${applicationId}/attachments`,
+  // );
+
+  // const response = await fetch(url, {
+  //   method: "POST",
+  //   headers: additionalHeaders,
+  //   body: file,
+  // });
+
+  // return (await response.json()) as ApplicationAttachmentUploadResponse;
 };

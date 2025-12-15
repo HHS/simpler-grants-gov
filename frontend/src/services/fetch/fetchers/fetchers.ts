@@ -41,7 +41,7 @@ export function requesterForEndpoint({
   return async function (
     options: {
       subPath?: string;
-      body?: JSONRequestBody;
+      body?: JSONRequestBody | FormData;
       additionalHeaders?: HeadersDict;
       nextOptions?: NextFetchRequestConfig;
     } = {},
