@@ -131,6 +131,7 @@ class CompetitionContainer:
     closing_date: date | None = date(2050, 1, 1)
     grace_period: int | None = 1
     contact_info: str | None = "Example Person\n123-456-7890"
+    # Application is open to everyone by default
     open_to_applicants: list[CompetitionOpenToApplicant] = dataclasses.field(
         default_factory=lambda: [
             CompetitionOpenToApplicant.INDIVIDUAL,
@@ -478,7 +479,6 @@ class BuildAutomaticOpportunitiesTask(Task):
             opportunity_assistance_listing=(
                 opportunity_assistance_listing if comp_data.has_assistance_listing else None
             ),
-            # Make the application open to everyone
             open_to_applicants=comp_data.open_to_applicants,
             is_simpler_grants_enabled=comp_data.is_simpler_grants_enabled,
         )
