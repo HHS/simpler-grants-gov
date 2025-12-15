@@ -1,8 +1,3 @@
-import { environment } from "src/constants/environments";
-import {
-  createRequestUrl,
-  getDefaultHeaders,
-} from "src/services/fetch/fetcherHelpers";
 import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
 import {
   ApplicationAttachmentUploadResponse,
