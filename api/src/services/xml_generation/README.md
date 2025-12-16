@@ -213,10 +213,6 @@ FORM_XML_TRANSFORM_RULES = {
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
 
-### Example: EPA Key Contacts
-
-The EPA Key Contacts form contains four optional contact person sections, each using `ContactPersonDataTypeV3` from GlobalLibrary:
-
 ### Example: Project Abstract Summary
 
 The Project Abstract Summary form contains text fields for project information:
@@ -251,6 +247,14 @@ FORM_XML_TRANSFORM_RULES = {
 - `applicant_name` → `OrganizationName` (required, called "Applicant Name" in UI)
 - `project_title` → `ProjectTitle` (required, max 250 chars)
 - `project_abstract` → `ProjectAbstract` (required, max 4000 chars)
+
+### Example: EPA Key Contacts
+
+The EPA Key Contacts form contains four optional contact person sections, each using `ContactPersonDataTypeV3` from GlobalLibrary:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
         "description": "XML transformation rules for EPA Key Contacts form",
         "form_name": "EPA_KeyContacts_2_0",
         "namespaces": {
