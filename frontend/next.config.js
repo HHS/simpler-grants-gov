@@ -211,6 +211,11 @@ const nextConfig = {
         destination: "/newsletter/unsubscribe",
         permanent: false,
       },
+      {
+        source: "/organization/:segments*",
+        destination: "/organizations/:segments*",
+        permanent: false,
+      },
     ];
   },
 };
