@@ -3,7 +3,6 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from src.api.common_grants.common_grants_schemas import ValidationError
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     LinkOpportunitySummaryApplicantType,
@@ -15,13 +14,31 @@ from src.db.models.opportunity_models import (
 from src.pagination.paginator import Paginator
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import OpportunityFactory
-from tests.src.form_schema.test_csv_to_jsonschema import expected_fields
 
 DEFAULT_OPPORTUNITY_PARAMS = {
     "opportunity_title": "opportunity of a lifetime",
     "opportunity_number": "XYZ-111",
     "is_draft": True,
 }
+
+
+def validate_error_types(errors, expected):
+    """
+    expected: iterable of (field, type) tuples
+    """
+    found = []
+
+    # Collect (field, type) pairs from the actual errors returned by the API
+    for err in errors:
+        found.append((err.get("field"), err.get("type")))
+
+    # Ensure every expected (field, type) error is present in the response
+    for exp in expected:
+        assert exp in found
+
+    # Ensure no unexpected (field, type) errors were returned
+    for f in found:
+        assert f in expected
 
 
 @pytest.fixture
@@ -161,15 +178,12 @@ def test_pagination_required_returns_422(client):
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
     assert response.status_code == 422
 
-    data = response.get_json()
-    assert "errors" in data
-
-    assert {
-        "field": "pagination",
-        "message": "Missing data for required field.",
-        "type": "required",
-        "value": None,  # added to match the actual error dict
-    } in data["errors"]
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("pagination", "required"),
+        ],
+    )
 
 
 def test_sort_order_string_returns_422(client):
@@ -178,15 +192,12 @@ def test_sort_order_string_returns_422(client):
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
 
     assert response.status_code == 422
-
-    data = response.get_json()
-    assert "errors" in data
-    assert {
-        "field": "pagination.sort_order",
-        "message": "Not a valid list.",
-        "type": "invalid",
-        "value": None,  # added to match the actual error dict
-    } in data["errors"]
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("pagination.sort_order", "invalid"),
+        ],
+    )
 
 
 def test_sort_order_invalid_json_returns_422(client):
@@ -196,14 +207,12 @@ def test_sort_order_invalid_json_returns_422(client):
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=invalid_json)
 
     assert response.status_code == 422
-    data = response.get_json()
-    assert "errors" in data
-    assert {
-        "field": "_schema",
-        "message": "Invalid input type.",
-        "type": "invalid",
-        "value": None,  # added to match the actual error dict
-    } in data["errors"]
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("_schema", "invalid"),
+        ],
+    )
 
 
 @pytest.mark.parametrize(
@@ -211,30 +220,24 @@ def test_sort_order_invalid_json_returns_422(client):
     [
         (
             {"page_offset": "abc", "page_size": 10},
-            {
-                "field": "pagination.page_offset",
-                "message": "Not a valid integer.",
-                "type": "invalid",
-                "value": None,
-            },
+            {("pagination.page_offset", "invalid")},
         ),
         (
             {"page_offset": 1, "page_size": "xyz"},
-            {
-                "field": "pagination.page_size",
-                "message": "Not a valid integer.",
-                "type": "invalid",
-                "value": None,
-            },
+            {("pagination.page_size", "invalid")},
         ),
         (
             {"page_offset": -1, "page_size": 10},
-            {
-                "field": "pagination.page_offset",
-                "message": "Must be greater than or equal to 1.",
-                "type": "min_or_max_value",
-                "value": None,
-            },
+            [
+                (
+                    "pagination.page_offset",
+                    "min_or_max_value",
+                )
+            ],
+        ),
+        (
+            {"page_offset": -1},
+            [("pagination.page_size", "required"), ("pagination.page_offset", "min_or_max_value")],
         ),
     ],
 )
@@ -242,7 +245,6 @@ def test_wrong_type_pagination_param_returns_422(client, payload, expected_error
     full_payload = {"pagination": payload}
 
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=full_payload)
+
     assert response.status_code == 422
-    data = response.get_json()
-    assert "errors" in data
-    assert expected_error in data["errors"]
+    validate_error_types(response.get_json()["errors"], expected_error)
