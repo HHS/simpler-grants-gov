@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-import { waitForURLContainsQueryParamValue } from "../playwrightUtils";
 import { toggleCheckbox, toggleFilterDrawer } from "./searchSpecUtil";
 
 test.describe("Search error page", () => {

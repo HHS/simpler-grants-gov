@@ -81,10 +81,11 @@ export async function selectSortBy(
   sortByValue: string,
   drawer = false,
 ) {
-  await page
-    .locator(`#search-sort-by-select${drawer ? "-drawer" : ""}`)
-    .selectOption(sortByValue);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const sortSelectElement = page.locator(
+    `#search-sort-by-select${drawer ? "-drawer" : ""}`,
+  );
+  await sortSelectElement.selectOption(sortByValue);
+  await expect(sortSelectElement).toHaveValue(sortByValue);
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
@@ -95,9 +96,22 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  // // Wait for number of opportunities to show
+  // const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
+  // await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+
+  // Wait for first search result link to appear
+
+  // const resultsHeading = page.locator("#search-result-link-1-1");
+  // await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+
+  // return await expect(
+  //   page.locator("#search-result-link-1-1").first(),
+  // ).toBeVisible();
+
+  return await expect(
+    page.locator('h3:has-text("Opportunities")').first(),
+  ).toBeVisible();
 }
 
 export async function clickAccordionWithTitle(

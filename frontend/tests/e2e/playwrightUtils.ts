@@ -36,20 +36,28 @@ export async function waitForURLContainsQueryParamValue(
   queryParamValue: string,
   timeout = 30000, // query params get set after a debounce period
 ) {
-  const changeCheck = (pageUrl: string): boolean => {
-    const url = new URL(pageUrl);
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
+  // const changeCheck = (pageUrl: string): boolean => {
+  //   const url = new URL(pageUrl);
+  //   const params = new URLSearchParams(url.search);
+  //   const actualValue = params.get(queryParamName);
 
-    return actualValue === queryParamValue;
-  };
-  try {
-    await waitForURLChange(page, changeCheck, timeout);
-  } catch (_e) {
-    throw new Error(
-      `Url did not change to contain ${queryParamName}:${queryParamValue} as expected`,
-    );
-  }
+  //   return actualValue === queryParamValue;
+  // };
+  // try {
+  //   await waitForURLChange(page, changeCheck, timeout);
+  // } catch (_e) {
+  //   throw new Error(
+  //     `Url did not change to contain ${queryParamName}:${queryParamValue} as expected`,
+  //   );
+  // }
+
+  // return expect(page.url()).toContain(
+  //   `${queryParamName}=${queryParamValue}`,
+  // );
+
+  const expectedQueryString = `${queryParamName}=${queryParamValue}`;
+
+  return await page.waitForURL(new RegExp(expectedQueryString));
 }
 
 export async function waitForUrl(
