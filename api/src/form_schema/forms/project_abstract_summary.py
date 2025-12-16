@@ -74,6 +74,63 @@ FORM_RULE_SCHEMA = {
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
 }
 
+# XML Transformation Rules for Project Abstract Summary v2.0
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for Project Abstract Summary form",
+        "version": "1.0",
+        "form_name": "Project_AbstractSummary_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "codes": "http://apply.grants.gov/system/UniversalCodes-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "Project_AbstractSummary_2_0",
+            "root_attributes": {
+                "FormVersion": "2.0",
+            },
+        },
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+        },
+    },
+    # Field mappings - order matches XSD sequence
+    # FundingOpportunityNumber (required) - OpportunityIDDataType
+    "funding_opportunity_number": {
+        "xml_transform": {
+            "target": "FundingOpportunityNumber",
+        }
+    },
+    # CFDANumber (optional) - CFDANumberDataType (now called Assistance Listing Number)
+    "assistance_listing_number": {
+        "xml_transform": {
+            "target": "CFDANumber",
+        }
+    },
+    # OrganizationName (required) - OrganizationNameDataType
+    "applicant_name": {
+        "xml_transform": {
+            "target": "OrganizationName",
+        }
+    },
+    # ProjectTitle (required) - string 1-250
+    "project_title": {
+        "xml_transform": {
+            "target": "ProjectTitle",
+        }
+    },
+    # ProjectAbstract (required) - string 1-4000
+    "project_abstract": {
+        "xml_transform": {
+            "target": "ProjectAbstract",
+        }
+    },
+}
+
 ProjectAbstractSummary_v2_0 = Form(
     # https://grants.gov/forms/form-items-description/fid/591
     form_id=uuid.UUID("bf683068-23a4-43fa-ac7a-0f046b83cb14"),
@@ -86,6 +143,7 @@ ProjectAbstractSummary_v2_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # This form does not have instructions.
     form_type=FormType.PROJECT_ABSTRACT_SUMMARY,
     sgg_version="1.0",
