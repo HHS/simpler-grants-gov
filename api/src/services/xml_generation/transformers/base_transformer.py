@@ -259,18 +259,18 @@ class RecursiveXMLTransformer:
                 logger.debug(
                     f"{conditional_type} transform {'.'.join(current_path)} -> {list(transformed_value.keys())}"
                 )
-            # Handle conditional_structure that returns nested objects
+            # Handle conditional_structure and field_grouping that return nested objects
             elif (
                 isinstance(transformed_value, dict)
                 and transform_type == "conditional"
-                and conditional_type == "conditional_structure"
+                and conditional_type in ("conditional_structure", "field_grouping")
             ):
                 # Get the target field name from the transform rule
                 target_field = transform_rule.get("target")
                 if target_field:
                     result[target_field] = transformed_value
                     logger.debug(
-                        f"Conditional structure transform {'.'.join(current_path)} -> {target_field}"
+                        f"{conditional_type} transform {'.'.join(current_path)} -> {target_field}"
                     )
             else:
                 # Standard field assignment for all other cases
@@ -307,6 +307,13 @@ class RecursiveXMLTransformer:
                     return self._process_conditional_structure(
                         conditional_result, source_value, path
                     )
+
+                # Check if this is a field_grouping result
+                if conditional_config.get("type") == "field_grouping" and isinstance(
+                    conditional_result, dict
+                ):
+                    # Handle field grouping - process the grouped fields with their transforms
+                    return self._process_field_grouping(conditional_result, full_rule_config, path)
 
                 return conditional_result
             else:
@@ -397,6 +404,82 @@ class RecursiveXMLTransformer:
                 )
 
             return transformed_value
+
+    def _process_field_grouping(
+        self, grouped_fields: dict[str, Any], full_rule_config: dict[str, Any], path: list[str]
+    ) -> dict[str, Any] | None:
+        """Process field grouping - apply transforms to grouped fields.
+
+        Args:
+            grouped_fields: Dictionary of grouped field values (keyed by original field names)
+            full_rule_config: The full rule config containing xml_transform and nested_fields
+            path: Current field path
+
+        Returns:
+            Dictionary with transformed field values, or None if no fields
+        """
+        if not grouped_fields:
+            return None
+
+        nested_result: dict[str, Any] = {}
+        nested_fields_config = full_rule_config.get("nested_fields", {})
+
+        # Process each grouped field according to its nested configuration
+        for field_name, field_value in grouped_fields.items():
+            if field_name not in nested_fields_config:
+                # No transform config for this field - skip it or use as-is?
+                logger.warning(
+                    f"No nested_fields config for grouped field '{field_name}' at {'.'.join(path)}"
+                )
+                continue
+
+            field_config = nested_fields_config[field_name]
+            if not isinstance(field_config, dict):
+                continue
+
+            # Check if this nested field has an xml_transform
+            if "xml_transform" in field_config:
+                child_transform = field_config["xml_transform"]
+                target_name = child_transform.get("target")
+                transform_type = child_transform.get("type", "simple")
+
+                # Handle None values based on null_handling
+                if field_value is None:
+                    null_handling = child_transform.get("null_handling", "exclude")
+                    if null_handling == "exclude":
+                        continue
+                    elif null_handling == "include_null":
+                        nested_result[target_name] = "INCLUDE_NULL_MARKER"
+                        continue
+                    elif null_handling == "default_value":
+                        field_value = child_transform.get("default_value")
+
+                # Apply appropriate transformation based on type
+                if transform_type == "nested_object" and isinstance(field_value, dict):
+                    # Process nested object (like applicant_address)
+                    nested_obj_result = {}
+                    for child_key, child_config in field_config.items():
+                        if child_key == "xml_transform":
+                            continue
+                        if isinstance(child_config, dict) and "xml_transform" in child_config:
+                            child_xml_transform = child_config["xml_transform"]
+                            child_target = child_xml_transform.get("target")
+                            if child_key in field_value and field_value[child_key] is not None:
+                                nested_obj_result[child_target] = field_value[child_key]
+
+                    if nested_obj_result:
+                        nested_result[target_name] = nested_obj_result
+                else:
+                    # Simple field or value transformation
+                    if "value_transform" in child_transform:
+                        field_value = apply_value_transformation(
+                            field_value, child_transform["value_transform"]
+                        )
+
+                    if field_value is not None:
+                        nested_result[target_name] = field_value
+
+        return nested_result if nested_result else None
 
     def _process_conditional_structure(
         self, structure_config: dict[str, Any], source_value: Any, path: list[str]
