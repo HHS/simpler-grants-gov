@@ -91,12 +91,10 @@ locals {
     ])
   )
 
-  # Environment variables for migrator task - same as app but with DB_USER="migrator"
-  # The migrator IAM role has RDS IAM auth for the "migrator" database user
-  migrator_environment_variables = [
-    for env in local.environment_variables :
-    env.name == "DB_USER" ? { name : "DB_USER", value : "migrator" } : env
-  ]
+  # Environment variables for migrator task - uses same DB_USER as app
+  # The migrator task uses the migrator_task IAM role for OpenSearch ingest permissions
+  # but connects to the database as the app user (which has legacy schema access)
+  migrator_environment_variables = local.environment_variables
 }
 
 #-------------------
