@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, Project Abstract Summary, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, and Project Abstract.
+This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, Project Abstract Summary, EPA Key Contacts, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, and Project Abstract.
 
 ## Architecture
 
@@ -25,6 +25,7 @@ api/src/form_schema/forms/
 ├── cd511.py                   # CD511 Certification Regarding Lobbying + XML transformation rules
 ├── gg_lobbying_form.py        # GG_LobbyingForm Grants.gov Lobbying Form + XML transformation rules
 ├── project_abstract_summary.py # Project Abstract Summary + XML transformation rules
+├── epa_key_contacts.py        # EPA Key Contacts + XML transformation rules
 ├── project_narrative_attachment.py  # Project Narrative Attachments + XML transformation rules
 ├── budget_narrative_attachment.py   # Budget Narrative Attachments + XML transformation rules
 ├── other_narrative_attachment.py    # Other Narrative Attachments + XML transformation rules
@@ -212,6 +213,10 @@ FORM_XML_TRANSFORM_RULES = {
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
 
+### Example: EPA Key Contacts
+
+The EPA Key Contacts form contains four optional contact person sections, each using `ContactPersonDataTypeV3` from GlobalLibrary:
+
 ### Example: Project Abstract Summary
 
 The Project Abstract Summary form contains text fields for project information:
@@ -246,6 +251,27 @@ FORM_XML_TRANSFORM_RULES = {
 - `applicant_name` → `OrganizationName` (required, called "Applicant Name" in UI)
 - `project_title` → `ProjectTitle` (required, max 250 chars)
 - `project_abstract` → `ProjectAbstract` (required, max 4000 chars)
+        "description": "XML transformation rules for EPA Key Contacts form",
+        "form_name": "EPA_KeyContacts_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+            "EPA_KeyContacts_2_0": "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "KeyContactPersons_2_0",
+            "root_namespace_prefix": "EPA_KeyContacts_2_0",
+            "root_attributes": {"FormVersion": "2.0"},
+        },
+    },
+    # Each contact uses ContactPersonDataTypeV3 structure
+    "authorized_representative": _create_contact_person_transform("AuthorizedRepresentative"),
+    "payee": _create_contact_person_transform("Payee"),
+    "administrative_contact": _create_contact_person_transform("AdminstrativeContact"),
+    "project_manager": _create_contact_person_transform("ProjectManager"),
+}
+```
 
 ### Example: SF-424B and SF-424D (Assurance Forms)
 
@@ -386,6 +412,7 @@ The following forms currently have XML generation support:
 - **CD-511 (v1.1)**: Certification Regarding Lobbying
 - **GG_LobbyingForm (v1.1)**: Grants.gov Lobbying Form
 - **Project Abstract Summary (v2.0)**: Project abstract summary with text fields
+- **EPA Key Contacts (v2.0)**: EPA key contact persons form
 - **Project Narrative Attachments (v1.2)**: Project narrative file attachments
 - **Budget Narrative Attachments (v1.2)**: Budget narrative file attachments
 - **Other Narrative Attachments (v1.2)**: Other narrative file attachments

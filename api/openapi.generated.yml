@@ -6811,6 +6811,29 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SavedOpportunityStatusFieldFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+            - posted
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
+    UserSavedOpportunitiesFilter:
+      type: object
+      properties:
+        opportunity_status:
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunityStatusFieldFilter'
     SortOrderUserGetSavedOpportunityPaginationV1:
       type: object
       properties:
@@ -6864,6 +6887,13 @@ components:
     UserSavedOpportunitiesRequest:
       type: object
       properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserSavedOpportunitiesFilter'
+          - type: 'null'
         pagination:
           type:
           - object
@@ -7497,6 +7527,54 @@ components:
           anyOf:
           - $ref: '#/components/schemas/InvitationStatusFilter'
           - type: 'null'
+    SortOrderOrganizationInvitationListPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - invitee_email
+          - created_at
+          - responded_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    OrganizationInvitationListPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: invitee_email
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderOrganizationInvitationListPagination'
+        page_size:
+          type: integer
+          default: 25
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          default: 1
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
     OrganizationInvitationListRequest:
       type: object
       properties:
@@ -7508,6 +7586,12 @@ components:
           anyOf:
           - $ref: '#/components/schemas/OrganizationInvitationFilter'
           - type: 'null'
+        pagination:
+          description: 'Pagination parameters for organization invitation list (default
+            sort: invitee_email ascending)'
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitationListPagination'
     InviterData:
       type: object
       properties:
@@ -7623,6 +7707,10 @@ components:
     OrganizationInvitationListResponse:
       type: object
       properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return
