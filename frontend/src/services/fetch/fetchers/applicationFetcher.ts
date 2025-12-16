@@ -50,6 +50,7 @@ export const handleSubmitApplication = async (
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/submit`,
     additionalHeaders: ssgToken,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
     allowedErrorStatuses: [422],
   });
 
@@ -189,10 +190,8 @@ export const uploadAttachment = async (
   const additionalHeaders = {
     "X-SGG-Token": token,
     Accept: "application/json",
-    // "Content-Type": "multipart/form-data",
   };
 
-  // this is throwing a 422, and not sure why. Maybe an issue with content type headers?
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/attachments`,
     additionalHeaders,
@@ -201,27 +200,4 @@ export const uploadAttachment = async (
   });
 
   return (await response.json()) as ApplicationAttachmentUploadResponse;
-  // const additionalHeaders = {
-  //   ...getDefaultHeaders(),
-  //   ...{
-  //     Accept: "application/json",
-  //     "X-SGG-Token": token,
-  //   },
-  // };
-
-  // const url = createRequestUrl(
-  //   "POST",
-  //   `${environment.API_URL}`,
-  //   "alpha",
-  //   "applications",
-  //   `${applicationId}/attachments`,
-  // );
-
-  // const response = await fetch(url, {
-  //   method: "POST",
-  //   headers: additionalHeaders,
-  //   body: file,
-  // });
-
-  // return (await response.json()) as ApplicationAttachmentUploadResponse;
 };
