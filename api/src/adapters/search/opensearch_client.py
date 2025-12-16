@@ -2,6 +2,7 @@ import logging
 from collections.abc import Generator, Iterable
 from typing import Any
 
+import boto3
 import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
@@ -313,8 +314,6 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
 
     # When aws_region is set, use AWS IAM credentials (SigV4) for authentication
     if opensearch_config.aws_region:
-        import boto3
-
         credentials = boto3.Session().get_credentials()
         auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
