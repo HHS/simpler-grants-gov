@@ -77,7 +77,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       applicationId,
       userSession?.token,
     );
-    if (response.status_code !== 200) {
+    if (historyResponse.status_code !== 200) {
       console.error(
         `Error retrieving application history details for (${applicationId})`,
         response,

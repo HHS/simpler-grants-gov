@@ -20,6 +20,7 @@ describe("ApplicationHistoryTable", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
+
   it("Contains history entries", () => {
     render(<ApplicationHistoryTable applicationHistory={applicationHistory} />);
 
@@ -50,5 +51,11 @@ describe("ApplicationHistoryTable", () => {
       screen.getByText("user_removed", { exact: false }),
     ).toBeInTheDocument();
     expect(screen.getByText("organization_added")).toBeInTheDocument();
+  });
+
+  it("Does not contain history entries", () => {
+    render(<ApplicationHistoryTable applicationHistory={[]} />);
+
+    expect(screen.getByText("error")).toBeInTheDocument();
   });
 });
