@@ -1,5 +1,9 @@
 locals {
   task_executor_role_name = "${var.service_name}-task-executor"
+
+  # Default role ARNs based on service naming convention. The default roles are created in the database module.
+  ingest_role_arn = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-migrator"
+  query_role_arn  = var.query_role_arn != null ? var.query_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"
 }
 
 # Master user credentials for the OpenSearch domain
@@ -49,7 +53,7 @@ resource "aws_kms_key" "opensearch" {
         Sid    = "Allow access for SSOed humans",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"
+          AWS = var.sso_admin_role_arn != null ? var.sso_admin_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         },
         Action   = "kms:*",
         Resource = "*"
@@ -151,7 +155,7 @@ data "aws_iam_policy_document" "iam_access_control" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = [var.ingest_role_arn]
+      identifiers = [local.ingest_role_arn]
     }
     actions = [
       "es:ESHttpPost",   # Bulk operations, _search, create documents
@@ -172,7 +176,7 @@ data "aws_iam_policy_document" "iam_access_control" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = [var.query_role_arn]
+      identifiers = [local.query_role_arn]
     }
     actions = [
       "es:ESHttpGet",  # Read documents, index settings
@@ -186,20 +190,23 @@ data "aws_iam_policy_document" "iam_access_control" {
   }
 
   # SSO Admin access - allows SSOed humans to manage the domain
-  statement {
-    sid    = "SSOAdminAccess"
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"]
+  dynamic "statement" {
+    for_each = var.sso_admin_role_arn != null ? [1] : []
+    content {
+      sid    = "SSOAdminAccess"
+      effect = "Allow"
+      principals {
+        type        = "AWS"
+        identifiers = [var.sso_admin_role_arn]
+      }
+      actions = [
+        "es:ESHttp*",
+      ]
+      resources = [
+        "${aws_opensearch_domain.opensearch.arn}",
+        "${aws_opensearch_domain.opensearch.arn}/*"
+      ]
     }
-    actions = [
-      "es:ESHttp*",
-    ]
-    resources = [
-      "${aws_opensearch_domain.opensearch.arn}",
-      "${aws_opensearch_domain.opensearch.arn}/*"
-    ]
   }
 
   # Security API access - allows configuring FGAC role mappings via master user (basic auth)

@@ -315,6 +315,8 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
     # When aws_region is set, use AWS IAM credentials (SigV4) for authentication
     if opensearch_config.aws_region:
         credentials = boto3.Session().get_credentials()
+        if credentials is None:
+            raise RuntimeError("AWS credentials not found. Ensure AWS credentials are configured ")
         auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
         logger.info("Using AWS IAM (SigV4) authentication for OpenSearch")

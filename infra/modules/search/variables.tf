@@ -64,11 +64,19 @@ variable "zone_awareness_enabled" {
 }
 
 variable "ingest_role_arn" {
-  description = "The ARN of the IAM role used for ingesting data into OpenSearch"
+  description = "The ARN of the IAM role used for ingesting data into OpenSearch. Defaults to {service_name}-migrator role."
   type        = string
+  default     = null
 }
 
 variable "query_role_arn" {
-  description = "The ARN of the IAM role used for querying data from OpenSearch"
+  description = "The ARN of the IAM role used for querying data from OpenSearch. Defaults to {service_name}-app role."
   type        = string
+  default     = null
+}
+
+variable "sso_admin_role_arn" {
+  description = "The ARN of the SSO Administrator role to grant OpenSearch access."
+  type        = string
+  default     = null
 }
