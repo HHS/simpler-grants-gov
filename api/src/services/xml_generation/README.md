@@ -277,6 +277,16 @@ FORM_XML_TRANSFORM_RULES = {
 }
 ```
 
+**EPA Key Contacts Field Mapping Notes:**
+- Uses a helper function `_create_contact_person_transform()` to generate the nested structure for each contact
+- All four contacts are optional per XSD
+- Note: XSD has a typo "AdminstrativeContact" (not "Administrative")
+- Each `ContactPersonDataTypeV3` contains:
+  - `ContactName` → nested name with prefix, first, middle, last, suffix (globLib namespace)
+  - `Title` → contact's title
+  - `Address` → nested address with street1, street2, city, state, zip, country
+  - `Phone`, `Fax`, `Email` → contact information
+
 ### Example: SF-424B and SF-424D (Assurance Forms)
 
 The SF-424B (Non-Construction) and SF-424D (Construction) assurance forms have a similar structure with fields nested inside an `AuthorizedRepresentative` element:
