@@ -14,7 +14,7 @@ jest.mock("react", () => ({
 }));
 
 jest.mock(
-  "src/app/[locale]/(base)/organization/[id]/manage-users/actions",
+  "src/app/[locale]/(base)/organizations/[id]/manage-users/actions",
   () => ({
     inviteUserAction: noop,
   }),

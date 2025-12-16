@@ -24,7 +24,7 @@ describe("InviteLegacyUserButton", () => {
     expect(legacyInviteButton).toBeVisible();
     expect(legacyInviteButton).toHaveAttribute(
       "href",
-      `/organization/${organizationId}/manage-users/legacy`,
+      `/organizations/${organizationId}/manage-users/legacy`,
     );
   });
 
