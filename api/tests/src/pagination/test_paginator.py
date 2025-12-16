@@ -178,7 +178,7 @@ def test_sort_order_string_returns_422(client):
 
     data = response.get_json()
     assert "errors" in data
-    assert any("sort_order" in str(err) for err in data["errors"])
+    assert any("sort_order" in str(err) and "valid" in str(err).lower() for err in data["errors"])
 
 
 def test_sort_order_invalid_json_returns_422(client):
