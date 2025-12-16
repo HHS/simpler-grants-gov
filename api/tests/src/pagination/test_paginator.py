@@ -3,6 +3,7 @@ import uuid
 import pytest
 from sqlalchemy import select
 
+from src.api.common_grants.common_grants_schemas import ValidationError
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     LinkOpportunitySummaryApplicantType,
@@ -14,6 +15,7 @@ from src.db.models.opportunity_models import (
 from src.pagination.paginator import Paginator
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import OpportunityFactory
+from tests.src.form_schema.test_csv_to_jsonschema import expected_fields
 
 DEFAULT_OPPORTUNITY_PARAMS = {
     "opportunity_title": "opportunity of a lifetime",
@@ -157,28 +159,34 @@ def test_pagination_required_returns_422(client):
     # Sending payload without the pagination object
     payload = {}  # pagination missing
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
-
     assert response.status_code == 422
 
     data = response.get_json()
     assert "errors" in data
 
-    # Schema-level required field error
-    assert any(err.get("field") == "pagination" for err in data["errors"])
-    assert any(
-        "Missing data for required field" in err.get("message", "") for err in data["errors"]
-    )
+    assert {
+        "field": "pagination",
+        "message": "Missing data for required field.",
+        "type": "required",
+        "value": None,  # added to match the actual error dict
+    } in data["errors"]
 
 
 def test_sort_order_string_returns_422(client):
     # Sending sort_order as a string instead of list/dict
-    payload = {"pagination": {"sort_order": "invalid_string"}}
+    payload = {"pagination": {"sort_order": "invalid_string", "page_size": 10, "page_offset": 1}}
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
+
     assert response.status_code == 422
 
     data = response.get_json()
     assert "errors" in data
-    assert any("sort_order" in str(err) and "valid" in str(err).lower() for err in data["errors"])
+    assert {
+        "field": "pagination.sort_order",
+        "message": "Not a valid list.",
+        "type": "invalid",
+        "value": None,  # added to match the actual error dict
+    } in data["errors"]
 
 
 def test_sort_order_invalid_json_returns_422(client):
@@ -190,21 +198,51 @@ def test_sort_order_invalid_json_returns_422(client):
     assert response.status_code == 422
     data = response.get_json()
     assert "errors" in data
+    assert {
+        "field": "_schema",
+        "message": "Invalid input type.",
+        "type": "invalid",
+        "value": None,  # added to match the actual error dict
+    } in data["errors"]
 
 
 @pytest.mark.parametrize(
-    "payload, expected_field",
+    "payload, expected_error",
     [
-        ({"page_offset": "abc", "page_size": 10}, "page_offset"),
-        ({"page_offset": 1, "page_size": "xyz"}, "page_size"),
-        ({"page_offset": -1, "page_size": 10}, "page_offset"),
+        (
+            {"page_offset": "abc", "page_size": 10},
+            {
+                "field": "pagination.page_offset",
+                "message": "Not a valid integer.",
+                "type": "invalid",
+                "value": None,
+            },
+        ),
+        (
+            {"page_offset": 1, "page_size": "xyz"},
+            {
+                "field": "pagination.page_size",
+                "message": "Not a valid integer.",
+                "type": "invalid",
+                "value": None,
+            },
+        ),
+        (
+            {"page_offset": -1, "page_size": 10},
+            {
+                "field": "pagination.page_offset",
+                "message": "Must be greater than or equal to 1.",
+                "type": "min_or_max_value",
+                "value": None,
+            },
+        ),
     ],
 )
-def test_wrong_type_pagination_param_returns_422(client, payload, expected_field):
+def test_wrong_type_pagination_param_returns_422(client, payload, expected_error):
     full_payload = {"pagination": payload}
 
     response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=full_payload)
     assert response.status_code == 422
     data = response.get_json()
     assert "errors" in data
-    assert any(err.get("field", "").endswith(expected_field) for err in data["errors"])
+    assert expected_error in data["errors"]
