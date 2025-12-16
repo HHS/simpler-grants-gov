@@ -1493,6 +1493,10 @@ PROJECT_ABSTRACT_SUMMARY_TEST_CASES = [
         },
         "form_name": "Project_AbstractSummary_2_0",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+]
+
 # Sample test cases for EPA Key Contacts validation
 EPA_KEY_CONTACTS_TEST_CASES = [
     {
