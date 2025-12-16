@@ -48,12 +48,13 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    OrganizationAuditEvent,
     Privilege,
     RoleType,
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
-    UserType, OrganizationAuditEvent,
+    UserType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
@@ -3134,6 +3135,7 @@ class IgnoredLegacyOrganizationUserFactory(BaseFactory):
     email = factory.Faker("email")
     user = factory.SubFactory(UserFactory)
     ignored_by_user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
 
 class OrganizationAuditFactory(BaseFactory):
     class Meta:
