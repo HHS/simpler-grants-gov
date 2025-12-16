@@ -761,6 +761,225 @@ SF424A_TEST_CASES = [
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
         "pretty_print": True,
     },
+    {
+        "name": "sf424a_complete_all_sections",
+        "json_input": {
+            # Required fields
+            "program_type": "Non-Construction",
+            "form_version_identifier": "1.0",
+            # Activity line items with all sections
+            "activity_line_items": [
+                {
+                    "activity_title": "Personnel and Training",
+                    # Section A - Budget Summary
+                    "budget_summary": {
+                        "assistance_listing_number": "93.001",  # CFDANumber - child element per XSD
+                        "federal_estimated_unobligated_amount": "1000.00",
+                        "non_federal_estimated_unobligated_amount": "500.00",
+                        "federal_new_or_revised_amount": "50000.00",
+                        "non_federal_new_or_revised_amount": "10000.00",
+                        "total_new_or_revised_amount": "61500.00",
+                    },
+                    # Section B - Budget Categories
+                    "budget_categories": {
+                        "personnel_amount": "30000.00",
+                        "fringe_benefits_amount": "8000.00",
+                        "travel_amount": "5000.00",
+                        "equipment_amount": "3000.00",
+                        "supplies_amount": "2000.00",
+                        "contractual_amount": "0.00",
+                        "construction_amount": "0.00",
+                        # Note: other_amount omitted - would need BudgetOtherRequestedAmount
+                        "total_direct_charge_amount": "49000.00",
+                        "total_indirect_charge_amount": "2000.00",
+                        # Note: total_amount not valid for CategorySet per XSD
+                        "program_income_amount": "500.00",
+                    },
+                    # Section C - Non-Federal Resources
+                    "non_federal_resources": {
+                        "applicant_amount": "5000.00",
+                        "state_amount": "3000.00",
+                        "other_amount": "2000.00",
+                        "total_amount": "10000.00",
+                    },
+                    # Section E - Federal Funds Needed
+                    "federal_fund_estimates": {
+                        "first_year_amount": "50000.00",
+                        "second_year_amount": "0.00",
+                        "third_year_amount": "0.00",
+                        "fourth_year_amount": "0.00",
+                    },
+                },
+            ],
+            # Totals
+            "total_budget_summary": {
+                "federal_estimated_unobligated_amount": "1000.00",
+                "non_federal_estimated_unobligated_amount": "500.00",
+                "federal_new_or_revised_amount": "50000.00",
+                "non_federal_new_or_revised_amount": "10000.00",
+                "total_new_or_revised_amount": "61500.00",
+            },
+            "total_budget_categories": {
+                "personnel_amount": "30000.00",
+                "fringe_benefits_amount": "8000.00",
+                "travel_amount": "5000.00",
+                "equipment_amount": "3000.00",
+                "supplies_amount": "2000.00",
+                "contractual_amount": "0.00",
+                "construction_amount": "0.00",
+                # Note: other_amount omitted - would need BudgetOtherRequestedAmount
+                "total_direct_charge_amount": "49000.00",
+                "total_indirect_charge_amount": "2000.00",
+                # Note: total_amount not valid for CategoryTotals per XSD
+                "program_income_amount": "500.00",
+            },
+            "total_non_federal_resources": {
+                "applicant_amount": "5000.00",
+                "state_amount": "3000.00",
+                "other_amount": "2000.00",
+                "total_amount": "10000.00",
+            },
+            # Section D - Forecasted Cash Needs
+            "forecasted_cash_needs": {
+                "federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "12500.00",
+                    "second_quarter_amount": "12500.00",
+                    "third_quarter_amount": "12500.00",
+                    "fourth_quarter_amount": "12500.00",
+                    "total_amount": "50000.00",
+                },
+                "non_federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "2500.00",
+                    "second_quarter_amount": "2500.00",
+                    "third_quarter_amount": "2500.00",
+                    "fourth_quarter_amount": "2500.00",
+                    "total_amount": "10000.00",
+                },
+                "total_forecasted_cash_needs": {
+                    "first_quarter_amount": "15000.00",
+                    "second_quarter_amount": "15000.00",
+                    "third_quarter_amount": "15000.00",
+                    "fourth_quarter_amount": "15000.00",
+                    "total_amount": "60000.00",
+                },
+            },
+            "total_federal_fund_estimates": {
+                "first_year_amount": "50000.00",
+                "second_year_amount": "0.00",
+                "third_year_amount": "0.00",
+                "fourth_year_amount": "0.00",
+            },
+            # Section F - Other Information
+            "other_information": {
+                "direct_charges_explanation": "Equipment costs for lab instruments",
+                "indirect_charges_explanation": "10% indirect rate on direct costs",
+                "remarks": "This budget supports a 12-month research project",
+            },
+        },
+        "form_name": "SF424A",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "pretty_print": True,
+    },
+]
+
+# Sample test cases for EPA Form 4700-4 validation
+EPA4700_4_TEST_CASES = [
+    {
+        "name": "minimal_valid_epa4700_4",
+        "json_input": {
+            "applicant_name": "Test University",
+            "applicant_address": {
+                "address": "123 Main Street",
+                "city": "Washington",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001",
+            },
+            "sam_uei": "TEST12345678",
+            "point_of_contact_name": "John Doe",
+            "point_of_contact_phone_number": "555-123-4567",
+            "point_of_contact_email": "john.doe@test.edu",
+            "point_of_contact_title": "Director",
+            "applicant_signature": {
+                "aor_signature": "John Doe Signature",
+                "aor_title": "Director",
+                "submitted_date": "2025-01-15",
+            },
+        },
+        "form_name": "EPA4700_4",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "complete_epa4700_4_with_all_fields",
+        "json_input": {
+            "applicant_name": "Environmental Research Institute",
+            "applicant_address": {
+                "address": "456 Green Boulevard, Suite 200",
+                "city": "Arlington",
+                "state": "VA: Virginia",
+                "zip_code": "22202",
+            },
+            "sam_uei": "ENVR98765432",
+            "point_of_contact_name": "Jane Smith",
+            "point_of_contact_phone_number": "555-987-6543",
+            "point_of_contact_email": "jane.smith@envresearch.org",
+            "point_of_contact_title": "Program Manager",
+            "federal_financial_assistance": True,
+            "civil_rights_lawsuit_question1": "No pending lawsuits or administrative complaints.",
+            "civil_rights_lawsuit_question2": "No civil rights lawsuits decided against the applicant in the last year.",
+            "civil_rights_lawsuit_question3": "One compliance review conducted by DOJ in 2023, resulting in no findings. Copy of review attached.",
+            "construction_federal_assistance": True,
+            "construction_new_facilities": True,
+            "notice1": True,
+            "notice2": True,
+            "notice3": True,
+            "notice4": True,
+            "demographic_data": True,
+            "policy": True,
+            "policy_explanation": "Civil Rights Coordinator: Maria Garcia, Title: Compliance Officer, Address: 456 Green Blvd, Arlington VA 22202, Email: compliance@envresearch.org, Phone: 555-987-6544",
+            "program_explanation": "Grievance procedures are available at https://envresearch.org/civil-rights-grievance or by contacting the Civil Rights Coordinator listed above.",
+            "applicant_signature": {
+                "aor_signature": "Jane Smith Signature",
+                "aor_title": "Executive Director",
+                "submitted_date": "2025-01-20",
+            },
+        },
+        "form_name": "EPA4700_4",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "epa4700_4_with_construction_explanation",
+        "json_input": {
+            "applicant_name": "City of Springfield",
+            "applicant_address": {
+                "address": "100 City Hall Plaza",
+                "city": "Springfield",
+                "state": "IL: Illinois",
+                "zip_code": "62701",
+            },
+            "sam_uei": "CITY12345678",
+            "point_of_contact_name": "Robert Johnson",
+            "point_of_contact_phone_number": "555-111-2222",
+            "point_of_contact_email": "r.johnson@springfield.gov",
+            "point_of_contact_title": "City Engineer",
+            "federal_financial_assistance": False,
+            "construction_federal_assistance": True,
+            "construction_new_facilities": False,
+            "construction_new_facilities_explanation": "The project involves renovation of an existing water treatment facility built in 1975. Due to the historic nature of the building and structural constraints, full accessibility modifications would compromise the building's structural integrity per 40 C.F.R. 7.70(b).",
+            "notice1": True,
+            "demographic_data": False,
+            "policy": False,
+            "applicant_signature": {
+                "aor_signature": "Robert Johnson Signature",
+                "aor_title": "City Engineer",
+                "submitted_date": "2025-01-18",
+            },
+        },
+        "form_name": "EPA4700_4",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "pretty_print": True,
+    },
 ]
 
 
@@ -1356,6 +1575,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + SFLLL_TEST_CASES
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES
+        + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
     )
 
