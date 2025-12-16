@@ -196,7 +196,7 @@ class IgnoredLegacyOrganizationUser(ApiSchemaTable, TimestampMixin):
     user: Mapped[User] = relationship("User")
 
 class OrganizationAudit(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "application_audit"
+    __tablename__ = "organization_audit"
 
     organization_audit_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4

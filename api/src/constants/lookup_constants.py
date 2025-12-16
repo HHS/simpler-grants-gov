@@ -290,3 +290,8 @@ class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
     LEGACY_CERTIFICATE = "legacy_certificate"
+
+class OrganizationAuditEvent(StrEnum):
+    USER_JOINED = "user_joined"
+    USER_ROLE_UPDATED = "user_role_updated"
+    USER_REMOVED = "user_removed"

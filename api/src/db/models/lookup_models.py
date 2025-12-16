@@ -21,7 +21,7 @@ from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
-    UserType,
+    UserType, OrganizationAuditEvent,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
@@ -264,6 +264,14 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
     ]
 )
 
+ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupConfig(
+    [
+        LookupStr(OrganizationAuditEvent.USER_JOINED, 1),
+        LookupStr(OrganizationAuditEvent.USER_ROLE_UPDATED, 2),
+        LookupStr(OrganizationAuditEvent.USER_REMOVED, 3),
+
+    ]
+)
 
 @LookupRegistry.register_lookup(OPPORTUNITY_CATEGORY_CONFIG)
 class LkOpportunityCategory(LookupTable, TimestampMixin):
@@ -546,3 +554,16 @@ class LkUserType(LookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkUserType:
         return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
+
+@LookupRegistry.register_lookup(ORGANIZATION_AUDIT_EVENT_CONFIG)
+class LkOrganizationAuditEvent(LookupTable, TimestampMixin):
+    __tablename__ = "lk_organization_audit_event"
+
+    organization_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkOrganizationAuditEvent:
+        return LkOrganizationAuditEvent(
+            organization_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
