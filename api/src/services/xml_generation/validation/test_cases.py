@@ -1443,6 +1443,60 @@ GG_LOBBYING_FORM_TEST_CASES = [
 ]
 
 
+# Sample test cases for Project Abstract Summary validation
+PROJECT_ABSTRACT_SUMMARY_TEST_CASES = [
+    {
+        "name": "project_abstract_summary_complete",
+        "json_input": {
+            "funding_opportunity_number": "HHS-2025-ACF-001",
+            "assistance_listing_number": "93.001",
+            "applicant_name": "National Health Research Institute",
+            "project_title": "Community Health Improvement Initiative",
+            "project_abstract": (
+                "This project aims to improve health outcomes in underserved communities "
+                "through targeted interventions, community engagement, and data-driven "
+                "approaches to healthcare delivery."
+            ),
+        },
+        "form_name": "Project_AbstractSummary_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "project_abstract_summary_without_cfda",
+        "json_input": {
+            "funding_opportunity_number": "NSF-2025-001",
+            "applicant_name": "University Research Foundation",
+            "project_title": "Advanced Computing Research Initiative",
+            "project_abstract": (
+                "This research initiative focuses on developing next-generation computing "
+                "algorithms for scientific applications."
+            ),
+        },
+        "form_name": "Project_AbstractSummary_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+    {
+        "name": "project_abstract_summary_energy_research",
+        "json_input": {
+            "funding_opportunity_number": "DOE-2025-FOA-001",
+            "assistance_listing_number": "81.086",
+            "applicant_name": "Clean Energy Innovation Center",
+            "project_title": "Renewable Energy Grid Integration Study",
+            "project_abstract": (
+                "This comprehensive study examines the technical and economic challenges "
+                "of integrating high levels of renewable energy into existing electrical "
+                "grids. Our research team will develop new modeling tools and conduct "
+                "field demonstrations to validate grid stability solutions."
+            ),
+        },
+        "form_name": "Project_AbstractSummary_2_0",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "pretty_print": True,
+    },
+]
+
 # Sample test cases for EPA Key Contacts validation
 EPA_KEY_CONTACTS_TEST_CASES = [
     {
@@ -1575,6 +1629,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + SFLLL_TEST_CASES
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES
+        + PROJECT_ABSTRACT_SUMMARY_TEST_CASES
         + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
     )
