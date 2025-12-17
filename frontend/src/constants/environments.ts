@@ -51,7 +51,7 @@ const legacyHost = (): string => {
     case "test":
       return "https://test.grants.gov";
     default:
-      return "https://default.com";
+      return "https://test.grants.gov";
   }
 };
 
