@@ -51,6 +51,7 @@ OPP_REQUEST_FIELD_NAME_MAPPING = {
     "award_floor": "summary.award_floor",
     "award_ceiling": "summary.award_ceiling",
     "estimated_total_program_funding": "summary.estimated_total_program_funding",
+    "assistance_listing_number": "opportunity_assistance_listings.assistance_listing_number.keyword",
 }
 
 FILTER_RULE_MAPPING = {
@@ -160,6 +161,10 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
         "close_date",
         _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
         STATIC_DATE_RANGES,
+    )
+    builder.aggregation_terms(
+        "assistance_listing_number",
+        _adjust_field_name("assistance_listing_number", OPP_REQUEST_FIELD_NAME_MAPPING),
     )
 
 

@@ -918,6 +918,25 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 ),
                 [NASA_SPACE_FELLOWSHIP, DOC_MANUFACTURING, DOC_TOP_LEVEL],
             ),
+            # Assistance Listing Number
+            (get_search_request(assistance_listing_one_of=["43.008"]), [NASA_SPACE_FELLOWSHIP]),
+            (get_search_request(assistance_listing_one_of=["43.012"]), [NASA_INNOVATIONS]),
+            (get_search_request(assistance_listing_one_of=["43.002"]), [NASA_SUPERSONIC]),
+            (
+                get_search_request(assistance_listing_one_of=["43.008", "43.012"]),
+                [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS],
+            ),
+            (
+                get_search_request(assistance_listing_one_of=["43.008", "43.012", "43.002"]),
+                [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_SUPERSONIC],
+            ),
+            (get_search_request(assistance_listing_one_of=["99.999"]), []),
+            (
+                get_search_request(
+                    assistance_listing_one_of=["43.008"], agency_one_of=["NASA"]
+                ),
+                [NASA_SPACE_FELLOWSHIP],
+            ),
         ],
         ids=search_scenario_id_fnc,
     )
