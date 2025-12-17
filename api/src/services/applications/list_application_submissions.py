@@ -22,7 +22,7 @@ class ApplicationSubmissionsRequest(BaseModel):
 
 def list_application_submissions(
     db_session: db.Session, application_id: uuid.UUID, user: User, request: dict
-) -> tuple[list[dict], PaginationInfo]:
+) -> tuple[Sequence[ApplicationSubmission], PaginationInfo]:
     """List all application submissions for an application."""
 
     params = ApplicationSubmissionsRequest.model_validate(request)
@@ -40,20 +40,4 @@ def list_application_submissions(
     paginated_results = paginator.page_at(page_offset=params.pagination.page_offset)
     pagination_info = PaginationInfo.from_pagination_params(params.pagination, paginator)
 
-    return _transform_submissions(paginated_results), pagination_info
-
-
-def _transform_submissions(submissions: Sequence[ApplicationSubmission]) -> list[dict]:
-    """Transform application submissions into the response format."""
-    results = []
-    for submission in submissions:
-        results.append(
-            {
-                "application_submission_id": submission.application_submission_id,
-                "download_path": submission.download_path,
-                "file_size_bytes": submission.file_size_bytes,
-                "legacy_tracking_number": submission.legacy_tracking_number,
-            }
-        )
-
-    return results
+    return paginated_results, pagination_info
