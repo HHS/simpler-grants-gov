@@ -360,3 +360,9 @@ variable "optional_extra_alb_domains" {
   type        = list(string)
   default     = []
 }
+
+variable "opensearch_ingest_policy_arn" {
+  description = "The ARN of the IAM policy for OpenSearch ingest operations. When provided, attaches to the migrator role for scheduled data loading jobs."
+  type        = string
+  default     = null
+}
