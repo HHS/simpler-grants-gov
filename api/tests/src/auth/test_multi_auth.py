@@ -212,11 +212,11 @@ def test_multi_auth_simpler_with_jwt(mini_app, enable_factory_create, db_session
 def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, db_session):
     """Test that the jwt_or_api_user_key_multi_auth works with api user keys and returns the actual user"""
     user = UserFactory.create()
-    api_key = UserApiKeyFactory.create(user=user, key_id="test-api-user-key-123", is_active=True)
+    api_key = UserApiKeyFactory.create(user=user, is_active=True)
     db_session.commit()
 
     resp = mini_app.test_client().get(
-        "/dummy_auth_endpoint_simpler", headers={"X-API-Key": "test-api-user-key-123"}
+        "/dummy_auth_endpoint_simpler", headers={"X-API-Key": api_key.key_id}
     )
     assert resp.status_code == 200
     assert resp.json["message"] == "ok"
@@ -232,15 +232,13 @@ def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_sessi
 
     # Create authentication for both users
     token, _ = create_jwt_for_user(jwt_user, db_session)
-    api_key = UserApiKeyFactory.create(
-        user=api_user_key_user, key_id="test-api-user-key-456", is_active=True
-    )
+    api_key = UserApiKeyFactory.create(user=api_user_key_user, is_active=True)
     db_session.commit()
 
     # Send request with both authentication methods
     resp = mini_app.test_client().get(
         "/dummy_auth_endpoint_simpler",
-        headers={"X-SGG-Token": token, "X-API-Key": "test-api-user-key-456"},
+        headers={"X-SGG-Token": token, "X-API-Key": api_key.key_id},
     )
 
     # Should use the JWT user since it's first in the MultiUserAuth definition
