@@ -79,7 +79,7 @@ def update_user_organization_roles(
     for role_id in new_role_ids - existing_role_ids:
         db_session.add(OrganizationUserRole(organization_user=org_user, role_id=role_id))
 
-    # Add an audit event.when a user role is updated
+    # Add audit event when a user role is updated
     add_audit_event(
         db_session=db_session,
         organization=organization,

@@ -6,7 +6,7 @@ from sqlalchemy import select
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OrganizationAuditEvent, Privilege
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import (
     LinkRolePrivilege,
@@ -16,6 +16,7 @@ from src.db.models.user_models import (
     User,
 )
 from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.organization_audit import add_audit_event
 from src.services.organizations_v1.organization_user_utils import validate_organization_user_exists
 
 logger = logging.getLogger(__name__)
@@ -90,5 +91,14 @@ def remove_user_from_organization(
 
     # Perform the deletion - cascade delete will handle OrganizationUserRole records
     db_session.delete(org_user)
+
+    # Add audit event when a user role is updated
+    add_audit_event(
+        db_session=db_session,
+        organization=organization,
+        user=user,
+        audit_event=OrganizationAuditEvent.USER_REMOVED,
+        target_user=org_user.user,
+    )
 
     logger.info("Successfully removed user from organization")
