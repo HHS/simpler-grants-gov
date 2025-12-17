@@ -7,6 +7,8 @@ const mockGetItem = jest.fn();
 const mockSetItem = jest.fn();
 const mockUseSearchParams = jest.fn();
 
+const legacyLink = "http://legacy.com";
+
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
 }));
@@ -32,7 +34,7 @@ describe("ReturnToGrantsNotification", () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("utm_source=Grants.gov"),
     );
-    render(<ReturnToGrantsNotification />);
+    render(<ReturnToGrantsNotification legacyLink={legacyLink} />);
 
     expect(mockSetItem).toHaveBeenCalledWith(
       "showLegacySearchReturnNotification",
@@ -44,15 +46,23 @@ describe("ReturnToGrantsNotification", () => {
   it("displays link if session storage is set", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     mockGetItem.mockReturnValue("true");
-    render(<ReturnToGrantsNotification />);
+    render(<ReturnToGrantsNotification legacyLink={legacyLink} />);
 
     expect(screen.getByRole("link")).toBeInTheDocument();
   });
   it("does not display a link if utm source and session storage are not set", () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
     mockGetItem.mockReturnValue("false");
-    render(<ReturnToGrantsNotification />);
+    render(<ReturnToGrantsNotification legacyLink={legacyLink} />);
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+  it("links to the correct location", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    mockGetItem.mockReturnValue("true");
+    render(<ReturnToGrantsNotification legacyLink={legacyLink} />);
+
+    expect(screen.getByRole("link")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute("href", legacyLink);
   });
 });
