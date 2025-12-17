@@ -96,6 +96,29 @@ export const getApplicationHistory = async (
         page_size: 5000,
         sort_order: [{ order_by: "created_at", sort_direction: "descending" }],
       },
+      // The following events exist, but should not be displayed yet (See #6644 for implementation):
+      // attachment_updated, submittion_created, user_updated, user_removed, organization_added
+      // events are left in the array, but commented out to make the follow-up ticket easier and
+      // make it clear that these events are being excluded deliberately for now
+      filters: {
+        application_audit_event: {
+          one_of: [
+            "application_created",
+            "application_name_changed",
+            "attachment_added",
+            "attachment_deleted",
+            // "attachment_updated",
+            "application_submitted",
+            "form_updated",
+            "user_added",
+            // "user_updated",
+            // "user_removed",
+            // "organization_added",
+            "application_submit_rejected",
+            // "submission_created",
+          ],
+        },
+      },
     },
   });
 
