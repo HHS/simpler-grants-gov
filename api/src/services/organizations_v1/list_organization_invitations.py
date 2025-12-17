@@ -1,6 +1,9 @@
+import math
 import uuid
 from collections.abc import Sequence
+from typing import Any
 
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -14,6 +17,98 @@ from src.db.models.entity_models import (
     OrganizationInvitation,
 )
 from src.db.models.user_models import User
+from src.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
+from src.search.search_models import StrSearchFilter
+
+
+class OrganizationInvitationFilters(BaseModel):
+    status: StrSearchFilter | None = None
+
+
+class OrganizationInvitationPaginationParams(BaseModel):
+    sort_order: list[SortOrderParams] = Field(
+        default_factory=lambda: [
+            SortOrderParams(order_by="invitee_email", sort_direction="ascending")
+        ]
+    )
+    page_size: int = Field(default=25)
+    page_offset: int = Field(default=1)
+
+
+class ListOrganizationsParams(BaseModel):
+    pagination: OrganizationInvitationPaginationParams = Field(
+        default_factory=OrganizationInvitationPaginationParams
+    )
+    filters: OrganizationInvitationFilters | None = Field(default=None)
+
+
+def apply_sorting_python(items: Sequence[Any], sort_order: list[SortOrderParams]) -> Sequence[Any]:
+    """
+    Generic multi-field sorting for Python objects.
+
+    Args:
+        items: A sequence of Python objects
+        sort_order: A list of sort rules where each rule contains:
+            - order_by: attribute name (supports dotted paths like "user.email")
+            - sort_direction: "ascending" | "descending"
+
+    Returns:
+        A new, sorted list of items.
+    """
+
+    # Apply sorts in reverse order
+    for rule in reversed(sort_order):
+        attr_path = rule.order_by
+        reverse = rule.sort_direction == "descending"
+
+        def get_value(obj: Any, path: str = attr_path) -> Any:
+            """Traverse dotted attributes safely (e.g., 'user.profile.email')."""
+            value = obj
+            for part in path.split("."):
+                value = getattr(value, part, None)
+                if value is None:
+                    break
+            return value
+
+        # Sort with safe handling for None (None always goes last)
+        items = sorted(
+            items,
+            key=lambda i: (get_value(i) is None, get_value(i)),
+            reverse=reverse,
+        )
+
+    return items
+
+
+def paginate_python(
+    items: Sequence[Any], page_offset: int, page_size: int, sort_order: list[SortOrderParams]
+) -> tuple[Sequence[OrganizationInvitation], PaginationInfo]:
+    """
+    Paginate a list of Python objects.
+
+    Args:
+        items: A list of Python objects
+        page_offset: The offset of the current page
+        page_size: The size of the current page
+        sort_order: Sorting rules applied
+
+    Returns:
+        Paginated list of items
+        PaginationInfo Object
+    """
+    total_records = len(items)
+    total_pages = math.ceil(total_records / page_size) if total_records > 0 else 0
+    start = (page_offset - 1) * page_size
+    end = start + page_size
+    page_items = items[start:end]
+
+    return page_items, PaginationInfo(
+        total_records=total_records,
+        page_offset=page_offset,
+        page_size=page_size,
+        total_pages=total_pages,
+        sort_order=[SortOrder(p.order_by, p.sort_direction) for p in sort_order],
+    )
 
 
 def get_organization_and_verify_access(
@@ -41,23 +136,23 @@ def get_organization_and_verify_access(
 def list_organization_invitations_with_filters(
     db_session: db.Session,
     organization_id: uuid.UUID,
-    status_filters: list[str] | None = None,
-) -> Sequence[OrganizationInvitation]:
+    params: ListOrganizationsParams,
+) -> tuple[Sequence[OrganizationInvitation], PaginationInfo]:
     """
-    List organization invitations with filtering.
+    List organization invitations with filtering, sorting, pagination.
 
     Args:
         db_session: Database session
         organization_id: Organization ID to list invitations for
-        status_filters: Optional list of status strings to filter by
+        params: Query parameters
 
     Returns:
-        List of OrganizationInvitation objects
+        List of OrganizationInvitation objects and pagination_info
 
     Note:
-        Status filtering is done in Python since status is a computed property.
-        If pagination is needed in the future, this will need to be refactored
-        to implement status filtering in the database query.
+        Status filtering is done in Python since status is a computed property
+        Pagination and sorting also applied in Python
+        Filtering on database fields can be applied in SQL
     """
     # Build the base query with optimized eager loading using selectinload
     stmt = (
@@ -86,22 +181,36 @@ def list_organization_invitations_with_filters(
         .order_by(OrganizationInvitation.created_at.desc())
     )
 
-    # Execute query to get all invitations (we'll filter in Python since status is computed)
-    all_invitations = db_session.execute(stmt).scalars().all()
+    # Execute query to get all invitations
+    invitations = db_session.execute(stmt).scalars().all()
 
-    # Apply status filtering if provided
-    if status_filters:
-        return [invitation for invitation in all_invitations if invitation.status in status_filters]
+    # Apply status filters if provided (already converted to enums by Marshmallow)
+    if params.filters and params.filters.status and params.filters.status.one_of:
+        invitations = [
+            invitation
+            for invitation in invitations
+            if invitation.status in params.filters.status.one_of
+        ]
+    # Apply sort using Python
+    invitations = apply_sorting_python(invitations, params.pagination.sort_order)
 
-    return all_invitations
+    # Pagination
+    paginated_invitations, pagination_info = paginate_python(
+        invitations,
+        params.pagination.page_offset,
+        params.pagination.page_size,
+        params.pagination.sort_order,
+    )
+
+    return paginated_invitations, pagination_info
 
 
 def list_organization_invitations_and_verify_access(
     db_session: db.Session,
     user: User,
     organization_id: uuid.UUID,
-    filters: dict | None = None,
-) -> Sequence[OrganizationInvitation]:
+    json_data: dict,
+) -> tuple[Sequence[OrganizationInvitation], PaginationInfo]:
     """
     List organization invitations with access control and filtering.
 
@@ -109,23 +218,20 @@ def list_organization_invitations_and_verify_access(
         db_session: Database session
         user: User requesting the invitations
         organization_id: Organization ID to list invitations for
-        filters: Optional filters dict from request (already validated by schema)
+        json_data: Raw request payload containing pagination, sorting, and filters.
     """
+    # Validate parameters
+    params = ListOrganizationsParams.model_validate(json_data)
 
     # First verify the user has access to manage organization members
     get_organization_and_verify_access(db_session, user, organization_id)
 
-    # Extract status filters if provided (already converted to enums by Marshmallow)
-    status_filters = None
-    if filters and filters.get("status") and filters["status"].get("one_of"):
-        status_filters = filters["status"]["one_of"]
-
-    # Get the raw invitations with filters
-    invitations = list_organization_invitations_with_filters(
+    # Get the raw invitations with filters and pagination
+    invitations, pagination_info = list_organization_invitations_with_filters(
         db_session=db_session,
         organization_id=organization_id,
-        status_filters=status_filters,
+        params=params,
     )
 
     # Transform to data classes for proper serialization
-    return invitations
+    return invitations, pagination_info

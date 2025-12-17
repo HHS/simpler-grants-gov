@@ -4,6 +4,8 @@ import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import {
   OrganizationInvitationStatus,
+  OrganizationLegacyUser,
+  OrganizationLegacyUserStatus,
   OrganizationPendingInvitation,
   UserDetail,
   UserRole,
@@ -214,5 +216,54 @@ export const removeOrganizationUser = async (
   }
 
   const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const getOrganizationLegacyUsers = async (
+  organizationId: string,
+): Promise<OrganizationLegacyUser[]> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const ssgToken = {
+    "X-SGG-Token": session.token,
+  };
+  const resp = await fetchOrganizationWithMethod("POST")({
+    subPath: `${organizationId}/legacy-users`,
+    additionalHeaders: ssgToken,
+    body: {
+      filters: {
+        status: {
+          one_of: [
+            OrganizationLegacyUserStatus.Available,
+            OrganizationLegacyUserStatus.Member,
+            OrganizationLegacyUserStatus.PendingInvitation,
+          ],
+        },
+      },
+      pagination: {
+        page_offset: 1,
+        page_size: 5000,
+        sort_order: [
+          {
+            order_by: "email",
+            sort_direction: "ascending",
+          },
+        ],
+      },
+    },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "getOrganizationLegacyUsers",
+      unauthorizedMessage: "No active session for managing legacy users.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: OrganizationLegacyUser[] };
   return json.data;
 };
