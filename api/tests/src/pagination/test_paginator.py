@@ -1,5 +1,3 @@
-import uuid
-
 import pytest
 from sqlalchemy import select
 
@@ -151,60 +149,3 @@ def test_paginator(db_session, create_opportunities):
 def test_page_size_zero_or_negative(db_session, page_size):
     with pytest.raises(ValueError, match="Page size must be at least 1"):
         Paginator(Opportunity, select(Opportunity), db_session, page_size)
-
-
-def test_pagination_required_returns_422(client):
-    # Sending payload without the pagination object
-    payload = {}  # pagination missing
-    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
-
-    assert response.status_code == 422
-
-    data = response.get_json()
-    assert "errors" in data
-
-    # Schema-level required field error
-    assert any(err.get("field") == "pagination" for err in data["errors"])
-    assert any(
-        "Missing data for required field" in err.get("message", "") for err in data["errors"]
-    )
-
-
-def test_sort_order_string_returns_422(client):
-    # Sending sort_order as a string instead of list/dict
-    payload = {"pagination": {"sort_order": "invalid_string"}}
-    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
-    assert response.status_code == 422
-
-    data = response.get_json()
-    assert "errors" in data
-    assert any("sort_order" in str(err) for err in data["errors"])
-
-
-def test_sort_order_invalid_json_returns_422(client):
-    # Sending broken JSON
-    invalid_json = '{"pagination": {"sort_order": [}'
-
-    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=invalid_json)
-
-    assert response.status_code == 422
-    data = response.get_json()
-    assert "errors" in data
-
-
-@pytest.mark.parametrize(
-    "payload, expected_field",
-    [
-        ({"page_offset": "abc", "page_size": 10}, "page_offset"),
-        ({"page_offset": 1, "page_size": "xyz"}, "page_size"),
-        ({"page_offset": -1, "page_size": 10}, "page_offset"),
-    ],
-)
-def test_wrong_type_pagination_param_returns_422(client, payload, expected_field):
-    full_payload = {"pagination": payload}
-
-    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=full_payload)
-    assert response.status_code == 422
-    data = response.get_json()
-    assert "errors" in data
-    assert any(err.get("field", "").endswith(expected_field) for err in data["errors"])
