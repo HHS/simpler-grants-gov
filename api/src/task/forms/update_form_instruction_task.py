@@ -88,4 +88,3 @@ class UpdateFormInstructionTask(BaseFormTask):
             f"Successfully uploaded form instruction {self.form_instruction_id} "
             f"for form {self.form_id} in {self.environment} environment"
         )
-
