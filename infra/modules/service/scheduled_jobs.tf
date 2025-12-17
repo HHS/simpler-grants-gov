@@ -30,6 +30,8 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
   name     = "${var.service_name}-${each.key}"
   role_arn = aws_iam_role.workflow_orchestrator.arn
 
+  # Use migrator task definition which has OpenSearch ingest permissions for write operations
+  # Falls back to app task definition if migrator is not available (no database configured)
   definition = jsonencode({
     "StartAt" : "RunTask",
     "States" : {
@@ -39,7 +41,7 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
         "Resource" : "arn:aws:states:::ecs:runTask.sync",
         "Parameters" : {
           "Cluster" : aws_ecs_cluster.cluster.arn,
-          "TaskDefinition" : aws_ecs_task_definition.app.arn,
+          "TaskDefinition" : length(aws_ecs_task_definition.migrator) > 0 ? aws_ecs_task_definition.migrator[0].arn : aws_ecs_task_definition.app.arn,
           "LaunchType" : "FARGATE",
           "NetworkConfiguration" : {
             "AwsvpcConfiguration" : {
