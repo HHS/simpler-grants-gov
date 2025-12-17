@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { environment } from "src/constants/environments";
 
 import { Suspense } from "react";
 import {
@@ -72,7 +73,7 @@ const Breadcrumbs = ({
         {breadcrumArray}
       </BreadcrumbBar>
       <Suspense>
-        <ReturnToGrantsNotification />
+        <ReturnToGrantsNotification legacyLink={environment.LEGACY_HOST} />
       </Suspense>
     </div>
   );
