@@ -96,6 +96,13 @@ class Organization(ApiSchemaTable, TimestampMixin):
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
     )
 
+    organization_audits: Mapped[list[OrganizationAudit]] = relationship(
+        "OrganizationAudit",
+        uselist=True,
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def organization_name(self) -> str | None:
         return self.sam_gov_entity.legal_business_name if self.sam_gov_entity else None
