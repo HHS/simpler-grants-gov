@@ -1,8 +1,8 @@
 """add_organization_audit_table
 
-Revision ID: aa091607965d
-Revises: 78081116ef9e
-Create Date: 2025-12-16 18:16:47.676403
+Revision ID: 22bf34acf454
+Revises: a73e934149e5
+Create Date: 2025-12-17 18:44:15.863078
 
 """
 
@@ -11,8 +11,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "aa091607965d"
-down_revision = "78081116ef9e"
+revision = "22bf34acf454"
+down_revision = "a73e934149e5"
 branch_labels = None
 depends_on = None
 
