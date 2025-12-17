@@ -18,6 +18,9 @@ from src.services.xml_generation.validation.test_runner import ValidationTestRun
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
 
+# Build form map at module level to enable click.Choice validation
+FORM_TRANSFORM_RULES_MAP = _build_xml_form_map()
+
 
 @task_blueprint.cli.command("generate-xml")
 @click.option(
@@ -34,7 +37,8 @@ from src.task.task_blueprint import task_blueprint
 @click.option(
     "--form",
     default="SF424_4_0",
-    help="Form name/version (e.g., SF424_4_0, SF424A, SFLLL_2_0, CD511). Default: SF424_4_0",
+    type=click.Choice(list(FORM_TRANSFORM_RULES_MAP.keys()), case_sensitive=False),
+    help="Form name/version. Default: SF424_4_0",
 )
 @click.option(
     "--compact",
@@ -88,15 +92,8 @@ def generate_xml_command(
             click.echo("Error: Must provide either --json or --file", err=True)
             sys.exit(1)
 
-        # Get transform config for the specified form
-        form_transform_rules_map = _build_xml_form_map()
-        transform_config = form_transform_rules_map.get(form.upper())
-        if not transform_config:
-            click.echo(
-                f"Error: Unknown form '{form}'. Available forms: {', '.join(form_transform_rules_map.keys())}",
-                err=True,
-            )
-            sys.exit(1)
+        # Get transform config for the specified form (validated by click.Choice)
+        transform_config = FORM_TRANSFORM_RULES_MAP.get(form.upper())
 
         # Create service and generate XML
         service = XMLGenerationService()

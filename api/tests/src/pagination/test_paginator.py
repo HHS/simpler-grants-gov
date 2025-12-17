@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 from sqlalchemy import select
 
@@ -18,6 +20,25 @@ DEFAULT_OPPORTUNITY_PARAMS = {
     "opportunity_number": "XYZ-111",
     "is_draft": True,
 }
+
+
+def validate_error_types(errors, expected):
+    """
+    expected: iterable of (field, type) tuples
+    """
+    found = []
+
+    # Collect (field, type) pairs from the actual errors returned by the API
+    for err in errors:
+        found.append((err.get("field"), err.get("type")))
+
+    # Ensure every expected (field, type) error is present in the response
+    for exp in expected:
+        assert exp in found
+
+    # Ensure no unexpected (field, type) errors were returned
+    for f in found:
+        assert f in expected
 
 
 @pytest.fixture
@@ -149,3 +170,81 @@ def test_paginator(db_session, create_opportunities):
 def test_page_size_zero_or_negative(db_session, page_size):
     with pytest.raises(ValueError, match="Page size must be at least 1"):
         Paginator(Opportunity, select(Opportunity), db_session, page_size)
+
+
+def test_pagination_required_returns_422(client):
+    # Sending payload without the pagination object
+    payload = {}  # pagination missing
+    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
+    assert response.status_code == 422
+
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("pagination", "required"),
+        ],
+    )
+
+
+def test_sort_order_string_returns_422(client):
+    # Sending sort_order as a string instead of list/dict
+    payload = {"pagination": {"sort_order": "invalid_string", "page_size": 10, "page_offset": 1}}
+    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
+
+    assert response.status_code == 422
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("pagination.sort_order", "invalid"),
+        ],
+    )
+
+
+def test_sort_order_invalid_json_returns_422(client):
+    # Sending broken JSON
+    invalid_json = '{"pagination": {"sort_order": [}'
+
+    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=invalid_json)
+
+    assert response.status_code == 422
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("_schema", "invalid"),
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    "payload, expected_error",
+    [
+        (
+            {"page_offset": "abc", "page_size": 10},
+            {("pagination.page_offset", "invalid")},
+        ),
+        (
+            {"page_offset": 1, "page_size": "xyz"},
+            {("pagination.page_size", "invalid")},
+        ),
+        (
+            {"page_offset": -1, "page_size": 10},
+            [
+                (
+                    "pagination.page_offset",
+                    "min_or_max_value",
+                )
+            ],
+        ),
+        (
+            {"page_offset": -1},
+            [("pagination.page_size", "required"), ("pagination.page_offset", "min_or_max_value")],
+        ),
+    ],
+)
+def test_wrong_type_pagination_param_returns_422(client, payload, expected_error):
+    full_payload = {"pagination": payload}
+
+    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=full_payload)
+
+    assert response.status_code == 422
+    validate_error_types(response.get_json()["errors"], expected_error)

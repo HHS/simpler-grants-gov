@@ -231,9 +231,10 @@ resource "aws_sns_topic_subscription" "security_hub_findings_slack" {
 }
 
 # EventBridge rule for CRITICAL severity findings
+# Excludes Inspector findings (CVE vulnerabilities) which are too noisy for real-time alerts
 resource "aws_cloudwatch_event_rule" "security_hub_critical_findings" {
   name        = "security-hub-critical-findings"
-  description = "Capture CRITICAL severity findings from Security Hub"
+  description = "Capture CRITICAL severity findings from Security Hub (excluding Inspector)"
 
   event_pattern = jsonencode({
     source      = ["aws.securityhub"]
@@ -247,6 +248,11 @@ resource "aws_cloudwatch_event_rule" "security_hub_critical_findings" {
           Status = ["NEW"]
         }
         RecordState = ["ACTIVE"]
+        ProductArn = [{
+          "anything-but" = {
+            "prefix" = "arn:aws:securityhub:us-east-1::product/aws/inspector"
+          }
+        }]
       }
     }
   })
@@ -259,9 +265,10 @@ resource "aws_cloudwatch_event_target" "security_hub_critical_findings_sns" {
 }
 
 # EventBridge rule for HIGH severity findings
+# Excludes Inspector findings (CVE vulnerabilities) which are too noisy for real-time alerts
 resource "aws_cloudwatch_event_rule" "security_hub_high_findings" {
   name        = "security-hub-high-findings"
-  description = "Capture HIGH severity findings from Security Hub"
+  description = "Capture HIGH severity findings from Security Hub (excluding Inspector)"
 
   event_pattern = jsonencode({
     source      = ["aws.securityhub"]
@@ -275,6 +282,11 @@ resource "aws_cloudwatch_event_rule" "security_hub_high_findings" {
           Status = ["NEW"]
         }
         RecordState = ["ACTIVE"]
+        ProductArn = [{
+          "anything-but" = {
+            "prefix" = "arn:aws:securityhub:us-east-1::product/aws/inspector"
+          }
+        }]
       }
     }
   })
