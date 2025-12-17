@@ -17,7 +17,7 @@ class TuserAccountMapper(foreignbase.ForeignBase, user_mixin.TuserAccountMapperM
 # TODO(#7340): Evaluate removing TuserAccount/TuserAccountMapper - no longer synced from Oracle
 class TuserAccount(foreignbase.ForeignBase, user_mixin.TuserAccountMixin):
     __tablename__ = "tuser_account"
-    
+
 
 class VuserAccount(foreignbase.ForeignBase, user_mixin.VuserAccountMixin):
     __tablename__ = "vuser_account"
