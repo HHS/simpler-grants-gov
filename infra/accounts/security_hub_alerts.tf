@@ -264,39 +264,8 @@ resource "aws_cloudwatch_event_target" "security_hub_critical_findings_sns" {
   arn       = aws_sns_topic.security_hub_findings.arn
 }
 
-# EventBridge rule for HIGH severity findings
-# Excludes Inspector findings (CVE vulnerabilities) which are too noisy for real-time alerts
-resource "aws_cloudwatch_event_rule" "security_hub_high_findings" {
-  name        = "security-hub-high-findings"
-  description = "Capture HIGH severity findings from Security Hub (excluding Inspector)"
-
-  event_pattern = jsonencode({
-    source      = ["aws.securityhub"]
-    detail-type = ["Security Hub Findings - Imported"]
-    detail = {
-      findings = {
-        Severity = {
-          Label = ["HIGH"]
-        }
-        Workflow = {
-          Status = ["NEW"]
-        }
-        RecordState = ["ACTIVE"]
-        ProductArn = [{
-          "anything-but" = {
-            "prefix" = "arn:aws:securityhub:us-east-1::product/aws/inspector"
-          }
-        }]
-      }
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "security_hub_high_findings_sns" {
-  rule      = aws_cloudwatch_event_rule.security_hub_high_findings.name
-  target_id = "SendToSNS"
-  arn       = aws_sns_topic.security_hub_findings.arn
-}
+# HIGH severity findings are not sent to Slack/email - only CRITICAL
+# HIGH findings can be reviewed in the Security Hub console
 
 # SNS topic policy to allow EventBridge to publish
 resource "aws_sns_topic_policy" "security_hub_findings" {
