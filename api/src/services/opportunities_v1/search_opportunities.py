@@ -162,10 +162,6 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
         _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
         STATIC_DATE_RANGES,
     )
-    builder.aggregation_terms(
-        "assistance_listing_number",
-        _adjust_field_name("assistance_listing_number", OPP_REQUEST_FIELD_NAME_MAPPING),
-    )
 
 
 def _add_top_level_agency_prefix(

@@ -932,9 +932,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             ),
             (get_search_request(assistance_listing_one_of=["99.999"]), []),
             (
-                get_search_request(
-                    assistance_listing_one_of=["43.008"], agency_one_of=["NASA"]
-                ),
+                get_search_request(assistance_listing_one_of=["43.008"], agency_one_of=["NASA"]),
                 [NASA_SPACE_FELLOWSHIP],
             ),
         ],
