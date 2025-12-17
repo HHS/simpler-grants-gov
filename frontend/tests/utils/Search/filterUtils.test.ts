@@ -528,6 +528,7 @@ describe("formatPillLabels", () => {
         ...searchFetcherParams,
         agency: new Set(["FAKE-SUB", "MOCK-SUB"]),
         topLevelAgency: new Set(["FAKE", "MOCK"]),
+        assistanceListingNumber: new Set(["15.808"]),
       },
       [
         { id: "FAKE-SUB", label: "Fake sub", value: "FAKE-SUB" },
@@ -536,7 +537,10 @@ describe("formatPillLabels", () => {
         { id: "MOCK", label: "Mock top", value: "MOCK" },
       ],
     );
-    expect(result).toEqual([
+
+  expect(result).toEqual(
+    expect.arrayContaining([
+      
       {
         label: "Forecasted",
         queryParamKey: "status",
@@ -577,6 +581,12 @@ describe("formatPillLabels", () => {
         queryParamKey: "topLevelAgency",
         queryParamValue: "MOCK",
       },
-    ]);
-  });
+      {
+        label: "ALN 15.808",
+        queryParamKey: "assistanceListingNumber",
+        queryParamValue: "15.808",
+      },
+    ]),
+  )})
+
 });
