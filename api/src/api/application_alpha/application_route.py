@@ -517,6 +517,7 @@ def application_submissions_list(
     logger.info("POST /alpha/applications/:application_id/submissions")
 
     # Get user from the multi-auth (supports both JWT and User API Key)
+    # TODO: Simplify this after multi-auth is updated to return user directly
     multi_auth_user = jwt_or_user_api_key_multi_auth.get_user()
 
     if isinstance(multi_auth_user.user, UserTokenSession):
