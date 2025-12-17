@@ -1,15 +1,17 @@
 import logging
 import uuid
 from collections.abc import Iterator
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+import pytz
 import requests
 from apiflask import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import update
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import AgencyUser, LegacyCertificate
@@ -31,12 +33,14 @@ from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
     AgencyFactory,
+    ApplicationFactory,
     ApplicationSubmissionFactory,
     ApplicationUserFactory,
     ApplicationUserRoleFactory,
     CompetitionFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
+    OrganizationFactory,
 )
 from tests.src.legacy_soap_api.soap_request_templates import (
     get_opportunity_list_requests as mock_requests,
@@ -46,6 +50,9 @@ from tests.util.minifiers import minify_xml
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
+TZ_EST = pytz.timezone("America/New_York")
+DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
+DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
 
 
 @pytest.fixture(autouse=True)
@@ -414,14 +421,14 @@ class TestSimplerSOAPGetApplicationZip:
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
-                '--uuid:cccccccc-1111-2222-3333-dddddddddddd\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\nContent-Transfer-Encoding: binary\nContent-Id: <root.message@cxf.apache.org'
+                '--uuid:cccccccc-1111-2222-3333-dddddddddddd\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org'
                 '>\n\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:GetApplicationZipResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns11="htt'
                 'p://schemas.xmlsoap.org/wsdl/" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns'
                 ':ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsP'
                 'ackage-V1.0" xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" xmlns:ns3="http://apply.grants.gov'
                 '/system/GrantsTemplate-V1.0" xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0"><ns2:FileDataHandler>'
                 '<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb-0001@apply.grants.gov"/></ns2:FileDataHandler></ns2:GetApplicationZipResp'
-                f"onse></soap:Body></soap:Envelope>\n--uuid:cccccccc-1111-2222-3333-dddddddddddd\n{submission_text}\n--uuid:cccccccc-1111-2222-3333-dddddddddddd\n--"
+                f"onse></soap:Body></soap:Envelope>\n--uuid:cccccccc-1111-2222-3333-dddddddddddd\n{submission_text}\n--uuid:cccccccc-1111-2222-3333-dddddddddddd--"
             ).encode("utf-8")
             assert isinstance(result.data, Iterator)
             assert b"".join(list(result.data)) == expected
@@ -606,3 +613,220 @@ class TestSimplerSOAPGetApplicationZip:
             result = client.get_simpler_soap_response(mock_proxy_response)
             assert result.data == mock_proxy_response.data
             assert result.status_code == mock_proxy_response.status_code
+
+
+class TestSimplerSOAPGetSubmissionListExpanded:
+    def setup_application_submission(
+        self,
+        agency,
+        legacy_package_id="PKG00118065",
+        sam_gov_entity=None,
+        application_status=ApplicationStatus.ACCEPTED,
+        opportunity_assistance_listing=True,
+        has_organization=True,
+        legacy_competition_id=1,
+    ):
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+            legacy_package_id=legacy_package_id,
+            legacy_competition_id=legacy_competition_id,
+            opportunity_assistance_listing=(
+                OpportunityAssistanceListingFactory.create(opportunity=opportunity)
+                if opportunity_assistance_listing
+                else None
+            ),
+        )
+        application_kwargs = dict(
+            competition=competition,
+            application_status=application_status,
+            submitted_at=DT_EST_AWARE,
+        )
+        if has_organization:
+            application_kwargs = application_kwargs | {
+                "organization": (
+                    OrganizationFactory.create(sam_gov_entity=sam_gov_entity)
+                    if sam_gov_entity
+                    else OrganizationFactory.create()
+                )
+            }
+        application = ApplicationFactory.create(**application_kwargs)
+        return ApplicationSubmissionFactory.create(application=application)
+
+    def test_get_simpler_soap_response_returns_mtom_xml(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        submission = self.setup_application_submission(agency)
+        application = submission.application
+        sam_gov_entity = application.organization.sam_gov_entity
+        sam_gov_entity.has_debt_subject_to_offset = True
+        sam_gov_entity.has_exclusion_status = True
+        db_session.commit()
+        db_session.refresh(application.competition)
+        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=request_xml_bytes,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            expected = (
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
+                "\nContent-Type: application/xop+xml; charset=UTF-8; type"
+                '="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org>\n\n'
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                '<ns2:GetSubmissionListExpandedResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1'
+                '1="http://schemas.xmlsoap.org/wsdl/" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynops'
+                'is-V2.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns:ns8="htt'
+                'p://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/'
+                'AgencyManagePackage-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" xmlns:ns5="'
+                'http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns4="http://apply.grants.gov/system/Gr'
+                'antsRelatedDocument-V1.0" xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" xmlns:ns2='
+                '"http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns="http://apply.grants.gov/system/Gra'
+                'ntsCommonElements-V1.0">'
+                "<ns2:Success>true</ns2:Success>"
+                "<ns2:AvailableApplicationNumber>1</ns2:AvailableApplicationNumber>"
+                "<ns2:SubmissionInfo>"
+                f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
+                f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
+                f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
+                "<SubmissionMethod>web</SubmissionMethod>"
+                f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
+                "<PackageID>PKG00118065</PackageID>"
+                "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
+                "<ActiveExclusions>Yes</ActiveExclusions>"
+                f"<UEI>{sam_gov_entity.uei}</UEI>"
+                "</ns2:SubmissionInfo>"
+                "</ns2:GetSubmissionListExpandedResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>"
+                "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+            ).encode("utf-8")
+            assert result.data == expected
+            assert result.status_code == 200
+            assert result.headers == {
+                "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+                "MIME-Version": "1.0",
+            }
+
+    def test_get_simpler_soap_response_returns_multiple_objects(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
+        agency = AgencyFactory.create()
+        submission = self.setup_application_submission(agency)
+        application = submission.application
+        sam_gov_entity = application.organization.sam_gov_entity
+        sam_gov_entity.has_debt_subject_to_offset = True
+        sam_gov_entity.has_exclusion_status = True
+        submission_2 = self.setup_application_submission(agency)
+        application_2 = submission_2.application
+        sam_gov_entity_2 = application_2.organization.sam_gov_entity
+        sam_gov_entity_2.has_debt_subject_to_offset = True
+        sam_gov_entity_2.has_exclusion_status = True
+        db_session.commit()
+        db_session.refresh(application.competition)
+        db_session.refresh(application_2.competition)
+        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=request_xml_bytes,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            expected = (
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
+                'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+                "Content-Transfer-Encoding: binary\n"
+                "Content-ID: <root.message@cxf.apache.org>\n\n"
+                '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+                "<soap:Body>"
+                "<ns2:GetSubmissionListExpandedResponse "
+                'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+                'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+                'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+                'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+                'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+                'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+                'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+                'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+                'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+                'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+                'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+                'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+                "<ns2:Success>true</ns2:Success>"
+                "<ns2:AvailableApplicationNumber>2</ns2:AvailableApplicationNumber>"
+                "<ns2:SubmissionInfo>"
+                f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
+                f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
+                f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
+                "<SubmissionMethod>web</SubmissionMethod>"
+                f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
+                "<PackageID>PKG00118065</PackageID>"
+                "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
+                "<ActiveExclusions>Yes</ActiveExclusions>"
+                f"<UEI>{sam_gov_entity.uei}</UEI>"
+                "</ns2:SubmissionInfo>"
+                "<ns2:SubmissionInfo>"
+                f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
+                f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
+                f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
+                "<SubmissionMethod>web</SubmissionMethod>"
+                f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
+                "<PackageID>PKG00118065</PackageID>"
+                "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
+                "<ActiveExclusions>Yes</ActiveExclusions>"
+                f"<UEI>{sam_gov_entity_2.uei}</UEI>"
+                "</ns2:SubmissionInfo>"
+                "</ns2:GetSubmissionListExpandedResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>\n"
+                "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
+            ).encode("utf-8")
+            assert result.data == expected
+            assert result.status_code == 200
+            assert result.headers == {
+                "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+                "MIME-Version": "1.0",
+            }

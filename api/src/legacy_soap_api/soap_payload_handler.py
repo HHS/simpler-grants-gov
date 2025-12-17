@@ -323,41 +323,30 @@ def _build_xml_elements(
             el.text = str(value)
 
 
-def _build_mtom_nested_elements(
-    parent_element: etree._Element,
-    data_dict: dict,
-    namespaces: dict,
-    bound_prefixes: set,
-    response_operation_name: str,
-) -> None:
-    for local_name, value in data_dict.items():
-        # if the local_name is @href, assign the href value to the element
+def _build_mtom_nested_elements(parent: etree._Element, data: dict, namespaces: dict) -> None:
+    for key, value in data.items():
+        prefix, local_name = get_prefix_and_local_name(key)
+        ns_map = {}
+        ns_uri = namespaces.get(prefix)
         if local_name[0] == "@":
-            parent_element.set(local_name[1:], str(value))
+            parent.set(local_name[1:], str(value))
             continue
-        prefix, local_name = local_name.split(":")
-        ns_uri = namespaces.get(prefix) if prefix else None
-        new_element_nsmap = {}
         if ns_uri:
-            tag = QName(ns_uri, local_name)
-            if local_name == response_operation_name:
-                nsmap_to_apply = {p: namespaces[p] for p in namespaces if p not in ("soap", "xop")}
-                child_element = SubElement(parent_element, tag, nsmap=nsmap_to_apply)
-                bound_prefixes = set(namespaces.keys()).union(bound_prefixes)
-            elif local_name == "Include":
-                new_element_nsmap["xop"] = namespaces["xop"]
-                child_element = SubElement(parent_element, tag, nsmap=new_element_nsmap)
-                bound_prefixes = bound_prefixes.union({"xop"})
+            if local_name == "Include":
+                tag = QName(namespaces["xop"], local_name)
+                ns_map.update({"xop": namespaces["xop"]})
             else:
-                child_element = SubElement(parent_element, tag)
+                tag = QName(ns_uri, local_name)
+        if isinstance(value, list):
+            for item in value:
+                child_element = etree.SubElement(parent, tag, nsmap=ns_map)
+                _build_mtom_nested_elements(child_element, item, namespaces)
+        elif isinstance(value, dict):
+            child_element = etree.SubElement(parent, tag, nsmap=ns_map)
+            _build_mtom_nested_elements(child_element, value, namespaces)
         else:
-            child_element = SubElement(parent_element, local_name)
-        if isinstance(value, dict):
-            _build_mtom_nested_elements(
-                child_element, value, namespaces, bound_prefixes, response_operation_name
-            )
-        elif value is not None:
-            child_element.text = str(value)
+            child_element = etree.SubElement(parent, tag, nsmap=ns_map)
+            child_element.text = str(value).lower() if isinstance(value, bool) else str(value)
 
 
 # Handle building the MTOM xml for responses like GetApplicationZipResponse
@@ -369,13 +358,34 @@ def _build_mtom_nested_elements(
 #           </ns2:GetApplicationZipResponse>
 #       </soap:Body>
 #     </soap:Envelope>
-def build_mtom_xml_from_dict(
-    namespaces: dict, pydantic_data_dict: dict, response_operation_name: str
+def build_mtom_response_from_dict(
+    input_data: dict, raw_uuid: str, namespaces: dict, root: str
 ) -> bytes:
-    ns_soap = namespaces["soap"]
-    nsmap_root = {"soap": ns_soap}
-    envelope = etree.Element(QName(ns_soap, "Envelope"), nsmap=nsmap_root)
-    if body_data := pydantic_data_dict.get("Body"):
-        body = SubElement(envelope, QName(ns_soap, "Body"))
-        _build_mtom_nested_elements(body, body_data, namespaces, {"soap"}, response_operation_name)
-    return etree.tostring(envelope, encoding="UTF-8")
+    soap_env = etree.Element(
+        QName(namespaces["soap"], "Envelope"),
+        nsmap={"soap": "http://schemas.xmlsoap.org/soap/envelope/"},
+    )
+    soap_body = etree.SubElement(soap_env, QName(namespaces["soap"], "Body"))
+    response_data = input_data.get("Body", {})
+    nsmap = {key: val for key, val in namespaces.items() if key not in ("xop", "soap")}
+    for key, value in response_data.items():
+        prefix, local_name = get_prefix_and_local_name(key)
+        tag = QName(namespaces[prefix], local_name)
+        response_node = etree.SubElement(soap_body, tag, nsmap=nsmap)
+        _build_mtom_nested_elements(response_node, value, namespaces)
+    xml_bytes = etree.tostring(soap_env, encoding="UTF-8", xml_declaration=False)
+    boundary = f"uuid:{raw_uuid}"
+    mime_header = (
+        f"--{boundary}\n"
+        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+        f"Content-Transfer-Encoding: binary\n"
+        f"Content-ID: <root.message@cxf.apache.org>\n\n"
+    )
+    return mime_header.encode("utf-8") + xml_bytes
+
+
+def get_prefix_and_local_name(key: str) -> tuple:
+    if ":" in key:
+        return key.split(":")[0], key.split(":")[-1]
+    else:
+        return None, key
