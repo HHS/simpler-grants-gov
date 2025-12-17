@@ -223,7 +223,7 @@ module "service" {
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
-    local.service_config.extra_environment_variables
+    local.service_config.extra_environment_variables,
   )
 
   secrets = concat(
@@ -235,15 +235,8 @@ module "service" {
       # name      = "COGNITO_CLIENT_SECRET"
       # valueFrom = module.identity_provider_client[0].client_secret_arn
     }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_USERNAME"
-      valueFrom = data.aws_ssm_parameter.search_username_arn[0].arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_PASSWORD"
-      valueFrom = data.aws_ssm_parameter.search_password_arn[0].arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
+    # OpenSearch endpoint
+    local.search_config != null ? [{
       name      = "SEARCH_ENDPOINT"
       valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
     }] : []
@@ -255,8 +248,15 @@ module "service" {
     },
     module.app_config.enable_identity_provider ? {
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {},
+    # OpenSearch IAM policy for query operations
+    local.search_config != null ? {
+      opensearch_query = data.aws_iam_policy.opensearch_query[0].arn,
     } : {}
   )
+
+  # OpenSearch ingest policy for migrator role (scheduled data loading jobs)
+  opensearch_ingest_policy_arn = local.search_config != null ? data.aws_iam_policy.opensearch_ingest[0].arn : null
 
   is_temporary = local.is_temporary
 }

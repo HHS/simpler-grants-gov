@@ -264,6 +264,207 @@ FORM_RULE_SCHEMA = {
     },
 }
 
+# XML transformation rules for converting Simpler EPA Form 4700-4 JSON to Grants.gov XML format
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting Simpler EPA Form 4700-4 JSON to XML",
+        "version": "1.0",
+        "form_name": "EPA4700_4_5_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0",
+            "EPA4700_4_5_0": "http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "xml_structure": {
+            "root_element": "EPA4700_4_5_0",
+            "version": "5.0",
+        },
+    },
+    # Applicant Information - wrapped under ApplicantInfo element
+    # XSD requires both ApplicantName and ApplicantAddress to be grouped under ApplicantInfo
+    "applicant_info": {
+        "xml_transform": {
+            "type": "conditional",
+            "target": "ApplicantInfo",
+            "conditional_transform": {
+                "type": "field_grouping",
+                "source_fields": ["applicant_name", "applicant_address"],
+            },
+        },
+        # Nested field transformations for the grouped fields
+        "nested_fields": {
+            "applicant_name": {
+                "xml_transform": {
+                    "target": "ApplicantName",
+                }
+            },
+            "applicant_address": {
+                "xml_transform": {
+                    "target": "ApplicantAddress",
+                    "type": "nested_object",
+                },
+                "address": {
+                    "xml_transform": {
+                        "target": "Address",
+                    }
+                },
+                "city": {
+                    "xml_transform": {
+                        "target": "City",
+                    }
+                },
+                "state": {
+                    "xml_transform": {
+                        "target": "State",
+                    }
+                },
+                "zip_code": {
+                    "xml_transform": {
+                        "target": "ZipCode",
+                    }
+                },
+            },
+        },
+    },
+    # SAM UEI
+    "sam_uei": {
+        "xml_transform": {
+            "target": "SAMUEI",
+        }
+    },
+    # Point of Contact
+    "point_of_contact_name": {
+        "xml_transform": {
+            "target": "POCName",
+        }
+    },
+    "point_of_contact_phone_number": {
+        "xml_transform": {
+            "target": "Phone",
+        }
+    },
+    "point_of_contact_email": {
+        "xml_transform": {
+            "target": "Email",
+        }
+    },
+    "point_of_contact_title": {
+        "xml_transform": {
+            "target": "Title",
+        }
+    },
+    # Questions (all optional fields)
+    "federal_financial_assistance": {
+        "xml_transform": {
+            "target": "FederalFinancialAssistanceQuestion",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "civil_rights_lawsuit_question1": {
+        "xml_transform": {
+            "target": "CivilRightsLawSuits1",
+        }
+    },
+    "civil_rights_lawsuit_question2": {
+        "xml_transform": {
+            "target": "CivilRightsLawSuits2",
+        }
+    },
+    "civil_rights_lawsuit_question3": {
+        "xml_transform": {
+            "target": "CivilRightsLawSuits3",
+        }
+    },
+    "construction_federal_assistance": {
+        "xml_transform": {
+            "target": "ConstructionFederalAssistance",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "construction_new_facilities": {
+        "xml_transform": {
+            "target": "Construction",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "construction_new_facilities_explanation": {
+        "xml_transform": {
+            "target": "Construction2",
+        }
+    },
+    "notice1": {
+        "xml_transform": {
+            "target": "Notice1",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "notice2": {
+        "xml_transform": {
+            "target": "Notice2",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "notice3": {
+        "xml_transform": {
+            "target": "Notice3",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "notice4": {
+        "xml_transform": {
+            "target": "Notice4",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "demographic_data": {
+        "xml_transform": {
+            "target": "Demographic",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "policy": {
+        "xml_transform": {
+            "target": "Policy1",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "policy_explanation": {
+        "xml_transform": {
+            "target": "Policy2",
+        }
+    },
+    "program_explanation": {
+        "xml_transform": {
+            "target": "Program",
+        }
+    },
+    # Applicant Signature (nested object)
+    "applicant_signature": {
+        "xml_transform": {
+            "target": "ApplicantSignature",
+            "type": "nested_object",
+        },
+        "aor_signature": {
+            "xml_transform": {
+                "target": "AORSignature",
+            }
+        },
+        "aor_title": {
+            "xml_transform": {
+                "target": "PersonTitle",
+            }
+        },
+        "submitted_date": {
+            "xml_transform": {
+                "target": "SubmittedDate",
+            }
+        },
+    },
+}
+
 EPA_FORM_4700_4_v5_0 = Form(
     # https://www.grants.gov/forms/form-items-description/fid/773
     form_id=uuid.UUID("4f0b0974-9a16-490b-a0f2-d03dfdc26ecd"),
@@ -276,6 +477,7 @@ EPA_FORM_4700_4_v5_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # No form instructions
     form_type=FormType.EPA_FORM_4700_4,
     sgg_version="1.0",

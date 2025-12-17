@@ -2,6 +2,7 @@ import logging
 from collections.abc import Generator, Iterable
 from typing import Any
 
+import boto3
 import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
@@ -311,14 +312,13 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
         pool_maxsize=opensearch_config.search_connection_pool_size,
     )
 
-    # We'll assume if the aws_region is set, we're running in AWS
-    # and should connect using the session credentials
+    # When aws_region is set, use AWS IAM credentials (SigV4) for authentication
     if opensearch_config.aws_region:
-        # Get credentials and authorize with AWS Opensearch Serverless (es)
-        # TODO - once we have the user setup in Opensearch, we want to change to this approach
-        # credentials = boto3.Session().get_credentials()
-        # auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
-        auth = (opensearch_config.search_username, opensearch_config.search_password)
+        credentials = boto3.Session().get_credentials()
+        if credentials is None:
+            raise RuntimeError("AWS credentials not found. Ensure AWS credentials are configured ")
+        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
+        logger.info("Using AWS IAM (SigV4) authentication for OpenSearch")
 
     return params

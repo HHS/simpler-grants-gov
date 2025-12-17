@@ -72,9 +72,12 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
   }
 
   statement {
-    effect    = "Allow"
-    actions   = ["ecs:RunTask"]
-    resources = ["${aws_ecs_task_definition.app.arn_without_revision}:*"]
+    effect  = "Allow"
+    actions = ["ecs:RunTask"]
+    resources = concat(
+      ["${aws_ecs_task_definition.app.arn_without_revision}:*"],
+      length(aws_ecs_task_definition.migrator) > 0 ? ["${aws_ecs_task_definition.migrator[0].arn_without_revision}:*"] : []
+    )
     condition {
       test     = "ArnLike"
       variable = "ecs:cluster"
@@ -102,9 +105,13 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
     actions = [
       "iam:PassRole",
     ]
-    resources = [
-      aws_iam_role.task_executor.arn,
-      aws_iam_role.app_service.arn,
-    ]
+    # Allow passing both app_service and migrator_task roles
+    resources = concat(
+      [
+        aws_iam_role.task_executor.arn,
+        aws_iam_role.app_service.arn,
+      ],
+      length(aws_iam_role.migrator_task) > 0 ? [aws_iam_role.migrator_task[0].arn] : []
+    )
   }
 }
