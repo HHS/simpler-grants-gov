@@ -153,8 +153,8 @@ locals {
     }
     create-application-submission = {
       task_command = ["poetry", "run", "flask", "task", "create-application-submission"]
-      # Every day at 2am Eastern Time during DST. 3am during non-DST.
-      schedule_expression = "cron(0 7 * * ? *)"
+      # Every hour at minute 15 (offset to avoid collision with other hourly jobs)
+      schedule_expression = "cron(15 * * * ? *)"
       state               = "ENABLED"
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
