@@ -44,7 +44,7 @@ class MultiHttpTokenAuth(MultiAuth):
             return MultiAuthUser(current_user, AuthType.INTERNAL_JWT_AUTH)
 
         raise Exception("Unknown user type %s", type(current_user))
-    
+
 
 class MultiHttpTokenAuthSimpler(MultiAuth):
     def get_user(self) -> User:
