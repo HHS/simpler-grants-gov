@@ -31,7 +31,6 @@ TABLES_TO_LOAD = [
     "tfundinstr_synopsis",
     "tgroups",
     "tsynopsisattachment",
-    "tuser_account_mapper",
     "tcompetition",
     "tinstructions",
     "tcertificates",
