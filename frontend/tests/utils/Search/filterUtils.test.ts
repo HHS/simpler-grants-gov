@@ -538,55 +538,54 @@ describe("formatPillLabels", () => {
       ],
     );
 
-  expect(result).toEqual(
-    expect.arrayContaining([
-      
-      {
-        label: "Forecasted",
-        queryParamKey: "status",
-        queryParamValue: "forecasted",
-      },
-      {
-        label: "Open",
-        queryParamKey: "status",
-        queryParamValue: "posted",
-      },
-      {
-        label: "Grant",
-        queryParamKey: "fundingInstrument",
-        queryParamValue: "grant",
-      },
-      {
-        label: "Cooperative Agreement",
-        queryParamKey: "fundingInstrument",
-        queryParamValue: "cooperative_agreement",
-      },
-      {
-        label: "Fake sub",
-        queryParamKey: "agency",
-        queryParamValue: "FAKE-SUB",
-      },
-      {
-        label: "Mock sub",
-        queryParamKey: "agency",
-        queryParamValue: "MOCK-SUB",
-      },
-      {
-        label: "Fake top",
-        queryParamKey: "topLevelAgency",
-        queryParamValue: "FAKE",
-      },
-      {
-        label: "Mock top",
-        queryParamKey: "topLevelAgency",
-        queryParamValue: "MOCK",
-      },
-      {
-        label: "ALN 15.808",
-        queryParamKey: "assistanceListingNumber",
-        queryParamValue: "15.808",
-      },
-    ]),
-  )})
-
+    expect(result).toEqual(
+      expect.arrayContaining([
+        {
+          label: "Forecasted",
+          queryParamKey: "status",
+          queryParamValue: "forecasted",
+        },
+        {
+          label: "Open",
+          queryParamKey: "status",
+          queryParamValue: "posted",
+        },
+        {
+          label: "Grant",
+          queryParamKey: "fundingInstrument",
+          queryParamValue: "grant",
+        },
+        {
+          label: "Cooperative Agreement",
+          queryParamKey: "fundingInstrument",
+          queryParamValue: "cooperative_agreement",
+        },
+        {
+          label: "Fake sub",
+          queryParamKey: "agency",
+          queryParamValue: "FAKE-SUB",
+        },
+        {
+          label: "Mock sub",
+          queryParamKey: "agency",
+          queryParamValue: "MOCK-SUB",
+        },
+        {
+          label: "Fake top",
+          queryParamKey: "topLevelAgency",
+          queryParamValue: "FAKE",
+        },
+        {
+          label: "Mock top",
+          queryParamKey: "topLevelAgency",
+          queryParamValue: "MOCK",
+        },
+        {
+          label: "ALN 15.808",
+          queryParamKey: "assistanceListingNumber",
+          queryParamValue: "15.808",
+        },
+      ]),
+    );
+  });
 });

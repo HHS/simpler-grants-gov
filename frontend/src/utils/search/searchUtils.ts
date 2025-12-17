@@ -38,7 +38,9 @@ export function convertSearchParamsToProperTypes(
     andOr: (params.andOr as QueryOperator) || "",
     topLevelAgency: paramToSet(params.topLevelAgency),
     sortby: (params.sortby as SortOptions) || null, // Convert empty string to null if needed
-    assistanceListingNumber: paramToSet(params.assistanceListingNumber as QuerySetParam),
+    assistanceListingNumber: paramToSet(
+      params.assistanceListingNumber as QuerySetParam,
+    ),
 
     // Ensure page is at least 1 or default to 1 if undefined
     page: getSafePage(params.page),
