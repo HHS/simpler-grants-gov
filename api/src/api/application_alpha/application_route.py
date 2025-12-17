@@ -26,14 +26,21 @@ from src.api.application_alpha.application_schemas import (
     ApplicationGetResponseSchema,
     ApplicationStartRequestSchema,
     ApplicationStartResponseSchema,
+    ApplicationSubmissionsRequestSchema,
+    ApplicationSubmissionsResponseSchema,
     ApplicationUpdateRequestSchema,
     ApplicationUpdateResponseSchema,
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_key_or_internal_security_schemes
+from src.auth.multi_auth import (
+    jwt_key_or_internal_multi_auth,
+    jwt_key_or_internal_security_schemes,
+    jwt_or_user_api_key_multi_auth,
+    jwt_or_user_api_key_security_schemes,
+)
 from src.constants.lookup_constants import ApplicationAuditEvent
-from src.db.models.user_models import UserTokenSession
+from src.db.models.user_models import UserApiKey, UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
@@ -48,6 +55,7 @@ from src.services.applications.get_application_attachment import (
 )
 from src.services.applications.get_application_form import get_application_form
 from src.services.applications.list_application_audit import list_application_audit
+from src.services.applications.list_application_submissions import list_application_submissions
 from src.services.applications.submit_application import submit_application
 from src.services.applications.update_application import update_application
 from src.services.applications.update_application_attachment import update_application_attachment
@@ -490,4 +498,48 @@ def application_audit_list(
 
     return response.ApiResponse(
         message="Success", data=audit_events, pagination_info=pagination_info
+    )
+
+
+@application_blueprint.post("/applications/<uuid:application_id>/submissions")
+@application_blueprint.input(ApplicationSubmissionsRequestSchema())
+@application_blueprint.output(ApplicationSubmissionsResponseSchema())
+@application_blueprint.doc(
+    responses=[200, 401, 403, 404], security=jwt_or_user_api_key_security_schemes
+)
+@jwt_or_user_api_key_multi_auth.login_required
+@flask_db.with_db_session()
+def application_submissions_list(
+    db_session: db.Session, application_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Get all application submissions for an application"""
+    add_extra_data_to_current_request_logs({"application_id": application_id})
+    logger.info("POST /alpha/applications/:application_id/submissions")
+
+    # Get user from the multi-auth (supports both JWT and User API Key)
+    multi_auth_user = jwt_or_user_api_key_multi_auth.get_user()
+
+    if isinstance(multi_auth_user.user, UserTokenSession):
+        user = multi_auth_user.user.user
+    elif isinstance(multi_auth_user.user, UserApiKey):
+        user = multi_auth_user.user.user
+    else:
+        raise Exception(f"Unknown user type: {type(multi_auth_user.user)}")
+
+    with db_session.begin():
+        db_session.add(multi_auth_user.user)
+        submissions, pagination_info = list_application_submissions(
+            db_session, application_id, user, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched application submissions")
+
+    return response.ApiResponse(
+        message="Success", data=submissions, pagination_info=pagination_info
     )
