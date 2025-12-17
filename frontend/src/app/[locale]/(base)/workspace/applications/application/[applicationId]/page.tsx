@@ -73,18 +73,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     opportunity = opportunityResponse.data;
     attachments = response.data.application_attachments;
-    const historyResponse = await getApplicationHistory(
-      applicationId,
-      userSession?.token,
-    );
-    if (historyResponse.status_code !== 200) {
-      console.error(
-        `Error retrieving application history details for (${applicationId})`,
-        response,
-      );
-    } else {
-      historyDetails = historyResponse.data;
-    }
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -94,6 +82,25 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       return <NotFound />;
     }
     return <TopLevelError />;
+  }
+  try {
+    const historyResponse = await getApplicationHistory(
+      applicationId,
+      userSession?.token,
+    );
+    if (historyResponse.status_code !== 200) {
+      console.error(
+        `Error retrieving application history details for (${applicationId})`,
+        historyResponse,
+      );
+    } else {
+      historyDetails = historyResponse.data;
+    }
+  } catch (e) {
+    console.error(
+      `Error retrieving application history details for (${applicationId})`,
+      e,
+    );
   }
 
   return (
