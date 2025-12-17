@@ -3,7 +3,7 @@ from uuid import uuid4
 import pytest
 
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.constants.lookup_constants import Privilege, RoleType
+from src.constants.lookup_constants import OrganizationAuditEvent, Privilege, RoleType
 from src.db.models.user_models import OrganizationUserRole
 from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
@@ -76,6 +76,15 @@ class TestUpdateUserOrganizationRoles:
         assert len(data) == len(roles_assigned)
         assert set([role["role_id"] for role in data]) == set(roles_assigned)
 
+        # Verify audit history recorded
+        assert len(org.organization_audits) == 1
+        assert org.organization_audits[0].user.user_id == request_user.user_id
+        assert org.organization_audits[0].target_user_id == org_user.user_id
+        assert (
+            org.organization_audits[0].organization_audit_event
+            == OrganizationAuditEvent.USER_ROLE_UPDATED
+        )
+
     def test_update_user_overwrites_existing_roles(
         self,
         client,
@@ -87,7 +96,7 @@ class TestUpdateUserOrganizationRoles:
     ):
         """Should overwrite existing roles with the new set of roles."""
         # Create user in organization with given role
-        _, org, token = create_user_in_org(db_session=db_session, role=role_a)
+        request_user, org, token = create_user_in_org(db_session=db_session, role=role_a)
 
         # Create target user with existing roles
         org_user = OrganizationUserFactory.create(organization=org)
@@ -111,6 +120,15 @@ class TestUpdateUserOrganizationRoles:
         assert resp.status_code == 200
         assert len(data) == len(roles_assigned)
         assert [role["role_id"] for role in data] == roles_assigned
+
+        # Verify audit history recorded
+        assert len(org.organization_audits) == 1
+        assert org.organization_audits[0].user.user_id == request_user.user_id
+        assert org.organization_audits[0].target_user_id == org_user.user_id
+        assert (
+            org.organization_audits[0].organization_audit_event
+            == OrganizationAuditEvent.USER_ROLE_UPDATED
+        )
 
     def test_update_user_organization_roles_404_organization(
         self, client, db_session, user, enable_factory_create, role_a
@@ -194,6 +212,9 @@ class TestUpdateUserOrganizationRoles:
             .one()
         )
         assert db_user_role.created_at == org_user_role.created_at
+
+        # Verify audit history not recorded
+        assert len(org.organization_audits) == 0
 
     def test_update_user_organization_roles_404_missing_role_ids(
         self, client, db_session, enable_factory_create, role_a, role_b
