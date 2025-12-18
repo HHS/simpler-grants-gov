@@ -4,7 +4,10 @@ import NotFound from "src/app/[locale]/(base)/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import {
+  getApplicationDetails,
+  getApplicationHistory,
+} from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -14,6 +17,7 @@ import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
+import { ApplicationHistoryCardProps } from "src/components/application/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +42,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
   const { applicationId } = await params;
   let details = {} as ApplicationDetailsCardProps;
+  let historyDetails = [] as ApplicationHistoryCardProps;
   let opportunity = {} as OpportunityDetail;
   let attachments = [] as Attachment[];
 
@@ -78,6 +83,25 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     }
     return <TopLevelError />;
   }
+  try {
+    const historyResponse = await getApplicationHistory(
+      applicationId,
+      userSession?.token,
+    );
+    if (historyResponse.status_code !== 200) {
+      console.error(
+        `Error retrieving application history details for (${applicationId})`,
+        historyResponse,
+      );
+    } else {
+      historyDetails = historyResponse.data;
+    }
+  } catch (e) {
+    console.error(
+      `Error retrieving application history details for (${applicationId})`,
+      e,
+    );
+  }
 
   return (
     <>
@@ -87,6 +111,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           applicationDetails={details}
           opportunity={opportunity}
           attachments={attachments}
+          applicationHistory={historyDetails}
         />
       </GridContainer>
     </>
