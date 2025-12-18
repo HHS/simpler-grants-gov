@@ -8,7 +8,7 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 const validateUserProfileAction = async (formData: FormData) => {
-  const t = await getTranslations("UserAccount.validationErrors");
+  const t = await getTranslations("Settings.validationErrors");
   const schema = z.object({
     firstName: z.string().min(1, { message: t("firstName") }),
     lastName: z.string().min(1, { message: t("lastName") }),

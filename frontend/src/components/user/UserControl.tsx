@@ -3,7 +3,6 @@ import { noop } from "lodash";
 import { applicationTestUserId, testApplicationId } from "src/constants/auth";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
-import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -27,14 +26,14 @@ const TestApplicationLink = () => {
   );
 };
 
-const AccountNavLink = () => {
+const SettingsNavLink = () => {
   const t = useTranslations("Header.navLinks");
   return (
     <Link
       className="display-flex usa-button usa-button--unstyled text-no-underline"
-      href="/user/account"
+      href="/settings"
     >
-      {t("account")}
+      {t("settings")}
     </Link>
   );
 };
@@ -43,13 +42,8 @@ const AccountNavLink = () => {
 // 1. on desktop - nav item drop down button content
 // 2. on mobile - nav item drop down button content, without email text
 // 3. on mobile - nav sub item content
-const UserEmailItem = ({
-  email,
-  isSubnav,
-}: {
-  email?: string;
-  isSubnav: boolean;
-}) => {
+const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
+  const t = useTranslations("Header.navLinks");
   return (
     <a
       className={clsx("flex-align-center", "display-flex", {
@@ -70,7 +64,7 @@ const UserEmailItem = ({
           "desktop:display-block": !isSubnav,
         })}
       >
-        {email}
+        {t("account")}
       </div>
     </a>
   );
@@ -105,10 +99,8 @@ const LogoutNavItem = () => {
 };
 
 export const UserDropdown = ({
-  user,
   isApplicationTestUser,
 }: {
-  user: UserProfile;
   isApplicationTestUser: boolean;
 }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
@@ -125,7 +117,7 @@ export const UserDropdown = ({
         // perfectly well.
         // eslint-disable-next-line
         // @ts-ignore: Type 'Element' is not assignable to type 'string'
-        label={<UserEmailItem isSubnav={false} email={user.email} />}
+        label={<UserAccountItem isSubnav={false} />}
         isOpen={userProfileMenuOpen}
         onClick={(e) => {
           if (!userProfileMenuOpen) {
@@ -150,8 +142,8 @@ export const UserDropdown = ({
         className="position-absolute desktop:width-full z-200 right-0"
         id="user-control"
         items={[
-          <UserEmailItem key="email" isSubnav={true} email={user.email} />,
-          showUserAdminNavItems && <AccountNavLink key="account" />,
+          <UserAccountItem key="account" isSubnav={true} />,
+          showUserAdminNavItems && <SettingsNavLink key="settings" />,
           isApplicationTestUser && <TestApplicationLink />,
           <LogoutNavItem key="logout" />,
         ].filter(Boolean)}
@@ -173,10 +165,7 @@ export const UserControl = ({ localDev }: { localDev: boolean }) => {
     <>
       {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
       {!!user?.token && (
-        <UserDropdown
-          user={user}
-          isApplicationTestUser={isApplicationTestUser}
-        />
+        <UserDropdown isApplicationTestUser={isApplicationTestUser} />
       )}
     </>
   );
