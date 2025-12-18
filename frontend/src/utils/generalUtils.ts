@@ -5,7 +5,7 @@
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
 
-import { difference } from "lodash";
+import { difference, isArray, isNumber, isString } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 // Refer to tests to see how this works in practice
@@ -128,4 +128,16 @@ export function isExternalLink(href: string): boolean {
 
 export const isSubset = <T>(subset: T[], superset: T[]) => {
   return !difference(subset, superset).length;
+};
+
+export const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
+  if (typeof mightBeAnObject === "boolean") {
+    return false;
+  }
+  return (
+    !!mightBeAnObject &&
+    !isArray(mightBeAnObject) &&
+    !isString(mightBeAnObject) &&
+    !isNumber(mightBeAnObject)
+  );
 };
