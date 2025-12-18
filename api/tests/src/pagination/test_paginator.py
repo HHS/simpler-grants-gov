@@ -199,6 +199,18 @@ def test_sort_order_string_returns_422(client):
         ],
     )
 
+def test_pagination_invalid_422(client):
+    # Sending an invalid pagination object
+    payload = {"pagination": 5}
+    response = client.post(f"/v1/organizations/{uuid.uuid4()}/legacy-users", json=payload)
+
+    assert response.status_code == 422
+    validate_error_types(
+        response.get_json()["errors"],
+        [
+            ("pagination", "invalid"),
+        ],
+    )
 
 def test_sort_order_invalid_json_returns_422(client):
     # Sending broken JSON

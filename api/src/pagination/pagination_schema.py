@@ -10,7 +10,7 @@ class BasePaginationSchema(Schema):
     def before_load(self, item: dict, many: bool, **kwargs: dict) -> dict:
         # If input is not a dict, just return it; Marshmallow will raise a ValidationError
         if not isinstance(item, dict):
-            raise item
+            return item
 
         # If sort_order is used, don't change anything
         # We'll assume they've migrated properly
