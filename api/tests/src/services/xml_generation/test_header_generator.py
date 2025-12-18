@@ -120,7 +120,7 @@ class TestSubmissionXMLGenerator:
         opportunity = OpportunityFactory.create(
             opportunity_number="TEST-OPP-12345",
             opportunity_title="Test Opportunity Title",
-            agency_code="XYZ-XYZ-XYZ",  # Use a different code that won't have an Agency record
+            agency_code="XYZ",  # Use a different code that won't have an Agency record
         )
         competition = CompetitionFactory.create(opportunity=opportunity)
         application = ApplicationFactory.create(competition=competition)
