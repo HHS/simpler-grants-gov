@@ -447,14 +447,10 @@ FORM_XML_TRANSFORM_RULES = {
             },
         }
     },
-    # Institution/Organization Type - maps "1330: University" to "1330"
+    # Institution/Organization Type - passed through as-is (full "CODE: Description" format)
     "organization_type": {
         "xml_transform": {
             "target": "InstType",
-            "value_transform": {
-                "type": "map_values",
-                "params": {"mappings": ORGANIZATION_TYPE_CODE_MAP},
-            },
         }
     },
     # Nested structure for project funding amounts
@@ -482,9 +478,9 @@ FORM_XML_TRANSFORM_RULES = {
 ```
 
 **Supplementary Cover Sheet for NEH Grant Programs Field Mapping Notes:**
-- Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes
+- Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes for discipline fields
 - `major_field` (Project Director's Major Field): Maps ~150 discipline display values (e.g., "History: U.S. History") to numeric codes (e.g., "4")
-- `organization_type`: Maps institution type display values (e.g., "1330: University") to just the code (e.g., "1330")
+- `organization_type`: Passed through as-is (full "CODE: Description" format, e.g., "1330: University")
 - `primary_project_discipline`, `secondary_project_discipline`, `tertiary_project_discipline`: Same mapping as `major_field` but uses a subset of values (project disciplines only, not the additional "Other" field of study values)
 - `funding_group` → `ProjectFunding`: Nested structure with currency-formatted amounts
 - `application_info` → `ApplicationInfo`: Nested structure with boolean-to-yes/no conversion for `additional_funding`

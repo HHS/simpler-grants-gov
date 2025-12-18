@@ -66,8 +66,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         # Verify discipline codes are transformed correctly
         assert "PDMajorField>4<" in xml_data  # "History: U.S. History" -> "4"
         assert "PrimaryPDNEH>4<" in xml_data  # Same mapping
-        # Verify organization type code
-        assert "InstType>1330<" in xml_data  # "1330: University" -> "1330"
+        # Verify organization type (passed through as full value)
+        assert "InstType>1330: University<" in xml_data  # Full value preserved
 
     def test_generate_neh_cover_sheet_xml_discipline_code_mapping(self):
         """Test that discipline display values are correctly mapped to XSD numeric codes."""
@@ -108,17 +108,18 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             assert f"PDMajorField>{expected_code}<" in response.xml_data
             assert f"PrimaryPDNEH>{expected_code}<" in response.xml_data
 
-    def test_generate_neh_cover_sheet_xml_organization_type_mapping(self):
-        """Test that organization type display values are correctly mapped to codes."""
+    def test_generate_neh_cover_sheet_xml_organization_type_passthrough(self):
+        """Test that organization type values are passed through as-is (full value)."""
         test_cases = [
-            ("1326: Center For Advanced Study/Research Institute", "1326"),
-            ("1330: University", "1330"),
-            ("1344: Public Library", "1344"),
-            ("1349: Art Museum", "1349"),
-            ("2819: Unknown", "2819"),
+            "1326: Center For Advanced Study/Research Institute",
+            "1330: University",
+            "1344: Public Library",
+            "1349: Art Museum",
+            "1329: Four-Year College",
+            "2819: Unknown",
         ]
 
-        for display_value, expected_code in test_cases:
+        for display_value in test_cases:
             application_data = {
                 "major_field": "History: U.S. History",
                 "organization_type": display_value,
@@ -143,7 +144,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             response = service.generate_xml(request)
 
             assert response.success is True, f"Failed for {display_value}"
-            assert f"InstType>{expected_code}<" in response.xml_data
+            # Organization type should be passed through as full value
+            assert f"InstType>{display_value}<" in response.xml_data
 
     def test_generate_neh_cover_sheet_xml_with_federal_match(self):
         """Test NEH Cover Sheet XML generation with federal match funding."""

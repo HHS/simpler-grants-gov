@@ -177,52 +177,8 @@ FIELD_OF_STUDY_CODE_MAP = {
     "Other: Statistics": "2881",
 }
 
-# Mapping from display values to XSD numeric codes for organization types
-# The display value is in format "CODE: Description", XSD expects just the code
-ORGANIZATION_TYPE_CODE_MAP = {
-    "1326: Center For Advanced Study/Research Institute": "1326",
-    "1327: Publishing": "1327",
-    "1328: Two-Year College": "1328",
-    "1329: Four-Year College": "1329",
-    "1330: University": "1330",
-    "1331: Professional School": "1331",
-    "1332: Elementary/Middle School": "1332",
-    "1333: Secondary School": "1333",
-    "1334: School District": "1334",
-    "1335: State Department of Education": "1335",
-    "1336: Non-Profit Educational Center": "1336",
-    "1337: Educational Consortium": "1337",
-    "1338: Philanthropic Foundation": "1338",
-    "1339: State/Local/Federal Government": "1339",
-    "1340: Historical Society": "1340",
-    "1341: Archives": "1341",
-    "1342: Historical Site/House": "1342",
-    "1343: Historic Preservation Organization": "1343",
-    "1344: Public Library": "1344",
-    "1345: Academic Library": "1345",
-    "1346: Independent Research Library": "1346",
-    "1347: History Museum": "1347",
-    "1348: Natural History Museum": "1348",
-    "1349: Art Museum": "1349",
-    "1350: University Museum": "1350",
-    "1351: Anthropology/Archaeology Museum": "1351",
-    "1352: Science and Technology Museum": "1352",
-    "1353: General Museum": "1353",
-    "1354: Nature Center/Botanical Garden/Arboretum": "1354",
-    "1355: National Organization": "1355",
-    "1356: State Humanities Council": "1356",
-    "1357: Community-Level Organization": "1357",
-    "1358: Indian Tribal Organization": "1358",
-    "1359: Professional Association": "1359",
-    "1360: Arts Related Organizations": "1360",
-    "1361: Television/Station": "1361",
-    "1362: Radio Station": "1362",
-    "1363: Independent Production Company": "1363",
-    "1364: Press": "1364",
-    "2786: Museums": "2786",
-    "2787: Libraries": "2787",
-    "2819: Unknown": "2819",
-}
+# Note: Organization type values are passed through as-is (full "CODE: Description" format)
+# The XSD expects the full value, not just the code number
 
 PROJECT_DISCIPLINE_VALUES = [
     "Arts: General",  # 117
@@ -688,13 +644,10 @@ FORM_XML_TRANSFORM_RULES = {
         }
     },
     # 2. InstType - Institution/Organization Type
+    # Note: Organization type is passed through as-is (full "CODE: Description" format)
     "organization_type": {
         "xml_transform": {
             "target": "InstType",
-            "value_transform": {
-                "type": "map_values",
-                "params": {"mappings": ORGANIZATION_TYPE_CODE_MAP},
-            },
         }
     },
     # 3. ProjectFunding - Nested structure for funding amounts
