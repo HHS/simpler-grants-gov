@@ -101,6 +101,7 @@ const handleSave = async (
   }
 };
 
+// get and process the form schema, which is then used to determing proper typing for save form payload data
 async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   let formDetail = <FormDetail>{};
   try {
@@ -115,11 +116,11 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
   }
-  let formSchema = {};
   try {
-    formSchema = await processFormSchema(formDetail.form_json_schema);
+    const { formSchema } = await processFormSchema(formDetail.form_json_schema);
+    return formSchema;
   } catch (e) {
-    console.error("Error parsing JSON schema", e);
+    console.error(`Error parsing JSON schema for ${formId}`, e);
+    return undefined;
   }
-  return formSchema;
 }

@@ -11,6 +11,7 @@ export type BooleanFilter = { one_of: boolean[] };
 
 export interface SearchFilterRequestBody {
   opportunity_status?: OneOfFilter;
+  assistance_listing_number?: OneOfFilter;
   funding_instrument?: OneOfFilter;
   applicant_type?: OneOfFilter;
   agency?: OneOfFilter;
@@ -28,6 +29,7 @@ export type PaginationOrderBy =
   | "opportunity_number"
   | "opportunity_title"
   | "agency_name"
+  | "assistance_listing_number"
   | "top_level_agency_name"
   | "post_date"
   | "close_date";

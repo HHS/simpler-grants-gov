@@ -89,6 +89,7 @@ describe("convertSearchParamsToProperTypes", () => {
       fundingInstrument: new Set([fakeSearchParamDict.fundingInstrument]),
       eligibility: new Set([fakeSearchParamDict.eligibility]),
       agency: new Set([fakeSearchParamDict.agency]),
+      assistanceListingNumber: new Set(),
       category: new Set([fakeSearchParamDict.category]),
       closeDate: new Set(["7"]),
       costSharing: new Set(),

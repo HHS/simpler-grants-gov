@@ -3,13 +3,17 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
-from src.constants.lookup_constants import OrganizationInvitationStatus, SamGovImportType
+from src.constants.lookup_constants import (
+    OrganizationAuditEvent,
+    OrganizationInvitationStatus,
+    SamGovImportType,
+)
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.lookup_models import LkSamGovImportType
+from src.db.models.lookup_models import LkOrganizationAuditEvent, LkSamGovImportType
 from src.util.datetime_util import utcnow
 
 # Add conditional import for type checking to avoid circular imports
@@ -90,6 +94,13 @@ class Organization(ApiSchemaTable, TimestampMixin):
 
     applications: Mapped[list[Application]] = relationship(
         "Application", uselist=True, back_populates="organization", cascade="all, delete-orphan"
+    )
+
+    organization_audits: Mapped[list[OrganizationAudit]] = relationship(
+        "OrganizationAudit",
+        uselist=True,
+        back_populates="organization",
+        cascade="all, delete-orphan",
     )
 
     @property
@@ -194,3 +205,33 @@ class IgnoredLegacyOrganizationUser(ApiSchemaTable, TimestampMixin):
         ForeignKey("api.user.user_id"), index=True
     )
     user: Mapped[User] = relationship("User")
+
+
+class OrganizationAudit(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "organization_audit"
+
+    organization_audit_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), nullable=False, index=True
+    )
+    user: Mapped[User] = relationship("User", foreign_keys=[user_id])
+
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id), nullable=False, index=True
+    )
+    organization: Mapped[Organization] = relationship(Organization)
+
+    organization_audit_event: Mapped[OrganizationAuditEvent] = mapped_column(
+        "organization_audit_event_id",
+        LookupColumn(LkOrganizationAuditEvent),
+        ForeignKey(LkOrganizationAuditEvent.organization_audit_event_id),
+        nullable=False,
+    )
+    target_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey("api.user.user_id"), index=True
+    )
+    target_user: Mapped[User | None] = relationship("User", foreign_keys=[target_user_id])
+    audit_metadata: Mapped[dict | None] = mapped_column(JSONB)

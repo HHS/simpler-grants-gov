@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { fakeUserProfile } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { UserDropdown } from "src/components/user/UserControl";
@@ -36,9 +35,7 @@ jest.mock("src/services/auth/useUser", () => ({
 
 describe("UserDropdown", () => {
   it("does not display test application link if not for a test application user", async () => {
-    render(
-      <UserDropdown isApplicationTestUser={false} user={fakeUserProfile} />,
-    );
+    render(<UserDropdown isApplicationTestUser={false} />);
 
     const menuOpenButton = screen.getByTestId("navDropDownButton");
     await userEvent.click(menuOpenButton);
@@ -49,9 +46,7 @@ describe("UserDropdown", () => {
   });
 
   it("displays test application link if for a test application user", async () => {
-    render(
-      <UserDropdown isApplicationTestUser={true} user={fakeUserProfile} />,
-    );
+    render(<UserDropdown isApplicationTestUser={true} />);
 
     const menuOpenButton = screen.getByTestId("navDropDownButton");
     await userEvent.click(menuOpenButton);

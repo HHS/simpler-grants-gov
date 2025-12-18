@@ -414,6 +414,78 @@ FORM_XML_TRANSFORM_RULES = {
 - **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
 - **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`
 
+### Example: Supplementary Cover Sheet for NEH Grant Programs
+
+The Supplementary Cover Sheet for NEH Grant Programs form uses enum code mappings to transform human-readable display values to XSD-required numeric codes:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Supplementary Cover Sheet for NEH Grant Programs",
+        "form_name": "SupplementaryCoverSheetforNEHGrantPrograms_3_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0",
+            "SupplementaryCoverSheetforNEHGrantPrograms_3_0": (
+                "http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"
+            ),
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd",
+        "xml_structure": {
+            "root_element": "SupplementaryCoverSheetforNEHGrantPrograms_3_0",
+            "root_namespace_prefix": "SupplementaryCoverSheetforNEHGrantPrograms_3_0",
+            "root_attributes": {"FormVersion": "3.0"},
+        },
+    },
+    # Project Director's Major Field of Study - maps display value to numeric code
+    "major_field": {
+        "xml_transform": {
+            "target": "PDMajorField",
+            "value_transform": {
+                "type": "map_values",
+                "params": {"mappings": FIELD_OF_STUDY_CODE_MAP},
+            },
+        }
+    },
+    # Institution/Organization Type - passed through as-is (full "CODE: Description" format)
+    "organization_type": {
+        "xml_transform": {
+            "target": "InstType",
+        }
+    },
+    # Nested structure for project funding amounts
+    "funding_group": {
+        "xml_transform": {"target": "ProjectFunding", "type": "nested_object"},
+        "outright_funds": {"xml_transform": {"target": "OutrightFunds", "value_transform": {"type": "currency_format"}}},
+        "federal_match": {"xml_transform": {"target": "FederalMatch", "value_transform": {"type": "currency_format"}}},
+        # ... additional funding fields
+    },
+    # Nested structure for application information
+    "application_info": {
+        "xml_transform": {"target": "ApplicationInfo", "type": "nested_object"},
+        "additional_funding": {"xml_transform": {"target": "AdditionalFunding", "value_transform": {"type": "boolean_to_yes_no"}}},
+        # ... additional fields
+    },
+    # Project discipline fields - map display values like "History: U.S. History" to code "4"
+    "primary_project_discipline": {
+        "xml_transform": {
+            "target": "PrimaryPDNEH",
+            "value_transform": {"type": "map_values", "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP}},
+        }
+    },
+    # ... secondary and tertiary project disciplines
+}
+```
+
+**Supplementary Cover Sheet for NEH Grant Programs Field Mapping Notes:**
+- Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes for discipline fields
+- `major_field` (Project Director's Major Field): Maps ~150 discipline display values (e.g., "History: U.S. History") to numeric codes (e.g., "4")
+- `organization_type`: Passed through as-is (full "CODE: Description" format, e.g., "1330: University")
+- `primary_project_discipline`, `secondary_project_discipline`, `tertiary_project_discipline`: Same mapping as `major_field` but uses a subset of values (project disciplines only, not the additional "Other" field of study values)
+- `funding_group` → `ProjectFunding`: Nested structure with currency-formatted amounts
+- `application_info` → `ApplicationInfo`: Nested structure with boolean-to-yes/no conversion for `additional_funding`
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd
+
 ## Supported Forms
 
 The following forms currently have XML generation support:
@@ -431,6 +503,7 @@ The following forms currently have XML generation support:
 - **Budget Narrative Attachments (v1.2)**: Budget narrative file attachments
 - **Other Narrative Attachments (v1.2)**: Other narrative file attachments
 - **Project Abstract (v1.2)**: Project abstract file attachment
+- **Supplementary Cover Sheet for NEH Grant Programs (v3.0)**: NEH-specific supplementary cover sheet
 
 ## Adding New Forms
 
