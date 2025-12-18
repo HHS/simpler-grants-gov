@@ -1,4 +1,7 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { useMessages, useTranslations } from "next-intl";
+import Link from "next/link";
 import { Accordion } from "@trussworks/react-uswds";
 
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
@@ -11,6 +14,16 @@ export default function RoadmapMilestones() {
 
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
+      <p>
+        <Link
+          target="_blank"
+          className="usa-link--external"
+          href={ExternalRoutes.WIKI_RELEASE_NOTES}
+        >
+          {t("releaseNotesLink")}
+        </Link>
+      </p>
+
       {/* Early 2025 Section - Always visible */}
       <h3 className="margin-bottom-4">{t("contentTitle")}</h3>
       {/* Render Early 2025 content items */}
