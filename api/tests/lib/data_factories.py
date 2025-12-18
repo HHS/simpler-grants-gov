@@ -4,7 +4,6 @@ To help simplify setup when we need many factories repeatedly
 with only a few alterations.
 """
 
-from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.user_models import Role, User
@@ -123,9 +122,7 @@ def setup_application_for_form_validation(
     return application_form
 
 
-def setup_cert_user(
-    agency: Agency, privileges: list
-) -> tuple[User, Role, SOAPClientCertificate]:
+def setup_cert_user(agency: Agency, privileges: list) -> tuple[User, Role, SOAPClientCertificate]:
     legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
     agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
     role = RoleFactory.create(privileges=privileges, is_agency_role=True)
