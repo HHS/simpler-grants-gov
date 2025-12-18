@@ -3,6 +3,7 @@ import "server-only";
 import { UnauthorizedError } from "src/errors";
 import {
   createRequestUrl,
+  removeRedundantSlashes,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
@@ -159,5 +160,23 @@ describe("getDefaultHeaders", () => {
     expect(headers["X-AUTH"]).toBeUndefined();
     expect(headers["X-API-KEY"]).toBeUndefined();
     expect(headers["Content-Type"]).toEqual("application/json");
+  });
+});
+
+describe("removeRedundantSlashes", () => {
+  it("removes leading slashes", () => {
+    expect(removeRedundantSlashes("/something/something/something")).toEqual(
+      "something/something/something",
+    );
+  });
+  it("retains protocol slashes", () => {
+    expect(removeRedundantSlashes("http://anyhost.com/path")).toEqual(
+      "http://anyhost.com/path",
+    );
+  });
+  it("removes double path slashes", () => {
+    expect(
+      removeRedundantSlashes("http://toomany.slashes//path/subpath"),
+    ).toEqual("http://toomany.slashes/path/subpath");
   });
 });
