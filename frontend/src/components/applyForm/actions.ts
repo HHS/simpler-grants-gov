@@ -121,6 +121,6 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
     return formSchema;
   } catch (e) {
     console.error("Error parsing JSON schema", e);
+    return undefined;
   }
-  return {};
 }
