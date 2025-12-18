@@ -199,6 +199,7 @@ def test_sort_order_string_returns_422(client):
         ],
     )
 
+
 def test_pagination_invalid_422(client):
     # Sending an invalid pagination object
     payload = {"pagination": 5}
@@ -211,6 +212,7 @@ def test_pagination_invalid_422(client):
             ("pagination", "invalid"),
         ],
     )
+
 
 def test_sort_order_invalid_json_returns_422(client):
     # Sending broken JSON
