@@ -261,7 +261,9 @@ export const messages = {
     submissionSuccess: {
       title: "Your application has been submitted",
       description:
-        "The awarding agency will review and process it independently of Grants.gov. Once they receive your application, they will manage all further updates. Grants.gov won't have access to the status of your award.",
+        "<p>The awarding agency will review and process it independently of Grants.gov. Grants.gov won't have access to the status of your award.</p><p>The award agency will contact your EBiz point of contact or your Authorized Organization Representatives (AOR) with all further updates. Please review the application instructions for information on this agency's application review process. You can return to this submitted application at any time by <linkMyApplications>visiting your applications list</linkMyApplications>.</p><p>Grants.gov does support edits to submitted applications. Please submit a new application if you would like to make changes to submitted information.</p>",
+      contact:
+        "For technical support or feedback, email <email-link>simpler@grants.gov</email-link> and include your Application ID.",
     },
     information: {
       applicant: "Applicant",
