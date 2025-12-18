@@ -360,6 +360,29 @@ export const messages = {
         deleting: "Deleting...",
       },
     },
+    historyTable: {
+      applicationHistory: "Application History",
+      timestamp: "Timestamp",
+      activity: "Activity",
+      performedBy: "Performed By",
+      error:
+        "We have encountered an error loading your application activity history. Please try again later.",
+      activities: {
+        application_created: "Application created",
+        application_name_changed: "Application name changed",
+        attachment_added: "Attachment added: ",
+        attachment_deleted: "Attachment deleted: ",
+        attachment_updated: "Attachment updated: ",
+        application_submitted: "Application submitted",
+        form_updated: "Form updated: ",
+        user_added: "User added: ",
+        user_updated: "User updated: ",
+        user_removed: "User removed: ",
+        organization_added: "Organization Added",
+        application_submit_rejected: "Application submission failed",
+        submission_created: "Application submission created",
+      },
+    },
     applyForm: {
       errorTitle: "This form could not be saved",
       errorMessage:
@@ -969,6 +992,7 @@ export const messages = {
       milestones: {
         title: "What we've delivered",
         contentTitle: "Early 2025",
+        releaseNotesLink: "Read the latest release notes on our public wiki",
         contentItems: [
           {
             title: "Simpler application workflow prototype",
