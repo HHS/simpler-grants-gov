@@ -120,7 +120,7 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
     const { formSchema } = await processFormSchema(formDetail.form_json_schema);
     return formSchema;
   } catch (e) {
-    console.error("Error parsing JSON schema", e);
+    console.error(`Error parsing JSON schema for ${formId}`, e);
     return undefined;
   }
 }

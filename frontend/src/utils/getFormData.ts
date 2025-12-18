@@ -93,7 +93,9 @@ export default async function getFormData({
     }
 
     if (applicationFormData.application_form_id !== appFormId) {
-      console.error(`Application form ids do not match`);
+      console.error(
+        `Application form ids do not match: ${applicationFormData.application_form_id} & ${appFormId}`,
+      );
       return { error: "TopLevelError" };
     }
     formValidationWarnings =
@@ -120,7 +122,7 @@ export default async function getFormData({
   const schemaErrors = validateUiSchema(formUiSchema);
   if (schemaErrors) {
     console.error(
-      "Error validating form ui schema",
+      `Error validating form ui schema for form id: ${formId}`,
       formUiSchema,
       schemaErrors,
     );
@@ -142,7 +144,7 @@ export default async function getFormData({
       },
     };
   } catch (e) {
-    console.error("Error parsing JSON schema", e);
+    console.error(`Error parsing JSON schema for form id: ${formId}`, e);
     return { error: "TopLevelError" };
   }
 }
