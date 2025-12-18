@@ -83,7 +83,7 @@ def org_invitation_response(
             db_session=db_session,
             organization=invitation.organization,
             user=user,
-            audit_event=OrganizationAuditEvent.USER_JOINED,
+            audit_event=OrganizationAuditEvent.USER_ADDED,
         )
     if status == OrganizationInvitationStatus.REJECTED:
         # Update response time

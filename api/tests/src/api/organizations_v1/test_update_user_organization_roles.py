@@ -82,7 +82,7 @@ class TestUpdateUserOrganizationRoles:
         assert org.organization_audits[0].target_user_id == org_user.user_id
         assert (
             org.organization_audits[0].organization_audit_event
-            == OrganizationAuditEvent.USER_ROLE_UPDATED
+            == OrganizationAuditEvent.USER_UPDATED
         )
 
     def test_update_user_overwrites_existing_roles(
@@ -127,7 +127,7 @@ class TestUpdateUserOrganizationRoles:
         assert org.organization_audits[0].target_user_id == org_user.user_id
         assert (
             org.organization_audits[0].organization_audit_event
-            == OrganizationAuditEvent.USER_ROLE_UPDATED
+            == OrganizationAuditEvent.USER_UPDATED
         )
 
     def test_update_user_organization_roles_404_organization(

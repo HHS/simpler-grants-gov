@@ -66,7 +66,7 @@ def test_org_invitation_response_accepted(
     org = inv.organization
     assert len(org.organization_audits) == 1
     assert org.organization_audits[0].user.user_id == user.user_id
-    assert org.organization_audits[0].organization_audit_event == OrganizationAuditEvent.USER_JOINED
+    assert org.organization_audits[0].organization_audit_event == OrganizationAuditEvent.USER_ADDED
 
 
 def test_org_invitation_response_rejected(

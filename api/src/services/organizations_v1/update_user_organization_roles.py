@@ -84,7 +84,7 @@ def update_user_organization_roles(
         db_session=db_session,
         organization=organization,
         user=user,
-        audit_event=OrganizationAuditEvent.USER_ROLE_UPDATED,
+        audit_event=OrganizationAuditEvent.USER_UPDATED,
         target_user=org_user.user,
     )
 
