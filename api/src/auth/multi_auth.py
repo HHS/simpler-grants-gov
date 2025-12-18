@@ -133,3 +133,20 @@ jwt_or_api_user_key_security_schemes = _get_security_requirement(
         api_user_key_auth.security_scheme_name,
     ]
 )
+
+
+# Define the multi auth that supports both user-connected auth methods:
+# * User JWT auth (X-SGG-Token header)
+# * User API Key auth (X-API-Key header)
+#
+# Both of these auth methods connect to a user, so the implementation is similar.
+# This is useful for application endpoints that need to support both auth types.
+jwt_or_user_api_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_user_key_auth)
+
+# List of security scheme names for JWT or User API Key multi-auth
+jwt_or_user_api_key_security_schemes = _get_security_requirement(
+    [
+        api_jwt_auth.security_scheme_name,
+        api_user_key_auth.security_scheme_name,
+    ]
+)
