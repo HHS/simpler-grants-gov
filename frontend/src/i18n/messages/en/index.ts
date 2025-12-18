@@ -2,16 +2,16 @@ export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",
     pageDescription:
-      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+      "Simpler.Grants.gov is where we are building new features for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
     githubLink: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "Test out our experimental features",
+        title: "New Features, simpler experience",
         canDoHeader: "Tell us what's working (and what's not)",
         canDoSubHeader: "What you can do now",
         canDoParagraph:
           "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
-        tryLink: "Try the new simpler search",
+        tryLink: "Use the new simpler search",
         cantDoHeader: "What you can't do quite yet",
         cantDoParagraph:
           "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
