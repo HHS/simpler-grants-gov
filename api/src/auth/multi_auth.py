@@ -93,7 +93,7 @@ api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
 # We define the JWT auth first as the frontend will pass us a users JWT
 # and the frontend's API key for all user-based requests in order to validate
 # with our API gateway that handles rate limiting.
-jwt_or_api_user_key_multi_auth_simpler = MultiHttpTokenAuthSimpler(api_jwt_auth, api_user_key_auth)
+jwt_or_api_user_key_multi_auth = MultiHttpTokenAuthSimpler(api_jwt_auth, api_user_key_auth)
 
 
 # Helper function to format security schemes for OpenAPI
@@ -127,7 +127,7 @@ api_key_multi_auth_security_schemes = _get_security_requirement(
 )
 
 # List of security scheme names for JWT or API User Key multi-auth
-jwt_or_api_user_key_simpler_security_schemes = _get_security_requirement(
+jwt_or_api_user_key_security_schemes = _get_security_requirement(
     [
         api_jwt_auth.security_scheme_name,
         api_user_key_auth.security_scheme_name,
