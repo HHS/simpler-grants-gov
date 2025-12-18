@@ -293,6 +293,6 @@ class UserType(StrEnum):
 
 
 class OrganizationAuditEvent(StrEnum):
-    USER_JOINED = "user_joined"
-    USER_ROLE_UPDATED = "user_role_updated"
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"

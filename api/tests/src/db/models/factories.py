@@ -3149,16 +3149,16 @@ class OrganizationAuditFactory(BaseFactory):
     organization = factory.SubFactory(OrganizationFactory)
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
 
-    organization_audit_event = OrganizationAuditEvent.USER_JOINED
+    organization_audit_event = OrganizationAuditEvent.USER_ADDED
 
     class Params:
         is_user_added = factory.Trait(
-            organization_audit_event=OrganizationAuditEvent.USER_JOINED,
+            organization_audit_event=OrganizationAuditEvent.USER_ADDED,
             target_user=factory.SubFactory(UserFactory, with_profile=True),
             target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
         )
         is_user_role_updated = factory.Trait(
-            organization_audit_event=OrganizationAuditEvent.USER_ROLE_UPDATED,
+            organization_audit_event=OrganizationAuditEvent.USER_UPDATED,
             target_user=factory.SubFactory(UserFactory, with_profile=True),
             target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
         )

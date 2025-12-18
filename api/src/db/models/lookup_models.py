@@ -267,8 +267,8 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
 
 ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupConfig(
     [
-        LookupStr(OrganizationAuditEvent.USER_JOINED, 1),
-        LookupStr(OrganizationAuditEvent.USER_ROLE_UPDATED, 2),
+        LookupStr(OrganizationAuditEvent.USER_ADDED, 1),
+        LookupStr(OrganizationAuditEvent.USER_UPDATED, 2),
         LookupStr(OrganizationAuditEvent.USER_REMOVED, 3),
     ]
 )
