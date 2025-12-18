@@ -1,7 +1,6 @@
-import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
+import { RJSFSchema } from "@rjsf/utils";
 
 import { handleFormAction } from "src/components/applyForm/actions";
-import { shapeFormData } from "src/components/applyForm/utils";
 
 const mockGetSession = jest.fn();
 const mockProcessFormSchema = jest.fn();
@@ -9,16 +8,18 @@ const mockShapeFormData = jest.fn();
 const mockGetFormDetails = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
-  getSession: () => mockGetSession(),
+  getSession: () => mockGetSession() as unknown,
 }));
 
 jest.mock("src/components/applyForm/utils", () => ({
-  processFormSchema: (schema) => mockProcessFormSchema(schema),
-  shapeFormData: (data, schema) => mockShapeFormData(data, schema),
+  processFormSchema: (schema: RJSFSchema) =>
+    mockProcessFormSchema(schema) as unknown,
+  shapeFormData: (data: FormData, schema: RJSFSchema) =>
+    mockShapeFormData(data, schema) as unknown,
 }));
 
 jest.mock("src/services/fetch/fetchers/formsFetcher", () => ({
-  getFormDetails: (id) => mockGetFormDetails(id),
+  getFormDetails: (id: string) => mockGetFormDetails(id) as unknown,
 }));
 
 const genericPayload = {
@@ -32,7 +33,7 @@ const genericPayload = {
 describe("handleFormAction", () => {
   beforeEach(() => {
     mockGetSession.mockResolvedValue({ token: "a token" });
-    mockProcessFormSchema.mockImplementation((schema) => {
+    mockProcessFormSchema.mockImplementation((schema: RJSFSchema) => {
       return Promise.resolve({
         formSchema: schema,
       });
