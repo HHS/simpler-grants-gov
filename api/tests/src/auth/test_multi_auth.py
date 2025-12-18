@@ -9,7 +9,7 @@ from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.auth.multi_auth import (
     AuthType,
     jwt_key_or_internal_multi_auth,
-    jwt_or_api_user_key_multi_auth,
+    jwt_or_api_user_key_multi_auth_simpler,
     jwt_or_key_multi_auth,
 )
 from src.util import datetime_util
@@ -55,9 +55,9 @@ def mini_app(monkeypatch_module):
         }
 
     @mini_app.get("/dummy_auth_endpoint_simpler")
-    @mini_app.auth_required(jwt_or_api_user_key_multi_auth)
+    @mini_app.auth_required(jwt_or_api_user_key_multi_auth_simpler)
     def dummy_endpoint_simpler():
-        user = jwt_or_api_user_key_multi_auth.get_user()
+        user = jwt_or_api_user_key_multi_auth_simpler.get_user()
 
         return {
             "message": "ok",
@@ -194,7 +194,7 @@ def test_internal_multi_auth_precedence(
 
 
 def test_multi_auth_simpler_with_jwt(mini_app, enable_factory_create, db_session):
-    """Test that the jwt_or_api_user_key_multi_auth works with JWT tokens and returns the actual user"""
+    """Test that the jwt_or_api_user_key_multi_auth_simpler works with JWT tokens and returns the actual user"""
     user = UserFactory.create()
     token, _ = create_jwt_for_user(user, db_session)
     db_session.commit()
@@ -208,7 +208,7 @@ def test_multi_auth_simpler_with_jwt(mini_app, enable_factory_create, db_session
 
 
 def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, db_session):
-    """Test that the jwt_or_api_user_key_multi_auth works with api user keys and returns the actual user"""
+    """Test that the jwt_or_api_user_key_multi_auth_simpler works with api user keys and returns the actual user"""
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(user=user, is_active=True)
     db_session.commit()
@@ -222,7 +222,7 @@ def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, d
 
 
 def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_session):
-    """Test that JWT auth takes precedence over api user key auth when both are provided for jwt_or_api_user_key_multi_auth"""
+    """Test that JWT auth takes precedence over api user key auth when both are provided for jwt_or_api_user_key_multi_auth_simpler"""
     # Create two different users
     jwt_user = UserFactory.create()
     api_user_key_user = UserFactory.create()
@@ -245,13 +245,13 @@ def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_sessi
 
 
 def test_multi_auth_simpler_no_auth(mini_app):
-    """Test that authentication fails when no auth is provided for jwt_or_api_user_key_multi_auth"""
+    """Test that authentication fails when no auth is provided for jwt_or_api_user_key_multi_auth_simpler"""
     resp = mini_app.test_client().get("/dummy_auth_endpoint_simpler", headers={})
     assert resp.status_code == 401
 
 
 def test_multi_auth_simpler_invalid_auth(mini_app):
-    """Test that authentication fails with invalid credentials for jwt_or_api_user_key_multi_auth"""
+    """Test that authentication fails with invalid credentials for jwt_or_api_user_key_multi_auth_simpler"""
     resp = mini_app.test_client().get(
         "/dummy_auth_endpoint_simpler", headers={"X-SGG-Token": "invalid-token"}
     )
