@@ -49,7 +49,6 @@ export function createRequestUrl(
   subPath = "",
   body?: JSONRequestBody,
 ) {
-  // Remove leading slash
   const cleanedPaths = compact([basePath, version, namespace, subPath]);
   let url = [...cleanedPaths].map(removeRedundantSlashes).join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
@@ -68,10 +67,10 @@ export function createRequestUrl(
 }
 
 /**
- * Remove leading slash and double slashes (in case a segment such a version is not provided)
+ * Remove leading slash and (non protocol related) double slashes (in case a segment such a version is not provided)
  */
-function removeRedundantSlashes(path: string) {
-  return path.replace(/^\//, "").replace(/\/\//g, "/");
+export function removeRedundantSlashes(path: string) {
+  return path.replace(/^\//, "").replace(/(?<!:)\/\//g, "/");
 }
 
 /**
