@@ -90,6 +90,9 @@ api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
 # Note that the order defined matters - earlier ones will take precedence in
 # the event a user provides us with multiple auth approaches at once, only the first
 # relevant one will be used
+# We define the JWT auth first as the frontend will pass us a users JWT
+# and the frontend's API key for all user-based requests in order to validate
+# with our API gateway that handles rate limiting.
 jwt_or_api_user_key_multi_auth = MultiHttpTokenAuthSimpler(api_jwt_auth, api_user_key_auth)
 
 

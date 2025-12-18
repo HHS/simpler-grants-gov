@@ -62,7 +62,6 @@ def mini_app(monkeypatch_module):
         return {
             "message": "ok",
             "user_id": getattr(user, "user_id", None),
-            "username": getattr(user, "username", None),
         }
 
     # To avoid re-initializing logging everytime we
@@ -206,7 +205,6 @@ def test_multi_auth_simpler_with_jwt(mini_app, enable_factory_create, db_session
     assert resp.status_code == 200
     assert resp.json["message"] == "ok"
     assert resp.json["user_id"] == str(user.user_id)
-    assert resp.json["username"] is None
 
 
 def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, db_session):
@@ -221,7 +219,6 @@ def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, d
     assert resp.status_code == 200
     assert resp.json["message"] == "ok"
     assert resp.json["user_id"] == str(user.user_id)
-    assert resp.json["username"] is None
 
 
 def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_session):
@@ -245,7 +242,6 @@ def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_sessi
     assert resp.status_code == 200
     assert resp.json["message"] == "ok"
     assert resp.json["user_id"] == str(jwt_user.user_id)
-    assert resp.json["username"] is None
 
 
 def test_multi_auth_simpler_no_auth(mini_app):
