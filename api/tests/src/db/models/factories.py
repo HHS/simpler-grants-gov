@@ -48,6 +48,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    OrganizationAuditEvent,
     Privilege,
     RoleType,
     SamGovExtractType,
@@ -3134,6 +3135,38 @@ class IgnoredLegacyOrganizationUserFactory(BaseFactory):
     email = factory.Faker("email")
     user = factory.SubFactory(UserFactory)
     ignored_by_user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+
+class OrganizationAuditFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationAudit
+
+    organization_audit_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    organization_audit_event = OrganizationAuditEvent.USER_ADDED
+
+    class Params:
+        is_user_added = factory.Trait(
+            organization_audit_event=OrganizationAuditEvent.USER_ADDED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
+        is_user_role_updated = factory.Trait(
+            organization_audit_event=OrganizationAuditEvent.USER_UPDATED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
+        is_user_removed = factory.Trait(
+            organization_audit_event=OrganizationAuditEvent.USER_REMOVED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
 
 
 class SuppressedEmailFactory(BaseFactory):
