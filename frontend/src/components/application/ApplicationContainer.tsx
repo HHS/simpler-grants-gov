@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { Status } from "src/types/applicationResponseTypes";
 import {
   Alert,
   SummaryBox,
@@ -98,8 +99,8 @@ const ApplicationContainer = ({
   return (
     <>
       {(success ||
-        applicationDetails.application_status === "submitted" ||
-        applicationDetails.application_status === "completed") && (
+        applicationDetails.application_status === Status.SUBMITTED ||
+        applicationDetails.application_status === Status.ACCEPTED) && (
         <SummaryBox>
           <SummaryBoxHeading headingLevel="h3">
             {t("submissionSuccess.title")}
