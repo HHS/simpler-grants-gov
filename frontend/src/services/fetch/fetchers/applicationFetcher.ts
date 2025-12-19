@@ -1,5 +1,3 @@
-import { environment } from "src/constants/environments";
-import { createRequestUrl } from "src/services/fetch/fetcherHelpers";
 import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
 import {
   ApplicationAttachmentUploadResponse,
@@ -53,6 +51,8 @@ export const handleSubmitApplication = async (
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/submit`,
     additionalHeaders: ssgToken,
+    // want to allow responses with failed validations through so we can properly handle displaying validation errors
+    allowedErrorStatuses: [422],
   });
 
   return (await response.json()) as ApplicationSubmitApiResponse;
@@ -234,22 +234,15 @@ export const uploadAttachment = async (
   file: FormData,
 ): Promise<ApplicationAttachmentUploadResponse> => {
   const additionalHeaders = {
-    Accept: "application/json",
     "X-SGG-Token": token,
+    Accept: "application/json",
   };
 
-  const url = createRequestUrl(
-    "POST",
-    `${environment.API_URL}`,
-    "alpha",
-    "applications",
-    `${applicationId}/attachments`,
-  );
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: additionalHeaders,
+  const response = await fetchApplicationWithMethod("POST")({
+    subPath: `${applicationId}/attachments`,
+    additionalHeaders,
     body: file,
+    addContentType: false,
   });
 
   return (await response.json()) as ApplicationAttachmentUploadResponse;

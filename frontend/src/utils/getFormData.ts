@@ -33,6 +33,13 @@ type FormDataResult =
       };
     };
 
+/*
+  fetches application form data
+  validates ui schema
+  formats / processes form schema
+  returns all relevant data
+*/
+
 export default async function getFormData({
   applicationId,
   appFormId,
@@ -86,7 +93,9 @@ export default async function getFormData({
     }
 
     if (applicationFormData.application_form_id !== appFormId) {
-      console.error(`Application form ids do not match`);
+      console.error(
+        `Application form ids do not match: ${applicationFormData.application_form_id} & ${appFormId}`,
+      );
       return { error: "TopLevelError" };
     }
     formValidationWarnings =
@@ -113,30 +122,29 @@ export default async function getFormData({
   const schemaErrors = validateUiSchema(formUiSchema);
   if (schemaErrors) {
     console.error(
-      "Error validating form ui schema",
+      `Error validating form ui schema for form id: ${formId}`,
       formUiSchema,
       schemaErrors,
     );
     return { error: "TopLevelError" };
   }
 
-  let formSchema = {};
   try {
-    formSchema = await processFormSchema(form_json_schema);
+    const result = await processFormSchema(form_json_schema);
+    return {
+      data: {
+        applicationAttachments: applicationFormData.application_attachments,
+        applicationResponse,
+        applicationName: applicationFormData.application_name,
+        formId,
+        formName,
+        formSchema: result.formSchema,
+        formUiSchema,
+        formValidationWarnings,
+      },
+    };
   } catch (e) {
-    console.error("Error parsing JSON schema", e);
+    console.error(`Error parsing JSON schema for form id: ${formId}`, e);
     return { error: "TopLevelError" };
   }
-  return {
-    data: {
-      applicationAttachments: applicationFormData.application_attachments,
-      applicationResponse,
-      applicationName: applicationFormData.application_name,
-      formId,
-      formName,
-      formSchema,
-      formUiSchema,
-      formValidationWarnings,
-    },
-  };
 }

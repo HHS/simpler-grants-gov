@@ -1,27 +1,34 @@
-import { getSession } from "src/services/auth/session";
-import { getApplicationFormDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import getFormData from "src/utils/getFormData";
 
+const mockGetSession = jest.fn();
+const mockGetApplicationFormDetails = jest.fn();
+const mockProcessFormSchema = jest.fn();
+const mockValidateUISchema = jest.fn();
+
 jest.mock("src/services/auth/session", () => ({
-  getSession: jest.fn(),
+  getSession: () => mockGetSession() as unknown,
 }));
 jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
-  getApplicationFormDetails: jest.fn(),
+  getApplicationFormDetails: () => mockGetApplicationFormDetails() as unknown,
 }));
 jest.mock("src/components/applyForm/utils", () => ({
-  processFormSchema: jest.fn(() => ({})),
+  processFormSchema: () => mockProcessFormSchema() as unknown,
 }));
 jest.mock("src/components/applyForm/validate", () => ({
-  validateUiSchema: jest.fn(() => null),
+  validateUiSchema: () => mockValidateUISchema() as unknown,
 }));
 
 describe("getFormData", () => {
   beforeEach(() => {
+    mockProcessFormSchema.mockReturnValue({});
+    mockValidateUISchema.mockReturnValue(null);
+  });
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
   it("returns UnauthorizedError if no session and no internalToken", async () => {
-    (getSession as jest.Mock).mockResolvedValue(null);
+    mockGetSession.mockResolvedValue(null);
     const result = await getFormData({
       applicationId: "app1",
       appFormId: "form1",
@@ -30,8 +37,8 @@ describe("getFormData", () => {
   });
 
   it("returns TopLevelError if API response status is not 200", async () => {
-    (getSession as jest.Mock).mockResolvedValue({ token: "session-token" });
-    (getApplicationFormDetails as jest.Mock).mockResolvedValue({
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockGetApplicationFormDetails.mockResolvedValue({
       status_code: 500,
       data: {},
     });
@@ -43,8 +50,8 @@ describe("getFormData", () => {
   });
 
   it("returns TopLevelError if no form data", async () => {
-    (getSession as jest.Mock).mockResolvedValue({ token: "session-token" });
-    (getApplicationFormDetails as jest.Mock).mockResolvedValue({
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockGetApplicationFormDetails.mockResolvedValue({
       status_code: 200,
       data: {},
     });
@@ -56,8 +63,8 @@ describe("getFormData", () => {
   });
 
   it("returns TopLevelError if application_form_id does not match", async () => {
-    (getSession as jest.Mock).mockResolvedValue({ token: "session-token" });
-    (getApplicationFormDetails as jest.Mock).mockResolvedValue({
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockGetApplicationFormDetails.mockResolvedValue({
       status_code: 200,
       data: {
         form: {
@@ -77,8 +84,9 @@ describe("getFormData", () => {
   });
 
   it("returns data on success", async () => {
-    (getSession as jest.Mock).mockResolvedValue({ token: "session-token" });
-    (getApplicationFormDetails as jest.Mock).mockResolvedValue({
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockProcessFormSchema.mockResolvedValue({ formSchema: {} });
+    mockGetApplicationFormDetails.mockResolvedValue({
       status_code: 200,
       data: {
         form: {

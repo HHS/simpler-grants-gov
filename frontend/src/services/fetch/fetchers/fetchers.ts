@@ -36,17 +36,25 @@ export function requesterForEndpoint({
   basePath,
   version,
   namespace,
-  allowedErrorStatuses = [],
 }: EndpointConfig) {
   return async function (
     options: {
       subPath?: string;
-      body?: JSONRequestBody;
+      body?: JSONRequestBody | FormData;
       additionalHeaders?: HeadersDict;
       nextOptions?: NextFetchRequestConfig;
+      allowedErrorStatuses?: number[];
+      addContentType?: boolean;
     } = {},
   ): Promise<Response> {
-    const { additionalHeaders = {}, body, subPath, nextOptions } = options;
+    const {
+      additionalHeaders = {},
+      body,
+      subPath,
+      nextOptions,
+      allowedErrorStatuses = [],
+      addContentType = true,
+    } = options;
     const url = createRequestUrl(
       method,
       basePath,
@@ -56,7 +64,7 @@ export function requesterForEndpoint({
       body,
     );
     const headers: HeadersDict = {
-      ...getDefaultHeaders(),
+      ...getDefaultHeaders(addContentType),
       ...additionalHeaders,
     };
 

@@ -17,6 +17,7 @@ const fakeRequestForSearchParams = (searchParams: string) => {
 const fakeConvertedParams = {
   actionType: "initialLoad",
   agency: new Set(["EPA"]),
+  assistanceListingNumber: new Set(),
   category: new Set(),
   eligibility: new Set(),
   fundingInstrument: new Set(),
