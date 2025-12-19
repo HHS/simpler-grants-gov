@@ -92,7 +92,7 @@ def remove_user_from_organization(
     # Perform the deletion - cascade delete will handle OrganizationUserRole records
     db_session.delete(org_user)
 
-    # Add audit event when a user role is updated
+    # Add audit event when a user role is removed
     add_audit_event(
         db_session=db_session,
         organization=organization,
