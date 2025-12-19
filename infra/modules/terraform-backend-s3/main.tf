@@ -8,12 +8,20 @@ locals {
   tf_locks_table_name  = "${var.name}-state-locks"
 }
 
-# Create the dynamodb table required for state locking.
+# DynamoDB table for state locking (deprecated - use S3 native locking instead)
+#
+# As of Terraform 1.7+, S3 native locking is available via use_lockfile = true in backend config.
+# This is now the recommended approach. See: https://developer.hashicorp.com/terraform/language/backend/s3
+#
+# The DynamoDB resources below are kept for backwards compatibility but should not be used for new deployments.
+# Set enable_dynamodb_lock_table = true only if you need to maintain the existing DynamoDB table.
 
 # Options for encryption are an AWS owned key, which is not unique to your account; AWS managed; or customer managed. The latter two options are more secure, and customer managed gives
 # control over the key. This allows for ability to restrict access by key as well as policies attached to roles or users.
 # https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html
 resource "aws_kms_key" "tf_backend" {
+  count = var.enable_dynamodb_lock_table ? 1 : 0
+
   description = "KMS key for DynamoDB table ${local.tf_locks_table_name}"
   # The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key.
   deletion_window_in_days = "10"
@@ -23,6 +31,8 @@ resource "aws_kms_key" "tf_backend" {
 }
 
 resource "aws_dynamodb_table" "terraform_lock" {
+  count = var.enable_dynamodb_lock_table ? 1 : 0
+
   name                        = local.tf_locks_table_name
   hash_key                    = "LockID"
   billing_mode                = "PAY_PER_REQUEST"
@@ -35,7 +45,7 @@ resource "aws_dynamodb_table" "terraform_lock" {
 
   server_side_encryption {
     enabled     = true
-    kms_key_arn = aws_kms_key.tf_backend.arn
+    kms_key_arn = aws_kms_key.tf_backend[0].arn
   }
 
   point_in_time_recovery {
