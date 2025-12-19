@@ -22,6 +22,17 @@ GRANTS_APPLICATION_STATUSES = {
     ApplicationStatus.SUBMITTED: "Received",
     ApplicationStatus.ACCEPTED: "Validated",
 }
+# TODO - this will require new statuses, we will need to adjust this later (2025-12-18)
+STATUS_TRANSFORM = {
+    "Receiving": None,
+    "Received": None,
+    "Processing": ApplicationStatus.SUBMITTED,
+    "Validated": ApplicationStatus.ACCEPTED,
+    "Rejected with Errors": None,
+    "Download Preparation": None,
+    "Received by Agency": ApplicationStatus.ACCEPTED,
+    "Agency Tracking Number Assigned": ApplicationStatus.ACCEPTED,
+}
 
 
 def transform_submission(submission: ApplicationSubmission) -> dict[str, str | datetime | None]:
@@ -109,39 +120,45 @@ def get_submission_list_expanded_response(
             status = submission_filters.get("Status")
             submission_titles = submission_filters.get("SubmissionTitle")
 
-    STATUS_TRANSFORM = {
-        "Receiving": None,
-        "Received": None,
-        "Processing": ApplicationStatus.SUBMITTED,
-        "Validated": ApplicationStatus.ACCEPTED,
-        "Rejected with Errors": None,
-        "Download Preparation": None,
-        "Received by Agency": ApplicationStatus.ACCEPTED,
-        "Agency Tracking Number Assigned": ApplicationStatus.ACCEPTED,
-    }
-    # Getting only one status from a potential list of statuses because multiple statuses on a filter don't make sense'
     if isinstance(status, list) and len(status) > 0:
-        simpler_status = STATUS_TRANSFORM.get(status[0]) if isinstance(status[0], str) else None
+        simpler_status = [
+            Application.application_status == STATUS_TRANSFORM.get(str(s)) for s in status
+        ]
     else:
         simpler_status = None
 
     certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
     if certificate.agency is not None:
         stmt = stmt.where(Opportunity.agency_code == certificate.agency.agency_code)
+    # Attempts to apply AND so if multiple statuses are entered no application submissions are returned
+    if simpler_status:
+        stmt = stmt.where(*simpler_status)
+    # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
     if grants_gov_tracking_numbers:
         stmt = stmt.where(
-            ApplicationSubmission.legacy_tracking_number.in_(grants_gov_tracking_numbers)
+            [
+                ApplicationSubmission.legacy_tracking_number == tracking_number
+                for tracking_number in grants_gov_tracking_numbers
+            ][-1]
         )
     if cfda_numbers:
-        stmt = stmt.where(OpportunityAssistanceListing.assistance_listing_number.in_(cfda_numbers))
+        stmt = stmt.where(
+            [
+                OpportunityAssistanceListing.assistance_listing_number == cfda
+                for cfda in cfda_numbers
+            ][-1]
+        )
     if funding_opportunity_numbers:
-        stmt = stmt.where(Opportunity.opportunity_number.in_(funding_opportunity_numbers))
+        stmt = stmt.where(
+            [
+                Opportunity.opportunity_number == opportunity_number
+                for opportunity_number in funding_opportunity_numbers
+            ][-1]
+        )
     if opportunity_ids:
         stmt = stmt.where(
-            Opportunity.legacy_opportunity_id.in_([int(oid) for oid in opportunity_ids if oid])
+            [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][-1]
         )
-    if simpler_status:
-        stmt = stmt.where(Application.application_status == simpler_status)
 
     # Unsupported but logged
     if competition_ids:

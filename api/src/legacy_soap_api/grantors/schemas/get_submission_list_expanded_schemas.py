@@ -101,7 +101,6 @@ class ConsolidatedFilter(BaseModel):
             consolidated = update_consolidated(
                 consolidated, item["FilterType"], item["FilterValue"]
             )
-
         return {"filters": consolidated}
 
 

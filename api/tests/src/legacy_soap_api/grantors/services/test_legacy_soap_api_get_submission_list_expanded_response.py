@@ -70,11 +70,11 @@ def setup_application_submission(
 class TestLegacySoapApiGrantorGetSubmissionListExpanded:
     def test_get_submission_list_expanded_response(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
-        submission = setup_application_submission(agency)
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        sam_gov_entity = application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         db_session.commit()
         db_session.refresh(application.competition)
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
@@ -125,7 +125,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "SubmissionMethod": "web",
                             "DelinquentFederalDebt": "Yes",
                             "ActiveExclusions": "Yes",
-                            "UEI": application.organization.sam_gov_entity.uei,
+                            "UEI": sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -153,7 +153,6 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
         )
-
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
@@ -196,7 +195,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
-            "UEI": submission_1.application.organization.sam_gov_entity.uei,
+            "UEI": sam_gov_entity_1.uei,
         }
         expected_2 = {
             "FundingOpportunityNumber": f"{opportunity_2.opportunity_number}",
@@ -209,7 +208,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
-            "UEI": submission_2.application.organization.sam_gov_entity.uei,
+            "UEI": sam_gov_entity_2.uei,
         }
         available_application_number = soap_envelope_dict["Body"][
             "ns2:GetSubmissionListExpandedResponse"
@@ -248,24 +247,18 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
-        sam_gov_entity_1 = SamGovEntityFactory.create(
-            has_debt_subject_to_offset=False, has_exclusion_status=False
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
         )
         submission = setup_application_submission(
             agency,
             legacy_package_id="PKG00118065",
-            sam_gov_entity=sam_gov_entity_1,
+            sam_gov_entity=sam_gov_entity,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(agency, legacy_package_id="PKG00000001")
         setup_application_submission(agency, legacy_package_id="PKG00000002")
         application = submission.application
@@ -318,7 +311,235 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "SubmissionMethod": "web",
                             "DelinquentFederalDebt": "Yes",
                             "ActiveExclusions": "Yes",
+                            "UEI": sam_gov_entity.uei,
+                        }
+                    ],
+                }
+            }
+        }
+        assert soap_envelope_dict == expected
+
+    def test_get_submission_list_expanded_response_grants_gov_tracking_number_filters_just_the_last_one_entered(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create()
+        submission_1 = setup_application_submission(
+            agency,
+            legacy_package_id="PKG00118065",
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_VIEWER}
+        )
+        submission_2 = setup_application_submission(agency, legacy_package_id="PKG00000001")
+        setup_application_submission(agency, legacy_package_id="PKG00000002")
+        application = submission_1.application
+        competition = application.competition
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
+            f"<gran:FilterValue>GRANT{submission_2.legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
+            f"<gran:FilterValue>GRANT{submission_1.legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=request_xml,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_rquest_schema, soap_request
+        )
+        soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
+        expected = {
+            "Body": {
+                "ns2:GetSubmissionListExpandedResponse": {
+                    "ns2:Success": True,
+                    "ns2:AvailableApplicationNumber": 1,
+                    "ns2:SubmissionInfo": [
+                        {
+                            "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
+                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+                            "GrantsGovApplicationStatus": "Received",
+                            "SubmissionTitle": application.application_name,
+                            "PackageID": competition.legacy_package_id,
+                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                            "SubmissionMethod": "web",
+                            "DelinquentFederalDebt": f"{'Yes' if application.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                            "ActiveExclusions": f"{'Yes' if application.organization.sam_gov_entity.has_exclusion_status else 'No'}",
                             "UEI": application.organization.sam_gov_entity.uei,
+                        }
+                    ],
+                }
+            }
+        }
+        assert soap_envelope_dict == expected
+
+    def test_get_submission_list_expanded_response_cfda_number_filters_just_the_last_one_entered(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create()
+        submission_1 = setup_application_submission(
+            agency,
+            legacy_package_id="PKG00118065",
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_VIEWER}
+        )
+        db_session.commit()
+        submission_2 = setup_application_submission(agency, legacy_package_id="PKG00000001")
+        setup_application_submission(agency, legacy_package_id="PKG00000002")
+        application_1 = submission_1.application
+        competition_1 = application_1.competition
+        competition_2 = submission_2.application.competition
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>OpportunityID</gran:FilterType>"
+            f"<gran:FilterValue>{competition_2.opportunity.legacy_opportunity_id}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>OpportunityID</gran:FilterType>"
+            f"<gran:FilterValue>{competition_1.opportunity.legacy_opportunity_id}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=request_xml,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_rquest_schema, soap_request
+        )
+        soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
+        expected = {
+            "Body": {
+                "ns2:GetSubmissionListExpandedResponse": {
+                    "ns2:Success": True,
+                    "ns2:AvailableApplicationNumber": 1,
+                    "ns2:SubmissionInfo": [
+                        {
+                            "FundingOpportunityNumber": f"{competition_1.opportunity.opportunity_number}",
+                            "CFDANumber": competition_1.opportunity_assistance_listing.assistance_listing_number,
+                            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+                            "GrantsGovApplicationStatus": "Received",
+                            "SubmissionTitle": application_1.application_name,
+                            "PackageID": competition_1.legacy_package_id,
+                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                            "SubmissionMethod": "web",
+                            "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                            "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
+                            "UEI": application_1.organization.sam_gov_entity.uei,
+                        }
+                    ],
+                }
+            }
+        }
+        assert soap_envelope_dict == expected
+
+    def test_get_submission_list_expanded_response_opportunity_ids_filters_just_the_last_one_entered(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create()
+        submission_1 = setup_application_submission(
+            agency,
+            legacy_package_id="PKG00118065",
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_VIEWER}
+        )
+        submission_2 = setup_application_submission(agency, legacy_package_id="PKG00000001")
+        setup_application_submission(agency, legacy_package_id="PKG00000002")
+        application_1 = submission_1.application
+        competition_1 = application_1.competition
+        competition_2 = submission_2.application.competition
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>CFDANumber</gran:FilterType>"
+            f"<gran:FilterValue>{competition_2.opportunity_assistance_listing.assistance_listing_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>CFDANumber</gran:FilterType>"
+            f"<gran:FilterValue>{competition_1.opportunity_assistance_listing.assistance_listing_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=request_xml,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_rquest_schema, soap_request
+        )
+        soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
+        expected = {
+            "Body": {
+                "ns2:GetSubmissionListExpandedResponse": {
+                    "ns2:Success": True,
+                    "ns2:AvailableApplicationNumber": 1,
+                    "ns2:SubmissionInfo": [
+                        {
+                            "FundingOpportunityNumber": f"{competition_1.opportunity.opportunity_number}",
+                            "CFDANumber": competition_1.opportunity_assistance_listing.assistance_listing_number,
+                            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+                            "GrantsGovApplicationStatus": "Received",
+                            "SubmissionTitle": application_1.application_name,
+                            "PackageID": competition_1.legacy_package_id,
+                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                            "SubmissionMethod": "web",
+                            "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                            "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
+                            "UEI": application_1.organization.sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -330,18 +551,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
-        submission = setup_application_submission(
-            agency, application_status=ApplicationStatus.SUBMITTED
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
+        submission = setup_application_submission(
+            agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
+        )
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PK000001", application_status=ApplicationStatus.SUBMITTED
         )
@@ -398,9 +616,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "PackageID": competition.legacy_package_id,
                             "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
                             "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": application.organization.sam_gov_entity.uei,
+                            "DelinquentFederalDebt": f"{'Yes' if sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                            "ActiveExclusions": f"{'Yes' if sam_gov_entity.has_exclusion_status else 'No'}",
+                            "UEI": sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -412,18 +630,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
-        submission = setup_application_submission(
-            agency, application_status=ApplicationStatus.SUBMITTED
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
+        submission = setup_application_submission(
+            agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
+        )
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PK000001", application_status=ApplicationStatus.SUBMITTED
         )
@@ -482,7 +697,86 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "SubmissionMethod": "web",
                             "DelinquentFederalDebt": "Yes",
                             "ActiveExclusions": "Yes",
-                            "UEI": application.organization.sam_gov_entity.uei,
+                            "UEI": sam_gov_entity.uei,
+                        }
+                    ],
+                }
+            }
+        }
+        assert soap_envelope_dict == expected
+
+    def test_get_submission_list_expanded_response_filters_status_successfully(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = setup_application_submission(
+            agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
+        )
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_VIEWER}
+        )
+        setup_application_submission(
+            agency, legacy_package_id="PK000001", application_status=ApplicationStatus.ACCEPTED
+        )
+        setup_application_submission(
+            agency, legacy_package_id="PK000002", application_status=ApplicationStatus.ACCEPTED
+        )
+
+        application = submission.application
+        competition = application.competition
+        opportunity = competition.opportunity
+
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>Status</gran:FilterType>"
+            "<gran:FilterValue>Processing</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=request_xml,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_rquest_schema, soap_request
+        )
+        soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
+        expected = {
+            "Body": {
+                "ns2:GetSubmissionListExpandedResponse": {
+                    "ns2:Success": True,
+                    "ns2:AvailableApplicationNumber": 1,
+                    "ns2:SubmissionInfo": [
+                        {
+                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                            "GrantsGovApplicationStatus": "Received",
+                            "SubmissionTitle": application.application_name,
+                            "PackageID": competition.legacy_package_id,
+                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                            "SubmissionMethod": "web",
+                            "DelinquentFederalDebt": "Yes",
+                            "ActiveExclusions": "Yes",
+                            "UEI": sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -494,18 +788,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
-        submission = setup_application_submission(
-            agency, application_status=ApplicationStatus.SUBMITTED
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
+        submission = setup_application_submission(
+            agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
+        )
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PK000001", application_status=ApplicationStatus.SUBMITTED
         )
@@ -572,7 +863,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "SubmissionMethod": "web",
                             "DelinquentFederalDebt": "Yes",
                             "ActiveExclusions": "Yes",
-                            "UEI": application.organization.sam_gov_entity.uei,
+                            "UEI": sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -690,15 +981,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency, legacy_package_id="PKG00118065", opportunity_assistance_listing=False
         )
-        application = submission.application
-        sam_gov_entity = application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -845,11 +1130,6 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        application = submission.application
-        sam_gov_entity = application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
-        db_session.commit()
         _, _, soap_client_certificate = setup_cert_user(agency_2, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
@@ -896,20 +1176,18 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
         submission = setup_application_submission(
             agency,
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
+            sam_gov_entity=sam_gov_entity,
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PKG00000001", application_status=ApplicationStatus.ACCEPTED
         )
@@ -966,7 +1244,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "SubmissionMethod": "web",
                             "DelinquentFederalDebt": "Yes",
                             "ActiveExclusions": "Yes",
-                            "UEI": application.organization.sam_gov_entity.uei,
+                            "UEI": sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -978,20 +1256,18 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
         submission = setup_application_submission(
             agency,
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
+            sam_gov_entity=sam_gov_entity,
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PKG00000001", application_status=ApplicationStatus.ACCEPTED
         )
@@ -1000,7 +1276,6 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         application = submission.application
         competition = application.competition
-
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1048,7 +1323,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                             "SubmissionMethod": "web",
                             "DelinquentFederalDebt": "Yes",
                             "ActiveExclusions": "Yes",
-                            "UEI": application.organization.sam_gov_entity.uei,
+                            "UEI": sam_gov_entity.uei,
                         }
                     ],
                 }
@@ -1066,20 +1341,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_competition_id=1,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(agency, legacy_competition_id=2)
         setup_application_submission(agency, legacy_competition_id=3)
         application = submission.application
         competition = application.competition
-
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1119,24 +1387,14 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
     ):
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
-        sam_gov_entity_1 = SamGovEntityFactory.create(
-            has_debt_subject_to_offset=False, has_exclusion_status=False
-        )
         submission = setup_application_submission(
             agency,
             legacy_package_id="PKG00118065",
-            sam_gov_entity=sam_gov_entity_1,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PKG00000001", application_status=ApplicationStatus.ACCEPTED
         )
@@ -1145,7 +1403,6 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         application = submission.application
         competition = application.competition
-
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1169,11 +1426,11 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
         get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request
         )
         assert (
             f"GetSubmissionListExpanded Filter: PackageIDs ['{competition.legacy_package_id}']"
@@ -1185,24 +1442,14 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
     ):
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
-        sam_gov_entity_1 = SamGovEntityFactory.create(
-            has_debt_subject_to_offset=False, has_exclusion_status=False
-        )
-        submission = setup_application_submission(
+        setup_application_submission(
             agency,
             legacy_package_id="PKG00118065",
-            sam_gov_entity=sam_gov_entity_1,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        sam_gov_entity = submission.application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
-        db_session.commit()
-        db_session.refresh(sam_gov_entity)
-
         setup_application_submission(
             agency, legacy_package_id="PKG00000001", application_status=ApplicationStatus.ACCEPTED
         )

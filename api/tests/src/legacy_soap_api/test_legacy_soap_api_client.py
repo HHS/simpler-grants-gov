@@ -41,6 +41,7 @@ from tests.src.db.models.factories import (
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
     OrganizationFactory,
+    SamGovEntityFactory,
 )
 from tests.src.legacy_soap_api.soap_request_templates import (
     get_opportunity_list_requests as mock_requests,
@@ -657,13 +658,11 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        submission = self.setup_application_submission(agency)
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        sam_gov_entity = application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
-        db_session.commit()
-        db_session.refresh(application.competition)
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
@@ -734,19 +733,16 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        submission = self.setup_application_submission(agency)
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        sam_gov_entity = application.organization.sam_gov_entity
-        sam_gov_entity.has_debt_subject_to_offset = True
-        sam_gov_entity.has_exclusion_status = True
-        submission_2 = self.setup_application_submission(agency)
+        sam_gov_entity_2 = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=False, has_exclusion_status=False
+        )
+        submission_2 = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity_2)
         application_2 = submission_2.application
-        sam_gov_entity_2 = application_2.organization.sam_gov_entity
-        sam_gov_entity_2.has_debt_subject_to_offset = True
-        sam_gov_entity_2.has_exclusion_status = True
-        db_session.commit()
-        db_session.refresh(application.competition)
-        db_session.refresh(application_2.competition)
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
@@ -815,8 +811,8 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
                 "<PackageID>PKG00118065</PackageID>"
-                "<DelinquentFederalDebt>Yes</DelinquentFederalDebt>"
-                "<ActiveExclusions>Yes</ActiveExclusions>"
+                "<DelinquentFederalDebt>No</DelinquentFederalDebt>"
+                "<ActiveExclusions>No</ActiveExclusions>"
                 f"<UEI>{sam_gov_entity_2.uei}</UEI>"
                 "</ns2:SubmissionInfo>"
                 "</ns2:GetSubmissionListExpandedResponse>"
