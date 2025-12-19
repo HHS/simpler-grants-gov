@@ -7,6 +7,7 @@ export type TableCellData = {
   cellData: ReactNode;
   stackOrder?: number; // -1 to hide
   className?: string;
+  style?: object;
 };
 
 export const TableWithResponsiveHeader = ({
@@ -51,6 +52,7 @@ export const TableWithResponsiveHeader = ({
           return (
             <td
               key={`responsiveTableCell-${i}-${j}`}
+              style={headerContent[j].style}
               className={clsx(
                 "tablet-lg:display-table-cell",
                 "border-base",
