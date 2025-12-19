@@ -75,7 +75,7 @@ FORM_JSON_SCHEMA = {
         },
         "civil_rights_lawsuit_question1": {  # CivilRightsLawSuits1
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
-            "title": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.) IV. List all civil rights",
+            "title": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)",
         },
         "civil_rights_lawsuit_question2": {  # CivilRightsLawSuits2
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
@@ -109,7 +109,7 @@ FORM_JSON_SCHEMA = {
         },
         "notice3": {  # Notice3
             "type": "boolean",
-            "title": "b. Is the notice posted in a prominent place in the applicant's/recipient’s website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?",
+            "title": "b. Is the notice posted in a prominent place in the applicant's/recipient's website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?",
         },
         "notice4": {  # Notice4
             "type": "boolean",
@@ -131,7 +131,7 @@ FORM_JSON_SCHEMA = {
         },
         "program_explanation": {  # Program
             "type": "string",
-            "title": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7? Provide a legal citation or applicant’s/ recipient’s website address for, or a copy of, the procedures.",
+            "title": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7? Provide a legal citation or applicant's/ recipient's website address for, or a copy of, the procedures.",
             "minLength": 1,
             "maxLength": 1000,
         },
@@ -162,7 +162,14 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "A. Applicant/Recipient (Name, Address, City, State, Zip Code)",
+        "label": "Instructions for EPA Form 4700-4 (Rev. 04/2021)",
+        "name": "instructions",
+        "description": DIRECTIONS,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": "I. A. Applicant/Recipient (Name, Address, City, State, Zip Code)",
         "name": "applicant",
         "children": [
             {"type": "field", "definition": "/properties/applicant_name"},
@@ -174,7 +181,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "B.",
+        "label": "I. B. Unique Entity Identifier (UEI)",
         "name": "uei",
         "children": [
             {"type": "field", "definition": "/properties/sam_uei"},
@@ -182,7 +189,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "C. Applicant/Recipient Point of Contact",
+        "label": "I. C. Applicant/Recipient Point of Contact",
         "name": "poc",
         "children": [
             {"type": "field", "definition": "/properties/point_of_contact_name"},
@@ -196,17 +203,45 @@ FORM_UI_SCHEMA = [
     # and just putting everything in one big list (sorry)
     {
         "type": "section",
-        "label": "III-XI",
-        "name": "questions",
+        "label": "II",
+        "name": "section ii",
         "children": [
             {
                 "type": "field",
                 "definition": "/properties/federal_financial_assistance",
                 "widget": "Radio",
             },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "III",
+        "name": "section iii",
+        "children": [
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question1"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "IV",
+        "name": "section iv",
+        "children": [
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question2"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "V",
+        "name": "section v",
+        "children": [
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question3"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "VI",
+        "name": "section vi",
+        "children": [
             {
                 "type": "field",
                 "definition": "/properties/construction_federal_assistance",
@@ -218,13 +253,48 @@ FORM_UI_SCHEMA = [
                 "widget": "Radio",
             },
             {"type": "field", "definition": "/properties/construction_new_facilities_explanation"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "VII",
+        "name": "section vii",
+        "children": [
             {"type": "field", "definition": "/properties/notice1", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice2", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice3", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice4", "widget": "Radio"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "VIII",
+        "name": "section viii",
+        "children": [
             {"type": "field", "definition": "/properties/demographic_data", "widget": "Radio"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "IX",
+        "name": "section ix",
+        "children": [
             {"type": "field", "definition": "/properties/policy", "widget": "Radio"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "X",
+        "name": "section x",
+        "children": [
             {"type": "field", "definition": "/properties/policy_explanation"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "XI",
+        "name": "section xi",
+        "children": [
             {"type": "field", "definition": "/properties/program_explanation"},
         ],
     },
@@ -244,13 +314,6 @@ FORM_UI_SCHEMA = [
                 "definition": "/properties/applicant_signature/properties/submitted_date",
             },
         ],
-    },
-    {
-        "type": "section",
-        "label": "Instructions for EPA Form 4700-4 (Rev. 04/2021)",
-        "name": "instructions",
-        "description": DIRECTIONS,
-        "children": [],
     },
 ]
 
