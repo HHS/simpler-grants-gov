@@ -2,7 +2,6 @@ import { environment } from "src/constants/environments";
 import { ApiMethod } from "src/services/fetch/fetcherHelpers";
 
 export interface EndpointConfig {
-  allowedErrorStatuses?: number[];
   basePath: string;
   version: string;
   namespace: string;
@@ -27,7 +26,6 @@ export const toDynamicApplicationsEndpoint = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => {
   return {
-    allowedErrorStatuses: [422],
     basePath: environment.API_URL,
     version: "alpha",
     namespace: "applications",

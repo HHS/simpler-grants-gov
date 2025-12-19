@@ -49,6 +49,7 @@ export const searchFetcherParams: QueryParamData = {
   status: new Set(["forecasted", "posted"]),
   fundingInstrument: new Set(["grant", "cooperative_agreement"]),
   agency: new Set(),
+  assistanceListingNumber: new Set(),
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
@@ -119,6 +120,9 @@ export const fakeFacetCounts = {
   opportunity_status: {
     posted: 1,
     forecasted: 1,
+  },
+  assistance_listing_number: {
+    "15.808": 1,
   },
   funding_instrument: {
     arbitraryKey: 1,

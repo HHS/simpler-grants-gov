@@ -641,6 +641,7 @@ export const messages = {
   Header: {
     navLinks: {
       about: "About",
+      account: "Account",
       activityDashboard: "Activity Dashboard",
       applications: "Applications",
       community: "Community",
@@ -662,7 +663,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
-      account: "My account",
+      settings: "Settings",
       testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
@@ -903,6 +904,7 @@ export const messages = {
       fundingInstrument: "Funding instrument",
       eligibility: "Eligibility",
       agency: "Agency",
+      assistanceListingNumber: "Assistance Listing Number",
       category: "Category",
       query: "Search terms",
       page: "Page",
@@ -1454,9 +1456,12 @@ export const messages = {
   returnToGrants: {
     message: "Return to Grants.gov",
   },
-  UserAccount: {
-    pageTitle: "User Account | Simpler.Grants.gov",
-    title: "User Account",
+  Settings: {
+    pageTitle: "Settings | Simpler.Grants.gov",
+    title: "Settings",
+    contactInfoHeading: "Contact information",
+    contactInfoBody:
+      "Your name and email will be visible to others in your organization as you collaborate. You may update your name here at any time, but your email and password are managed by <link>login.gov</link>.",
     inputs: {
       firstName: "First name",
       middleName: "Middle name",
@@ -1465,8 +1470,8 @@ export const messages = {
     },
     save: "Save",
     validationErrors: {
-      firstName: "First name is required",
-      lastName: "Last name is required",
+      firstName: "You must enter a first name",
+      lastName: "You must enter a last name",
     },
     fetchError: "Error fetching user data. Please try refreshing the page.",
     pending: "Saving...",

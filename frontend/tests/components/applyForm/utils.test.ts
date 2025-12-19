@@ -29,6 +29,7 @@ import {
 
 const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
+const mockExtricateConditionalValidationRules = jest.fn();
 
 jest.mock("@apidevtools/json-schema-ref-parser", () => ({
   dereference: () => mockDereference() as unknown,
@@ -37,6 +38,11 @@ jest.mock("@apidevtools/json-schema-ref-parser", () => ({
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,
   default: (...args: unknown[]) => mockMergeAllOf(...args) as unknown,
+}));
+
+jest.mock("src/utils/applyForm/formSchemaProcessors", () => ({
+  extricateConditionalValidationRules: (properties: unknown) =>
+    mockExtricateConditionalValidationRules(properties) as unknown,
 }));
 
 describe("shapeFormData", () => {
@@ -499,6 +505,12 @@ describe("processFormSchema", () => {
         return processMe;
       },
     );
+    mockExtricateConditionalValidationRules.mockImplementation(
+      (properties: RJSFSchema) => ({
+        propertiesWithoutComplexConditionals: properties,
+        conditionalValidationRules: { path: [{ rule: "something " }] },
+      }),
+    );
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -511,15 +523,22 @@ describe("processFormSchema", () => {
     await processFormSchema({ properties: {} });
     expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
   });
+  it("calls mockExtricateConditionalValidationRules function", async () => {
+    await processFormSchema({ properties: {} });
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledTimes(1);
+  });
   it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
     const processed = await processFormSchema({});
-    expect(processed).toEqual({
+    expect(processed.formSchema).toEqual({
       others: {
         just: "for fun",
       },
       properties: {
         dereferenced: "stuff",
       },
+    });
+    expect(processed.conditionalValidationRules).toEqual({
+      path: [{ rule: "something " }],
     });
   });
 });
