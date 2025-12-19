@@ -5,6 +5,7 @@ import { submitApplication } from "src/services/fetch/fetchers/clientApplication
 import {
   ApplicationDetail,
   ApplicationHistory,
+  Status,
 } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -13,7 +14,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { Status } from "src/types/applicationResponseTypes";
 import {
   Alert,
   SummaryBox,
