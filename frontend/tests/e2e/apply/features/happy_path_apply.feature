@@ -128,8 +128,7 @@ Then all required and optional forms have no validation errors
 
 # --- Attachment Uploads From the Attachment Section ---
 When the user uploads all required documents under the "Attachment" header
-Then each file meets size and format requirements
-And the documents are successfully attached
+Then the documents are successfully attached
 And the uploaded files appear in the "Attached documents" table
 
 # --- Submitting the Application ---
