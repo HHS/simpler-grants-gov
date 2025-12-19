@@ -14,7 +14,7 @@ Feature: Happy Path – Apply Workflow
     Given the user is logged in
 
     # --- Search the Opportunity ---
-    When the user searches for funding opportunity
+    When the user searches for an open funding opportunity
 
     # --- Starting Application ---
     When the user clicks "Start Application"
@@ -35,10 +35,10 @@ Feature: Happy Path – Apply Workflow
     Given the user has confirmed the optional Form for Submission
 
     # --- Validate All Required and Optional Forms ---
-    Given the user completes validation of Required and Optional Forms
+    Given the required and optional forms contain no validation errors
 
     # --- Complete Additional Attachments ---
-    Given the user completes the additional attachments
+    Given the user uploads additional attachments
 
     # --- Submitting the Application ---
     Given the user submits the application
@@ -96,18 +96,23 @@ Then the user scrolls to the search results table
 When the user clicks the Funding Opportunity number
 Then the user is taken to the Funding Opportunity details page
 
-# ---- Completing Forms (Required or Conditionally Required) ---
-Given there are <form_type> forms in the application forms list
-When the user clicks on a <form_type> form
-Then the <form_type> form opens
-When the user completes all required fields, including uploading a file in any available attachment field if present
+#---- Completing Forms (Required or Conditionally Required) ---
+Given there are forms in the application forms list
+When the user clicks on a form
+Then the form opens
+And the user completes all required fields
+
+#--- Uploading Attachments (if present) ---
+When the user uploads a file in any available attachment field
 And the user clicks "choose from folder" or drags and drops the file
-Then the file meets size and format requirements
-And the file is successfully attached
-And the uploaded file appears in the appropriate attachment table
+Then the file is successfully attached and appears in the appropriate attachment table
+
+#--- Saving the Form ---
 And the user clicks "Save"
 Then no validation errors should appear
-And the system saves the <form_type> form
+And the system saves the form
+
+#--- Returning to Application Landing Page ---
 When the user clicks on the Application Name link
 Then the system navigates back to the Application landing page
 
@@ -116,7 +121,6 @@ When the user scrolls down to the "Conditionally-Required forms" section
 And under "Submit with application" the user selects "Yes" for the completed optional form
 Then no validation errors should appear
 And remaining optional forms have "No" selected
-And the user is taken to the next step
 
 # --- Validate All Required and Optional Forms ---
 When the user completes all required and optional forms
