@@ -89,8 +89,8 @@ locals {
       }],
       "v1/users/login/callback" = [{ "method" : "GET" }],
       "v1/users/login/result"   = [{ "method" : "GET" }],
-      "v1/users/token/logout"   = [{ "method" : "GET" }],
-      "v1/users/token/refresh"  = [{ "method" : "GET" }],
+      "v1/users/token/logout"   = [{ "method" : "POST" }],
+      "v1/users/token/refresh"  = [{ "method" : "POST" }],
   }][var.enable_api_gateway ? 1 : 0]
 
   # In order to support multiple request methods, we need to be able to loop on all method types
