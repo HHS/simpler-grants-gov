@@ -97,7 +97,9 @@ const ApplicationContainer = ({
 
   return (
     <>
-      {(success || applicationDetails.application_status === "submitted") && (
+      {(success ||
+        applicationDetails.application_status === "submitted" ||
+        applicationDetails.application_status === "completed") && (
         <SummaryBox>
           <SummaryBoxHeading headingLevel="h3">
             {t("submissionSuccess.title")}
