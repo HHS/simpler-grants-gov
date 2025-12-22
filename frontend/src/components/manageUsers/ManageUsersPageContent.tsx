@@ -50,11 +50,11 @@ export async function ManageUsersPageContent({
         breadcrumbList={[
           {
             title: name ?? "Organization",
-            path: `/organization/${organizationId}`,
+            path: `/organizations/${organizationId}`,
           },
           {
             title: `${t("pageHeading")}`,
-            path: `/organization/${organizationId}/manage-users`,
+            path: `/organizations/${organizationId}/manage-users`,
           },
         ]}
       />
