@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import ApplicationStatus, OpportunityStatus
+from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
 from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
@@ -24,6 +24,7 @@ from src.services.applications.application_validation import (
     validate_application_form,
 )
 from src.util import file_util
+from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
 
 logger = logging.getLogger(__name__)
@@ -209,6 +210,51 @@ def _build_organizations_and_users(
     )
 
     user_scenarios.append("many_app_user - Has many applications across many orgs")
+
+    ########################
+    # Legacy users
+    ########################
+    # Available members
+    for i, org in enumerate([org1, org2, org3], start=1):
+        create_legacy_user_with_status(
+            uei=f"AVAILABLE_UEI_{i}",
+            email=f"legacy_available_org{i}@example.com",
+            status=LegacyUserStatus.AVAILABLE,
+            organization=org,
+            first_name="Legacy",
+            last_name="Available",
+        )
+
+        user_scenarios.append(
+            f"legacy_available_org{i} - Legacy user associated with {org.organization_name}, invite not sent"
+        )
+
+    # Legacy members
+    for i, org in enumerate([org1, org2, org3], start=1):
+        create_legacy_user_with_status(
+            uei=f"MEMBER_UEI_{org.organization_id}",
+            email=f"legacy_member_org{i}@example.com",
+            status=LegacyUserStatus.MEMBER,
+            organization=org,
+            first_name="Legacy",
+            last_name="Member",
+        )
+        user_scenarios.append(
+            f"legacy_member_org{i} - Legacy user already member of {org.organization_name}"
+        )
+
+    # Legacy user with pending invitation to org2
+    create_legacy_user_with_status(
+        uei="PENDING_UEI_ORG2",
+        email="legacy_pending_org2@example.com",
+        status=LegacyUserStatus.PENDING_INVITATION,
+        organization=org2,
+        inviter=many_app_user,
+        first_name="Legacy",
+        last_name="Pending",
+    )
+
+    user_scenarios.append("legacy_pending_org2 - Legacy user invited to ORG2, invite pending")
 
     ########################
     # Apps for many_app_user
