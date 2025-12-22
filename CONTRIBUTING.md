@@ -20,7 +20,7 @@ If you think you have found a bug in the code or static site, [search our issues
 
 If you do not find your bug in our issues list, file a bug report. When reporting the bug, please follow these guidelines:
 
-- **Please use the [Bug Report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template** This is populated with information and questions that will help grants.gov developers resolve the issuethe right information
+- **Please use the [Bug Report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template** This is populated with information and questions that will help grants.gov developers resolve the issue with the right information
 - **Use a clear and descriptive issue title** for the issue to identify the problem.
 - **Describe the exact steps to reproduce the problem** in as much detail as possible. For example, start by explaining how you got to the page where you encountered the bug and what you were attempting to do when the bug occurred.
 - **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
@@ -52,7 +52,7 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 
 ## Code Contributions
 
-The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecylce on the project.
+The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
 
 ### Getting Started
 

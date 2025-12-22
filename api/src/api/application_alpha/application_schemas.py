@@ -461,3 +461,54 @@ class ApplicationAuditDataSchema(Schema):
 
 class ApplicationAuditResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     data = fields.List(fields.Nested(ApplicationAuditDataSchema()))
+
+
+# Application Submissions Schemas
+
+
+class ApplicationSubmissionsRequestSchema(Schema):
+    """Request schema for listing application submissions"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "ApplicationSubmissionsRequestPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
+class ApplicationSubmissionDataSchema(Schema):
+    """Schema for a single application submission"""
+
+    application_submission_id = fields.UUID(
+        metadata={
+            "description": "The unique identifier of the application submission",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    download_path = fields.String(
+        metadata={
+            "description": "The presigned URL path for downloading the submission package",
+            "example": "https://s3.amazonaws.com/bucket/path/to/submission.zip",
+        }
+    )
+    file_size_bytes = fields.Integer(
+        metadata={
+            "description": "The size of the submission file in bytes",
+            "example": 1234567,
+        }
+    )
+    legacy_tracking_number = fields.Integer(
+        metadata={
+            "description": "The legacy tracking number for the submission",
+            "example": 80000001,
+        }
+    )
+
+
+class ApplicationSubmissionsResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Response schema for listing application submissions"""
+
+    data = fields.List(fields.Nested(ApplicationSubmissionDataSchema()))

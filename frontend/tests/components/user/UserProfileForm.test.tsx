@@ -12,7 +12,7 @@ jest.mock("react", () => ({
   useActionState: () => mockUseActionState() as unknown,
 }));
 
-jest.mock("src/app/[locale]/(base)/user/account/actions", () => ({
+jest.mock("src/app/[locale]/(base)/settings/actions", () => ({
   userProfileAction: noop,
 }));
 
@@ -90,7 +90,7 @@ describe("userProfileForm", () => {
 
     render(<UserProfileForm userDetails={fakeUserWithProfile} />);
 
-    const alert = screen.getByRole("heading");
+    const alert = screen.getByRole("heading", { name: "errorHeading" });
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveTextContent("errorHeading");
   });

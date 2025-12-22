@@ -51,6 +51,7 @@ OPP_REQUEST_FIELD_NAME_MAPPING = {
     "award_floor": "summary.award_floor",
     "award_ceiling": "summary.award_ceiling",
     "estimated_total_program_funding": "summary.estimated_total_program_funding",
+    "assistance_listing_number": "opportunity_assistance_listings.assistance_listing_number.keyword",
 }
 
 FILTER_RULE_MAPPING = {

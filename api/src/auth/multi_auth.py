@@ -6,7 +6,7 @@ from typing import Any, cast
 from flask_httpauth import MultiAuth
 
 from ..db.models.competition_models import ShortLivedInternalToken
-from ..db.models.user_models import UserApiKey, UserTokenSession
+from ..db.models.user_models import User, UserApiKey, UserTokenSession
 from .api_jwt_auth import api_jwt_auth
 from .api_key_auth import ApiKeyUser, api_key_auth
 from .api_user_key_auth import api_user_key_auth
@@ -46,6 +46,16 @@ class MultiHttpTokenAuth(MultiAuth):
         raise Exception("Unknown user type %s", type(current_user))
 
 
+class MultiHttpTokenAuthSimpler(MultiAuth):
+    def get_user(self) -> User:
+        current_user = self.current_user()
+
+        if isinstance(current_user, UserTokenSession) or isinstance(current_user, UserApiKey):
+            return current_user.user
+
+        raise Exception(f"Unsupported user type: {type(current_user)}")
+
+
 # Define the multi auth that supports
 # * User JWT auth
 # * API Key Auth
@@ -71,6 +81,19 @@ jwt_key_or_internal_multi_auth = MultiHttpTokenAuth(api_jwt_auth, internal_jwt_a
 #
 # Note that the order matters - api_user_key_auth will take precedence if both headers are present
 api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
+
+
+# Define the multi auth that supports
+# * User JWT auth
+# * API User Key Auth
+#
+# Note that the order defined matters - earlier ones will take precedence in
+# the event a user provides us with multiple auth approaches at once, only the first
+# relevant one will be used
+# We define the JWT auth first as the frontend will pass us a users JWT
+# and the frontend's API key for all user-based requests in order to validate
+# with our API gateway that handles rate limiting.
+jwt_or_api_user_key_multi_auth = MultiHttpTokenAuthSimpler(api_jwt_auth, api_user_key_auth)
 
 
 # Helper function to format security schemes for OpenAPI
@@ -100,5 +123,30 @@ api_key_multi_auth_security_schemes = _get_security_requirement(
     [
         api_user_key_auth.security_scheme_name,
         api_key_auth.security_scheme_name,
+    ]
+)
+
+# List of security scheme names for JWT or API User Key multi-auth
+jwt_or_api_user_key_security_schemes = _get_security_requirement(
+    [
+        api_jwt_auth.security_scheme_name,
+        api_user_key_auth.security_scheme_name,
+    ]
+)
+
+
+# Define the multi auth that supports both user-connected auth methods:
+# * User JWT auth (X-SGG-Token header)
+# * User API Key auth (X-API-Key header)
+#
+# Both of these auth methods connect to a user, so the implementation is similar.
+# This is useful for application endpoints that need to support both auth types.
+jwt_or_user_api_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_user_key_auth)
+
+# List of security scheme names for JWT or User API Key multi-auth
+jwt_or_user_api_key_security_schemes = _get_security_requirement(
+    [
+        api_jwt_auth.security_scheme_name,
+        api_user_key_auth.security_scheme_name,
     ]
 )

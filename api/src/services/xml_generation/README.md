@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, EPA Key Contacts, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, and Project Abstract.
+This is the implementation of the JSON to XML conversion service. This service provides field mapping capabilities for various Grants.gov forms including SF-424, SF-424A, SF-424B, SF-424D, SF-LLL, CD-511, GG_LobbyingForm, Project Abstract Summary, EPA Key Contacts, Project Narrative Attachments, Budget Narrative Attachments, Other Narrative Attachments, and Project Abstract.
 
 ## Architecture
 
@@ -24,6 +24,7 @@ api/src/form_schema/forms/
 ├── sflll.py                   # SF-LLL Lobbying Disclosure + XML transformation rules
 ├── cd511.py                   # CD511 Certification Regarding Lobbying + XML transformation rules
 ├── gg_lobbying_form.py        # GG_LobbyingForm Grants.gov Lobbying Form + XML transformation rules
+├── project_abstract_summary.py # Project Abstract Summary + XML transformation rules
 ├── epa_key_contacts.py        # EPA Key Contacts + XML transformation rules
 ├── project_narrative_attachment.py  # Project Narrative Attachments + XML transformation rules
 ├── budget_narrative_attachment.py   # Budget Narrative Attachments + XML transformation rules
@@ -212,6 +213,41 @@ FORM_XML_TRANSFORM_RULES = {
 - `authorized_representative_name` → `AuthorizedRepresentativeName` with nested `HumanNameDataType` structure
 - `authorized_representative_signature` and `submitted_date` are auto-populated during submission
 
+### Example: Project Abstract Summary
+
+The Project Abstract Summary form contains text fields for project information:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Project Abstract Summary form",
+        "form_name": "Project_AbstractSummary_2_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_AbstractSummary_2_0-V2.0.xsd",
+        "xml_structure": {
+            "root_element": "Project_AbstractSummary_2_0",
+            "root_attributes": {"FormVersion": "2.0"},
+        },
+    },
+    # Field mappings (order matches XSD sequence)
+    "funding_opportunity_number": {"xml_transform": {"target": "FundingOpportunityNumber"}},
+    "assistance_listing_number": {"xml_transform": {"target": "CFDANumber"}},
+    "applicant_name": {"xml_transform": {"target": "OrganizationName"}},
+    "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "project_abstract": {"xml_transform": {"target": "ProjectAbstract"}},
+}
+```
+
+**Project Abstract Summary Field Mapping Notes:**
+- `funding_opportunity_number` → `FundingOpportunityNumber` (required)
+- `assistance_listing_number` → `CFDANumber` (optional, legacy name for Assistance Listing Number)
+- `applicant_name` → `OrganizationName` (required, called "Applicant Name" in UI)
+- `project_title` → `ProjectTitle` (required, max 250 chars)
+- `project_abstract` → `ProjectAbstract` (required, max 4000 chars)
+
 ### Example: EPA Key Contacts
 
 The EPA Key Contacts form contains four optional contact person sections, each using `ContactPersonDataTypeV3` from GlobalLibrary:
@@ -378,6 +414,78 @@ FORM_XML_TRANSFORM_RULES = {
 - **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
 - **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`
 
+### Example: Supplementary Cover Sheet for NEH Grant Programs
+
+The Supplementary Cover Sheet for NEH Grant Programs form uses enum code mappings to transform human-readable display values to XSD-required numeric codes:
+
+```python
+FORM_XML_TRANSFORM_RULES = {
+    "_xml_config": {
+        "description": "XML transformation rules for Supplementary Cover Sheet for NEH Grant Programs",
+        "form_name": "SupplementaryCoverSheetforNEHGrantPrograms_3_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0",
+            "SupplementaryCoverSheetforNEHGrantPrograms_3_0": (
+                "http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"
+            ),
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd",
+        "xml_structure": {
+            "root_element": "SupplementaryCoverSheetforNEHGrantPrograms_3_0",
+            "root_namespace_prefix": "SupplementaryCoverSheetforNEHGrantPrograms_3_0",
+            "root_attributes": {"FormVersion": "3.0"},
+        },
+    },
+    # Project Director's Major Field of Study - maps display value to numeric code
+    "major_field": {
+        "xml_transform": {
+            "target": "PDMajorField",
+            "value_transform": {
+                "type": "map_values",
+                "params": {"mappings": FIELD_OF_STUDY_CODE_MAP},
+            },
+        }
+    },
+    # Institution/Organization Type - passed through as-is (full "CODE: Description" format)
+    "organization_type": {
+        "xml_transform": {
+            "target": "InstType",
+        }
+    },
+    # Nested structure for project funding amounts
+    "funding_group": {
+        "xml_transform": {"target": "ProjectFunding", "type": "nested_object"},
+        "outright_funds": {"xml_transform": {"target": "OutrightFunds", "value_transform": {"type": "currency_format"}}},
+        "federal_match": {"xml_transform": {"target": "FederalMatch", "value_transform": {"type": "currency_format"}}},
+        # ... additional funding fields
+    },
+    # Nested structure for application information
+    "application_info": {
+        "xml_transform": {"target": "ApplicationInfo", "type": "nested_object"},
+        "additional_funding": {"xml_transform": {"target": "AdditionalFunding", "value_transform": {"type": "boolean_to_yes_no"}}},
+        # ... additional fields
+    },
+    # Project discipline fields - map display values like "History: U.S. History" to code "4"
+    "primary_project_discipline": {
+        "xml_transform": {
+            "target": "PrimaryPDNEH",
+            "value_transform": {"type": "map_values", "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP}},
+        }
+    },
+    # ... secondary and tertiary project disciplines
+}
+```
+
+**Supplementary Cover Sheet for NEH Grant Programs Field Mapping Notes:**
+- Uses `map_values` transformation to convert human-readable enum values to XSD-required numeric codes for discipline fields
+- `major_field` (Project Director's Major Field): Maps ~150 discipline display values (e.g., "History: U.S. History") to numeric codes (e.g., "4")
+- `organization_type`: Passed through as-is (full "CODE: Description" format, e.g., "1330: University")
+- `primary_project_discipline`, `secondary_project_discipline`, `tertiary_project_discipline`: Same mapping as `major_field` but uses a subset of values (project disciplines only, not the additional "Other" field of study values)
+- `funding_group` → `ProjectFunding`: Nested structure with currency-formatted amounts
+- `application_info` → `ApplicationInfo`: Nested structure with boolean-to-yes/no conversion for `additional_funding`
+- XSD reference: https://apply07.grants.gov/apply/forms/schemas/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd
+
 ## Supported Forms
 
 The following forms currently have XML generation support:
@@ -389,11 +497,13 @@ The following forms currently have XML generation support:
 - **SF-LLL (v2.0)**: Disclosure of Lobbying Activities
 - **CD-511 (v1.1)**: Certification Regarding Lobbying
 - **GG_LobbyingForm (v1.1)**: Grants.gov Lobbying Form
+- **Project Abstract Summary (v2.0)**: Project abstract summary with text fields
 - **EPA Key Contacts (v2.0)**: EPA key contact persons form
 - **Project Narrative Attachments (v1.2)**: Project narrative file attachments
 - **Budget Narrative Attachments (v1.2)**: Budget narrative file attachments
 - **Other Narrative Attachments (v1.2)**: Other narrative file attachments
 - **Project Abstract (v1.2)**: Project abstract file attachment
+- **Supplementary Cover Sheet for NEH Grant Programs (v3.0)**: NEH-specific supplementary cover sheet
 
 ## Adding New Forms
 
