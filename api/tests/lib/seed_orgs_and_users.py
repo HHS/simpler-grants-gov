@@ -221,7 +221,7 @@ def _build_organizations_and_users(
             email=f"legacy_available_org{i}@example.com",
             status=LegacyUserStatus.AVAILABLE,
             organization=org,
-            first_name="Legacy",
+            first_name=f"Legacy{i}",
             last_name="Available",
         )
 
@@ -236,7 +236,7 @@ def _build_organizations_and_users(
             email=f"legacy_member_org{i}@example.com",
             status=LegacyUserStatus.MEMBER,
             organization=org,
-            first_name="Legacy",
+            first_name=f"Legacy{i}",
             last_name="Member",
         )
         user_scenarios.append(
