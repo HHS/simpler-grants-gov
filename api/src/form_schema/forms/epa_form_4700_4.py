@@ -184,7 +184,7 @@ FORM_UI_SCHEMA = [
         "label": "I. B. Unique Entity Identifier (UEI)",
         "name": "uei",
         "children": [
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
         ],
     },
     {
