@@ -21,7 +21,7 @@ exports[`Homepage Hero Content matches snapshot 1`] = `
         <p
           class="text-balance font-sans-md margin-y-2 tablet:font-sans-lg tablet:margin-y-3"
         >
-          Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. 
+          Simpler.Grants.gov is where we are building new features for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. 
         </p>
       </div>
       <span

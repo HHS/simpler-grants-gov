@@ -6,7 +6,7 @@ import "@testing-library/jest-dom";
 
 import Page, {
   generateMetadata,
-} from "src/app/[locale]/(base)/organization/[id]/manage-users/page";
+} from "src/app/[locale]/(base)/organizations/[id]/manage-users/page";
 
 type Params = { locale: string; id: string };
 

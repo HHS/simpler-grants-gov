@@ -6,11 +6,18 @@ import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { UserDetail } from "src/types/userTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-import { FunctionComponent, ReactNode } from "react";
+import { FunctionComponent, PropsWithChildren, ReactNode } from "react";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 const redirectMock = jest.fn();
+
+const authentication = jest.fn().mockResolvedValue({
+  token: "fake-token",
+  user_id: "user-1",
+});
+
+const organizations = jest.fn().mockResolvedValue([]);
 
 jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,
@@ -20,11 +27,6 @@ jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-const authentication = jest.fn().mockResolvedValue({
-  token: "fake-token",
-  user_id: "user-1",
-});
-
 jest.mock("src/services/auth/session", () => ({
   getSession: () => authentication() as Promise<UserDetail>,
 }));
@@ -33,7 +35,6 @@ jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
   getUserPrivileges: () => Promise.resolve({}),
 }));
 
-const organizations = jest.fn().mockResolvedValue([]);
 jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
   getUserOrganizations: () => organizations() as Promise<Organization[]>,
 }));
@@ -44,6 +45,10 @@ jest.mock("src/components/workspace/UserOrganizationsList", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: (location: string) => redirectMock(location) as unknown,
+}));
+
+jest.mock("src/components/user/AuthenticationGate", () => ({
+  AuthenticationGate: ({ children }: PropsWithChildren) => children,
 }));
 
 const withFeatureFlagMock = jest

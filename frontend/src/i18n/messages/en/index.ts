@@ -2,16 +2,16 @@ export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",
     pageDescription:
-      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+      "Simpler.Grants.gov is where we are building new features for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
     githubLink: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "Test out our experimental features",
+        title: "New Features, simpler experience",
         canDoHeader: "Tell us what's working (and what's not)",
         canDoSubHeader: "What you can do now",
         canDoParagraph:
           "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
-        tryLink: "Try the new simpler search",
+        tryLink: "Use the new simpler search",
         cantDoHeader: "What you can't do quite yet",
         cantDoParagraph:
           "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
@@ -261,7 +261,9 @@ export const messages = {
     submissionSuccess: {
       title: "Your application has been submitted",
       description:
-        "The awarding agency will review and process it independently of Grants.gov. Once they receive your application, they will manage all further updates. Grants.gov won't have access to the status of your award.",
+        "<p>The awarding agency will review and process your application independently of Grants.gov. Grants.gov won't have access to the status of your award.</p><p>The award agency will contact your EBiz point of contact or your Authorized Organization Representatives (AOR) with all further updates. Please review the application instructions for information on this agency's application review process. You can return to this submitted application at any time by <linkMyApplications>visiting your applications list</linkMyApplications>.</p><p>Grants.gov does support edits to submitted applications. Please submit a new application if you would like to make changes to submitted information.</p>",
+      contact:
+        "For technical support or feedback, email <email-link>simpler@grants.gov</email-link> and include your Application ID.",
     },
     information: {
       applicant: "Applicant",
@@ -881,7 +883,7 @@ export const messages = {
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
-    body: "Our team is working to improve the site, and we'll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
+    body: "Our team is working to improve the site, and we'll have it back up as soon as possible.",
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },

@@ -12,11 +12,9 @@ the src.form_schemas.forms.__init__.get_active_forms function.
 
 # Auth
 Both of these scripts talk with our API endpoints in the specified environment
-and need an auth token to work. There are currently two different auth token approaches
-you can use:
+and need an API key to work.
 
 * `FORM_X_API_KEY_ID` - An API key attached to your user in the specified environment. The update-form task requires this user have the `update_form` privilege.
-* `NON_LOCAL_API_AUTH_TOKEN` (deprecated - will be removed soon) - the auth token for calling the environment - at the moment MUST be the same auth token the frontend uses (the first one configured in our API_AUTH_TOKEN env var)
 
 To setup your `FORM_X_API_KEY_ID`, do the following:
 * Go to the specified environment and generate an API key after logging in (eg. in staging, go to the [API Dashboard](https://staging.simpler.grants.gov/api-dashboard))
