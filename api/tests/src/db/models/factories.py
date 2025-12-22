@@ -48,6 +48,7 @@ from src.constants.lookup_constants import (
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
+    OrganizationAuditEvent,
     Privilege,
     RoleType,
     SamGovExtractType,
@@ -2591,39 +2592,6 @@ class ForeignVopportunitySummaryFactory(VOpportunitySummaryFactory):
     opportunity_id = factory.Sequence(lambda n: n)
 
 
-class TuserAccountFactory(BaseFactory):
-    class Meta:
-        abstract = True
-
-    user_account_id = factory.Sequence(lambda n: n)
-    user_id = Generators.UuidObj
-    full_name = factory.Faker("name")
-    email_address = factory.LazyAttribute(lambda o: f"{o.full_name}@example.com")
-    last_upd_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
-    created_date = factory.Faker("date_time_between", start_date="-10y", end_date="-5y")
-    is_deleted_legacy = factory.Faker("yn_boolean")
-    is_duplicate = factory.Faker("yn_boolean")
-    is_active = factory.Faker("yn_boolean")
-    is_email_confirm_pending = factory.Faker("yn_boolean")
-    deactivated_date = sometimes_none(
-        factory.Faker("date_time_between", start_date="-5y", end_date="now")
-    )
-    mobile_number = factory.Faker("phone_number")
-
-
-class ForeignTuserAccountFactory(TuserAccountFactory):
-    class Meta:
-        model = foreign.user.TuserAccount
-
-    @classmethod
-    def _setup_next_sequence(cls):
-        if _db_session is not None:
-            value = _db_session.query(func.max(foreign.user.TuserAccount.user_account_id)).scalar()
-            if value is not None:
-                return value + 1
-        return 1
-
-
 class ForeignTcertificatesFactory(BaseFactory):
     class Meta:
         model = foreign.certificates.Tcertificates
@@ -2731,69 +2699,6 @@ class StagingTuserProfileFactory(TuserProfileFactory, AbstractStagingFactory):
     def _setup_next_sequence(cls):
         if _db_session is not None:
             value = _db_session.query(func.max(staging.user.TuserProfile.user_profile_id)).scalar()
-            if value is not None:
-                return value + 1
-        return 1
-
-
-class StagingTuserAccountFactory(TuserAccountFactory, AbstractStagingFactory):
-    class Meta:
-        model = staging.user.TuserAccount
-
-    class Params:
-        # Trait to set all nullable fields to None
-        all_fields_null = factory.Trait(
-            full_name=None,
-            email_address=None,
-        )
-
-    @classmethod
-    def _setup_next_sequence(cls):
-        if _db_session is not None:
-            value = _db_session.query(func.max(staging.user.TuserAccount.user_account_id)).scalar()
-            if value is not None:
-                return value + 1
-        return 1
-
-
-class TuserAccountMapperFactory(BaseFactory):
-    class Meta:
-        abstract = True
-
-    user_account_id = factory.Sequence(lambda n: n)
-    ext_user_id = Generators.UuidObj
-    ext_issuer = factory.Faker("word")
-    last_auth_date = factory.Faker("date_time_between", start_date="-5y", end_date="now")
-    source_type = "GOV"
-    is_deleted = factory.Faker("boolean")
-
-
-class StagingTuserAccountMapperFactory(TuserAccountMapperFactory, AbstractStagingFactory):
-    class Meta:
-        model = staging.user.TuserAccountMapper
-
-    @classmethod
-    def _setup_next_sequence(cls):
-        if _db_session is not None:
-            value = _db_session.query(
-                func.max(staging.user.TuserAccountMapper.user_account_id)
-            ).scalar()
-
-            if value is not None:
-                return value + 1
-        return 1
-
-
-class ForeignTuserAccountMapperFactory(TuserAccountMapperFactory):
-    class Meta:
-        model = foreign.user.TuserAccountMapper
-
-    @classmethod
-    def _setup_next_sequence(cls):
-        if _db_session is not None:
-            value = _db_session.query(
-                func.max(foreign.user.TuserAccountMapper.user_account_id)
-            ).scalar()
             if value is not None:
                 return value + 1
         return 1
@@ -3134,6 +3039,38 @@ class IgnoredLegacyOrganizationUserFactory(BaseFactory):
     email = factory.Faker("email")
     user = factory.SubFactory(UserFactory)
     ignored_by_user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+
+class OrganizationAuditFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationAudit
+
+    organization_audit_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory, with_profile=True)
+    user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    organization_audit_event = OrganizationAuditEvent.USER_ADDED
+
+    class Params:
+        is_user_added = factory.Trait(
+            organization_audit_event=OrganizationAuditEvent.USER_ADDED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
+        is_user_role_updated = factory.Trait(
+            organization_audit_event=OrganizationAuditEvent.USER_UPDATED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
+        is_user_removed = factory.Trait(
+            organization_audit_event=OrganizationAuditEvent.USER_REMOVED,
+            target_user=factory.SubFactory(UserFactory, with_profile=True),
+            target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
+        )
 
 
 class SuppressedEmailFactory(BaseFactory):

@@ -8,6 +8,7 @@ describe("BadRequestError (as an example of other error types)", () => {
     fundingInstrument: new Set(["grant"]),
     eligibility: new Set(["public"]),
     agency: new Set(["NASA"]),
+    assistanceListingNumber: new Set(["15.817"]),
     category: new Set(["science"]),
     closeDate: new Set(["500"]),
     costSharing: new Set(["true"]),

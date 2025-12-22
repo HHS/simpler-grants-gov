@@ -18,7 +18,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
           data-testid="grid"
         >
           <h2>
-            Test out our experimental features
+            New Features, simpler experience
           </h2>
         </div>
         <div
@@ -44,7 +44,7 @@ exports[`Homepage Experimental Content matches snapshot 1`] = `
               data-testid="button"
               type="button"
             >
-              Try the new simpler search
+              Use the new simpler search
             </button>
           </a>
           <h4>

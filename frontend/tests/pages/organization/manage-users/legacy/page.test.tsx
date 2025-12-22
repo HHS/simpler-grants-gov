@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import InviteLegacyUsersPage from "src/app/[locale]/(base)/organization/[id]/manage-users/legacy/page";
+import InviteLegacyUsersPage from "src/app/[locale]/(base)/organizations/[id]/manage-users/legacy/page";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { UserDetail } from "src/types/userTypes";

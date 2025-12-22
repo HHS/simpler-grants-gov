@@ -18,7 +18,7 @@ const ManageUsersButton = ({
 }) => {
   const t = useTranslations("ActivityDashboard");
   return (
-    <Link href={`/organization/${organization.organization_id}/manage-users`}>
+    <Link href={`/organizations/${organization.organization_id}/manage-users`}>
       <Button type="button">
         <USWDSIcon name="people" /> {t("organizationButtons.manage")}
       </Button>
@@ -33,7 +33,7 @@ const ViewDetailsButton = ({
 }) => {
   const t = useTranslations("ActivityDashboard");
   return (
-    <Link href={`/organization/${organization.organization_id}`}>
+    <Link href={`/organizations/${organization.organization_id}`}>
       <Button type="button">
         <USWDSIcon name="visibility" />
         {t("organizationButtons.view")}

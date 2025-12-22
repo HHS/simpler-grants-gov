@@ -3,8 +3,10 @@ import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
-import { filter, get, isArray, isNumber, isObject, isString } from "lodash";
+import { filter, get, isArray, isObject } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
+import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
+import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 import {
@@ -619,18 +621,6 @@ export function getFieldsForNav(
   return results;
 }
 
-const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
-  if (typeof mightBeAnObject === "boolean") {
-    return false;
-  }
-  return (
-    !!mightBeAnObject &&
-    !isArray(mightBeAnObject) &&
-    !isString(mightBeAnObject) &&
-    !isNumber(mightBeAnObject)
-  );
-};
-
 const isEmptyField = (mightBeEmpty: unknown): boolean => {
   if (mightBeEmpty === undefined) {
     return true;
@@ -776,17 +766,24 @@ export const isFieldRequired = (
 // to condense in any case
 export const processFormSchema = async (
   formSchema: RJSFSchema,
-): Promise<RJSFSchema> => {
+): Promise<{
+  formSchema: RJSFSchema;
+  conditionalValidationRules: RJSFSchema;
+}> => {
   try {
     const dereferenced = await $Refparser.dereference(formSchema);
+    const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
+      extricateConditionalValidationRules(
+        dereferenced.properties as JSONSchema7,
+      );
     const condensedProperties = mergeAllOf({
-      properties: dereferenced.properties,
+      properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
     const condensed = {
       ...dereferenced,
       ...condensedProperties,
     };
-    return condensed as RJSFSchema;
+    return { formSchema: condensed as RJSFSchema, conditionalValidationRules };
   } catch (e) {
     console.error("Error processing schema");
     throw e;

@@ -6,7 +6,7 @@ This folder contains documentation for the Simpler Grants Project.
 
 Our vision is for the following to become true:
 
-**_We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone._**.
+**_We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone._**
 
 See [goals.md](./goals.md) for more information about the vision and goals for the project.
 
