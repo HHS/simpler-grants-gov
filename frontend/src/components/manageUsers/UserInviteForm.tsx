@@ -3,7 +3,7 @@
 import {
   inviteUserAction,
   OrganizationInviteValidationErrors,
-} from "src/app/[locale]/(base)/organization/[id]/manage-users/actions";
+} from "src/app/[locale]/(base)/organizations/[id]/manage-users/actions";
 import { usePrevious } from "src/hooks/usePrevious";
 import { UserRole } from "src/types/userTypes";
 

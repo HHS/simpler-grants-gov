@@ -29,49 +29,30 @@ ENV_FORM_INSTRUCTION_URL_MAP = {
 
 
 class FormTaskConfig(PydanticBaseEnvConfig):
-    # This is the legacy API key approach
-    non_local_api_auth_token: str | None = None
-    # This is the new API key approach
-    form_x_api_key_id: str | None = None
+    form_x_api_key_id: str
 
 
 class BaseFormTask(abc.ABC):
     def __init__(self) -> None:
         self.config = FormTaskConfig()
-        if self.config.non_local_api_auth_token is None and self.config.form_x_api_key_id is None:
-            raise Exception(
-                "Please set either the NON_LOCAL_API_AUTH_TOKEN or FORM_X_API_KEY_ID environment variable for the environment you wish to call"
-            )
 
     def build_headers(self) -> dict:
-
-        headers = {
+        return {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "X-API-Key": self.config.form_x_api_key_id,
         }
-        if self.config.form_x_api_key_id is not None:
-            headers["X-API-Key"] = self.config.form_x_api_key_id
-        if self.config.non_local_api_auth_token is not None:
-            headers["X-Auth"] = self.config.non_local_api_auth_token
-
-        return headers
 
     def build_file_upload_headers(self) -> dict:
         """Build headers for file upload requests (multipart/form-data).
 
         Note: Content-Type is not set here because requests will automatically
         set the correct Content-Type with boundary for multipart/form-data.
-
-        Note: X-Auth is not included here because the form instruction endpoint
-        only supports X-API-Key authentication.
         """
-        headers = {
+        return {
             "Accept": "application/json",
+            "X-API-Key": self.config.form_x_api_key_id,
         }
-        if self.config.form_x_api_key_id is not None:
-            headers["X-API-Key"] = self.config.form_x_api_key_id
-
-        return headers
 
     def get_forms(self) -> list[Form]:
         """Utility function to get active forms in derived classes"""

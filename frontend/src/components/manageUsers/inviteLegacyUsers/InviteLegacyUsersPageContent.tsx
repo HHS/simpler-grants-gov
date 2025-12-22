@@ -20,15 +20,15 @@ const PageBreadcrumbs = ({
       breadcrumbList={[
         {
           title: organizationName || t("OrganizationDetail.pageTitle"),
-          path: `/organization/${organizationId}`,
+          path: `/organizations/${organizationId}`,
         },
         {
           title: t("ManageUsers.pageHeading"),
-          path: `/organization/${organizationId}/manage-users`,
+          path: `/organizations/${organizationId}/manage-users`,
         },
         {
           title: t("InviteLegacyUsers.pageHeading"),
-          path: `/organization/${organizationId}/manage-users/legacy`,
+          path: `/organizations/${organizationId}/manage-users/legacy`,
         },
       ]}
     />
@@ -41,7 +41,7 @@ const EmptyLegacyUsersNotice = ({
   organizationId: string;
 }) => {
   const t = useTranslations("InviteLegacyUsers");
-  const manageUsersLink = `/organization/${organizationId}/manage-users`;
+  const manageUsersLink = `/organizations/${organizationId}/manage-users`;
 
   return (
     <div className="margin-top-1 margin-bottom-15">

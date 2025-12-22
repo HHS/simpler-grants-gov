@@ -1,6 +1,6 @@
 # Development and Software Delivery Lifecycle
 
-The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that externabl contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contribributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
+The following guide is for members of the project team who have access to the repository as well as code contributors. The main difference between internal and external contributions is that external contributors will need to fork the project and will not be able to merge their own pull requests. For more information on contributing, see: [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Local Development
 
@@ -8,7 +8,7 @@ This project is monorepo with several apps. Please see the [api](./api/README.md
 
 ### Linting and Testing
 
-Each application has its own linting and testing guidelines. Lint and code tests are run on each commit, so linters and tests should be run locally before commiting.
+Each application has its own linting and testing guidelines. Lint and code tests are run on each commit, so linters and tests should be run locally before committing.
 
 ## Branching Model
 
@@ -95,7 +95,7 @@ Step by step instructions for creating a release:
 - On Github.com, open the Releases page: https://github.com/HHS/simpler-grants-gov/releases
 - Click "Draft a new release"
 - Create the new tag via the UI
-- Start with `N=1` for a release, incrementing if there is another release on the same day. So the first release on `2000.10.10` would be `2000.10.10-1`, ths second release on that day would be `2000.10.10-2`, etc.
+- Start with `N=1` for a release, incrementing if there is another release on the same day. So the first release on `2000.10.10` would be `2000.10.10-1`, the second release on that day would be `2000.10.10-2`, etc.
   - Alternatively, create the tag in your terminal
   - `git switch main` and `git pull` to sync your local code with the latest main commit
   - `git tag YYYY.MM.DD-N` (FILLED IN!) and `git push --tags` to tag and push your CalVer tag

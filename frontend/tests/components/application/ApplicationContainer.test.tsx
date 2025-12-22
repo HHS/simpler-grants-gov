@@ -346,5 +346,59 @@ describe("ApplicationContainer", () => {
         expect(submitButton).toHaveTextContent("Submit");
       });
     });
+
+    it("should display the submission successful box", () => {
+      const inProgressApplication = {
+        ...mockApplicationDetails,
+        application_status: "submitted",
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ data: {} }),
+      });
+
+      render(
+        <ApplicationContainer
+          applicationDetails={inProgressApplication}
+          attachments={mockAttachments}
+          opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
+        />,
+      );
+
+      const submitConfirmationtButton = screen.getByText(
+        "submissionSuccess.title",
+      );
+      expect(submitConfirmationtButton).toBeInTheDocument();
+    });
+
+    it("should not display the submission successful box when in progress", () => {
+      const inProgressApplication = {
+        ...mockApplicationDetails,
+        application_status: "in_progress",
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ data: {} }),
+      });
+
+      render(
+        <ApplicationContainer
+          applicationDetails={inProgressApplication}
+          attachments={mockAttachments}
+          opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
+        />,
+      );
+
+      const submitConfirmationtButton = screen.queryByText(
+        "submissionSuccess.title",
+      );
+      expect(submitConfirmationtButton).not.toBeInTheDocument();
+    });
   });
 });
