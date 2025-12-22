@@ -48,7 +48,7 @@ class PostgresDBClient(DBClient):
             pool=conn_pool,
             hide_parameters=db_config.hide_sql_parameter_logs,
             execution_options={"schema_translate_map": db_config.get_schema_translate_map()},
-            # TODO: Don't think we need this as we aren't using JSON columns, but keeping for reference
+            # Don't think we need this as we aren't using JSON columns, but keeping for reference
             # json_serializer=lambda o: json.dumps(o, default=pydantic.json.pydantic_encoder),
         )
 
@@ -70,10 +70,6 @@ class PostgresDBClient(DBClient):
                 },
             )
             verify_ssl(conn_info)
-
-            # TODO add check_migrations_current to config
-            # if check_migrations_current:
-            #     have_all_migrations_run(engine)
 
 
 def get_connection_parameters(db_config: PostgresDBConfig) -> dict[str, Any]:
