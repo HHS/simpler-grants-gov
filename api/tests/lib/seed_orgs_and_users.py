@@ -217,7 +217,7 @@ def _build_organizations_and_users(
     # Available members
     for i, org in enumerate([org1, org2, org3], start=1):
         create_legacy_user_with_status(
-            uei=f"AVAILABLE_UEI_{i}",
+            uei=org.sam_gov_entity.uei,
             email=f"legacy_available_org{i}@example.com",
             status=LegacyUserStatus.AVAILABLE,
             organization=org,
@@ -232,7 +232,7 @@ def _build_organizations_and_users(
     # Legacy members
     for i, org in enumerate([org1, org2, org3], start=1):
         create_legacy_user_with_status(
-            uei=f"MEMBER_UEI_{org.organization_id}",
+            uei=org.sam_gov_entity.uei,
             email=f"legacy_member_org{i}@example.com",
             status=LegacyUserStatus.MEMBER,
             organization=org,
@@ -245,7 +245,7 @@ def _build_organizations_and_users(
 
     # Legacy user with pending invitation to org2
     create_legacy_user_with_status(
-        uei="PENDING_UEI_ORG2",
+        uei=org2.sam_gov_entity.uei,
         email="legacy_pending_org2@example.com",
         status=LegacyUserStatus.PENDING_INVITATION,
         organization=org2,
