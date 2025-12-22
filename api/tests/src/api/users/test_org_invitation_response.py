@@ -104,6 +104,12 @@ def test_org_invitation_response_rejected(
     assert data["status"] == OrganizationInvitationStatus.REJECTED
     assert data["responded_at"] == res.rejected_at.isoformat()
 
+    # Verify user added audit event was not created
+    user_added_audits = [
+        audit for audit in inv.organization.organization_audits if audit.audit_event == "USER_ADDED"
+    ]
+    assert len(user_added_audits) == 0
+
 
 def test_org_invitation_response_404_invitation(client, db_session, user, user_auth_token):
     """Test that responding to a non-existent invitation returns a 404 error."""
