@@ -212,49 +212,13 @@ def _build_organizations_and_users(
     user_scenarios.append("many_app_user - Has many applications across many orgs")
 
     ########################
-    # Legacy users
+    # Legacy users for orgs
     ########################
-    # Available members
-    for i, org in enumerate([org1, org2, org3], start=1):
-        create_legacy_user_with_status(
-            uei=org.sam_gov_entity.uei,
-            email=f"legacy_available_org{i}@example.com",
-            status=LegacyUserStatus.AVAILABLE,
-            organization=org,
-            first_name=f"Legacy{i}",
-            last_name="Available",
-        )
-
-        user_scenarios.append(
-            f"legacy_available_org{i} - Legacy user associated with {org.organization_name}, invite not sent"
-        )
-
-    # Legacy members
-    for i, org in enumerate([org1, org2, org3], start=1):
-        create_legacy_user_with_status(
-            uei=org.sam_gov_entity.uei,
-            email=f"legacy_member_org{i}@example.com",
-            status=LegacyUserStatus.MEMBER,
-            organization=org,
-            first_name=f"Legacy{i}",
-            last_name="Member",
-        )
-        user_scenarios.append(
-            f"legacy_member_org{i} - Legacy user already member of {org.organization_name}"
-        )
-
-    # Legacy user with pending invitation to org2
-    create_legacy_user_with_status(
-        uei=org2.sam_gov_entity.uei,
-        email="legacy_pending_org2@example.com",
-        status=LegacyUserStatus.PENDING_INVITATION,
-        organization=org2,
+    _build_legacy_users_for_orgs(
+        orgs=[org1, org2, org3],
         inviter=many_app_user,
-        first_name="Legacy",
-        last_name="Pending",
+        user_scenarios=user_scenarios,
     )
-
-    user_scenarios.append("legacy_pending_org2 - Legacy user invited to ORG2, invite pending")
 
     ########################
     # Apps for many_app_user
@@ -546,3 +510,52 @@ def handle_static_application_forms(application: Application, competition: Compe
         )
 
         validate_application_form(application_form, ApplicationAction.START)
+
+
+def _build_legacy_users_for_orgs(
+    orgs: list[Organization],
+    inviter: User,
+    user_scenarios: list[str],
+) -> None:
+    """
+    Creates legacy users for each org to support invite lifecycle testing.
+    """
+    # AVAILABLE legacy users
+    for i, org in enumerate(orgs, start=1):
+        create_legacy_user_with_status(
+            uei=org.sam_gov_entity.uei,
+            email=f"legacy_available_org{i}@example.com",
+            status=LegacyUserStatus.AVAILABLE,
+            organization=org,
+            first_name=f"Legacy{i}",
+            last_name="Available",
+        )
+        user_scenarios.append(
+            f"legacy_available_org{i} - Legacy user for {org.organization_name}, invite not sent"
+        )
+
+    # MEMBER legacy users
+    for i, org in enumerate(orgs, start=1):
+        create_legacy_user_with_status(
+            uei=org.sam_gov_entity.uei,
+            email=f"legacy_member_org{i}@example.com",
+            status=LegacyUserStatus.MEMBER,
+            organization=org,
+            first_name=f"Legacy{i}",
+            last_name="Member",
+        )
+        user_scenarios.append(
+            f"legacy_member_org{i} - Legacy user already member of {org.organization_name}"
+        )
+
+    # Single PENDING invite
+    create_legacy_user_with_status(
+        uei=orgs[1].sam_gov_entity.uei,
+        email="legacy_pending_org2@example.com",
+        status=LegacyUserStatus.PENDING_INVITATION,
+        organization=orgs[1],
+        inviter=inviter,
+        first_name="Legacy",
+        last_name="Pending",
+    )
+    user_scenarios.append("legacy_pending_org2 - Legacy user invited to ORG2, invite pending")
