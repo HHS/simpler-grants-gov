@@ -158,6 +158,15 @@ resource "aws_api_gateway_rest_api" "api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  # Configure binary media types to prevent API Gateway from base64-encoding binary content
+  # This is critical for file uploads (e.g., PDF files) via multipart/form-data
+  binary_media_types = [
+    "multipart/form-data",      # File uploads
+    "application/pdf",          # PDF files
+    "application/octet-stream", # Generic binary files
+    "image/*",                  # All image types (png, jpg, gif, etc.)
+  ]
 }
 
 resource "aws_api_gateway_method" "root" {
