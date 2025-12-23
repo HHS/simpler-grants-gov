@@ -73,7 +73,6 @@ class Base(DeclarativeBase):
         return json_valid_dict
 
     def copy(self, **kwargs: dict[str, Any]) -> Base:
-        # TODO - Python 3.11 will let us make the return Self instead
         table = self.__table__
         non_pk_columns = [
             k for k in table.columns.keys() if k not in table.primary_key.columns.keys()  # type: ignore

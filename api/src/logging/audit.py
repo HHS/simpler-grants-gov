@@ -32,7 +32,7 @@ def handle_audit_event(event_name: str, args: tuple[Any, ...]) -> None:
     EVENTS_TO_LOG = {
         # Detect dynamic execution of code objects. This only occurs for explicit
         # calls, and is not raised for normal function invocation.
-        "exec": ("code_object",),  # TODO - this can't be logged as a code object isn't serializable
+        "exec": ("code_object",),
         # Detect when a file is about to be opened. path and mode are the usual
         # parameters to open if available, while flags is provided instead of
         # mode in some cases.

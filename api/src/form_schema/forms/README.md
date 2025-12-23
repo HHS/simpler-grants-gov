@@ -350,8 +350,8 @@ only be found by figuring out the behavior from the PDF. Consult
 with product and confirm the behavior we want for any auto-summed fields.
 
 ## Building the XML Conversion Schema
-TODO - we'll want to document this when we build out
-more of the schemas.
+We have a configuration for each form to convert it to the XML format
+that grants.gov used. This is further documented in [xml_generation](/api/src/services/xml_generation/README.md)
 
 ## Deploying a form
 We deploy forms to a given environment using a set of scripts.

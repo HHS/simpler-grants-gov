@@ -11,7 +11,6 @@ class NotificationReason(StrEnum):
     CLOSING_DATE_REMINDER = "closing_date_reminder"
 
 
-# TODO: Confirm with team if we want to use these metrics
 class Metrics(StrEnum):
     OPPORTUNITIES_TRACKED = "opportunities_tracked"
     VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"

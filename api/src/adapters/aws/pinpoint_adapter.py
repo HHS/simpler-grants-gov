@@ -104,8 +104,6 @@ def send_pinpoint_email_raw(
             "Addresses": {to_address: {"ChannelType": "EMAIL"}},
             "MessageConfiguration": {
                 "EmailMessage": {
-                    # TODO - we'll switch this to use templates in the future
-                    #        so keeping this simple with html/text the same
                     "SimpleEmail": {
                         "Subject": {"Charset": "UTF-8", "Data": subject},
                         "HtmlPart": {"Charset": "UTF-8", "Data": message},
