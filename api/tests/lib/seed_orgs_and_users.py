@@ -525,7 +525,7 @@ def _build_legacy_users_for_orgs(
     for i, org in enumerate(orgs, start=1):
         create_legacy_user_with_status(
             uei=org.sam_gov_entity.uei,
-            email=f"{faker.email()}@example.com",
+            email=faker.email(),
             status=LegacyUserStatus.AVAILABLE,
             organization=org,
             first_name=f"Legacy{i}",
@@ -539,7 +539,7 @@ def _build_legacy_users_for_orgs(
     for i, org in enumerate(orgs, start=1):
         create_legacy_user_with_status(
             uei=org.sam_gov_entity.uei,
-            email=f"{faker.email()}@example.com",
+            email=faker.email(),
             status=LegacyUserStatus.MEMBER,
             organization=org,
             first_name=f"Legacy{i}",
@@ -550,7 +550,7 @@ def _build_legacy_users_for_orgs(
     # Single PENDING invite
     create_legacy_user_with_status(
         uei=orgs[1].sam_gov_entity.uei,
-        email=f"{faker.email()}@example.com",
+        email=faker.email(),
         status=LegacyUserStatus.PENDING_INVITATION,
         organization=orgs[1],
         inviter=inviter,
