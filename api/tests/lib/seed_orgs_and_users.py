@@ -2,6 +2,7 @@ import logging
 import uuid
 import zipfile
 
+from faker import Faker
 from sqlalchemy import select
 
 import src.adapters.db as db
@@ -26,6 +27,8 @@ from src.services.applications.application_validation import (
 from src.util import file_util
 from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
+
+faker = Faker()
 
 logger = logging.getLogger(__name__)
 
@@ -217,7 +220,6 @@ def _build_organizations_and_users(
     _build_legacy_users_for_orgs(
         orgs=[org1, org2, org3],
         inviter=many_app_user,
-        user_scenarios=user_scenarios,
     )
 
     ########################
@@ -515,7 +517,6 @@ def handle_static_application_forms(application: Application, competition: Compe
 def _build_legacy_users_for_orgs(
     orgs: list[Organization],
     inviter: User,
-    user_scenarios: list[str],
 ) -> None:
     """
     Creates legacy users for each org to support invite lifecycle testing.
@@ -524,13 +525,13 @@ def _build_legacy_users_for_orgs(
     for i, org in enumerate(orgs, start=1):
         create_legacy_user_with_status(
             uei=org.sam_gov_entity.uei,
-            email=f"legacy_available_org{i}@example.com",
+            email=f"{faker.email()}@example.com",
             status=LegacyUserStatus.AVAILABLE,
             organization=org,
             first_name=f"Legacy{i}",
             last_name="Available",
         )
-        user_scenarios.append(
+        logger.info(
             f"legacy_available_org{i} - Legacy user for {org.organization_name}, invite not sent"
         )
 
@@ -538,24 +539,22 @@ def _build_legacy_users_for_orgs(
     for i, org in enumerate(orgs, start=1):
         create_legacy_user_with_status(
             uei=org.sam_gov_entity.uei,
-            email=f"legacy_member_org{i}@example.com",
+            email=f"{faker.email()}@example.com",
             status=LegacyUserStatus.MEMBER,
             organization=org,
             first_name=f"Legacy{i}",
             last_name="Member",
         )
-        user_scenarios.append(
-            f"legacy_member_org{i} - Legacy user already member of {org.organization_name}"
-        )
+        logger.info(f"legacy_member_org{i} - Legacy user already member of {org.organization_name}")
 
     # Single PENDING invite
     create_legacy_user_with_status(
         uei=orgs[1].sam_gov_entity.uei,
-        email="legacy_pending_org2@example.com",
+        email=f"{faker.email()}@example.com",
         status=LegacyUserStatus.PENDING_INVITATION,
         organization=orgs[1],
         inviter=inviter,
         first_name="Legacy",
         last_name="Pending",
     )
-    user_scenarios.append("legacy_pending_org2 - Legacy user invited to ORG2, invite pending")
+    logger.info("legacy_pending_org2 - Legacy user invited to ORG2, invite pending")
