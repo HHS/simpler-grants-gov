@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.constants.lookup_constants import OrganizationInvitationStatus
+from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
 from src.db.models.entity_models import OrganizationInvitation
 from tests.src.db.models import factories
 from tests.src.db.models.factories import (
@@ -62,6 +62,12 @@ def test_org_invitation_response_accepted(
     assert data["status"] == OrganizationInvitationStatus.ACCEPTED
     assert data["responded_at"] == res.accepted_at.isoformat()
 
+    # Verify audit history recorded
+    org = inv.organization
+    assert len(org.organization_audits) == 1
+    assert org.organization_audits[0].user.user_id == user.user_id
+    assert org.organization_audits[0].organization_audit_event == OrganizationAuditEvent.USER_ADDED
+
 
 def test_org_invitation_response_rejected(
     client, db_session, user, user_auth_token, enable_factory_create
@@ -97,6 +103,14 @@ def test_org_invitation_response_rejected(
     data = resp.get_json()["data"]
     assert data["status"] == OrganizationInvitationStatus.REJECTED
     assert data["responded_at"] == res.rejected_at.isoformat()
+
+    # Verify user added audit event was not created
+    user_added_audits = [
+        audit
+        for audit in inv.organization.organization_audits
+        if audit.audit_event == OrganizationAuditEvent.USER_ADDED
+    ]
+    assert len(user_added_audits) == 0
 
 
 def test_org_invitation_response_404_invitation(client, db_session, user, user_auth_token):
