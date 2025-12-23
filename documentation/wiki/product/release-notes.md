@@ -1,8 +1,8 @@
 # Release Notes
 
-## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 22, 2025
+## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 23, 2025
 
-December 22nd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases): &#x20;
+December 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases): &#x20;
 
 {% columns %}
 {% column width="25%" %}
