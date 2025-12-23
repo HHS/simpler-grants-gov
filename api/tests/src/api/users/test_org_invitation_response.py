@@ -106,7 +106,9 @@ def test_org_invitation_response_rejected(
 
     # Verify user added audit event was not created
     user_added_audits = [
-        audit for audit in inv.organization.organization_audits if audit.audit_event == "USER_ADDED"
+        audit
+        for audit in inv.organization.organization_audits
+        if audit.audit_event == OrganizationAuditEvent.USER_ADDED
     ]
     assert len(user_added_audits) == 0
 
