@@ -40,10 +40,12 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
                 operation_name="GetApplicationZipResponse"
             )
             expected = {
-                "Body": {
-                    "ns2:GetApplicationZipResponse": {
-                        "ns2:FileDataHandler": {
-                            "xop:Include": {"@href": f"cid:{CID_UUID}-0001@apply.grants.gov"}
+                "Envelope": {
+                    "Body": {
+                        "ns2:GetApplicationZipResponse": {
+                            "ns2:FileDataHandler": {
+                                "xop:Include": {"@href": f"cid:{CID_UUID}-0001@apply.grants.gov"}
+                            }
                         }
                     }
                 }

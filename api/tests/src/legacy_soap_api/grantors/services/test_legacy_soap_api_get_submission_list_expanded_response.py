@@ -109,25 +109,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{application.competition.opportunity.opportunity_number}",
-                            "CFDANumber": application.competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Validated",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": application.competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{application.competition.opportunity.opportunity_number}",
+                                "CFDANumber": application.competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Validated",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": application.competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -210,11 +212,11 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "ActiveExclusions": "No",
             "UEI": sam_gov_entity_2.uei,
         }
-        available_application_number = soap_envelope_dict["Body"][
+        available_application_number = soap_envelope_dict["Envelope"]["Body"][
             "ns2:GetSubmissionListExpandedResponse"
         ]["ns2:AvailableApplicationNumber"]
         assert available_application_number == 2
-        expanded_application_info = soap_envelope_dict["Body"][
+        expanded_application_info = soap_envelope_dict["Envelope"]["Body"][
             "ns2:GetSubmissionListExpandedResponse"
         ]["ns2:SubmissionInfo"]
         assert len(expanded_application_info) == 2
@@ -295,25 +297,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -370,25 +374,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": f"{'Yes' if application.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
-                            "ActiveExclusions": f"{'Yes' if application.organization.sam_gov_entity.has_exclusion_status else 'No'}",
-                            "UEI": application.organization.sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": f"{'Yes' if application.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                                "ActiveExclusions": f"{'Yes' if application.organization.sam_gov_entity.has_exclusion_status else 'No'}",
+                                "UEI": application.organization.sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -447,25 +453,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{competition_1.opportunity.opportunity_number}",
-                            "CFDANumber": competition_1.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application_1.application_name,
-                            "PackageID": competition_1.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
-                            "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
-                            "UEI": application_1.organization.sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{competition_1.opportunity.opportunity_number}",
+                                "CFDANumber": competition_1.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application_1.application_name,
+                                "PackageID": competition_1.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                                "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
+                                "UEI": application_1.organization.sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -523,25 +531,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{competition_1.opportunity.opportunity_number}",
-                            "CFDANumber": competition_1.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application_1.application_name,
-                            "PackageID": competition_1.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
-                            "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
-                            "UEI": application_1.organization.sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{competition_1.opportunity.opportunity_number}",
+                                "CFDANumber": competition_1.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application_1.application_name,
+                                "PackageID": competition_1.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                                "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
+                                "UEI": application_1.organization.sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -602,25 +612,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": f"{'Yes' if sam_gov_entity.has_debt_subject_to_offset else 'No'}",
-                            "ActiveExclusions": f"{'Yes' if sam_gov_entity.has_exclusion_status else 'No'}",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": f"{'Yes' if sam_gov_entity.has_debt_subject_to_offset else 'No'}",
+                                "ActiveExclusions": f"{'Yes' if sam_gov_entity.has_exclusion_status else 'No'}",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -681,25 +693,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -760,25 +774,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -847,25 +863,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -955,20 +973,22 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "SubmissionMethod": "web",
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "SubmissionMethod": "web",
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -1019,11 +1039,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 0,
-                    "ns2:SubmissionInfo": [],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 0,
+                        "ns2:SubmissionInfo": [],
+                    }
                 }
             }
         }
@@ -1099,22 +1121,24 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -1162,11 +1186,13 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 0,
-                    "ns2:SubmissionInfo": [],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 0,
+                        "ns2:SubmissionInfo": [],
+                    }
                 }
             }
         }
@@ -1228,25 +1254,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }
@@ -1307,25 +1335,27 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
-            "Body": {
-                "ns2:GetSubmissionListExpandedResponse": {
-                    "ns2:Success": True,
-                    "ns2:AvailableApplicationNumber": 1,
-                    "ns2:SubmissionInfo": [
-                        {
-                            "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
-                            "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
-                            "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-                            "GrantsGovApplicationStatus": "Received",
-                            "SubmissionTitle": application.application_name,
-                            "PackageID": competition.legacy_package_id,
-                            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
-                            "SubmissionMethod": "web",
-                            "DelinquentFederalDebt": "Yes",
-                            "ActiveExclusions": "Yes",
-                            "UEI": sam_gov_entity.uei,
-                        }
-                    ],
+            "Envelope": {
+                "Body": {
+                    "ns2:GetSubmissionListExpandedResponse": {
+                        "ns2:Success": True,
+                        "ns2:AvailableApplicationNumber": 1,
+                        "ns2:SubmissionInfo": [
+                            {
+                                "FundingOpportunityNumber": f"{competition.opportunity.opportunity_number}",
+                                "CFDANumber": competition.opportunity_assistance_listing.assistance_listing_number,
+                                "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
+                                "GrantsGovApplicationStatus": "Received",
+                                "SubmissionTitle": application.application_name,
+                                "PackageID": competition.legacy_package_id,
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "SubmissionMethod": "web",
+                                "DelinquentFederalDebt": "Yes",
+                                "ActiveExclusions": "Yes",
+                                "UEI": sam_gov_entity.uei,
+                            }
+                        ],
+                    }
                 }
             }
         }

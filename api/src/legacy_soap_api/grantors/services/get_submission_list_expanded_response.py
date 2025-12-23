@@ -77,7 +77,7 @@ def get_submission_list_expanded_response(
     db_session: db.Session,
     get_submission_list_expanded_request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
-) -> schemas.GetSubmissionListExpandedResponseSOAPEnvelope:
+) -> schemas.GetSubmissionListExpandedResponse | list:
     stmt = (
         select(ApplicationSubmission)
         .join(ApplicationSubmission.application)
@@ -133,53 +133,46 @@ def get_submission_list_expanded_response(
     submissions_query: Sequence[ApplicationSubmission] = []
     # If more than one status in filter then just return nothing
     if status and len(status) > 1:
-        submissions_query = []
-    else:
-        certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
-        if certificate.agency is not None:
-            stmt = stmt.where(Opportunity.agency_code == certificate.agency.agency_code)
-        simpler_status = STATUS_TRANSFORM.get(str(status[0])) if status else None
-        if simpler_status:
-            stmt = stmt.where(Application.application_status == simpler_status)
+        return []
+    certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
+    if certificate.agency is not None:
+        stmt = stmt.where(Opportunity.agency_code == certificate.agency.agency_code)
+    simpler_status = STATUS_TRANSFORM.get(str(status[0])) if status else None
+    if simpler_status:
+        stmt = stmt.where(Application.application_status == simpler_status)
 
-        # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
-        if grants_gov_tracking_numbers:
-            stmt = stmt.where(
-                [
-                    ApplicationSubmission.legacy_tracking_number == tracking_number
-                    for tracking_number in grants_gov_tracking_numbers
-                ][-1]
-            )
-        if cfda_numbers:
-            stmt = stmt.where(
-                [
-                    OpportunityAssistanceListing.assistance_listing_number == cfda
-                    for cfda in cfda_numbers
-                ][-1]
-            )
-        if funding_opportunity_numbers:
-            stmt = stmt.where(
-                [
-                    Opportunity.opportunity_number == opportunity_number
-                    for opportunity_number in funding_opportunity_numbers
-                ][-1]
-            )
-        if opportunity_ids:
-            stmt = stmt.where(
-                [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][
-                    -1
-                ]
-            )
-        submissions_query = db_session.execute(stmt).scalars().all()
+    # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
+    if grants_gov_tracking_numbers:
+        stmt = stmt.where(
+            [
+                ApplicationSubmission.legacy_tracking_number == tracking_number
+                for tracking_number in grants_gov_tracking_numbers
+            ][-1]
+        )
+    if cfda_numbers:
+        stmt = stmt.where(
+            [
+                OpportunityAssistanceListing.assistance_listing_number == cfda
+                for cfda in cfda_numbers
+            ][-1]
+        )
+    if funding_opportunity_numbers:
+        stmt = stmt.where(
+            [
+                Opportunity.opportunity_number == opportunity_number
+                for opportunity_number in funding_opportunity_numbers
+            ][-1]
+        )
+    if opportunity_ids:
+        stmt = stmt.where(
+            [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][-1]
+        )
+    submissions_query = db_session.execute(stmt).scalars().all()
 
     info = []
     for submission in submissions_query:
         submission_list_obj = transform_submission(submission)
         info.append(schemas.SubmissionInfo(**submission_list_obj))
-    get_submission_list_expanded_response = schemas.GetSubmissionListExpandedResponse(
-        **dict(success=True, available_application_number=len(info), submission_info=info)
+    return schemas.GetSubmissionListExpandedResponse(
+        success=True, available_application_number=len(info), submission_info=info
     )
-    soap_body = schemas.GetSubmissionListExpandedResponseSOAPBody(
-        **{"ns2:GetSubmissionListExpandedResponse": get_submission_list_expanded_response}
-    )
-    return schemas.GetSubmissionListExpandedResponseSOAPEnvelope(**{"Body": soap_body})

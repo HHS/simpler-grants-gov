@@ -366,7 +366,7 @@ def build_mtom_response_from_dict(
         nsmap={"soap": "http://schemas.xmlsoap.org/soap/envelope/"},
     )
     soap_body = etree.SubElement(soap_env, QName(namespaces["soap"], "Body"))
-    response_data = input_data.get("Body", {})
+    response_data = input_data.get("Envelope", {}).get("Body", {})
     nsmap = {key: val for key, val in namespaces.items() if key not in ("xop", "soap")}
     for key, value in response_data.items():
         prefix, local_name = get_prefix_and_local_name(key)

@@ -26,28 +26,8 @@ class GetSubmissionListExpandedResponse(BaseSOAPSchema):
     available_application_number: int = Field(alias="ns2:AvailableApplicationNumber")
     submission_info: list[SubmissionInfo] = Field(alias="ns2:SubmissionInfo")
 
-
-class GetSubmissionListExpandedResponseSOAPBody(BaseSOAPSchema):
-    get_submission_list_expanded_response: GetSubmissionListExpandedResponse = Field(
-        alias="ns2:GetSubmissionListExpandedResponse"
-    )
-
-
-class GetSubmissionListExpandedResponseSOAPEnvelope(BaseSOAPSchema):
-    Body: GetSubmissionListExpandedResponseSOAPBody
-
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
-        body = self.Body.model_dump(by_alias=True, mode="json")
-        cleaned_submissions = []
-        if body.get("ns2:GetSubmissionListExpandedResponse"):
-            for item in body["ns2:GetSubmissionListExpandedResponse"].get("ns2:SubmissionInfo", []):
-                cleaned_submissions.append(
-                    {key: val for key, val in item.items() if val is not None}
-                )
-            body["ns2:GetSubmissionListExpandedResponse"][
-                "ns2:SubmissionInfo"
-            ] = cleaned_submissions
-        return {"Body": body}
+        return super().to_soap_envelope_dict(f"ns2:{operation_name}")
 
 
 class ExpandedApplicationFilter(BaseModel):

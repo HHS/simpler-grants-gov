@@ -237,7 +237,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
 
     def GetSubmissionListExpandedRequest(
         self,
-    ) -> grantors_schemas.GetSubmissionListExpandedResponseSOAPEnvelope:
+    ) -> grantors_schemas.GetSubmissionListExpandedResponse | list[Any]:
         soap_request_dict = self.get_soap_request_dict() or {}
         return get_submission_list_expanded_response(
             db_session=self.db_session,
