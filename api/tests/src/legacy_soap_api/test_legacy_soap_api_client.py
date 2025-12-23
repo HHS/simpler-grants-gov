@@ -93,7 +93,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         )
         assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
         assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
-        assert client.GetOpportunityListRequest() is not None
+        assert client.get_opportunity_list_request() is not None
         simpler_soap_response = client.get_simpler_soap_response(mock_proxy_request_response)
         assert isinstance(simpler_soap_response, SOAPResponse)
 
@@ -114,7 +114,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         )
         assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
         assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
-        opportunity_list_response = client.GetOpportunityListRequest()
+        opportunity_list_response = client.get_opportunity_list_request()
         assert len(opportunity_list_response.opportunity_details) == 1
         assert opportunity_list_response.opportunity_details[0].package_id == package_id
 
@@ -126,7 +126,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             mock_requests.get_opportunity_list_by_package_id_request(package_id).encode(),
             db_session,
         )
-        result = client.GetOpportunityListRequest()
+        result = client.get_opportunity_list_request()
         assert len(result.opportunity_details) == 1
         assert result.opportunity_details[0].package_id == package_id
 
@@ -143,7 +143,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             ).encode(),
             db_session,
         )
-        result = client.GetOpportunityListRequest()
+        result = client.get_opportunity_list_request()
         assert len(result.opportunity_details) == 1
         assert result.opportunity_details[0].competition_id == competition_id
         assert result.opportunity_details[0].funding_opportunity_number == opportunity_number
@@ -160,13 +160,13 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
             ).encode(),
             db_session,
         )
-        result = client.GetOpportunityListRequest()
+        result = client.get_opportunity_list_request()
         assert len(result.opportunity_details) == 1
         assert result.opportunity_details[0].funding_opportunity_number == opportunity_number
 
         # Test adding another competition results in entries returned
         CompetitionFactory.create(opportunity=opportunity, public_competition_id="ABC-134-22222")
-        result = client.GetOpportunityListRequest()
+        result = client.get_opportunity_list_request()
         assert len(result.opportunity_details) == 2
 
     def test_get_opportunity_list_by_assistance_listing_number(

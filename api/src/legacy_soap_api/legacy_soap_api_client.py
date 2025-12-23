@@ -21,6 +21,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_soap_response,
     json_formatter,
     log_local,
+    to_snake_case,
     wrap_envelope_dict,
     xml_formatter,
 )
@@ -56,7 +57,9 @@ class BaseSOAPClient:
         Example:
             {'Envelope': {'Body': {'GetOpportunityListResponse': {...}}}}
         """
-        operation_method = getattr(self, self.operation_config.request_operation_name)
+        operation_method = getattr(
+            self, to_snake_case(self.operation_config.request_operation_name)
+        )
         return operation_method().to_soap_envelope_dict(
             self.operation_config.response_operation_name
         )
@@ -209,7 +212,7 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/applicant-system-to-system/web-services/
     """
 
-    def GetOpportunityListRequest(self) -> applicants_schemas.GetOpportunityListResponse:
+    def get_opportunity_list_request(self) -> applicants_schemas.GetOpportunityListResponse:
         return get_opportunity_list_response(
             db_session=self.db_session,
             get_opportunity_list_request=applicants_schemas.GetOpportunityListRequest(
@@ -225,7 +228,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/grantor-system-to-system/web-services
     """
 
-    def GetApplicationZipRequest(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
+    def get_application_zip_request(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
         return get_application_zip_response(
             db_session=self.db_session,
             soap_request=self.soap_request,
@@ -235,16 +238,14 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             soap_config=self.operation_config,
         )
 
-    def GetSubmissionListExpandedRequest(
+    def get_submission_list_expanded_request(
         self,
-    ) -> grantors_schemas.GetSubmissionListExpandedResponse | list[Any]:
+    ) -> grantors_schemas.GetSubmissionListExpandedResponse:
         soap_request_dict = self.get_soap_request_dict() or {}
         return get_submission_list_expanded_response(
             db_session=self.db_session,
             soap_request=self.soap_request,
-            get_submission_list_expanded_request=grantors_schemas.GetSubmissionListExpandedRequest(
-                **soap_request_dict
-            ),
+            request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
         )
 
     def _gen_response_data(

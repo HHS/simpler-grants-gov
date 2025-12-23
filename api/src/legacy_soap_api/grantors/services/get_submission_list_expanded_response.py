@@ -1,5 +1,4 @@
 import logging
-from collections.abc import Sequence
 from datetime import datetime
 
 from sqlalchemy import select
@@ -73,11 +72,11 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
     return application_list_obj
 
 
-def get_submission_list_expanded_response(
+def get_submissions(
     db_session: db.Session,
-    get_submission_list_expanded_request: schemas.GetSubmissionListExpandedRequest,
+    request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
-) -> schemas.GetSubmissionListExpandedResponse | list:
+) -> list[ApplicationSubmission]:
     stmt = (
         select(ApplicationSubmission)
         .join(ApplicationSubmission.application)
@@ -99,78 +98,66 @@ def get_submission_list_expanded_response(
         )
     )
 
-    grants_gov_tracking_numbers = None
-    cfda_numbers = None
-    funding_opportunity_numbers = None
-    opportunity_ids = None
-    competition_ids = None
-    package_ids = None
-    status = None
-    simpler_status = None
-    submission_titles = None
-    if get_submission_list_expanded_request.expanded_application_filter:
-        if (
-            submission_filters := get_submission_list_expanded_request.expanded_application_filter.filters
-        ):
-            grants_gov_tracking_numbers = submission_filters.get("GrantsGovTrackingNumber")
-            cfda_numbers = submission_filters.get("CFDANumber")
-            funding_opportunity_numbers = submission_filters.get("FundingOpportunityNumber")
-            opportunity_ids = submission_filters.get("OpportunityID")
-            competition_ids = submission_filters.get("CompetitionID")
-            package_ids = submission_filters.get("PackageID")
-            status = submission_filters.get("Status")
-            submission_titles = submission_filters.get("SubmissionTitle")
+    if request.expanded_application_filter and request.expanded_application_filter.filters:
+        submission_filters = request.expanded_application_filter.filters
+        if status := submission_filters.get("Status"):
+            # If more than one status in filter then just return nothing
+            if status and len(status) > 1:
+                return []
+            simpler_status = STATUS_TRANSFORM.get(str(status[0])) if status else None
+            if simpler_status:
+                stmt = stmt.where(Application.application_status == simpler_status)
+        # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
+        if grants_gov_tracking_numbers := submission_filters.get("GrantsGovTrackingNumber"):
+            stmt = stmt.where(
+                [
+                    ApplicationSubmission.legacy_tracking_number == tracking_number
+                    for tracking_number in grants_gov_tracking_numbers
+                ][-1]
+            )
+        if cfda_numbers := submission_filters.get("CFDANumber"):
+            stmt = stmt.where(
+                [
+                    OpportunityAssistanceListing.assistance_listing_number == cfda
+                    for cfda in cfda_numbers
+                ][-1]
+            )
+        if funding_opportunity_numbers := submission_filters.get("FundingOpportunityNumber"):
+            stmt = stmt.where(
+                [
+                    Opportunity.opportunity_number == opportunity_number
+                    for opportunity_number in funding_opportunity_numbers
+                ][-1]
+            )
+        if opportunity_ids := submission_filters.get("OpportunityID"):
+            stmt = stmt.where(
+                [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][
+                    -1
+                ]
+            )
 
-    # Unsupported but logged
-    if competition_ids:
-        logger.info(f"GetSubmissionListExpanded Filter: CompetitionIDs {competition_ids}")
-    if package_ids:
-        logger.info(f"GetSubmissionListExpanded Filter: PackageIDs {package_ids}")
-    if submission_titles:
-        logger.info(f"GetSubmissionListExpanded Filter: SubmissionTitles {submission_titles}")
+        # Unsupported but logged
+        if competition_ids := submission_filters.get("CompetitionID"):
+            logger.info(f"GetSubmissionListExpanded Filter: CompetitionIDs {competition_ids}")
+        if package_ids := submission_filters.get("PackageID"):
+            logger.info(f"GetSubmissionListExpanded Filter: PackageIDs {package_ids}")
+        if submission_titles := submission_filters.get("SubmissionTitle"):
+            logger.info(f"GetSubmissionListExpanded Filter: SubmissionTitles {submission_titles}")
 
-    simpler_status = None
-    submissions_query: Sequence[ApplicationSubmission] = []
-    # If more than one status in filter then just return nothing
-    if status and len(status) > 1:
-        return []
     certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
     if certificate.agency is not None:
         stmt = stmt.where(Opportunity.agency_code == certificate.agency.agency_code)
-    simpler_status = STATUS_TRANSFORM.get(str(status[0])) if status else None
-    if simpler_status:
-        stmt = stmt.where(Application.application_status == simpler_status)
+    return list(db_session.execute(stmt).scalars().all())
 
-    # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
-    if grants_gov_tracking_numbers:
-        stmt = stmt.where(
-            [
-                ApplicationSubmission.legacy_tracking_number == tracking_number
-                for tracking_number in grants_gov_tracking_numbers
-            ][-1]
-        )
-    if cfda_numbers:
-        stmt = stmt.where(
-            [
-                OpportunityAssistanceListing.assistance_listing_number == cfda
-                for cfda in cfda_numbers
-            ][-1]
-        )
-    if funding_opportunity_numbers:
-        stmt = stmt.where(
-            [
-                Opportunity.opportunity_number == opportunity_number
-                for opportunity_number in funding_opportunity_numbers
-            ][-1]
-        )
-    if opportunity_ids:
-        stmt = stmt.where(
-            [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][-1]
-        )
-    submissions_query = db_session.execute(stmt).scalars().all()
 
+def get_submission_list_expanded_response(
+    db_session: db.Session,
+    request: schemas.GetSubmissionListExpandedRequest,
+    soap_request: SOAPRequest,
+) -> schemas.GetSubmissionListExpandedResponse:
+    submissions = get_submissions(db_session, request, soap_request)
     info = []
-    for submission in submissions_query:
+    for submission in submissions:
         submission_list_obj = transform_submission(submission)
         info.append(schemas.SubmissionInfo(**submission_list_obj))
     return schemas.GetSubmissionListExpandedResponse(
