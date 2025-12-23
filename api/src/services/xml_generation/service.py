@@ -597,7 +597,7 @@ class XMLGenerationService:
         """
         # Get element order from config
         address_order = self._get_element_order_from_config(
-            transform_config, nested_path="applicant_address"
+            transform_config, nested_path="applicant"
         )
 
         # Add elements in the correct order
