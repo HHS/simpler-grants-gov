@@ -56,3 +56,4 @@ The following list links to all of the ADRs we've adopted:
 * [Use Fider as co-planning tool](2025-08-28-co-planning-tool.md)
 * [API Key Management](2025-09-04-api-key-management.md)
 * [CommonGrants adoption in Simpler.Grants.gov](2025-10-27-common-grants-in-sgg.md)
+* [Simpler Grants Management Data Flow](2025-12-24-sgm-data-flow.md)
