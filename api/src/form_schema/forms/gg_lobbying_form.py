@@ -30,7 +30,7 @@ FORM_JSON_SCHEMA = {
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Applicant's Organization",
-            "description": "Enter the legal name of the applicant's organization that will undertake the assistance activity. This is the organization that has registered with the System for Award Management (SAM). Information on registering with SAM may be obtained by visiting SAM.gov."
+            "description": "Enter the legal name of the applicant's organization that will undertake the assistance activity. This is the organization that has registered with the System for Award Management (SAM). Information on registering with SAM may be obtained by visiting SAM.gov.",
         },
         "authorized_representative_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}]
