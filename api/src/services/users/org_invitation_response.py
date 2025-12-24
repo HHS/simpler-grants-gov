@@ -5,13 +5,14 @@ from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import OrganizationInvitationStatus
+from src.constants.lookup_constants import OrganizationAuditEvent, OrganizationInvitationStatus
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
     Organization,
     OrganizationInvitation,
 )
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole, User
+from src.services.organizations_v1.organization_audit import add_audit_event
 from src.util.datetime_util import utcnow
 
 
@@ -74,9 +75,16 @@ def org_invitation_response(
         for role in invitation.linked_roles:
             org_user_role = OrganizationUserRole(organization_user=org_user, role_id=role.role_id)
             db_session.add(org_user_role)
+
         # Update response time
         invitation.accepted_at = now
-
+        # When a user accepts an invitation, add an audit event.
+        add_audit_event(
+            db_session=db_session,
+            organization=invitation.organization,
+            user=user,
+            audit_event=OrganizationAuditEvent.USER_ADDED,
+        )
     if status == OrganizationInvitationStatus.REJECTED:
         # Update response time
         invitation.rejected_at = now

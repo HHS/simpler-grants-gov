@@ -141,7 +141,13 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="GetApplicationZipResponse",
             is_mtom=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
-        )
+        ),
+        "GetSubmissionListExpandedRequest": SOAPOperationConfig(
+            request_operation_name="GetSubmissionListExpandedRequest",
+            response_operation_name="GetSubmissionListExpandedResponse",
+            is_mtom=True,
+            privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+        ),
     },
 }
 

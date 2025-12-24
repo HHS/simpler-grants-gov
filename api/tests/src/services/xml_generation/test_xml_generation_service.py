@@ -163,7 +163,7 @@ class TestXMLGenerationService:
         application_data = {
             "submission_type": "Application",
             "organization_name": "Test University",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main Street",
                 "street2": "Suite 100",
                 "city": "Washington",
@@ -197,6 +197,127 @@ class TestXMLGenerationService:
         assert "globLib:Country" in xml_data and "US" in xml_data
         assert "globLib:ZipPostalCode" in xml_data and "20001-1234" in xml_data
         assert "</SF424_4_0:Applicant>" in xml_data
+
+    def test_generate_xml_with_contact_person(self):
+        """Test XML generation with ContactPerson nested structure."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "contact_person": {
+                "first_name": "Chris",
+                "last_name": "Kuryak",
+            },
+            "project_title": "Research Project",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify nested ContactPerson structure is created correctly
+        assert "<SF424_4_0:ContactPerson>" in xml_data
+        assert "globLib:FirstName" in xml_data and "Chris" in xml_data
+        assert "globLib:LastName" in xml_data and "Kuryak" in xml_data
+        assert "</SF424_4_0:ContactPerson>" in xml_data
+
+    def test_generate_xml_with_applicant_and_contact_person(self):
+        """Test XML generation with both Applicant and ContactPerson elements."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "applicant": {
+                "street1": "123 Main Street",
+                "city": "Austin",
+                "state": "TX: Texas",
+                "zip_code": "78701",
+                "country": "USA: UNITED STATES",
+            },
+            "contact_person": {
+                "first_name": "Chris",
+                "last_name": "Kuryak",
+            },
+            "phone_number": "555-555-5555",
+            "email": "test@example.com",
+            "project_title": "Research Project",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify both Applicant and ContactPerson are present
+        assert "<SF424_4_0:Applicant>" in xml_data
+        assert "<SF424_4_0:ContactPerson>" in xml_data
+
+        # Verify ContactPerson structure with namespaces
+        assert "globLib:FirstName" in xml_data and "Chris" in xml_data
+        assert "globLib:LastName" in xml_data and "Kuryak" in xml_data
+
+        # Verify element order: Applicant should come before ContactPerson
+        applicant_pos = xml_data.find("<SF424_4_0:Applicant>")
+        contact_person_pos = xml_data.find("<SF424_4_0:ContactPerson>")
+        assert applicant_pos != -1, "Applicant element not found"
+        assert contact_person_pos != -1, "ContactPerson element not found"
+        assert applicant_pos < contact_person_pos, "ContactPerson should come after Applicant"
+
+        # Verify ContactPerson comes before PhoneNumber
+        phone_pos = xml_data.find("<SF424_4_0:PhoneNumber>")
+        assert phone_pos != -1, "PhoneNumber element not found"
+        assert contact_person_pos < phone_pos, "ContactPerson should come before PhoneNumber"
+
+    def test_generate_xml_with_competition_identification(self):
+        """Test XML generation with CompetitionIdentificationNumber and CompetitionIdentificationTitle."""
+        application_data = {
+            "submission_type": "Application",
+            "organization_name": "Test University",
+            "funding_opportunity_number": "SIMP-TEST-001",
+            "funding_opportunity_title": "Test Opportunity",
+            "competition_identification_number": "SIMP-TEST-001",
+            "competition_identification_title": "Test Competition",
+            "project_title": "Research Project",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data, transform_config=FORM_XML_TRANSFORM_RULES
+        )
+
+        response = service.generate_xml(request)
+
+        # Verify response
+        assert response.success is True
+        assert response.xml_data is not None
+        xml_data = response.xml_data
+
+        # Verify CompetitionIdentificationNumber and CompetitionIdentificationTitle are present
+        assert "<SF424_4_0:CompetitionIdentificationNumber>" in xml_data
+        assert "<SF424_4_0:CompetitionIdentificationTitle>" in xml_data
+        assert "SIMP-TEST-001" in xml_data
+        assert "Test Competition" in xml_data
+
+        # Verify element order: CompetitionIdentificationNumber should come after FundingOpportunityTitle
+        funding_title_pos = xml_data.find("<SF424_4_0:FundingOpportunityTitle>")
+        competition_number_pos = xml_data.find("<SF424_4_0:CompetitionIdentificationNumber>")
+        assert competition_number_pos != -1, "CompetitionIdentificationNumber element not found"
+        assert (
+            funding_title_pos < competition_number_pos
+        ), "CompetitionIdentificationNumber should come after FundingOpportunityTitle"
 
     def test_generate_xml_pretty_print_vs_condensed(self):
         """Test XML generation with pretty-print vs condensed formatting."""
@@ -368,7 +489,7 @@ class TestXMLGenerationService:
             "organization_name": "Test University",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "ABC123DEF456",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Anytown",
                 "state": "CA",
