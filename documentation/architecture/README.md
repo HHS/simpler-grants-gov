@@ -6,7 +6,7 @@ At a high level, this system uses Github to maintain the codebase repository and
 
 ## Architecture
 
-This is a general architecture diagram of the simpler.grants.gov system.
+This is a general software development/CI/CD diagram of the simpler.grants.gov system.
 
 ```mermaid
 %%{init: {'theme': 'neutral' } }%%
@@ -23,7 +23,7 @@ flowchart TB
 
 ## AWS Hosted Infrastructure
 
-This is an architecture diagram focusing on the AWS shared infrastructure managed by simpler.grants.gov. There's a [write up of the same information](#architecture-description) later in the document.
+This is an architecture diagram focusing on the AWS shared infrastructure managed by Simpler Grants.gov. There's a [write up of the same information](#architecture-description) later in the document.
 
 ![Grants gov system architecture](https://github.com/user-attachments/assets/f4191c3e-d8a5-4094-b7c9-f45d5a9e08e1)
 
@@ -33,7 +33,7 @@ The infrastructure is documented as a [write up later in this document](#archite
 
 ## AWS Shared Services
 
-The simpler.grants.gov is using the following non infrastructure shared services in AWS:
+Simpler grants.gov is using the following non infrastructure shared services in AWS:
 
 - [ECS: Elastic Container Service](https://aws.amazon.com/ecs/)
 - [ECR: Elastic Container Registry](https://aws.amazon.com/ecr/)
@@ -91,6 +91,8 @@ The "analytics" component of the application is the parts composed of the analyt
 
 ## Architecture Description
 
+### Overview
+
 Currently a single AWS Project houses all of the environments.
 
 - [Layers](#layers)
@@ -122,7 +124,7 @@ Public exposure of the API enters via the AWS API Gateway, publicly exposed on [
 
 #### File Requests
 
-Publicly available files such as files attached to Opportunities, Application Instructions, etc. are accessed via a separate Cloudfront CDN which provides access to the S3 bucket where those files are stored.
+Publicly available files such as files attached to Opportunities, Application Instructions, etc. are accessed via a separate Cloudfront CDN (files.simpler.grants.gov) which provides access to the S3 bucket where those files are stored.
 
 ### SOAP S2S Replacement
 
