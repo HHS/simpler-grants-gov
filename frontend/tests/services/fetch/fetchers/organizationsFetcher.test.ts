@@ -31,33 +31,33 @@ type FetchImpl = (args: FetchArgs) => FetchResponse;
 
 type FetchWithMethodFn = (type: string) => FetchImpl;
 
-const fetchOrganizationMock = jest.fn<FetchResponse, [FetchArgs]>();
-const fetchOrganizationWithMethodMock = jest.fn<FetchImpl, [string]>();
+const fetchOrganizationMock: jest.MockedFunction<FetchImpl> = jest.fn();
+const fetchOrganizationWithMethodMock: jest.MockedFunction<FetchWithMethodFn> =
+  jest.fn();
 
-const fetchUserMock = jest.fn<FetchResponse, [FetchArgs]>();
-const fetchUserWithMethodMock = jest.fn<FetchImpl, [string]>();
+const fetchUserMock: jest.MockedFunction<FetchImpl> = jest.fn();
+const fetchUserWithMethodMock: jest.MockedFunction<FetchWithMethodFn> =
+  jest.fn();
 
-type GetSessionFn = () => Promise<unknown>;
+type GetSessionFn = () => Promise<{ token?: string } | null>;
 
-const mockGetSession = jest.fn<ReturnType<GetSessionFn>, []>();
+const mockGetSession: jest.MockedFunction<GetSessionFn> = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => {
-  const mocked: {
-    fetchOrganizationWithMethod: FetchWithMethodFn;
-    fetchUserWithMethod: FetchWithMethodFn;
-  } = {
+  return {
     fetchOrganizationWithMethod: (type: string) =>
       fetchOrganizationWithMethodMock(type),
     fetchUserWithMethod: (type: string) => fetchUserWithMethodMock(type),
+  } satisfies {
+    fetchOrganizationWithMethod: FetchWithMethodFn;
+    fetchUserWithMethod: FetchWithMethodFn;
   };
-  return mocked;
 });
 
 jest.mock("src/services/auth/session", () => {
-  const mocked: { getSession: GetSessionFn } = {
-    getSession: () => mockGetSession(),
+  return { getSession: () => mockGetSession() } satisfies {
+    getSession: GetSessionFn;
   };
-  return mocked;
 });
 
 describe("getOrganizationDetails", () => {
@@ -391,6 +391,8 @@ describe("removeOrganizationUser", () => {
       throw new Error("Network error");
     });
 
+    // Expect the fetch factory itself to throw; allow this call despite jest type erasure
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await expect(
       removeOrganizationUser("org-123", "user-1"),
     ).rejects.toThrowError("Network error");
