@@ -139,6 +139,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create(is_multilevel_agency=False)
+        other_agency = AgencyFactory.create(is_multilevel_agency=False)
         sam_gov_entity_1 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
@@ -149,15 +150,25 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         sam_gov_entity_2 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
+        sam_gov_entity_3 = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=False, has_exclusion_status=False
+        )
+
         submission_2 = setup_application_submission(
             agency,
             legacy_package_id="PKG00000005",
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
         )
+        other_submission = setup_application_submission(
+            other_agency,
+            legacy_package_id="PKG99999999",
+            sam_gov_entity=sam_gov_entity_3,
+        )
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
+
         opportunity_1 = submission_1.application.competition.opportunity
         opportunity_2 = submission_2.application.competition.opportunity
         request_xml = (
@@ -222,6 +233,11 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         assert len(expanded_application_info) == 2
         assert expected_1 in expanded_application_info
         assert expected_2 in expanded_application_info
+        # Ensure unrelated agency submission is excluded
+        assert all(
+            item["PackageID"] != other_submission.application.competition.legacy_package_id
+            for item in expanded_application_info
+        )
 
     def test_get_submission_list_expanded_response_multi_level_agency(
         self, db_session, enable_factory_create
