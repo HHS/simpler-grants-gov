@@ -138,7 +138,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
     def test_get_submission_list_expanded_response_no_filter(
         self, db_session, enable_factory_create
     ):
-        agency = AgencyFactory.create()
+        agency = AgencyFactory.create(is_multilevel_agency=False)
         sam_gov_entity_1 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
@@ -151,6 +151,96 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         submission_2 = setup_application_submission(
             agency,
+            legacy_package_id="PKG00000005",
+            sam_gov_entity=sam_gov_entity_2,
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_VIEWER}
+        )
+        opportunity_1 = submission_1.application.competition.opportunity
+        opportunity_2 = submission_2.application.competition.opportunity
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=request_xml,
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest") or {}
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_request_schema, soap_request
+        )
+        soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
+        expected_1 = {
+            "FundingOpportunityNumber": f"{opportunity_1.opportunity_number}",
+            "CFDANumber": submission_1.application.competition.opportunity_assistance_listing.assistance_listing_number,
+            "GrantsGovTrackingNumber": f"GRANT{submission_1.legacy_tracking_number}",
+            "GrantsGovApplicationStatus": "Validated",
+            "SubmissionTitle": submission_1.application.application_name,
+            "PackageID": submission_1.application.competition.legacy_package_id,
+            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+            "SubmissionMethod": "web",
+            "DelinquentFederalDebt": "No",
+            "ActiveExclusions": "No",
+            "UEI": sam_gov_entity_1.uei,
+        }
+        expected_2 = {
+            "FundingOpportunityNumber": f"{opportunity_2.opportunity_number}",
+            "CFDANumber": submission_2.application.competition.opportunity_assistance_listing.assistance_listing_number,
+            "GrantsGovTrackingNumber": f"GRANT{submission_2.legacy_tracking_number}",
+            "GrantsGovApplicationStatus": "Received",
+            "SubmissionTitle": submission_2.application.application_name,
+            "PackageID": submission_2.application.competition.legacy_package_id,
+            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+            "SubmissionMethod": "web",
+            "DelinquentFederalDebt": "No",
+            "ActiveExclusions": "No",
+            "UEI": sam_gov_entity_2.uei,
+        }
+        available_application_number = soap_envelope_dict["Envelope"]["Body"][
+            "ns2:GetSubmissionListExpandedResponse"
+        ]["ns2:AvailableApplicationNumber"]
+        assert available_application_number == 2
+        expanded_application_info = soap_envelope_dict["Envelope"]["Body"][
+            "ns2:GetSubmissionListExpandedResponse"
+        ]["ns2:SubmissionInfo"]
+        assert len(expanded_application_info) == 2
+        assert expected_1 in expanded_application_info
+        assert expected_2 in expanded_application_info
+
+    def test_get_submission_list_expanded_response_multi_level_agency(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create(is_multilevel_agency=True, agency_code="DOD")
+        sub_agency = AgencyFactory.create(sub_agency_code=agency.agency_code, agency_code="DOD-HHO")
+
+        sam_gov_entity_1 = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=False, has_exclusion_status=False
+        )
+        submission_1 = setup_application_submission(
+            agency, legacy_package_id="PKG00118065", sam_gov_entity=sam_gov_entity_1
+        )
+
+        sam_gov_entity_2 = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=False, has_exclusion_status=False
+        )
+        submission_2 = setup_application_submission(
+            sub_agency,
             legacy_package_id="PKG00000005",
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
