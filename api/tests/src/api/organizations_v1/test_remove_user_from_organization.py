@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OrganizationAuditEvent, Privilege
 from src.db.models.user_models import OrganizationUser, OrganizationUserRole
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
 from tests.src.db.models.factories import OrganizationFactory
@@ -60,6 +60,15 @@ class TestRemoveUserFromOrganization:
             .first()
         )
         assert org_user_after is None
+
+        # Verify audit history recorded
+        assert len(organization.organization_audits) == 1
+        assert organization.organization_audits[0].user.user_id == admin_user.user_id
+        assert organization.organization_audits[0].target_user_id == target_user.user_id
+        assert (
+            organization.organization_audits[0].organization_audit_event
+            == OrganizationAuditEvent.USER_REMOVED
+        )
 
     def test_remove_user_cascades_delete_roles(self, enable_factory_create, client, db_session):
         """Test that removing user also deletes their organization roles"""

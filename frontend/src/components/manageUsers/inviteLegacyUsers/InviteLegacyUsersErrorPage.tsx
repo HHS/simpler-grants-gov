@@ -10,15 +10,15 @@ const PageBreadcrumbs = ({ organizationId }: { organizationId: string }) => {
       breadcrumbList={[
         {
           title: t("OrganizationDetail.pageTitle"),
-          path: `/organization/${organizationId}`,
+          path: `/organizations/${organizationId}`,
         },
         {
           title: t("ManageUsers.pageHeading"),
-          path: `/organization/${organizationId}/manage-users`,
+          path: `/organizations/${organizationId}/manage-users`,
         },
         {
           title: t("InviteLegacyUsers.pageHeading"),
-          path: `/organization/${organizationId}/manage-users/legacy`,
+          path: `/organizations/${organizationId}/manage-users/legacy`,
         },
       ]}
     />

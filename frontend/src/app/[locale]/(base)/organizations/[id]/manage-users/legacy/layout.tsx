@@ -6,7 +6,9 @@ import { getTranslations } from "next-intl/server";
 
 import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 
-export async function generateMetadata({ params }: LocalizedPageProps) {
+export async function generateMetadata({
+  params,
+}: LocalizedPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
 

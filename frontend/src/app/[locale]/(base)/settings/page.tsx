@@ -16,14 +16,14 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("UserAccount.pageTitle"),
+    title: t("Settings.pageTitle"),
     description: t("Index.metaDescription"),
   };
   return meta;
 }
 
-async function UserAccount() {
-  const t = await getTranslations("UserAccount");
+async function Settings() {
+  const t = await getTranslations("Settings");
 
   const session = await getSession();
   if (!session?.email) {
@@ -40,7 +40,7 @@ async function UserAccount() {
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>{t("title")}</h1>
+      <h1 className="margin-bottom-6">{t("title")}</h1>
       {userDetails ? (
         <UserProfileForm userDetails={userDetails} />
       ) : (
@@ -50,6 +50,6 @@ async function UserAccount() {
   );
 }
 
-export default withFeatureFlag<object, never>(UserAccount, "userAdminOff", () =>
+export default withFeatureFlag<object, never>(Settings, "userAdminOff", () =>
   redirect("/maintenance"),
 );

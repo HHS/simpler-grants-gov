@@ -1,3 +1,5 @@
+from typing import Any
+
 from marshmallow import pre_load
 
 from src.api.schemas.extension import Schema, fields, validators
@@ -7,7 +9,11 @@ from src.pagination.pagination_models import SortDirection
 class BasePaginationSchema(Schema):
 
     @pre_load
-    def before_load(self, item: dict, many: bool, **kwargs: dict) -> dict:
+    def before_load(self, item: Any, many: bool, **kwargs: dict) -> Any:
+        # If input is not a dict, just return it; Marshmallow will raise a ValidationError
+        if not isinstance(item, dict):
+            return item
+
         # If sort_order is used, don't change anything
         # We'll assume they've migrated properly
         if item.get("sort_order") is not None:

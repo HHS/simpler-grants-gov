@@ -98,7 +98,6 @@ def test_build_headers():
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-API-Key": "fake-x-api-key",
-        "X-Auth": "fake-auth-token",
     }
 
 

@@ -7,9 +7,10 @@ from sqlalchemy import select
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import Privilege, RoleType
+from src.constants.lookup_constants import OrganizationAuditEvent, Privilege, RoleType
 from src.db.models.user_models import LinkRoleRoleType, OrganizationUserRole, Role, User
 from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.organization_audit import add_audit_event
 from src.services.organizations_v1.organization_user_utils import validate_organization_user_exists
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,7 @@ def update_user_organization_roles(
 
     # Validate and update roles
     validate_roles(db_session, new_role_ids)
+
     # Delete roles
     for org_role in [
         r
@@ -76,6 +78,15 @@ def update_user_organization_roles(
     # Add new roles
     for role_id in new_role_ids - existing_role_ids:
         db_session.add(OrganizationUserRole(organization_user=org_user, role_id=role_id))
+
+    # Add audit event when a user role is updated
+    add_audit_event(
+        db_session=db_session,
+        organization=organization,
+        user=user,
+        audit_event=OrganizationAuditEvent.USER_UPDATED,
+        target_user=org_user.user,
+    )
 
     # Push changes to database and refresh
     db_session.flush()

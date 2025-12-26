@@ -15,7 +15,7 @@ class TestConfigurableNamespaces:
         application_data = {
             "submission_type": "Application",
             "organization_name": "Test Organization",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC",
@@ -81,7 +81,7 @@ class TestConfigurableNamespaces:
 
         application_data = {
             "submission_type": "Application",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
             },

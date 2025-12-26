@@ -185,6 +185,7 @@ const nextConfig = {
   },
   experimental: {
     testProxy: true,
+    middlewareClientMaxBodySize: "2000mb",
     serverActions: {
       bodySizeLimit: "2000mb",
     },
@@ -209,6 +210,11 @@ const nextConfig = {
       {
         source: "/subscribe/unsubscribe",
         destination: "/newsletter/unsubscribe",
+        permanent: false,
+      },
+      {
+        source: "/organization/:segments*",
+        destination: "/organizations/:segments*",
         permanent: false,
       },
     ];

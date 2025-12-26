@@ -2,11 +2,12 @@ import logging
 import uuid
 import zipfile
 
+from faker import Faker
 from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import ApplicationStatus, OpportunityStatus
+from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
 from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
@@ -24,7 +25,10 @@ from src.services.applications.application_validation import (
     validate_application_form,
 )
 from src.util import file_util
+from tests.lib.legacy_user_test_utils import create_legacy_user_with_status
 from tests.lib.seed_data_utils import CompetitionContainer, UserBuilder
+
+faker = Faker()
 
 logger = logging.getLogger(__name__)
 
@@ -209,6 +213,14 @@ def _build_organizations_and_users(
     )
 
     user_scenarios.append("many_app_user - Has many applications across many orgs")
+
+    ########################
+    # Legacy users for orgs
+    ########################
+    _build_legacy_users_for_orgs(
+        orgs=[org1, org2, org3],
+        inviter=many_app_user,
+    )
 
     ########################
     # Apps for many_app_user
@@ -500,3 +512,49 @@ def handle_static_application_forms(application: Application, competition: Compe
         )
 
         validate_application_form(application_form, ApplicationAction.START)
+
+
+def _build_legacy_users_for_orgs(
+    orgs: list[Organization],
+    inviter: User,
+) -> None:
+    """
+    Creates legacy users for each org to support invite lifecycle testing.
+    """
+    # AVAILABLE legacy users
+    for i, org in enumerate(orgs, start=1):
+        create_legacy_user_with_status(
+            uei=org.sam_gov_entity.uei,
+            email=faker.email(),
+            status=LegacyUserStatus.AVAILABLE,
+            organization=org,
+            first_name=f"Legacy{i}",
+            last_name="Available",
+        )
+        logger.info(
+            f"legacy_available_org{i} - Legacy user for {org.organization_name}, invite not sent"
+        )
+
+    # MEMBER legacy users
+    for i, org in enumerate(orgs, start=1):
+        create_legacy_user_with_status(
+            uei=org.sam_gov_entity.uei,
+            email=faker.email(),
+            status=LegacyUserStatus.MEMBER,
+            organization=org,
+            first_name=f"Legacy{i}",
+            last_name="Member",
+        )
+        logger.info(f"legacy_member_org{i} - Legacy user already member of {org.organization_name}")
+
+    # Single PENDING invite
+    create_legacy_user_with_status(
+        uei=orgs[1].sam_gov_entity.uei,
+        email=faker.email(),
+        status=LegacyUserStatus.PENDING_INVITATION,
+        organization=orgs[1],
+        inviter=inviter,
+        first_name="Legacy",
+        last_name="Pending",
+    )
+    logger.info("legacy_pending_org2 - Legacy user invited to ORG2, invite pending")

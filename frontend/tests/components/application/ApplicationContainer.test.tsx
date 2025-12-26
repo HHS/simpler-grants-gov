@@ -1,11 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationHistory,
+} from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
+import historyMock from "stories/components/application/history.mock.json";
 import opportunityMock from "stories/components/application/opportunity.mock.json";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
@@ -109,6 +113,7 @@ describe("ApplicationContainer", () => {
         applicationDetails={mockApplicationDetails}
         attachments={mockAttachments}
         opportunity={mockOpportunity}
+        applicationHistory={historyMock as ApplicationHistory[]}
       />,
     );
 
@@ -128,6 +133,7 @@ describe("ApplicationContainer", () => {
           applicationDetails={inProgressApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
@@ -146,6 +152,7 @@ describe("ApplicationContainer", () => {
           applicationDetails={submittedApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
@@ -164,11 +171,33 @@ describe("ApplicationContainer", () => {
           applicationDetails={acceptedApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
       const submittedStatus = screen.getByTestId("application-submitted");
       expect(submittedStatus).toHaveTextContent("true");
+    });
+  });
+
+  describe("Application History visibility", () => {
+    it("should have a history section", () => {
+      const inProgressApplication = {
+        ...mockApplicationDetails,
+        application_status: "in_progress",
+      };
+
+      render(
+        <ApplicationContainer
+          applicationDetails={inProgressApplication}
+          attachments={mockAttachments}
+          opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
+        />,
+      );
+
+      const historyHeader = screen.getByText("applicationHistory");
+      expect(historyHeader).toBeInTheDocument();
     });
   });
 
@@ -191,6 +220,7 @@ describe("ApplicationContainer", () => {
           applicationDetails={inProgressApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
@@ -223,6 +253,7 @@ describe("ApplicationContainer", () => {
           applicationDetails={inProgressApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
@@ -254,6 +285,7 @@ describe("ApplicationContainer", () => {
           applicationDetails={inProgressApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
@@ -285,6 +317,7 @@ describe("ApplicationContainer", () => {
           applicationDetails={inProgressApplication}
           attachments={mockAttachments}
           opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
         />,
       );
 
@@ -312,6 +345,60 @@ describe("ApplicationContainer", () => {
       await waitFor(() => {
         expect(submitButton).toHaveTextContent("Submit");
       });
+    });
+
+    it("should display the submission successful box", () => {
+      const inProgressApplication = {
+        ...mockApplicationDetails,
+        application_status: "submitted",
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ data: {} }),
+      });
+
+      render(
+        <ApplicationContainer
+          applicationDetails={inProgressApplication}
+          attachments={mockAttachments}
+          opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
+        />,
+      );
+
+      const submitConfirmationtButton = screen.getByText(
+        "submissionSuccess.title",
+      );
+      expect(submitConfirmationtButton).toBeInTheDocument();
+    });
+
+    it("should not display the submission successful box when in progress", () => {
+      const inProgressApplication = {
+        ...mockApplicationDetails,
+        application_status: "in_progress",
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ data: {} }),
+      });
+
+      render(
+        <ApplicationContainer
+          applicationDetails={inProgressApplication}
+          attachments={mockAttachments}
+          opportunity={mockOpportunity}
+          applicationHistory={historyMock as ApplicationHistory[]}
+        />,
+      );
+
+      const submitConfirmationtButton = screen.queryByText(
+        "submissionSuccess.title",
+      );
+      expect(submitConfirmationtButton).not.toBeInTheDocument();
     });
   });
 });

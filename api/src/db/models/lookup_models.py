@@ -16,6 +16,7 @@ from src.constants.lookup_constants import (
     JobStatus,
     OpportunityCategory,
     OpportunityStatus,
+    OrganizationAuditEvent,
     Privilege,
     RoleType,
     SamGovExtractType,
@@ -261,6 +262,14 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
         LookupStr(UserType.STANDARD, 1),
         LookupStr(UserType.INTERNAL_FRONTEND, 2),
         LookupStr(UserType.LEGACY_CERTIFICATE, 3),
+    ]
+)
+
+ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupConfig(
+    [
+        LookupStr(OrganizationAuditEvent.USER_ADDED, 1),
+        LookupStr(OrganizationAuditEvent.USER_UPDATED, 2),
+        LookupStr(OrganizationAuditEvent.USER_REMOVED, 3),
     ]
 )
 
@@ -546,3 +555,17 @@ class LkUserType(LookupTable, TimestampMixin):
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkUserType:
         return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(ORGANIZATION_AUDIT_EVENT_CONFIG)
+class LkOrganizationAuditEvent(LookupTable, TimestampMixin):
+    __tablename__ = "lk_organization_audit_event"
+
+    organization_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkOrganizationAuditEvent:
+        return LkOrganizationAuditEvent(
+            organization_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )

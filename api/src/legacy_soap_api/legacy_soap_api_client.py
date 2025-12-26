@@ -9,7 +9,10 @@ import src.adapters.db as db
 from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
-from src.legacy_soap_api.grantors.services import get_application_zip_response
+from src.legacy_soap_api.grantors.services import (
+    get_application_zip_response,
+    get_submission_list_expanded_response,
+)
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
@@ -18,12 +21,13 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_soap_response,
     json_formatter,
     log_local,
+    to_snake_case,
     wrap_envelope_dict,
     xml_formatter,
 )
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPPayload,
-    build_mtom_xml_from_dict,
+    build_mtom_response_from_dict,
     build_xml_from_dict,
     get_envelope_dict,
     get_soap_operation_dict,
@@ -53,7 +57,9 @@ class BaseSOAPClient:
         Example:
             {'Envelope': {'Body': {'GetOpportunityListResponse': {...}}}}
         """
-        operation_method = getattr(self, self.operation_config.request_operation_name)
+        operation_method = getattr(
+            self, to_snake_case(self.operation_config.request_operation_name)
+        )
         return operation_method().to_soap_envelope_dict(
             self.operation_config.response_operation_name
         )
@@ -206,7 +212,7 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/applicant-system-to-system/web-services/
     """
 
-    def GetOpportunityListRequest(self) -> applicants_schemas.GetOpportunityListResponse:
+    def get_opportunity_list_request(self) -> applicants_schemas.GetOpportunityListResponse:
         return get_opportunity_list_response(
             db_session=self.db_session,
             get_opportunity_list_request=applicants_schemas.GetOpportunityListRequest(
@@ -222,7 +228,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/grantor-system-to-system/web-services
     """
 
-    def GetApplicationZipRequest(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
+    def get_application_zip_request(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
         return get_application_zip_response(
             db_session=self.db_session,
             soap_request=self.soap_request,
@@ -230,6 +236,16 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
                 **self.get_soap_request_dict()
             ),
             soap_config=self.operation_config,
+        )
+
+    def get_submission_list_expanded_request(
+        self,
+    ) -> grantors_schemas.GetSubmissionListExpandedResponse:
+        soap_request_dict = self.get_soap_request_dict() or {}
+        return get_submission_list_expanded_response(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
         )
 
     def _gen_response_data(
@@ -258,35 +274,36 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         # 2. headers:
         #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
         #    "Content-Transfer-Encoding: binary\n"
-        #    "Content-Id: <root.message@cxf.apache.org>\n\n"
+        #    "Content-ID: <root.message@cxf.apache.org>\n\n"
         # 3. MTOM xml body
         # 4. --uuid: {boundary_uuid}
         # 5. the file bytes from the file being attached
+        # 6. --uuid: {boundary_uuid}--
         simpler_response_soap_dict = self.get_soap_response_dict()
         mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
         )
-        simpler_response_xml = build_mtom_xml_from_dict(
-            self.operation_config.namespaces,
-            simpler_response_soap_dict,
-            self.operation_config.response_operation_name,
-        ).decode()
         boundary_uuid = str(uuid.uuid4())
         update_headers = {
             "MIME-Version": "1.0",
             "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
         }
-        boundary = "--uuid:" + boundary_uuid + "\n"
-        mime_message = (
-            f"{boundary}"
-            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-            "Content-Transfer-Encoding: binary\n"
-            "Content-Id: <root.message@cxf.apache.org>\n\n"
-            f"{simpler_response_xml}\n"
-            f"{boundary}"
-        ).encode("utf-8")
+        boundary = "--uuid:" + boundary_uuid
+        mime_message = build_mtom_response_from_dict(
+            simpler_response_soap_dict,
+            boundary_uuid,
+            self.operation_config.namespaces,
+            root=self.operation_config.response_operation_name,
+        )
+        if self.operation_config.response_operation_name != "GetApplicationZipResponse":
+            mime_message += f"\n--uuid:{boundary_uuid}--".encode("utf-8")
+            return get_soap_response(
+                data=mime_message,
+                headers=update_headers,
+            )
         if mtom_file_stream:
+            mime_message += ("\n" + boundary + "\n").encode("utf8")
             return get_soap_response(
                 data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
                 headers=update_headers,

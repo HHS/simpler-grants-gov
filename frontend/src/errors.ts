@@ -188,6 +188,9 @@ function convertSearchInputSetsToArrays(
       ? Array.from(searchInputs.eligibility)
       : [],
     agency: searchInputs.agency ? Array.from(searchInputs.agency) : [],
+    assistanceListingNumber: searchInputs.assistanceListingNumber
+      ? Array.from(searchInputs.assistanceListingNumber)
+      : [],
     category: searchInputs.category ? Array.from(searchInputs.category) : [],
     closeDate: searchInputs.closeDate ? Array.from(searchInputs.closeDate) : [],
     costSharing: searchInputs.costSharing

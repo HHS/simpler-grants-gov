@@ -2,30 +2,45 @@
 
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationHistory,
+  Status,
+} from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { Alert } from "@trussworks/react-uswds";
+import {
+  Alert,
+  SummaryBox,
+  SummaryBoxContent,
+  SummaryBoxHeading,
+} from "@trussworks/react-uswds";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
+import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
 import { AttachmentsCard } from "./attachments/AttachmentsCard";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
+const MY_APPLICATIONS_LINK = "/applications";
+
 const ApplicationContainer = ({
   applicationDetails,
   attachments,
   opportunity,
+  applicationHistory,
 }: {
   applicationDetails: ApplicationDetail;
   attachments: Attachment[];
   opportunity: OpportunityDetail;
+  applicationHistory: ApplicationHistory[];
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
@@ -65,6 +80,7 @@ const ApplicationContainer = ({
           setError(true);
         } else if (data?.errors) {
           setValidationErrors(data.errors);
+          router.refresh();
         } else {
           setSuccess(true);
           // Refresh server-side data to get updated application status from API
@@ -82,14 +98,36 @@ const ApplicationContainer = ({
 
   return (
     <>
-      {success && (
-        <Alert
-          heading={t("submissionSuccess.title")}
-          headingLevel="h3"
-          type="success"
-        >
-          {t("submissionSuccess.description")}{" "}
-        </Alert>
+      {(success ||
+        applicationDetails.application_status === Status.SUBMITTED ||
+        applicationDetails.application_status === Status.ACCEPTED) && (
+        <SummaryBox>
+          <SummaryBoxHeading headingLevel="h3">
+            {t("submissionSuccess.title")}
+          </SummaryBoxHeading>
+          <SummaryBoxContent
+            style={{ fontWeight: "bold", paddingBottom: "20px" }}
+          >
+            Application ID #: {applicationId}
+          </SummaryBoxContent>
+          <SummaryBoxContent style={{ paddingBottom: "20px" }}>
+            {t.rich("submissionSuccess.description", {
+              linkMyApplications: (chunks) => (
+                <Link href={MY_APPLICATIONS_LINK}>{chunks}</Link>
+              ),
+              p: (content) => (
+                <p style={{ width: "100%", maxWidth: "100%" }}>{content}</p>
+              ),
+            })}
+          </SummaryBoxContent>
+          <SummaryBoxContent>
+            {t.rich("submissionSuccess.contact", {
+              "email-link": (content) => (
+                <a href="mailto:simpler@grants.gov">{content}</a>
+              ),
+            })}
+          </SummaryBoxContent>
+        </SummaryBox>
       )}
       {error && (
         <Alert
@@ -106,12 +144,15 @@ const ApplicationContainer = ({
           })}
         </Alert>
       )}
-
-      <ApplicationValidationAlert
-        applicationForms={applicationForms}
-        forms={forms}
-        validationErrors={validationErrors}
-      />
+      {validationErrors.length > 0 &&
+        applicationDetails.application_status === "in_progress" &&
+        !success && (
+          <ApplicationValidationAlert
+            applicationForms={applicationForms}
+            forms={forms}
+            validationErrors={validationErrors}
+          />
+        )}
       <InformationCard
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
@@ -137,6 +178,7 @@ const ApplicationContainer = ({
         attachments={attachments}
         competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
+      <ApplicationHistoryTable applicationHistory={applicationHistory} />
     </>
   );
 };

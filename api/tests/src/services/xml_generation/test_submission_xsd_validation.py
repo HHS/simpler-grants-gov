@@ -98,12 +98,16 @@ class TestSubmissionXSDValidation:
                 "organization_name": "Test Research University",
                 "employer_taxpayer_identification_number": "123456789",  # Required per XSD
                 "sam_uei": "TEST12345678",  # Required per XSD (exactly 12 chars)
-                "applicant_address": {  # Required per XSD
+                "applicant": {  # Required per XSD
                     "street1": "123 Main St",
                     "city": "Washington",
                     "state": "DC: District of Columbia",
-                    "zip_postal_code": "20001",
+                    "zip_code": "20001",
                     "country": "USA: UNITED STATES",
+                },
+                "contact_person": {  # Required per XSD
+                    "first_name": "John",
+                    "last_name": "Doe",
                 },
                 "phone_number": "555-123-4567",  # Required per XSD
                 "email": "test@example.org",  # Required per XSD
@@ -367,12 +371,16 @@ class TestSubmissionXSDValidation:
                 "organization_name": "Multi-Form Test Org",
                 "employer_taxpayer_identification_number": "987654321",  # Required per XSD
                 "sam_uei": "MULTI8765432",  # Required per XSD (exactly 12 chars)
-                "applicant_address": {  # Required per XSD
+                "applicant": {  # Required per XSD
                     "street1": "456 Oak Ave",
                     "city": "Washington",
                     "state": "DC: District of Columbia",
-                    "zip_postal_code": "20002",
+                    "zip_code": "20002",
                     "country": "USA: UNITED STATES",
+                },
+                "contact_person": {  # Required per XSD
+                    "first_name": "Jane",
+                    "last_name": "Smith",
                 },
                 "phone_number": "555-987-6543",  # Required per XSD
                 "email": "multi@example.org",  # Required per XSD
