@@ -2,7 +2,14 @@ import path from "path";
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 
-dotenv.config({ path: path.resolve(__dirname, "..", ".env.local") });
+dotenv.config({
+  path: path.resolve(__dirname, "..", ".env.local"),
+  quiet: true,
+});
+
+// oddly, this value is not available to tests via config, need to export it for use in individual tests
+export const baseURL =
+  process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -22,8 +29,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
-
+    baseURL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "on",
