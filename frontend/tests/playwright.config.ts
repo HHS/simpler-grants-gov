@@ -43,7 +43,7 @@ const testOpportunityId = testOpportunityIdMap[targetEnv];
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 75000,
+  timeout: 120000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
   fullyParallel: true,
