@@ -1,6 +1,7 @@
 import io
 import json
 import logging
+import re
 import uuid
 from collections.abc import Callable, Iterator
 from enum import StrEnum
@@ -338,3 +339,14 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
 
 def convert_bool_to_yes_no(value: bool | None) -> str:
     return "Yes" if value else "No"
+
+
+def to_snake_case(name: str) -> str:
+    """
+    Converts camel case to snake case
+    GetApplicationZipRequest -> get_application_zip_request
+    SF424ABC -> sf424_abc
+    OperationID -> operation_id
+    """
+    sub = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
