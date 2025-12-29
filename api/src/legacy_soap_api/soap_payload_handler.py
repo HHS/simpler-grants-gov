@@ -1,13 +1,22 @@
 import io
+import logging
 import re
 from collections import defaultdict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Generator, Iterable, Iterator
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import xmltodict
 from lxml import etree
 from lxml.etree import Element, QName, SubElement
+
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+
+if TYPE_CHECKING:
+    from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+
+
+logger = logging.getLogger(__name__)
 
 ENVELOPE_REGEX = r"<([a-zA-Z0-9]+):Envelope.*?>(.*?)</([a-zA-Z0-9]+):Envelope>"
 XML_DICT_KEY_NAMESPACE_DELIMITER = ":"
@@ -389,3 +398,131 @@ def get_prefix_and_local_name(key: str) -> tuple:
         return key.split(":")[0], key.split(":")[-1]
     else:
         return None, key
+
+
+def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[bytes]:
+    found_xml = False
+    for chunk in byte_gen:
+        if not found_xml:
+            start_idx = chunk.find(b"<soap:Envelope")
+            if start_idx != -1:
+                found_xml = True
+                yield chunk[start_idx:]
+        else:
+            yield chunk
+
+
+class GeneratorStream(io.RawIOBase):
+    def __init__(self, gen: Generator) -> None:
+        self.gen = gen
+        self.leftover = b""
+
+    def readinto(self, buffer: Any) -> int:
+        try:
+            chunk = self.leftover or next(self.gen)
+        except StopIteration:
+            return 0
+
+        n = len(buffer)
+        if len(chunk) > n:
+            self.leftover = chunk[n:]
+            buffer[:n] = chunk[:n]
+            return n
+        else:
+            self.leftover = b""
+            buffer[: len(chunk)] = chunk
+            return len(chunk)
+
+    def readable(self) -> bool:
+        return True
+
+
+def get_proxy_submissions_generator(
+    proxy_data: SOAPResponse, simple_count: int, proxy_response_status_code: int
+) -> Generator[bytes]:
+    bytes_stream = io.BufferedReader(GeneratorStream(clean_mtom_generator(proxy_data.stream())))
+    context = etree.iterparse(bytes_stream, events=("start", "end"))
+    if proxy_response_status_code != 200:
+        yield f"<ns2:AvailableApplicationNumber>{simple_count}</ns2:AvailableApplicationNumber>".encode(
+            "utf-8"
+        )
+    else:
+        try:
+            for event, element in context:
+                tag_name = etree.QName(element).localname
+                if event == "end":
+                    if tag_name == "GetSubmissionListExpandedResponse":
+                        break
+                    if tag_name == "AvailableApplicationNumber":
+                        count = int(element.text)
+                        yield f"<ns2:AvailableApplicationNumber>{count + simple_count}</ns2:AvailableApplicationNumber>".encode(
+                            "utf-8"
+                        )
+                    if tag_name == "SubmissionInfo":
+                        data = etree.tostring(element)
+                        yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
+                        element.clear()
+                        while element.getprevious() is not None:
+                            del element.getparent()[0]
+        except etree.XMLSyntaxError:
+            logger.info(
+                msg="Could not parse proxy xml response",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
+            )
+            yield f"<ns2:AvailableApplicationNumber>{simple_count}</ns2:AvailableApplicationNumber>".encode(
+                "utf-8"
+            )
+
+
+def build_merged_get_submission_list_expanded_mtom_response(
+    input_data: dict, raw_uuid: str, namespaces: dict, root: str, proxy_data: SOAPResponse
+) -> Generator[bytes]:
+    response_data = input_data.get("Envelope", {}).get("Body", {})
+    simple_data = response_data.get("ns2:GetSubmissionListExpandedResponse", {}).get(
+        "ns2:SubmissionInfo", {}
+    )
+    boundary = f"uuid:{raw_uuid}"
+    yield (
+        f"--{boundary}\n"
+        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+        f"Content-Transfer-Encoding: binary\n"
+        f"Content-ID: <root.message@cxf.apache.org>\n\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<ns2:GetSubmissionListExpandedResponse "
+        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<ns2:Success>true</ns2:Success>"
+    ).encode("utf-8")
+
+    yield from get_proxy_submissions_generator(proxy_data, len(simple_data), proxy_data.status_code)
+
+    """
+    This takes a list of dicts like [{"FundingOpportunityNumber": "ABC"}] and coverts each dict into
+    an xml element then converts that xml to bytes and cleans out the namespace xmlns data we do not need
+    because that data is already injected in above
+    """
+    tag = etree.QName(namespaces["ns2"], "SubmissionInfo")
+    for data in simple_data:
+        submission_info_element = etree.Element(tag, nsmap=namespaces)
+        _build_mtom_nested_elements(submission_info_element, data, namespaces=namespaces)
+        raw_xml = etree.tostring(submission_info_element)
+        yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", raw_xml)
+
+    yield (
+        "</ns2:GetSubmissionListExpandedResponse>"
+        "</soap:Body>"
+        "</soap:Envelope>\n"
+        f"--{boundary}--"
+    ).encode("utf-8")
