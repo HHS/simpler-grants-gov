@@ -7,6 +7,7 @@ import * as newrelic from "newrelic";
 import { environment } from "src/constants/environments";
 import { NewRelicWithCorrectTypes } from "src/types/newRelic";
 
+import Head from "next/head";
 import Script from "next/script";
 
 import "src/styles/styles.scss";
@@ -54,13 +55,13 @@ export default async function RootLayoutWrapper({
   // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
+      <Head>
         <GoogleAnalytics gaId={environment.GOOGLE_TAG_MANAGER_ID} />
         <meta
           name="google-site-verification"
           content="jFShzxCTiLzv8gvEW4ft7fCaQkluH229-B-tJKteYJY"
         />
-      </head>
+      </Head>
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}
