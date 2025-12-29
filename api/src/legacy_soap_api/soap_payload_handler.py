@@ -459,6 +459,7 @@ def stream_expanded_submissions_response(context: Iterable, simple_count: int) -
                 )
             if tag_name == "SubmissionInfo":
                 data = etree.tostring(element)
+                # Using regex to strip out the xmlns stuff since it is already addeda
                 yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
                 element.clear()
                 while element.getprevious() is not None:
@@ -521,6 +522,7 @@ def build_merged_get_submission_list_expanded_mtom_response(
         submission_info_element = etree.Element(tag, nsmap=namespaces)
         _build_mtom_nested_elements(submission_info_element, data, namespaces=namespaces)
         raw_xml = etree.tostring(submission_info_element)
+        # Using regex to strip out the xmlns stuff since it is already added
         yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", raw_xml)
 
     yield (
