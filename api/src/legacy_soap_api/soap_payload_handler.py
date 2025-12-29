@@ -459,7 +459,7 @@ def stream_expanded_submissions_response(context: Iterable, simple_count: int) -
                 )
             if tag_name == "SubmissionInfo":
                 data = etree.tostring(element)
-                # Using regex to strip out the xmlns stuff since it is already addeda
+                # Using regex to strip out the xmlns stuff since it is already added
                 yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
                 element.clear()
                 while element.getprevious() is not None:
