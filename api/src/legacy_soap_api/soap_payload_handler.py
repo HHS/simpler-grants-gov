@@ -441,7 +441,7 @@ def get_proxy_submissions_generator(
     proxy_data: SOAPResponse, simple_count: int, proxy_response_status_code: int
 ) -> Generator[bytes]:
     bytes_stream = io.BufferedReader(GeneratorStream(clean_mtom_generator(proxy_data.stream())))
-    context = etree.iterparse(bytes_stream, events=("start", "end"))
+    context = etree.iterparse(bytes_stream, events=("end",))
     if proxy_response_status_code != 200:
         yield f"<ns2:AvailableApplicationNumber>{simple_count}</ns2:AvailableApplicationNumber>".encode(
             "utf-8"
