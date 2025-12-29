@@ -1,11 +1,13 @@
 import logging
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import Select
 
 import src.adapters.db as db
 from src.constants.lookup_constants import ApplicationStatus
+from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
@@ -145,9 +147,24 @@ def get_submissions(
             logger.info(f"GetSubmissionListExpanded Filter: SubmissionTitles {submission_titles}")
 
     certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
-    if certificate.agency is not None:
-        stmt = stmt.where(Opportunity.agency_code == certificate.agency.agency_code)
+    stmt = _apply_agency_filter(stmt, certificate.agency)
+
     return list(db_session.execute(stmt).scalars().all())
+
+
+def _apply_agency_filter(stmt: Select, agency: Agency | None) -> Select:
+    if agency is None:
+        return stmt
+
+    if agency.is_multilevel_agency:
+        return stmt.where(
+            or_(
+                Opportunity.agency_code == agency.agency_code,
+                Opportunity.agency_code.like(f"{agency.agency_code}-%"),
+            )
+        )
+
+    return stmt.where(Opportunity.agency_code == agency.agency_code)
 
 
 def get_submission_list_expanded_response(
