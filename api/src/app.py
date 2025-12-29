@@ -23,6 +23,7 @@ from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
@@ -173,6 +174,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
+    app.register_blueprint(internal_blueprint)
 
     endpoint_config = EndpointConfig()
     if endpoint_config.auth_endpoint:
