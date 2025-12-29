@@ -401,6 +401,10 @@ def get_prefix_and_local_name(key: str) -> tuple:
 
 
 def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[bytes]:
+    """
+    This will take the bytes of an MTOM messages and remove the header
+    to prevent errors when processing the xml
+    """
     found_xml = False
     for chunk in byte_gen:
         if not found_xml:
@@ -413,6 +417,11 @@ def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[b
 
 
 class GeneratorStream(io.RawIOBase):
+    """
+    This takes the response stream and converts into an object
+    that is file-like that can be used by Python tools
+    """
+
     def __init__(self, gen: Generator) -> None:
         self.gen = gen
         self.leftover = b""
@@ -437,42 +446,23 @@ class GeneratorStream(io.RawIOBase):
         return True
 
 
-def get_proxy_submissions_generator(
-    proxy_data: SOAPResponse, simple_count: int, proxy_response_status_code: int
-) -> Generator[bytes]:
-    bytes_stream = io.BufferedReader(GeneratorStream(clean_mtom_generator(proxy_data.stream())))
-    context = etree.iterparse(bytes_stream, events=("end",))
-    if proxy_response_status_code != 200:
-        yield f"<ns2:AvailableApplicationNumber>{simple_count}</ns2:AvailableApplicationNumber>".encode(
-            "utf-8"
-        )
-    else:
-        try:
-            for event, element in context:
-                tag_name = etree.QName(element).localname
-                if event == "end":
-                    if tag_name == "GetSubmissionListExpandedResponse":
-                        break
-                    if tag_name == "AvailableApplicationNumber":
-                        count = int(element.text)
-                        yield f"<ns2:AvailableApplicationNumber>{count + simple_count}</ns2:AvailableApplicationNumber>".encode(
-                            "utf-8"
-                        )
-                    if tag_name == "SubmissionInfo":
-                        data = etree.tostring(element)
-                        yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
-                        element.clear()
-                        while element.getprevious() is not None:
-                            del element.getparent()[0]
-        except etree.XMLSyntaxError:
-            logger.info(
-                msg="Could not parse proxy xml response",
-                exc_info=True,
-                extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
-            )
-            yield f"<ns2:AvailableApplicationNumber>{simple_count}</ns2:AvailableApplicationNumber>".encode(
-                "utf-8"
-            )
+def stream_expanded_submissions_response(context: Iterable, simple_count: int) -> Generator[bytes]:
+    for event, element in context:
+        tag_name = etree.QName(element).localname
+        if event == "end":
+            if tag_name == "GetSubmissionListExpandedResponse":
+                break
+            if tag_name == "AvailableApplicationNumber":
+                count = int(element.text)
+                yield f"<ns2:AvailableApplicationNumber>{count + simple_count}</ns2:AvailableApplicationNumber>".encode(
+                    "utf-8"
+                )
+            if tag_name == "SubmissionInfo":
+                data = etree.tostring(element)
+                yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
+                element.clear()
+                while element.getprevious() is not None:
+                    del element.getparent()[0]
 
 
 def build_merged_get_submission_list_expanded_mtom_response(
@@ -506,13 +496,26 @@ def build_merged_get_submission_list_expanded_mtom_response(
         "<ns2:Success>true</ns2:Success>"
     ).encode("utf-8")
 
-    yield from get_proxy_submissions_generator(proxy_data, len(simple_data), proxy_data.status_code)
+    simple_count_response = f"<ns2:AvailableApplicationNumber>{len(simple_data)}</ns2:AvailableApplicationNumber>".encode(
+        "utf-8"
+    )
+    if proxy_data.status_code == 200:
+        # Get the proxy data and inject it into the response here
+        reader = io.BufferedReader(GeneratorStream(clean_mtom_generator(proxy_data.stream())))
+        context = etree.iterparse(reader, events=("end",))
+        try:
+            yield from stream_expanded_submissions_response(context, len(simple_data))
+        except etree.XMLSyntaxError:
+            logger.info(
+                msg="Could not parse proxy xml response",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
+            )
+            yield simple_count_response
+    else:
+        yield simple_count_response
 
-    """
-    This takes a list of dicts like [{"FundingOpportunityNumber": "ABC"}] and coverts each dict into
-    an xml element then converts that xml to bytes and cleans out the namespace xmlns data we do not need
-    because that data is already injected in above
-    """
+    # Inject the data from simpler
     tag = etree.QName(namespaces["ns2"], "SubmissionInfo")
     for data in simple_data:
         submission_info_element = etree.Element(tag, nsmap=namespaces)
