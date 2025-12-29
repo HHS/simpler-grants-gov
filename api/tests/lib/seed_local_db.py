@@ -3,10 +3,9 @@ import logging
 import uuid
 from datetime import timedelta
 
-from sqlalchemy.exc import IntegrityError
-
 import click
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 import src.adapters.db as db
 import src.logging
