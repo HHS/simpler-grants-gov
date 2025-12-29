@@ -1,6 +1,7 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema
 
+
 class InternalRoleAssignmentRequestSchema(Schema):
     internal_role_id = fields.UUID(
         required=True,
@@ -16,6 +17,7 @@ class InternalRoleAssignmentRequestSchema(Schema):
             "example": "example@example.com",
         },
     )
+
 
 class InternalRoleAssignmentResponseSchema(AbstractResponseSchema):
     pass
