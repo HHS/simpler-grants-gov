@@ -27,9 +27,12 @@ def update_internal_roles(db_session: db.Session, json_data: dict) -> response.A
     logger.info("PUT /v1/internal/roles")
 
     user = api_user_key_auth.get_user()
-    db_session.add(user)
+    user = db_session.merge(user, load=False)
+
     verify_access(user, {Privilege.MANAGE_INTERNAL_ROLES}, None)
 
     update_internal_user_role(db_session, internal_role_id, user_email)
+
+    db_session.commit()
 
     return response.ApiResponse(message="Success")
