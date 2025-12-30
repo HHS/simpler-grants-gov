@@ -7,7 +7,13 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
+from src.constants.lookup_constants import (
+    ApplicationStatus,
+    LegacyUserStatus,
+    OpportunityStatus,
+    Privilege,
+    RoleType,
+)
 from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
@@ -59,6 +65,34 @@ def setup_org(
     organization.sam_gov_entity.legal_business_name = legal_business_name
 
     return organization
+
+
+def seed_internal_admin(db_session: db.Session) -> None:
+    """
+    Seeds a local admin user with the 'manage_internal_roles' privilege
+    and a static API key.
+    """
+    logger.info("Creating internal admin user")
+
+    admin_role = factories.RoleFactory.create(
+        role_name="Internal Admin", is_core=True, privileges=[Privilege.MANAGE_INTERNAL_ROLES]
+    )
+
+    factories.LinkRoleRoleTypeFactory.create(role=admin_role, role_type=RoleType.INTERNAL)
+
+    admin_user = (
+        UserBuilder(
+            uuid.UUID("7c3e5d1e-8a2f-4e5a-8b1c-9d2e3f4a5b6c"), db_session, "internal admin user"
+        )
+        .with_oauth_login("admin_user")
+        .with_api_key("admin_key")
+        .with_jwt_auth()
+        .build()
+    )
+
+    factories.InternalUserRoleFactory.create(user=admin_user, role=admin_role)
+
+    logger.info("Internal admin user created. Key: 'admin_key'")
 
 
 #############################################################
