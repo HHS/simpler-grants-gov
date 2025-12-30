@@ -447,23 +447,22 @@ class GeneratorStream(io.RawIOBase):
 
 
 def stream_expanded_submissions_response(context: Iterable, simple_count: int) -> Generator[bytes]:
-    for event, element in context:
+    for _, element in context:
         tag_name = etree.QName(element).localname
-        if event == "end":
-            if tag_name == "GetSubmissionListExpandedResponse":
-                break
-            if tag_name == "AvailableApplicationNumber":
-                count = int(element.text)
-                yield f"<ns2:AvailableApplicationNumber>{count + simple_count}</ns2:AvailableApplicationNumber>".encode(
-                    "utf-8"
-                )
-            if tag_name == "SubmissionInfo":
-                data = etree.tostring(element)
-                # Using regex to strip out the xmlns stuff since it is already added
-                yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
-                element.clear()
-                while element.getprevious() is not None:
-                    del element.getparent()[0]
+        if tag_name == "GetSubmissionListExpandedResponse":
+            break
+        if tag_name == "AvailableApplicationNumber":
+            count = int(element.text)
+            yield f"<ns2:AvailableApplicationNumber>{count + simple_count}</ns2:AvailableApplicationNumber>".encode(
+                "utf-8"
+            )
+        if tag_name == "SubmissionInfo":
+            data = etree.tostring(element)
+            # Using regex to strip out the xmlns stuff since it is already added
+            yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
+            element.clear()
+            while element.getprevious() is not None:
+                del element.getparent()[0]
 
 
 def build_merged_get_submission_list_expanded_mtom_response(
@@ -473,6 +472,7 @@ def build_merged_get_submission_list_expanded_mtom_response(
     simple_data = response_data.get("ns2:GetSubmissionListExpandedResponse", {}).get(
         "ns2:SubmissionInfo", {}
     )
+
     boundary = f"uuid:{raw_uuid}"
     yield (
         f"--{boundary}\n"
