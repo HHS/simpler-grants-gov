@@ -22,7 +22,7 @@ jest.mock("next/navigation", () => ({
 describe("IncludeFormInSubmissionRadio", () => {
   const applicationId = "app-123";
   const formId = "form-456";
-  const applicationStatus = "submitted"
+  const applicationStatus = "submitted";
 
   beforeEach(() => {
     jest.clearAllMocks();
