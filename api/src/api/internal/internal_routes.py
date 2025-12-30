@@ -19,20 +19,21 @@ logger = logging.getLogger(__name__)
 @internal_blueprint.output(internal_schema.InternalRoleAssignmentResponseSchema)
 @internal_blueprint.auth_required(api_user_key_auth)
 @flask_db.with_db_session()
-def update_internal_roles(db_session: db.Session, json_data: dict) -> response.ApiResponse:
-    internal_role_id = str(json_data.get("internal_role_id"))
-    user_email = str(json_data.get("user_email"))
+def update_internal_roles(
+    db_session: db.Session, json_data: dict[str, str]
+) -> response.ApiResponse:
+    internal_role_id = json_data.get("internal_role_id", "")
+    user_email = json_data.get("user_email", "")
 
     add_extra_data_to_current_request_logs({"internal_role_id": internal_role_id})
     logger.info("PUT /v1/internal/roles")
 
-    user = api_user_key_auth.get_user()
-    user = db_session.merge(user, load=False)
+    with db_session.begin():
+        user = api_user_key_auth.get_user()
+        user = db_session.merge(user, load=False)
 
-    verify_access(user, {Privilege.MANAGE_INTERNAL_ROLES}, None)
+        verify_access(user, {Privilege.MANAGE_INTERNAL_ROLES}, None)
 
-    update_internal_user_role(db_session, internal_role_id, user_email)
-
-    db_session.commit()
+        update_internal_user_role(db_session, internal_role_id, user_email)
 
     return response.ApiResponse(message="Success")

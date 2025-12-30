@@ -43,8 +43,7 @@ def update_internal_user_role(
         raise_flask_error(422, "User already has this role.")
 
     # Add the new internal role assignment
-    with db_session.begin_nested():
-        new_assignment = InternalUserRole(user_id=target_user_id, role_id=internal_role_id)
-        db_session.add(new_assignment)
+    new_assignment = InternalUserRole(user_id=target_user_id, role_id=internal_role_id)
+    db_session.add(new_assignment)
 
     logger.info(f"Successfully assigned role {internal_role_id} to user {user_email}")
