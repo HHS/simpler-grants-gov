@@ -57,8 +57,7 @@ export const IncludeFormInSubmissionRadio = ({
     : includeFormInSubmission === false
       ? "No"
       : undefined;
-  const disabledValue = applicationStatus === 'submitted' ? true :
-                                 loading;
+  const disabledValue = applicationStatus === "submitted" ? true : loading;
   const radioId = `include-form${formId}-in-application-submission-radio`;
   return (
     <>

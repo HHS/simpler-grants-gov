@@ -30,7 +30,7 @@ const competitionForms = competitionMock.competition
 const applicationForms =
   competitionMock.application_forms as unknown as ApplicationFormDetail[];
 const applicationId = "12345";
-const applicationStatus = 'submitted';
+const applicationStatus = "submitted";
 
 describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {

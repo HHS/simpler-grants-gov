@@ -1,9 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-
-
 import { IncludeFormInSubmissionRadio } from "src/components/application/IncludeFormInSubmissionRadio";
-
 
 const clientFetchMock = jest.fn();
 
