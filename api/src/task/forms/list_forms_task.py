@@ -71,9 +71,11 @@ class ListFormsTask(BaseFormTask):
                 [form.form_name, form.form_version, "n/a", "ALL"], divider=True
             )
 
+            update_cmd = get_update_cmd(self.environment, form_id)
+
             # Add a message to the out-of-date forms list so we can make it easier
             # to update those forms by generating the command with some messages for organization
-            out_of_date_entries = [f"# {form_txt}"]
+            out_of_date_entries = [f"# {form_txt}", update_cmd]
 
             # If the form has a form_instruction_id, also include the command to update the instruction
             if form.form_instruction_id is not None:
@@ -81,9 +83,6 @@ class ListFormsTask(BaseFormTask):
                     self.environment, form_id, str(form.form_instruction_id)
                 )
                 out_of_date_entries.append(form_instruction_cmd)
-
-            update_cmd = get_update_cmd(self.environment, form_id)
-            out_of_date_entries.append(update_cmd)
 
             out_of_date_entries.append("\n---")
 
