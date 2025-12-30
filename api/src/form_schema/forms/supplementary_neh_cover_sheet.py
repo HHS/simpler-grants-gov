@@ -565,7 +565,6 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "4. Application Information",
         "name": "Application Information",
-        "description": "A non-zero amount is required for either Outright Funds or Federal Match.",
         "children": [
             {
                 "type": "field",
