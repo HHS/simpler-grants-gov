@@ -1,17 +1,13 @@
-import itertools
 import logging
-import os
 import uuid
 from collections.abc import Iterator, Sequence
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from enum import StrEnum
 
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
-from sqlalchemy import exists, select, update
+from sqlalchemy import exists, select
 from sqlalchemy.orm import noload, selectinload
-from sqlalchemy.sql import Select
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
@@ -23,7 +19,6 @@ from src.db.models.opportunity_models import (
     ExcludedOpportunityReview,
     Opportunity,
     OpportunityAttachment,
-    OpportunityChangeAudit,
 )
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
@@ -51,18 +46,11 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
         default=False, alias="ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE"
     )
 
-    incremental_load_batch_size: int = Field(default=1000)
-    incremental_load_max_process_time: int = Field(default=3000)
-    # Configurable max worker. Set default to ThreaPoolExecutor default.
-    # See: https://docs.python.org/dev/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-    incremental_load_max_workers: int = Field(default=(os.cpu_count() or 1) + 4)
-
-
 class LoadOpportunitiesToIndex(Task):
     class Metrics(StrEnum):
         RECORDS_LOADED = "records_loaded"
         TEST_RECORDS_SKIPPED = "test_records_skipped"
-        BATCHES_PROCESSED = "batches_processed"
+        # BATCHES_PROCESSED = "batches_processed"
         ATTACHMENTS_PROCESSED = "attachments_processed"
         ATTACHMENTS_FAILED = "attachments_failed"
         ATTACHMENTS_SKIPPED = "attachments_skipped"
@@ -82,11 +70,10 @@ class LoadOpportunitiesToIndex(Task):
             config = LoadOpportunitiesToIndexConfig()
         self.config = config
 
-        if is_full_refresh:
-            current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
-            self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
-        else:
-            self.index_name = self.config.alias_name
+        current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
+        self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
+        # else:
+        #     self.index_name = self.config.alias_name
         self.set_metrics({"index_name": self.index_name})
         self.start_time = utcnow()
 
@@ -96,9 +83,6 @@ class LoadOpportunitiesToIndex(Task):
         if self.is_full_refresh:
             logger.info("Running full refresh")
             self.full_refresh()
-        else:
-            logger.info("Running incremental load")
-            self.incremental_updates_and_deletes()
 
     def _create_multi_attachment_pipeline(self) -> None:
         """
@@ -138,137 +122,6 @@ class LoadOpportunitiesToIndex(Task):
         }
 
         self.search_client.put_pipeline(pipeline, "multi-attachment")
-
-    def incremental_updates_and_deletes(self) -> None:
-        existing_opportunity_ids = self.fetch_existing_opportunity_ids_in_index()
-        # Handle updates/inserts
-        self._handle_incremental_upserts(existing_opportunity_ids)
-
-        # Handle deletes
-        self._handle_incremental_delete(existing_opportunity_ids)
-
-    def _build_opportunities_to_process_query(self) -> Select:
-        return (
-            select(Opportunity)
-            .join(OpportunityChangeAudit)
-            .join(CurrentOpportunitySummary)
-            .where(
-                Opportunity.is_draft.is_(False),
-                CurrentOpportunitySummary.opportunity_status.isnot(None),
-                OpportunityChangeAudit.is_loaded_to_search.isnot(True),
-            )
-            .order_by(Opportunity.created_at.desc())
-            .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-            .limit(self.config.incremental_load_batch_size)
-        )
-
-    def _handle_incremental_upserts(self, existing_opportunity_ids: set[uuid.UUID]) -> None:
-        """Handle updates/inserts of opportunities into the search index when running incrementally"""
-        while True:
-            # Check elapsed_time before starting new batch processing
-            elapsed_time = utcnow() - self.start_time
-
-            if elapsed_time.total_seconds() > self.config.incremental_load_max_process_time:
-                logger.info(
-                    f"Elapsed time: {elapsed_time.total_seconds() / 60:.2f} minutes exceeded the limit. Stopping batch processing."
-                )
-                break
-
-            # Fetch opportunities that need processing from the queue
-            queued_opportunities = (
-                self.db_session.execute(self._build_opportunities_to_process_query())
-                .scalars()
-                .all()
-            )
-
-            if len(queued_opportunities) == 0:
-                logger.info("No opportunities remain in queue, exiting processing")
-                break
-
-            # Process updates and inserts
-            processed_opportunity_ids = set()
-
-            for opportunity in queued_opportunities:
-                logger.info(
-                    "Processing queued opportunity",
-                    extra={
-                        "opportunity_id": opportunity.opportunity_id,
-                        "status": (
-                            "update"
-                            if opportunity.opportunity_id in existing_opportunity_ids
-                            else "insert"
-                        ),
-                    },
-                )
-
-            # Determine how many opportunities each thread will process
-            thread_count = self.config.incremental_load_max_workers
-            batches = itertools.batched(queued_opportunities, thread_count, strict=False)
-
-            # Create a thread pool for processing and uploading batch of opportunities in parallel
-            with ThreadPoolExecutor(
-                max_workers=self.config.incremental_load_max_workers
-            ) as executor:
-                futures = {executor.submit(self.load_records, batch) for batch in batches}
-
-                for future in as_completed(futures):
-                    batch_processed_opp_ids = future.result()
-                    processed_opportunity_ids.update(batch_processed_opp_ids)
-
-            logger.info(f"Indexed {len(processed_opportunity_ids)} opportunities")
-
-            # refresh index
-            self.search_client.refresh_index(self.index_name)
-
-            # Update updated_at timestamp instead of deleting records
-            self.db_session.execute(
-                update(OpportunityChangeAudit)
-                .where(OpportunityChangeAudit.opportunity_id.in_(processed_opportunity_ids))
-                .values(is_loaded_to_search=True)
-            )
-
-            self.increment(self.Metrics.BATCHES_PROCESSED)
-
-    def _handle_incremental_delete(self, existing_opportunity_ids: set[uuid.UUID]) -> None:
-        """Handle deletion of opportunities when running incrementally
-
-        Scenarios in which we delete an opportunity from the index:
-        * An opportunity is no longer in our database
-        * An opportunity is a draft (unlikely to ever happen, would require published->draft)
-        * An opportunity loses its opportunity status
-        * An opportunity has a test agency
-        """
-
-        # Fetch the opportunity IDs of opportunities we would expect to be in the index
-        opportunity_ids_we_want_in_search: set[uuid.UUID] = set(
-            self.db_session.execute(
-                select(Opportunity.opportunity_id)
-                .join(CurrentOpportunitySummary)
-                .join(Agency, Opportunity.agency_code == Agency.agency_code, isouter=True)
-                .where(
-                    Opportunity.is_draft.is_(False),
-                    CurrentOpportunitySummary.opportunity_status.isnot(None),
-                    # We treat a null agency as fine
-                    # We only want to filter out if is_test_agency=True specifically
-                    Agency.is_test_agency.isnot(True),
-                )
-            )
-            .scalars()
-            .all()
-        )
-
-        opportunity_ids_to_delete = existing_opportunity_ids - opportunity_ids_we_want_in_search
-
-        for opportunity_id in opportunity_ids_to_delete:
-            logger.info(
-                "Deleting opportunity from search",
-                extra={"opportunity_id": opportunity_id, "status": "delete"},
-            )
-
-        if opportunity_ids_to_delete:
-            # Convert UUIDs to strings for the search client
-            opportunity_ids_to_delete_str = [str(uuid_id) for uuid_id in opportunity_ids_to_delete]
-            self.search_client.bulk_delete(self.index_name, opportunity_ids_to_delete_str)
 
     def full_refresh(self) -> None:
         # create the index
@@ -328,26 +181,6 @@ class LoadOpportunitiesToIndex(Task):
             .scalars()
             .partitions()
         )
-
-    def fetch_existing_opportunity_ids_in_index(self) -> set[uuid.UUID]:
-        if not self.search_client.alias_exists(self.index_name):
-            raise RuntimeError(
-                "Alias %s does not exist, please run the full refresh job before the incremental job"
-                % self.index_name
-            )
-
-        opportunity_ids: set[uuid.UUID] = set()
-
-        for response in self.search_client.scroll(
-            self.config.alias_name,
-            {"size": 10000, "_source": ["opportunity_id"]},
-            include_scores=False,
-        ):
-            for record in response.records:
-                # Convert string UUID from search index back to UUID object
-                opportunity_ids.add(uuid.UUID(record["opportunity_id"]))
-
-        return opportunity_ids
 
     def filter_attachment(self, attachment: OpportunityAttachment) -> bool:
         file_suffix = attachment.file_name.lower().split(".")[-1]
