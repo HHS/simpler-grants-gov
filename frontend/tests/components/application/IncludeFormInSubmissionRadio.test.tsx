@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
+
+
 import { IncludeFormInSubmissionRadio } from "src/components/application/IncludeFormInSubmissionRadio";
+
 
 const clientFetchMock = jest.fn();
 
@@ -19,6 +22,7 @@ jest.mock("next/navigation", () => ({
 describe("IncludeFormInSubmissionRadio", () => {
   const applicationId = "app-123";
   const formId = "form-456";
+  const applicationStatus = "submitted"
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,6 +34,7 @@ describe("IncludeFormInSubmissionRadio", () => {
         applicationId={applicationId}
         formId={formId}
         includeFormInApplicationSubmission={true}
+        applicationStatus={applicationStatus}
       />,
     );
     const yesRadio = screen.getByDisplayValue("Yes");
@@ -42,6 +47,7 @@ describe("IncludeFormInSubmissionRadio", () => {
         applicationId={applicationId}
         formId={formId}
         includeFormInApplicationSubmission={false}
+        applicationStatus={applicationStatus}
       />,
     );
     const noRadio = screen.getByDisplayValue("No");
@@ -54,6 +60,7 @@ describe("IncludeFormInSubmissionRadio", () => {
         applicationId={applicationId}
         formId={formId}
         includeFormInApplicationSubmission={null}
+        applicationStatus={applicationStatus}
       />,
     );
     const yesRadio = screen.getByDisplayValue("Yes");

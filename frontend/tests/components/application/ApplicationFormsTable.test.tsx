@@ -30,6 +30,7 @@ const competitionForms = competitionMock.competition
 const applicationForms =
   competitionMock.application_forms as unknown as ApplicationFormDetail[];
 const applicationId = "12345";
+const applicationStatus = 'submitted'
 
 describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {
@@ -39,6 +40,7 @@ describe("CompetitionFormsTable", () => {
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
+        applicationStatus={applicationStatus}
       />,
     );
     const results = await axe(container);
@@ -51,6 +53,7 @@ describe("CompetitionFormsTable", () => {
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
+        applicationStatus={applicationStatus}
       />,
     );
 
@@ -71,6 +74,7 @@ describe("CompetitionFormsTable", () => {
         forms={competitionForms}
         applicationForms={applicationForms}
         applicationId={applicationId}
+        applicationStatus={applicationStatus}
       />,
     );
 
