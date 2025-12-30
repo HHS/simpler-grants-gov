@@ -1,9 +1,48 @@
-import { expect, test } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 
-// import { waitForURLChange } from "./playwrightUtils";
+type TestWithOpportunityId = {
+  testOpportunityId: string;
+};
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("/opportunity/33");
+/*
+
+  each opportunity must have:
+
+  * sufficiently long description to hide
+  * sufficiently long close date description to hide
+
+*/
+
+// const testOpportunityIdMap: {
+//   [key: string]: { simpler: string; legacy: string };
+// } = {
+//   staging: {
+//     simpler: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+//     legacy: "42315",
+//   },
+//   local: { simpler: "c3c59562-a54f-4203-b0f6-98f2f0383481", legacy: "93" },
+// };
+
+const testOpportunityIdMap: {
+  [key: string]: string;
+} = {
+  staging: "332d9e58-7a4d-4bd0-afc8-70b4458262bc",
+  // local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+  local: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
+};
+
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+
+// either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
+// note that this staging id may be subject to change
+const testOpportunityId = testOpportunityIdMap[targetEnv];
+
+const test = base.extend<TestWithOpportunityId>({
+  testOpportunityId,
+});
+
+test.beforeEach(async ({ page, testOpportunityId }) => {
+  await page.goto(`/opportunity/${testOpportunityId}`);
 });
 
 test.afterEach(async ({ context }) => {
@@ -109,8 +148,7 @@ test("can navigate to grants.gov", async ({ page, context }) => {
   await page.getByRole("button", { name: "View on Grants.gov" }).click();
 
   const newPage = await newTabPromise;
-  // await waitForURLChange(page, (url) => !!url.match(/grants\.gov/));
-  await expect(newPage).toHaveURL(
-    "https://test.grants.gov/search-results-detail/33",
+  expect(newPage.url()).toContain(
+    "https://test.grants.gov/search-results-detail/",
   );
 });
