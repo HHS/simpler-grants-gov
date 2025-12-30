@@ -47,12 +47,14 @@ export const ApplicationFormsTable = ({
   forms,
   competitionInstructionsDownloadPath,
   errors = null,
+  applicationStatus,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
   competitionInstructionsDownloadPath: string;
   errors?: FormValidationWarning[] | null;
+  applicationStatus: string;
 }) => {
   const requiredForms = selectApplicationFormsByRequired({
     applicationForms,
@@ -74,6 +76,7 @@ export const ApplicationFormsTable = ({
         applicationForms={requiredForms}
         applicationId={applicationId}
         formsAreOptional={false}
+        applicationStatus={applicationStatus}
       />
       {conditionalRequiredForms.length > 0 && (
         <>
@@ -95,6 +98,7 @@ export const ApplicationFormsTable = ({
             applicationId={applicationId}
             formsAreOptional={true}
             errors={errors}
+            applicationStatus={applicationStatus}
           />
         </>
       )}
@@ -134,12 +138,14 @@ const ApplicationTable = ({
   forms,
   formsAreOptional = false,
   errors = null,
+  applicationStatus,
 }: {
   applicationForms: ApplicationFormDetail[];
   applicationId: string;
   forms: CompetitionForms;
   formsAreOptional: boolean;
   errors?: FormValidationWarning[] | null;
+  applicationStatus: string;
 }) => {
   const t = useTranslations("Application.competitionFormTable");
   const formIdsWithErrors = errors ? errors.map((item) => item.value) : [];
@@ -191,6 +197,7 @@ const ApplicationTable = ({
                   includeFormInApplicationSubmission={
                     form.is_included_in_submission
                   }
+                  applicationStatus={applicationStatus}
                 />
               </td>
             )}

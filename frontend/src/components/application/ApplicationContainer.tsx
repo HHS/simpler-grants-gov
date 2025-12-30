@@ -172,6 +172,7 @@ const ApplicationContainer = ({
         forms={forms}
         errors={validationErrors}
         competitionInstructionsDownloadPath={instructionsDownloadPath}
+        applicationStatus={applicationStatus}
       />
       <AttachmentsCard
         applicationId={applicationId}
