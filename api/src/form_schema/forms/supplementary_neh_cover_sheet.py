@@ -549,6 +549,7 @@ FORM_UI_SCHEMA = [
         "type": "section",
         "label": "3. Project Funding",
         "name": "Project Funding",
+        "description": "A non-zero amount is required for either Outright Funds or Federal Match.",
         "children": [
             {"type": "field", "definition": "/properties/funding_group/properties/outright_funds"},
             {"type": "field", "definition": "/properties/funding_group/properties/federal_match"},
@@ -567,6 +568,7 @@ FORM_UI_SCHEMA = [
         "children": [
             {
                 "type": "field",
+                "widget": "Radio",
                 "definition": "/properties/application_info/properties/additional_funding",
             },
             {
