@@ -6,9 +6,13 @@ import src.adapters.db.flask_db as flask_db
 import src.api.competition_alpha.competition_schema as competition_schema
 import src.api.response as response
 from src.api.competition_alpha.competition_blueprint import competition_blueprint
+from src.auth.api_user_key_auth import api_user_key_auth
+from src.auth.endpoint_access_util import verify_access
 from src.auth.multi_auth import jwt_or_key_multi_auth, jwt_or_key_security_schemes
+from src.constants.lookup_constants import Privilege
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.competition_alpha.get_competition import get_competition
+from src.services.competition_alpha.update_competition_flag import update_competition_flag
 
 logger = logging.getLogger(__name__)
 
@@ -26,3 +30,23 @@ def competition_get(db_session: db.Session, competition_id: uuid.UUID) -> respon
         competition = get_competition(db_session, competition_id)
 
     return response.ApiResponse(message="Success", data=competition)
+
+
+@competition_blueprint.put("/competitions/<uuid:competition_id>/flag")
+@competition_blueprint.input(competition_schema.CompetitionFlagUpdateSchema, location="json")
+@competition_blueprint.output(competition_schema.CompetitionResponseAlphaSchema())
+@competition_blueprint.auth_required(api_user_key_auth)
+@flask_db.with_db_session()
+def update_competition_flag_route(
+    db_session: db.Session, competition_id: uuid.UUID, json_data: dict[str, bool]
+) -> response.ApiResponse:
+    is_enabled = json_data.get("is_simpler_grants_enabled", False)
+
+    with db_session.begin():
+        user = api_user_key_auth.get_user()
+        user = db_session.merge(user, load=False)
+        verify_access(user, {Privilege.MANAGE_COMPETITION}, None)
+
+        competition = update_competition_flag(db_session, str(competition_id), is_enabled)
+
+        return response.ApiResponse(message="Success", data=competition)
