@@ -1,16 +1,13 @@
-
 import pytest
 
 from src.search.backend.load_opportunities_to_index import (
     LoadOpportunitiesToIndex,
     LoadOpportunitiesToIndexConfig,
 )
-from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
     ExcludedOpportunityReviewFactory,
-    OpportunityAttachmentFactory,
     OpportunityChangeAuditFactory,
     OpportunityFactory,
 )
@@ -137,86 +134,6 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         assert set([str(opp.opportunity_id) for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
         )
-
-    def test_opportunity_attachment_pipeline(
-        self,
-        mock_s3_bucket,
-        db_session,
-        enable_factory_create,
-        load_opportunities_to_index,
-        monkeypatch: pytest.MonkeyPatch,
-        opportunity_index_alias,
-        search_client,
-    ):
-        filename_1 = "test_file_1.txt"
-        file_path_1 = f"s3://{mock_s3_bucket}/{filename_1}"
-        content = "I am a file"
-
-        with file_util.open_stream(file_path_1, "w") as outfile:
-            outfile.write(content)
-
-        filename_2 = "test_file_2.css"
-        file_path_2 = f"s3://{mock_s3_bucket}/{filename_2}"
-
-        opportunity = OpportunityFactory.create(opportunity_attachments=[])
-        OpportunityAttachmentFactory.create(
-            opportunity=opportunity,
-            file_contents=content,
-            file_location=file_path_1,
-            file_name=filename_1,
-        )
-
-        OpportunityAttachmentFactory.create(
-            opportunity=opportunity,
-            file_contents=content,
-            file_location=file_path_2,
-            file_name=filename_2,
-        )
-
-        load_opportunities_to_index.index_name = (
-            load_opportunities_to_index.index_name + "-pipeline"
-        )
-
-        load_opportunities_to_index.run()
-
-        resp = search_client.search(opportunity_index_alias, {"size": 100})
-
-        record = [
-            d for d in resp.records if d.get("opportunity_id") == str(opportunity.opportunity_id)
-        ]
-        attachments = record[0]["attachments"]
-
-        expected_number_of_processed_attachments = 1
-        expected_number_of_skipped_attachments = 1
-        expected_number_of_failed_attachments = 0
-
-        # assert only one (allowed) opportunity attachment was uploaded
-        assert len(attachments) == expected_number_of_processed_attachments
-
-        # assert processed attachment metrics
-        assert (
-            load_opportunities_to_index.metrics[
-                load_opportunities_to_index.Metrics.ATTACHMENTS_PROCESSED
-            ]
-            == expected_number_of_processed_attachments
-        )
-        assert (
-            load_opportunities_to_index.metrics[
-                load_opportunities_to_index.Metrics.ATTACHMENTS_SKIPPED
-            ]
-            == expected_number_of_skipped_attachments
-        )
-        assert (
-            load_opportunities_to_index.metrics[
-                load_opportunities_to_index.Metrics.ATTACHMENTS_FAILED
-            ]
-            == expected_number_of_failed_attachments
-        )
-
-        # assert correct attachment was uploaded
-        assert attachments[0]["filename"] == filename_1
-        # assert data was b64encoded
-        assert attachments[0]["attachment"]["content"] == content  # decoded b64encoded attachment
 
     def test_excluded_opportunities_not_indexed(
         self,

@@ -18,17 +18,12 @@ from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     ExcludedOpportunityReview,
     Opportunity,
-    OpportunityAttachment,
 )
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.text_extractor import extract_text_from_file, get_text_extractor_configs
 
 logger = logging.getLogger(__name__)
-
-ALLOWED_ATTACHMENT_SUFFIXES = set(get_text_extractor_configs().keys())
-TEXT_EXTRACTOR_CHAR_LIMIT = 100000
 
 
 class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
@@ -47,10 +42,6 @@ class LoadOpportunitiesToIndex(Task):
     class Metrics(StrEnum):
         RECORDS_LOADED = "records_loaded"
         TEST_RECORDS_SKIPPED = "test_records_skipped"
-        # BATCHES_PROCESSED = "batches_processed"
-        ATTACHMENTS_PROCESSED = "attachments_processed"
-        ATTACHMENTS_FAILED = "attachments_failed"
-        ATTACHMENTS_SKIPPED = "attachments_skipped"
 
     def __init__(
         self,
@@ -69,8 +60,6 @@ class LoadOpportunitiesToIndex(Task):
 
         current_timestamp = get_now_us_eastern_datetime().strftime("%Y-%m-%d_%H-%M-%S")
         self.index_name = f"{self.config.index_prefix}-{current_timestamp}"
-        # else:
-        #     self.index_name = self.config.alias_name
         self.set_metrics({"index_name": self.index_name})
         self.start_time = utcnow()
 
@@ -178,47 +167,6 @@ class LoadOpportunitiesToIndex(Task):
             .scalars()
             .partitions()
         )
-
-    def filter_attachment(self, attachment: OpportunityAttachment) -> bool:
-        file_suffix = attachment.file_name.lower().split(".")[-1]
-        return file_suffix in ALLOWED_ATTACHMENT_SUFFIXES
-
-    def get_attachment_json_for_opportunity(
-        self, opp_attachments: list[OpportunityAttachment]
-    ) -> list[dict]:
-
-        attachments = []
-        for att in opp_attachments:
-            if not self.filter_attachment(att):
-                self.increment(self.Metrics.ATTACHMENTS_SKIPPED)
-                continue
-            try:
-                file_text = extract_text_from_file(
-                    att.file_location,
-                    char_limit=TEXT_EXTRACTOR_CHAR_LIMIT,
-                    raise_on_error=True,
-                )
-                attachments.append(
-                    {
-                        "filename": att.file_name,
-                        "attachment": {
-                            "content": file_text,
-                        },
-                    }
-                )
-                self.increment(self.Metrics.ATTACHMENTS_PROCESSED)
-            except Exception as e:
-                self.increment(self.Metrics.ATTACHMENTS_FAILED)
-                logger.warning(
-                    "text-extractor: error extracting text",
-                    extra={
-                        "err": e,
-                        "attachment_id": att.attachment_id,
-                        "opportunity_id": att.opportunity_id,
-                    },
-                )
-
-        return attachments
 
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times
