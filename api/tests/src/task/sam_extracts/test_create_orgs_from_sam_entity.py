@@ -144,7 +144,6 @@ def test_run_task_varying_scenarios_org_exists(enable_factory_create, db_session
     )
     assert len(entity_a.organization.organization_users) == 3
 
-    # TODO - other compares
     assert len(user_b.user.organization_users) == 1
     assert (
         user_b.user.organization_users[0].organization_id == entity_b.organization.organization_id

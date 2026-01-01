@@ -132,7 +132,6 @@ def test_validate_form_all_valid(
         is_included_in_submission=True,
     )
     application.application_forms = [application_form_a, application_form_b, application_form_c]
-    # TODO - add attachment stuff
 
     validation_errors, error_detail = get_application_form_errors(
         application, ApplicationAction.GET

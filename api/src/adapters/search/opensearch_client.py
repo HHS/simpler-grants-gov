@@ -22,11 +22,11 @@ DEFAULT_INDEX_ANALYSIS = {
     },
     # Change the default stemming to use snowball which handles plural
     # queries better than the default
-    # TODO - there are a lot of stemmers, we should take some time to figure out
-    #        which one works best with our particular dataset. Snowball is really
+    # NOTE - there are a lot of stemmers, Snowball is really
     #        basic and naive (literally just adjusting suffixes on words in common patterns)
     #        which might be fine generally, but we work with a lot of acronyms
-    #        and should verify that doesn't cause any issues.
+    #        and should verify that doesn't cause any issues. Although we can use
+    #        keyword fields to work around that particular issue.
     # see: https://opensearch.org/docs/latest/analyzers/token-filters/index/
     "filter": {"custom_stemmer": {"type": "snowball", "name": "english"}},
 }
