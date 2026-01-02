@@ -27,6 +27,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
 )
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPPayload,
+    build_merged_get_submission_list_expanded_mtom_response,
     build_mtom_response_from_dict,
     build_xml_from_dict,
     get_envelope_dict,
@@ -265,9 +266,12 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         yield b"\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
-        if proxy_response.status_code != 500:
+        if (
+            proxy_response.status_code != 500
+            and self.operation_config.response_operation_name != "GetSubmissionListExpandedResponse"
+        ):
             return proxy_response
-        if not self.operation_config.is_mtom:
+        if self.operation_config.is_mtom is False:
             return proxy_response
         # MTOM message is assembled here
         # 1. --uuid: {boundary_uuid}\n
@@ -290,6 +294,19 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
         }
         boundary = "--uuid:" + boundary_uuid
+        mime_message: Iterator[bytes] | bytes = b""
+        if self.operation_config.response_operation_name == "GetSubmissionListExpandedResponse":
+            mime_message = build_merged_get_submission_list_expanded_mtom_response(
+                simpler_response_soap_dict,
+                boundary_uuid,
+                self.operation_config.namespaces,
+                root=self.operation_config.response_operation_name,
+                proxy_data=proxy_response,
+            )
+            return get_soap_response(
+                data=mime_message,
+                headers=update_headers,
+            )
         mime_message = build_mtom_response_from_dict(
             simpler_response_soap_dict,
             boundary_uuid,
