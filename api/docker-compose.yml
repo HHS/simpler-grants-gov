@@ -12,9 +12,7 @@ services:
       - default
 
   opensearch-node:
-    build:
-      context: .
-      dockerfile: opensearch/Dockerfile
+    image: opensearchproject/opensearch:2
     container_name: opensearch-node
     environment:
       - cluster.name=opensearch-cluster # Name the cluster
