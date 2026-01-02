@@ -64,6 +64,10 @@ class LoadOpportunitiesToIndex(Task):
         self.start_time = utcnow()
 
     def run_task(self) -> None:
+        # NOTE:
+        # Incremental (changed-only) opportunity loading logic previously lived here.
+        # It was removed as part of PR https://github.com/HHS/simpler-grants-gov/pull/7748 during code cleanup.
+        # See that PR if incremental search support needs to be revived in the future.
         if self.is_full_refresh:
             logger.info("Running full refresh")
             self.full_refresh()
