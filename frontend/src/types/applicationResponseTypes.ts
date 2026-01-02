@@ -1,12 +1,9 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
-
-
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 import { FormDetail } from "./formResponseTypes";
-
 
 export interface ApplicationResponseDetail {
   [key: string]: string;

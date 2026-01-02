@@ -4,10 +4,7 @@ import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
-
-
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
-
 
 const clientFetchMock = jest.fn();
 

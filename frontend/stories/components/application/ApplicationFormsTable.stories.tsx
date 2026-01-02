@@ -1,11 +1,8 @@
 import { Meta } from "@storybook/react";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
 
-
-
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 import competitionMock from "./competition.mock.json";
-
 
 const applicationDetailsObject: ApplicationDetail = {
   ...(competitionMock as unknown as ApplicationDetail),

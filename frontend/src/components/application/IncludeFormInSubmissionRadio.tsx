@@ -1,9 +1,9 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { Status } from "src/types/applicationResponseTypes";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Radio } from "@trussworks/react-uswds";
-import { Status } from "src/types/applicationResponseTypes";
 
 export const IncludeFormInSubmissionRadio = ({
   applicationId,
