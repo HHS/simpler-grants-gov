@@ -68,9 +68,7 @@ export const ApplicationFormsTable = ({
   return (
     <>
       <h3>{t("requiredForms")}</h3>
-      <ApplicationTable
-        applicationDetailsObject={applicationDetailsObject}
-      />
+      <ApplicationTable applicationDetailsObject={applicationDetailsObject} />
       {conditionalRequiredForms.length > 0 && (
         <>
           <h3>{t("conditionalForms")}</h3>
