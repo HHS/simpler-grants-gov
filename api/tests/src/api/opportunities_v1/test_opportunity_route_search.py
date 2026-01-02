@@ -391,7 +391,10 @@ def search_scenario_id_fnc(val):
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(
-        self, opportunity_index, opportunity_index_alias, search_client,
+        self,
+        opportunity_index,
+        opportunity_index_alias,
+        search_client,
     ):
         # Load into the search index
         schema = OpportunityV1Schema()

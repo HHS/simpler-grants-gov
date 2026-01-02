@@ -265,8 +265,6 @@ def search_client() -> search.SearchClient:
         client.delete_index("test-*")
 
 
-
-
 @pytest.fixture(scope="session")
 def opportunity_index(search_client):
     # create a random index name just to make sure it won't ever conflict
