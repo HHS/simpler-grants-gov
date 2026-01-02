@@ -162,7 +162,13 @@ def create_application(
         user=user,
         audit_event=ApplicationAuditEvent.APPLICATION_CREATED,
     )
-
+    if organization_id:
+        add_audit_event(
+            db_session=db_session,
+            application=application,
+            user=user,
+            audit_event=ApplicationAuditEvent.ORGANIZATION_ADDED,
+        )
     # Assign the Application Owner role to the user if application is not owned by organization
     if not organization_id:
         _assign_application_owner_role(db_session, user, application)

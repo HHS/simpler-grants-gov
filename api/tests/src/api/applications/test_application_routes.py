@@ -2725,11 +2725,16 @@ def test_application_start_with_organization_success(
     # Assert it does create an application user
     assert not application.application_users
 
-    assert len(application.application_audits) == 1
+    assert len(application.application_audits) == 2
     assert (
         application.application_audits[0].application_audit_event
         == ApplicationAuditEvent.APPLICATION_CREATED
     )
+    assert {audit.application_audit_event for audit in application.application_audits} == {
+        ApplicationAuditEvent.APPLICATION_CREATED,
+        ApplicationAuditEvent.ORGANIZATION_ADDED,
+    }
+    assert all(audit.user_id == user.user_id for audit in application.application_audits)
     assert application.application_audits[0].user_id == user.user_id
 
 
