@@ -5,6 +5,12 @@ Feature: Filter Drawer - What-If Facets
 
   Background:
     Given I am on the Search Funding Opportunity page
+    And my login state is "<loginState>"
+
+  Examples:
+      | loginState   |
+      | logged in    |
+      | not logged in |
 
   Scenario: Selecting a single what-if facet updates results
     When I select one of Funding Instrument type
