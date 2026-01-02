@@ -54,7 +54,6 @@ export interface ApplicationFormDetail {
 }
 
 export interface ApplicationDetail {
-  applicationDetailsObject: any;
   application_attachments: Array<Attachment>;
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
