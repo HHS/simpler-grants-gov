@@ -237,6 +237,7 @@ class Privilege(StrEnum):
     LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
     LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
+    MANAGE_COMPETITION = "manage_competition"
 
 
 class RoleType(StrEnum):
