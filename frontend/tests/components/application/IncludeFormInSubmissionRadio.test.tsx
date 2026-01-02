@@ -65,4 +65,19 @@ describe("IncludeFormInSubmissionRadio", () => {
     expect(yesRadio).not.toBeChecked();
     expect(noRadio).not.toBeChecked();
   });
+
+  it("conditionally disable radio buttons when application status is submitted", () => {
+    render(
+      <IncludeFormInSubmissionRadio
+        applicationId={applicationId}
+        formId={formId}
+        includeFormInApplicationSubmission={false}
+        applicationStatus={applicationStatus}
+      />,
+    );
+    const yesRadio = screen.getByDisplayValue("Yes");
+    expect(yesRadio).toBeDisabled();
+    const noRadio = screen.getByDisplayValue("No");
+    expect(noRadio).toBeDisabled();
+  });
 });

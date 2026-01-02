@@ -1,9 +1,12 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 
+
+
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 import { FormDetail } from "./formResponseTypes";
+
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
@@ -51,6 +54,7 @@ export interface ApplicationFormDetail {
 }
 
 export interface ApplicationDetail {
+  applicationDetailsObject: any;
   application_attachments: Array<Attachment>;
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;

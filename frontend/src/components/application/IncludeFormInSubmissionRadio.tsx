@@ -3,6 +3,7 @@ import { useClientFetch } from "src/hooks/useClientFetch";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Radio } from "@trussworks/react-uswds";
+import { Status } from "../../types/applicationResponseTypes";
 
 export const IncludeFormInSubmissionRadio = ({
   applicationId,
@@ -57,7 +58,8 @@ export const IncludeFormInSubmissionRadio = ({
     : includeFormInSubmission === false
       ? "No"
       : undefined;
-  const disabledValue = applicationStatus === "submitted" ? true : loading;
+  const disabledValue =
+    applicationStatus !== Status.IN_PROGRESS ? true : loading;
   const radioId = `include-form${formId}-in-application-submission-radio`;
   return (
     <>
