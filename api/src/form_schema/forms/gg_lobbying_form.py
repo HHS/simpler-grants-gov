@@ -4,9 +4,7 @@ from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.shared import COMMON_SHARED_V1
 
-DIRECTIONS = """Certification for Contracts, Grants, Loans, and Cooperative Agreements
-
-The undersigned certifies, to the best of his or her knowledge and belief, that:
+DIRECTIONS = """The undersigned certifies, to the best of his or her knowledge and belief, that:
 
 (1) No Federal appropriated funds have been paid or will be paid, by or on behalf of the undersigned, to any person for influencing or attempting to influence an officer or employee of an agency, a Member of Congress, an officer or employee of Congress, or an employee of a Member of Congress in connection with the awarding of any Federal contract, the making of any Federal grant, the making of any Federal loan, the entering into of any cooperative agreement, and the extension, continuation, renewal, amendment, or modification of any Federal contract, grant, loan, or cooperative agreement
 
@@ -32,6 +30,7 @@ FORM_JSON_SCHEMA = {
         "organization_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
             "title": "Applicant's Organization",
+            "description": "Enter the legal name of the applicant's organization that will undertake the assistance activity. This is the organization that has registered with the System for Award Management (SAM). Information on registering with SAM may be obtained by visiting SAM.gov.",
         },
         "authorized_representative_name": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}]
@@ -54,7 +53,7 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Directions",
+        "label": "1. Certification for Contracts, Grants, Loans, and Cooperative Agreements",
         "name": "directions",
         "description": DIRECTIONS,
         "children": [],
@@ -69,7 +68,7 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "3. Printed Name and Title of Authorized Representative",
+        "label": "3. Authorized Representative",
         "name": "authorizedRepresentative",
         "children": [
             {
