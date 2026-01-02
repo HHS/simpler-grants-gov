@@ -391,7 +391,7 @@ def search_scenario_id_fnc(val):
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(
-        self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline
+        self, opportunity_index, opportunity_index_alias, search_client,
     ):
         # Load into the search index
         schema = OpportunityV1Schema()
@@ -416,7 +416,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
             opportunity_index,
             json_records,
             "opportunity_id",
-            pipeline=search_attachment_pipeline,
             refresh=True,
         )
 
@@ -1719,26 +1718,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
         )
         assert resp.status_code == 200
-
-    def test_search_experimental_attachment_200(
-        self, client, api_auth_token, search_client, opportunity_index_alias
-    ):
-        # Prepare the search request
-        search_request = get_search_request(
-            query="Space",
-            experimental={"scoring_rule": "attachment_only"},
-        )
-
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        data = resp.json["data"]
-
-        # Assert only NASA opportunities are returned
-        assert resp.status_code == 200
-        assert len(data) == 1
-
-        assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
 
     def test_search_top_level_agency_200(
         self,

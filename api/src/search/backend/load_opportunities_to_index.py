@@ -64,50 +64,9 @@ class LoadOpportunitiesToIndex(Task):
         self.start_time = utcnow()
 
     def run_task(self) -> None:
-        logger.info("Creating multi-attachment pipeline")
-        self._create_multi_attachment_pipeline()
         if self.is_full_refresh:
             logger.info("Running full refresh")
             self.full_refresh()
-
-    def _create_multi_attachment_pipeline(self) -> None:
-        """
-        Create multi-attachment processor
-        """
-        pipeline = {
-            "description": "Extract attachment information",
-            "processors": [
-                {
-                    "foreach": {
-                        "field": "attachments",
-                        "processor": {
-                            "attachment": {
-                                "target_field": "_ingest._value.attachment",
-                                "field": "_ingest._value.data",
-                            }
-                        },
-                        "ignore_missing": True,
-                    }
-                },
-                # After we've done the above processing to send the base64
-                # encoded file to OpenSearch, remove the raw base64 "data"
-                # field from what we actually index as it's not useful
-                # and will bloat the size of our index.
-                {
-                    "foreach": {
-                        "field": "attachments",
-                        "processor": {
-                            "remove": {
-                                "field": "_ingest._value.data",
-                            }
-                        },
-                        "ignore_missing": True,
-                    }
-                },
-            ],
-        }
-
-        self.search_client.put_pipeline(pipeline, "multi-attachment")
 
     def full_refresh(self) -> None:
         # create the index
@@ -212,7 +171,6 @@ class LoadOpportunitiesToIndex(Task):
                 self.index_name,
                 batch_json_records,
                 "opportunity_id",
-                pipeline=None,
                 refresh=refresh,
             )
 
