@@ -57,7 +57,7 @@ describe("ApplicationValidationAlert", () => {
         validationErrors={[
           {
             field: "form_id",
-            value: "123e4567-e89b-12d3-a456-426614174003",
+            value: "123e4567-e89b-12d3-a456-426614174001",
             type: "application_form_validation",
             message: "yolo",
           },
@@ -84,7 +84,7 @@ describe("ApplicationValidationAlert", () => {
           },
           {
             field: "form_id",
-            value: "123e4567-e89b-12d3-a456-426614174003",
+            value: "123e4567-e89b-12d3-a456-426614174001",
             type: "missing_required_form",
             message: "yolo",
           },

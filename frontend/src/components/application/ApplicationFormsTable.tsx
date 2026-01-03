@@ -1,16 +1,18 @@
-import {
-  ApplicationDetail,
-  ApplicationFormDetail,
-} from "src/types/applicationResponseTypes";
+import { ApplicationDetail, ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
+
+
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
+
+
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { IncludeFormInSubmissionRadio } from "./IncludeFormInSubmissionRadio";
+
 
 export const selectApplicationFormsByRequired = ({
   applicationForms,
@@ -45,19 +47,16 @@ const selectApplicationForm = ({
 };
 
 export const ApplicationFormsTable = ({
+  competitionInstructionsDownloadPath,
   errors = null,
   applicationDetailsObject,
 }: {
+  competitionInstructionsDownloadPath: string;
   errors?: FormValidationWarning[] | null;
   applicationDetailsObject: ApplicationDetail;
 }) => {
   const forms = applicationDetailsObject.competition.competition_forms;
   const applicationForms = applicationDetailsObject.application_forms;
-  const competitionInstructionsDownloadPath = applicationDetailsObject
-    .competition.competition_instructions.length
-    ? applicationDetailsObject.competition.competition_instructions[0]
-        .download_path
-    : "";
   const conditionalRequiredForms = selectApplicationFormsByRequired({
     applicationForms,
     forms,
@@ -68,7 +67,10 @@ export const ApplicationFormsTable = ({
   return (
     <>
       <h3>{t("requiredForms")}</h3>
-      <ApplicationTable applicationDetailsObject={applicationDetailsObject} />
+      <ApplicationTable
+        formsAreOptional={false}
+        applicationDetailsObject={applicationDetailsObject}
+      />
       {conditionalRequiredForms.length > 0 && (
         <>
           <h3>{t("conditionalForms")}</h3>
@@ -84,6 +86,7 @@ export const ApplicationFormsTable = ({
             })}
           </p>
           <ApplicationTable
+            formsAreOptional={true}
             errors={errors}
             applicationDetailsObject={applicationDetailsObject}
           />
@@ -122,11 +125,12 @@ const ApplicationTableColumnError = ({
 const ApplicationTable = ({
   errors = null,
   applicationDetailsObject,
+  formsAreOptional = false,
 }: {
   errors?: FormValidationWarning[] | null;
   applicationDetailsObject: ApplicationDetail;
+  formsAreOptional: boolean;
 }) => {
-  const formsAreOptional = false;
   const forms = applicationDetailsObject.competition.competition_forms;
   const applicationForms = applicationDetailsObject.application_forms;
   const applicationId = applicationDetailsObject.application_id;

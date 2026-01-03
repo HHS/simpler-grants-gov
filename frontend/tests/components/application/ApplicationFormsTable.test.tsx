@@ -4,7 +4,10 @@ import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
+
+
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
+
 
 const clientFetchMock = jest.fn();
 
@@ -38,6 +41,7 @@ describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <ApplicationFormsTable
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
         errors={null}
         applicationDetailsObject={applicationDetailsObject}
       />,
@@ -48,6 +52,7 @@ describe("CompetitionFormsTable", () => {
   it("Renders without errors", () => {
     render(
       <ApplicationFormsTable
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
         errors={null}
         applicationDetailsObject={applicationDetailsObject}
       />,
@@ -66,6 +71,7 @@ describe("CompetitionFormsTable", () => {
   it("matches snapshot", () => {
     const { container } = render(
       <ApplicationFormsTable
+        competitionInstructionsDownloadPath="http://path-to-instructions.com"
         errors={null}
         applicationDetailsObject={applicationDetailsObject}
       />,

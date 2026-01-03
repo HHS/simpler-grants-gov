@@ -86,14 +86,14 @@ exports[`CompetitionFormsTable matches snapshot 1`] = `
         </td>
       </tr>
       <tr
-        id="form-123e4567-e89b-12d3-a456-426614174001"
+        id="form-123e4567-e89b-12d3-a456-426614174002"
       >
         <td
           data-label="form"
         >
           <a
             class="text-bold"
-            href="/workspace/applications/application/12345/form/123e4567-e89b-12d3-a456-426614174001"
+            href="/workspace/applications/application/12345/form/123e4567-e89b-12d3-a456-426614174002"
           >
             DEF Project Form
           </a>
@@ -161,6 +161,12 @@ exports[`CompetitionFormsTable matches snapshot 1`] = `
     <thead>
       <tr>
         <th
+          class="bg-base-lightest padding-y-205 maxw-15"
+          scope="col"
+        >
+          includeFormInApplicationSubmissionDataLabel
+        </th>
+        <th
           class="bg-base-lightest padding-y-205"
           scope="col"
         >
@@ -190,6 +196,46 @@ exports[`CompetitionFormsTable matches snapshot 1`] = `
       <tr
         id="form-123e4567-e89b-12d3-a456-426614174001"
       >
+        <td
+          data-label="includeFormInApplicationSubmissionDataLabel"
+        >
+          <div
+            class="usa-radio"
+            data-testid="radio"
+          >
+            <input
+              class="usa-radio__input"
+              id="include-form123e4567-e89b-12d3-a456-426614174000-in-application-submission-radio-yes"
+              name="include-form123e4567-e89b-12d3-a456-426614174000-in-application-submission-radio-yes"
+              type="radio"
+              value="Yes"
+            />
+            <label
+              class="usa-radio__label"
+              for="include-form123e4567-e89b-12d3-a456-426614174000-in-application-submission-radio-yes"
+            >
+              Yes
+            </label>
+          </div>
+          <div
+            class="usa-radio"
+            data-testid="radio"
+          >
+            <input
+              class="usa-radio__input"
+              id="include-form123e4567-e89b-12d3-a456-426614174000-in-application-submission-radio-no"
+              name="include-form123e4567-e89b-12d3-a456-426614174000-in-application-submission-radio-no"
+              type="radio"
+              value="No"
+            />
+            <label
+              class="usa-radio__label"
+              for="include-form123e4567-e89b-12d3-a456-426614174000-in-application-submission-radio-no"
+            >
+              No
+            </label>
+          </div>
+        </td>
         <td
           data-label="form"
         >
@@ -235,14 +281,54 @@ exports[`CompetitionFormsTable matches snapshot 1`] = `
         </td>
       </tr>
       <tr
-        id="form-123e4567-e89b-12d3-a456-426614174001"
+        id="form-123e4567-e89b-12d3-a456-426614174002"
       >
+        <td
+          data-label="includeFormInApplicationSubmissionDataLabel"
+        >
+          <div
+            class="usa-radio"
+            data-testid="radio"
+          >
+            <input
+              class="usa-radio__input"
+              id="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-yes"
+              name="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-yes"
+              type="radio"
+              value="Yes"
+            />
+            <label
+              class="usa-radio__label"
+              for="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-yes"
+            >
+              Yes
+            </label>
+          </div>
+          <div
+            class="usa-radio"
+            data-testid="radio"
+          >
+            <input
+              class="usa-radio__input"
+              id="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-no"
+              name="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-no"
+              type="radio"
+              value="No"
+            />
+            <label
+              class="usa-radio__label"
+              for="include-form123e4567-e89b-12d3-a456-426614174001-in-application-submission-radio-no"
+            >
+              No
+            </label>
+          </div>
+        </td>
         <td
           data-label="form"
         >
           <a
             class="text-bold"
-            href="/workspace/applications/application/12345/form/123e4567-e89b-12d3-a456-426614174001"
+            href="/workspace/applications/application/12345/form/123e4567-e89b-12d3-a456-426614174002"
           >
             DEF Project Form
           </a>
