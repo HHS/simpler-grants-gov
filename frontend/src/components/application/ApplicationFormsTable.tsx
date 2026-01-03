@@ -1,18 +1,16 @@
-import { ApplicationDetail, ApplicationFormDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationFormDetail,
+} from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
-
-
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
-
-
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { IncludeFormInSubmissionRadio } from "./IncludeFormInSubmissionRadio";
-
 
 export const selectApplicationFormsByRequired = ({
   applicationForms,

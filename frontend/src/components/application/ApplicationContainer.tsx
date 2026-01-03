@@ -2,19 +2,24 @@
 
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
-import { ApplicationDetail, ApplicationHistory, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationHistory,
+  Status,
+} from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
-
-
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { Alert, SummaryBox, SummaryBoxContent, SummaryBoxHeading } from "@trussworks/react-uswds";
-
-
+import {
+  Alert,
+  SummaryBox,
+  SummaryBoxContent,
+  SummaryBoxHeading,
+} from "@trussworks/react-uswds";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
@@ -23,7 +28,6 @@ import ApplicationValidationAlert from "./ApplicationValidationAlert";
 import { AttachmentsCard } from "./attachments/AttachmentsCard";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
-
 
 const MY_APPLICATIONS_LINK = "/applications";
 
