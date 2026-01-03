@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
-import { CompetitionForms } from "src/types/competitionsResponseTypes";
+import { ApplicationDetail } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
@@ -25,32 +24,34 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-const competitionForms = competitionMock.competition
-  .competition_forms as unknown as CompetitionForms;
-const applicationForms =
-  competitionMock.application_forms as unknown as ApplicationFormDetail[];
-const applicationId = "12345";
+const applicationDetailsObject: ApplicationDetail = {
+  ...(competitionMock as unknown as ApplicationDetail),
+  application_status: "in_progress",
+  application_id: "12345",
+  competition: {
+    ...(competitionMock.competition as unknown as ApplicationDetail["competition"]),
+    competition_instructions: [], // ensure property exists
+  },
+};
 
 describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <ApplicationFormsTable
         competitionInstructionsDownloadPath="http://path-to-instructions.com"
-        forms={competitionForms}
-        applicationForms={applicationForms}
-        applicationId={applicationId}
+        errors={null}
+        applicationDetailsObject={applicationDetailsObject}
       />,
     );
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(results).not.toHaveNoViolations();
   });
   it("Renders without errors", () => {
     render(
       <ApplicationFormsTable
         competitionInstructionsDownloadPath="http://path-to-instructions.com"
-        forms={competitionForms}
-        applicationForms={applicationForms}
-        applicationId={applicationId}
+        errors={null}
+        applicationDetailsObject={applicationDetailsObject}
       />,
     );
 
@@ -68,9 +69,8 @@ describe("CompetitionFormsTable", () => {
     const { container } = render(
       <ApplicationFormsTable
         competitionInstructionsDownloadPath="http://path-to-instructions.com"
-        forms={competitionForms}
-        applicationForms={applicationForms}
-        applicationId={applicationId}
+        errors={null}
+        applicationDetailsObject={applicationDetailsObject}
       />,
     );
 

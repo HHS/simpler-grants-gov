@@ -1,4 +1,7 @@
-import { ApplicationFormDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationFormDetail,
+} from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -42,23 +45,16 @@ const selectApplicationForm = ({
 };
 
 export const ApplicationFormsTable = ({
-  applicationForms,
-  applicationId,
-  forms,
   competitionInstructionsDownloadPath,
   errors = null,
+  applicationDetailsObject,
 }: {
-  applicationForms: ApplicationFormDetail[];
-  applicationId: string;
-  forms: CompetitionForms;
   competitionInstructionsDownloadPath: string;
   errors?: FormValidationWarning[] | null;
+  applicationDetailsObject: ApplicationDetail;
 }) => {
-  const requiredForms = selectApplicationFormsByRequired({
-    applicationForms,
-    forms,
-    required: true,
-  });
+  const forms = applicationDetailsObject.competition.competition_forms;
+  const applicationForms = applicationDetailsObject.application_forms;
   const conditionalRequiredForms = selectApplicationFormsByRequired({
     applicationForms,
     forms,
@@ -70,10 +66,8 @@ export const ApplicationFormsTable = ({
     <>
       <h3>{t("requiredForms")}</h3>
       <ApplicationTable
-        forms={forms}
-        applicationForms={requiredForms}
-        applicationId={applicationId}
         formsAreOptional={false}
+        applicationDetailsObject={applicationDetailsObject}
       />
       {conditionalRequiredForms.length > 0 && (
         <>
@@ -90,11 +84,9 @@ export const ApplicationFormsTable = ({
             })}
           </p>
           <ApplicationTable
-            forms={forms}
-            applicationForms={conditionalRequiredForms}
-            applicationId={applicationId}
             formsAreOptional={true}
             errors={errors}
+            applicationDetailsObject={applicationDetailsObject}
           />
         </>
       )}
@@ -129,18 +121,18 @@ const ApplicationTableColumnError = ({
 };
 
 const ApplicationTable = ({
-  applicationForms,
-  applicationId,
-  forms,
-  formsAreOptional = false,
   errors = null,
+  applicationDetailsObject,
+  formsAreOptional = false,
 }: {
-  applicationForms: ApplicationFormDetail[];
-  applicationId: string;
-  forms: CompetitionForms;
-  formsAreOptional: boolean;
   errors?: FormValidationWarning[] | null;
+  applicationDetailsObject: ApplicationDetail;
+  formsAreOptional: boolean;
 }) => {
+  const forms = applicationDetailsObject.competition.competition_forms;
+  const applicationForms = applicationDetailsObject.application_forms;
+  const applicationId = applicationDetailsObject.application_id;
+  const applicationStatus = applicationDetailsObject.application_status;
   const t = useTranslations("Application.competitionFormTable");
   const formIdsWithErrors = errors ? errors.map((item) => item.value) : [];
 
@@ -191,6 +183,7 @@ const ApplicationTable = ({
                   includeFormInApplicationSubmission={
                     form.is_included_in_submission
                   }
+                  applicationStatus={applicationStatus}
                 />
               </td>
             )}
