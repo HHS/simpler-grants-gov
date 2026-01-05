@@ -7,9 +7,7 @@ import src.api.competition_alpha.competition_schema as competition_schema
 import src.api.response as response
 from src.api.competition_alpha.competition_blueprint import competition_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
-from src.auth.endpoint_access_util import verify_access
 from src.auth.multi_auth import jwt_or_key_multi_auth, jwt_or_key_security_schemes
-from src.constants.lookup_constants import Privilege
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.competition_alpha.get_competition import get_competition
 from src.services.competition_alpha.update_competition_flag import update_competition_flag
@@ -40,13 +38,15 @@ def competition_get(db_session: db.Session, competition_id: uuid.UUID) -> respon
 def update_competition_flag_route(
     db_session: db.Session, competition_id: uuid.UUID, json_data: dict[str, bool]
 ) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"competition_id": competition_id})
+    logger.info("PUT /alpha/competitions/:competition_id/flag")
+
     is_enabled = json_data.get("is_simpler_grants_enabled", False)
 
     with db_session.begin():
         user = api_user_key_auth.get_user()
-        user = db_session.merge(user, load=False)
-        verify_access(user, {Privilege.MANAGE_COMPETITION}, None)
+        db_session.add(user)
 
-        competition = update_competition_flag(db_session, str(competition_id), is_enabled)
+        competition = update_competition_flag(db_session, competition_id, is_enabled, user)
 
         return response.ApiResponse(message="Success", data=competition)
