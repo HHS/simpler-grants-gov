@@ -11,7 +11,6 @@ describe("HomepageHero", () => {
       screen.getByRole("heading", { level: 1, name: messages.Homepage.pageTitle }),
     ).toBeInTheDocument();
 
-    // robust to whitespace / minor formatting
     const description = screen.getByText((content, node) => {
       return node?.tagName.toLowerCase() === "p" &&
         content.includes("Simpler.Grants.gov is where we are building new features");
