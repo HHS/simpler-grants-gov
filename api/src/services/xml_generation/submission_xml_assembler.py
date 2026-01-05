@@ -224,12 +224,10 @@ class SubmissionXMLAssembler:
         Constructs the URL from competition's legacy_package_id if available.
         Returns None if package_id is not available.
         """
-        if self.application.competition.legacy_package_id:
-            return (
-                f"{SCHEMA_LOCATION_BASE_URL}/"
-                f"{self.application.competition.legacy_package_id}.xsd"
-            )
-        return None
+        return (
+            f"{SCHEMA_LOCATION_BASE_URL}/"
+            f"{self.application.competition.legacy_package_id}.xsd"
+        )
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""
