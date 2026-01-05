@@ -225,8 +225,7 @@ class SubmissionXMLAssembler:
         Returns None if package_id is not available.
         """
         return (
-            f"{SCHEMA_LOCATION_BASE_URL}/"
-            f"{self.application.competition.legacy_package_id}.xsd"
+            f"{SCHEMA_LOCATION_BASE_URL}/" f"{self.application.competition.legacy_package_id}.xsd"
         )
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
