@@ -85,7 +85,7 @@ describe("handleStartApplication", () => {
     expect(result).toEqual(expectedResponse);
     expect(fetchApplicationWithMethod).toHaveBeenCalledWith("POST");
     const mockFn = (fetchApplicationWithMethod as jest.Mock).mock.results[0]
-      .value;
+      .value as jest.Mock;
     expect(mockFn).toHaveBeenCalledWith({
       subPath: "start",
       additionalHeaders: { "X-SGG-Token": token },
@@ -117,7 +117,7 @@ describe("handleStartApplication", () => {
 
     expect(result).toEqual(expectedResponse);
     const mockFn = (fetchApplicationWithMethod as jest.Mock).mock.results[0]
-      .value;
+      .value as jest.Mock;
     expect(mockFn).toHaveBeenCalledWith({
       subPath: "start",
       additionalHeaders: { "X-SGG-Token": token },
@@ -158,7 +158,7 @@ describe("handleSubmitApplication", () => {
     expect(result).toEqual(expectedResponse);
     expect(fetchApplicationWithMethod).toHaveBeenCalledWith("POST");
     const mockFn = (fetchApplicationWithMethod as jest.Mock).mock.results[0]
-      .value;
+      .value as jest.Mock;
     expect(mockFn).toHaveBeenCalledWith({
       subPath: `${applicationId}/submit`,
       additionalHeaders: { "X-SGG-Token": token },
