@@ -179,13 +179,30 @@ class SubmissionXMLAssembler:
         form_elements = [self._parse_xml_string(xml) for xml in form_xmls]
 
         # Create root element with namespaces
+        # Add all required namespaces per Grants.gov specification
+        grant_ns = "http://apply.grants.gov/system/GrantsCommonTypes-V1.0"
         nsmap = {
             "header": "http://apply.grants.gov/system/Header-V1.0",
             "footer": "http://apply.grants.gov/system/Footer-V1.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+            "grant": grant_ns,
+            "xsi": "http://www.w3.org/2001/XMLSchema-instance",
         }
 
-        root = lxml_etree.Element("GrantApplication", nsmap=nsmap)
+        # Create GrantApplication element with grant: namespace prefix
+        root = lxml_etree.Element(f"{{{grant_ns}}}GrantApplication", nsmap=nsmap)
+
+        # Add xsi:schemaLocation attribute
+        # Construct schema URL from competition's legacy_package_id if available
+        schema_url = self._get_schema_location_url()
+        if schema_url:
+            schema_location = f"http://apply.grants.gov/system/GrantsCommonTypes-V1.0 {schema_url}"
+            root.set(
+                f"{{{nsmap['xsi']}}}schemaLocation",
+                schema_location,
+            )
 
         # Add header (must strip XML declaration and use just the element)
         root.append(header_element)
@@ -198,15 +215,28 @@ class SubmissionXMLAssembler:
         # Add footer
         root.append(footer_element)
 
-        # Generate final XML string
+        # Generate final XML string with UTF-8 encoding (uppercase)
         if pretty_print:
             xml_bytes = lxml_etree.tostring(
-                root, encoding="utf-8", xml_declaration=True, pretty_print=True
+                root, encoding="UTF-8", xml_declaration=True, pretty_print=True
             )
         else:
-            xml_bytes = lxml_etree.tostring(root, encoding="utf-8", xml_declaration=True)
+            xml_bytes = lxml_etree.tostring(root, encoding="UTF-8", xml_declaration=True)
 
         return xml_bytes.decode("utf-8").strip()
+
+    def _get_schema_location_url(self) -> str | None:
+        """Get the schema location URL for xsi:schemaLocation attribute.
+
+        Constructs the URL from competition's legacy_package_id if available.
+        Returns None if package_id is not available.
+        """
+        if self.application.competition.legacy_package_id:
+            return (
+                f"https://apply07.grants.gov/apply/opportunities/schemas/applicant/"
+                f"{self.application.competition.legacy_package_id}.xsd"
+            )
+        return None
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""

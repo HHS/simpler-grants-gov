@@ -48,10 +48,10 @@ class SubmissionXMLGenerator:
         """Generate XML string from root element."""
         if pretty_print:
             xml_bytes = lxml_etree.tostring(
-                root, encoding="utf-8", xml_declaration=True, pretty_print=True
+                root, encoding="UTF-8", xml_declaration=True, pretty_print=True
             )
         else:
-            xml_bytes = lxml_etree.tostring(root, encoding="utf-8", xml_declaration=True)
+            xml_bytes = lxml_etree.tostring(root, encoding="UTF-8", xml_declaration=True)
 
         return xml_bytes.decode("utf-8").strip()
 
@@ -67,6 +67,9 @@ class SubmissionXMLGenerator:
             HEADER_NAMESPACES["glob"],
             self._calculate_hash_value(),
         )
+
+        # Namespace redeclarations are handled via nsmap in lxml
+        # The namespaces are already declared in the nsmap and will be serialized correctly
 
         header_ns = HEADER_NAMESPACES["header"]
         self._add_field(root, "AgencyName", self._get_agency_name(), header_ns)
