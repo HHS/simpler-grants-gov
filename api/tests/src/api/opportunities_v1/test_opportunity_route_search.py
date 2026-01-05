@@ -1759,9 +1759,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING, DOC_TOP_LEVEL]
         ]
 
-    def test_search_top_level_agency_and_sub_agencies_200(
-        self, client, db_session, api_auth_token
-    ):
+    def test_search_top_level_agency_and_sub_agencies_200(self, client, db_session, api_auth_token):
 
         resp = client.post(
             "/v1/opportunities/search",
