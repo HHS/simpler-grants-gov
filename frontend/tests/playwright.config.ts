@@ -8,6 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, "..", ".env.local") });
 export const baseURL =
   process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
 
+export const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
