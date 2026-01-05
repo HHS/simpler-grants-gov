@@ -19,14 +19,18 @@ describe("TableWithResponsiveHeader", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  it("matches snapshot", () => {
-    const component = TableWithResponsiveHeader({
-      headerContent: fakeResponsiveTableHeaders,
-      tableRowData: fakeResponsiveTableRows,
-    });
-    const { container } = render(component);
-    expect(container).toMatchSnapshot();
-  });
+  it("does not render if rows do not match header length", () => {
+  const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  render(
+    <TableWithResponsiveHeader
+      headerContent={fakeResponsiveTableHeaders.concat([{ cellData: "superfluous" }])}
+      tableRowData={fakeResponsiveTableRows}
+    />,
+  );
+
+  expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  consoleSpy.mockRestore();
+});
   it("displays header content in table header", () => {
     render(
       <TableWithResponsiveHeader

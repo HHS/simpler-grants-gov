@@ -84,10 +84,16 @@ describe("Header", () => {
     global.fetch = originalFetch;
   });
 
-  it("renders Header navbar menu", () => {
-    const { container } = render(<Header />);
-    expect(container).toMatchSnapshot();
-  });
+it("renders the primary navigation", () => {
+  render(<Header />);
+
+  // Logo link to home
+  expect(screen.getByRole("link", { name: /Simpler\.Grants\.gov/i })).toHaveAttribute("href", "/");
+
+  // Primary links a user can see
+  expect(screen.getByRole("link", { name: /Home/i })).toHaveAttribute("href", "/");
+  expect(screen.getByRole("link", { name: /Search/i })).toHaveAttribute("href", "/search");
+});
 
   it("toggles the mobile nav menu", async () => {
     global.fetch = jest.fn(() =>
@@ -318,7 +324,6 @@ describe("Header", () => {
 
       await userEvent.click(aboutBtn);
 
-      expect(container).toMatchSnapshot();
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
       const visionLink = screen.getByRole("link", { name: /Our Vision/i });
@@ -335,7 +340,6 @@ describe("Header", () => {
 
       await userEvent.click(communityBtn);
 
-      expect(container).toMatchSnapshot();
       expect(communityBtn).toHaveAttribute("aria-expanded", "true");
 
       const eventsLink = screen.getByRole("link", { name: /Events/i });
