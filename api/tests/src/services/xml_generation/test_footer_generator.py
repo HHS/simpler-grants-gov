@@ -241,7 +241,7 @@ class TestFooterGeneration:
 
         assert xml_string.startswith("<?xml version=")
         first_line = xml_string.split("\n")[0]
-        assert "encoding='utf-8'" in first_line or 'encoding="utf-8"' in first_line
+        assert "encoding='utf-8'" in first_line.lower() or 'encoding="utf-8"' in first_line.lower()
 
     def test_footer_namespace_prefixes_in_output(self, application_with_submission):
         """Test that namespace prefixes are correctly used in footer XML output."""
