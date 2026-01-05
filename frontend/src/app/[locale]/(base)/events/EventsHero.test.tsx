@@ -2,12 +2,11 @@ import EventsHero from "src/app/[locale]/(base)/events/EventsHero";
 import { render, screen } from "tests/react-utils";
 
 describe("Events Hero Content", () => {
-  it("Renders without errors", () => {
+  it("renders the hero heading", () => {
     render(<EventsHero />);
-    const H1 = screen.getByRole("heading", {
-      name: /Events/i,
-    });
 
-    expect(H1).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: /events/i }),
+    ).toBeInTheDocument();
   });
 });
