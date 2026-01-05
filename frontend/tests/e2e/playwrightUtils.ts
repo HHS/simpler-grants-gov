@@ -4,6 +4,7 @@ import {
   FullProject,
   Page,
 } from "@playwright/test";
+import { baseURL } from "tests/playwright.config";
 
 export interface PageProps {
   page: Page;
@@ -112,16 +113,11 @@ export const generateRandomString = (desiredPattern: number[]) => {
 // signs in using mock 0auth server
 // note that this does not currently work in CI, but does work locally
 // an unknown error prevents sending the token back successfully from the API in CI
-// this will be remedied by https://github.com/HHS/simpler-grants-gov/issues/3791
-// after which we can reenable sign in related tests
 export const performSignIn = async (page: Page, project: FullProject) => {
-  const signInButton = page.locator('button[data-testid="sign-in-button"]');
-  await expect(signInButton).toHaveText("Sign in");
+  const signInButton = page.getByRole("link", { name: "Sign in" });
   await signInButton.click();
-  const secondSignInButton = page.locator(".usa-modal__footer a");
-  await secondSignInButton.click();
 
-  await waitForAnyURLChange(page, "/");
+  await waitForAnyURLChange(page, baseURL);
 
   const requiredInput = page.locator('input[type="text"]');
   const submitButton = page.locator('input[type="submit"]');
@@ -130,20 +126,18 @@ export const performSignIn = async (page: Page, project: FullProject) => {
   await requiredInput.fill(randomUserName);
   await submitButton.click();
 
-  await waitForUrl(page, "http://localhost:3000/");
+  await waitForAnyURLChange(page, baseURL);
 
   if (project.name.match(/[Mm]obile/)) {
-    const userDropdown = page.locator(
-      'button[data-testid="navDropDownButton"]',
-    );
+    const userDropdown = page.getByTestId("navMenuButton");
     await userDropdown.click();
     await expect(
       page.locator("#user-control > li:first-child a div"),
-    ).toHaveText("fake_mail@mail.com");
+    ).toHaveText("Account");
   } else {
     await expect(
       page.locator('button[data-testid="navDropDownButton"] a div'),
-    ).toHaveText("fake_mail@mail.com");
+    ).toHaveText("Account");
   }
 };
 
