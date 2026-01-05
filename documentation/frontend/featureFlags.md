@@ -184,3 +184,28 @@ The `FeatureFlagsManager` and middleware integration intelligently and gracefull
 - Invalid query param formats, invalid feature flag names, and invalid feature flag values are ignored
 - If the cookie value is corrupted, a new cookie value set to the default feature flag values will be set
 - The cookie is read every time we check if a feature flag is enabled, so it also handles changes to the cookie made by another page or request
+
+# Updating default feature flags in deployed apps
+
+When the default value of a flag should be updated for all users of a deployed application, for examople when turning on a new feature:
+
+First, gather the name for the SSM parameter from terraform. You may need to trace through from frontend variable name -> env var name (found in environments.ts) -> SSM param name (found in frontend/app-config/env-config/environment_variables.tf). The name will look something like `/<application>/<environment>/<name-of-flag>`
+
+For PROD and Training:
+
+1. log in to AWS. Note that this can only be done by a user with write access to AWS
+2. go to Systems Manager
+3. scroll down to the Parameter Store link on the left nav
+4. find the right entry for the feature flag, found in step one
+5. click edit
+6. set value and save
+7. you will need to manually redeploy or restart the frontend ECS service to pick up the new value of the feature flag
+
+For DEV and Staging:
+
+1. go to https://github.com/HHS/simpler-grants-gov/actions/workflows/update-frontend-feature-flag.yml
+2. click run workflow
+3. choose the feature flag in the drop down that you found in step one
+4. set value and environment
+5. click run workflow
+6. this will automatically restart the service after setting the feature flag
