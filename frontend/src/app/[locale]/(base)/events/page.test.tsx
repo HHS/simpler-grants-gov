@@ -1,19 +1,19 @@
-import type { LocalizedPageProps } from "src/types/intl";
 import { generateMetadata } from "./page";
+import { makeLocalizedPageProps } from "tests/utils/page-utils";
+import { messages } from "src/i18n/messages/en";
+import { getMessage } from "tests/utils/intl";
+
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => (key: string) => key,
+  getTranslations: async () => (key: string) => getMessage(messages, key),
+  setRequestLocale: jest.fn(),
 }));
 
 describe("Events page metadata", () => {
-  it("sets the browser title and description correctly", async () => {
-    const props: LocalizedPageProps = {
-      params: Promise.resolve({ locale: "en" }),
-    };
+  it("sets the browser title and description", async () => {
+    const metadata = await generateMetadata(makeLocalizedPageProps("en"));
 
-    const metadata = await generateMetadata(props);
-
-    expect(metadata.title).toBe("Events.pageTitle");
-    expect(metadata.description).toBe("Index.metaDescription");
+    expect(metadata.title).toBe(getMessage(messages, "Events.pageTitle"));
+    expect(metadata.description).toBe(getMessage(messages, "Index.metaDescription"));
   });
 });

@@ -6,7 +6,7 @@ describe("Events Hero Content", () => {
     render(<EventsHero />);
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /events/i }),
+      screen.getByText(/be a part of the journey/i),
     ).toBeInTheDocument();
   });
 });

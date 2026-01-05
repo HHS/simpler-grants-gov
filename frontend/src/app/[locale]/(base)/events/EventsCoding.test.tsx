@@ -1,11 +1,24 @@
-import EventsCoding from "src/app/[locale]/(base)/events/EventsCoding";
+import EventsCoding from "./EventsCoding";
 import { render, screen } from "tests/react-utils";
 
-describe("Events coding Content", () => {
-  it("Renders without errors", () => {
+describe("EventsCoding", () => {
+  it("renders the coding challenge section", () => {
     render(<EventsCoding />);
-    const component = screen.getByTestId("events-coding-content");
 
-    expect(component).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Collaborative Coding Challenge",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", {
+        name: /spring 2025 coding challenge/i,
+      }),
+    ).toHaveAttribute(
+      "href",
+      "https://wiki.simpler.grants.gov/get-involved/community-events/spring-2025-collaborative-coding-challenge",
+    );
   });
 });

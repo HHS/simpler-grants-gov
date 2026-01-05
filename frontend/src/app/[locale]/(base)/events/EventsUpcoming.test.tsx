@@ -1,13 +1,19 @@
-import EventsUpcoming from "src/app/[locale]/(base)/events/EventsUpcoming";
+import EventsUpcoming from "./EventsUpcoming";
 import { render, screen } from "tests/react-utils";
 
-describe("Events Upcoming Content", () => {
-  it("Renders without errors", () => {
+describe("EventsUpcoming", () => {
+  it("renders upcoming events and sign-up link", () => {
     render(<EventsUpcoming />);
-    const H1 = screen.getByRole("heading", {
-      name: /Upcoming Events/i,
-    });
 
-    expect(H1).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: /upcoming events/i }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: /sign up/i }),
+    ).toHaveAttribute(
+      "href",
+      "https://docs.google.com/forms/d/e/1FAIpQLSe3nyLxAIeky3bGydyvuZobrlEGdWrl0YaZBbVmsn7Pu6HhUw/viewform",
+    );
   });
 });

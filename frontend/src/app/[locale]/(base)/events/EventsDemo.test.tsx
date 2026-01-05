@@ -1,11 +1,25 @@
-import EventsDemo from "src/app/[locale]/(base)/events/EventsDemo";
+import EventsDemo from "./EventsDemo";
 import { render, screen } from "tests/react-utils";
 
-describe("Events demo Content", () => {
-  it("Renders without errors", () => {
+describe("EventsDemo", () => {
+  it("renders the demo section and watch link", () => {
     render(<EventsDemo />);
-    const component = screen.getByTestId("events-demo-content");
 
-    expect(component).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Simpler.Grants.gov Big Demo",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", {
+        name: /January 15, 2025/i,
+      }),
+    ).toHaveAttribute(
+      "href",
+      "https://vimeo.com/1050177794/278fa78e0b?share=copy",
+    );
   });
 });
