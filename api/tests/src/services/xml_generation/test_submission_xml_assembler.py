@@ -7,6 +7,7 @@ from lxml import etree as lxml_etree
 
 import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -185,7 +186,7 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify root element (with grant: namespace prefix)
-        grant_ns = "http://apply.grants.gov/system/GrantsCommonTypes-V1.0"
+        grant_ns = GRANTS_GOV_NAMESPACES["grant"]
         assert root.tag == f"{{{grant_ns}}}GrantApplication"
 
         # Verify header element
@@ -566,9 +567,9 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify namespace declarations exist
-        assert "http://apply.grants.gov/system/Header-V1.0" in root.nsmap.values()
-        assert "http://apply.grants.gov/system/Footer-V1.0" in root.nsmap.values()
-        assert "http://apply.grants.gov/system/Global-V1.0" in root.nsmap.values()
+        assert GRANTS_GOV_NAMESPACES["header"] in root.nsmap.values()
+        assert GRANTS_GOV_NAMESPACES["footer"] in root.nsmap.values()
+        assert GRANTS_GOV_NAMESPACES["glob"] in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
         self, sample_application, sample_application_submission, enable_factory_create

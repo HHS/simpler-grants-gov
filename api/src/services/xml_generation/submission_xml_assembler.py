@@ -7,6 +7,10 @@ from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
+from src.services.xml_generation.constants import (
+    GRANTS_GOV_NAMESPACES,
+    SCHEMA_LOCATION_BASE_URL,
+)
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -180,16 +184,8 @@ class SubmissionXMLAssembler:
 
         # Create root element with namespaces
         # Add all required namespaces per Grants.gov specification
-        grant_ns = "http://apply.grants.gov/system/GrantsCommonTypes-V1.0"
-        nsmap = {
-            "header": "http://apply.grants.gov/system/Header-V1.0",
-            "footer": "http://apply.grants.gov/system/Footer-V1.0",
-            "glob": "http://apply.grants.gov/system/Global-V1.0",
-            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
-            "att": "http://apply.grants.gov/system/Attachments-V1.0",
-            "grant": grant_ns,
-            "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-        }
+        grant_ns = GRANTS_GOV_NAMESPACES["grant"]
+        nsmap = GRANTS_GOV_NAMESPACES
 
         # Create GrantApplication element with grant: namespace prefix
         root = lxml_etree.Element(f"{{{grant_ns}}}GrantApplication", nsmap=nsmap)
@@ -233,7 +229,7 @@ class SubmissionXMLAssembler:
         """
         if self.application.competition.legacy_package_id:
             return (
-                f"https://apply07.grants.gov/apply/opportunities/schemas/applicant/"
+                f"{SCHEMA_LOCATION_BASE_URL}/"
                 f"{self.application.competition.legacy_package_id}.xsd"
             )
         return None

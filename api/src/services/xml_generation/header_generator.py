@@ -12,15 +12,7 @@ from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
-HEADER_NAMESPACES = {
-    "header": "http://apply.grants.gov/system/Header-V1.0",
-    "glob": "http://apply.grants.gov/system/Global-V1.0",
-}
-
-FOOTER_NAMESPACES = {
-    "footer": "http://apply.grants.gov/system/Footer-V1.0",
-    "glob": "http://apply.grants.gov/system/Global-V1.0",
-}
+from src.services.xml_generation.constants import FOOTER_NAMESPACES, HEADER_NAMESPACES
 
 
 class SubmissionXMLGenerator:

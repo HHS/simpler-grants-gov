@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 import pytest
 from lxml import etree as lxml_etree
 
+from src.services.xml_generation.constants import FOOTER_NAMESPACES
 from src.services.xml_generation.header_generator import (
-    FOOTER_NAMESPACES,
     SubmissionXMLGenerator,
     generate_application_footer_xml,
 )
