@@ -100,8 +100,6 @@ REQUIRED_FIELDS = {
 
 
 class AgencyConfig(PydanticBaseEnvConfig):
-    # TODO - we might want to put this somewhere more central
-    #        as we might want to filter these out in other places
     prefix_env: str = Field(
         default="GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN", alias="TEST_AGENCY_PREFIXES"
     )
@@ -442,12 +440,7 @@ def get_agency_updates(tgroup_agency: TgroupAgency) -> AgencyUpdates:
             )
             continue
 
-        # TODO - how we want to actually handle deleted rows likely needs more investigation
-        #        and discussion - do we assume that if certain fields are deleted that the
-        #        entire agency should be deleted? Can they even be deleted once an opportunity refers to them?
-        #        Rather than focus too much on that detail right now, I'm deferring
-        #        a more thorough investigation to later
-        # For now - we'll error any agency that has deleted rows except for a few
+        # we'll error any agency that has deleted rows except for a few
         # specific fields we know are safe to delete.
         if tgroup.is_deleted:
             if tgroup_field_name not in NULLABLE_FIELDS:

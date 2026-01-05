@@ -195,3 +195,37 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
         )
         schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
         assert schema.model_dump() == {"expanded_application_filter": None}
+
+    def test_get_submission_list_expanded_request_filters_created_by_multiple_statuses(
+        self, db_session
+    ):
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>Status</gran:FilterType>"
+            "<gran:FilterValue>Rejected with Errors</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>Status</gran:FilterType>"
+            "<gran:FilterValue>Validated</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>Status</gran:FilterType>"
+            "<gran:FilterValue>Received</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
+        soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
+        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        expected = {
+            "expanded_application_filter": {
+                "filters": {"Status": ["Rejected with Errors", "Validated", "Received"]}
+            }
+        }
+        assert schema.model_dump() == expected

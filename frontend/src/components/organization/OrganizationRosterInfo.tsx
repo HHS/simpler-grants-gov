@@ -30,7 +30,7 @@ export const OrganizationRosterInfo = ({
         {!checkFeatureFlag("manageUsersOff") &&
           manageUsersPrivilege?.authorized && (
             <Link
-              href={`/organization/${organizationId}/manage-users`}
+              href={`/organizations/${organizationId}/manage-users`}
               className="usa-button usa-button--secondary float-right"
             >
               <USWDSIcon name="people" />

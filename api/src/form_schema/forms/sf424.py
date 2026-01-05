@@ -876,7 +876,8 @@ FORM_XML_TRANSFORM_RULES = {
     },
     "sam_uei": {"xml_transform": {"target": "SAMUEI"}},
     # Address information - nested structure with GlobalLibrary namespace
-    "applicant_address": {
+    # Order must match XSD: Street1, Street2, City, County, State/Province, ZipPostalCode, Country
+    "applicant": {
         "xml_transform": {"target": "Applicant", "type": "nested_object"},
         "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
         "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
@@ -884,8 +885,24 @@ FORM_XML_TRANSFORM_RULES = {
         "county": {"xml_transform": {"target": "County", "namespace": "globLib"}},
         "state": {"xml_transform": {"target": "State", "namespace": "globLib"}},
         "province": {"xml_transform": {"target": "Province", "namespace": "globLib"}},
-        "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
         "zip_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
+        "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
+    },
+    # Contact person - nested structure with GlobalLibrary namespace for names
+    "contact_person": {
+        "xml_transform": {"target": "ContactPerson", "type": "nested_object"},
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+            }
+        },
     },
     # Contact information - direct field mappings
     "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
@@ -911,6 +928,12 @@ FORM_XML_TRANSFORM_RULES = {
     "assistance_listing_program_title": {"xml_transform": {"target": "CFDAProgramTitle"}},
     "funding_opportunity_number": {"xml_transform": {"target": "FundingOpportunityNumber"}},
     "funding_opportunity_title": {"xml_transform": {"target": "FundingOpportunityTitle"}},
+    "competition_identification_number": {
+        "xml_transform": {"target": "CompetitionIdentificationNumber"}
+    },
+    "competition_identification_title": {
+        "xml_transform": {"target": "CompetitionIdentificationTitle"}
+    },
     # Project information - direct field mappings
     "project_title": {"xml_transform": {"target": "ProjectTitle"}},
     "congressional_district_applicant": {
