@@ -225,26 +225,10 @@ export const savedOpportunityStatusOptions: FilterOption[] = [
     label: "Any opportunity status",
     value: "",
   },
-  {
-    id: "saved-status-forecasted",
-    label: "Forecasted",
-    value: "forecasted",
-  },
-  {
-    id: "saved-status-open",
-    label: "Open",
-    value: "posted",
-  },
-  {
-    id: "saved-status-closed",
-    label: "Closed",
-    value: "closed",
-  },
-  {
-    id: "saved-status-archived",
-    label: "Archived",
-    value: "archived",
-  },
+  ...statusOptions.map((option) => ({
+    ...option,
+    id: `saved-${option.id}`,
+  })),
 ];
 
 export const sortOptions: FilterOption[] = [
