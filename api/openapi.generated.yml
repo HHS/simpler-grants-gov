@@ -25,6 +25,7 @@ tags:
 - name: Extract v1
 - name: Agency v1
 - name: Organization v1
+- name: Internal v1 - Admin Only
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
@@ -166,6 +167,38 @@ paths:
         with endpoints.
 
         '
+  /v1/internal/roles:
+    put:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalRoleAssignmentResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Internal v1 - Admin Only
+      summary: Update Internal Roles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalRoleAssignmentRequest'
+      security:
+      - ApiUserKeyAuth: []
   /local/local-users:
     get:
       parameters: []
@@ -3173,6 +3206,34 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    InternalRoleAssignmentRequest:
+      type: object
+      properties:
+        internal_role_id:
+          type: string
+          format: uuid
+          description: The UUID of the internal role to assign
+          example: 57e8875f-c154-41be-a5f6-602f4c92d6e6
+        user_email:
+          type: string
+          description: The email address of the user receiving the role
+          example: example@example.com
+      required:
+      - internal_role_id
+      - user_email
+    InternalRoleAssignmentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     LocalUserToken:
       type: object
       properties:
@@ -5103,6 +5164,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     UserOrganization:
@@ -5250,6 +5312,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     UserCanAccessResponse:
@@ -6242,6 +6305,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     UserInvitationItem:
@@ -6786,6 +6850,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     OrganizationUser:
