@@ -40,7 +40,7 @@ locals {
     {
       ".well-known/pki-validation"  = [],
       "alpha/applications"          = [],
-      "alpha/forms"          = [],
+      "alpha/forms"                 = [],
       "grantsws-agency/services"    = [],
       "grantsws-applicant/services" = [],
       "static/{proxy+}" = [{
@@ -68,7 +68,7 @@ locals {
         }
       }],
       "alpha/applications/{application_id}" = [],
-      "alpha/forms/{form_id}"          = [],
+      "alpha/forms/{form_id}"               = [],
       "grantsws-agency/services/v2"         = [],
       "grantsws-applicant/services/v2"      = [],
       "v1/users/login"                      = [{ "method" : "GET" }],
@@ -91,7 +91,7 @@ locals {
           "multipart/form-data" : local.alpha_applications_model_name
         }
       }],
-      "alpha/forms/{form_id}/form_instructions"          = [],
+      "alpha/forms/{form_id}/form_instructions" = [],
       "grantsws-agency/services/v2/{service_port_name}" = [{
         "method" : "POST",
         "method_parameters" : {
@@ -123,7 +123,7 @@ locals {
         "method" : "PUT",
         "api_key_required" : true,
         "method_parameters" : {
-          "method.request.path.form_id" = true,
+          "method.request.path.form_id"             = true,
           "method.request.path.form_instruction_id" = true,
         },
         "request_parameters" : {
@@ -208,7 +208,7 @@ locals {
   first_level_endpoint_methods  = { for config in local.flattened_first_level_endpoints : config.id => config }
   second_level_endpoint_methods = { for config in local.flattened_second_level_endpoints : config.id => config }
   third_level_endpoint_methods  = { for config in local.flattened_third_level_endpoints : config.id => config }
-  fourth_level_endpoint_methods  = { for config in local.flattened_fourth_level_endpoints : config.id => config }
+  fourth_level_endpoint_methods = { for config in local.flattened_fourth_level_endpoints : config.id => config }
 }
 
 resource "aws_api_gateway_rest_api" "api" {
