@@ -1,6 +1,10 @@
 locals {
+  alpha_applications_model_name = "alphaApplicationsAttachments"
   # Root level paths, and their method types. If the method is an empty list, this has sub-paths, which will be defined
   # in another variable
+  # Note that by default, API gateway will encode all bodies of requests, which can cause issues for attachments/uploads.
+  # To handle this, you need to create an explicit endpoint that is expecting an upload, and have it use a model. See
+  # /alpha/applications/{app_id}/attachments for an example of how this is done
   root_endpoints = [
     # Terraform does not like conditionally setting an object that has different keys, so we have to force set the values
     # from a list, with the index being what is conditional
@@ -8,6 +12,7 @@ locals {
     {
       ".well-known"        = [],
       "docs"               = [{ "method" : "GET" }],
+      "alpha"              = [],
       "grantsws-agency"    = [],
       "grantsws-applicant" = [],
       "health"             = [{ "method" : "GET" }],
@@ -34,6 +39,7 @@ locals {
     {},
     {
       ".well-known/pki-validation"  = [],
+      "alpha/applications"          = [],
       "grantsws-agency/services"    = [],
       "grantsws-applicant/services" = [],
       "static/{proxy+}" = [{
@@ -60,15 +66,29 @@ locals {
           "integration.request.path.proxy" : "method.request.path.proxy",
         }
       }],
-      "grantsws-agency/services/v2"    = [],
-      "grantsws-applicant/services/v2" = [],
-      "v1/users/login"                 = [{ "method" : "GET" }],
-      "v1/users/token"                 = [],
+      "alpha/applications/{application_id}" = [],
+      "grantsws-agency/services/v2"         = [],
+      "grantsws-applicant/services/v2"      = [],
+      "v1/users/login"                      = [{ "method" : "GET" }],
+      "v1/users/token"                      = [],
   }][var.enable_api_gateway ? 1 : 0]
 
   third_level_endpoints = [
     {},
     {
+      "alpha/applications/{application_id}/attachments" = [{
+        "method" : "POST",
+        "api_key_required" : true,
+        "method_parameters" : {
+          "method.request.path.application_id" = true
+        },
+        "request_parameters" : {
+          "integration.request.path.application_id" : "method.request.path.application_id",
+        },
+        "request_models" : {
+          "multipart/form-data" : local.alpha_applications_model_name
+        }
+      }],
       "grantsws-agency/services/v2/{service_port_name}" = [{
         "method" : "POST",
         "method_parameters" : {
@@ -103,7 +123,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -115,7 +136,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -127,7 +149,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -139,7 +162,8 @@ locals {
         "method" : config.method,
         "api_key_required" : lookup(config, "api_key_required", false),
         "method_parameters" : lookup(config, "method_parameters", {}),
-        "request_parameters" : lookup(config, "request_parameters", {})
+        "request_parameters" : lookup(config, "request_parameters", {}),
+        "request_models" : lookup(config, "request_models", {}),
       }
     ]
   ]) : []
@@ -160,10 +184,30 @@ resource "aws_api_gateway_rest_api" "api" {
   }
 }
 
+resource "aws_api_gateway_model" "alpha_applications_model" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  rest_api_id  = aws_api_gateway_rest_api.api[0].id
+  name         = local.alpha_applications_model_name
+  description  = "Schema for allowing uploads to /alpha/applications/{app_id}/attachments"
+  content_type = "application/form-data"
+
+  schema = jsonencode({
+    "$schema" : "http://json-schema.org/draft-04/schema#",
+    "title" : "MediaFileUpload",
+    "type" : "object",
+    "properties" : {
+      "file" : { "type" : "string" }
+    }
+  })
+}
+
 resource "aws_api_gateway_method" "root" {
   # checkov:skip=CKV_AWS_59: Public endpoints or endpoint that is used as part of a flow don't need auth. Auth is enforced on greedy proxy
   # checkov:skip=CKV2_AWS_53: Integration is proxy to downstream ECS, input validation is done at that level to reduce duplicative work
   count = var.enable_api_gateway ? 1 : 0
+
+  depends_on = [aws_api_gateway_model.alpha_applications_model]
 
   rest_api_id   = aws_api_gateway_rest_api.api[0].id
   resource_id   = aws_api_gateway_rest_api.api[0].root_resource_id
@@ -207,6 +251,7 @@ resource "aws_api_gateway_method" "root_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -247,6 +292,7 @@ resource "aws_api_gateway_method" "first_level_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -287,6 +333,7 @@ resource "aws_api_gateway_method" "second_level_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
@@ -327,6 +374,7 @@ resource "aws_api_gateway_method" "third_level_endpoints" {
   authorization = "NONE"
 
   request_parameters = each.value.method_parameters
+  request_models     = each.value.request_models
   api_key_required   = each.value.api_key_required
 }
 
