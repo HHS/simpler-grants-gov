@@ -1,13 +1,11 @@
 import logging
 import uuid
-from collections.abc import Sequence
 from typing import Any
 
 from pydantic import BaseModel, Field
 from sqlalchemy import Select, and_, exists, select
-from sqlalchemy.orm import InstrumentedAttribute, joinedload
+from sqlalchemy.orm import InstrumentedAttribute
 
-import src.adapters.db as db
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import (
@@ -15,9 +13,7 @@ from src.db.models.opportunity_models import (
     ExcludedOpportunityReview,
     Opportunity,
 )
-from src.pagination.pagination_models import PaginationInfo, PaginationParams
-from src.pagination.paginator import Paginator
-from src.services.service_utils import apply_sorting
+from src.pagination.pagination_models import PaginationParams
 
 logger = logging.getLogger(__name__)
 

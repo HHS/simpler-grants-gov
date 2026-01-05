@@ -13,10 +13,6 @@ from src.util.dict_util import flatten_dict
 logger = logging.getLogger(__name__)
 
 
-
-
-
-
 examples = {
     "example1": {
         "summary": "No filters",
