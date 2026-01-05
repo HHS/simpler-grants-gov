@@ -7,10 +7,7 @@ from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
-from src.services.xml_generation.constants import (
-    GRANTS_GOV_NAMESPACES,
-    SCHEMA_LOCATION_BASE_URL,
-)
+from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES, SCHEMA_LOCATION_BASE_URL
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -194,9 +191,7 @@ class SubmissionXMLAssembler:
         # Construct schema URL from competition's legacy_package_id
         schema_url = self._get_schema_location_url()
         if schema_url:
-            schema_location = (
-                f"http://apply.grants.gov/system/GrantsCommonTypes-V1.0 {schema_url}"
-            )
+            schema_location = f"http://apply.grants.gov/system/GrantsCommonTypes-V1.0 {schema_url}"
             root.set(
                 f"{{{nsmap['xsi']}}}schemaLocation",
                 schema_location,
