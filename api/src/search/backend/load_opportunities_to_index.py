@@ -47,13 +47,11 @@ class LoadOpportunitiesToIndex(Task):
         self,
         db_session: db.Session,
         search_client: search.SearchClient,
-        is_full_refresh: bool = True,
         config: LoadOpportunitiesToIndexConfig | None = None,
     ) -> None:
         super().__init__(db_session)
 
         self.search_client = search_client
-        self.is_full_refresh = is_full_refresh
         if config is None:
             config = LoadOpportunitiesToIndexConfig()
         self.config = config
@@ -68,9 +66,8 @@ class LoadOpportunitiesToIndex(Task):
         # Incremental (changed-only) opportunity loading logic previously lived here.
         # It was removed as part of PR https://github.com/HHS/simpler-grants-gov/pull/7748 during code cleanup.
         # See that PR if incremental search support needs to be revived in the future.
-        if self.is_full_refresh:
-            logger.info("Running full refresh")
-            self.full_refresh()
+        logger.info("Running full refresh")
+        self.full_refresh()
 
     def full_refresh(self) -> None:
         # create the index
