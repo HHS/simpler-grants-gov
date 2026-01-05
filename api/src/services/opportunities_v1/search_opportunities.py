@@ -132,8 +132,7 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
 
 
 def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
-    # TODO - we'll likely want to adjust the total number of values returned, especially
-    # for agency as there could be hundreds of different agencies, and currently it's limited to 25.
+    """Add aggregations / facet_counts to the query to the search index"""
     builder.aggregation_terms(
         "opportunity_status",
         _adjust_field_name("opportunity_status", OPP_REQUEST_FIELD_NAME_MAPPING),

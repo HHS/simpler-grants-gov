@@ -32,8 +32,6 @@ class LoadOpportunitiesToIndexConfig(PydanticBaseEnvConfig):
     shard_count: int = Field(default=1)  # LOAD_OPP_SEARCH_SHARD_COUNT
     replica_count: int = Field(default=1)  # LOAD_OPP_SEARCH_REPLICA_COUNT
 
-    # TODO - these might make sense to come from some sort of opportunity-search-index-config?
-    # look into this a bit more when we setup the search endpoint itself.
     alias_name: str = Field(default="opportunity-index-alias")  # LOAD_OPP_SEARCH_ALIAS_NAME
     index_prefix: str = Field(default="opportunity-index")  # LOAD_OPP_INDEX_PREFIX
 
