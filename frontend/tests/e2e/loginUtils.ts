@@ -1,5 +1,6 @@
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
+import { baseURL } from "tests/playwright.config";
 
 /*
   most of this is copied from src/services/auth/session in order to keep app logic and test logic separate
@@ -58,7 +59,7 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
     {
       name: "session",
       value: token,
-      url: "http://localhost:3000",
+      url: baseURL,
     },
   ]);
 };
