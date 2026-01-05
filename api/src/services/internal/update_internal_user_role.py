@@ -46,4 +46,4 @@ def update_internal_user_role(
     new_assignment = InternalUserRole(user_id=target_user_id, role_id=internal_role_id)
     db_session.add(new_assignment)
 
-    logger.info(f"Successfully assigned role to user.")
+    logger.info("Successfully assigned role to user.")
