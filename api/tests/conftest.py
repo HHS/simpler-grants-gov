@@ -418,7 +418,6 @@ def app(
     monkeypatch_session.setenv(
         "LOGIN_GOV_AUTH_ENDPOINT", "http://localhost:8080/test-endpoint/oauth-authorize"
     )
-    # TODO: Discussion shouldnt the env variable cover this?
     monkeypatch_session.setenv(
         "LOGIN_FINAL_DESTINATION", "http://localhost:8080/v1/users/login/result"
     )

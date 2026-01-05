@@ -39,10 +39,12 @@ class SOAPClientCertificate(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def get_pem(self, key_map: dict) -> str:
-        """Note that this auth mechanism will only be configured in lower environments
+        """Fetch the PEM from our pre-defined env var
 
-        There will be no prod configurations for this auth mechanism.
-        TODO - is the above true? I think this happens for prod as well?
+        NOTE: Needing to manually define private keys is something
+        we should be able to remove once MicroHealth adjusts their
+        SOAP endpoints, we expect that sometime in early 2026, and
+        then this should not be needed.
         """
         if not self.legacy_certificate:
             raise SOAPClientCertificateLookupError(
