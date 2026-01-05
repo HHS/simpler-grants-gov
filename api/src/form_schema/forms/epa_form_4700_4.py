@@ -321,7 +321,7 @@ FORM_RULE_SCHEMA = {
     #### PRE-POPULATION RULES
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
     #### POST-POPULATION RULES
-    "application_signature": {
+    "applicant_signature": {
         "aor_signature": {"gg_post_population": {"rule": "signature"}},
         "submitted_date": {"gg_post_population": {"rule": "current_date"}},
     },
