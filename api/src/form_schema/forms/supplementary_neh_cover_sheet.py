@@ -401,7 +401,6 @@ FORM_JSON_SCHEMA = {
         "organization_type",
         "funding_group",
         "application_info",
-        "primary_project_discipline",
     ],
     "properties": {
         "major_field": {
@@ -500,19 +499,19 @@ FORM_JSON_SCHEMA = {
                     "minLength": 1,
                     "maxLength": 50,
                 },
+                "primary_project_discipline": {
+                    "allOf": [{"$ref": "#/$defs/project_discipline"}],
+                    "title": "Primary Project Discipline",
+                },
+                "secondary_project_discipline": {
+                    "allOf": [{"$ref": "#/$defs/project_discipline"}],
+                    "title": "Secondary Project Discipline (optional)",
+                },
+                "tertiary_project_discipline": {
+                    "allOf": [{"$ref": "#/$defs/project_discipline"}],
+                    "title": "Tertiary Project Discipline (optional)",
+                },
             },
-        },
-        "primary_project_discipline": {
-            "allOf": [{"$ref": "#/$defs/project_discipline"}],
-            "title": "Primary Project Discipline",
-        },
-        "secondary_project_discipline": {
-            "allOf": [{"$ref": "#/$defs/project_discipline"}],
-            "title": "Secondary Project Discipline (optional)",
-        },
-        "tertiary_project_discipline": {
-            "allOf": [{"$ref": "#/$defs/project_discipline"}],
-            "title": "Tertiary Project Discipline (optional)",
         },
     },
     "$defs": {
@@ -583,9 +582,18 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/application_info/properties/supplemental_grant_numbers",
             },
-            {"type": "field", "definition": "/properties/primary_project_discipline"},
-            {"type": "field", "definition": "/properties/secondary_project_discipline"},
-            {"type": "field", "definition": "/properties/tertiary_project_discipline"},
+            {
+                "type": "field",
+                "definition": "/properties/application_info/properties/primary_project_discipline",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/application_info/properties/secondary_project_discipline",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/application_info/properties/tertiary_project_discipline",
+            },
         ],
     },
 ]
@@ -622,6 +630,8 @@ FORM_XML_TRANSFORM_RULES = {
             "SupplementaryCoverSheetforNEHGrantPrograms_3_0": (
                 "http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"
             ),
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
         },
         "xsd_url": (
@@ -649,24 +659,24 @@ FORM_XML_TRANSFORM_RULES = {
     # Note: Organization type is passed through as-is (full "CODE: Description" format)
     "organization_type": {
         "xml_transform": {
-            "target": "InstType",
+            "target": "OrganizationType",
         }
     },
     # 3. ProjectFunding - Nested structure for funding amounts
     "funding_group": {
         "xml_transform": {
-            "target": "ProjectFunding",
+            "target": "ProjectFundingGroup",
             "type": "nested_object",
         },
         "outright_funds": {
             "xml_transform": {
-                "target": "OutrightFunds",
+                "target": "ReqOutrightAmount",
                 "value_transform": {"type": "currency_format"},
             }
         },
         "federal_match": {
             "xml_transform": {
-                "target": "FederalMatch",
+                "target": "ReqMatchAmount",
                 "value_transform": {"type": "currency_format"},
             }
         },
@@ -692,13 +702,16 @@ FORM_XML_TRANSFORM_RULES = {
     # 4. ApplicationInfo - Nested structure for application information
     "application_info": {
         "xml_transform": {
-            "target": "ApplicationInfo",
+            "target": "ApplicationInfoGroup",
             "type": "nested_object",
         },
         "additional_funding": {
             "xml_transform": {
                 "target": "AdditionalFunding",
-                "value_transform": {"type": "boolean_to_yes_no"},
+                "value_transform": {
+                    "type": "map_values",
+                    "params": {"mappings": {"True": "Yes", "False": "No"}},
+                },
             }
         },
         "additional_funding_explanation": {
@@ -708,7 +721,7 @@ FORM_XML_TRANSFORM_RULES = {
         },
         "application_type": {
             "xml_transform": {
-                "target": "ApplicationType",
+                "target": "TypeofApplication",
             }
         },
         "supplemental_grant_numbers": {
@@ -716,36 +729,36 @@ FORM_XML_TRANSFORM_RULES = {
                 "target": "SupplementalGrantNumber",
             }
         },
-    },
-    # 5. PrimaryPDNEH - Primary Project Discipline
-    "primary_project_discipline": {
-        "xml_transform": {
-            "target": "PrimaryPDNEH",
-            "value_transform": {
-                "type": "map_values",
-                "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
-            },
-        }
-    },
-    # 6. SecondaryPDNEH - Secondary Project Discipline (optional)
-    "secondary_project_discipline": {
-        "xml_transform": {
-            "target": "SecondaryPDNEH",
-            "value_transform": {
-                "type": "map_values",
-                "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
-            },
-        }
-    },
-    # 7. TertiaryPDNEH - Tertiary Project Discipline (optional)
-    "tertiary_project_discipline": {
-        "xml_transform": {
-            "target": "TertiaryPDNEH",
-            "value_transform": {
-                "type": "map_values",
-                "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
-            },
-        }
+        # 5. Primary Project Discipline (moved inside ApplicationInfoGroup for XML)
+        "primary_project_discipline": {
+            "xml_transform": {
+                "target": "ProjFieldCode",
+                "value_transform": {
+                    "type": "map_values",
+                    "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
+                },
+            }
+        },
+        # 6. SecondaryPDNEH - Secondary Project Discipline (optional)
+        "secondary_project_discipline": {
+            "xml_transform": {
+                "target": "SecondaryProjFieldCode",
+                "value_transform": {
+                    "type": "map_values",
+                    "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
+                },
+            }
+        },
+        # 7. TertiaryPDNEH - Tertiary Project Discipline (optional)
+        "tertiary_project_discipline": {
+            "xml_transform": {
+                "target": "TertiaryProjFieldCode",
+                "value_transform": {
+                    "type": "map_values",
+                    "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
+                },
+            }
+        },
     },
 }
 
