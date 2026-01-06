@@ -184,16 +184,35 @@ def test_cover_sheet_v3_0_max_length(
     "value,expected_error_field",
     [
         ({"major_field": "not-a-valid-value"}, "$.major_field"),
-        ({"application_info": {"primary_project_discipline": "words"}}, "$.application_info.primary_project_discipline"),
-        ({"application_info": {"secondary_project_discipline": "xyz123"}}, "$.application_info.secondary_project_discipline"),
         (
-            {"application_info": {"tertiary_project_discipline": "Arts: But not really a category"}},
+            {"application_info": {"primary_project_discipline": "words"}},
+            "$.application_info.primary_project_discipline",
+        ),
+        (
+            {"application_info": {"secondary_project_discipline": "xyz123"}},
+            "$.application_info.secondary_project_discipline",
+        ),
+        (
+            {
+                "application_info": {
+                    "tertiary_project_discipline": "Arts: But not really a category"
+                }
+            },
             "$.application_info.tertiary_project_discipline",
         ),
         # Each of these are values in the field of study list, but not in the project discipline list
-        ({"application_info": {"primary_project_discipline": "Other: Education"}}, "$.application_info.primary_project_discipline"),
-        ({"application_info": {"secondary_project_discipline": "Other: Mathematics"}}, "$.application_info.secondary_project_discipline"),
-        ({"application_info": {"tertiary_project_discipline": "Other: Statistics"}}, "$.application_info.tertiary_project_discipline"),
+        (
+            {"application_info": {"primary_project_discipline": "Other: Education"}},
+            "$.application_info.primary_project_discipline",
+        ),
+        (
+            {"application_info": {"secondary_project_discipline": "Other: Mathematics"}},
+            "$.application_info.secondary_project_discipline",
+        ),
+        (
+            {"application_info": {"tertiary_project_discipline": "Other: Statistics"}},
+            "$.application_info.tertiary_project_discipline",
+        ),
     ],
 )
 def test_cover_sheet_v3_0_invalid_enum_values(
