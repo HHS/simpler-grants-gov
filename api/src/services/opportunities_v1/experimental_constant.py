@@ -51,4 +51,3 @@ class ScoringRule(StrEnum):
     DEFAULT = "default"
     EXPANDED = "expanded"
     AGENCY = "agency"
-    ATTACHMENT_ONLY = "attachment_only"
