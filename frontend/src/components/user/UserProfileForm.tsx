@@ -12,6 +12,7 @@ import { Alert, Button, FormGroup, Label, TextInput } from "@trussworks/react-us
 
 import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
 import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const UserProfileValidationError =
   ConditionalFormActionError<UserProfileValidationErrors>;
@@ -58,7 +59,9 @@ export function UserProfileForm({
         <Alert heading={t("successHeading")} headingLevel="h2" type="success" />
       )}
       {isMissingName && (
-        <Alert heading={t("missingFullName")} headingLevel="h2" type="warning" />
+        <Alert heading={t("missingFullNameTitle")} headingLevel="h2" type="warning">
+          {t("missingFullNameDescription")}
+        </Alert>
       )}
       <h2>{t("contactInfoHeading")}</h2>
       <p>
@@ -127,6 +130,13 @@ export function UserProfileForm({
           />
         </FormGroup>
         <Button type="submit" disabled={isPending} className="margin-top-4">
+          {!isPending && (
+            <USWDSIcon
+              name="check_circle"
+              className="margin-right-05"
+              aria-hidden="true"
+            />
+          )}
           {t(isPending ? "pending" : "save")}
         </Button>
       </form>
