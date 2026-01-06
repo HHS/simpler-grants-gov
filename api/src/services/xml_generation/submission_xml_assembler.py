@@ -7,7 +7,11 @@ from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
-from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES, SCHEMA_LOCATION_BASE_URL
+from src.services.xml_generation.constants import (
+    GRANTS_GOV_NAMESPACES,
+    SCHEMA_LOCATION_BASE_URL,
+    Namespace,
+)
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -181,7 +185,7 @@ class SubmissionXMLAssembler:
 
         # Create root element with namespaces
         # Add all required namespaces per Grants.gov specification
-        grant_ns = GRANTS_GOV_NAMESPACES["grant"]
+        grant_ns = Namespace.GRANT
         nsmap = GRANTS_GOV_NAMESPACES
 
         # Create GrantApplication element with grant: namespace prefix

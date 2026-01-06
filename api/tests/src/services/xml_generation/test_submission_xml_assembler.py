@@ -7,7 +7,7 @@ from lxml import etree as lxml_etree
 
 import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
-from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES
+from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES, Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -186,11 +186,11 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify root element
-        grant_ns = f"{{{GRANTS_GOV_NAMESPACES['grant']}}}"
+        grant_ns = f"{{{Namespace.GRANT}}}"
         assert root.tag == f"{grant_ns}GrantApplication"
 
         # Verify header element
-        header_ns = f"{{{GRANTS_GOV_NAMESPACES['header']}}}"
+        header_ns = f"{{{Namespace.HEADER}}}"
         header_elements = root.findall(f".//{header_ns}GrantSubmissionHeader")
         assert len(header_elements) == 1
 
@@ -204,7 +204,7 @@ class TestSubmissionXMLAssembler:
         assert len(sf424_elements) == 1
 
         # Verify footer element
-        footer_ns = f"{{{GRANTS_GOV_NAMESPACES['footer']}}}"
+        footer_ns = f"{{{Namespace.FOOTER}}}"
         footer_elements = root.findall(f".//{footer_ns}GrantSubmissionFooter")
         assert len(footer_elements) == 1
 
@@ -496,9 +496,9 @@ class TestSubmissionXMLAssembler:
         assert "encoding" in xml_string[:50]  # Check encoding is in declaration
 
         # Verify namespaces are properly declared
-        assert f'xmlns:header="{GRANTS_GOV_NAMESPACES["header"]}"' in xml_string
-        assert f'xmlns:footer="{GRANTS_GOV_NAMESPACES["footer"]}"' in xml_string
-        assert f'xmlns:glob="{GRANTS_GOV_NAMESPACES["glob"]}"' in xml_string
+        assert f'xmlns:header="{Namespace.HEADER}"' in xml_string
+        assert f'xmlns:footer="{Namespace.FOOTER}"' in xml_string
+        assert f'xmlns:glob="{Namespace.GLOB}"' in xml_string
 
     def test_parse_xml_string_valid(self, sample_application, sample_application_submission):
         """Test parsing a valid XML string."""
@@ -567,9 +567,9 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify namespace declarations exist
-        assert GRANTS_GOV_NAMESPACES["header"] in root.nsmap.values()
-        assert GRANTS_GOV_NAMESPACES["footer"] in root.nsmap.values()
-        assert GRANTS_GOV_NAMESPACES["glob"] in root.nsmap.values()
+        assert Namespace.HEADER in root.nsmap.values()
+        assert Namespace.FOOTER in root.nsmap.values()
+        assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
         self, sample_application, sample_application_submission, enable_factory_create
