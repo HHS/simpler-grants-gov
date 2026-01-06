@@ -228,6 +228,8 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.LEGACY_AGENCY_VIEWER, 12),
         LookupStr(Privilege.LEGACY_AGENCY_GRANT_RETRIEVER, 13),
         LookupStr(Privilege.LEGACY_AGENCY_ASSIGNER, 14),
+        LookupStr(Privilege.MANAGE_INTERNAL_ROLES, 15),
+        LookupStr(Privilege.MANAGE_COMPETITION, 16),
     ]
 )
 

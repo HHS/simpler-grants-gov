@@ -44,13 +44,9 @@ module "dev_config" {
   service_override_extra_environment_variables = {
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT   = 1
-    ENABLE_APPLY_ENDPOINTS = 1
-    ENABLE_SOAP_API        = 1
-    ENABLE_XML_GENERATION  = 1
+    ENABLE_XML_GENERATION = 1
 
-    # CommonGrants Protocol
-    ENABLE_COMMON_GRANTS_ENDPOINTS = 1
+
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"

@@ -36,14 +36,16 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
         )
         with patch.object(uuid, "uuid4", return_value=CID_UUID):
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.GetApplicationZipRequest().to_soap_envelope_dict(
+            result = client.get_application_zip_request().to_soap_envelope_dict(
                 operation_name="GetApplicationZipResponse"
             )
             expected = {
-                "Body": {
-                    "ns2:GetApplicationZipResponse": {
-                        "ns2:FileDataHandler": {
-                            "xop:Include": {"@href": f"cid:{CID_UUID}-0001@apply.grants.gov"}
+                "Envelope": {
+                    "Body": {
+                        "ns2:GetApplicationZipResponse": {
+                            "ns2:FileDataHandler": {
+                                "xop:Include": {"@href": f"cid:{CID_UUID}-0001@apply.grants.gov"}
+                            }
                         }
                     }
                 }

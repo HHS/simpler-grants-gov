@@ -10,8 +10,6 @@ from src.legacy_soap_api.grantors.schemas.get_submission_list_expanded_schemas i
     ExpandedApplicationFilter,
     GetSubmissionListExpandedRequest,
     GetSubmissionListExpandedResponse,
-    GetSubmissionListExpandedResponseSOAPBody,
-    GetSubmissionListExpandedResponseSOAPEnvelope,
     SubmissionInfo,
 )
 
@@ -24,8 +22,6 @@ __all__ = [
     "GetApplicationZipRequest",
     "GetSubmissionListExpandedRequest",
     "GetSubmissionListExpandedResponse",
-    "GetSubmissionListExpandedResponseSOAPEnvelope",
     "ExpandedApplicationFilter",
-    "GetSubmissionListExpandedResponseSOAPBody",
     "SubmissionInfo",
 ]

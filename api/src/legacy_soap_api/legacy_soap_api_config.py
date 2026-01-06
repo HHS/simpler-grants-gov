@@ -21,7 +21,7 @@ class SOAPOperationConfigError(Exception):
 class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     grants_gov_uri: str = Field(alias="GRANTS_GOV_URI")
     grants_gov_port: int = Field(default=443, alias="GRANTS_GOV_PORT")
-    soap_api_enabled: bool = Field(default=False, alias="ENABLE_SOAP_API")
+
     inject_uuid_data: bool = Field(default=False, alias="INJECT_UUID_SOAP_RESPONSE")
     gg_s2s_proxy_header_key: str = Field(default="", alias="GG_S2S_PROXY_HEADER_KEY")
     soap_private_keys: str | None = Field(None, alias="SOAP_PRIVATE_KEYS")
@@ -141,7 +141,13 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="GetApplicationZipResponse",
             is_mtom=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
-        )
+        ),
+        "GetSubmissionListExpandedRequest": SOAPOperationConfig(
+            request_operation_name="GetSubmissionListExpandedRequest",
+            response_operation_name="GetSubmissionListExpandedResponse",
+            is_mtom=True,
+            privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+        ),
     },
 }
 
