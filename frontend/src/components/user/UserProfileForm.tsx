@@ -7,8 +7,14 @@ import {
 } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useActionState } from "react";
-import { Alert, Button, FormGroup, Label, TextInput } from "@trussworks/react-uswds";
+import { useActionState, useEffect } from "react";
+import {
+  Alert,
+  Button,
+  FormGroup,
+  Label,
+  TextInput,
+} from "@trussworks/react-uswds";
 
 import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
 import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
@@ -59,7 +65,11 @@ export function UserProfileForm({
         <Alert heading={t("successHeading")} headingLevel="h2" type="success" />
       )}
       {isMissingName && (
-        <Alert heading={t("missingFullNameTitle")} headingLevel="h2" type="warning">
+        <Alert
+          heading={t("missingFullNameTitle")}
+          headingLevel="h2"
+          type="warning"
+        >
           {t("missingFullNameDescription")}
         </Alert>
       )}
@@ -116,7 +126,9 @@ export function UserProfileForm({
             id="lastName"
             name="lastName"
             type="text"
-            defaultValue={state.data?.last_name || userDetails.profile?.last_name}
+            defaultValue={
+              state.data?.last_name || userDetails.profile?.last_name
+            }
           />
         </FormGroup>
         <FormGroup>

@@ -21,4 +21,3 @@ export const getUserDetailsHandler = async (): Promise<Response> => {
     );
   }
 };
-

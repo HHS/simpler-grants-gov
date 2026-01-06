@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { noop } from "lodash";
 import { applicationTestUserId, testApplicationId } from "src/constants/auth";
+import { useClientFetch } from "src/hooks/useClientFetch";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { UserDetailWithProfile } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
@@ -89,7 +89,8 @@ const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
     };
   }, [fetchUserDetails]);
 
-  const isMissingName = !userDetails?.profile?.first_name || !userDetails?.profile?.last_name;
+  const isMissingName =
+    !userDetails?.profile?.first_name || !userDetails?.profile?.last_name;
   const iconName = isMissingName ? "warning" : "account_circle";
 
   return (

@@ -1483,7 +1483,8 @@ export const messages = {
     errorHeading: "Error",
     successHeading: "Account updated",
     missingFullNameTitle: "Your profile is incomplete",
-    missingFullNameDescription: "Add your first and last name to complete your profile.",
+    missingFullNameDescription:
+      "Add your first and last name to complete your profile.",
   },
   ActivityDashboard: {
     pageTitle: "Activity Dashboard | Simpler.Grants.gov",
