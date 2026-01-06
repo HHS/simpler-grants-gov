@@ -44,7 +44,6 @@ module "training_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-    # Login.gov OAuth
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 
     # Email notification
