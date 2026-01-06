@@ -708,7 +708,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
@@ -722,7 +722,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>"
                 "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert result.data == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
@@ -793,7 +793,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
@@ -806,7 +806,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
@@ -820,7 +820,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert result.data == expected
             assert result.status_code == 200
             assert result.headers == {
                 "Content-Type": 'multipart/related; type="application/xop+xml"; boundary="uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
@@ -945,7 +945,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
@@ -958,7 +958,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
@@ -972,7 +972,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert result.data == expected
 
     def test_get_simpler_soap_response_returns_multiple_objects_handles_just_response_from_proxy(
         self, db_session, enable_factory_create, mock_s3_bucket
@@ -1083,7 +1083,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>\n"
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert result.data == expected
 
     def test_get_simpler_soap_response_returns_mtom_xml_only_returns_simpler_data_if_proxy_response_is_a_500(
         self, db_session, enable_factory_create, mock_s3_bucket
@@ -1139,7 +1139,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
@@ -1153,7 +1153,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>"
                 "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert result.data == expected
 
     def test_get_simpler_soap_response_returns_mtom_xml_ignores_malformed_response_from_proxy(
         self, db_session, enable_factory_create, mock_s3_bucket
@@ -1211,7 +1211,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
@@ -1225,10 +1225,10 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>"
                 "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert result.data == expected
 
-    def test_get_simpler_soap_response_returns_valid_data_out_of_proxy_xml_that_is_invalid_partway_through(
-        self, db_session, enable_factory_create, mock_s3_bucket
+    def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
+        self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
         agency = AgencyFactory.create()
         sam_gov_entity = SamGovEntityFactory.create(
@@ -1291,7 +1291,13 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<ActiveExclusions>No</ActiveExclusions>"
             "<UEI>E9T7F9N2ERR4</UEI>"
             "</ns2:SubmissionInfo>"
-            "======GARBAGE====="
+            "<ns2:SubmissionInfo>"
+            "<GARBAGE>E9T7F9N2ERR4</GARBAGE>"
+            "</ns2:SubmissionInfo>"
+            "</ns2:GetSubmissionListExpandedResponse>"
+            "</soap:Body>"
+            "</soap:Envelope>"
+            "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
         )
         mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
@@ -1332,7 +1338,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application.application_name}</SubmissionTitle>"
@@ -1346,4 +1352,5 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "</soap:Envelope>"
                 "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
-            assert b"".join(result.data) == expected
+            assert "Skipping invalid submission due to validation error" in caplog.messages
+            assert result.data == expected

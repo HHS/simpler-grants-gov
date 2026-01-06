@@ -1,17 +1,14 @@
 import io
 import logging
 import re
-import tempfile
 from collections import defaultdict
-from collections.abc import Callable, Generator, Iterable, Iterator
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import IO, Any
+from typing import Any
 
 import xmltodict
 from lxml import etree
 from lxml.etree import Element, QName, SubElement
-
-from src.legacy_soap_api.legacy_soap_api_schemas.response import SOAPResponse
 
 logger = logging.getLogger(__name__)
 
@@ -416,98 +413,3 @@ def get_prefix_and_local_name(key: str) -> tuple:
         return key.split(":")[0], key.split(":")[-1]
     else:
         return None, key
-
-
-def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[bytes]:
-    """
-    This will take the bytes of an MTOM messages and remove the header
-    to prevent errors when processing the xml
-    """
-    found_xml = False
-    for chunk in byte_gen:
-        if not found_xml:
-            start_idx = chunk.find(b"<soap:Envelope")
-            if start_idx != -1:
-                found_xml = True
-                yield chunk[start_idx:]
-        else:
-            yield chunk
-
-
-def stream_expanded_submissions_response(tmp: IO[bytes]) -> Generator[bytes]:
-    tmp.seek(0)
-    for _, element in etree.iterparse(tmp, events=("end",), tag="{*}SubmissionInfo", recover=True):
-        data = etree.tostring(element)
-        yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
-        element.clear()
-        while element.getprevious() is not None:
-            del element.getparent()[0]
-
-
-def get_valid_proxy_count(tmp: IO[bytes]) -> int:
-    tmp.seek(0)
-    real_count = 0
-    for _, element in etree.iterparse(tmp, events=("end",), tag="{*}SubmissionInfo", recover=True):
-        real_count += 1
-        element.clear()
-        while element.getprevious() is not None:
-            del element.getparent()[0]
-    return real_count
-
-
-def write_to_tempfile(tmp: IO[bytes], proxy_data: SOAPResponse) -> bool:
-    has_data = False
-    for chunk in clean_mtom_generator(proxy_data.stream()):
-        if chunk:
-            tmp.write(chunk)
-            has_data = True
-    return has_data
-
-
-def build_merged_get_submission_list_expanded_mtom_response(
-    input_data: dict, raw_uuid: str, namespaces: dict, root: str, proxy_data: SOAPResponse
-) -> Generator[bytes]:
-    response_data = input_data.get("Envelope", {}).get("Body", {})
-    simple_data = response_data.get("ns2:GetSubmissionListExpandedResponse", {}).get(
-        "ns2:SubmissionInfo", {}
-    )
-
-    boundary = f"uuid:{raw_uuid}"
-    yield f"--{boundary}\n".encode("utf-8")
-    yield MESSAGE_HEADER.encode("utf-8")
-
-    simple_count_response = f"<ns2:AvailableApplicationNumber>{len(simple_data)}</ns2:AvailableApplicationNumber>".encode(
-        "utf-8"
-    )
-    yield from get_proxy_submission_data(proxy_data, simple_count_response, len(simple_data))
-
-    # Inject the data from simpler
-    tag = etree.QName(namespaces["ns2"], "SubmissionInfo")
-    for data in simple_data:
-        submission_info_element = etree.Element(tag, nsmap=namespaces)
-        _build_mtom_nested_elements(submission_info_element, data, namespaces=namespaces)
-        raw_xml = etree.tostring(submission_info_element)
-        # Using regex to strip out the xmlns stuff since it is already added
-        yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", raw_xml)
-
-    yield (
-        "</ns2:GetSubmissionListExpandedResponse>"
-        "</soap:Body>"
-        "</soap:Envelope>\n"
-        f"--{boundary}--"
-    ).encode("utf-8")
-
-
-def get_proxy_submission_data(
-    proxy_data: SOAPResponse, simple_count_response: bytes, simple_data_count: int
-) -> Generator[bytes]:
-    with tempfile.NamedTemporaryFile(mode="w+b") as tmp:
-        if not write_to_tempfile(tmp, proxy_data):
-            yield simple_count_response
-            return
-        tmp.flush()
-        proxy_count = get_valid_proxy_count(tmp)
-        yield f"<ns2:AvailableApplicationNumber>{simple_data_count + proxy_count}</ns2:AvailableApplicationNumber>".encode(
-            "utf-8"
-        )
-        yield from stream_expanded_submissions_response(tmp)

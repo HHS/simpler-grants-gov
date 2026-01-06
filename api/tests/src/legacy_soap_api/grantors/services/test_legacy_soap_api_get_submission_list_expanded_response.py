@@ -11,7 +11,11 @@ from src.legacy_soap_api.grantors.services.get_submission_list_expanded_response
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPInvalidEnvelope, SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import (
+    SOAPInvalidEnvelope,
+    SOAPRequest,
+    SOAPResponse,
+)
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
@@ -104,8 +108,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_request_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -122,7 +127,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Validated",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": application.competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -193,8 +198,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_request_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected_1 = {
@@ -204,7 +210,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Validated",
             "SubmissionTitle": submission_1.application.application_name,
             "PackageID": submission_1.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -217,7 +223,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -288,8 +294,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_request_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected_1 = {
@@ -299,7 +306,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Validated",
             "SubmissionTitle": submission_1.application.application_name,
             "PackageID": submission_1.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -312,7 +319,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -398,8 +405,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -416,7 +424,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -475,8 +483,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -493,7 +502,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if application.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
                                 "ActiveExclusions": f"{'Yes' if application.organization.sam_gov_entity.has_exclusion_status else 'No'}",
@@ -554,8 +563,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -572,7 +582,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application_1.application_name,
                                 "PackageID": competition_1.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
                                 "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
@@ -632,8 +642,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -650,7 +661,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application_1.application_name,
                                 "PackageID": competition_1.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if application_1.organization.sam_gov_entity.has_debt_subject_to_offset else 'No'}",
                                 "ActiveExclusions": f"{'Yes' if application_1.organization.sam_gov_entity.has_exclusion_status else 'No'}",
@@ -713,8 +724,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -731,7 +743,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": f"{'Yes' if sam_gov_entity.has_debt_subject_to_offset else 'No'}",
                                 "ActiveExclusions": f"{'Yes' if sam_gov_entity.has_exclusion_status else 'No'}",
@@ -794,8 +806,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -812,7 +825,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -875,8 +888,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -893,7 +907,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -964,8 +978,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -982,7 +997,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -1074,8 +1089,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1140,8 +1156,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_request_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1222,8 +1239,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1240,7 +1258,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                             }
                         ],
@@ -1287,8 +1305,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_request_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1355,8 +1374,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1373,7 +1393,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -1436,8 +1456,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         result = get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1454,7 +1475,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                                 "GrantsGovApplicationStatus": "Received",
                                 "SubmissionTitle": application.application_name,
                                 "PackageID": competition.legacy_package_id,
-                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17-04:00",
+                                "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
                                 "SubmissionMethod": "web",
                                 "DelinquentFederalDebt": "Yes",
                                 "ActiveExclusions": "Yes",
@@ -1510,13 +1531,20 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
-        assert (
-            f"GetSubmissionListExpanded Filter: CompetitionIDs ['{competition.legacy_competition_id}']"
-            in caplog.messages
+        record = next(
+            (
+                r
+                for r in caplog.records
+                if "GetSubmissionListExpanded Filter: CompetitionIDs" in r.message
+            ),
+            None,
         )
+        assert record
+        assert record.competition_ids == f"['{competition.legacy_competition_id}']"
 
     def test_get_submission_list_expanded_response_logs_filters_by_package_id(
         self, db_session, enable_factory_create, caplog
@@ -1565,13 +1593,20 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_request_schema, soap_request
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
         )
-        assert (
-            f"GetSubmissionListExpanded Filter: PackageIDs ['{competition.legacy_package_id}']"
-            in caplog.messages
+        record = next(
+            (
+                r
+                for r in caplog.records
+                if "GetSubmissionListExpanded Filter: PackageIDs" in r.message
+            ),
+            None,
         )
+        assert record
+        assert record.package_ids == f"['{competition.legacy_package_id}']"
 
     def test_get_submission_list_expanded_response_logs_filters_by_submission_title(
         self, db_session, enable_factory_create, caplog
@@ -1615,13 +1650,20 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
         get_submission_list_expanded_response(
-            db_session, get_submission_list_expanded_rquest_schema, soap_request
+            db_session, get_submission_list_expanded_rquest_schema, soap_request, proxy_response
         )
-        assert (
-            "GetSubmissionListExpanded Filter: SubmissionTitles ['This is my submission']"
-            in caplog.messages
+        record = next(
+            (
+                r
+                for r in caplog.records
+                if "GetSubmissionListExpanded Filter: SubmissionTitles" in r.message
+            ),
+            None,
         )
+        assert record
+        assert record.submission_titles == "['This is my submission']"

@@ -27,7 +27,6 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
 )
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPPayload,
-    build_merged_get_submission_list_expanded_mtom_response,
     build_mtom_response_from_dict,
     build_xml_from_dict,
     get_envelope_dict,
@@ -48,7 +47,7 @@ class BaseSOAPClient:
             self.soap_request.data.decode(), self.operation_config.request_operation_name
         )
 
-    def get_soap_response_dict(self) -> dict:
+    def get_soap_response_dict(self, proxy_response: SOAPResponse | None = None) -> dict:
         """Get Simpler SOAP response dict
 
         This method will return the validated pydantic schema returned from the
@@ -61,6 +60,10 @@ class BaseSOAPClient:
         operation_method = getattr(
             self, to_snake_case(self.operation_config.request_operation_name)
         )
+        if self.operation_config.has_merge_list_response:
+            return operation_method(proxy_response=proxy_response).to_soap_envelope_dict(
+                self.operation_config.response_operation_name
+            )
         return operation_method().to_soap_envelope_dict(
             self.operation_config.response_operation_name
         )
@@ -240,13 +243,14 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
 
     def get_submission_list_expanded_request(
-        self,
+        self, proxy_response: SOAPResponse
     ) -> grantors_schemas.GetSubmissionListExpandedResponse:
         soap_request_dict = self.get_soap_request_dict() or {}
         return get_submission_list_expanded_response(
             db_session=self.db_session,
             soap_request=self.soap_request,
             request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
+            proxy_response=proxy_response,
         )
 
     def _gen_response_data(
@@ -266,10 +270,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         yield b"\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
-        if (
-            proxy_response.status_code != 500
-            and self.operation_config.response_operation_name != "GetSubmissionListExpandedResponse"
-        ):
+        if proxy_response.status_code != 500 and not self.operation_config.has_merge_list_response:
             return proxy_response
         if self.operation_config.is_mtom is False:
             return proxy_response
@@ -283,7 +284,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         # 4. --uuid: {boundary_uuid}
         # 5. the file bytes from the file being attached
         # 6. --uuid: {boundary_uuid}--
-        simpler_response_soap_dict = self.get_soap_response_dict()
+        simpler_response_soap_dict = self.get_soap_response_dict(proxy_response)
         mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
@@ -295,18 +296,6 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         }
         boundary = "--uuid:" + boundary_uuid
         mime_message: Iterator[bytes] | bytes = b""
-        if self.operation_config.has_merge_list_response:
-            mime_message = build_merged_get_submission_list_expanded_mtom_response(
-                simpler_response_soap_dict,
-                boundary_uuid,
-                self.operation_config.namespaces,
-                root=self.operation_config.response_operation_name,
-                proxy_data=proxy_response,
-            )
-            return get_soap_response(
-                data=mime_message,
-                headers=update_headers,
-            )
         mime_message = build_mtom_response_from_dict(
             simpler_response_soap_dict,
             boundary_uuid,

@@ -1,6 +1,10 @@
 import logging
+from collections.abc import Generator, Iterator
 from datetime import datetime
 
+import xmltodict
+from lxml import etree
+from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
@@ -12,7 +16,7 @@ from src.db.models.competition_models import Application, ApplicationSubmission,
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
 
@@ -140,11 +144,20 @@ def get_submissions(
 
         # Unsupported but logged
         if competition_ids := submission_filters.get("CompetitionID"):
-            logger.info(f"GetSubmissionListExpanded Filter: CompetitionIDs {competition_ids}")
+            extra = {
+                "competition_ids": str(competition_ids),
+            }
+            logger.info("GetSubmissionListExpanded Filter: CompetitionIDs", extra=extra)
         if package_ids := submission_filters.get("PackageID"):
-            logger.info(f"GetSubmissionListExpanded Filter: PackageIDs {package_ids}")
+            extra = {
+                "package_ids": str(package_ids),
+            }
+            logger.info("GetSubmissionListExpanded Filter: PackageIDs", extra=extra)
         if submission_titles := submission_filters.get("SubmissionTitle"):
-            logger.info(f"GetSubmissionListExpanded Filter: SubmissionTitles {submission_titles}")
+            extra = {
+                "submission_titles": str(submission_titles),
+            }
+            logger.info("GetSubmissionListExpanded Filter: SubmissionTitles", extra=extra)
 
     certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
     stmt = _apply_agency_filter(stmt, certificate.agency)
@@ -171,12 +184,41 @@ def get_submission_list_expanded_response(
     db_session: db.Session,
     request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
+    proxy_response: SOAPResponse,
 ) -> schemas.GetSubmissionListExpandedResponse:
     submissions = get_submissions(db_session, request, soap_request)
     info = []
+    xml_bytes = b"".join(clean_mtom_generator(proxy_response.stream()))
+    if xml_bytes:
+        parser = etree.XMLParser(recover=True)
+        root = etree.fromstring(xml_bytes, parser=parser)
+        for element in root.iter("{*}SubmissionInfo"):
+            try:
+                element_bytes = etree.tostring(element)
+                submission_info_dict = xmltodict.parse(element_bytes).get("ns2:SubmissionInfo")
+                info.append(schemas.SubmissionInfo(**submission_info_dict))
+            except PydanticValidationError:
+                logger.exception("Skipping invalid submission due to validation error")
+                continue
     for submission in submissions:
         submission_list_obj = transform_submission(submission)
         info.append(schemas.SubmissionInfo(**submission_list_obj))
     return schemas.GetSubmissionListExpandedResponse(
         success=True, available_application_number=len(info), submission_info=info
     )
+
+
+def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[bytes]:
+    """
+    This will take the bytes of an MTOM messages and remove the header
+    to prevent errors when processing the xml
+    """
+    found_xml = False
+    for chunk in byte_gen:
+        if not found_xml:
+            start_idx = chunk.find(b"<soap:Envelope")
+            if start_idx != -1:
+                found_xml = True
+                yield chunk[start_idx:]
+        else:
+            yield chunk
