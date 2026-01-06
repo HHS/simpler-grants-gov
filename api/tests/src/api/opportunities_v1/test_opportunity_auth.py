@@ -6,7 +6,6 @@ from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
     OpportunityFactory,
     UserApiKeyFactory,
-    UserTokenSessionFactory,
 )
 
 
