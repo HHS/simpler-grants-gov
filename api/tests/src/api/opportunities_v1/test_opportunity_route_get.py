@@ -17,9 +17,13 @@ from tests.src.db.models.factories import (
     OpportunitySummaryFactory,
 )
 
-#####################################
+##################################################################################
 # GET opportunity tests
-#####################################
+# As of the 1/6/2026 update for SGG-7621, these tests have been modified
+# to cover both API User Key and JWT authentication.
+# The JWT tests are toggled between regular and legacy endpoints as appropriate,
+# to cover as much as possible with minimal duplication.
+##################################################################################
 
 
 @pytest.mark.parametrize(
@@ -364,9 +368,9 @@ def test_get_opportunity_404_not_found(client, user_api_key_id):
 
 
 def test_get_opportunity_404_not_found_legacy(client, api_auth_token, user_api_key_id):
-    resp = client.get("/v1/opportunities/1", headers={"X-API-Key": user_api_key_id})
+    resp = client.get("/v1/opportunities/456789", headers={"X-API-Key": user_api_key_id})
     assert resp.status_code == 404
-    assert resp.get_json()["message"] == "Could not find Opportunity with Legacy ID 1"
+    assert resp.get_json()["message"] == "Could not find Opportunity with Legacy ID 456789"
 
 
 # JWT version of the get opportunity 404 not found, regular endpoint
