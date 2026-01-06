@@ -48,7 +48,12 @@ from tests.src.db.models.factories import (
     ],
 )
 def test_get_opportunity_200(
-    client, api_auth_token, enable_factory_create, opportunity_params, opportunity_summary_params, user_api_key_id
+    client,
+    api_auth_token,
+    enable_factory_create,
+    opportunity_params,
+    opportunity_summary_params,
+    user_api_key_id,
 ):
     # Split the setup of the opportunity from the opportunity summary to simplify the factory usage a bit
     db_opportunity = OpportunityFactory.create(
@@ -113,7 +118,8 @@ def test_get_opportunity_200_JWT(
         )
 
     resp = client.get(
-        f"/v1/opportunities/{db_opportunity.opportunity_id}", headers={"X-SGG-Token": user_auth_token}
+        f"/v1/opportunities/{db_opportunity.opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
     assert resp.status_code == 200
     response_data = resp.get_json()["data"]
@@ -150,7 +156,8 @@ def test_get_opportunity_with_attachment_200_legacy(
 
     # Make the GET request
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-API-Key": user_api_key_id}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-API-Key": user_api_key_id},
     )
 
     # Check the response
@@ -163,15 +170,14 @@ def test_get_opportunity_with_attachment_200_legacy(
 
 
 # JWT version of the get opportunity with attachment, legacy endpoint
-def test_get_opportunity_with_attachment_200_legacy_JWT(
-    client, user_auth_token
-):
+def test_get_opportunity_with_attachment_200_legacy_JWT(client, user_auth_token):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create(has_attachments=True)
 
     # Make the GET request
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-SGG-Token": user_auth_token}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Check the response
@@ -183,7 +189,9 @@ def test_get_opportunity_with_attachment_200_legacy_JWT(
     validate_opportunity_with_attachments(opportunity, response_data)
 
 
-def test_get_opportunity_with_agency_200(client, api_auth_token, enable_factory_create, user_api_key_id):
+def test_get_opportunity_with_agency_200(
+    client, api_auth_token, enable_factory_create, user_api_key_id
+):
     parent_agency = AgencyFactory.create(agency_code="EXAMPLEAGENCYXYZ")
     child_agency = AgencyFactory.create(
         agency_code="EXAMPLEAGENCYXYZ-12345678", top_level_agency=parent_agency
@@ -203,7 +211,9 @@ def test_get_opportunity_with_agency_200(client, api_auth_token, enable_factory_
     assert response_data["top_level_agency_name"] == parent_agency.agency_name
 
 
-def test_get_opportunity_with_agency_200_legacy(client, api_auth_token, enable_factory_create, user_api_key_id):
+def test_get_opportunity_with_agency_200_legacy(
+    client, api_auth_token, enable_factory_create, user_api_key_id
+):
     parent_agency = AgencyFactory.create(agency_code="EXAMPLEAGENCYXYZ2")
     child_agency = AgencyFactory.create(
         agency_code="EXAMPLEAGENCYXYZ2-12345678", top_level_agency=parent_agency
@@ -212,7 +222,8 @@ def test_get_opportunity_with_agency_200_legacy(client, api_auth_token, enable_f
     opportunity = OpportunityFactory.create(agency_code=child_agency.agency_code)
 
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-API-Key": user_api_key_id}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-API-Key": user_api_key_id},
     )
 
     assert resp.status_code == 200
@@ -245,7 +256,13 @@ def test_get_opportunity_with_agency_200_JWT(client, user_auth_token):
 
 
 def test_get_opportunity_s3_endpoint_url_200(
-    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket, monkeypatch_session, user_api_key_id
+    client,
+    api_auth_token,
+    enable_factory_create,
+    db_session,
+    mock_s3_bucket,
+    monkeypatch_session,
+    user_api_key_id,
 ):
     # Reset the global _s3_config to ensure a fresh config is created
     monkeypatch_session.setattr(file_util, "_s3_config", None)
@@ -275,7 +292,13 @@ def test_get_opportunity_s3_endpoint_url_200(
 
 
 def test_get_opportunity_s3_endpoint_url_200_legacy(
-    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket, monkeypatch_session, user_api_key_id
+    client,
+    api_auth_token,
+    enable_factory_create,
+    db_session,
+    mock_s3_bucket,
+    monkeypatch_session,
+    user_api_key_id,
 ):
     monkeypatch_session.delenv("CDN_URL", raising=False)
     # Create an opportunity with a specific attachment
@@ -288,7 +311,8 @@ def test_get_opportunity_s3_endpoint_url_200_legacy(
 
     # Make the GET request
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-API-Key": user_api_key_id}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-API-Key": user_api_key_id},
     )
 
     # Check the response
@@ -317,7 +341,8 @@ def test_get_opportunity_s3_endpoint_url_200_legacy_JWT(
 
     # Make the GET request
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-SGG-Token": user_auth_token}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     # Check the response
@@ -347,12 +372,16 @@ def test_get_opportunity_404_not_found_legacy(client, api_auth_token, user_api_k
 # JWT version of the get opportunity 404 not found, regular endpoint
 def test_get_opportunity_404_not_found_JWT(client, user_auth_token):
     opportunity_id = uuid.uuid4()
-    resp = client.get(f"/v1/opportunities/{opportunity_id}", headers={"X-SGG-Token": user_auth_token})
+    resp = client.get(
+        f"/v1/opportunities/{opportunity_id}", headers={"X-SGG-Token": user_auth_token}
+    )
     assert resp.status_code == 404
     assert resp.get_json()["message"] == f"Could not find Opportunity with ID {opportunity_id}"
 
 
-def test_get_opportunity_404_not_found_is_draft(client, api_auth_token, enable_factory_create, user_api_key_id):
+def test_get_opportunity_404_not_found_is_draft(
+    client, api_auth_token, enable_factory_create, user_api_key_id
+):
     # The endpoint won't return drafts, so this'll be a 404 despite existing
     opportunity = OpportunityFactory.create(is_draft=True)
 
@@ -373,7 +402,8 @@ def test_get_opportunity_404_not_found_is_draft_legacy(
     opportunity = OpportunityFactory.create(is_draft=True)
 
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-API-Key": user_api_key_id}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-API-Key": user_api_key_id},
     )
     assert resp.status_code == 404
     assert (
@@ -383,14 +413,13 @@ def test_get_opportunity_404_not_found_is_draft_legacy(
 
 
 # JWT version of the get opportunity 404 not found is_draft, legacy endpoint
-def test_get_opportunity_404_not_found_is_draft_legacy_JWT(
-    client, user_auth_token
-):
+def test_get_opportunity_404_not_found_is_draft_legacy_JWT(client, user_auth_token):
     # The endpoint won't return drafts, so this'll be a 404 despite existing
     opportunity = OpportunityFactory.create(is_draft=True)
 
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-SGG-Token": user_auth_token}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
     assert resp.status_code == 404
     assert (
@@ -400,7 +429,13 @@ def test_get_opportunity_404_not_found_is_draft_legacy_JWT(
 
 
 def test_get_opportunity_returns_cdn_urls(
-    client, api_auth_token, monkeypatch_session, enable_factory_create, db_session, mock_s3_bucket, user_api_key_id
+    client,
+    api_auth_token,
+    monkeypatch_session,
+    enable_factory_create,
+    db_session,
+    mock_s3_bucket,
+    user_api_key_id,
 ):
     # Reset the global _s3_config to ensure a fresh config is created
     monkeypatch_session.setattr(file_util, "_s3_config", None)
@@ -434,7 +469,13 @@ def test_get_opportunity_returns_cdn_urls(
 
 
 def test_get_opportunity_returns_cdn_urls_legacy(
-    client, api_auth_token, monkeypatch_session, enable_factory_create, db_session, mock_s3_bucket, user_api_key_id
+    client,
+    api_auth_token,
+    monkeypatch_session,
+    enable_factory_create,
+    db_session,
+    mock_s3_bucket,
+    user_api_key_id,
 ):
     monkeypatch_session.setenv("CDN_URL", "https://cdn.example.com")
     """Test that S3 file locations are converted to CDN URLs in the response"""
@@ -449,7 +490,8 @@ def test_get_opportunity_returns_cdn_urls_legacy(
 
     # Make the GET request
     resp = client.get(
-        f"/v1/opportunities/{opportunity.legacy_opportunity_id}", headers={"X-API-Key": user_api_key_id}
+        f"/v1/opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-API-Key": user_api_key_id},
     )
 
     # Check the response
@@ -524,9 +566,7 @@ def test_get_opportunity_with_competitions_200(
 
 
 # JWT version of the get opportunity with competitions, regular endpoint
-def test_get_opportunity_with_competitions_200_JWT(
-    client, db_session, user_auth_token
-):
+def test_get_opportunity_with_competitions_200_JWT(client, db_session, user_auth_token):
     # Create an opportunity with a competition
     opportunity = OpportunityFactory.create()
     competition = CompetitionFactory.create(opportunity=opportunity)

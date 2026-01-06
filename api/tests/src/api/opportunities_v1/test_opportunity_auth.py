@@ -1,9 +1,13 @@
 import pytest
-import src.util.datetime_util as datetime_util
 
-from tests.src.api.opportunities_v1.conftest import get_search_request
-from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory, UserTokenSessionFactory
+import src.util.datetime_util as datetime_util
 from src.auth.api_jwt_auth import parse_jwt_for_user
+from tests.src.api.opportunities_v1.conftest import get_search_request
+from tests.src.db.models.factories import (
+    OpportunityFactory,
+    UserApiKeyFactory,
+    UserTokenSessionFactory,
+)
 
 
 @pytest.mark.parametrize(
@@ -112,9 +116,7 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
     assert response.get_json()["message"] == "API key is inactive"
 
 
-def test_opportunity_get_legacy_success_with_jwt_auth(
-    client, user_auth_token
-):
+def test_opportunity_get_legacy_success_with_jwt_auth(client, user_auth_token):
     """Test legacy opportunity get endpoint with valid JWT auth token"""
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
@@ -129,9 +131,7 @@ def test_opportunity_get_legacy_success_with_jwt_auth(
     assert response.get_json()["data"]["opportunity_id"] == str(opportunity.opportunity_id)
 
 
-def test_opportunity_get_success_with_jwt_auth(
-    client, user_auth_token
-):
+def test_opportunity_get_success_with_jwt_auth(client, user_auth_token):
     """Test opportunity get endpoint with valid JWT auth token"""
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()

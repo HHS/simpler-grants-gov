@@ -12,7 +12,12 @@ import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
-from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes, jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
+from src.auth.multi_auth import (
+    api_key_multi_auth,
+    api_key_multi_auth_security_schemes,
+    jwt_or_api_user_key_multi_auth,
+    jwt_or_api_user_key_security_schemes,
+)
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
@@ -225,7 +230,7 @@ def opportunity_search(
         facet_counts=aggregations,
         pagination_info=pagination_info,
     )
-    
+
 
 @opportunity_blueprint.get("/opportunities/<int:legacy_opportunity_id>")
 @opportunity_blueprint.output(opportunity_schemas.OpportunityGetResponseV1Schema())
