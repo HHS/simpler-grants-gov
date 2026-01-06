@@ -1,5 +1,6 @@
-import EventsCoding from "./EventsCoding";
 import { render, screen } from "tests/react-utils";
+
+import EventsCoding from "./EventsCoding";
 
 describe("EventsCoding", () => {
   it("renders the coding challenge section", () => {

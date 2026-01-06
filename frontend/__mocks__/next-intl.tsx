@@ -1,6 +1,6 @@
-import React from "react";
 import { messages } from "src/i18n/messages/en";
 
+import React from "react";
 
 type MessagesTree = Record<string, any>;
 
@@ -74,7 +74,10 @@ export function useMessages() {
   return activeMessages;
 }
 
-export function NextIntlClientProvider({ children, messages: providerMessages }: any) {
+export function NextIntlClientProvider({
+  children,
+  messages: providerMessages,
+}: any) {
   if (providerMessages) activeMessages = providerMessages;
   return children;
 }

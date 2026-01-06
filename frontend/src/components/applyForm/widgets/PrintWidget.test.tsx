@@ -1,6 +1,7 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
 import type { RJSFSchema } from "@rjsf/utils";
+import { render, screen } from "@testing-library/react";
+
+import React from "react";
 
 import PrintWidget from "src/components/applyForm/widgets/PrintWidget";
 
@@ -26,7 +27,7 @@ function renderWidget(overrides: Partial<BaseProps> = {}) {
 
   // PrintWidget’s prop type is generic and wider than this minimal base.
   // We keep this test focused on user-visible rendering behavior.
-  render(<PrintWidget {...(props)} />);
+  render(<PrintWidget {...props} />);
 
   return props;
 }
@@ -86,7 +87,9 @@ describe("PrintWidget", () => {
   });
 
   it("renders with minimal props", () => {
-    render(<PrintWidget id="minimal" schema={{ title: "Minimal" }} value="Value" />);
+    render(
+      <PrintWidget id="minimal" schema={{ title: "Minimal" }} value="Value" />,
+    );
 
     expect(screen.getByText("Minimal")).toBeInTheDocument();
     expect(screen.getByText("Value")).toBeInTheDocument();

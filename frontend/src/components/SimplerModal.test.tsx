@@ -26,23 +26,23 @@ describe("SimplerModal", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
-it("renders title and content", () => {
-  render(
-    <SimplerModal
-      modalRef={createRef()}
-      titleText="title text"
-      modalId="modal-id"
-      className="modal-class"
-      onKeyDown={noop}
-      onClose={noop}
-    >
-      <div id="modal-id-description">content</div>
-    </SimplerModal>,
-  );
+  it("renders title and content", () => {
+    render(
+      <SimplerModal
+        modalRef={createRef()}
+        titleText="title text"
+        modalId="modal-id"
+        className="modal-class"
+        onKeyDown={noop}
+        onClose={noop}
+      >
+        <div id="modal-id-description">content</div>
+      </SimplerModal>,
+    );
 
-  expect(screen.getByText("title text")).toBeInTheDocument();
-  expect(screen.getByText("content")).toBeInTheDocument();
-});
+    expect(screen.getByText("title text")).toBeInTheDocument();
+    expect(screen.getByText("content")).toBeInTheDocument();
+  });
 
   it("displays header", () => {
     render(

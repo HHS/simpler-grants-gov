@@ -1,11 +1,13 @@
-import React from "react";
-import { render as rtlRender, type RenderOptions } from "@testing-library/react";
-import { NextIntlClientProvider } from "next-intl";
-import type { AbstractIntlMessages } from "next-intl";
-
-import type { LocalizedPageProps } from "src/types/intl";
+import {
+  render as rtlRender,
+  type RenderOptions,
+} from "@testing-library/react";
 import { defaultLocale, formats, timeZone } from "src/i18n/config";
 import { messages } from "src/i18n/messages/en";
+import type { LocalizedPageProps } from "src/types/intl";
+
+import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
+import React from "react";
 
 export function makeLocalizedPageProps(
   locale: string = defaultLocale,

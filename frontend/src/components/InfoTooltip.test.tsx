@@ -1,6 +1,7 @@
-import React, { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+import React, { useState } from "react";
 
 import InfoTooltip from "src/components/InfoTooltip";
 
@@ -74,6 +75,8 @@ describe("InfoTooltip", () => {
 
   it("has help cursor style", () => {
     render(<InfoTooltip text="Test tooltip" />);
-    expect(screen.getByTestId("triggerElement")).toHaveStyle({ cursor: "help" });
+    expect(screen.getByTestId("triggerElement")).toHaveStyle({
+      cursor: "help",
+    });
   });
 });

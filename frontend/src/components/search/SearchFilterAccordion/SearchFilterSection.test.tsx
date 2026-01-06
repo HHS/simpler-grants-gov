@@ -1,10 +1,11 @@
 import "@testing-library/jest-dom";
 
-import React, { JSX } from "react";
 import { axe } from "jest-axe";
-import { render, screen } from "tests/react-utils";
-import type { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import type { FilterOption } from "src/types/search/searchFilterTypes";
+import type { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
+import { render, screen } from "tests/react-utils";
+
+import React, { JSX } from "react";
 
 type AllOptionCheckboxProps = {
   title: string;
@@ -16,13 +17,17 @@ type AllOptionCheckboxProps = {
   topLevelQueryValue?: string;
 };
 
-const AllOptionCheckboxMock = jest.fn<JSX.Element, [AllOptionCheckboxProps]>(() => (
-  <div data-testid="all-option-checkbox" />
-));
+const AllOptionCheckboxMock = jest.fn<JSX.Element, [AllOptionCheckboxProps]>(
+  () => <div data-testid="all-option-checkbox" />,
+);
 
-jest.mock("src/components/search/SearchFilterAccordion/AllOptionCheckbox", () => ({
-  AllOptionCheckbox: (props: AllOptionCheckboxProps) => AllOptionCheckboxMock(props),
-}));
+jest.mock(
+  "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
+  () => ({
+    AllOptionCheckbox: (props: AllOptionCheckboxProps) =>
+      AllOptionCheckboxMock(props),
+  }),
+);
 
 const mockSetQueryParam = jest.fn();
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
@@ -36,8 +41,18 @@ const defaultProps = {
     label: "Option 1",
     value: "some value",
     children: [
-      { id: "1-1", label: "Child 1", isChecked: false, value: "1st-child-value" },
-      { id: "1-2", label: "Child 2", isChecked: true, value: "2nd-child-value" },
+      {
+        id: "1-1",
+        label: "Child 1",
+        isChecked: false,
+        value: "1st-child-value",
+      },
+      {
+        id: "1-2",
+        label: "Child 2",
+        isChecked: true,
+        value: "2nd-child-value",
+      },
     ],
   },
   updateCheckedOption: jest.fn(),
@@ -72,8 +87,12 @@ describe("SearchFilterSection", () => {
 
     expect(screen.getByTestId("all-option-checkbox")).toBeInTheDocument();
 
-    expect(screen.getByRole("checkbox", { name: /^Child 1\b/ })).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: /^Child 2\b/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: /^Child 1\b/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: /^Child 2\b/ }),
+    ).toBeInTheDocument();
 
     expect(AllOptionCheckboxMock).toHaveBeenCalledWith(
       expect.objectContaining({

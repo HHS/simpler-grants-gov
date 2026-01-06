@@ -6,7 +6,6 @@ import {
 } from "src/utils/testing/fixtures";
 
 import { TableWithResponsiveHeader } from "src/components/TableWithResponsiveHeader";
-import { silenceConsole } from "tests/utils/console";
 
 // this does not directly test responsive aspects of the component, that should be done in e2e tests
 // see https://github.com/HHS/simpler-grants-gov/issues/5414
@@ -20,21 +19,27 @@ describe("TableWithResponsiveHeader", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-it("does not render if rows do not match header length", () => {
-  const consoleSpy = silenceConsole("error");
+  it("does not render if rows do not match header length", () => {
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation((): void => undefined);
 
-  render(
-    <TableWithResponsiveHeader
-      headerContent={fakeResponsiveTableHeaders.concat([
-        { cellData: "superfluous" },
-      ])}
-      tableRowData={fakeResponsiveTableRows}
-    />,
-  );
+    try {
+      render(
+        <TableWithResponsiveHeader
+          headerContent={fakeResponsiveTableHeaders.concat([
+            { cellData: "superfluous" },
+          ])}
+          tableRowData={fakeResponsiveTableRows}
+        />,
+      );
 
-  expect(screen.queryByRole("table")).not.toBeInTheDocument();
-  consoleSpy.mockRestore();
-});
+      expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
   it("displays header content in table header", () => {
     render(
       <TableWithResponsiveHeader

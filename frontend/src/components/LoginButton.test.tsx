@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
 import { LOGIN_URL } from "src/constants/auth";
-import { LoginButton, LoginLink } from "src/components/LoginButton";
 import * as userUtils from "src/utils/userUtils";
+
+import { LoginButton, LoginLink } from "src/components/LoginButton";
 
 jest.mock("src/utils/userUtils", () => ({
   storeCurrentPage: jest.fn(),

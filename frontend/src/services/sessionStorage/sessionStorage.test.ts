@@ -33,7 +33,11 @@ describe("SessionStorage", () => {
   afterEach(() => {
     console.error = originalConsoleError;
 
-    Object.defineProperty(window, "sessionStorage", originalSessionStorageDescriptor);
+    Object.defineProperty(
+      window,
+      "sessionStorage",
+      originalSessionStorageDescriptor,
+    );
 
     jest.restoreAllMocks();
   });

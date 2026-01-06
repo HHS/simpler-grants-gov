@@ -5,8 +5,6 @@ describe("Events Hero Content", () => {
   it("renders the hero heading", () => {
     render(<EventsHero />);
 
-    expect(
-      screen.getByText(/be a part of the journey/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/be a part of the journey/i)).toBeInTheDocument();
   });
 });

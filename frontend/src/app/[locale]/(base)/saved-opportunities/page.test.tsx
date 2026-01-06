@@ -1,22 +1,23 @@
 import { screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-
-import SavedOpportunities from "./page";
-import { renderServerPage } from "tests/utils/page-utils";
-
+import { messages } from "src/i18n/messages/en";
 import type {
   MinimalOpportunity,
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
-
-import { messages } from "src/i18n/messages/en";
 import { okResponse } from "tests/utils/api";
 import {
-  makeOpportunityDetail,
   makeMinimalOpportunity,
+  makeOpportunityDetail,
 } from "tests/utils/fixtures/opportunity";
+import { renderServerPage } from "tests/utils/page-utils";
 
-const fetchSavedOpportunitiesMock = jest.fn<Promise<MinimalOpportunity[]>, []>();
+import SavedOpportunities from "./page";
+
+const fetchSavedOpportunitiesMock = jest.fn<
+  Promise<MinimalOpportunity[]>,
+  []
+>();
 const getOpportunityDetailsMock = jest.fn<
   Promise<OpportunityApiResponse>,
   [string]
@@ -122,10 +123,9 @@ describe("Saved Opportunities page", () => {
 
     await renderServerPage(SavedOpportunities, { locale: "en" });
 
-    expect(screen.getByRole("link", { name: "Test Opportunity" })).toHaveAttribute(
-      "href",
-      "/opportunity/12345",
-    );
+    expect(
+      screen.getByRole("link", { name: "Test Opportunity" }),
+    ).toHaveAttribute("href", "/opportunity/12345");
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
 
     expect(fetchSavedOpportunitiesMock).toHaveBeenCalledTimes(1);

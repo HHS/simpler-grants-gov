@@ -1,5 +1,7 @@
-import React from "react";
 import { render, screen, within } from "tests/react-utils";
+
+import React from "react";
+
 import Header from "./Header";
 
 jest.mock("./RouteChangeWatcher", () => ({

@@ -1,13 +1,12 @@
-import React from "react";
 import { axe } from "jest-axe";
-import { render, screen, within } from "tests/react-utils";
-
-import competitionMock from "stories/components/application/competition.mock.json";
-
 import type { ApplicationFormDetail } from "src/types/applicationResponseTypes";
 import type { CompetitionForms } from "src/types/competitionsResponseTypes";
-import type { FormValidationWarning } from "src/components/applyForm/types";
+import competitionMock from "stories/components/application/competition.mock.json";
+import { render, screen, within } from "tests/react-utils";
 
+import React from "react";
+
+import type { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 
 jest.mock("next/navigation", () => ({
@@ -20,8 +19,8 @@ jest.mock("./IncludeFormInSubmissionRadio", () => ({
   IncludeFormInSubmissionRadio: () => <div data-testid="include-form-radio" />,
 }));
 
-const competitionForms = competitionMock.competition.competition_forms as unknown as CompetitionForms;
-
+const competitionForms = competitionMock.competition
+  .competition_forms as unknown as CompetitionForms;
 
 const applicationForms: ApplicationFormDetail[] =
   competitionMock.application_forms as unknown as ApplicationFormDetail[];

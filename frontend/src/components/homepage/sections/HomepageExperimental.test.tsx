@@ -1,6 +1,7 @@
-import { render, screen } from "tests/react-utils";
-import HomepageExperimental from "./HomepageExperimental";
 import { messages } from "src/i18n/messages/en";
+import { render, screen } from "tests/react-utils";
+
+import HomepageExperimental from "./HomepageExperimental";
 
 describe("HomepageExperimental", () => {
   it("renders the section title and primary search CTA", () => {
@@ -28,12 +29,18 @@ describe("HomepageExperimental", () => {
       screen.getByRole("link", {
         name: messages.Homepage.sections.experimental.iconSections[0].link,
       }),
-    ).toHaveAttribute("href", messages.Homepage.sections.experimental.iconSections[0].http);
+    ).toHaveAttribute(
+      "href",
+      messages.Homepage.sections.experimental.iconSections[0].http,
+    );
 
     expect(
       screen.getByRole("link", {
         name: messages.Homepage.sections.experimental.iconSections[1].link,
       }),
-    ).toHaveAttribute("href", messages.Homepage.sections.experimental.iconSections[1].http);
+    ).toHaveAttribute(
+      "href",
+      messages.Homepage.sections.experimental.iconSections[1].http,
+    );
   });
 });

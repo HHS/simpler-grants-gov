@@ -1,10 +1,10 @@
-import EventsDemo from "./EventsDemo";
 import { render, screen } from "tests/react-utils";
+
+import EventsDemo from "./EventsDemo";
 
 describe("EventsDemo", () => {
   it("renders the demo section and watch link", () => {
     render(<EventsDemo />);
-
 
     expect(
       screen.getByRole("heading", {

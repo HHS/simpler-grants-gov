@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom";
+
 import { toHaveNoViolations } from "jest-axe";
 
 expect.extend(toHaveNoViolations);
@@ -27,9 +28,11 @@ beforeEach(() => {
       originalError(...args);
     });
 
-  warnSpy = jest.spyOn(console, "warn").mockImplementation((...args: unknown[]) => {
-    originalWarn(...args);
-  });
+  warnSpy = jest
+    .spyOn(console, "warn")
+    .mockImplementation((...args: unknown[]) => {
+      originalWarn(...args);
+    });
 });
 
 afterEach(() => {

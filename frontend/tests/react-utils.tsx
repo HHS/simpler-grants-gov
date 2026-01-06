@@ -4,13 +4,12 @@
  * tests render within a global context that includes i18n content
  * @see https://testing-library.com/docs/react-testing-library/setup#custom-render
  */
-import React from "react";
 import { render as _render, type RenderOptions } from "@testing-library/react";
 import { defaultLocale, formats, timeZone } from "src/i18n/config";
 import { messages } from "src/i18n/messages/en";
 
-import { NextIntlClientProvider } from "next-intl";
-import type { AbstractIntlMessages } from "next-intl";
+import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
+import React from "react";
 
 const GlobalProviders = ({ children }: { children: React.ReactNode }) => {
   // IMPORTANT:

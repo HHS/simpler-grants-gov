@@ -1,6 +1,5 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen, waitFor } from "tests/react-utils";
-import { silenceConsole } from "tests/utils/console";
 
 import { IncludeFormInSubmissionRadio } from "./IncludeFormInSubmissionRadio";
 
@@ -52,7 +51,9 @@ describe("IncludeFormInSubmissionRadio", () => {
   beforeEach(() => {
     refreshMock.mockClear();
     clientFetchMock.mockReset();
-    consoleSpy = silenceConsole("error");
+    consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation((): void => undefined);
   });
 
   afterEach(() => {

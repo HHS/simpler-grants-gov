@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+
 import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
 
 describe("RequiredFieldIndicator", () => {

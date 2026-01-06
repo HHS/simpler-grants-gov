@@ -1,7 +1,8 @@
-import { generateMetadata } from "./page";
-import { makeLocalizedPageProps } from "tests/utils/page-utils";
 import { messages } from "src/i18n/messages/en";
 import { getMessage, type MessagesTree } from "tests/utils/intl";
+import { makeLocalizedPageProps } from "tests/utils/page-utils";
+
+import { generateMetadata } from "./page";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => (key: string) =>
