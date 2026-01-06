@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationFormDetail,
+} from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
@@ -24,6 +27,8 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
+const applicationForms =
+  competitionMock.application_forms as unknown as ApplicationFormDetail[];
 const applicationDetailsObject: ApplicationDetail = {
   ...(competitionMock as unknown as ApplicationDetail),
   application_status: "in_progress",
@@ -38,17 +43,19 @@ describe("CompetitionFormsTable", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <ApplicationFormsTable
+        applicationForms={applicationForms}
         competitionInstructionsDownloadPath="http://path-to-instructions.com"
         errors={null}
         applicationDetailsObject={applicationDetailsObject}
       />,
     );
     const results = await axe(container);
-    expect(results).not.toHaveNoViolations();
+    expect(results).toHaveNoViolations();
   });
   it("Renders without errors", () => {
     render(
       <ApplicationFormsTable
+        applicationForms={applicationForms}
         competitionInstructionsDownloadPath="http://path-to-instructions.com"
         errors={null}
         applicationDetailsObject={applicationDetailsObject}
@@ -68,6 +75,7 @@ describe("CompetitionFormsTable", () => {
   it("matches snapshot", () => {
     const { container } = render(
       <ApplicationFormsTable
+        applicationForms={applicationForms}
         competitionInstructionsDownloadPath="http://path-to-instructions.com"
         errors={null}
         applicationDetailsObject={applicationDetailsObject}

@@ -45,16 +45,22 @@ const selectApplicationForm = ({
 };
 
 export const ApplicationFormsTable = ({
+  applicationForms,
   competitionInstructionsDownloadPath,
   errors = null,
   applicationDetailsObject,
 }: {
+  applicationForms: ApplicationFormDetail[];
   competitionInstructionsDownloadPath: string;
   errors?: FormValidationWarning[] | null;
   applicationDetailsObject: ApplicationDetail;
 }) => {
   const forms = applicationDetailsObject.competition.competition_forms;
-  const applicationForms = applicationDetailsObject.application_forms;
+  const requiredForms = selectApplicationFormsByRequired({
+    applicationForms,
+    forms,
+    required: true,
+  });
   const conditionalRequiredForms = selectApplicationFormsByRequired({
     applicationForms,
     forms,
@@ -67,6 +73,7 @@ export const ApplicationFormsTable = ({
       <h3>{t("requiredForms")}</h3>
       <ApplicationTable
         formsAreOptional={false}
+        applicationForms={requiredForms}
         applicationDetailsObject={applicationDetailsObject}
       />
       {conditionalRequiredForms.length > 0 && (
@@ -85,6 +92,7 @@ export const ApplicationFormsTable = ({
           </p>
           <ApplicationTable
             formsAreOptional={true}
+            applicationForms={conditionalRequiredForms}
             errors={errors}
             applicationDetailsObject={applicationDetailsObject}
           />
@@ -121,16 +129,17 @@ const ApplicationTableColumnError = ({
 };
 
 const ApplicationTable = ({
+  applicationForms,
   errors = null,
   applicationDetailsObject,
   formsAreOptional = false,
 }: {
+  applicationForms: ApplicationFormDetail[];
   errors?: FormValidationWarning[] | null;
   applicationDetailsObject: ApplicationDetail;
   formsAreOptional: boolean;
 }) => {
   const forms = applicationDetailsObject.competition.competition_forms;
-  const applicationForms = applicationDetailsObject.application_forms;
   const applicationId = applicationDetailsObject.application_id;
   const applicationStatus = applicationDetailsObject.application_status;
   const t = useTranslations("Application.competitionFormTable");
