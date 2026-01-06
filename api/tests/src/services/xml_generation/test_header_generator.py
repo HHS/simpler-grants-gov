@@ -5,8 +5,8 @@ from datetime import date
 import pytest
 from lxml import etree as lxml_etree
 
+from src.services.xml_generation.constants import HEADER_NAMESPACES
 from src.services.xml_generation.header_generator import (
-    HEADER_NAMESPACES,
     SubmissionXMLGenerator,
     generate_application_header_xml,
 )
