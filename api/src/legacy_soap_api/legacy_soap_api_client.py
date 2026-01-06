@@ -60,11 +60,7 @@ class BaseSOAPClient:
         operation_method = getattr(
             self, to_snake_case(self.operation_config.request_operation_name)
         )
-        if self.operation_config.has_merge_list_response:
-            return operation_method(proxy_response=proxy_response).to_soap_envelope_dict(
-                self.operation_config.response_operation_name
-            )
-        return operation_method().to_soap_envelope_dict(
+        return operation_method(proxy_response).to_soap_envelope_dict(
             self.operation_config.response_operation_name
         )
 
@@ -216,7 +212,9 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/applicant-system-to-system/web-services/
     """
 
-    def get_opportunity_list_request(self) -> applicants_schemas.GetOpportunityListResponse:
+    def get_opportunity_list_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> applicants_schemas.GetOpportunityListResponse:
         return get_opportunity_list_response(
             db_session=self.db_session,
             get_opportunity_list_request=applicants_schemas.GetOpportunityListRequest(
@@ -232,7 +230,9 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/grantor-system-to-system/web-services
     """
 
-    def get_application_zip_request(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
+    def get_application_zip_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
         return get_application_zip_response(
             db_session=self.db_session,
             soap_request=self.soap_request,

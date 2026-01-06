@@ -188,7 +188,23 @@ def get_submission_list_expanded_response(
 ) -> schemas.GetSubmissionListExpandedResponse:
     submissions = get_submissions(db_session, request, soap_request)
     info = []
+    proxy_submissions = []
+    try:
+        proxy_submissions = parse_submissions_from_proxy(proxy_response)
+    except Exception:
+        logger.exception("Failed to parse submission list expanded XML response")
+    info.extend(proxy_submissions)
+    for submission in submissions:
+        submission_list_obj = transform_submission(submission)
+        info.append(schemas.SubmissionInfo(**submission_list_obj))
+    return schemas.GetSubmissionListExpandedResponse(
+        success=True, available_application_number=len(info), submission_info=info
+    )
+
+
+def parse_submissions_from_proxy(proxy_response: SOAPResponse) -> list[schemas.SubmissionInfo]:
     xml_bytes = b"".join(clean_mtom_generator(proxy_response.stream()))
+    info = []
     if xml_bytes:
         parser = etree.XMLParser(recover=True)
         root = etree.fromstring(xml_bytes, parser=parser)
@@ -200,12 +216,7 @@ def get_submission_list_expanded_response(
             except PydanticValidationError:
                 logger.exception("Skipping invalid submission due to validation error")
                 continue
-    for submission in submissions:
-        submission_list_obj = transform_submission(submission)
-        info.append(schemas.SubmissionInfo(**submission_list_obj))
-    return schemas.GetSubmissionListExpandedResponse(
-        success=True, available_application_number=len(info), submission_info=info
-    )
+    return info
 
 
 def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[bytes]:
