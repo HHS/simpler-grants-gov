@@ -97,6 +97,9 @@ export function UserProfileForm({
             <span>{t("inputs.firstName")}</span>
             <RequiredFieldIndicator> *</RequiredFieldIndicator>
           </Label>
+          <p className="text-base-dark margin-top-0">
+            {t("requiredForProfile")}
+          </p>
           <UserProfileValidationError
             fieldName="firstName"
             errors={state.validationErrors}
@@ -126,6 +129,9 @@ export function UserProfileForm({
             <span>{t("inputs.lastName")}</span>
             <RequiredFieldIndicator> *</RequiredFieldIndicator>
           </Label>
+          <p className="text-base-dark margin-top-0">
+            {t("requiredForProfile")}
+          </p>
           <UserProfileValidationError
             fieldName="lastName"
             errors={state.validationErrors}

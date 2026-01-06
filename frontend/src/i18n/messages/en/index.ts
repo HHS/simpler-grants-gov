@@ -1487,6 +1487,7 @@ export const messages = {
       "Add your first and last name to complete your profile.",
     firstNameRequired: "First name is required",
     lastNameRequired: "Last name is required",
+    requiredForProfile: "Required to complete your profile.",
   },
   ActivityDashboard: {
     pageTitle: "Activity Dashboard | Simpler.Grants.gov",
