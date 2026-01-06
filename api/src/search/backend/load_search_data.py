@@ -22,9 +22,10 @@ from src.task.ecs_background_task import ecs_background_task
 @flask_opensearch.with_search_client()
 @ecs_background_task(task_name="load-opportunity-data-opensearch")
 def load_opportunity_data(
-    search_client: search.SearchClient, db_session: db.Session, full_refresh: bool
+    search_client: search.SearchClient,
+    db_session: db.Session,
 ) -> None:
-    LoadOpportunitiesToIndex(db_session, search_client, full_refresh).run()
+    LoadOpportunitiesToIndex(db_session, search_client).run()
 
 
 @load_search_data_blueprint.cli.command(
