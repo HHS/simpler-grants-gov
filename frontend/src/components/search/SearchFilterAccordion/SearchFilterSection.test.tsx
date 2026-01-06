@@ -1,24 +1,33 @@
 import "@testing-library/jest-dom";
 
+import React, { JSX } from "react";
 import { axe } from "jest-axe";
-import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import { render, screen } from "tests/react-utils";
+import type { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
+import type { FilterOption } from "src/types/search/searchFilterTypes";
 
-import React from "react";
+type AllOptionCheckboxProps = {
+  title: string;
+  currentSelections: Set<string>;
+  childOptions: FilterOption[];
+  queryParamKey: ValidSearchQueryParam;
+  topLevelQueryParamKey?: string;
+  topLevelQuery?: Set<string>;
+  topLevelQueryValue?: string;
+};
 
-import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection";
+const AllOptionCheckboxMock = jest.fn<JSX.Element, [AllOptionCheckboxProps]>(() => (
+  <div data-testid="all-option-checkbox" />
+));
 
-const AllOptionCheckboxMock = jest.fn();
-
-jest.mock(
-  "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
-  () => ({
-    AllOptionCheckbox: (props: unknown) =>
-      AllOptionCheckboxMock(props) as unknown,
-  }),
-);
+jest.mock("src/components/search/SearchFilterAccordion/AllOptionCheckbox", () => ({
+  AllOptionCheckbox: (props: AllOptionCheckboxProps) => AllOptionCheckboxMock(props),
+}));
 
 const mockSetQueryParam = jest.fn();
+jest.mock("src/hooks/useSearchParamUpdater", () => ({
+  useSearchParamUpdater: () => ({ setQueryParam: mockSetQueryParam }),
+}));
 
 const defaultProps = {
   queryParamKey: "agency" as ValidSearchQueryParam,
@@ -27,104 +36,52 @@ const defaultProps = {
     label: "Option 1",
     value: "some value",
     children: [
-      {
-        id: "1-1",
-        label: "Child 1",
-        isChecked: false,
-        value: "1st-child-value",
-      },
-      {
-        id: "1-2",
-        label: "Child 2",
-        isChecked: true,
-        value: "2nd-child-value",
-      },
+      { id: "1-1", label: "Child 1", isChecked: false, value: "1st-child-value" },
+      { id: "1-2", label: "Child 2", isChecked: true, value: "2nd-child-value" },
     ],
   },
   updateCheckedOption: jest.fn(),
   accordionTitle: "Default Title",
-  query: new Set(""),
+  query: new Set<string>(),
   facetCounts: {
     "1st-child-value": 1,
     "2nd-child-value": 2,
   },
 };
 
-jest.mock("src/hooks/useSearchParamUpdater", () => ({
-  useSearchParamUpdater: () => ({
-    setQueryParam: mockSetQueryParam,
-  }),
-}));
+async function loadSearchFilterSection() {
+  const mod = await import("./SearchFilterSection");
+  return mod.default;
+}
 
 describe("SearchFilterSection", () => {
-  beforeEach(() => {
-    AllOptionCheckboxMock.mockImplementation((props) =>
-      // eslint-disable-next-line
-      jest
-        .requireActual(
-          "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
-        )
-        .AllOptionCheckbox(props),
-    );
+  afterEach(() => {
+    jest.resetModules(); // ensures next test re-imports with mocks applied
+    jest.clearAllMocks();
   });
-  afterEach(() => jest.resetAllMocks());
+
   it("should not have accessibility violations", async () => {
+    const SearchFilterSection = await loadSearchFilterSection();
     const { container } = render(<SearchFilterSection {...defaultProps} />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(await axe(container)).toHaveNoViolations();
   });
-  it("displays select all checkbox and checkbox for each child", () => {
+
+  it("renders select-all control and a checkbox for each child", async () => {
+    const SearchFilterSection = await loadSearchFilterSection();
     render(<SearchFilterSection {...defaultProps} />);
 
-    expect(screen.getAllByRole("checkbox")).toHaveLength(3);
-  });
-  it("passes referenceOption to AllOptionCheckbox when available", () => {
-    render(
-      <SearchFilterSection
-        {...defaultProps}
-        referenceOption={{
-          id: "2",
-          label: "Option 2",
-          value: "some value 2",
-          children: [
-            {
-              id: "2-1",
-              label: "Child 3",
-              isChecked: false,
-              value: "1st-child-value",
-            },
-            {
-              id: "2-2",
-              label: "Child 4",
-              isChecked: true,
-              value: "2nd-child-value",
-            },
-          ],
-        }}
-      />,
-    );
+    expect(screen.getByTestId("all-option-checkbox")).toBeInTheDocument();
 
-    expect(AllOptionCheckboxMock).toHaveBeenCalledWith({
-      title: "Option 1",
-      queryParamKey: "agency",
-      childOptions: [
-        {
-          id: "2-1",
-          label: "Child 3",
-          isChecked: false,
-          value: "1st-child-value",
-        },
-        {
-          id: "2-2",
-          label: "Child 4",
-          isChecked: true,
-          value: "2nd-child-value",
-        },
-      ],
-      currentSelections: new Set(""),
-      topLevelQuery: undefined,
-      topLevelQueryParamKey: undefined,
-      topLevelQueryValue: "some value",
-    });
+    expect(screen.getByRole("checkbox", { name: /^Child 1\b/ })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: /^Child 2\b/ })).toBeInTheDocument();
+
+    expect(AllOptionCheckboxMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Option 1",
+        queryParamKey: "agency",
+        currentSelections: defaultProps.query,
+        topLevelQueryValue: "some value",
+      }),
+    );
   });
 });

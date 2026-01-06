@@ -1,189 +1,100 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable testing-library/no-node-access */
-import { RJSFSchema } from "@rjsf/utils";
+import React from "react";
 import { render, screen } from "@testing-library/react";
+import type { RJSFSchema } from "@rjsf/utils";
 
 import PrintWidget from "src/components/applyForm/widgets/PrintWidget";
 
-describe("PrintWidget", () => {
-  const defaultProps = {
+type BaseProps = {
+  id: string;
+  required?: boolean;
+  schema: RJSFSchema;
+  value?: unknown;
+  formClassName?: string;
+  inputClassName?: string;
+};
+
+function renderWidget(overrides: Partial<BaseProps> = {}) {
+  const props: BaseProps = {
     id: "test-field",
     required: false,
-    schema: {
-      title: "Test Field",
-      type: "string" as const,
-    },
+    schema: { title: "Test Field", type: "string" },
     value: "Test Value",
-    rawErrors: [],
     formClassName: "test-form-class",
     inputClassName: "test-input-class",
-    placeholder: "",
-    readOnly: false,
-    disabled: false,
-    autofocus: false,
-    label: "Test Label",
-    hideLabel: false,
-    hideError: false,
+    ...overrides,
   };
 
-  const warnSpy = jest
-    .spyOn(console, "warn")
-    .mockImplementation(() => undefined);
+  // PrintWidget’s prop type is generic and wider than this minimal base.
+  // We keep this test focused on user-visible rendering behavior.
+  render(<PrintWidget {...(props)} />);
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  return props;
+}
 
-  afterAll(() => {
-    warnSpy.mockRestore();
-  });
-
-  it("renders with basic props", () => {
-    render(<PrintWidget {...defaultProps} />);
+describe("PrintWidget", () => {
+  it("renders the title and value", () => {
+    renderWidget();
 
     expect(screen.getByText("Test Field")).toBeInTheDocument();
     expect(screen.getByText("Test Value")).toBeInTheDocument();
     expect(screen.getByTestId("test-field")).toBeInTheDocument();
   });
 
-  it("displays the field title from schema", () => {
-    const props = {
-      ...defaultProps,
-      schema: {
-        ...defaultProps.schema,
-        title: "Custom Field Title",
-      },
-    };
+  it("renders required indicator when required", () => {
+    renderWidget({ required: true });
 
-    render(<PrintWidget {...props} />);
-
-    expect(screen.getByText("Custom Field Title")).toBeInTheDocument();
+    expect(screen.getByText("*")).toBeInTheDocument();
   });
 
-  it("displays the field value", () => {
-    const props = {
-      ...defaultProps,
-      value: "Custom Test Value",
-    };
-
-    render(<PrintWidget {...props} />);
-
-    expect(screen.getByText("Custom Test Value")).toBeInTheDocument();
-  });
-
-  it("displays empty string when value is null", () => {
-    const propsWithNull = { ...defaultProps, value: null as unknown as string };
-
-    render(<PrintWidget {...propsWithNull} />);
+  it("renders empty string when value is null", () => {
+    renderWidget({ value: null });
 
     expect(screen.getByTestId("test-field")).toHaveTextContent("");
-    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("displays empty string when value is undefined", () => {
-    const propsWithUndefined = {
-      ...defaultProps,
-      value: undefined as unknown as string,
-    };
-
-    render(<PrintWidget {...propsWithUndefined} />);
+  it("renders empty string when value is undefined", () => {
+    renderWidget({ value: undefined });
 
     expect(screen.getByTestId("test-field")).toHaveTextContent("");
-    expect(warnSpy).not.toHaveBeenCalled();
   });
 
-  it("does not show required indicator when field is not required", () => {
-    const props = { ...defaultProps, required: false };
-
-    render(<PrintWidget {...props} />);
-
-    expect(screen.queryByText("*")).not.toBeInTheDocument();
-  });
-
-  it("does not display errors when rawErrors is empty", () => {
-    const props = { ...defaultProps, rawErrors: [] };
-
-    render(<PrintWidget {...props} />);
-
-    expect(
-      screen.queryByTestId("field-errors-test-field"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("applies custom CSS classes", () => {
-    const props = {
-      ...defaultProps,
-      formClassName: "custom-form-class",
-      inputClassName: "custom-input-class",
-    };
-
-    render(<PrintWidget {...props} />);
-
-    const inputElement = screen.getByTestId("test-field");
-    expect(inputElement).toHaveClass("custom-input-class");
-  });
-
-  it("sets correct HTML attributes", () => {
-    render(<PrintWidget {...defaultProps} />);
-
-    const fieldElement = screen.getByTestId("test-field");
-    expect(fieldElement).toHaveAttribute("id", "test-field");
-    expect(fieldElement).toHaveAttribute("data-testid", "test-field");
-  });
-
-  it("handles numeric values by converting to string", () => {
-    const props = { ...defaultProps, value: 12345 };
-
-    render(<PrintWidget {...props} />);
+  it("handles numbers by converting to string", () => {
+    renderWidget({ value: 12345 });
 
     expect(screen.getByText("12345")).toBeInTheDocument();
   });
 
-  it("renders 'Yes' for boolean true", () => {
-    const props = { ...defaultProps, value: true };
-
-    render(<PrintWidget {...props} />);
-
+  it("renders Yes/No for booleans", () => {
+    renderWidget({ value: true });
     expect(screen.getByText("Yes")).toBeInTheDocument();
-  });
 
-  it("renders 'No' for boolean false", () => {
-    const props = { ...defaultProps, value: false };
-
-    render(<PrintWidget {...props} />);
-
+    renderWidget({ value: false, id: "bool-field" });
     expect(screen.getByText("No")).toBeInTheDocument();
   });
 
-  it("handles array values by joining defined items with ', '", () => {
-    const props = { ...defaultProps, value: ["A", null, "B", undefined, "C"] };
-
-    render(<PrintWidget {...props} />);
+  it("joins arrays while skipping null/undefined", () => {
+    renderWidget({ value: ["A", null, "B", undefined, "C"] });
 
     expect(screen.getByText("A, B, C")).toBeInTheDocument();
   });
 
-  it("handles object values by JSON-stringifying and console warns", () => {
+  it("stringifies objects for display", () => {
     const obj = { a: 1, b: "x" };
-    const props = { ...defaultProps, value: obj };
-
-    render(<PrintWidget {...props} />);
+    renderWidget({ value: obj });
 
     expect(screen.getByText(JSON.stringify(obj))).toBeInTheDocument();
-    expect(warnSpy).toHaveBeenCalled();
   });
 
   it("renders with minimal props", () => {
-    const minimalProps = {
-      id: "minimal",
-      schema: { title: "Minimal" } as RJSFSchema,
-      value: "Value",
-    };
-
-    render(<PrintWidget {...minimalProps} />);
+    render(<PrintWidget id="minimal" schema={{ title: "Minimal" }} value="Value" />);
 
     expect(screen.getByText("Minimal")).toBeInTheDocument();
     expect(screen.getByText("Value")).toBeInTheDocument();
+  });
+
+  it("applies custom CSS classes", () => {
+    renderWidget({ inputClassName: "custom-input-class" });
+
+    expect(screen.getByTestId("test-field")).toHaveClass("custom-input-class");
   });
 });

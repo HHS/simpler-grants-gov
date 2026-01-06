@@ -5,7 +5,7 @@ import { getMessage } from "tests/utils/intl";
 
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: async () => (key: string) => getMessage(messages, key),
+  getTranslations: () => (key: string) => getMessage(messages, key),
   setRequestLocale: jest.fn(),
 }));
 

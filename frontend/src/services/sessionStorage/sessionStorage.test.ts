@@ -4,11 +4,20 @@ describe("SessionStorage", () => {
   const mockConsoleError = jest.fn();
   let originalConsoleError: typeof console.error;
 
+  let originalSessionStorageDescriptor: PropertyDescriptor;
+
   beforeEach(() => {
     originalConsoleError = console.error;
     console.error = mockConsoleError;
 
+    const desc = Object.getOwnPropertyDescriptor(window, "sessionStorage");
+    if (!desc) {
+      throw new Error("Expected window.sessionStorage to exist in jsdom");
+    }
+    originalSessionStorageDescriptor = desc;
+
     Object.defineProperty(window, "sessionStorage", {
+      configurable: true,
       value: {
         getItem: jest.fn(),
         setItem: jest.fn(),
@@ -19,6 +28,14 @@ describe("SessionStorage", () => {
     });
 
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    console.error = originalConsoleError;
+
+    Object.defineProperty(window, "sessionStorage", originalSessionStorageDescriptor);
+
+    jest.restoreAllMocks();
   });
 
   afterEach(() => {

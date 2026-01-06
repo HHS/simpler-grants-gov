@@ -4,7 +4,7 @@ import { messages } from "src/i18n/messages/en";
 import { getMessage, type MessagesTree } from "tests/utils/intl";
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: async () => (key: string) =>
+  getTranslations: () => (key: string) =>
     getMessage(messages as MessagesTree, key),
 }));
 

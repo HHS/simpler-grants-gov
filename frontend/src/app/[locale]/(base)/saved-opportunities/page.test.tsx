@@ -37,8 +37,6 @@ jest.mock("src/components/search/SearchResultsListItem", () => {
       opportunity_title: string | null;
       opportunity_number: string;
     };
-    saved: boolean;
-    index: number;
   }) {
     return (
       <div>
@@ -58,11 +56,14 @@ jest.mock("src/components/Breadcrumbs", () => {
 });
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: async () => (key: string) => {
-    if (key === "SavedOpportunities.heading")
-      return messages.SavedOpportunities.heading;
-    return key;
-  },
+  getTranslations: () =>
+    Promise.resolve((key: string) => {
+      if (key === "SavedOpportunities.heading") {
+        return messages.SavedOpportunities.heading;
+      }
+      return key;
+    }),
+  setRequestLocale: jest.fn(),
 }));
 
 describe("Saved Opportunities page", () => {

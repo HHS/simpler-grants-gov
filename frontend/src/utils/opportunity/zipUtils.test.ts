@@ -6,7 +6,7 @@ import {
   attachmentsToZipEntries,
   deduplicateFilename,
 } from "src/utils/opportunity/zipUtils";
-import { FakeHttpReader } from "tests/__mocks__/zipjs";
+import { FakeHttpReader } from "__mocks__/zipjs";
 
 describe("deduplicateFilename", () => {
   it("returns original filename if no previous usage of name is found", () => {

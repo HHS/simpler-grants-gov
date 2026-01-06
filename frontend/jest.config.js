@@ -15,7 +15,8 @@ const customJestConfig = {
   moduleDirectories: ["node_modules", "<rootDir>/"],
   testPathIgnorePatterns: ["<rootDir>/tests/e2e"],
   moduleNameMapper: {
-    "@zip.js/zip.js": "<rootDir>/tests/__mocks__/zipjs.ts",
+    "@zip.js/zip.js": "<rootDir>/__mocks__/zipjs.ts",
+    "^next-intl$": "<rootDir>/__mocks__/next-intl.tsx",
   },
 };
 
