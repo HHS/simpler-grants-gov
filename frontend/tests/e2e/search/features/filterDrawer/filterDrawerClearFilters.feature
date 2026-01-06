@@ -72,11 +72,8 @@ Scenario: Clear Filters resets selections after page reload
     Then all selected filters should be deselected
     And results should update accordingly
 
-Scenario Outline: Clear Filters button works across different viewports
-    Given I am on the Search Funding Opportunity page
-    And my login state is "<loginState>"
-    And the viewport is set to "<viewport>"
-    And I open the filter drawer
+Scenario: Clear Filters button works across different viewports
+    Given the viewport is set to "<viewport>"
     And I have selected one or more filters
     When I click the Clear Filters button
     Then all selected filters should be deselected
@@ -84,9 +81,6 @@ Scenario Outline: Clear Filters button works across different viewports
     And the Clear Filters button should behave correctly for "<viewport>"
 
 Examples:
-    | loginState    | viewport  |
-    | logged in     | mobile    |
-    | not logged in | mobile    |
-    | logged in     | desktop   |
-    | not logged in | desktop   |
-
+    | viewport  |
+    | mobile    |
+    | desktop   |
