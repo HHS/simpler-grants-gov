@@ -7,7 +7,7 @@ from lxml import etree as lxml_etree
 
 import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
-from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES, Namespace
+from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
