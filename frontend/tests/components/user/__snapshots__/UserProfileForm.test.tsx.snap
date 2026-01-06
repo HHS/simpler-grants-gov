@@ -2,96 +2,135 @@
 
 exports[`userProfileForm matches snapshot 1`] = `
 <div>
-  <h3>
+  <h2>
     contactInfoHeading
-  </h3>
+  </h2>
   <p>
     contactInfoBody
   </p>
   <form
     action="javascript:throw new Error('A React form was unexpectedly submitted. If you called form.submit() manually, consider using form.requestSubmit() instead. If you\\'re trying to use event.stopPropagation() in a submit event handler, consider also calling event.preventDefault().')"
   >
-    <label
-      class="usa-label"
-      data-testid="label"
-      for="firstName"
+    <div
+      class="usa-form-group"
+      data-testid="formGroup"
     >
-      <span>
-        inputs.firstName
-      </span>
-      <span
-        class="usa-hint usa-hint--required"
-        data-testid="required-field-indicator"
+      <label
+        class="usa-label"
+        data-testid="label"
+        for="firstName"
       >
-         *
-      </span>
-    </label>
-    <input
-      class="usa-input"
-      data-testid="textInput"
-      id="edit-user-first-name"
-      name="firstName"
-      type="text"
-      value="joe"
-    />
-    <label
-      class="usa-label"
-      data-testid="label"
-      for="middle-name"
-    >
-      inputs.middleName
-    </label>
-    <input
-      class="usa-input"
-      data-testid="textInput"
-      id="edit-user-middle-name"
-      name="middleName"
-      type="text"
-    />
-    <label
-      class="usa-label"
-      data-testid="label"
-      for="lastName"
-    >
-      <span>
-        inputs.lastName
-      </span>
-      <span
-        class="usa-hint usa-hint--required"
-        data-testid="required-field-indicator"
+        <span>
+          inputs.firstName
+        </span>
+        <span
+          class="usa-hint usa-hint--required"
+          data-testid="required-field-indicator"
+        >
+           *
+        </span>
+      </label>
+      <p
+        class="text-base-dark margin-top-0"
       >
-         *
-      </span>
-    </label>
-    <input
-      class="usa-input"
-      data-testid="textInput"
-      id="edit-user-last-name"
-      name="lastName"
-      type="text"
-      value="quisling"
-    />
-    <label
-      class="usa-label"
-      data-testid="label"
-      for="email"
+        requiredForProfile
+      </p>
+      <input
+        class="usa-input"
+        data-testid="textInput"
+        id="firstName"
+        name="firstName"
+        type="text"
+        value="joe"
+      />
+    </div>
+    <div
+      class="usa-form-group"
+      data-testid="formGroup"
     >
-      inputs.email
-    </label>
-    <input
-      class="usa-input"
-      data-testid="textInput"
-      disabled=""
-      id="edit-user-email"
-      name="email"
-      type="text"
-      value="not-the-real-email@fake.com"
-    />
+      <label
+        class="usa-label"
+        data-testid="label"
+        for="middle-name"
+      >
+        inputs.middleName
+      </label>
+      <input
+        class="usa-input"
+        data-testid="textInput"
+        id="middle-name"
+        name="middleName"
+        type="text"
+      />
+    </div>
+    <div
+      class="usa-form-group"
+      data-testid="formGroup"
+    >
+      <label
+        class="usa-label"
+        data-testid="label"
+        for="lastName"
+      >
+        <span>
+          inputs.lastName
+        </span>
+        <span
+          class="usa-hint usa-hint--required"
+          data-testid="required-field-indicator"
+        >
+           *
+        </span>
+      </label>
+      <p
+        class="text-base-dark margin-top-0"
+      >
+        requiredForProfile
+      </p>
+      <input
+        class="usa-input"
+        data-testid="textInput"
+        id="lastName"
+        name="lastName"
+        type="text"
+        value="quisling"
+      />
+    </div>
+    <div
+      class="usa-form-group"
+      data-testid="formGroup"
+    >
+      <label
+        class="usa-label"
+        data-testid="label"
+        for="email"
+      >
+        inputs.email
+      </label>
+      <input
+        class="usa-input"
+        data-testid="textInput"
+        disabled=""
+        id="email"
+        name="email"
+        type="text"
+        value="not-the-real-email@fake.com"
+      />
+    </div>
     <button
       class="usa-button margin-top-4"
       data-testid="button"
       type="submit"
     >
+      <svg
+        aria-hidden="true"
+        class="usa-icon margin-right-05"
+        role="img"
+      >
+        <use
+          href="/img.jpg#check_circle"
+        />
+      </svg>
       save
     </button>
   </form>
