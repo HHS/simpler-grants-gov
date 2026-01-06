@@ -3,11 +3,13 @@ import { noop } from "lodash";
 import { applicationTestUserId, testApplicationId } from "src/constants/auth";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
+import { useClientFetch } from "src/hooks/useClientFetch";
+import { UserDetailWithProfile } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
 import { LoginButton } from "src/components/LoginButton";
@@ -44,6 +46,52 @@ const SettingsNavLink = () => {
 // 3. on mobile - nav sub item content
 const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
   const t = useTranslations("Header.navLinks");
+  const { user } = useUser();
+  const { clientFetch } = useClientFetch<{ data: UserDetailWithProfile }>(
+    "Failed to fetch user details",
+  );
+  const [userDetails, setUserDetails] = useState<UserDetailWithProfile | null>(
+    null,
+  );
+  const isFetchingRef = useRef(false);
+
+  const fetchUserDetails = useCallback(() => {
+    if (user?.token && user?.user_id && !isFetchingRef.current) {
+      isFetchingRef.current = true;
+      clientFetch("/api/user/details")
+        .then((response) => {
+          setUserDetails(response.data);
+        })
+        .catch(() => {
+          // Silently fail - we'll just show the default icon
+        })
+        .finally(() => {
+          isFetchingRef.current = false;
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.token, user?.user_id]);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchUserDetails();
+  }, [fetchUserDetails]);
+
+  // Listen for profile update events from UserProfileForm
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchUserDetails();
+    };
+
+    window.addEventListener("userProfileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("userProfileUpdated", handleProfileUpdate);
+    };
+  }, [fetchUserDetails]);
+
+  const isMissingName = !userDetails?.profile?.first_name || !userDetails?.profile?.last_name;
+  const iconName = isMissingName ? "warning" : "account_circle";
+
   return (
     <a
       className={clsx("flex-align-center", "display-flex", {
@@ -55,8 +103,9 @@ const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
       })}
     >
       <USWDSIcon
-        name="account_circle"
+        name={iconName}
         className="usa-icon--size-3 display-block"
+        style={isMissingName ? { color: "#FF580A" } : undefined}
       />
       <div
         className={clsx("padding-left-1", {

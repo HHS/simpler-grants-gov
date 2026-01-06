@@ -1482,6 +1482,7 @@ export const messages = {
     pending: "Saving...",
     errorHeading: "Error",
     successHeading: "Account updated",
+    missingFullName: "Please enter your full name in the fields below.",
   },
   ActivityDashboard: {
     pageTitle: "Activity Dashboard | Simpler.Grants.gov",
