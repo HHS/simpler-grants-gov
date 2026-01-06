@@ -55,7 +55,6 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
-    enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
 
@@ -179,8 +178,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(competition_blueprint)
 
     # CommonGrants Protocol endpoints
-    if endpoint_config.enable_common_grants_endpoints:
-        app.register_blueprint(common_grants_blueprint)
+    app.register_blueprint(common_grants_blueprint)
 
     # Local endpoints for development, will error
     # if this is ever enabled non-locally.
