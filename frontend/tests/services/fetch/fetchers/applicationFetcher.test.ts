@@ -35,19 +35,6 @@ describe("getApplicationDetails", () => {
     expect(result).toEqual(expectedResponse);
     expect(fetchApplicationWithMethod).toHaveBeenCalledWith("GET");
   });
-
-  it("should return 500 error response when fetch fails", async () => {
-    const mockFetchFn = jest.fn().mockRejectedValue(new Error("Network error"));
-    (fetchApplicationWithMethod as jest.Mock).mockReturnValue(mockFetchFn);
-
-    const result = await getApplicationDetails("app-123", "token");
-
-    expect(result).toEqual({
-      status_code: 500,
-      message: "",
-      data: {},
-    });
-  });
 });
 
 describe("handleStartApplication", () => {

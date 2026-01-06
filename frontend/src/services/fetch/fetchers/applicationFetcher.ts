@@ -66,28 +66,18 @@ export const getApplicationDetails = async (
   applicationId: string,
   token: string,
 ): Promise<ApplicationDetailApiResponse> => {
-  try {
-    const ssgToken = {
-      "X-SGG-Token": token,
-    };
-    const response = await fetchApplicationWithMethod("GET")({
-      subPath: applicationId,
-      additionalHeaders: ssgToken,
-      nextOptions: {
-        tags: [`application-${applicationId}`, "application-details"],
-      },
-    });
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchApplicationWithMethod("GET")({
+    subPath: applicationId,
+    additionalHeaders: ssgToken,
+    nextOptions: {
+      tags: [`application-${applicationId}`, "application-details"],
+    },
+  });
 
-    return (await response.json()) as ApplicationDetailApiResponse;
-  } catch (e) {
-    console.error("Error in getApplicationDetails:", e);
-    // Return empty response JSON
-    return {
-      status_code: 500,
-      message: "",
-      data: {},
-    } as ApplicationDetailApiResponse;
-  }
+  return (await response.json()) as ApplicationDetailApiResponse;
 };
 
 export const getApplicationHistory = async (
