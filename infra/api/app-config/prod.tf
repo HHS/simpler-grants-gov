@@ -83,7 +83,6 @@ module "prod_config" {
     # grants.gov services/applications URI.
     GRANTS_GOV_URI  = "https://ws07.grants.gov"
     GRANTS_GOV_PORT = 443
-    ENABLE_SOAP_API = 1
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api.sam.gov"

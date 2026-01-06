@@ -30,7 +30,6 @@ locals {
     # Both staging and dev environments both point to trainingws subdomain.
     GRANTS_GOV_URI  = "https://trainingws.grants.gov"
     GRANTS_GOV_PORT = 443
-    ENABLE_SOAP_API = 0
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"

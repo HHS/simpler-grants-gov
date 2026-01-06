@@ -46,7 +46,6 @@ module "staging_config" {
     # Login.gov OAuth
     ENABLE_AUTH_ENDPOINT   = 1
     ENABLE_APPLY_ENDPOINTS = 1
-    ENABLE_SOAP_API        = 1
     ENABLE_XML_GENERATION  = 1
 
     # CommonGrants Protocol
