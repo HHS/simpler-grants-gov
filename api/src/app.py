@@ -55,8 +55,6 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
-    auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
-
     enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
     enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
@@ -93,9 +91,8 @@ def create_app() -> APIFlask:
     register_search_client(app)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        initialize_login_gov_config()
-        initialize_jwt_auth()
+    initialize_login_gov_config()
+    initialize_jwt_auth()
 
     init_legacy_soap_api(app)
 
@@ -175,8 +172,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(internal_blueprint)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        app.register_blueprint(user_blueprint)
+    app.register_blueprint(user_blueprint)
 
     # Endpoints for apply functionality
     if endpoint_config.enable_apply_endpoints:

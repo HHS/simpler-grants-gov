@@ -67,7 +67,6 @@ module "prod_config" {
     LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT     = 1
     LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
     LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
