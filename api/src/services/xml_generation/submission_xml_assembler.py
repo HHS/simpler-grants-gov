@@ -7,7 +7,11 @@ from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
-from src.services.xml_generation.constants import GRANTS_GOV_NAMESPACES, SCHEMA_LOCATION_BASE_URL
+from src.services.xml_generation.constants import (
+    GRANTS_GOV_NAMESPACES,
+    SCHEMA_LOCATION_BASE_URL,
+    Namespace,
+)
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -181,14 +185,14 @@ class SubmissionXMLAssembler:
 
         # Create root element with namespaces
         # Add all required namespaces per Grants.gov specification
-        grant_ns = GRANTS_GOV_NAMESPACES["grant"]
+        grant_ns = Namespace.GRANT
         nsmap = GRANTS_GOV_NAMESPACES
 
         # Create GrantApplication element with grant: namespace prefix
         root = lxml_etree.Element(f"{{{grant_ns}}}GrantApplication", nsmap=nsmap)
 
         # Add xsi:schemaLocation attribute
-        # Construct schema URL from competition's legacy_package_id if available
+        # Construct schema URL from competition's legacy_package_id
         schema_url = self._get_schema_location_url()
         if schema_url:
             schema_location = f"http://apply.grants.gov/system/GrantsCommonTypes-V1.0 {schema_url}"
@@ -221,8 +225,7 @@ class SubmissionXMLAssembler:
     def _get_schema_location_url(self) -> str | None:
         """Get the schema location URL for xsi:schemaLocation attribute.
 
-        Constructs the URL from competition's legacy_package_id if available.
-        Returns None if package_id is not available.
+        Constructs the URL from competition's legacy_package_id.
         """
         return (
             f"{SCHEMA_LOCATION_BASE_URL}/" f"{self.application.competition.legacy_package_id}.xsd"

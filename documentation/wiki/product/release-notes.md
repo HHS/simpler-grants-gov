@@ -2,7 +2,7 @@
 
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 23, 2025
 
-December 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases): &#x20;
+December 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.23-1): &#x20;
 
 {% columns %}
 {% column width="25%" %}
@@ -44,7 +44,7 @@ Instead of a temporary success alert, applicants will now see a permanent confir
 
 ## Launching [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 10, 2025!
 
-We're excited to announce the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. This update for December 10th brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases): &#x20;
+We're excited to announce the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. This update for December 10th brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.10-1): &#x20;
 
 {% columns %}
 {% column width="25%" %}
