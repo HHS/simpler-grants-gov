@@ -72,7 +72,6 @@ module "prod_config" {
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
 
-    ENABLE_APPLY_ENDPOINTS = 1
 
     # CommonGrants Protocol
     ENABLE_COMMON_GRANTS_ENDPOINTS = 1

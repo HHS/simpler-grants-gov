@@ -44,7 +44,6 @@ module "dev_config" {
   service_override_extra_environment_variables = {
 
     # Login.gov OAuth
-    ENABLE_APPLY_ENDPOINTS = 1
     ENABLE_XML_GENERATION  = 1
 
     # CommonGrants Protocol
