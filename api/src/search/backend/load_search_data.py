@@ -1,5 +1,3 @@
-import click
-
 import src.adapters.db as db
 import src.adapters.search as search
 from src.adapters.db import flask_db
