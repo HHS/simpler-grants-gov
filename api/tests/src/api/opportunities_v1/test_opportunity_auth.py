@@ -3,10 +3,7 @@ import pytest
 import src.util.datetime_util as datetime_util
 from src.auth.api_jwt_auth import parse_jwt_for_user
 from tests.src.api.opportunities_v1.conftest import get_search_request
-from tests.src.db.models.factories import (
-    OpportunityFactory,
-    UserApiKeyFactory,
-)
+from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
 
 
 @pytest.mark.parametrize(
