@@ -3806,7 +3806,6 @@ components:
           - default
           - expanded
           - agency
-          - attachment_only
           type:
           - string
     SortOrderOpportunityPaginationV1:
