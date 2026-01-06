@@ -7,6 +7,11 @@ from lxml import etree as lxml_etree
 
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_validation import is_form_required
+from src.services.xml_generation.constants import (
+    GRANTS_GOV_NAMESPACES,
+    SCHEMA_LOCATION_BASE_URL,
+    Namespace,
+)
 from src.services.xml_generation.header_generator import (
     generate_application_footer_xml,
     generate_application_header_xml,
@@ -179,13 +184,22 @@ class SubmissionXMLAssembler:
         form_elements = [self._parse_xml_string(xml) for xml in form_xmls]
 
         # Create root element with namespaces
-        nsmap = {
-            "header": "http://apply.grants.gov/system/Header-V1.0",
-            "footer": "http://apply.grants.gov/system/Footer-V1.0",
-            "glob": "http://apply.grants.gov/system/Global-V1.0",
-        }
+        # Add all required namespaces per Grants.gov specification
+        grant_ns = Namespace.GRANT
+        nsmap = GRANTS_GOV_NAMESPACES
 
-        root = lxml_etree.Element("GrantApplication", nsmap=nsmap)
+        # Create GrantApplication element with grant: namespace prefix
+        root = lxml_etree.Element(f"{{{grant_ns}}}GrantApplication", nsmap=nsmap)
+
+        # Add xsi:schemaLocation attribute
+        # Construct schema URL from competition's legacy_package_id
+        schema_url = self._get_schema_location_url()
+        if schema_url:
+            schema_location = f"http://apply.grants.gov/system/GrantsCommonTypes-V1.0 {schema_url}"
+            root.set(
+                f"{{{nsmap['xsi']}}}schemaLocation",
+                schema_location,
+            )
 
         # Add header (must strip XML declaration and use just the element)
         root.append(header_element)
@@ -207,6 +221,15 @@ class SubmissionXMLAssembler:
             xml_bytes = lxml_etree.tostring(root, encoding="utf-8", xml_declaration=True)
 
         return xml_bytes.decode("utf-8").strip()
+
+    def _get_schema_location_url(self) -> str | None:
+        """Get the schema location URL for xsi:schemaLocation attribute.
+
+        Constructs the URL from competition's legacy_package_id.
+        """
+        return (
+            f"{SCHEMA_LOCATION_BASE_URL}/" f"{self.application.competition.legacy_package_id}.xsd"
+        )
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""
