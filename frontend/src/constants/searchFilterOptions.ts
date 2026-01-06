@@ -219,6 +219,18 @@ export const allFilterOptions = {
   fundingInstrument: fundingOptions,
 };
 
+export const savedOpportunityStatusOptions: FilterOption[] = [
+  {
+    id: "saved-status-any",
+    label: "Any opportunity status",
+    value: "",
+  },
+  ...statusOptions.map((option) => ({
+    ...option,
+    id: `saved-${option.id}`,
+  })),
+];
+
 export const sortOptions: FilterOption[] = [
   {
     label: "Most relevant (Default)",
