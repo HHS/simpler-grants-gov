@@ -452,7 +452,7 @@ FORM_JSON_SCHEMA = {
         },
         "application_info": {
             "type": "object",
-            "required": ["additional_funding", "application_type"],
+            "required": ["additional_funding", "application_type", "primary_project_discipline"],
             # Conditional validation rules for application info
             "allOf": [
                 # If additional_funding is True, additional_funding_explanation is required

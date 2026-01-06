@@ -21,8 +21,11 @@ def minimal_valid_cover_sheet_v3_0() -> dict:
         "funding_group": {
             "outright_funds": "1.23",
         },
-        "application_info": {"additional_funding": False, "application_type": "New"},
-        "primary_project_discipline": "History: Ancient History",
+        "application_info": {
+            "additional_funding": False,
+            "application_type": "New",
+            "primary_project_discipline": "History: Ancient History",
+        },
     }
 
 
@@ -43,10 +46,10 @@ def full_valid_cover_sheet_v3_0() -> dict:
             "additional_funding_explanation": "An explanation!",
             "application_type": "Supplement",
             "supplemental_grant_numbers": "ABC-123,XYZ-456",
+            "primary_project_discipline": "Interdisciplinary: General",
+            "secondary_project_discipline": "Arts: Art History and Criticism",
+            "tertiary_project_discipline": "Languages: Romance Languages",
         },
-        "primary_project_discipline": "Interdisciplinary: General",
-        "secondary_project_discipline": "Arts: Art History and Criticism",
-        "tertiary_project_discipline": "Languages: Romance Languages",
     }
 
 
@@ -68,7 +71,6 @@ def test_cover_sheet_v3_0_empty_json(supplementary_neh_cover_sheet_v3_0):
         "$.organization_type",
         "$.funding_group",
         "$.application_info",
-        "$.primary_project_discipline",
     ]
     validate_required({}, EXPECTED_REQUIRED_FIELDS, supplementary_neh_cover_sheet_v3_0)
 
@@ -81,7 +83,7 @@ def test_cover_sheet_v3_0_empty_nested_json(supplementary_neh_cover_sheet_v3_0):
         "$.funding_group.federal_match",
         "$.application_info.additional_funding",
         "$.application_info.application_type",
-        "$.primary_project_discipline",
+        "$.application_info.primary_project_discipline",
     ]
     validate_required(
         {"funding_group": {}, "application_info": {}},
@@ -96,8 +98,11 @@ def test_cover_sheet_v3_0_mutually_required_fields(supplementary_neh_cover_sheet
         "major_field": "Other: Computer Science",
         "organization_type": "1329: Four-Year College",
         "funding_group": {},
-        "application_info": {"additional_funding": False, "application_type": "New"},
-        "primary_project_discipline": "History: Ancient History",
+        "application_info": {
+            "additional_funding": False,
+            "application_type": "New",
+            "primary_project_discipline": "History: Ancient History",
+        },
     }
     validate_required(
         base_data,
@@ -179,22 +184,28 @@ def test_cover_sheet_v3_0_max_length(
     "value,expected_error_field",
     [
         ({"major_field": "not-a-valid-value"}, "$.major_field"),
-        ({"primary_project_discipline": "words"}, "$.primary_project_discipline"),
-        ({"secondary_project_discipline": "xyz123"}, "$.secondary_project_discipline"),
+        ({"application_info": {"primary_project_discipline": "words"}}, "$.application_info.primary_project_discipline"),
+        ({"application_info": {"secondary_project_discipline": "xyz123"}}, "$.application_info.secondary_project_discipline"),
         (
-            {"tertiary_project_discipline": "Arts: But not really a category"},
-            "$.tertiary_project_discipline",
+            {"application_info": {"tertiary_project_discipline": "Arts: But not really a category"}},
+            "$.application_info.tertiary_project_discipline",
         ),
         # Each of these are values in the field of study list, but not in the project discipline list
-        ({"primary_project_discipline": "Other: Education"}, "$.primary_project_discipline"),
-        ({"secondary_project_discipline": "Other: Mathematics"}, "$.secondary_project_discipline"),
-        ({"tertiary_project_discipline": "Other: Statistics"}, "$.tertiary_project_discipline"),
+        ({"application_info": {"primary_project_discipline": "Other: Education"}}, "$.application_info.primary_project_discipline"),
+        ({"application_info": {"secondary_project_discipline": "Other: Mathematics"}}, "$.application_info.secondary_project_discipline"),
+        ({"application_info": {"tertiary_project_discipline": "Other: Statistics"}}, "$.application_info.tertiary_project_discipline"),
     ],
 )
 def test_cover_sheet_v3_0_invalid_enum_values(
     value, expected_error_field, minimal_valid_cover_sheet_v3_0, supplementary_neh_cover_sheet_v3_0
 ):
-    data = minimal_valid_cover_sheet_v3_0 | value
+    # Deep merge for nested application_info updates
+    data = minimal_valid_cover_sheet_v3_0.copy()
+    if "application_info" in value:
+        data["application_info"] = data["application_info"].copy()
+        data["application_info"].update(value["application_info"])
+    else:
+        data.update(value)
 
     validation_issues = validate_json_schema_for_form(data, supplementary_neh_cover_sheet_v3_0)
     assert len(validation_issues) == 1
