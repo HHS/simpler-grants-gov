@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { fakeOrganizationDetailsResponse } from "src/utils/testing/fixtures";
+
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
 
 describe("OrganizationInfo", () => {
@@ -9,7 +10,9 @@ describe("OrganizationInfo", () => {
     render(<OrganizationInfo organizationDetails={entity} />);
 
     expect(
-      screen.getByText(`${entity.ebiz_poc_first_name} ${entity.ebiz_poc_last_name}`),
+      screen.getByText(
+        `${entity.ebiz_poc_first_name} ${entity.ebiz_poc_last_name}`,
+      ),
     ).toBeInTheDocument();
 
     expect(screen.getByText(entity.ebiz_poc_email)).toBeInTheDocument();
