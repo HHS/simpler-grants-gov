@@ -401,6 +401,7 @@ FORM_JSON_SCHEMA = {
         "organization_type",
         "funding_group",
         "application_info",
+        "primary_project_discipline",
     ],
     "properties": {
         "major_field": {
@@ -452,7 +453,7 @@ FORM_JSON_SCHEMA = {
         },
         "application_info": {
             "type": "object",
-            "required": ["additional_funding", "application_type", "primary_project_discipline"],
+            "required": ["additional_funding", "application_type"],
             # Conditional validation rules for application info
             "allOf": [
                 # If additional_funding is True, additional_funding_explanation is required
@@ -499,19 +500,19 @@ FORM_JSON_SCHEMA = {
                     "minLength": 1,
                     "maxLength": 50,
                 },
-                "primary_project_discipline": {
-                    "allOf": [{"$ref": "#/$defs/project_discipline"}],
-                    "title": "Primary Project Discipline",
-                },
-                "secondary_project_discipline": {
-                    "allOf": [{"$ref": "#/$defs/project_discipline"}],
-                    "title": "Secondary Project Discipline (optional)",
-                },
-                "tertiary_project_discipline": {
-                    "allOf": [{"$ref": "#/$defs/project_discipline"}],
-                    "title": "Tertiary Project Discipline (optional)",
-                },
             },
+        },
+        "primary_project_discipline": {
+            "allOf": [{"$ref": "#/$defs/project_discipline"}],
+            "title": "Primary Project Discipline",
+        },
+        "secondary_project_discipline": {
+            "allOf": [{"$ref": "#/$defs/project_discipline"}],
+            "title": "Secondary Project Discipline (optional)",
+        },
+        "tertiary_project_discipline": {
+            "allOf": [{"$ref": "#/$defs/project_discipline"}],
+            "title": "Tertiary Project Discipline (optional)",
         },
     },
     "$defs": {
@@ -582,18 +583,9 @@ FORM_UI_SCHEMA = [
                 "type": "field",
                 "definition": "/properties/application_info/properties/supplemental_grant_numbers",
             },
-            {
-                "type": "field",
-                "definition": "/properties/application_info/properties/primary_project_discipline",
-            },
-            {
-                "type": "field",
-                "definition": "/properties/application_info/properties/secondary_project_discipline",
-            },
-            {
-                "type": "field",
-                "definition": "/properties/application_info/properties/tertiary_project_discipline",
-            },
+            {"type": "field", "definition": "/properties/primary_project_discipline"},
+            {"type": "field", "definition": "/properties/secondary_project_discipline"},
+            {"type": "field", "definition": "/properties/tertiary_project_discipline"},
         ],
     },
 ]
