@@ -25,20 +25,20 @@ class Namespace:
 
     # Header namespaces
     HEADER = "http://apply.grants.gov/system/Header-V1.0"
-    
+
     # Footer namespaces
     FOOTER = "http://apply.grants.gov/system/Footer-V1.0"
-    
+
     # Global namespaces
     GLOB = "http://apply.grants.gov/system/Global-V1.0"
     GLOB_LIB = "http://apply.grants.gov/system/GlobalLibrary-V2.0"
-    
+
     # Attachments namespace
     ATT = "http://apply.grants.gov/system/Attachments-V1.0"
-    
+
     # Grant common types namespace
     GRANT = "http://apply.grants.gov/system/GrantsCommonTypes-V1.0"
-    
+
     # XML Schema instance namespace
     XSI = "http://www.w3.org/2001/XMLSchema-instance"
 
