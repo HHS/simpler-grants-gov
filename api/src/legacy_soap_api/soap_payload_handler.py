@@ -1,5 +1,4 @@
 import io
-import logging
 import re
 from collections import defaultdict
 from collections.abc import Callable, Iterable
@@ -10,35 +9,12 @@ import xmltodict
 from lxml import etree
 from lxml.etree import Element, QName, SubElement
 
-logger = logging.getLogger(__name__)
-
 ENVELOPE_REGEX = r"<([a-zA-Z0-9]+):Envelope.*?>(.*?)</([a-zA-Z0-9]+):Envelope>"
 XML_DICT_KEY_NAMESPACE_DELIMITER = ":"
 XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 CHUNK_SIZE = 1000
 NUMBER_OF_CHUNKS = 5
-MESSAGE_HEADER = (
-    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-    "Content-Transfer-Encoding: binary\n"
-    "Content-ID: <root.message@cxf.apache.org>\n\n"
-    '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-    "<soap:Body>"
-    "<ns2:GetSubmissionListExpandedResponse "
-    'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
-    'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
-    'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
-    'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
-    'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
-    'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
-    'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
-    'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
-    'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
-    'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
-    'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
-    'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-    "<ns2:Success>true</ns2:Success>"
-)
 
 
 class SOAPPayload:
