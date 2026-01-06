@@ -212,13 +212,13 @@ class SubmissionXMLAssembler:
         # Add footer
         root.append(footer_element)
 
-        # Generate final XML string
+        # Generate final XML string with UTF-8 encoding (uppercase)
         if pretty_print:
             xml_bytes = lxml_etree.tostring(
-                root, encoding="utf-8", xml_declaration=True, pretty_print=True
+                root, encoding="UTF-8", xml_declaration=True, pretty_print=True
             )
         else:
-            xml_bytes = lxml_etree.tostring(root, encoding="utf-8", xml_declaration=True)
+            xml_bytes = lxml_etree.tostring(root, encoding="UTF-8", xml_declaration=True)
 
         return xml_bytes.decode("utf-8").strip()
 

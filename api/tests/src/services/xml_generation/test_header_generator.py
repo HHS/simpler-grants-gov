@@ -286,7 +286,7 @@ class TestSubmissionXMLGenerator:
         assert xml_string.startswith("<?xml version=")
         # Accept either single or double quotes in encoding declaration
         first_line = xml_string.split("\n")[0]
-        assert "encoding='utf-8'" in first_line or 'encoding="utf-8"' in first_line
+        assert "encoding='utf-8'" in first_line.lower() or 'encoding="utf-8"' in first_line.lower()
 
     def test_namespace_prefixes_in_output(self, application):
         """Test that namespace prefixes are correctly used in XML output."""

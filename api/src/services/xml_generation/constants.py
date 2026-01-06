@@ -8,6 +8,7 @@ used across the XML generation functionality.
 # Allows: empty string, integers, decimals with exactly 2 places, decimals starting with dot
 CURRENCY_REGEX = r"^(-)?\d*([.]\d{2})?$"
 
+
 # Grants.gov YesNoDataType constants from GlobalLibrary-V2.0.xsd
 YES_VALUE = "Y: Yes"
 NO_VALUE = "N: No"
