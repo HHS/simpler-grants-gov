@@ -65,12 +65,20 @@ export function UserProfileForm({
         <Alert heading={t("successHeading")} headingLevel="h2" type="success" />
       )}
       {isMissingName && (
-        <Alert
-          heading={t("missingFullNameTitle")}
-          headingLevel="h2"
-          type="warning"
-        >
-          {t("missingFullNameDescription")}
+        <Alert heading={t("profileIncomplete")} headingLevel="h2" type="error">
+          {state.validationErrors?.firstName ||
+          state.validationErrors?.lastName ? (
+            <ul>
+              {state.validationErrors?.firstName && (
+                <li>{t("firstNameRequired")}</li>
+              )}
+              {state.validationErrors?.lastName && (
+                <li>{t("lastNameRequired")}</li>
+              )}
+            </ul>
+          ) : (
+            t("addFullNameDescription")
+          )}
         </Alert>
       )}
       <h2>{t("contactInfoHeading")}</h2>

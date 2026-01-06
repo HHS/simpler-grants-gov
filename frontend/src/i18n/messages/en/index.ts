@@ -1482,9 +1482,11 @@ export const messages = {
     pending: "Saving...",
     errorHeading: "Error",
     successHeading: "Account updated",
-    missingFullNameTitle: "Your profile is incomplete",
-    missingFullNameDescription:
+    profileIncomplete: "Your profile is incomplete",
+    addFullNameDescription:
       "Add your first and last name to complete your profile.",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
   },
   ActivityDashboard: {
     pageTitle: "Activity Dashboard | Simpler.Grants.gov",
