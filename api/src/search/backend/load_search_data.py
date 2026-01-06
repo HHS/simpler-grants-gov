@@ -13,11 +13,6 @@ from src.task.ecs_background_task import ecs_background_task
 @load_search_data_blueprint.cli.command(
     "load-opportunity-data", help="Load opportunity data from our database to the search index"
 )
-@click.option(
-    "--full-refresh/--incremental",
-    default=True,
-    help="Whether to run a full refresh, or only incrementally update opportunities",
-)
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
 @ecs_background_task(task_name="load-opportunity-data-opensearch")
