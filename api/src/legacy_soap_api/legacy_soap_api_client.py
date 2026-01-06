@@ -295,7 +295,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         }
         boundary = "--uuid:" + boundary_uuid
         mime_message: Iterator[bytes] | bytes = b""
-        if self.operation_config.response_operation_name == "GetSubmissionListExpandedResponse":
+        if self.operation_config.has_merge_list_response:
             mime_message = build_merged_get_submission_list_expanded_mtom_response(
                 simpler_response_soap_dict,
                 boundary_uuid,

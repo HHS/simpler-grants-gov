@@ -1,20 +1,17 @@
 import io
 import logging
 import re
+import tempfile
 from collections import defaultdict
 from collections.abc import Callable, Generator, Iterable, Iterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import IO, Any
 
 import xmltodict
 from lxml import etree
 from lxml.etree import Element, QName, SubElement
 
-from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
-
-if TYPE_CHECKING:
-    from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
-
+from src.legacy_soap_api.legacy_soap_api_schemas.response import SOAPResponse
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +21,27 @@ XML_DICT_KEY_ATTRIBUTE_PREFIX = "@"
 XML_DICT_KEY_TEXT_VALUE_KEY = "#text"
 CHUNK_SIZE = 1000
 NUMBER_OF_CHUNKS = 5
+MESSAGE_HEADER = (
+    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+    "Content-Transfer-Encoding: binary\n"
+    "Content-ID: <root.message@cxf.apache.org>\n\n"
+    '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+    "<soap:Body>"
+    "<ns2:GetSubmissionListExpandedResponse "
+    'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+    'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+    'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+    'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+    'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+    'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+    'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+    'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+    'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+    'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+    'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+    'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+    "<ns2:Success>true</ns2:Success>"
+)
 
 
 class SOAPPayload:
@@ -416,53 +434,34 @@ def clean_mtom_generator(byte_gen: Iterator[bytes] | list[bytes]) -> Generator[b
             yield chunk
 
 
-class GeneratorStream(io.RawIOBase):
-    """
-    This takes the response stream and converts into an object
-    that is file-like that can be used by Python tools
-    """
-
-    def __init__(self, gen: Generator) -> None:
-        self.gen = gen
-        self.leftover = b""
-
-    def readinto(self, buffer: Any) -> int:
-        try:
-            chunk = self.leftover or next(self.gen)
-        except StopIteration:
-            return 0
-
-        n = len(buffer)
-        if len(chunk) > n:
-            self.leftover = chunk[n:]
-            buffer[:n] = chunk[:n]
-            return n
-        else:
-            self.leftover = b""
-            buffer[: len(chunk)] = chunk
-            return len(chunk)
-
-    def readable(self) -> bool:
-        return True
+def stream_expanded_submissions_response(tmp: IO[bytes]) -> Generator[bytes]:
+    tmp.seek(0)
+    for _, element in etree.iterparse(tmp, events=("end",), tag="{*}SubmissionInfo", recover=True):
+        data = etree.tostring(element)
+        yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
+        element.clear()
+        while element.getprevious() is not None:
+            del element.getparent()[0]
 
 
-def stream_expanded_submissions_response(context: Iterable, simple_count: int) -> Generator[bytes]:
-    for _, element in context:
-        tag_name = etree.QName(element).localname
-        if tag_name == "GetSubmissionListExpandedResponse":
-            break
-        if tag_name == "AvailableApplicationNumber":
-            count = int(element.text)
-            yield f"<ns2:AvailableApplicationNumber>{count + simple_count}</ns2:AvailableApplicationNumber>".encode(
-                "utf-8"
-            )
-        if tag_name == "SubmissionInfo":
-            data = etree.tostring(element)
-            # Using regex to strip out the xmlns stuff since it is already added
-            yield re.sub(rb' xmlns(?::\w+)?="[^"]+"', b"", data)
-            element.clear()
-            while element.getprevious() is not None:
-                del element.getparent()[0]
+def get_valid_proxy_count(tmp: IO[bytes]) -> int:
+    tmp.seek(0)
+    real_count = 0
+    for _, element in etree.iterparse(tmp, events=("end",), tag="{*}SubmissionInfo", recover=True):
+        real_count += 1
+        element.clear()
+        while element.getprevious() is not None:
+            del element.getparent()[0]
+    return real_count
+
+
+def write_to_tempfile(tmp: IO[bytes], proxy_data: SOAPResponse) -> bool:
+    has_data = False
+    for chunk in clean_mtom_generator(proxy_data.stream()):
+        if chunk:
+            tmp.write(chunk)
+            has_data = True
+    return has_data
 
 
 def build_merged_get_submission_list_expanded_mtom_response(
@@ -474,47 +473,13 @@ def build_merged_get_submission_list_expanded_mtom_response(
     )
 
     boundary = f"uuid:{raw_uuid}"
-    yield (
-        f"--{boundary}\n"
-        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
-        f"Content-Transfer-Encoding: binary\n"
-        f"Content-ID: <root.message@cxf.apache.org>\n\n"
-        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-        "<soap:Body>"
-        "<ns2:GetSubmissionListExpandedResponse "
-        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
-        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
-        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
-        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
-        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
-        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
-        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
-        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
-        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
-        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
-        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
-        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-        "<ns2:Success>true</ns2:Success>"
-    ).encode("utf-8")
+    yield f"--{boundary}\n".encode("utf-8")
+    yield MESSAGE_HEADER.encode("utf-8")
 
     simple_count_response = f"<ns2:AvailableApplicationNumber>{len(simple_data)}</ns2:AvailableApplicationNumber>".encode(
         "utf-8"
     )
-    if proxy_data.status_code == 200:
-        # Get the proxy data and inject it into the response here
-        reader = io.BufferedReader(GeneratorStream(clean_mtom_generator(proxy_data.stream())))
-        context = etree.iterparse(reader, events=("end",))
-        try:
-            yield from stream_expanded_submissions_response(context, len(simple_data))
-        except etree.XMLSyntaxError:
-            logger.info(
-                msg="Could not parse proxy xml response",
-                exc_info=True,
-                extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
-            )
-            yield simple_count_response
-    else:
-        yield simple_count_response
+    yield from get_proxy_submission_data(proxy_data, simple_count_response, len(simple_data))
 
     # Inject the data from simpler
     tag = etree.QName(namespaces["ns2"], "SubmissionInfo")
@@ -531,3 +496,18 @@ def build_merged_get_submission_list_expanded_mtom_response(
         "</soap:Envelope>\n"
         f"--{boundary}--"
     ).encode("utf-8")
+
+
+def get_proxy_submission_data(
+    proxy_data: SOAPResponse, simple_count_response: bytes, simple_data_count: int
+) -> Generator[bytes]:
+    with tempfile.NamedTemporaryFile(mode="w+b") as tmp:
+        if not write_to_tempfile(tmp, proxy_data):
+            yield simple_count_response
+            return
+        tmp.flush()
+        proxy_count = get_valid_proxy_count(tmp)
+        yield f"<ns2:AvailableApplicationNumber>{simple_data_count + proxy_count}</ns2:AvailableApplicationNumber>".encode(
+            "utf-8"
+        )
+        yield from stream_expanded_submissions_response(tmp)
