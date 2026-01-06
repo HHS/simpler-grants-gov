@@ -107,10 +107,6 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-search-table-on"
     },
-    FEATURE_DEVELOPER_PAGE_OFF = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-developer-page-off"
-    },
     FEATURE_USER_ADMIN_OFF = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-user-admin-off"
