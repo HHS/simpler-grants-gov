@@ -91,7 +91,7 @@ const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
 
   const isMissingName =
     !userDetails?.profile?.first_name || !userDetails?.profile?.last_name;
-  const iconName = isMissingName ? "warning" : "account_circle";
+  const iconName = isMissingName ? "error" : "account_circle";
 
   return (
     <a
@@ -106,7 +106,7 @@ const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
       <USWDSIcon
         name={iconName}
         className="usa-icon--size-3 display-block"
-        style={isMissingName ? { color: "#FF580A" } : undefined}
+        style={isMissingName ? { color: "#B50909" } : undefined}
       />
       <div
         className={clsx("padding-left-1", {
