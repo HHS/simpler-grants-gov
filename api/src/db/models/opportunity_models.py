@@ -112,6 +112,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    approvers: Mapped[list[OpportunityApproval]] = relationship(
+        "OpportunityApproval",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     @property
     def top_level_agency_name(self) -> str | None:
         if self.agency_record is not None and self.agency_record.top_level_agency is not None:
@@ -159,6 +166,21 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         # Note this will include historical and deleted records.
         return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
 
+class OpportunityApproval(ApiSchemaTable, TimestampMixin):
+    # TODO - I Have not thought about how the approval info will be stored at all yet
+    # This will definitely need a lot more thought than what I've done here as we need
+    # at least some context on what is being approved and where / how it connects to a workflow.
+    __tablename__ = "opportunity_approval"
+
+    opportunity_approval_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
+
+    approver: Mapped[str] # TODO - should be a foreign key to user
 
 class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"

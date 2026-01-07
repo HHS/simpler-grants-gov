@@ -1,34 +1,52 @@
+import uuid
 from abc import ABC, abstractmethod
+
+from sqlalchemy import select
 from statemachine.contrib.diagram import DotGraphMachine
 from statemachine.exceptions import TransitionNotAllowed
+from statemachine.event_data import EventData
 import statemachine
 from statemachine.states import States
 from statemachine.mixins import MachineMixin
+
+from src.adapters import db
+from src.db.models.opportunity_models import OpportunityApproval, Opportunity
+from src.db.models.workflow_models import Workflow, WorkflowAudit
 from src.task import task_blueprint
 import dataclasses
 from enum import StrEnum
+import logging
+
+logger = logging.getLogger(__name__)
+
+@dataclasses.dataclass
+class BaseWorkflowEvent:
+    # TODO - this would be an actual ID
+    acting_user_id: str
+
+@dataclasses.dataclass
+class StartWorkflowEvent(BaseWorkflowEvent):
+    workflow_type: str
+
+    # TODO - The entity ID structure needs to be sorted out
+    opportunity_id: uuid.UUID | None = None
+
+
+@dataclasses.dataclass
+class ProcessWorkflowEvent(BaseWorkflowEvent):
+    workflow_id: uuid.UUID
+
+    event: str # TODO - figure out what type this would be
+
+    # TODO - other metadata?
 
 class ExampleState(StrEnum):
+    START = "start"
     APPROVAL_NEEDED = "approval_needed"
     APPROVAL_RECEIVED = "approval_received"
     SEND_EMAIL = "send_email"
     END = "end"
 
-
-@dataclasses.dataclass
-class FakeOpportunity:
-    # Imagine this is the opportunity model object
-    title: str
-    approvers: list[str] = dataclasses.field(default_factory=list)
-
-    # Imagine this is a config being pulled from elsewhere
-    required_approvers: int = 3
-
-    history: list[str] = dataclasses.field(default_factory=list)
-
-    # TODO - this would probably be a separate set of tables
-    # and probably store a list of values
-    opportunity_state: str = "approval_needed"
 
 class AbstractPersistentModel(ABC):
     """Abstract Base Class for persistent models.
@@ -39,122 +57,164 @@ class AbstractPersistentModel(ABC):
     - `_write_state`: Write the state from the concrete persistent layer.
     """
 
-    def __init__(self):
-        self._state = None
+    def __init__(self, db_session: db.Session, workflow: Workflow):
+        self.db_session = db_session
+        self.workflow = workflow
 
     def __repr__(self):
-        return f"{type(self).__name__}(state={self.state})"
+        # TODO - do we need this?
+        return repr(self.workflow)
 
     @property
     def state(self):
-        if self._state is None:
-            self._state = self._read_state()
-        return self._state
+        return self.workflow.current_workflow_state
 
     @state.setter
     def state(self, value):
-        self._state = value
-        self._write_state(value)
+        """Setter for the state, anytime the state changes
+           on the state machine, set that value in the workflow
+           table.
+        """
+        self.workflow.current_workflow_state = value
 
-    @abstractmethod
-    def _read_state(self): ...
-
-    @abstractmethod
-    def _write_state(self, value): ...
+    def after_transition(self, state: statemachine.state.State):
+        # After each transition, check if the current state
+        # is the final one, and set the is_active flag accordingly.
+        self.workflow.is_active = not state.final
 
 class OpportunityPersistentModel(AbstractPersistentModel):
 
-    def __init__(self, opportunity: FakeOpportunity):
-        super().__init__()
-        self.opportunity = opportunity
+    def __init__(self, db_session: db.Session, workflow: Workflow):
+        super().__init__(db_session, workflow)
 
-    def _read_state(self):
-        return self.opportunity.opportunity_state
-
-    def _write_state(self, value):
-        self.opportunity.history.append(value)
-        self.opportunity.opportunity_state = value
+        if workflow.opportunity is None:
+            raise Exception("TODO - want to error if the opportunity workflow has no opportunity")
+        self.opportunity = workflow.opportunity
 
 
-class Example(statemachine.StateMachine):
-    _states = States.from_enum(ExampleState, initial=ExampleState.APPROVAL_NEEDED, final=ExampleState.END)
 
-    # TRANSITIONS
-    # TODO - while the enum is nice for
-    # the purposes of defining a value, using
-    # an enum is a bit clunky.
-    receive_approval = (_states.APPROVAL_NEEDED.to(_states.APPROVAL_RECEIVED, after="check_approvers"))
-    check_approvers = _states.APPROVAL_RECEIVED.to(_states.SEND_EMAIL, after="do_email_send", cond="has_enough_approvers") | _states.APPROVAL_RECEIVED.to(_states.APPROVAL_NEEDED)
-    do_email_send = _states.SEND_EMAIL.to(_states.END)
+class ExampleStateMachine(statemachine.StateMachine):
 
-    def __init__(self, model: OpportunityPersistentModel):
-        super().__init__(model=model)
-        self.db_session = None # TODO
+    ### EVENTS
 
+    states = States.from_enum(
+        ExampleState,
+        initial=ExampleState.START,
+        final=ExampleState.END,
+        use_enum_instance=True
+    )
+
+    ### TRANSITIONS
+
+    # ALL workflows should have a start_workflow transition
+    # So that we make an event even if the workflow can't do anything yet.
+    start_workflow = states.START.to(states.APPROVAL_NEEDED)
+
+    receive_approval = states.APPROVAL_NEEDED.to(states.APPROVAL_RECEIVED, after="check_approvers")
+
+    check_approvers = states.APPROVAL_RECEIVED.to(states.SEND_EMAIL, after="do_email_send", cond="has_enough_approvers") | states.APPROVAL_RECEIVED.to(states.APPROVAL_NEEDED)
+    do_email_send = states.SEND_EMAIL.to(states.END)
+
+    def __init__(self, model: OpportunityPersistentModel, **kwargs):
+        super().__init__(model=model, **kwargs)
         self.opportunity = model.opportunity
-        self.calls = []
-
-    def on_transition(self, event_data, event):
-        self.calls.append(str(event))
-        return ""
+        self.db_session = model.db_session
 
     def has_enough_approvers(self):
-        print(len(self.opportunity.approvers))
         return len(self.opportunity.approvers) >= 3
 
-    def on_enter_send_email(self, approver: str):
+    @do_email_send.on
+    def send_email(self, event_metadata):
         # Pretend this actually sends an email
         # But importantly, despite this being a different event
         # because they're daisy-chained, we can pass who was that last approver
         # to another state if needed.
-        print(f"SENDING AN EMAIL TO THE LAST APPROVER {approver}")
+        print(f"SENDING AN EMAIL TO THE LAST APPROVER {event_metadata}")
 
     @receive_approval.on
-    def handle_receive_approval(self, approver):
-        print("in receive")
-        self.opportunity.approvers.append(approver)
-        print(self.opportunity.approvers)
+    def handle_receive_approval(self, event_metadata):
+        self.opportunity.approvers.append(OpportunityApproval(opportunity=self.opportunity, approver=event_metadata.acting_user_id))
 
 
-@task_blueprint.cli.command("prototype")
-def run():
+class AuditListener:
 
-    # Pretend this is an event queue we're constantly reading from
-    events = [
-        {"event": "receive_approval", "approver": "bob"},
-        {"event": "receive_approval", "approver": "joe"},
-        {"event": "receive_approval", "approver": "steve"},
-    ]
+    def __init__(self):
+        self.user_id = None
 
-    opp = FakeOpportunity("a title")
+    def on_transition(self, event_data: EventData, model: OpportunityPersistentModel):
+        print("----")
+        print(event_data)
+        print("----")
 
-    e = Example(model=OpportunityPersistentModel(opp))
+        # TODO - is there a better way?
+        event_metadata = event_data.extended_kwargs.get("event_metadata")
+        if event_metadata is not None:
+            user_id = event_metadata.acting_user_id
+        else:
+            user_id = None
 
-    for event in events:
-        e.send(**event)
+        # TODO - how would we determine the user?
+        logger.info("Workflow event occurred", extra={"workflow_id": model.workflow.workflow_id, "event": event_data.event.name, "source_state": event_data.source.value, "target_state": event_data.target.value})
+        model.db_session.add(WorkflowAudit(workflow=model.workflow, source_state=event_data.source.value, target_state=event_data.target.value, transition_event=event_data.event.name, user_id=user_id))
 
-    # If we try to send an extra event
-    # It'll error as that wouldn't be a valid
-    # state transition. We'd have to build some sort
-    # of support for this
-    try:
-        e.send("receive_approval", approver="joe")
-    except TransitionNotAllowed:
-        print("Transition not allowed")
 
-    print("--------")
-    print(e.current_state_value)
+def get_listeners() -> list:
+    return [AuditListener()]
 
-    print(e.calls)
+def _handle_event(db_session: db.Session, event_metadata: StartWorkflowEvent | ProcessWorkflowEvent) -> statemachine.StateMachine:
 
-    print(opp.__dict__)
+    if isinstance(event_metadata, StartWorkflowEvent):
 
-    # If you want to output the workflow diagram as an image
-    # Requires you to have installed dependencies first yourself
-    if False:
-        graph = DotGraphMachine(e)
-        dot = graph()
-        dot.write_png("example.png")
+        # TODO - Find the entity with some variability
+        # assuming opportunity for now
+        opportunity = db_session.execute(select(Opportunity).where(Opportunity.opportunity_id == event_metadata.opportunity_id)).scalar_one_or_none()
+        if opportunity is None:
+            raise Exception("Opportunity not found")
+
+        # TODO - probably some sort of check on whether
+        # we can create the workflow.
+        # Probably by checking some defined workflow config stapled to a workflow?
+
+        # Create the workflow
+        workflow = Workflow(
+            workflow_id=uuid.uuid4(),
+            workflow_type=event_metadata.workflow_type,
+            # TODO - need logic to determine the state machine
+            # before this
+            current_workflow_state=ExampleStateMachine.initial_state.value,
+            # is_active will be added by the state machine
+            # TODO - how to handle is_active
+            opportunity=opportunity,
+        )
+        db_session.add(workflow)
+        event = "start_workflow"
+    else:
+        # Fetch the workflow
+
+        workflow = db_session.execute(select(Workflow).where(Workflow.workflow_id == event_metadata.workflow_id)).scalar_one_or_none()
+        if workflow is None:
+            # TODO - logging / better errors
+            raise Exception(f"No workflow found with ID {event_metadata.workflow_id}")
+
+        event = event_metadata.event
+
+    # Run the workflow
+    # TODO - mapping for model types and grabbing workflow
+    model = OpportunityPersistentModel(db_session=db_session, workflow=workflow)
+    example = ExampleStateMachine(model, listeners=get_listeners())
+
+    # TODO - this naming is terrible
+    example.send(event=event, event_metadata=event_metadata)
+
+    return example
+
+def handle_event(db_session: db.Session, event: StartWorkflowEvent | ProcessWorkflowEvent) -> statemachine.StateMachine:
+    # TODO - do we need to fetch DB sessions separately for each event handler? Probably.
+
+    # TODO - a context object would be nice to shove stuff into to make things like logging nicer
+    with db_session.begin():
+        return _handle_event(db_session, event)
+
 
 
 # TODO
