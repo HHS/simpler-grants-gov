@@ -57,23 +57,13 @@ This approach ensures search functionality consistency while providing the stand
 
 ## Configuration
 
-### Environment Variables
-
-```bash
-# Enable CommonGrants Protocol endpoints (defaults to false)
-ENABLE_COMMON_GRANTS_ENDPOINTS=true
-```
-
-**Note**: This environment variable is set to `true` in `local.env` by default. To disable CommonGrants endpoints, change the value to `false` in your environment.
-
 ### Route Registration
 
-The CommonGrants routes are conditionally registered in the Flask application based on the `ENABLE_COMMON_GRANTS_ENDPOINTS` environment variable:
+The CommonGrants routes are registered in the Flask application.
 
 ```python
 # In src/app.py
-if endpoint_config.enable_common_grants_endpoints:
-    app.register_blueprint(common_grants_blueprint)
+app.register_blueprint(common_grants_blueprint)
 ```
 
 ### Dependencies
