@@ -25,9 +25,11 @@ def test_create_application_assigns_owner_role_individual_application(
     # Create application
     application = create_application(
         db_session=db_session,
-        competition_id=competition.competition_id,
         user=user,
-        application_name="Test Application",
+        json_data={
+            "competition_id": competition.competition_id,
+            "application_name": "Test Application",
+        },
     )
 
     # Verify ApplicationUser was created with owner flag
@@ -62,10 +64,12 @@ def test_create_application_with_intends_to_add_organization_true(
 
     application = create_application(
         db_session=db_session,
-        competition_id=competition.competition_id,
         user=user,
-        application_name="Test Application",
-        intends_to_add_organization=True,
+        json_data={
+            "competition_id": competition.competition_id,
+            "application_name": "Test Application",
+            "intends_to_add_organization": True,
+        },
     )
 
     db_session.flush()
@@ -84,10 +88,12 @@ def test_create_application_with_intends_to_add_organization_false(
 
     application = create_application(
         db_session=db_session,
-        competition_id=competition.competition_id,
         user=user,
-        application_name="Test Application",
-        intends_to_add_organization=False,
+        json_data={
+            "competition_id": competition.competition_id,
+            "application_name": "Test Application",
+            "intends_to_add_organization": False,
+        },
     )
 
     db_session.flush()
@@ -106,10 +112,11 @@ def test_create_application_with_intends_to_add_organization_none(
 
     application = create_application(
         db_session=db_session,
-        competition_id=competition.competition_id,
         user=user,
-        application_name="Test Application",
-        intends_to_add_organization=None,
+        json_data={
+            "competition_id": competition.competition_id,
+            "application_name": "Test Application",
+        },
     )
 
     db_session.flush()
@@ -136,11 +143,13 @@ def test_create_application_rejects_both_organization_and_intends_to_add(
     with pytest.raises(apiflask.exceptions.HTTPError) as excinfo:
         create_application(
             db_session=db_session,
-            competition_id=competition.competition_id,
             user=user,
-            application_name="Test Application",
-            organization_id=organization.organization_id,
-            intends_to_add_organization=True,
+            json_data={
+                "competition_id": competition.competition_id,
+                "application_name": "Test Application",
+                "organization_id": organization.organization_id,
+                "intends_to_add_organization": True,
+            },
         )
 
     assert excinfo.value.status_code == 422

@@ -88,15 +88,18 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
 
 def create_application(
     db_session: db.Session,
-    competition_id: UUID,
     user: User,
-    application_name: str | None = None,
-    organization_id: UUID | None = None,
-    intends_to_add_organization: bool | None = None,
+    json_data: dict,
 ) -> Application:
     """
     Create a new application for a competition.
     """
+    # Extract values from json_data
+    competition_id = json_data["competition_id"]
+    application_name = json_data.get("application_name")
+    organization_id = json_data.get("organization_id")
+    intends_to_add_organization = json_data.get("intends_to_add_organization")
+
     # Validate that organization_id and intends_to_add_organization are not both set
     if organization_id is not None and intends_to_add_organization is True:
         logger.info(

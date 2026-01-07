@@ -72,14 +72,7 @@ logger = logging.getLogger(__name__)
 @flask_db.with_db_session()
 def application_start(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new application for a competition"""
-    competition_id = json_data["competition_id"]
-    # application_name is optional, so we use get to avoid a KeyError
-    application_name = json_data.get("application_name", None)
-    # organization_id is optional, so we use get to avoid a KeyError
-    organization_id = json_data.get("organization_id", None)
-    # intends_to_add_organization is optional, so we use get to avoid a KeyError
-    intends_to_add_organization = json_data.get("intends_to_add_organization", None)
-    add_extra_data_to_current_request_logs({"competition_id": competition_id})
+    add_extra_data_to_current_request_logs({"competition_id": json_data.get("competition_id")})
     logger.info("POST /alpha/applications/start")
 
     # Get user from token session
@@ -88,14 +81,7 @@ def application_start(db_session: db.Session, json_data: dict) -> response.ApiRe
 
     with db_session.begin():
         db_session.add(token_session)
-        application = create_application(
-            db_session,
-            competition_id,
-            user,
-            application_name,
-            organization_id,
-            intends_to_add_organization,
-        )
+        application = create_application(db_session, user, json_data)
 
     return response.ApiResponse(
         message="Success", data={"application_id": application.application_id}
