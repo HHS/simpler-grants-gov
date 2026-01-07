@@ -3,7 +3,7 @@
 import logging
 import re
 from collections.abc import Callable
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from typing import Any
 
 from .constants import CURRENCY_REGEX, NO_VALUE, YES_VALUE
