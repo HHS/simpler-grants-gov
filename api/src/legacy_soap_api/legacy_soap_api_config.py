@@ -76,7 +76,6 @@ class SOAPOperationConfig:
     compare_endpoints: bool = False
     is_mtom: bool = False
     always_call_simpler: bool = False
-    has_merge_list_response: bool = False
 
     # These are the privileges needed for these endpoints:
     # GetSubmissionListExpandedRequest = {Privilege.LEGACY_AGENCY_VIEWER}
@@ -147,7 +146,6 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
             is_mtom=True,
-            has_merge_list_response=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
     },
