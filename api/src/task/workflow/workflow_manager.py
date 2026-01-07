@@ -218,10 +218,9 @@ def handle_event(db_session: db.Session, event: StartWorkflowEvent | ProcessWork
 
 
 # TODO
-# Error handling - think about it
+# Error handling - a lot to think about
 # Locking a workflow?
-# Queue approach - SQS versus a DB table versus ??
 # Daemon, how to set that up
-# Do we want to consider asyncio (advantages versus added complexity?)
-# DB table schema (workflows, events, audit history, anything else?)
-# Event schema - regardless of approach, need a generic way to define and deserialize events into many different types (mapper class?)
+# Generifying a lot of the components here
+# A global mapping configuration for workflows
+# A workflow specific config (likely tied into the above?)
