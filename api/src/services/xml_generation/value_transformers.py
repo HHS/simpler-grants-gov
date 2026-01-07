@@ -71,15 +71,13 @@ def transform_currency_format(value: Any) -> str:
 
     # Convert to Decimal for precise formatting, then format with 2 decimal places
     from decimal import Decimal, InvalidOperation
-    
+
     try:
         decimal_value = Decimal(value)
         # Format with exactly 2 decimal places
         return f"{decimal_value:.2f}"
     except InvalidOperation:
-        raise ValueTransformationError(
-            f"Cannot convert currency value to decimal: '{value}'"
-        )
+        raise ValueTransformationError(f"Cannot convert currency value to decimal: '{value}'")
 
 
 def transform_string_case(value: Any, case_type: str) -> str:
