@@ -29,7 +29,7 @@ def xml_streamer() -> Iterator:
 
 def test_legacy_soap_api_request_raises_error_if_soap_config_privileges_are_none() -> None:
     with patch(
-        "src.legacy_soap_api.legacy_soap_api_schemas.get_soap_operation_config"
+        "src.legacy_soap_api.legacy_soap_api_schemas.base.get_soap_operation_config"
     ) as mock_config:
         mock_config.return_value = SOAPOperationConfig(
             request_operation_name="GetApplicationZipRequest",
