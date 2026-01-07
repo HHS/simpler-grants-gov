@@ -409,3 +409,46 @@ def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_
     db_session.refresh(app_form)
     # The form status should still be IN_PROGRESS since the form is incomplete
     assert app_form.application_form_status == ApplicationFormStatus.IN_PROGRESS
+
+
+def test_add_organization_preserves_intends_to_add_organization(enable_factory_create, db_session):
+    """Test that adding organization preserves the intends_to_add_organization field value"""
+    user = UserFactory.create()
+
+    competition = CompetitionFactory.create(
+        open_to_applicants={CompetitionOpenToApplicant.ORGANIZATION},
+        competition_forms=[],
+    )
+
+    # Create application with intends_to_add_organization=True
+    application = ApplicationFactory.create(
+        application_status=ApplicationStatus.IN_PROGRESS,
+        competition=competition,
+        organization_id=None,
+        intends_to_add_organization=True,
+    )
+
+    ApplicationUserRoleFactory.create(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory.create(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
+
+    organization = OrganizationFactory.create()
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory.create(user=user, organization=organization),
+        role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
+    )
+
+    # Call the function
+    add_organization_to_application(
+        db_session, application.application_id, organization.organization_id, user
+    )
+
+    # Flush to ensure changes are applied
+    db_session.flush()
+    db_session.refresh(application)
+
+    # Verify the organization was added
+    assert application.organization_id == organization.organization_id
+    # Verify the intends_to_add_organization field is preserved
+    assert application.intends_to_add_organization is True
