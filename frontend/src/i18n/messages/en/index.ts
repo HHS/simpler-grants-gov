@@ -677,6 +677,12 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
+  PivRequiredModal: {
+    title: "Your account requires additional identity verification.",
+    description:
+      "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
+    button: "Sign in using PIV/CAC",
+  },
   Footer: {
     agencyName: "Grants.gov",
     agencyContactCenter: "Grants.gov Program Management Office",

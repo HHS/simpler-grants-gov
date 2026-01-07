@@ -12,6 +12,9 @@ export async function GET(request: NextRequest) {
   try {
     await createSession(token, newExpirationDate());
   } catch (_e) {
+    if (_e instanceof Error && _e.message === "PIV Required") {
+      return redirect("/login?piverror=true");
+    }
     console.error("Error creating session for token", { token });
     console.error(_e);
     return redirect("/error");

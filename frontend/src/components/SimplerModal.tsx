@@ -48,6 +48,7 @@ export function SimplerModal({
   children,
   onKeyDown,
   onClose,
+  isInitiallyOpen,
 }: {
   modalRef: RefObject<ModalRef | null>;
   titleText?: string;
@@ -56,6 +57,7 @@ export function SimplerModal({
   children: ReactNode;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
   onClose?: () => void;
+  isInitiallyOpen?: boolean;
 }) {
   // Detect SSR so we can control whether the modal renders into a portal.
   const isSSR = useIsSSR();
@@ -113,6 +115,7 @@ export function SimplerModal({
       // overlay, close button, or Escape. All of these paths are funneled
       // through `onClose` by this wrapper.
       forceAction={false}
+      isInitiallyOpen={isInitiallyOpen}
       className={className}
       aria-labelledby={`${modalId}-heading`}
       aria-describedby={`${modalId}-description`}

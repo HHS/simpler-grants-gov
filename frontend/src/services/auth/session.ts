@@ -55,10 +55,27 @@ const decryptLoginGovToken = async (
   return (payload as UserSession) ?? null;
 };
 
+// The PIV Required Error Message should display if the user is an
+// Agency User, and they did not log in using PIV. We currently
+// do not have ways to identify these cases, but these functions
+// have been stubbed out to provide an easy place for the logic
+// to live once we get the concepts added.
+const isAgencyUser = (_user: UserSession | null) => {
+  return false;
+};
+
+const pivUsed = (_user: UserSession | null) => {
+  return false;
+};
+
 // ecrypts the api token into client token, then sets client token on cookie
 export const createSession = async (token: string, expiration: Date) => {
   if (!clientJwtKey) {
     initializeSessionSecrets();
+  }
+  const user = await decryptLoginGovToken(token);
+  if (isAgencyUser(user) && !pivUsed(user)) {
+    throw new Error("PIV Required");
   }
   const session = await encrypt(token, expiration, clientJwtKey);
   const cookie = await cookies();
