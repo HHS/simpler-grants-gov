@@ -221,8 +221,6 @@ resource "aws_api_gateway_rest_api" "api" {
   }
 
   binary_media_types = [
-    "application/pdf",
-    "application/octet-stream",
     "multipart/form-data",
   ]
 }
