@@ -42,6 +42,14 @@ class ApplicationStartRequestSchema(Schema):
             "example": "456e7890-e12c-34f5-b678-901234567890",
         },
     )
+    intends_to_add_organization = fields.Boolean(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Whether the user intends to add an organization later when applying as an individual",
+            "example": True,
+        },
+    )
 
 
 class ApplicationStartResponseDataSchema(Schema):
@@ -278,6 +286,13 @@ class ApplicationGetResponseDataSchema(Schema):
         OrganizationSchema(),
         allow_none=True,
         metadata={"description": "Organization associated with this application, if any"},
+    )
+
+    intends_to_add_organization = fields.Boolean(
+        allow_none=True,
+        metadata={
+            "description": "Whether the user intends to add an organization later when applying as an individual"
+        },
     )
 
     form_validation_warnings = fields.Dict(
