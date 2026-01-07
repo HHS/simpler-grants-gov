@@ -103,6 +103,17 @@ class CompetitionAlphaSchema(Schema):
         metadata={"description": "Whether the competition is open and accepting applications"}
     )
 
+    is_simpler_grants_enabled = fields.Boolean(
+        metadata={"description": "Whether simpler grants are enabled for this competition"}
+    )
+
+
+class CompetitionFlagUpdateSchema(Schema):
+    is_simpler_grants_enabled = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether simpler grants are enabled for this competition"},
+    )
+
 
 class CompetitionResponseAlphaSchema(AbstractResponseSchema):
     data = fields.Nested(CompetitionAlphaSchema())
