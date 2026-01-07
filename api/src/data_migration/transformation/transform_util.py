@@ -23,6 +23,7 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.staging.attachment import TsynopsisAttachment
+from src.db.models.staging.instructions import Tinstructions
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
 from src.util import datetime_util
@@ -516,4 +517,10 @@ def get_log_extra_opportunity_attachment(source_attachment: TsynopsisAttachment)
     return {
         "opportunity_id": source_attachment.opportunity_id,
         "syn_att_id": source_attachment.syn_att_id,
+    }
+
+
+def get_log_extra_competition_instruction(source_instruction: Tinstructions) -> dict:
+    return {
+        "competition_id": source_instruction.comp_id,
     }

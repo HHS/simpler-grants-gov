@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, datetime
 
 import pytest
@@ -11,6 +12,7 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
 )
+from src.data_migration.transformation.subtask.transform_competition_instruction import build_competition_instruction_file_name
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models import staging
 from src.db.models.agency_models import Agency
@@ -24,6 +26,7 @@ from src.db.models.opportunity_models import (
     OpportunityAttachment,
     OpportunitySummary,
 )
+from src.services.competition_alpha.competition_instruction_util import get_s3_competition_instruction_path
 from src.services.opportunity_attachments import attachment_util
 from src.util import file_util
 from tests.conftest import BaseTestClass
@@ -368,6 +371,39 @@ def setup_opportunity_attachment(
             )
 
     return synopsis_attachment
+
+
+def setup_competition_instruction(
+        create_existing: bool,
+        competition: Competition,
+        s3_config: S3Config,
+        is_delete: bool = False,
+        is_already_processed: bool = False,
+):
+
+
+    instructions = f.StagingTinstructionsFactory.create(
+        competition=None,
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
+    )
+
+    if create_existing:
+        instruction_id = uuid.uuid4()
+        file_name = build_competition_instruction_file_name(instructions, competition)
+        s3_path = get_s3_competition_instruction_path(file_name, instruction_id, competition, s3_config)
+
+        #with file_util.open_stream(s3_path, "w") as outfile:
+        #    outfile.write(f.fake.sentence(25))
+
+        f.CompetitionInstructionFactory.create(
+            competition_instruction_id=instruction_id,
+            competition=competition,
+            file_location=s3_path,
+            file_name=file_name
+        )
+
+    return instructions
 
 
 def validate_matching_fields(

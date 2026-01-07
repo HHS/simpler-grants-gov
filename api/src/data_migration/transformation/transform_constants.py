@@ -36,6 +36,7 @@ FUNDING_INSTRUMENT = "funding_instrument"
 AGENCY = "agency"
 OPPORTUNITY_ATTACHMENT = "opportunity_attachment"
 COMPETITION = "competition"
+COMPETITION_INSTRUCTION = "competition_instruction"
 
 
 class Metrics(StrEnum):

@@ -7,8 +7,12 @@ from src.adapters.aws import S3Config
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
 from src.db.models.staging.opportunity import Topportunity
+from src.services.competition_alpha.competition_instruction_util import (
+    get_s3_competition_instruction_path,
+)
 from src.services.opportunity_attachments import attachment_util
 from src.task.task import Task
 from src.util import file_util
@@ -71,6 +75,12 @@ class TransformOpportunity(AbstractTransformSubTask):
                 for attachment in target_opportunity.opportunity_attachments:
                     file_util.delete_file(attachment.file_location)
 
+                # Also cleanup competition instruction files
+                # TODO test this
+                for competition in target_opportunity.competitions:
+                    for competition_instruction in competition.competition_instructions:
+                        file_util.delete_file(competition_instruction.file_location)
+
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
@@ -104,6 +114,9 @@ class TransformOpportunity(AbstractTransformSubTask):
                         transformed_opportunity,
                     )
 
+                    for competition in target_opportunity.competitions:
+                        self._move_competition_instructions_to_correct_bucket(competition)
+
         logger.info("Processed opportunity", extra=extra)
         source_opportunity.transformed_at = self.transform_time
 
@@ -122,3 +135,15 @@ class TransformOpportunity(AbstractTransformSubTask):
             )
             file_util.move_file(attachment.file_location, s3_path)
             attachment.file_location = s3_path
+
+    def _move_competition_instructions_to_correct_bucket(self, competition: Competition) -> None:
+        # TODO - test this
+        for competition_instruction in competition.competition_instructions:
+            s3_path = get_s3_competition_instruction_path(
+                competition_instruction.file_name,
+                competition_instruction.competition_instruction_id,
+                competition,
+                self.s3_config,
+            )
+            file_util.move_file(competition_instruction.file_location, s3_path)
+            competition_instruction.file_location = s3_path

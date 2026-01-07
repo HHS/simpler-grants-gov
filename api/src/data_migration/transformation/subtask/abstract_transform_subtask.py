@@ -8,6 +8,7 @@ from sqlalchemy import UnaryExpression, and_, select
 from sqlalchemy.orm import selectinload
 
 import src.data_migration.transformation.transform_constants as transform_constants
+from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.task.subtask import SubTask
 from src.task.task import Task
@@ -195,4 +196,36 @@ class AbstractTransformSubTask(SubTask):
                 .options(selectinload(relationship_load_value))
                 .execution_options(yield_per=5000, populate_existing=True)
             ),
+        )
+
+    def fetch_with_competition(
+        self,
+        source_model: type[transform_constants.S],
+        destination_model: type[transform_constants.D],
+        join_clause: Sequence,
+        batch_size: int = 5000,
+        limit: int | None = None,
+        order_by: UnaryExpression | None = None,
+    ) -> list[tuple[transform_constants.S, transform_constants.D | None, Competition | None]]:
+        select_query = (
+            select(source_model, destination_model, Competition)
+            .join(destination_model, and_(*join_clause), isouter=True)
+            .join(
+                Competition,
+                source_model.comp_id == Competition.legacy_competition_id,  # type: ignore[attr-defined]
+                isouter=True,
+            )
+            .where(source_model.transformed_at.is_(None))
+            .execution_options(yield_per=batch_size)
+        )
+
+        if order_by is not None:
+            select_query = select_query.order_by(order_by)
+
+        if limit is not None:
+            select_query = select_query.limit(limit)
+
+        return cast(
+            list[tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]],
+            self.db_session.execute(select_query),
         )
