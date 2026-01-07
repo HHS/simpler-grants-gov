@@ -98,7 +98,7 @@ def create_application(
     Create a new application for a competition.
     """
     # Validate that organization_id and intends_to_add_organization are not both set
-    if organization_id is not None and intends_to_add_organization is not None:
+    if organization_id is not None and intends_to_add_organization is True:
         logger.info(
             "Cannot set both organization_id and intends_to_add_organization",
             extra={
