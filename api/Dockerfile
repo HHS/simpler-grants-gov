@@ -95,6 +95,10 @@ COPY --from=base /api/.venv /api/.venv
 COPY --from=base /api/newrelic.ini /api/newrelic.ini
 COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
 
+# Fix /tmp permissions - COPY --from creates parent directories as root with
+# default permissions (755), overriding the 1777 set in the base stage
+RUN chmod 1777 /tmp
+
 # Clean up to reduce image size:
 # - Remove Python bytecode cache files
 # - Remove pip cache
