@@ -25,7 +25,6 @@ export const StartApplicationDescription = ({
         <p>{t("organizationIntro")}</p>
         <ul>
           <li>{t("applyingForOrg")}</li>
-          <li>{t("poc")}</li>
           <li>
             {t.rich("uei", {
               link: (chunk) => (
@@ -75,7 +74,6 @@ export const StartApplicationDescription = ({
         </p>
         <p>{t("organizationIndividualIntro")}</p>
         <ul>
-          <li>{t("poc")}</li>
           <li>
             {t.rich("uei", {
               link: (chunk) => (
@@ -99,7 +97,6 @@ export const StartApplicationDescription = ({
       <p>{t("pilotIntro")}</p>
       <p>{t("organizationApply")}</p>
       <ul>
-        <li>{t("poc")}</li>
         <li>
           {t.rich("uei", {
             link: (chunk) => (

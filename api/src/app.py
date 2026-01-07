@@ -23,6 +23,7 @@ from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
@@ -35,7 +36,6 @@ from src.auth.auth_utils import get_app_security_scheme
 from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.legacy_soap_api import init_app as init_legacy_soap_api
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
@@ -55,10 +55,6 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
-    auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
-
-    enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
-    enable_common_grants_endpoints: bool = Field(False, alias="ENABLE_COMMON_GRANTS_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
 
@@ -93,12 +89,10 @@ def create_app() -> APIFlask:
     register_search_client(app)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        initialize_login_gov_config()
-        initialize_jwt_auth()
+    initialize_login_gov_config()
+    initialize_jwt_auth()
 
-    if LegacySoapAPIConfig().soap_api_enabled:
-        init_legacy_soap_api(app)
+    init_legacy_soap_api(app)
 
     register_well_known(app, endpoint_config.domain_verification_map)
 
@@ -173,20 +167,18 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
+    app.register_blueprint(internal_blueprint)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        app.register_blueprint(user_blueprint)
+    app.register_blueprint(user_blueprint)
 
     # Endpoints for apply functionality
-    if endpoint_config.enable_apply_endpoints:
-        app.register_blueprint(application_blueprint)
-        app.register_blueprint(form_blueprint)
-        app.register_blueprint(competition_blueprint)
+    app.register_blueprint(application_blueprint)
+    app.register_blueprint(form_blueprint)
+    app.register_blueprint(competition_blueprint)
 
     # CommonGrants Protocol endpoints
-    if endpoint_config.enable_common_grants_endpoints:
-        app.register_blueprint(common_grants_blueprint)
+    app.register_blueprint(common_grants_blueprint)
 
     # Local endpoints for development, will error
     # if this is ever enabled non-locally.

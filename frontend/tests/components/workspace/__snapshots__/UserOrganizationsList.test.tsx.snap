@@ -32,7 +32,7 @@ exports[`UserOrganizationsList matches snapshot with multiple organizations 1`] 
           data-testid="grid"
         >
           <a
-            href="/organization/great id"
+            href="/organizations/great id"
           >
             <button
               class="usa-button"
@@ -81,7 +81,7 @@ exports[`UserOrganizationsList matches snapshot with multiple organizations 1`] 
           data-testid="grid"
         >
           <a
-            href="/organization/another"
+            href="/organizations/another"
           >
             <button
               class="usa-button"

@@ -75,7 +75,7 @@ FORM_JSON_SCHEMA = {
         },
         "civil_rights_lawsuit_question1": {  # CivilRightsLawSuits1
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
-            "title": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.) IV. List all civil rights",
+            "title": "List all pending civil rights lawsuits and administrative complaints filed under federal law against the applicant/recipient that allege discrimination based on race, color, national origin, sex, age, or disability. (Do not include employment complaints not covered by 40 C.F.R. Parts 5 and 7.)",
         },
         "civil_rights_lawsuit_question2": {  # CivilRightsLawSuits2
             "allOf": [{"$ref": "#/$defs/civil_rights_lawsuit_question"}],
@@ -109,7 +109,7 @@ FORM_JSON_SCHEMA = {
         },
         "notice3": {  # Notice3
             "type": "boolean",
-            "title": "b. Is the notice posted in a prominent place in the applicant's/recipient’s website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?",
+            "title": "b. Is the notice posted in a prominent place in the applicant's/recipient's website, in the offices or facilities or, for education programs and activities, in appropriate periodicals and other written communications?",
         },
         "notice4": {  # Notice4
             "type": "boolean",
@@ -131,7 +131,7 @@ FORM_JSON_SCHEMA = {
         },
         "program_explanation": {  # Program
             "type": "string",
-            "title": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7? Provide a legal citation or applicant’s/ recipient’s website address for, or a copy of, the procedures.",
+            "title": "If the applicant is an education program or activity, or has 15 or more employees, has it adopted grievance procedures that assure the prompt and fair resolution of complaints that allege a violation of 40 C.F.R. Parts 5 and 7? Provide a legal citation or applicant's/ recipient's website address for, or a copy of, the procedures.",
             "minLength": 1,
             "maxLength": 1000,
         },
@@ -162,7 +162,14 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "A. Applicant/Recipient (Name, Address, City, State, Zip Code)",
+        "label": "Instructions for EPA Form 4700-4 (Rev. 04/2021)",
+        "name": "instructions",
+        "description": DIRECTIONS,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": "I. A. Applicant/Recipient (Name, Address, City, State, Zip Code)",
         "name": "applicant",
         "children": [
             {"type": "field", "definition": "/properties/applicant_name"},
@@ -174,15 +181,15 @@ FORM_UI_SCHEMA = [
     },
     {
         "type": "section",
-        "label": "B.",
+        "label": "I. B. Unique Entity Identifier (UEI)",
         "name": "uei",
         "children": [
-            {"type": "field", "definition": "/properties/sam_uei"},
+            {"type": "null", "definition": "/properties/sam_uei"},
         ],
     },
     {
         "type": "section",
-        "label": "C. Applicant/Recipient Point of Contact",
+        "label": "I. C. Applicant/Recipient Point of Contact",
         "name": "poc",
         "children": [
             {"type": "field", "definition": "/properties/point_of_contact_name"},
@@ -196,17 +203,45 @@ FORM_UI_SCHEMA = [
     # and just putting everything in one big list (sorry)
     {
         "type": "section",
-        "label": "III-XI",
-        "name": "questions",
+        "label": "II",
+        "name": "section ii",
         "children": [
             {
                 "type": "field",
                 "definition": "/properties/federal_financial_assistance",
                 "widget": "Radio",
             },
+        ],
+    },
+    {
+        "type": "section",
+        "label": "III",
+        "name": "section iii",
+        "children": [
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question1"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "IV",
+        "name": "section iv",
+        "children": [
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question2"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "V",
+        "name": "section v",
+        "children": [
             {"type": "field", "definition": "/properties/civil_rights_lawsuit_question3"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "VI",
+        "name": "section vi",
+        "children": [
             {
                 "type": "field",
                 "definition": "/properties/construction_federal_assistance",
@@ -218,13 +253,48 @@ FORM_UI_SCHEMA = [
                 "widget": "Radio",
             },
             {"type": "field", "definition": "/properties/construction_new_facilities_explanation"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "VII",
+        "name": "section vii",
+        "children": [
             {"type": "field", "definition": "/properties/notice1", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice2", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice3", "widget": "Radio"},
             {"type": "field", "definition": "/properties/notice4", "widget": "Radio"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "VIII",
+        "name": "section viii",
+        "children": [
             {"type": "field", "definition": "/properties/demographic_data", "widget": "Radio"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "IX",
+        "name": "section ix",
+        "children": [
             {"type": "field", "definition": "/properties/policy", "widget": "Radio"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "X",
+        "name": "section x",
+        "children": [
             {"type": "field", "definition": "/properties/policy_explanation"},
+        ],
+    },
+    {
+        "type": "section",
+        "label": "XI",
+        "name": "section xi",
+        "children": [
             {"type": "field", "definition": "/properties/program_explanation"},
         ],
     },
@@ -245,22 +315,216 @@ FORM_UI_SCHEMA = [
             },
         ],
     },
-    {
-        "type": "section",
-        "label": "Instructions for EPA Form 4700-4 (Rev. 04/2021)",
-        "name": "instructions",
-        "description": DIRECTIONS,
-        "children": [],
-    },
 ]
 
 FORM_RULE_SCHEMA = {
     #### PRE-POPULATION RULES
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
     #### POST-POPULATION RULES
-    "application_signature": {
+    "applicant_signature": {
         "aor_signature": {"gg_post_population": {"rule": "signature"}},
         "submitted_date": {"gg_post_population": {"rule": "current_date"}},
+    },
+}
+
+# XML transformation rules for converting Simpler EPA Form 4700-4 JSON to Grants.gov XML format
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting Simpler EPA Form 4700-4 JSON to XML",
+        "version": "1.0",
+        "form_name": "EPA4700_4_5_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0",
+            "EPA4700_4_5_0": "http://apply.grants.gov/forms/EPA4700_4_5_0-V5.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA4700_4_5_0-V5.0.xsd",
+        "xml_structure": {
+            "root_element": "EPA4700_4_5_0",
+            "version": "5.0",
+        },
+    },
+    # Applicant Information - wrapped under ApplicantInfo element
+    # XSD requires both ApplicantName and ApplicantAddress to be grouped under ApplicantInfo
+    "applicant_info": {
+        "xml_transform": {
+            "type": "conditional",
+            "target": "ApplicantInfo",
+            "conditional_transform": {
+                "type": "field_grouping",
+                "source_fields": ["applicant_name", "applicant_address"],
+            },
+        },
+        # Nested field transformations for the grouped fields
+        "nested_fields": {
+            "applicant_name": {
+                "xml_transform": {
+                    "target": "ApplicantName",
+                }
+            },
+            "applicant_address": {
+                "xml_transform": {
+                    "target": "ApplicantAddress",
+                    "type": "nested_object",
+                },
+                "address": {
+                    "xml_transform": {
+                        "target": "Address",
+                    }
+                },
+                "city": {
+                    "xml_transform": {
+                        "target": "City",
+                    }
+                },
+                "state": {
+                    "xml_transform": {
+                        "target": "State",
+                    }
+                },
+                "zip_code": {
+                    "xml_transform": {
+                        "target": "ZipCode",
+                    }
+                },
+            },
+        },
+    },
+    # SAM UEI
+    "sam_uei": {
+        "xml_transform": {
+            "target": "SAMUEI",
+        }
+    },
+    # Point of Contact
+    "point_of_contact_name": {
+        "xml_transform": {
+            "target": "POCName",
+        }
+    },
+    "point_of_contact_phone_number": {
+        "xml_transform": {
+            "target": "Phone",
+        }
+    },
+    "point_of_contact_email": {
+        "xml_transform": {
+            "target": "Email",
+        }
+    },
+    "point_of_contact_title": {
+        "xml_transform": {
+            "target": "Title",
+        }
+    },
+    # Questions (all optional fields)
+    "federal_financial_assistance": {
+        "xml_transform": {
+            "target": "FederalFinancialAssistanceQuestion",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "civil_rights_lawsuit_question1": {
+        "xml_transform": {
+            "target": "CivilRightsLawSuits1",
+        }
+    },
+    "civil_rights_lawsuit_question2": {
+        "xml_transform": {
+            "target": "CivilRightsLawSuits2",
+        }
+    },
+    "civil_rights_lawsuit_question3": {
+        "xml_transform": {
+            "target": "CivilRightsLawSuits3",
+        }
+    },
+    "construction_federal_assistance": {
+        "xml_transform": {
+            "target": "ConstructionFederalAssistance",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "construction_new_facilities": {
+        "xml_transform": {
+            "target": "Construction",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "construction_new_facilities_explanation": {
+        "xml_transform": {
+            "target": "Construction2",
+        }
+    },
+    "notice1": {
+        "xml_transform": {
+            "target": "Notice1",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "notice2": {
+        "xml_transform": {
+            "target": "Notice2",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "notice3": {
+        "xml_transform": {
+            "target": "Notice3",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "notice4": {
+        "xml_transform": {
+            "target": "Notice4",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "demographic_data": {
+        "xml_transform": {
+            "target": "Demographic",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "policy": {
+        "xml_transform": {
+            "target": "Policy1",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    "policy_explanation": {
+        "xml_transform": {
+            "target": "Policy2",
+        }
+    },
+    "program_explanation": {
+        "xml_transform": {
+            "target": "Program",
+        }
+    },
+    # Applicant Signature (nested object)
+    "applicant_signature": {
+        "xml_transform": {
+            "target": "ApplicantSignature",
+            "type": "nested_object",
+        },
+        "aor_signature": {
+            "xml_transform": {
+                "target": "AORSignature",
+            }
+        },
+        "aor_title": {
+            "xml_transform": {
+                "target": "PersonTitle",
+            }
+        },
+        "submitted_date": {
+            "xml_transform": {
+                "target": "SubmittedDate",
+            }
+        },
     },
 }
 
@@ -276,6 +540,7 @@ EPA_FORM_4700_4_v5_0 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     # No form instructions
     form_type=FormType.EPA_FORM_4700_4,
     sgg_version="1.0",

@@ -11,6 +11,7 @@ import src.logging
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.competition_models import Competition, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms
@@ -19,7 +20,7 @@ from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_data_utils import CompetitionContainer
 from tests.lib.seed_e2e import _build_users_and_tokens
-from tests.lib.seed_orgs_and_users import _build_organizations_and_users
+from tests.lib.seed_orgs_and_users import _build_organizations_and_users, seed_internal_admin
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +180,42 @@ def _build_pilot_competition(forms: dict[str, Form]) -> None:
     )
 
 
+def _build_individual_only_competition(forms: dict[str, Form]) -> None:
+    logger.info("Creating an individual only opportunity")
+    individual_only_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="Local Individual Only Opportunity",
+        competition_forms=[],
+        open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+        with_instruction=True,
+    )
+
+    factories.CompetitionFormFactory.create(
+        competition=individual_only_competition, form=forms["CD511"], is_required=True
+    )
+
+    logger.info(
+        f"Created an individual only opportunity - http://localhost:3000/opportunity/{individual_only_competition.opportunity_id}"
+    )
+
+
+def _build_organization_only_competition(forms: dict[str, Form]) -> None:
+    logger.info("Creating an organization only opportunity")
+    organization_only_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="Local Organization Only Opportunity",
+        competition_forms=[],
+        open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+        with_instruction=True,
+    )
+
+    factories.CompetitionFormFactory.create(
+        competition=organization_only_competition, form=forms["CD511"], is_required=True
+    )
+
+    logger.info(
+        f"Created an organization only opportunity - http://localhost:3000/opportunity/{organization_only_competition.opportunity_id}"
+    )
+
+
 def _build_competition_for_form(form: Form) -> Competition:
     competition = factories.CompetitionFactory.create(
         opportunity__opportunity_title=f"Test Opportunity for {form.short_form_name} {form.form_version}",
@@ -265,6 +302,8 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
     logger.info("Creating competitions")
     _build_pilot_competition(forms_map)
+    _build_individual_only_competition(forms_map)
+    _build_organization_only_competition(forms_map)
 
     forms = list(forms_map.values())
 
@@ -358,6 +397,7 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         forms_map = _build_forms(db_session)
         competition_container = _build_competitions(db_session, forms_map)
     if seed_config.seed_users:
+        seed_internal_admin(db_session)
         _build_organizations_and_users(db_session, competition_container)
     if seed_config.seed_e2e:
         _build_users_and_tokens(db_session)

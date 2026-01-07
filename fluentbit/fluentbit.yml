@@ -2,6 +2,8 @@ service:
   # The http service is used for healthchecks and such.
   http_server: On
   http_port: 80
+  log_level: info
+  parsers_file: /fluent-bit/etc/parsers.conf
 
 pipeline:
   inputs:
@@ -18,6 +20,23 @@ pipeline:
     # https://github.com/aws/aws-for-fluent-bit/blob/mainline/troubleshooting/debugging.md
     - name: tcp
       port: 8877 # aws custom port
+
+  filters:
+    # Parse the JSON in the 'log' field and merge fields to the record level
+    # This allows New Relic to query fields like aws.ecs.task_id directly
+    # NOTE: Must run BEFORE the Lua filter, otherwise escaped newlines break JSON parsing
+    - name: parser
+      match: "**"
+      key_name: log
+      parser: json
+      reserve_data: true
+      preserve_key: false
+
+    # This filter truncates SQL parameter lists and escapes control characters
+    - name: lua
+      match: "**"
+      script: /fluent-bit/etc/truncate_logs.lua
+      call: truncate_large_fields
 
   outputs:
     - name: nrlogs # new relic logs

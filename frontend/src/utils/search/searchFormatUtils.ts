@@ -70,6 +70,11 @@ const filterConfigurations = [
     backendName: "top_level_agency",
     dataType: "oneOf",
   },
+  {
+    frontendName: "assistanceListingNumber",
+    backendName: "assistance_listing_number",
+    dataType: "oneOf",
+  },
 ] as const;
 
 const toOneOfFilter = (data: Set<string>): OneOfFilter => {

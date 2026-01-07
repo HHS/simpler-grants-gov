@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 
 const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
@@ -70,12 +71,14 @@ async function OrganizationsPage({ params }: LocalizedPageProps) {
   }
 
   return (
-    <OrganizationsPageWrapper>
-      <UserOrganizationsList
-        userOrganizations={userOrganizations}
-        userRoles={userRoles}
-      />
-    </OrganizationsPageWrapper>
+    <AuthenticationGate>
+      <OrganizationsPageWrapper>
+        <UserOrganizationsList
+          userOrganizations={userOrganizations}
+          userRoles={userRoles}
+        />
+      </OrganizationsPageWrapper>
+    </AuthenticationGate>
   );
 }
 

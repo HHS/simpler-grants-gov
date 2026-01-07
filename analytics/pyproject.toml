@@ -19,16 +19,16 @@ pydantic = "^2.0.3"
 python = "~3.14"
 slack-sdk = "^3.23.0"
 sqlparse = ">=0.5.0"
-typer = { extras = ["all"], version = "^0.20.0" }
+typer = { extras = ["all"], version = "^0.21.0" }
 sqlalchemy = "^2.0.30"
 pydantic-settings = "^2.3.4"
 boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
 psycopg = { extras = ["binary"], version = "^3.2.3" }
 smart-open = "^7.0.5"
-newrelic = "10.17.0"
+newrelic = "11.2.0"
 requests = "^2.32.5"
-urllib3 = "2.6.0"
+urllib3 = "2.6.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"

@@ -11,7 +11,7 @@ class SubmissionInfo(BaseSOAPSchema):
     funding_opportunity_number: str | None = Field(alias="FundingOpportunityNumber")
     cfda_number: str | None = Field(alias="CFDANumber")
     grants_gov_tracking_number: str | None = Field(alias="GrantsGovTrackingNumber")
-    received_date_time: datetime | None = Field(alias="n2:ReceivedDateTime")
+    received_date_time: datetime | None = Field(alias="ns2:ReceivedDateTime")
     grants_gov_application_status: str | None = Field(alias="GrantsGovApplicationStatus")
     submission_method: str | None = Field(alias="SubmissionMethod")
     submission_title: str | None = Field(alias="SubmissionTitle")
@@ -22,19 +22,12 @@ class SubmissionInfo(BaseSOAPSchema):
 
 
 class GetSubmissionListExpandedResponse(BaseSOAPSchema):
-    success: bool = Field(default=True, alias="Success")
-    available_application_number: int = Field(alias="AvailableApplicationNumber")
-    submission_info: list[SubmissionInfo] = Field(alias="SubmissionInfo")
+    success: bool = Field(default=True, alias="ns2:Success")
+    available_application_number: int = Field(alias="ns2:AvailableApplicationNumber")
+    submission_info: list[SubmissionInfo] = Field(alias="ns2:SubmissionInfo")
 
-
-class GetSubmissionListExpandedResponseSOAPBody(BaseSOAPSchema):
-    get_submission_list_expanded_response: GetSubmissionListExpandedResponse = Field(
-        alias="GetSubmissionListExpandedResponse"
-    )
-
-
-class GetSubmissionListExpandedResponseSOAPEnvelope(BaseSOAPSchema):
-    Body: GetSubmissionListExpandedResponseSOAPBody
+    def to_soap_envelope_dict(self, operation_name: str) -> dict:
+        return super().to_soap_envelope_dict(f"ns2:{operation_name}")
 
 
 class ExpandedApplicationFilter(BaseModel):
@@ -88,7 +81,6 @@ class ConsolidatedFilter(BaseModel):
             consolidated = update_consolidated(
                 consolidated, item["FilterType"], item["FilterValue"]
             )
-
         return {"filters": consolidated}
 
 

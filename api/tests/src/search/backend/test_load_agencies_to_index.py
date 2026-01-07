@@ -1,8 +1,10 @@
 import pytest
+from sqlalchemy import update
 
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.user_models import AgencyUser, LegacyCertificate
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex, LoadAgenciesToIndexConfig
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -16,6 +18,8 @@ from tests.src.db.models.factories import (
 class TestLoadAgenciesToIndex(BaseTestClass):
     @pytest.fixture(autouse=True)
     def cleanup_agencies(self, db_session):
+        db_session.execute(update(LegacyCertificate).values(agency_id=None))
+        cascade_delete_from_db_table(db_session, AgencyUser)
         cascade_delete_from_db_table(db_session, Agency)
         cascade_delete_from_db_table(db_session, Opportunity)
 

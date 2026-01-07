@@ -6,9 +6,14 @@ import src.app as app_entry
 import src.logging
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.auth.multi_auth import AuthType, jwt_key_or_internal_multi_auth, jwt_or_key_multi_auth
+from src.auth.multi_auth import (
+    AuthType,
+    jwt_key_or_internal_multi_auth,
+    jwt_or_api_user_key_multi_auth,
+    jwt_or_key_multi_auth,
+)
 from src.util import datetime_util
-from tests.src.db.models.factories import UserFactory
+from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
 @pytest.fixture(scope="module")
@@ -47,6 +52,16 @@ def mini_app(monkeypatch_module):
             "user_id": getattr(user.user, "user_id", None),
             "username": getattr(user.user, "username", None),
             "token_id": getattr(user.user, "short_lived_internal_token_id", None),
+        }
+
+    @mini_app.get("/dummy_auth_endpoint_simpler")
+    @mini_app.auth_required(jwt_or_api_user_key_multi_auth)
+    def dummy_endpoint_simpler():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+
+        return {
+            "message": "ok",
+            "user_id": getattr(user, "user_id", None),
         }
 
     # To avoid re-initializing logging everytime we
@@ -176,3 +191,73 @@ def test_internal_multi_auth_precedence(
     assert resp.status_code == 200
     assert resp.json["auth_type"] == AuthType.USER_JWT_AUTH
     assert resp.json["user_id"] == str(user.user_id)
+
+
+def test_multi_auth_simpler_with_jwt(mini_app, enable_factory_create, db_session):
+    """Test that the jwt_or_api_user_key_multi_auth works with JWT tokens and returns the actual user"""
+    user = UserFactory.create()
+    token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()
+
+    resp = mini_app.test_client().get(
+        "/dummy_auth_endpoint_simpler", headers={"X-SGG-Token": token}
+    )
+    assert resp.status_code == 200
+    assert resp.json["message"] == "ok"
+    assert resp.json["user_id"] == str(user.user_id)
+
+
+def test_multi_auth_simpler_with_api_user_key(mini_app, enable_factory_create, db_session):
+    """Test that the jwt_or_api_user_key_multi_auth works with api user keys and returns the actual user"""
+    user = UserFactory.create()
+    api_key = UserApiKeyFactory.create(user=user, is_active=True)
+    db_session.commit()
+
+    resp = mini_app.test_client().get(
+        "/dummy_auth_endpoint_simpler", headers={"X-API-Key": api_key.key_id}
+    )
+    assert resp.status_code == 200
+    assert resp.json["message"] == "ok"
+    assert resp.json["user_id"] == str(user.user_id)
+
+
+def test_multi_auth_simpler_precedence(mini_app, enable_factory_create, db_session):
+    """Test that JWT auth takes precedence over api user key auth when both are provided for jwt_or_api_user_key_multi_auth"""
+    # Create two different users
+    jwt_user = UserFactory.create()
+    api_user_key_user = UserFactory.create()
+
+    # Create authentication for both users
+    token, _ = create_jwt_for_user(jwt_user, db_session)
+    api_key = UserApiKeyFactory.create(user=api_user_key_user, is_active=True)
+    db_session.commit()
+
+    # Send request with both authentication methods
+    resp = mini_app.test_client().get(
+        "/dummy_auth_endpoint_simpler",
+        headers={"X-SGG-Token": token, "X-API-Key": api_key.key_id},
+    )
+
+    # Should use the JWT user since it's first in the MultiUserAuth definition
+    assert resp.status_code == 200
+    assert resp.json["message"] == "ok"
+    assert resp.json["user_id"] == str(jwt_user.user_id)
+
+
+def test_multi_auth_simpler_no_auth(mini_app):
+    """Test that authentication fails when no auth is provided for jwt_or_api_user_key_multi_auth"""
+    resp = mini_app.test_client().get("/dummy_auth_endpoint_simpler", headers={})
+    assert resp.status_code == 401
+
+
+def test_multi_auth_simpler_invalid_auth(mini_app):
+    """Test that authentication fails with invalid credentials for jwt_or_api_user_key_multi_auth"""
+    resp = mini_app.test_client().get(
+        "/dummy_auth_endpoint_simpler", headers={"X-SGG-Token": "invalid-token"}
+    )
+    assert resp.status_code == 401
+
+    resp = mini_app.test_client().get(
+        "/dummy_auth_endpoint_simpler", headers={"X-API-Key": "invalid-key"}
+    )
+    assert resp.status_code == 401

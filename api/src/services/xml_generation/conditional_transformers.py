@@ -370,6 +370,60 @@ def evaluate_condition(condition: dict[str, Any], source_data: dict[str, Any]) -
         raise ConditionalTransformationError(f"Unknown condition type: {condition_type}")
 
 
+def _apply_field_grouping_transform(
+    transform_config: dict[str, Any], source_data: dict[str, Any]
+) -> dict[str, Any] | None:
+    """Apply field grouping transformation.
+
+    Groups multiple source fields under a single wrapper element.
+    This is useful when the XSD requires a wrapper element but the JSON
+    has the fields as siblings.
+
+    Example:
+        JSON: {"applicant_name": "Test", "applicant_address": {...}}
+        XSD: <ApplicantInfo><ApplicantName>...</><ApplicantAddress>...</></ApplicantInfo>
+
+    Configuration:
+        {
+            "type": "field_grouping",
+            "source_fields": ["applicant_name", "applicant_address"]
+        }
+
+    The nested field transforms will be processed by the transformer using
+    the nested_fields configuration in the parent rule.
+
+    Args:
+        transform_config: Field grouping configuration
+        source_data: Source data containing the fields to group
+
+    Returns:
+        Dictionary with grouped field values (keyed by original field names),
+        or None if no fields found
+    """
+    source_fields = transform_config.get("source_fields", [])
+
+    if not source_fields:
+        logger.warning(
+            "field_grouping requires 'source_fields' configuration (list of field names)"
+        )
+        return None
+
+    result = {}
+
+    # Extract each source field from the data
+    for source_field_name in source_fields:
+        if isinstance(source_field_name, str):
+            # Get value from source data
+            source_path = source_field_name.split(".")
+            value = get_nested_value(source_data, source_path)
+
+            if value is not None:
+                # Use the original field name as the key - transforms will be applied later
+                result[source_field_name] = value
+
+    return result if result else None
+
+
 def apply_conditional_transform(
     transform_config: dict[str, Any],
     source_data: dict[str, Any],
@@ -383,6 +437,7 @@ def apply_conditional_transform(
     - pivot_object: Restructure nested objects by pivoting dimensions
     - array_decomposition: Transform row-oriented arrays to column-oriented structure
     - conditional_structure: Select different structures based on data conditions
+    - field_grouping: Group multiple source fields under a single wrapper element
 
     Args:
         transform_config: Conditional transformation configuration
@@ -463,6 +518,9 @@ def apply_conditional_transform(
         return _apply_array_decomposition_transform(
             transform_config, source_data, transform_config_root
         )
+
+    elif transform_type == "field_grouping":
+        return _apply_field_grouping_transform(transform_config, source_data)
 
     elif transform_type == "compose_object":
         # Create a nested object from flat root-level fields

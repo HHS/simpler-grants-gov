@@ -25,6 +25,7 @@ tags:
 - name: Extract v1
 - name: Agency v1
 - name: Organization v1
+- name: Internal v1 - Admin Only
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
@@ -166,6 +167,38 @@ paths:
         with endpoints.
 
         '
+  /v1/internal/roles:
+    put:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalRoleAssignmentResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+      tags:
+      - Internal v1 - Admin Only
+      summary: Update Internal Roles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalRoleAssignmentRequest'
+      security:
+      - ApiUserKeyAuth: []
   /local/local-users:
     get:
       parameters: []
@@ -1904,6 +1937,56 @@ paths:
               $ref: '#/components/schemas/ApplicationAttachmentCreateRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/applications/{application_id}/submissions:
+    post:
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationSubmissionsResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Application Alpha
+      summary: Get all application submissions for an application
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationSubmissionsRequest'
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /alpha/applications/{application_id}/audit_history:
     post:
       parameters:
@@ -3119,6 +3202,34 @@ components:
             type:
             - object
             $ref: '#/components/schemas/AgencyResponse'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    InternalRoleAssignmentRequest:
+      type: object
+      properties:
+        internal_role_id:
+          type: string
+          format: uuid
+          description: The UUID of the internal role to assign
+          example: 57e8875f-c154-41be-a5f6-602f4c92d6e6
+        user_email:
+          type: string
+          description: The email address of the user receiving the role
+          example: example@example.com
+      required:
+      - internal_role_id
+      - user_email
+    InternalRoleAssignmentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The REST resource object
         status_code:
           type: integer
           description: The HTTP status code
@@ -5053,6 +5164,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     UserOrganization:
@@ -5200,6 +5312,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     UserCanAccessResponse:
@@ -6192,6 +6305,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     UserInvitationItem:
@@ -6736,6 +6850,7 @@ components:
             - legacy_agency_viewer
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
+            - manage_internal_roles
             type:
             - string
     OrganizationUser:
@@ -6811,6 +6926,29 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SavedOpportunityStatusFieldFilter:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+            - posted
+            enum:
+            - forecasted
+            - posted
+            - closed
+            - archived
+            type:
+            - string
+    UserSavedOpportunitiesFilter:
+      type: object
+      properties:
+        opportunity_status:
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunityStatusFieldFilter'
     SortOrderUserGetSavedOpportunityPaginationV1:
       type: object
       properties:
@@ -6864,6 +7002,13 @@ components:
     UserSavedOpportunitiesRequest:
       type: object
       properties:
+        filters:
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/UserSavedOpportunitiesFilter'
+          - type: 'null'
         pagination:
           type:
           - object
@@ -7245,6 +7390,103 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    SortOrderApplicationSubmissionsRequestPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    ApplicationSubmissionsRequestPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: descending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderApplicationSubmissionsRequestPagination'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    ApplicationSubmissionsRequest:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/ApplicationSubmissionsRequestPagination'
+      required:
+      - pagination
+    ApplicationSubmissionData:
+      type: object
+      properties:
+        application_submission_id:
+          type: string
+          format: uuid
+          description: The unique identifier of the application submission
+          example: 123e4567-e89b-12d3-a456-426614174000
+        download_path:
+          type: string
+          description: The presigned URL path for downloading the submission package
+          example: https://s3.amazonaws.com/bucket/path/to/submission.zip
+        file_size_bytes:
+          type: integer
+          description: The size of the submission file in bytes
+          example: 1234567
+        legacy_tracking_number:
+          type: integer
+          description: The legacy tracking number for the submission
+          example: 80000001
+    ApplicationSubmissionsResponse:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/ApplicationSubmissionData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     ApplicationAuditEventFieldFilter:
       type: object
       properties:
@@ -7497,6 +7739,54 @@ components:
           anyOf:
           - $ref: '#/components/schemas/InvitationStatusFilter'
           - type: 'null'
+    SortOrderOrganizationInvitationListPagination:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - invitee_email
+          - created_at
+          - responded_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    OrganizationInvitationListPagination:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: invitee_email
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderOrganizationInvitationListPagination'
+        page_size:
+          type: integer
+          default: 25
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          default: 1
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
     OrganizationInvitationListRequest:
       type: object
       properties:
@@ -7508,6 +7798,12 @@ components:
           anyOf:
           - $ref: '#/components/schemas/OrganizationInvitationFilter'
           - type: 'null'
+        pagination:
+          description: 'Pagination parameters for organization invitation list (default
+            sort: invitee_email ascending)'
+          type:
+          - object
+          $ref: '#/components/schemas/OrganizationInvitationListPagination'
     InviterData:
       type: object
       properties:
@@ -7623,6 +7919,10 @@ components:
     OrganizationInvitationListResponse:
       type: object
       properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id002
+          $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
           description: The message to return

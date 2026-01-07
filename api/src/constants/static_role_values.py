@@ -129,7 +129,10 @@ NAVA_INTERNAL_ROLE = Role(
     role_id=NAVA_INTERNAL_ROLE_ID,
     role_name="Nava Internal Admin Role",
     is_core=True,
-    link_privileges=get_link_privileges(NAVA_INTERNAL_ROLE_ID, [Privilege.UPDATE_FORM]),
+    link_privileges=get_link_privileges(
+        NAVA_INTERNAL_ROLE_ID,
+        [Privilege.UPDATE_FORM, Privilege.MANAGE_INTERNAL_ROLES, Privilege.MANAGE_COMPETITION],
+    ),
     link_role_types=[LinkRoleRoleType(role_id=NAVA_INTERNAL_ROLE_ID, role_type=RoleType.INTERNAL)],
 )
 

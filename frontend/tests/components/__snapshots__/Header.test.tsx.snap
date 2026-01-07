@@ -223,7 +223,9 @@ exports[`Header About renders About submenu 1`] = `
                 </svg>
                 <div
                   class="padding-left-1 display-none desktop:display-block"
-                />
+                >
+                  Account
+                </div>
               </a>
             </span>
           </button>
@@ -249,7 +251,9 @@ exports[`Header About renders About submenu 1`] = `
                 </svg>
                 <div
                   class="padding-left-1"
-                />
+                >
+                  Account
+                </div>
               </a>
             </li>
             <li
@@ -408,6 +412,17 @@ exports[`Header About renders About submenu 1`] = `
                 >
                   <div>
                     Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/developer"
+                >
+                  <div>
+                    Developers
                   </div>
                 </a>
               </li>
@@ -745,7 +760,9 @@ exports[`Header About renders Community submenu 1`] = `
                 </svg>
                 <div
                   class="padding-left-1 display-none desktop:display-block"
-                />
+                >
+                  Account
+                </div>
               </a>
             </span>
           </button>
@@ -771,7 +788,9 @@ exports[`Header About renders Community submenu 1`] = `
                 </svg>
                 <div
                   class="padding-left-1"
-                />
+                >
+                  Account
+                </div>
               </a>
             </li>
             <li
@@ -930,6 +949,17 @@ exports[`Header About renders Community submenu 1`] = `
                 >
                   <div>
                     Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/developer"
+                >
+                  <div>
+                    Developers
                   </div>
                 </a>
               </li>
@@ -1267,7 +1297,9 @@ exports[`Header renders Header navbar menu 1`] = `
                 </svg>
                 <div
                   class="padding-left-1 display-none desktop:display-block"
-                />
+                >
+                  Account
+                </div>
               </a>
             </span>
           </button>
@@ -1293,7 +1325,9 @@ exports[`Header renders Header navbar menu 1`] = `
                 </svg>
                 <div
                   class="padding-left-1"
-                />
+                >
+                  Account
+                </div>
               </a>
             </li>
             <li
@@ -1453,6 +1487,17 @@ exports[`Header renders Header navbar menu 1`] = `
                 >
                   <div>
                     Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/developer"
+                >
+                  <div>
+                    Developers
                   </div>
                 </a>
               </li>

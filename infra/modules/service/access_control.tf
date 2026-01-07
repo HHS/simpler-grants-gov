@@ -217,6 +217,13 @@ resource "aws_iam_role_policy_attachment" "email_access" {
   policy_arn = aws_iam_policy.email_access[0].arn
 }
 
+resource "aws_iam_role_policy_attachment" "migrator_email_access" {
+  count = length(var.pinpoint_app_id) > 0 && var.db_vars != null ? 1 : 0
+
+  role       = aws_iam_role.migrator_task[0].name
+  policy_arn = aws_iam_policy.email_access[0].arn
+}
+
 resource "aws_iam_role_policy_attachment" "api_gateway_access" {
   count = var.enable_api_gateway ? 1 : 0
 

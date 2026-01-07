@@ -7,6 +7,7 @@ from lxml import etree as lxml_etree
 
 import src.adapters.db as db
 from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -71,6 +72,19 @@ class TestSubmissionXMLAssembler:
             application_response={
                 "submission_type": "Application",
                 "organization_name": "Test Organization",
+                "applicant": {
+                    "street1": "123 Main St",
+                    "city": "Washington",
+                    "state": "DC: District of Columbia",
+                    "zip_code": "20001",
+                    "country": "USA: UNITED STATES",
+                },
+                "contact_person": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                },
+                "phone_number": "555-123-4567",
+                "email": "test@example.org",
                 "project_title": "Test Project",
                 "federal_estimated_funding": "50000.00",
                 "certification_agree": True,
@@ -172,10 +186,11 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify root element
-        assert root.tag == "GrantApplication"
+        grant_ns = f"{{{Namespace.GRANT}}}"
+        assert root.tag == f"{grant_ns}GrantApplication"
 
         # Verify header element
-        header_ns = "{http://apply.grants.gov/system/Header-V1.0}"
+        header_ns = f"{{{Namespace.HEADER}}}"
         header_elements = root.findall(f".//{header_ns}GrantSubmissionHeader")
         assert len(header_elements) == 1
 
@@ -189,7 +204,7 @@ class TestSubmissionXMLAssembler:
         assert len(sf424_elements) == 1
 
         # Verify footer element
-        footer_ns = "{http://apply.grants.gov/system/Footer-V1.0}"
+        footer_ns = f"{{{Namespace.FOOTER}}}"
         footer_elements = root.findall(f".//{footer_ns}GrantSubmissionFooter")
         assert len(footer_elements) == 1
 
@@ -220,6 +235,93 @@ class TestSubmissionXMLAssembler:
         assert "Test Organization" in xml_string
         assert "Test Project" in xml_string
         assert "50000.00" in xml_string
+
+    def test_generate_complete_submission_xml_contains_contact_person(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that generated XML contains ContactPerson element with correct structure."""
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Verify ContactPerson element exists
+        assert "<SF424_4_0:ContactPerson>" in xml_string, "ContactPerson element not found in XML"
+        assert "</SF424_4_0:ContactPerson>" in xml_string, "ContactPerson closing tag not found"
+
+        # Verify ContactPerson contains FirstName and LastName with globLib namespace
+        assert "globLib:FirstName" in xml_string, "globLib:FirstName not found in ContactPerson"
+        assert "globLib:LastName" in xml_string, "globLib:LastName not found in ContactPerson"
+        assert "John" in xml_string, "ContactPerson FirstName 'John' not found"
+        assert "Doe" in xml_string, "ContactPerson LastName 'Doe' not found"
+
+        # Verify ContactPerson comes after Applicant
+        applicant_pos = xml_string.find("<SF424_4_0:Applicant>")
+        contact_person_pos = xml_string.find("<SF424_4_0:ContactPerson>")
+        assert applicant_pos != -1, "Applicant element not found"
+        assert contact_person_pos != -1, "ContactPerson element not found"
+        assert (
+            applicant_pos < contact_person_pos
+        ), "ContactPerson should come after Applicant in XML"
+
+    def test_generate_complete_submission_xml_contains_applicant_and_contact_person(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that generated XML contains both Applicant and ContactPerson elements."""
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Parse XML to verify structure
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        # Find SF424 form element
+        sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
+        forms_element = root.find(".//Forms")
+        sf424_element = forms_element.find(f".//{sf424_ns}SF424_4_0")
+        assert sf424_element is not None, "SF424_4_0 element not found"
+
+        # Verify Applicant element exists
+        applicant_elements = sf424_element.findall(f".//{sf424_ns}Applicant")
+        assert len(applicant_elements) == 1, "Expected exactly one Applicant element"
+        applicant = applicant_elements[0]
+
+        # Verify Applicant has child elements with globLib namespace
+        glob_lib_ns = "{http://apply.grants.gov/system/GlobalLibrary-V2.0}"
+        assert (
+            applicant.find(f".//{glob_lib_ns}Street1") is not None
+        ), "Street1 not found in Applicant"
+        assert applicant.find(f".//{glob_lib_ns}City") is not None, "City not found in Applicant"
+        assert applicant.find(f".//{glob_lib_ns}State") is not None, "State not found in Applicant"
+
+        # Verify ContactPerson element exists
+        contact_person_elements = sf424_element.findall(f".//{sf424_ns}ContactPerson")
+        assert len(contact_person_elements) == 1, "Expected exactly one ContactPerson element"
+        contact_person = contact_person_elements[0]
+
+        # Verify ContactPerson has child elements with globLib namespace
+        first_name = contact_person.find(f".//{glob_lib_ns}FirstName")
+        last_name = contact_person.find(f".//{glob_lib_ns}LastName")
+        assert first_name is not None, "FirstName not found in ContactPerson"
+        assert last_name is not None, "LastName not found in ContactPerson"
+        assert first_name.text == "John", f"Expected FirstName='John', got '{first_name.text}'"
+        assert last_name.text == "Doe", f"Expected LastName='Doe', got '{last_name.text}'"
+
+        # Verify element order: Applicant should come before ContactPerson
+        sf424_children = list(sf424_element)
+        applicant_index = None
+        contact_person_index = None
+        for i, child in enumerate(sf424_children):
+            if child.tag == f"{sf424_ns}Applicant":
+                applicant_index = i
+            elif child.tag == f"{sf424_ns}ContactPerson":
+                contact_person_index = i
+
+        assert applicant_index is not None, "Applicant element not found in SF424 children"
+        assert contact_person_index is not None, "ContactPerson element not found in SF424 children"
+        assert (
+            applicant_index < contact_person_index
+        ), f"ContactPerson (index {contact_person_index}) should come after Applicant (index {applicant_index})"
 
     def test_generate_complete_submission_xml_contains_footer_data(
         self, sample_application, sample_application_submission
@@ -394,9 +496,9 @@ class TestSubmissionXMLAssembler:
         assert "encoding" in xml_string[:50]  # Check encoding is in declaration
 
         # Verify namespaces are properly declared
-        assert "xmlns:header" in xml_string
-        assert "xmlns:footer" in xml_string
-        assert "xmlns:glob" in xml_string
+        assert f'xmlns:header="{Namespace.HEADER}"' in xml_string
+        assert f'xmlns:footer="{Namespace.FOOTER}"' in xml_string
+        assert f'xmlns:glob="{Namespace.GLOB}"' in xml_string
 
     def test_parse_xml_string_valid(self, sample_application, sample_application_submission):
         """Test parsing a valid XML string."""
@@ -465,9 +567,9 @@ class TestSubmissionXMLAssembler:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify namespace declarations exist
-        assert "http://apply.grants.gov/system/Header-V1.0" in root.nsmap.values()
-        assert "http://apply.grants.gov/system/Footer-V1.0" in root.nsmap.values()
-        assert "http://apply.grants.gov/system/Global-V1.0" in root.nsmap.values()
+        assert Namespace.HEADER in root.nsmap.values()
+        assert Namespace.FOOTER in root.nsmap.values()
+        assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
         self, sample_application, sample_application_submission, enable_factory_create

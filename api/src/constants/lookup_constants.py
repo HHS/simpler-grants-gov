@@ -236,6 +236,8 @@ class Privilege(StrEnum):
     LEGACY_AGENCY_VIEWER = "legacy_agency_viewer"
     LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
     LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
+    MANAGE_INTERNAL_ROLES = "manage_internal_roles"
+    MANAGE_COMPETITION = "manage_competition"
 
 
 class RoleType(StrEnum):
@@ -290,3 +292,9 @@ class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
     LEGACY_CERTIFICATE = "legacy_certificate"
+
+
+class OrganizationAuditEvent(StrEnum):
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
