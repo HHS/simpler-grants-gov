@@ -72,7 +72,9 @@ class TestCurrencyTransformations:
 
     def test_transform_currency_empty_string(self):
         """Test currency transformation with empty string - should raise error."""
-        with pytest.raises(ValueTransformationError, match="Cannot convert currency value to decimal"):
+        with pytest.raises(
+            ValueTransformationError, match="Cannot convert currency value to decimal"
+        ):
             transform_currency_format("")
 
     def test_transform_currency_non_string_error(self):

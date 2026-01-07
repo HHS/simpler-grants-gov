@@ -750,7 +750,7 @@ FORM_XML_TRANSFORM_RULES = {
             "secondary_project_discipline": {
                 "xml_transform": {
                     "target": "SecondaryProjFieldCode",
-                     "value_transform": {
+                    "value_transform": {
                         "type": "map_values",
                         "params": {"mappings": PROJECT_DISCIPLINE_CODE_MAP},
                     },

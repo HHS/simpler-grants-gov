@@ -393,7 +393,7 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
     def test_generate_neh_cover_sheet_xml_matches_legacy_structure(self):
         """Test NEH Cover Sheet XML generation matches legacy XML structure exactly.
-        
+
         This test validates that generated XML contains all required elements and values
         from the legacy system output, without enforcing element ordering.
         """
@@ -426,12 +426,18 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         xml_data = response.xml_data
 
         # Verify root element and namespaces
-        assert "SupplementaryCoverSheetforNEHGrantPrograms_3_0:SupplementaryCoverSheetforNEHGrantPrograms_3_0" in xml_data
+        assert (
+            "SupplementaryCoverSheetforNEHGrantPrograms_3_0:SupplementaryCoverSheetforNEHGrantPrograms_3_0"
+            in xml_data
+        )
         assert 'xmlns:att="http://apply.grants.gov/system/Attachments-V1.0"' in xml_data
         assert 'xmlns:glob="http://apply.grants.gov/system/Global-V1.0"' in xml_data
         assert 'xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"' in xml_data
         assert 'FormVersion="3.0"' in xml_data
-        assert 'xmlns:SupplementaryCoverSheetforNEHGrantPrograms_3_0="http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"' in xml_data
+        assert (
+            'xmlns:SupplementaryCoverSheetforNEHGrantPrograms_3_0="http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"'
+            in xml_data
+        )
 
         # Verify PDMajorField (Project Director Major Field)
         assert "PDMajorField>117<" in xml_data  # "Arts: General" -> "117"
@@ -453,15 +459,18 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # CRITICAL: Verify ProjFieldCode is present and correctly nested in ApplicationInfoGroup
         assert "ProjFieldCode>117<" in xml_data  # "Arts: General" -> "117"
-        
+
         # Verify ProjFieldCode appears after ApplicationInfoGroup opens (proper nesting)
         # This ensures the field is inside the group, not at root level
         app_info_start = xml_data.find("ApplicationInfoGroup>")
-        app_info_end = xml_data.find("</SupplementaryCoverSheetforNEHGrantPrograms_3_0:ApplicationInfoGroup")
+        app_info_end = xml_data.find(
+            "</SupplementaryCoverSheetforNEHGrantPrograms_3_0:ApplicationInfoGroup"
+        )
         proj_field_pos = xml_data.find("ProjFieldCode>117")
-        
-        assert app_info_start < proj_field_pos < app_info_end, \
-            "ProjFieldCode must be nested inside ApplicationInfoGroup"
+
+        assert (
+            app_info_start < proj_field_pos < app_info_end
+        ), "ProjFieldCode must be nested inside ApplicationInfoGroup"
 
 
 @pytest.mark.xml_validation
