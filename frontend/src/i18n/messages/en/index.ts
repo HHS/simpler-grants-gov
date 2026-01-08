@@ -145,11 +145,10 @@ export const messages = {
         organizationIntro:
           "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
         pilotIntro:
-          "Welcome to our new, simpler application process. In partnership with the Bureau of Reclamation, we ensure your application is processed by the agency normally.",
+          "Welcome to our new, simpler application process. In partnership with the agency, we ensure your application is processed normally.",
         organizationApply: "To apply as part of an organization you must:",
         applyingForOrg:
           "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
-        poc: "Be the EBiz POC (Electronic Business Point of Contact) for your organization",
         uei: "Have a valid UEI (a Unique Entity ID <link>registered through SAM.gov</link>)",
         ineligibleGoToGrants:
           "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",

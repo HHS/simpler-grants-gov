@@ -65,9 +65,9 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         assert "<SupplementaryCoverSheetforNEHGrantPrograms_3_0:" in xml_data
         # Verify discipline codes are transformed correctly
         assert "PDMajorField>4<" in xml_data  # "History: U.S. History" -> "4"
-        assert "PrimaryPDNEH>4<" in xml_data  # Same mapping
+        assert "ProjFieldCode>4<" in xml_data  # Same mapping, moved to ApplicationInfoGroup
         # Verify organization type (passed through as full value)
-        assert "InstType>1330: University<" in xml_data  # Full value preserved
+        assert "OrganizationType>1330: University<" in xml_data  # Full value preserved
 
     def test_generate_neh_cover_sheet_xml_discipline_code_mapping(self):
         """Test that discipline display values are correctly mapped to XSD numeric codes."""
@@ -106,7 +106,7 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
             assert response.success is True, f"Failed for {display_value}"
             assert f"PDMajorField>{expected_code}<" in response.xml_data
-            assert f"PrimaryPDNEH>{expected_code}<" in response.xml_data
+            assert f"ProjFieldCode>{expected_code}<" in response.xml_data
 
     def test_generate_neh_cover_sheet_xml_organization_type_passthrough(self):
         """Test that organization type values are passed through as-is (full value)."""
@@ -145,7 +145,7 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
             assert response.success is True, f"Failed for {display_value}"
             # Organization type should be passed through as full value
-            assert f"InstType>{display_value}<" in response.xml_data
+            assert f"OrganizationType>{display_value}<" in response.xml_data
 
     def test_generate_neh_cover_sheet_xml_with_federal_match(self):
         """Test NEH Cover Sheet XML generation with federal match funding."""
@@ -179,9 +179,9 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         xml_data = response.xml_data
 
         # Verify funding structure
-        assert "ProjectFunding>" in xml_data
-        assert "OutrightFunds>25000.00<" in xml_data
-        assert "FederalMatch>25000.00<" in xml_data
+        assert "ProjectFundingGroup>" in xml_data
+        assert "ReqOutrightAmount>25000.00<" in xml_data
+        assert "ReqMatchAmount>25000.00<" in xml_data
         assert "TotalFromNEH>50000.00<" in xml_data
         assert "CostSharing>10000.00<" in xml_data
         assert "TotalProjectCosts>60000.00<" in xml_data
@@ -217,10 +217,10 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         xml_data = response.xml_data
 
         # Verify application info structure
-        assert "ApplicationInfo>" in xml_data
-        assert "AdditionalFunding>Y: Yes<" in xml_data  # Boolean converted to Y: Yes
+        assert "ApplicationInfoGroup>" in xml_data
+        assert "AdditionalFunding>Yes<" in xml_data  # Boolean converted to Yes
         assert "AdditionalFundingExplanation>State humanities council<" in xml_data
-        assert "ApplicationType>Supplement<" in xml_data
+        assert "TypeofApplication>Supplement<" in xml_data
         assert "SupplementalGrantNumber>NEH-12345-20<" in xml_data
 
     def test_generate_neh_cover_sheet_xml_additional_funding_false(self):
@@ -252,7 +252,7 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         xml_data = response.xml_data
 
         # Verify boolean conversion
-        assert "AdditionalFunding>N: No<" in xml_data
+        assert "AdditionalFunding>No<" in xml_data
 
     def test_generate_neh_cover_sheet_xml_with_secondary_and_tertiary_disciplines(self):
         """Test NEH Cover Sheet XML generation with optional secondary and tertiary disciplines."""
@@ -285,9 +285,9 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         xml_data = response.xml_data
 
         # Verify all three disciplines
-        assert "PrimaryPDNEH>76<" in xml_data  # "Interdisciplinary: American Studies" -> "76"
-        assert "SecondaryPDNEH>4<" in xml_data  # "History: U.S. History" -> "4"
-        assert "TertiaryPDNEH>55<" in xml_data  # "Literature: American Literature" -> "55"
+        assert "ProjFieldCode>76<" in xml_data  # "Interdisciplinary: American Studies" -> "76"
+        assert "SecondaryProjFieldCode>4<" in xml_data  # "History: U.S. History" -> "4"
+        assert "TertiaryProjFieldCode>55<" in xml_data  # "Literature: American Literature" -> "55"
 
     def test_generate_neh_cover_sheet_xml_without_optional_disciplines(self):
         """Test NEH Cover Sheet XML generation without optional secondary/tertiary disciplines."""
@@ -318,9 +318,9 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         xml_data = response.xml_data
 
         # Verify primary is present, secondary/tertiary are not
-        assert "PrimaryPDNEH>40<" in xml_data  # "Languages: English" -> "40"
-        assert "SecondaryPDNEH" not in xml_data
-        assert "TertiaryPDNEH" not in xml_data
+        assert "ProjFieldCode>40<" in xml_data  # "Languages: English" -> "40"
+        assert "SecondaryProjFieldCode" not in xml_data
+        assert "TertiaryProjFieldCode" not in xml_data
 
     def test_generate_neh_cover_sheet_xml_namespace_and_version(self):
         """Test that NEH Cover Sheet XML includes proper namespace and version attribute."""
@@ -390,6 +390,87 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # Verify the additional field of study code
         assert "PDMajorField>2872<" in xml_data  # "Other: Digital Humanities" -> "2872"
+
+    def test_generate_neh_cover_sheet_xml_matches_legacy_structure(self):
+        """Test NEH Cover Sheet XML generation matches legacy XML structure exactly.
+
+        This test validates that generated XML contains all required elements and values
+        from the legacy system output, without enforcing element ordering.
+        """
+        # Input JSON matching database structure
+        application_data = {
+            "major_field": "Arts: General",
+            "organization_type": "1326: Center For Advanced Study/Research Institute",
+            "funding_group": {
+                "outright_funds": "1",
+                "federal_match": "2",
+                "total_from_neh": "3.00",
+                "total_project_costs": "3.00",
+            },
+            "application_info": {
+                "additional_funding": False,
+                "application_type": "New",
+            },
+            "primary_project_discipline": "Arts: General",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data,
+            transform_config=NEH_COVER_SHEET_TRANSFORM_RULES,
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        xml_data = response.xml_data
+
+        # Verify root element and namespaces
+        assert (
+            "SupplementaryCoverSheetforNEHGrantPrograms_3_0:SupplementaryCoverSheetforNEHGrantPrograms_3_0"
+            in xml_data
+        )
+        assert 'xmlns:att="http://apply.grants.gov/system/Attachments-V1.0"' in xml_data
+        assert 'xmlns:glob="http://apply.grants.gov/system/Global-V1.0"' in xml_data
+        assert 'xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"' in xml_data
+        assert 'FormVersion="3.0"' in xml_data
+        assert (
+            'xmlns:SupplementaryCoverSheetforNEHGrantPrograms_3_0="http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"'
+            in xml_data
+        )
+
+        # Verify PDMajorField (Project Director Major Field)
+        assert "PDMajorField>117<" in xml_data  # "Arts: General" -> "117"
+
+        # Verify OrganizationType (passed through as-is)
+        assert "OrganizationType>1326: Center For Advanced Study/Research Institute<" in xml_data
+
+        # Verify ProjectFundingGroup structure
+        assert "ProjectFundingGroup>" in xml_data
+        assert "ReqOutrightAmount>1.00<" in xml_data
+        assert "ReqMatchAmount>2.00<" in xml_data
+        assert "TotalFromNEH>3.00<" in xml_data
+        assert "TotalProjectCosts>3.00<" in xml_data
+
+        # Verify ApplicationInfoGroup structure
+        assert "ApplicationInfoGroup>" in xml_data
+        assert "AdditionalFunding>No<" in xml_data  # False -> "No"
+        assert "TypeofApplication>New<" in xml_data
+
+        # CRITICAL: Verify ProjFieldCode is present and correctly nested in ApplicationInfoGroup
+        assert "ProjFieldCode>117<" in xml_data  # "Arts: General" -> "117"
+
+        # Verify ProjFieldCode appears after ApplicationInfoGroup opens (proper nesting)
+        # This ensures the field is inside the group, not at root level
+        app_info_start = xml_data.find("ApplicationInfoGroup>")
+        app_info_end = xml_data.find(
+            "</SupplementaryCoverSheetforNEHGrantPrograms_3_0:ApplicationInfoGroup"
+        )
+        proj_field_pos = xml_data.find("ProjFieldCode>117")
+
+        assert (
+            app_info_start < proj_field_pos < app_info_end
+        ), "ProjFieldCode must be nested inside ApplicationInfoGroup"
 
 
 @pytest.mark.xml_validation

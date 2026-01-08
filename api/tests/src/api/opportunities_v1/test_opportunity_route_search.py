@@ -19,7 +19,6 @@ from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
-    AgencyFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -1726,15 +1725,8 @@ class TestOpportunityRouteSearch(BaseTestClass):
         self,
         client,
         db_session,
-        enable_factory_create,
         api_auth_token,
     ):
-        # setup-data
-        doc = AgencyFactory.create(agency_code="DOC")
-        AgencyFactory.create(
-            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
-        )
-
         resp = client.post(
             "/v1/opportunities/search",
             json=get_search_request(top_level_agency_one_of=["DOC", "DOS"]),
@@ -1749,14 +1741,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING, DOC_TOP_LEVEL]
         ]
 
-    def test_search_top_level_agency_and_sub_agencies_200(
-        self, client, db_session, enable_factory_create, api_auth_token
-    ):
-        # setup-data
-        dos = AgencyFactory.create(agency_code="DOS")
-        AgencyFactory.create(
-            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=dos.agency_id
-        )
+    def test_search_top_level_agency_and_sub_agencies_200(self, client, db_session, api_auth_token):
 
         resp = client.post(
             "/v1/opportunities/search",
