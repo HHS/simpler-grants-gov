@@ -47,7 +47,7 @@ class BaseSOAPClient:
             self.soap_request.data.decode(), self.operation_config.request_operation_name
         )
 
-    def get_soap_response_dict(self) -> dict:
+    def get_soap_response_dict(self, proxy_response: SOAPResponse | None = None) -> dict:
         """Get Simpler SOAP response dict
 
         This method will return the validated pydantic schema returned from the
@@ -60,7 +60,7 @@ class BaseSOAPClient:
         operation_method = getattr(
             self, to_snake_case(self.operation_config.request_operation_name)
         )
-        return operation_method().to_soap_envelope_dict(
+        return operation_method(proxy_response).to_soap_envelope_dict(
             self.operation_config.response_operation_name
         )
 
@@ -212,7 +212,9 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/applicant-system-to-system/web-services/
     """
 
-    def get_opportunity_list_request(self) -> applicants_schemas.GetOpportunityListResponse:
+    def get_opportunity_list_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> applicants_schemas.GetOpportunityListResponse:
         return get_opportunity_list_response(
             db_session=self.db_session,
             get_opportunity_list_request=applicants_schemas.GetOpportunityListRequest(
@@ -228,7 +230,9 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     here: https://grants.gov/system-to-system/grantor-system-to-system/web-services
     """
 
-    def get_application_zip_request(self) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
+    def get_application_zip_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
         return get_application_zip_response(
             db_session=self.db_session,
             soap_request=self.soap_request,
@@ -239,13 +243,14 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
 
     def get_submission_list_expanded_request(
-        self,
+        self, proxy_response: SOAPResponse
     ) -> grantors_schemas.GetSubmissionListExpandedResponse:
         soap_request_dict = self.get_soap_request_dict() or {}
         return get_submission_list_expanded_response(
             db_session=self.db_session,
             soap_request=self.soap_request,
             request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
+            proxy_response=proxy_response,
         )
 
     def _gen_response_data(
@@ -265,9 +270,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         yield b"\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
-        if proxy_response.status_code != 500:
-            return proxy_response
-        if not self.operation_config.is_mtom:
+        if self.operation_config.is_mtom is False:
             return proxy_response
         # MTOM message is assembled here
         # 1. --uuid: {boundary_uuid}\n
@@ -279,7 +282,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         # 4. --uuid: {boundary_uuid}
         # 5. the file bytes from the file being attached
         # 6. --uuid: {boundary_uuid}--
-        simpler_response_soap_dict = self.get_soap_response_dict()
+        simpler_response_soap_dict = self.get_soap_response_dict(proxy_response)
         mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
@@ -290,6 +293,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
         }
         boundary = "--uuid:" + boundary_uuid
+        mime_message: Iterator[bytes] | bytes = b""
         mime_message = build_mtom_response_from_dict(
             simpler_response_soap_dict,
             boundary_uuid,
