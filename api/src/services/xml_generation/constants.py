@@ -37,8 +37,8 @@ class Namespace:
     # Attachments namespace
     ATT = "http://apply.grants.gov/system/Attachments-V1.0"
 
-    # Grant common types namespace
-    GRANT = "http://apply.grants.gov/system/GrantsCommonTypes-V1.0"
+    # Grant application namespace
+    GRANT = "http://apply.grants.gov/system/MetaGrantApplication"
 
     # XML Schema instance namespace
     XSI = "http://www.w3.org/2001/XMLSchema-instance"
