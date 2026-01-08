@@ -79,7 +79,7 @@ def transform_currency_format(value: Any) -> str:
     except InvalidOperation:
         raise ValueTransformationError(
             f"Cannot convert currency value to decimal: '{value}'"
-        ) from None
+        )
 
 
 def transform_string_case(value: Any, case_type: str) -> str:
