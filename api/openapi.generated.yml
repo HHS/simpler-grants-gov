@@ -1041,8 +1041,8 @@ paths:
 
         '
       security:
+      - ApiJwtAuth: []
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -1470,8 +1470,8 @@ paths:
 
         '
       security:
+      - ApiJwtAuth: []
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/organizations/{organization_id}/users:
     post:
       parameters:
@@ -4303,6 +4303,13 @@ components:
           format: uuid
           description: Optional organization ID to associate with the application
           example: 456e7890-e12c-34f5-b678-901234567890
+        intends_to_add_organization:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the user intends to add an organization later when
+            applying as an individual
+          example: true
       required:
       - competition_id
     ApplicationStartResponseData:
@@ -6438,6 +6445,12 @@ components:
           anyOf:
           - $ref: '#/components/schemas/Organization'
           - type: 'null'
+        intends_to_add_organization:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the user intends to add an organization later when
+            applying as an individual
         form_validation_warnings:
           type: object
           description: Specific form validation issues

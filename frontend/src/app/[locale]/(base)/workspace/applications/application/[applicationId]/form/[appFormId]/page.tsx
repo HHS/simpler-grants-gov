@@ -50,18 +50,26 @@ async function FormPage({ params }: formPageProps) {
   if (!userSession || !userSession.token) {
     return <TopLevelError />;
   }
-  const response = await getApplicationDetails(
-    applicationId,
-    userSession?.token,
-  );
 
-  if (response.status_code !== 200) {
+  let response;
+  try {
+    response = await getApplicationDetails(applicationId, userSession?.token);
+
+    if (response.status_code !== 200) {
+      console.error(
+        `Error retrieving application details for (${applicationId})`,
+        response,
+      );
+      return <TopLevelError />;
+    }
+  } catch (e) {
     console.error(
       `Error retrieving application details for (${applicationId})`,
-      response,
+      e,
     );
     return <TopLevelError />;
   }
+
   const { application_status } = response.data;
 
   if (error || !data) {
