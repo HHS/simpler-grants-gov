@@ -23,7 +23,7 @@ It is highly recommended you switch over in a lower environment first to discove
 
 ## Behaviors
 
-The SOAP Notary supports multiple different behaviors when receiving SOAP requests that can be configured based on the SOAP method being requested, the caller, or the agency that the Grant Opportunity or Application is associated with. This provides the ability to evolve the systems behind the Notary layer, including depreciation and end of life of existing systems and infrastructure to be disconnected from the timelines of backwards compatibility and ongoing support of SOAP consumers. These behaviors will be orchestrated by the the Simpler Grants.gov Team, callers don't need to configure or consider these behaviors, they are explained simply as additional context.
+The SOAP Notary supports multiple different behaviors when receiving SOAP requests that can be configured based on the SOAP method being requested, the caller, or the agency that the Grant Opportunity or Application is associated with. This provides the ability to evolve the systems behind the Notary layer. We can even go so far as depreciating and hitting end of life for the existing systems and infrastructure, while still maintaining extended timelines of backwards compatibility and ongoing support of existing SOAP consumers. In other words the Notary allows us to continue offering the established SOAP interface even if the original system backing the SOAP calls is entirely retired and all the responses are sourced from Simpler. These behaviors will be orchestrated by the the Simpler Grants.gov Team, callers don't need to configure or consider these behaviors, they are explained simply as additional context.
 
 ### Default Behavior
 
