@@ -75,8 +75,8 @@ def transform_currency_format(value: Any) -> str:
         decimal_value = Decimal(value)
         # Format with exactly 2 decimal places
         return f"{decimal_value:.2f}"
-    except InvalidOperation:
-        raise ValueTransformationError(f"Cannot convert currency value to decimal: '{value}'")
+    except InvalidOperation as err:
+        raise ValueTransformationError(f"Cannot convert currency value to decimal: '{value}'") from err
 
 
 def transform_string_case(value: Any, case_type: str) -> str:
