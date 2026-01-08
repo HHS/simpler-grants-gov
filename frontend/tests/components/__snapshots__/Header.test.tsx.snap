@@ -216,10 +216,9 @@ exports[`Header About renders About submenu 1`] = `
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
                   role="img"
-                  style="color: rgb(181, 9, 9);"
                 >
                   <use
-                    href="/img.jpg#error"
+                    href="/img.jpg#account_circle"
                   />
                 </svg>
                 <div
@@ -245,10 +244,9 @@ exports[`Header About renders About submenu 1`] = `
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
                   role="img"
-                  style="color: rgb(181, 9, 9);"
                 >
                   <use
-                    href="/img.jpg#error"
+                    href="/img.jpg#account_circle"
                   />
                 </svg>
                 <div
@@ -744,10 +742,9 @@ exports[`Header About renders Community submenu 1`] = `
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
                   role="img"
-                  style="color: rgb(181, 9, 9);"
                 >
                   <use
-                    href="/img.jpg#error"
+                    href="/img.jpg#account_circle"
                   />
                 </svg>
                 <div
@@ -773,10 +770,9 @@ exports[`Header About renders Community submenu 1`] = `
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
                   role="img"
-                  style="color: rgb(181, 9, 9);"
                 >
                   <use
-                    href="/img.jpg#error"
+                    href="/img.jpg#account_circle"
                   />
                 </svg>
                 <div
@@ -1272,10 +1268,9 @@ exports[`Header renders Header navbar menu 1`] = `
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
                   role="img"
-                  style="color: rgb(181, 9, 9);"
                 >
                   <use
-                    href="/img.jpg#error"
+                    href="/img.jpg#account_circle"
                   />
                 </svg>
                 <div
@@ -1301,10 +1296,9 @@ exports[`Header renders Header navbar menu 1`] = `
                   aria-hidden="true"
                   class="usa-icon usa-icon--size-3 display-block"
                   role="img"
-                  style="color: rgb(181, 9, 9);"
                 >
                   <use
-                    href="/img.jpg#error"
+                    href="/img.jpg#account_circle"
                   />
                 </svg>
                 <div
