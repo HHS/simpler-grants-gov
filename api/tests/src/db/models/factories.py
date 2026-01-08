@@ -9,6 +9,7 @@ https://factoryboy.readthedocs.io/en/latest/ for more information.
 """
 
 import random
+import string
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -774,7 +775,10 @@ class OpportunityAssistanceListingFactory(BaseFactory):
 
     program_title = factory.Faker("company")
     assistance_listing_number = factory.LazyFunction(
-        lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
+        lambda: (
+            f"{fake.random_int(min=1, max=99):02}."
+            f"{''.join(random.choices(string.ascii_uppercase + string.digits, k=random.randint(2, 3)))}"
+        )
     )
 
     class Params:

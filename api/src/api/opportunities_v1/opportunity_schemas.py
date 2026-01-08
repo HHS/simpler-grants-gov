@@ -1,4 +1,5 @@
 from enum import StrEnum
+from marshmallow.decorators import pre_load
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
@@ -356,7 +357,7 @@ class OpportunitySearchFilterV1Schema(Schema):
     assistance_listing_number = fields.Nested(
         StrSearchSchemaBuilder("AssistanceListingNumberFilterV1Schema")
         .with_one_of(
-            example="45.149", pattern=r"^\d{2}\.\d{2,3}$"
+            example="45.149", pattern=r"^\d{2}\.[A-Z0-9]{2,3}$"
         )  # Always of the format ##.## or ##.###
         .build()
     )
@@ -400,6 +401,12 @@ class OpportunitySearchFilterV1Schema(Schema):
         .with_one_of(example="USAID", minimum_length=2)
         .build()
     )
+
+    @pre_load
+    def uppercase_input(self, data, **kwargs):
+        if "assistance_listing_number" in data and isinstance(data["assistance_listing_number"], str):
+            data["assistance_listing_number"] = data["assistance_listing_number"].upper()
+        return data
 
 
 class OpportunityFacetV1Schema(Schema):
