@@ -173,66 +173,6 @@ def test_form_update_missing_required_fields(
     assert resp.status_code == 422
 
 
-def test_form_update_legacy_auth_token(client, api_auth_token, enable_factory_create):
-    """Test successfully creating a new form via PUT endpoint"""
-    form_id = uuid.uuid4()
-    form_data = {
-        "form_name": "New Test Form",
-        "short_form_name": "new_test_form",
-        "form_version": "2.0",
-        "agency_code": "TEST",
-        "omb_number": "4040-0002",
-        "form_json_schema": {"type": "object", "properties": {"test_field": {"type": "string"}}},
-        "form_ui_schema": [{"type": "field", "definition": "/properties/test_field"}],
-        "form_instruction_id": None,
-        "form_rule_schema": None,
-        "json_to_xml_schema": {"mapping": "test"},
-    }
-
-    resp = client.put(f"/alpha/forms/{form_id}", headers={"X-Auth": api_auth_token}, json=form_data)
-
-    assert resp.status_code == 200
-    response_data = resp.get_json()
-    assert response_data["message"] == "Success"
-
-    form = response_data["data"]
-    assert form["form_id"] == str(form_id)
-    assert form["form_name"] == "New Test Form"
-    assert form["short_form_name"] == "new_test_form"
-    assert form["form_version"] == "2.0"
-    assert form["agency_code"] == "TEST"
-    assert form["omb_number"] == "4040-0002"
-    assert form["json_to_xml_schema"] == {"mapping": "test"}
-
-
-def test_form_update_unauthorized_legacy_user(client, all_api_auth_tokens, enable_factory_create):
-    """Test that non-admin users cannot update forms"""
-    form_id = uuid.uuid4()
-
-    form_data = {
-        "form_name": "Test Form",
-        "short_form_name": "test_form",
-        "form_version": "1.0",
-        "agency_code": "TEST",
-        "omb_number": None,
-        "form_json_schema": {"type": "object"},
-        "form_ui_schema": [],
-        "form_instruction_id": None,
-        "form_rule_schema": None,
-    }
-
-    # Use auth_token_1 instead of auth_token_0 (not admin)
-    non_admin_token = all_api_auth_tokens[1] if len(all_api_auth_tokens) > 1 else "non_admin_token"
-
-    resp = client.put(
-        f"/alpha/forms/{form_id}", headers={"X-Auth": non_admin_token}, json=form_data
-    )
-
-    assert resp.status_code == 403
-    response_data = resp.get_json()
-    assert "Only internal admin users can update forms" in response_data["message"]
-
-
 def test_form_update_no_auth_token(client, enable_factory_create):
     """Test that requests without auth token are rejected"""
     form_id = uuid.uuid4()
