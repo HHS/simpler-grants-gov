@@ -28,7 +28,7 @@ psycopg = { extras = ["binary"], version = "^3.2.3" }
 smart-open = "^7.0.5"
 newrelic = "11.2.0"
 requests = "^2.32.5"
-urllib3 = "2.6.2"
+urllib3 = "^2.6.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
