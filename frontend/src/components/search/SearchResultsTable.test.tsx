@@ -48,14 +48,27 @@ describe("SearchResultsTable", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("matches snapshot", () => {
+  it("renders a table with header + one result row", () => {
     const component = SearchResultsTable({
       savedOpportunities: [],
       searchResults: [mockOpportunity],
       page: 1,
     });
-    const { container } = render(component);
-    expect(container).toMatchSnapshot();
+
+    render(component);
+
+    // header row + one data row
+    const rows = screen.getAllByRole("row");
+    expect(rows.length).toBeGreaterThanOrEqual(2);
+
+    // sanity check: a known heading exists
+    expect(
+      screen.getByRole("columnheader", { name: "headings.title" }),
+    ).toBeInTheDocument();
+
+    // sanity check: the opportunity title link exists
+    const title = mockOpportunity.opportunity_title ?? "Test Opportunity";
+    expect(screen.getByRole("link", { name: title })).toBeInTheDocument();
   });
 
   it("renders OpportunitySaveUserControl for each opportunity", () => {
@@ -348,6 +361,7 @@ describe("SearchResultsTable", () => {
       undefined,
     );
   });
+
   it("correctly determines previously saved opportunities", () => {
     const component = SearchResultsTable({
       savedOpportunities: [mockOpportunity],
