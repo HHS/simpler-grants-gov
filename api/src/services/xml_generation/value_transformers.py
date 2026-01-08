@@ -3,6 +3,7 @@
 import logging
 import re
 from collections.abc import Callable
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from .constants import CURRENCY_REGEX, NO_VALUE, YES_VALUE
@@ -70,8 +71,6 @@ def transform_currency_format(value: Any) -> str:
         )
 
     # Convert to Decimal for precise formatting, then format with 2 decimal places
-    from decimal import Decimal, InvalidOperation
-
     try:
         decimal_value = Decimal(value)
         # Format with exactly 2 decimal places
