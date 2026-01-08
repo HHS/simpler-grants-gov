@@ -108,7 +108,7 @@ AWS Cloudfront and API Gateway are deployed in front of public facing HTTPs serv
 
 Services, including FE NextJS service, BE Python API service, Metabase service, Python Analytics Service, and Simpler NOFOs Python service are all hosted as containers running on ECS clusters. These services are set to auto scale as needed to handle increases in traffic. AWS Parameter Store is used to adjust Environment Variables being passed to the services to control behavior by environment and to support feature flags defaults for the NextJS and Python API services.
 
-Managed AWS Services are used for our data storage layer, including AWS RDS for PostgreSQL, Manged OpenSearch for search index, and AWS S3 for file storage.
+Managed AWS Services are used for our data storage layer, including AWS RDS for PostgreSQL, Managed OpenSearch for search index, and AWS S3 for file storage.
 
 ### Traffic Flow
 

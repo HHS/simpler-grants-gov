@@ -4,7 +4,7 @@ The SOAP Notary is Simpler Grants.gov's solution to continuing to support Agenci
 
 ## Audience
 
-The primary audience for the SOAP Notary is Agencies who retrieve Application data from Grants.gov either directly into their own systems, or by utilizing GrantsSolutions. The SOAP Notary will provide a mechanism for that Application data to continue flowing through existing integrations while Simpler Grants works to iterate and evolve the Application experience for Applicants and Grantors. By providing the SOAP Notary, that backwards compatibility layer and unification of data between the existing Grants.gov and Simpler Grants.gov systems is done in one place, via one focused investment in maintaining those integrations.
+The primary audience for the SOAP Notary is Agencies who retrieve Application data from Grants.gov either directly into their own systems, or by utilizing GrantSolutions. The SOAP Notary will provide a mechanism for that Application data to continue flowing through existing integrations while Simpler Grants works to iterate and evolve the Application experience for Applicants and Grantors. By providing the SOAP Notary, that backwards compatibility layer and unification of data between the existing Grants.gov and Simpler Grants.gov systems is done in one place, via one focused investment in maintaining those integrations.
 
 ## Migrating to the SOAP Notary
 
@@ -45,7 +45,7 @@ As Simpler Grants stabilizes and support for features and application forms reac
 
 ### Endpoint mapping
 
-While there is not a commitment to 1-to-1 replacement/compatibility between existing SOAP requests and the new REST interface, this table provides a rough mapping for existing SOAP implementations to determine which REST endpoints would play a similar role in a REST implementation. REST implementation represents a mixture of native Simpler Grants API endpoints and CommonGrants Standard endpoints. Both types of endpoints are available the single API hosted on api.simpler.grants.gov, api.training.simpler.grants.gov, etc.
+While there is not a commitment to 1-to-1 replacement/compatibility between existing SOAP requests and the new REST interface, this table provides a rough mapping for existing SOAP implementations to determine which REST endpoints would play a similar role in a REST implementation. REST implementation represents a mixture of native Simpler Grants API endpoints and CommonGrants Standard endpoints. Both types of endpoints are available from the single API hosted on api.simpler.grants.gov, api.training.simpler.grants.gov, etc.
 
 #### [Grantor](https://www.grants.gov/system-to-system/grantor-system-to-system/web-services/)
 
