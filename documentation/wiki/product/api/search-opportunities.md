@@ -78,8 +78,8 @@ The opportunity search endpoint accepts the following parameters:
 **Other Filters**
 
 * **`assistance_listing_number`**: Specific CFDA number
-  * Format: `##.### or ##.???` (e.g., "45.A49")
-  * Example: `{"one_of": ["45.A49"]}`
+  * Format: `##.###` (e.g., "45.149")
+  * Example: `{"one_of": ["45.149"]}`
 * **`is_cost_sharing`**: Whether cost sharing is required
   * Example: `{"one_of": [true]}`
 
