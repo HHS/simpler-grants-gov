@@ -545,9 +545,8 @@ paths:
       tags:
       - Form Alpha
       summary: Form Get
-      security: &id001
+      security:
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
     put:
       parameters:
       - in: path
@@ -588,7 +587,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FormUpdateRequest'
-      security: *id001
+      security:
+      - ApiUserKeyAuth: []
   /common-grants/opportunities:
     get:
       parameters:
@@ -2589,6 +2589,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
         '404':
           content:
             application/json:
@@ -2603,6 +2609,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/FormInstructionUploadRequest'
+      security:
+      - ApiUserKeyAuth: []
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -3075,7 +3083,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id002
+          type: &id001
           - object
           $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -3341,7 +3349,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -4096,7 +4104,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id003
+          enum: &id002
           - discretionary
           - mandatory
           - continuation
@@ -4115,23 +4123,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id004
+            type: &id003
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id005
+          type: &id004
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id006
+          enum: &id005
           - forecasted
           - posted
           - closed
           - archived
-          type: &id007
+          type: &id006
           - string
         created_at:
           type: string
@@ -4204,7 +4212,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -4516,7 +4524,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id008
+            type: &id007
             - object
             $ref: '#/components/schemas/ValidationIssue'
     FormUpdateRequest:
@@ -5985,7 +5993,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id003
+          enum: *id002
           type:
           - string
           - 'null'
@@ -5999,17 +6007,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id004
+            type: *id003
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id005
+          type: *id004
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id006
-          type: *id007
+          enum: *id005
+          type: *id006
         created_at:
           type: string
           format: date-time
@@ -6476,7 +6484,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -6802,7 +6810,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7255,7 +7263,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7385,7 +7393,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7611,7 +7619,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7835,7 +7843,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7974,7 +7982,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -8139,7 +8147,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
