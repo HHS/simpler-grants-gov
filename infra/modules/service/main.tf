@@ -184,7 +184,13 @@ resource "aws_ecs_task_definition" "app" {
       logConfiguration = {
         logDriver = "awsfirelens",
       }
-      mountPoints    = []
+      mountPoints = [
+        {
+          sourceVolume  = "tmp"
+          containerPath = "/tmp"
+          readOnly      = false
+        }
+      ]
       systemControls = []
       volumesFrom    = []
     },
@@ -250,6 +256,11 @@ resource "aws_ecs_task_definition" "app" {
   # Reference https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html
   network_mode = "awsvpc"
 
+  # Ephemeral volume for /tmp - required when readonlyRootFilesystem is true
+  volume {
+    name = "tmp"
+  }
+
   depends_on = [
     aws_cloudwatch_log_group.service_logs,
     aws_cloudwatch_log_group.fluentbit,
@@ -289,7 +300,13 @@ resource "aws_ecs_task_definition" "migrator" {
       logConfiguration = {
         logDriver = "awsfirelens",
       }
-      mountPoints    = []
+      mountPoints = [
+        {
+          sourceVolume  = "tmp"
+          containerPath = "/tmp"
+          readOnly      = false
+        }
+      ]
       systemControls = []
       volumesFrom    = []
     },
@@ -342,6 +359,11 @@ resource "aws_ecs_task_definition" "migrator" {
 
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
+
+  # Ephemeral volume for /tmp - required when readonlyRootFilesystem is true
+  volume {
+    name = "tmp"
+  }
 
   depends_on = [
     aws_cloudwatch_log_group.service_logs,

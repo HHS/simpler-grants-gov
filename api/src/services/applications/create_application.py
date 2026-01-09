@@ -88,14 +88,32 @@ def _validate_applicant_type(competition: Competition, organization_id: UUID | N
 
 def create_application(
     db_session: db.Session,
-    competition_id: UUID,
     user: User,
-    application_name: str | None = None,
-    organization_id: UUID | None = None,
+    json_data: dict,
 ) -> Application:
     """
     Create a new application for a competition.
     """
+    # Extract values from json_data
+    competition_id = json_data["competition_id"]
+    application_name = json_data.get("application_name")
+    organization_id = json_data.get("organization_id")
+    intends_to_add_organization = json_data.get("intends_to_add_organization")
+
+    # Validate that organization_id and intends_to_add_organization are not both set
+    if organization_id is not None and intends_to_add_organization is True:
+        logger.info(
+            "Cannot set both organization_id and intends_to_add_organization",
+            extra={
+                "organization_id": organization_id,
+                "intends_to_add_organization": intends_to_add_organization,
+            },
+        )
+        raise_flask_error(
+            422,
+            "Cannot set both organization_id and intends_to_add_organization. "
+            "Applications with an organization do not need to indicate intent to add one.",
+        )
     # Check if competition exists
     competition = db_session.execute(
         select(Competition)
@@ -154,6 +172,7 @@ def create_application(
         application_name=application_name,
         application_status=ApplicationStatus.IN_PROGRESS,
         organization_id=organization_id,  # Set the organization ID if provided
+        intends_to_add_organization=intends_to_add_organization,
     )
     db_session.add(application)
     add_audit_event(

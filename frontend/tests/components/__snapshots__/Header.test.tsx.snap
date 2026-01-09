@@ -419,6 +419,17 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
+                  href="/developer"
+                >
+                  <div>
+                    Developers
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
                   href="https://wiki.simpler.grants.gov/"
                   target="_blank"
                 >
@@ -938,6 +949,17 @@ exports[`Header About renders Community submenu 1`] = `
                 >
                   <div>
                     Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/developer"
+                >
+                  <div>
+                    Developers
                   </div>
                 </a>
               </li>
@@ -1465,6 +1487,17 @@ exports[`Header renders Header navbar menu 1`] = `
                 >
                   <div>
                     Events
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/developer"
+                >
+                  <div>
+                    Developers
                   </div>
                 </a>
               </li>

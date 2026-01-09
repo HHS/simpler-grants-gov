@@ -13,7 +13,6 @@ locals {
     # Login.gov OAuth
     # Default values point to the IDP integration environment
     # which all non-prod environments should use
-    ENABLE_AUTH_ENDPOINT             = 0
     LOGIN_GOV_CLIENT_ID              = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-${var.environment}-simpler-grants-gov"
     LOGIN_GOV_ENDPOINT               = "https://idp.int.identitysandbox.gov/"
     LOGIN_GOV_JWK_ENDPOINT           = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
@@ -30,7 +29,6 @@ locals {
     # Both staging and dev environments both point to trainingws subdomain.
     GRANTS_GOV_URI  = "https://trainingws.grants.gov"
     GRANTS_GOV_PORT = 443
-    ENABLE_SOAP_API = 0
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"

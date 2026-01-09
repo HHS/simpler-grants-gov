@@ -265,6 +265,8 @@ class Application(ApiSchemaTable, TimestampMixin):
         Organization, uselist=False, back_populates="applications"
     )
 
+    intends_to_add_organization: Mapped[bool | None]
+
     application_forms: Mapped[list[ApplicationForm]] = relationship(
         "ApplicationForm", uselist=True, back_populates="application", cascade="all, delete-orphan"
     )
