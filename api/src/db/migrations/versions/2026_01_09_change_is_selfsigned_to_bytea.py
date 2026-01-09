@@ -25,6 +25,7 @@ def upgrade():
         type_=sa.LargeBinary(),
         existing_nullable=True,
         schema="staging",
+        postgresql_using='is_selfsigned::bytea'
     )
     # ### end Alembic commands ###
 
@@ -38,5 +39,6 @@ def downgrade():
         type_=sa.TEXT(),
         existing_nullable=True,
         schema="staging",
+        postgresql_using='is_selfsigned::bytea'
     )
     # ### end Alembic commands ###
