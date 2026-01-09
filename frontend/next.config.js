@@ -162,9 +162,10 @@ const nextConfig = {
   },
   basePath,
   reactStrictMode: true,
-  // Output only the necessary files for a deployment, excluding irrelevant node_modules
+  // Output only the necessary files for a deployment, excluding irrelevant node_modules.
+  // Keep standalone opt-in so local Playwright can run `next start`; enable via ENABLE_STANDALONE=true when needed.
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
-  output: "standalone",
+  output: process.env.ENABLE_STANDALONE === "true" ? "standalone" : undefined,
   sassOptions: appSassOptions,
   serverExternalPackages: ["newrelic"],
   webpack: (config) => {
