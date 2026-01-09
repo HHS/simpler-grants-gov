@@ -38,6 +38,9 @@ CMD ["npm", "run", "dev"]
 FROM base AS builder
 WORKDIR /frontend
 
+ARG ENABLE_STANDALONE
+ENV ENABLE_STANDALONE=${ENABLE_STANDALONE}
+
 COPY tsconfig.json .
 COPY *.config.js .
 COPY *.d.ts .
