@@ -1,8 +1,9 @@
 "use client";
+
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
 import { LoginLink } from "src/components/LoginButton";
