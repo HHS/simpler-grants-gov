@@ -15,3 +15,4 @@ Feature: Login with Login.gov Workflow
         And the user enters the authentication code
         And the user submits the MFA form
         Then the user is successfully logged in
+        
