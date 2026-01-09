@@ -1458,6 +1458,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["12.AB"]),
             get_search_request(assistance_listing_one_of=["45.A19"]),
             get_search_request(assistance_listing_one_of=["67.9C", "54.AB3", "12.Z9"]),
+            get_search_request(assistance_listing_one_of=["11.cC1"]),
         ],
     )
     def test_search_validate_assistance_listing_filters_200(
@@ -1479,7 +1480,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["fourfive.sixseveneight"]),
             get_search_request(assistance_listing_one_of=["11..11"]),
             get_search_request(assistance_listing_one_of=["A1..11"]),
-            get_search_request(assistance_listing_one_of=["11.cC1"]),
         ],
     )
     def test_search_validate_assistance_listing_filters_422(
