@@ -395,7 +395,7 @@ export const messages = {
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
       unsavedChangesWarning:
-        "You have unsaved changes or attachments that will be lost if you select OK.",
+        "You have unsaved  changes or attachments that will be lost if you select OK.",
     },
   },
   Index: {
