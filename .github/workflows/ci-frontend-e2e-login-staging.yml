@@ -1,0 +1,66 @@
+name: Staging Login E2E Tests
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+defaults:
+  run:
+    working-directory: ./frontend
+
+env:
+  NODE_VERSION: 22
+  LOCKFILE_PATH: ./frontend/package-lock.json
+  PACKAGE_MANAGER: npm
+  NODE_OPTIONS: --dns-result-order=ipv4first
+
+jobs:
+  e2e-login-staging:
+    name: Login E2E (Staging)
+    runs-on: ubuntu-22.04
+
+    env:
+      PLAYWRIGHT_TARGET_ENV: staging
+      STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+      LOCAL_BASE_URL: http://127.0.0.1:3000
+      STAGING_TEST_USER_EMAIL: ${{ secrets.STAGING_TEST_USER_EMAIL }}
+      STAGING_TEST_USER_PASSWORD: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
+      STAGING_TEST_USER_MFA_KEY: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - name: Install dependencies & Playwright
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Run staging login tests
+        env:
+          CI: true
+        run: |
+          npx playwright test \
+            --config=tests/playwright.config.ts \
+            --project=login-staging-chromium
+
+      - name: Verify Blob Report Directory
+        if: always()
+        run: |
+          echo "Contents of blob-report directory:"
+          ls -R blob-report || echo "blob-report directory not found"
+
+      - name: Upload Playwright blob report (login)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-login-staging
+          path: frontend/blob-report
+          retention-days: 7

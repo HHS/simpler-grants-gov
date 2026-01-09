@@ -23,8 +23,13 @@ concurrency:
 
 jobs:
   e2e-tests:
-    name: Run E2E Tests
+    name: Run Local E2E Tests
     runs-on: ubuntu-22.04
+
+    env:
+      PLAYWRIGHT_TARGET_ENV: local
+      LOCAL_BASE_URL: http://127.0.0.1:3000
+      STAGING_BASE_URL: https://staging.simpler.grants.gov
 
     strategy:
       fail-fast: true
@@ -33,7 +38,8 @@ jobs:
         total_shards: [4]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -42,7 +48,8 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - run: |
+      - name: Install dependencies and Playwright
+        run: |
           npm ci
           npx playwright install --with-deps
           docker rmi node:22 node:20 node:18
@@ -107,7 +114,10 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          npm run test:e2e
+          npx playwright test \
+            --config=tests/playwright.config.ts \
+            ./e2e \
+            --shard="${CURRENT_SHARD}/${TOTAL_SHARDS}"
 
       - name: Debug logging on failure
         if: failure()
@@ -176,9 +186,9 @@ jobs:
       - name: Merge Blob Reports into HTML
         run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-      - name: Verify Downloaded Artifacts
+      - name: Verify merged HTML report
         run: |
-          echo "Contents of all-blob-reports after download:"
+          echo "Contents of the merged Playwright HTML report:"
           ls -R playwright*
 
       - name: Upload Merged HTML Report
