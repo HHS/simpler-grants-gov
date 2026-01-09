@@ -7,6 +7,7 @@
 
 from datetime import date, datetime
 
+from sqlalchemy import LargeBinary
 from sqlalchemy.orm import Mapped, declarative_mixin, mapped_column
 
 
@@ -27,6 +28,6 @@ class TcertificatesMixin:
     creator_id: Mapped[str]
     last_upd_date: Mapped[datetime | None]
     last_upd_id: Mapped[str | None]
-    is_selfsigned: Mapped[str | None]
+    is_selfsigned: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     serial_num: Mapped[str | None]
     system_name: Mapped[str | None]
