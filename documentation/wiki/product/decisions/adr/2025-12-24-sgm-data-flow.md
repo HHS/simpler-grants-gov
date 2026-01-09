@@ -8,13 +8,13 @@
 
 ## Context and Problem Statement
 
-Given the different approach for modernization of GrantSolutions we need an ongoing interoperability with the existing system, not a strangler, rebuild and replace pattern. To allow for that we need to have strategies for accessing data across the existing and modernized system that were not already designed and built for the Simpler Grants.gov work. How will we allow for bi-directional, near real-time, data flow between GrantSolutions (GS) and Simpler Grants Management (SGM).
+Given the different approach for modernization of GrantSolutions we need an ongoing interoperability with the existing system, not a strangler, rebuild and replace pattern. To allow for that we need to have strategies for accessing data across the existing and modernized system that were not already designed and built for the Simpler Grants.gov work. How will we allow for bi-directional, near real-time, data flow between GrantSolutions (GS) and Simpler Grants Management (SGM)?
 
 ## Decision Drivers
 
 - Optimize User Experience
-  - User's should be able to move between systems as seamlessly as possible
-  - Workflows or processes should move from system to system as needed without long delays or user intervention
+  - Users should be able to move between systems as seamlessly as possible
+  - Automated processes should proceed in both systems as needed without long delays or user intervention
 - Minimize time data is not in sync
   - Hourly is too slow for some data, but may be fine for other data
 - Minimize needless data duplication
@@ -49,7 +49,7 @@ For this ADR we are not picking a single option, but rather identifying everythi
 
 ### Bulk data copy on a scheduled basis
 
-This is the approach we took on Simpler Grants.gov. Hourly, we Extract, Load, and Transform (ELT) all of the table data we need from Grants.gov's database into Simpler Grants.gov's database. Whenever possible we only pull records updated since the last run to minimize data volume and the associated load on the existing system. We do not currently send data back to Grants.gov's database but in the SGM work that would be a requirement as well. We would modify our existing processes to support bi-directional data transfer. We could also consider improving the existing code base to allow it to run more frequently without collision and add more filtering to avoid when we fetch rows that we didn't see their FK records and so we fail to create the records (we could just only process something if we've already seen the parent record this run).
+This is the approach we took on Simpler Grants.gov. Hourly, we Extract, Load, and Transform (ELT) all of the table data we need from Grants.gov's database into Simpler Grants.gov's database. Whenever possible we only pull records updated since the last run to minimize data volume and the associated load on the existing system. We do not currently send data back to Grants.gov's database but in the SGM work that would be a requirement as well. We would modify our existing processes to support bi-directional data transfer. We could also consider improving the existing code base to allow it to run more frequently without collision and address some of the nuisance alters that self resolve on the following sync.
 
 - **Pros**
   - Simple
@@ -57,20 +57,22 @@ This is the approach we took on Simpler Grants.gov. Hourly, we Extract, Load, an
 - **Cons**
   - Too slow for some features where users will expect to move directly from GS to SGM or back and see the changes they just made accounted for
   - Would require work to run more often, or write data back to GS from SGM
+  - May require additional work if metadata in the data modal isn't similar to Grants.gov approach
 
 ### Call GS APIs directly as needed (no additional data points tracked)
 
-Where existing GS APIs exist we'll call those. We will have to figure out how API keys/permissions would work in this scenario. We may wrap these in our existing API, or just call them directly from the NextJS API "backend" server side routes. This will be the most streamlined way to build specific screens out that are able to be integrated into existing GS usage.
+Where existing GS APIs exist we'll call those. We will have to figure out how API keys/permissions would work in this scenario. We will likely wrap these in our existing API, but could just call them directly from the NextJS API "backend" server side routes. This will be the most streamlined way to build specific screens out that are able to be integrated into existing GS usage. There will be some dependency issues, for example, creating an opportunity might require putting data in GS, tapping GS to send that data to Grants.gov, and then seeing that data flow through into Simpler Grants.gov
 
 - **Pros**
   - Data is always fresh, exactly as if the user was still in GS
   - Data written back via existing APIs has all of the consistency and
 - **Cons**
   - Still learning what data has existing APIs that will make this possible
+  - Calling through the Simpler API introduces questions of how we handle errors, logging, response values, etc.
 
 ### Call GS APIs directly as needed, store additional data points in SGM (without duplicating existing data)
 
-We won't be able to always mutate the GS data model as quickly as we'd want to iterate on SGM. In those cases we would store new fields in the Simpler DB, with the identifier of the record in GS. This would allow the data from both systems to be pulled together either in the API layer or in the FE via 2 API calls depending on whether we're wrapping API calls to GS in the Simpler API.
+We won't be able to always mutate the GS data model as quickly as we'd want to iterate on SGM. In those cases we would store new fields in the Simpler DB, with the identifier of the record in GS. This would allow the data from both systems to be pulled together in the API layer and keep the FE from needing to be aware of what data is stored where and how that changes over time.
 
 - **Pros**
   - Provides flexibility to store new data without having to work that through on the SGM side
