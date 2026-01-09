@@ -215,7 +215,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     applicant_eligibility_description: Mapped[str | None]
 
     # SGG-7090, deprecate agency_phone_number usage - first deploy
-    agency_phone_number: Mapped[str | None] = mapped_column(Text.evaluates_none(), deferred=True)
+    agency_phone_number: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
     agency_email_address_description: Mapped[str | None]
@@ -228,8 +228,8 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     # the same named values in the opportunity itself
 
     # SGG-7090, deprecate agency_code, agency_name usage - first deploy
-    agency_code: Mapped[str | None] = mapped_column(Text.evaluates_none(), deferred=True)
-    agency_name: Mapped[str | None] = mapped_column(Text.evaluates_none(), deferred=True)
+    agency_code: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
+    agency_name: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
 
     link_funding_instruments: Mapped[list[LinkOpportunitySummaryFundingInstrument]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
