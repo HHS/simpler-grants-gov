@@ -4,7 +4,11 @@
  * tests render within a global context that includes i18n content
  * @see https://testing-library.com/docs/react-testing-library/setup#custom-render
  */
-import { render as _render, type RenderOptions } from "@testing-library/react";
+import {
+  render as _render,
+  type RenderOptions,
+  type RenderResult,
+} from "@testing-library/react";
 import { defaultLocale, formats, timeZone } from "src/i18n/config";
 import { messages } from "src/i18n/messages/en";
 
@@ -38,6 +42,6 @@ export * from "@testing-library/react";
 export function render(
   ui: React.ReactElement,
   options: Omit<RenderOptions, "wrapper"> = {},
-) {
+): RenderResult {
   return _render(ui, { wrapper: GlobalProviders, ...options });
 }

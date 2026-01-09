@@ -1,21 +1,22 @@
-import React from "react";
-import { render, screen } from "tests/react-utils";
 import { messages } from "src/i18n/messages/en";
-
+import type { Organization } from "src/types/applicationResponseTypes";
+import type { UserPrivilegesResponse } from "src/types/userTypes";
 import {
   fakeOrganizationDetailsResponse,
   fakeUserPrivilegesResponse,
 } from "src/utils/testing/fixtures";
+import { render, screen } from "tests/react-utils";
+
+import React from "react";
 
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
-import type { Organization } from "src/types/applicationResponseTypes";
-import type { UserPrivilegesResponse } from "src/types/userTypes";
 
 // Mock OrganizationItem so this test only verifies list behavior (empty vs mapping + props)
 const OrganizationItemMock = jest.fn(
-  (_props: { organization: Organization; userRoles: UserPrivilegesResponse }) => (
-    <li data-testid="org-item" />
-  ),
+  (_props: {
+    organization: Organization;
+    userRoles: UserPrivilegesResponse;
+  }) => <li data-testid="org-item" />,
 );
 
 jest.mock("src/components/workspace/UserOrganizationItem", () => ({

@@ -1,9 +1,9 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { identity, noop } from "lodash";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SaveSearchModal } from "src/components/search/SaveSearchModal";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const searchParameters = new URLSearchParams();
 
@@ -67,7 +67,9 @@ describe("SaveSearchModal", () => {
 
     // “title” is returned by the translation mock as a key; this ensures content is present.
     expect(screen.getByText("title")).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "inputLabel" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "inputLabel" }),
+    ).toBeInTheDocument();
   });
 
   it("closes the modal when Cancel is clicked", async () => {
@@ -123,22 +125,25 @@ describe("SaveSearchModal", () => {
     expect(screen.getByText("successDescription")).toBeInTheDocument();
 
     // Success view renders
-expect(screen.getByText("successTitle")).toBeInTheDocument();
-expect(screen.getByText("successDescription")).toBeInTheDocument();
+    expect(screen.getByText("successTitle")).toBeInTheDocument();
+    expect(screen.getByText("successDescription")).toBeInTheDocument();
 
-// NOTE: We intentionally do not assert the workspace link here because our next-intl
-// mock returns plain strings for t.rich(), so the <a> element is not rendered in this test.
-
+    // NOTE: We intentionally do not assert the workspace link here because our next-intl
+    // mock returns plain strings for t.rich(), so the <a> element is not rendered in this test.
 
     // Ensure we called the API with expected endpoint + method
     await waitFor(() => {
       expect(clientFetchMockImplementation).toHaveBeenCalled();
     });
 
-    const [firstCallUrl, firstCallOptions] = clientFetchMockImplementation.mock.calls[0] as unknown[];
+    const [firstCallUrl, firstCallOptions] = clientFetchMockImplementation.mock
+      .calls[0] as unknown[];
     expect(firstCallUrl).toBe("/api/user/saved-searches");
 
-    const requestOptions = firstCallOptions as { method?: unknown; body?: unknown };
+    const requestOptions = firstCallOptions as {
+      method?: unknown;
+      body?: unknown;
+    };
     expect(requestOptions.method).toBe("POST");
     expect(typeof requestOptions.body).toBe("string");
   });
@@ -146,7 +151,9 @@ expect(screen.getByText("successDescription")).toBeInTheDocument();
   it("shows an API error alert when the API request fails", async () => {
     const user = userEvent.setup();
 
-    clientFetchMockImplementation.mockRejectedValue(new Error("Request failed"));
+    clientFetchMockImplementation.mockRejectedValue(
+      new Error("Request failed"),
+    );
 
     render(<SaveSearchModal onSave={noop} />);
 

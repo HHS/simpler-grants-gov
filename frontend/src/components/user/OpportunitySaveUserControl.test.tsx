@@ -1,6 +1,7 @@
-import React from "react";
-import { render, screen, waitFor } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
+import { render, screen, waitFor } from "tests/react-utils";
+
+import React from "react";
 
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 

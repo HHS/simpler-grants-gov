@@ -42,7 +42,7 @@ describe("handleFormAction", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it("it returns error state if not logged in", async () => {
+  it("returns error state if not logged in", async () => {
     mockGetSession.mockResolvedValue(null);
     const result = await handleFormAction(genericPayload, new FormData());
     expect(result).toEqual({

@@ -1,12 +1,12 @@
-import React, { JSX } from "react";
-import { render, screen, waitFor } from "tests/react-utils";
 import userEvent from "@testing-library/user-event";
-
 import {
   fakeCompetition,
   fakeUserOrganization,
 } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
+import { render, screen, waitFor } from "tests/react-utils";
+
+import React, { JSX } from "react";
 
 import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
 
@@ -122,7 +122,9 @@ describe("StartApplicationModalControl", () => {
     );
 
     expect(await screen.findByTestId("login-modal")).toBeInTheDocument();
-    expect(screen.queryByTestId("start-application-modal")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("start-application-modal"),
+    ).not.toBeInTheDocument();
   });
 
   it("disables the open button while data is loading and shows Loading UI", async () => {

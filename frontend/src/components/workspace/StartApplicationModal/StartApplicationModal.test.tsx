@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createRef } from "react";
-
 import { fakeUserOrganization } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
+
+import { createRef } from "react";
 
 import { StartApplicationModal } from "src/components/workspace/StartApplicationModal/StartApplicationModal";
 
@@ -20,10 +20,7 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-type ClientFetch = (
-  url: string,
-  options?: RequestInit,
-) => Promise<unknown>;
+type ClientFetch = (url: string, options?: RequestInit) => Promise<unknown>;
 
 const clientFetchMock: jest.MockedFunction<ClientFetch> = jest.fn();
 
@@ -33,7 +30,9 @@ jest.mock("src/hooks/useClientFetch", () => ({
   }),
 }));
 
-function renderModal(overrides?: Partial<React.ComponentProps<typeof StartApplicationModal>>) {
+function renderModal(
+  overrides?: Partial<React.ComponentProps<typeof StartApplicationModal>>,
+) {
   return render(
     <StartApplicationModal
       competitionId="1"

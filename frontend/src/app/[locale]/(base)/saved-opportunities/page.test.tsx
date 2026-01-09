@@ -5,26 +5,28 @@ import type {
   MinimalOpportunity,
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
+import { render } from "tests/react-utils";
 import { okResponse } from "tests/utils/api";
 import {
   makeMinimalOpportunity,
   makeOpportunityDetail,
 } from "tests/utils/fixtures/opportunity";
-import { renderServerPage } from "tests/utils/page-utils";
+
+import React from "react";
 
 import SavedOpportunities from "./page";
 
-const fetchSavedOpportunitiesMock = jest.fn<
-  Promise<MinimalOpportunity[]>,
-  []
->();
-const getOpportunityDetailsMock = jest.fn<
-  Promise<OpportunityApiResponse>,
-  [string]
->();
+const fetchSavedOpportunitiesMock: jest.MockedFunction<
+  (status?: string) => Promise<MinimalOpportunity[]>
+> = jest.fn();
+
+const getOpportunityDetailsMock: jest.MockedFunction<
+  (id: string) => Promise<OpportunityApiResponse>
+> = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  fetchSavedOpportunities: () => fetchSavedOpportunitiesMock(),
+  fetchSavedOpportunities: (status?: string) =>
+    fetchSavedOpportunitiesMock(status),
 }));
 
 jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
@@ -56,16 +58,64 @@ jest.mock("src/components/Breadcrumbs", () => {
   };
 });
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+  }),
+  usePathname: () => "/saved-opportunities",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+jest.mock(
+  "src/components/saved-opportunities/SavedOpportunityStatusFilter",
+  () => {
+    return function SavedOpportunityStatusFilterMock() {
+      return <div data-testid="status-filter" />;
+    };
+  },
+);
+
 jest.mock("next-intl/server", () => ({
   getTranslations: () =>
     Promise.resolve((key: string) => {
       if (key === "SavedOpportunities.heading") {
         return messages.SavedOpportunities.heading;
       }
+      if (key === "SavedOpportunities.noSavedCTAParagraphOne") {
+        return messages.SavedOpportunities.noSavedCTAParagraphOne;
+      }
+      if (key === "SavedOpportunities.noSavedCTAParagraphTwo") {
+        return messages.SavedOpportunities.noSavedCTAParagraphTwo;
+      }
+      if (key === "SavedOpportunities.searchButton") {
+        return messages.SavedOpportunities.searchButton;
+      }
+      if (key === "SavedOpportunities.noMatchingStatus") {
+        return messages.SavedOpportunities.noMatchingStatus;
+      }
       return key;
     }),
   setRequestLocale: jest.fn(),
 }));
+
+type SavedOpportunitiesTestProps = {
+  locale?: string;
+  status?: string;
+};
+
+async function renderSavedOpportunitiesPage({
+  locale = "en",
+  status,
+}: SavedOpportunitiesTestProps = {}) {
+  const ui = await SavedOpportunities({
+    params: Promise.resolve({ locale }),
+    searchParams: Promise.resolve(status ? { status } : {}),
+  });
+
+  return render(ui);
+}
 
 describe("Saved Opportunities page", () => {
   beforeEach(() => {
@@ -77,7 +127,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("renders the heading", async () => {
-    await renderServerPage(SavedOpportunities, { locale: "en" });
+    await renderSavedOpportunitiesPage({ locale: "en" });
 
     expect(
       screen.getByRole("heading", {
@@ -88,7 +138,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("shows the empty state CTA and search button when there are no saved opportunities", async () => {
-    await renderServerPage(SavedOpportunities, { locale: "en" });
+    await renderSavedOpportunitiesPage({ locale: "en" });
 
     expect(
       screen.getByText(messages.SavedOpportunities.noSavedCTAParagraphOne),
@@ -103,6 +153,7 @@ describe("Saved Opportunities page", () => {
     expect(searchCta).toHaveAttribute("href", "/search");
 
     expect(fetchSavedOpportunitiesMock).toHaveBeenCalledTimes(1);
+    expect(fetchSavedOpportunitiesMock).toHaveBeenCalledWith(undefined);
     expect(getOpportunityDetailsMock).not.toHaveBeenCalled();
   });
 
@@ -121,7 +172,7 @@ describe("Saved Opportunities page", () => {
       ),
     );
 
-    await renderServerPage(SavedOpportunities, { locale: "en" });
+    await renderSavedOpportunitiesPage({ locale: "en" });
 
     expect(
       screen.getByRole("link", { name: "Test Opportunity" }),
@@ -129,14 +180,13 @@ describe("Saved Opportunities page", () => {
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
 
     expect(fetchSavedOpportunitiesMock).toHaveBeenCalledTimes(1);
+    expect(fetchSavedOpportunitiesMock).toHaveBeenCalledWith(undefined);
     expect(getOpportunityDetailsMock).toHaveBeenCalledTimes(1);
     expect(getOpportunityDetailsMock).toHaveBeenCalledWith("12345");
   });
 
   it("passes accessibility scan in empty state", async () => {
-    const { container } = await renderServerPage(SavedOpportunities, {
-      locale: "en",
-    });
+    const { container } = await renderSavedOpportunitiesPage({ locale: "en" });
     expect(await axe(container)).toHaveNoViolations();
   });
 
@@ -166,7 +216,7 @@ describe("Saved Opportunities page", () => {
         ),
       );
 
-    await renderServerPage(SavedOpportunities, { locale: "en" });
+    await renderSavedOpportunitiesPage({ locale: "en" });
 
     expect(screen.getByRole("link", { name: "Opp One" })).toHaveAttribute(
       "href",
@@ -180,5 +230,13 @@ describe("Saved Opportunities page", () => {
     expect(getOpportunityDetailsMock).toHaveBeenCalledTimes(2);
     expect(getOpportunityDetailsMock).toHaveBeenNthCalledWith(1, "1");
     expect(getOpportunityDetailsMock).toHaveBeenNthCalledWith(2, "2");
+  });
+
+  it("passes status to fetchSavedOpportunities when provided", async () => {
+    await renderSavedOpportunitiesPage({ locale: "en", status: "active" });
+
+    expect(fetchSavedOpportunitiesMock).toHaveBeenCalledTimes(2);
+    expect(fetchSavedOpportunitiesMock).toHaveBeenNthCalledWith(1, "active");
+    expect(fetchSavedOpportunitiesMock).toHaveBeenNthCalledWith(2, undefined);
   });
 });

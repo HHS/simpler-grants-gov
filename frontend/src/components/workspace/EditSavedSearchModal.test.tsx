@@ -1,11 +1,11 @@
-import React from "react";
-import { render, screen } from "tests/react-utils";
 import { messages } from "src/i18n/messages/en";
-
 import {
   fakeOrganizationDetailsResponse,
   fakeUserPrivilegesResponse,
 } from "src/utils/testing/fixtures";
+import { render, screen } from "tests/react-utils";
+
+import React from "react";
 
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 

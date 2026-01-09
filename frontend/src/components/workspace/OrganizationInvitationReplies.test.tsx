@@ -1,8 +1,12 @@
-import React from "react";
+import {
+  completeStatuses,
+  type OrganizationInvitation,
+} from "src/types/userTypes";
 import { render, screen } from "tests/react-utils";
 import { __setFeatureFlags } from "tests/utils/mock-feature-flags";
 
-import { completeStatuses, type OrganizationInvitation } from "src/types/userTypes";
+import React from "react";
+
 import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
 
 // Use controllable feature flags helper
@@ -13,13 +17,16 @@ jest.mock("src/hooks/useFeatureFlags", () => {
 // Mock child so we only test filtering + wiring
 const OrganizationInvitationReplyMock = jest.fn(
   ({ userInvitation }: { userInvitation: OrganizationInvitation }) => (
-    <li data-testid="invitation-reply">{userInvitation.organization_invitation_id}</li>
+    <li data-testid="invitation-reply">
+      {userInvitation.organization_invitation_id}
+    </li>
   ),
 );
 
 jest.mock("src/components/workspace/OrganizationInvitationReply", () => ({
-  OrganizationInvitationReply: (props: { userInvitation: OrganizationInvitation }) =>
-    OrganizationInvitationReplyMock(props),
+  OrganizationInvitationReply: (props: {
+    userInvitation: OrganizationInvitation;
+  }) => OrganizationInvitationReplyMock(props),
 }));
 
 function makeInvitation(
