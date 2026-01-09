@@ -89,7 +89,6 @@ const NavLinks = ({
   const { checkFeatureFlag } = useFeatureFlags();
   const showSavedSearch = checkFeatureFlag("savedSearchesOn");
   const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
-  const showDeveloperPortal = !checkFeatureFlag("developerPageOff");
   const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
 
   const navLinkList = useMemo(() => {
@@ -108,9 +107,7 @@ const NavLinks = ({
         children: [
           { text: t("newsletter"), href: "/newsletter" },
           { text: t("events"), href: "/events" },
-          ...(showDeveloperPortal
-            ? [{ text: t("developers"), href: "/developer" }]
-            : []),
+          { text: t("developers"), href: "/developer" },
           { text: t("wiki"), href: ExternalRoutes.WIKI },
           { text: t("forum"), href: ExternalRoutes.FORUM },
         ],
@@ -162,7 +159,6 @@ const NavLinks = ({
     user,
     showSavedOpportunities,
     showSavedSearch,
-    showDeveloperPortal,
     showUserAdminNavItems,
   ]);
 

@@ -8,7 +8,7 @@ from src.services.form_alpha.update_form import update_form
 from tests.src.db.models.factories import FormFactory, FormInstructionFactory
 
 
-def test_update_form_create_new(enable_factory_create, db_session):
+def test_update_form_create_new(enable_factory_create, db_session, internal_admin_user):
     """Test creating a new form"""
     form_id = uuid.uuid4()
     form_data = {
@@ -24,7 +24,7 @@ def test_update_form_create_new(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, form_id, form_data)
+        form = update_form(db_session, form_id, form_data, internal_admin_user)
 
     assert form.form_id == form_id
     assert form.form_name == "New Test Form"
@@ -39,7 +39,7 @@ def test_update_form_create_new(enable_factory_create, db_session):
     assert form.legacy_form_id is None
 
 
-def test_update_form_update_existing(enable_factory_create, db_session):
+def test_update_form_update_existing(enable_factory_create, db_session, internal_admin_user):
     """Test updating an existing form"""
     existing_form = FormFactory.create(
         form_name="Original Name",
@@ -62,7 +62,7 @@ def test_update_form_update_existing(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, existing_form.form_id, form_data)
+        form = update_form(db_session, existing_form.form_id, form_data, internal_admin_user)
 
     assert form.form_id == existing_form.form_id
     assert form.form_name == "Updated Name"
@@ -75,7 +75,7 @@ def test_update_form_update_existing(enable_factory_create, db_session):
     assert form.form_rule_schema == {"rule": "updated"}
 
 
-def test_update_form_with_form_instruction(enable_factory_create, db_session):
+def test_update_form_with_form_instruction(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form with a form instruction"""
     form_instruction = FormInstructionFactory.create()
     form_id = uuid.uuid4()
@@ -93,13 +93,13 @@ def test_update_form_with_form_instruction(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, form_id, form_data)
+        form = update_form(db_session, form_id, form_data, internal_admin_user)
 
     assert form.form_instruction_id == form_instruction.form_instruction_id
     assert form.form_instruction == form_instruction
 
 
-def test_update_form_invalid_instruction(enable_factory_create, db_session):
+def test_update_form_invalid_instruction(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form with invalid form instruction ID"""
     form_id = uuid.uuid4()
     invalid_instruction_id = uuid.uuid4()
@@ -118,13 +118,13 @@ def test_update_form_invalid_instruction(enable_factory_create, db_session):
 
     with pytest.raises(HTTPError) as exc_info:
         with db_session.begin():
-            update_form(db_session, form_id, form_data)
+            update_form(db_session, form_id, form_data, internal_admin_user)
 
     assert exc_info.value.status_code == 404
     assert f"Form instruction with ID {invalid_instruction_id} not found" in exc_info.value.message
 
 
-def test_update_form_nullable_fields(enable_factory_create, db_session):
+def test_update_form_nullable_fields(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form with null values for optional fields"""
     form_id = uuid.uuid4()
     form_data = {
@@ -140,7 +140,7 @@ def test_update_form_nullable_fields(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, form_id, form_data)
+        form = update_form(db_session, form_id, form_data, internal_admin_user)
 
     assert form.omb_number is None
     assert form.form_instruction_id is None
@@ -148,7 +148,7 @@ def test_update_form_nullable_fields(enable_factory_create, db_session):
     assert form.legacy_form_id is None
 
 
-def test_update_form_overwrite_instruction(enable_factory_create, db_session):
+def test_update_form_overwrite_instruction(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form to remove form instruction"""
     form_instruction = FormInstructionFactory.create()
     existing_form = FormFactory.create(form_instruction=form_instruction)
@@ -166,13 +166,13 @@ def test_update_form_overwrite_instruction(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, existing_form.form_id, form_data)
+        form = update_form(db_session, existing_form.form_id, form_data, internal_admin_user)
 
     assert form.form_instruction_id is None
     assert form.form_instruction is None
 
 
-def test_update_form_with_new_fields(enable_factory_create, db_session):
+def test_update_form_with_new_fields(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form with form_type, sgg_version, and is_deprecated"""
     form_id = uuid.uuid4()
     form_data = {
@@ -191,7 +191,7 @@ def test_update_form_with_new_fields(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, form_id, form_data)
+        form = update_form(db_session, form_id, form_data, internal_admin_user)
 
     assert form.form_id == form_id
     assert form.form_type == FormType.SF424
@@ -199,7 +199,7 @@ def test_update_form_with_new_fields(enable_factory_create, db_session):
     assert form.is_deprecated is False
 
 
-def test_update_form_with_null_new_fields(enable_factory_create, db_session):
+def test_update_form_with_null_new_fields(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form with null values for new fields"""
     form_id = uuid.uuid4()
     form_data = {
@@ -218,7 +218,7 @@ def test_update_form_with_null_new_fields(enable_factory_create, db_session):
     }
 
     with db_session.begin():
-        form = update_form(db_session, form_id, form_data)
+        form = update_form(db_session, form_id, form_data, internal_admin_user)
 
     assert form.form_type is None
     assert form.sgg_version is None

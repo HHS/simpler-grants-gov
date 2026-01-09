@@ -196,36 +196,49 @@ class AttachmentTransformer:
         if not isinstance(attachment_data, dict):
             return
 
-        # Add FileName
+        # Get namespace URIs from nsmap
+        att_ns = nsmap.get("att", self.attachment_namespace)
+        glob_ns = nsmap.get("glob", "http://apply.grants.gov/system/Global-V1.0")
+
+        # Add FileName with xmlns:att namespace declaration
+        # Create element with local nsmap to force namespace declaration on the element
         if "FileName" in attachment_data:
-            filename_elem = lxml_etree.SubElement(attachment_elem, "FileName")
+            filename_elem = lxml_etree.SubElement(
+                attachment_elem, "FileName", nsmap={"att": att_ns}
+            )
             filename_elem.text = str(attachment_data["FileName"])
 
-        # Add MimeType
+        # Add MimeType with xmlns:att namespace declaration
         if "MimeType" in attachment_data:
-            mimetype_elem = lxml_etree.SubElement(attachment_elem, "MimeType")
+            mimetype_elem = lxml_etree.SubElement(
+                attachment_elem, "MimeType", nsmap={"att": att_ns}
+            )
             mimetype_elem.text = str(attachment_data["MimeType"])
 
-        # Add FileLocation with href attribute
+        # Add FileLocation with att:href attribute (namespace-prefixed)
         if "FileLocation" in attachment_data:
             filelocation_elem = lxml_etree.SubElement(attachment_elem, "FileLocation")
             file_location_data = attachment_data["FileLocation"]
 
             if isinstance(file_location_data, dict) and "@href" in file_location_data:
-                filelocation_elem.set("href", str(file_location_data["@href"]))
+                filelocation_elem.set(f"{{{att_ns}}}href", str(file_location_data["@href"]))
             elif isinstance(file_location_data, str):
-                filelocation_elem.set("href", file_location_data)
+                filelocation_elem.set(f"{{{att_ns}}}href", file_location_data)
 
-        # Add HashValue with hashAlgorithm attribute and text content
+        # Add HashValue with glob:hashAlgorithm attribute and xmlns:glob declaration
         if "HashValue" in attachment_data:
-            hashvalue_elem = lxml_etree.SubElement(attachment_elem, "HashValue")
+            hashvalue_elem = lxml_etree.SubElement(
+                attachment_elem, "HashValue", nsmap={"glob": glob_ns}
+            )
             hash_data = attachment_data["HashValue"]
 
             if isinstance(hash_data, dict):
                 if "@hashAlgorithm" in hash_data:
-                    hashvalue_elem.set("hashAlgorithm", str(hash_data["@hashAlgorithm"]))
+                    hashvalue_elem.set(
+                        f"{{{glob_ns}}}hashAlgorithm", str(hash_data["@hashAlgorithm"])
+                    )
                 if "#text" in hash_data:
                     hashvalue_elem.text = str(hash_data["#text"])
             elif isinstance(hash_data, str):
-                hashvalue_elem.set("hashAlgorithm", "SHA-1")  # Default
+                hashvalue_elem.set(f"{{{glob_ns}}}hashAlgorithm", "SHA-1")  # Default
                 hashvalue_elem.text = hash_data
