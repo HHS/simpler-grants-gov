@@ -2,11 +2,11 @@
  * @jest-environment node
  */
 
+import { HttpReader as FakeHttpReader } from "@zip.js/zip.js";
 import {
   attachmentsToZipEntries,
   deduplicateFilename,
 } from "src/utils/opportunity/zipUtils";
-import { HttpReader as FakeHttpReader } from "@zip.js/zip.js";
 
 describe("deduplicateFilename", () => {
   it("returns original filename if no previous usage of name is found", () => {
