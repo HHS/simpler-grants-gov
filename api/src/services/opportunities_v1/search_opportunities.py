@@ -244,11 +244,24 @@ def _search_opportunities(
     return response
 
 
+def _normalize_aln(filters: OpportunityFilters | None) -> None:
+    if not filters or not filters.assistance_listing_number:
+        return
+
+    one_of = filters.assistance_listing_number.one_of
+    if one_of:
+        filters.assistance_listing_number.one_of = [v.upper() for v in one_of]
+
+
 def search_opportunities(
     search_client: search.SearchClient, raw_search_params: dict
 ) -> tuple[Sequence[dict], dict, PaginationInfo]:
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
+
+    # Normalize ALN casing before building the search query
+    _normalize_aln(search_params.filters)
+
     response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)

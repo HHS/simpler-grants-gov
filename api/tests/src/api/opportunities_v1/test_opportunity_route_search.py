@@ -925,7 +925,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (get_search_request(assistance_listing_one_of=["43.012"]), [NASA_INNOVATIONS]),
-            (get_search_request(assistance_listing_one_of=["43.T02"]), [NASA_SUPERSONIC]),
+            (get_search_request(assistance_listing_one_of=["43.t02"]), [NASA_SUPERSONIC]),
             (
                 get_search_request(assistance_listing_one_of=["43.008", "43.012"]),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_TEACHING],
