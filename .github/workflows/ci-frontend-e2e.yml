@@ -75,6 +75,8 @@ jobs:
             cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
             cat ../api/e2e_token.tmp
+            # Also include API gateway auth key for endpoints that accept X-API-Key
+            if [ -f ../api/e2e_api_key.tmp ]; then cat ../api/e2e_api_key.tmp; fi
           } >> .env.local
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local

@@ -22,9 +22,16 @@ def _write_token_to_file(token: str) -> None:
     write_to_file(path_to_tmp_token_file, token_declaration)
 
 
+def _write_api_key_to_file(api_key: str) -> None:
+    path_to_tmp_key_file = os.path.join(os.path.dirname(__file__), "..", "..", "e2e_api_key.tmp")
+    key_declaration = 'API_GW_AUTH="' + api_key + '"'
+    write_to_file(path_to_tmp_key_file, key_declaration)
+
+
 def _build_users_and_tokens(db_session: db.Session) -> None:
     builder = UserBuilder(
         uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff"), db_session, "user for e2e"
-    ).with_jwt_auth()
+    ).with_jwt_auth().with_api_key("local-dev-api-key")
     builder.build()
     _write_token_to_file(builder.jwt_token)
+    _write_api_key_to_file("local-dev-api-key")
