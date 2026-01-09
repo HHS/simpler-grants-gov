@@ -6,11 +6,13 @@ import React from "react";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 // ---- controllable mocks ----
-let mockUser: Record<string, unknown> = {};
+type MockUser = { token?: string };
+let mockUser: MockUser = {};
 let isSSRValue = false;
 let featureFlagOn = true;
 
-const clientFetchMock = jest.fn();
+type ClientFetch = (url: string, options?: RequestInit) => Promise<unknown>;
+const clientFetchMock: jest.MockedFunction<ClientFetch> = jest.fn();
 
 const setHelpText = jest.fn();
 const setButtonText = jest.fn();
@@ -34,7 +36,7 @@ jest.mock("src/services/auth/useUser", () => ({
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+    clientFetch: (...args: Parameters<ClientFetch>) => clientFetchMock(...args),
   }),
 }));
 
@@ -53,32 +55,31 @@ jest.mock("src/components/USWDSIcon", () => ({
   USWDSIcon: (_props: unknown) => <span data-testid="icon" />,
 }));
 
+type ModalToggleButtonMockProps =
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    children?: React.ReactNode;
+    "data-testid"?: string;
+  };
+
 /**
  * Replace ModalToggleButton with a plain <button> so id/onClick are testable.
+ * (Typed requireActual to avoid `any`.)
  */
 jest.mock("@trussworks/react-uswds", () => {
-  const actual = jest.requireActual("@trussworks/react-uswds");
+  const actual = jest.requireActual<typeof import("@trussworks/react-uswds")>(
+    "@trussworks/react-uswds",
+  );
+
   return {
     ...actual,
-    ModalToggleButton: ({
-      children,
-      onClick,
-      id,
-      disabled,
-      className,
-      "data-testid": dataTestId,
-    }: any) => (
-      <button
-        type="button"
-        id={id}
-        disabled={disabled}
-        className={className}
-        data-testid={dataTestId}
-        onClick={onClick}
-      >
-        {children}
-      </button>
-    ),
+    ModalToggleButton: (props: ModalToggleButtonMockProps) => {
+      const { children, ...buttonProps } = props;
+      return (
+        <button type="button" {...buttonProps}>
+          {children}
+        </button>
+      );
+    },
   };
 });
 
@@ -114,9 +115,13 @@ jest.mock("src/components/SaveIcon", () => ({
     ),
 }));
 
+type SaveButtonMockProps = {
+  buttonClick: React.MouseEventHandler<HTMLButtonElement>;
+};
+
 jest.mock("src/components/SaveButton", () => ({
   __esModule: true,
-  default: (props: any) => (
+  default: (props: SaveButtonMockProps) => (
     <button type="button" onClick={props.buttonClick}>
       SaveButton
     </button>
@@ -177,10 +182,11 @@ describe("OpportunitySaveUserControl", () => {
       />,
     );
 
-    const toggle = document.getElementById("save-search-result-opp-1");
-    expect(toggle).toBeTruthy();
+    // Avoid document.getElementById (testing-library/no-node-access)
+    const toggle = screen.getByRole("button");
+    expect(toggle).toHaveAttribute("id", "save-search-result-opp-1");
 
-    await user.click(toggle as HTMLElement);
+    await user.click(toggle);
 
     expect(setHelpText).toHaveBeenCalled();
     expect(setButtonText).toHaveBeenCalled();
@@ -202,7 +208,6 @@ describe("OpportunitySaveUserControl", () => {
       />,
     );
 
-    // This is the outer toggle button (our ModalToggleButton mock)
     const toggle = screen.getByRole("button");
     await user.click(toggle);
 
@@ -222,8 +227,10 @@ describe("OpportunitySaveUserControl", () => {
       />,
     );
 
-    const saveBtn = screen.getByRole("button", { name: /save opportunity/i });
-    await user.click(saveBtn);
+    const saveButton = screen.getByRole("button", {
+      name: /save opportunity/i,
+    });
+    await user.click(saveButton);
 
     expect(clientFetchMock).toHaveBeenCalledWith(
       "/api/user/saved-opportunities",

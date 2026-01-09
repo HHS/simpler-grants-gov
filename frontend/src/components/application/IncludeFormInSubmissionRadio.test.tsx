@@ -80,6 +80,9 @@ describe("IncludeFormInSubmissionRadio", () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText("Yes")).toBeDisabled();
+    });
+
+    await waitFor(() => {
       expect(screen.getByLabelText("No")).toBeDisabled();
     });
 
@@ -97,8 +100,8 @@ describe("IncludeFormInSubmissionRadio", () => {
       expect(refreshMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(screen.getByLabelText("Yes")).not.toBeDisabled();
-    expect(screen.getByLabelText("No")).not.toBeDisabled();
+    expect(screen.getByLabelText("Yes")).toBeEnabled();
+    expect(screen.getByLabelText("No")).toBeEnabled();
   });
 
   it("on failure: stays optimistic briefly, then falls back to No and refreshes", async () => {
@@ -122,6 +125,9 @@ describe("IncludeFormInSubmissionRadio", () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText("No")).toBeChecked();
+    });
+
+    await waitFor(() => {
       expect(refreshMock).toHaveBeenCalledTimes(1);
     });
 

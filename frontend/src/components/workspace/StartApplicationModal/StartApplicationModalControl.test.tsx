@@ -10,10 +10,13 @@ import React, { JSX } from "react";
 
 import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
 
-jest.mock("next-intl", () => ({
-  ...jest.requireActual("next-intl"),
-  useTranslations: () => useTranslationsMock(),
-}));
+jest.mock("next-intl", () => {
+  const actual = jest.requireActual<typeof import("next-intl")>("next-intl");
+  return {
+    ...actual,
+    useTranslations: () => useTranslationsMock(),
+  };
+});
 
 const mockUseUser = jest.fn(() => ({ user: { token: "a token" } }));
 jest.mock("src/services/auth/useUser", () => ({
@@ -129,8 +132,9 @@ describe("StartApplicationModalControl", () => {
 
   it("disables the open button while data is loading and shows Loading UI", async () => {
     let resolveCompetition: (value: unknown) => void = () => undefined;
-    const competitionPromise = new Promise((res) => {
-      resolveCompetition = res;
+
+    const competitionPromise = new Promise<unknown>((resolve) => {
+      resolveCompetition = resolve;
     });
 
     clientFetchMock.mockImplementation((url: string) => {
@@ -156,7 +160,7 @@ describe("StartApplicationModalControl", () => {
     resolveCompetition(fakeCompetition);
 
     await waitFor(() => {
-      expect(button).not.toBeDisabled();
+      expect(button).toBeEnabled();
     });
   });
 
@@ -171,7 +175,7 @@ describe("StartApplicationModalControl", () => {
     );
 
     const button = screen.getByTestId("open-start-application-modal-button");
-    await waitFor(() => expect(button).not.toBeDisabled());
+    await waitFor(() => expect(button).toBeEnabled());
 
     await user.click(button);
 

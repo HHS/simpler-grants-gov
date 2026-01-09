@@ -360,9 +360,10 @@ describe("removeOrganizationUser", () => {
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
 
-    await removeOrganizationUser("org-123", "user-1").catch((error) => {
-      expect(error).toBeInstanceOf(Error);
-      expect((error as { status?: number }).status).toBe(403);
+    await expect(
+      removeOrganizationUser("org-123", "user-1"),
+    ).rejects.toMatchObject({
+      status: 403,
     });
   });
 
@@ -377,9 +378,10 @@ describe("removeOrganizationUser", () => {
       });
       fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
 
-      await removeOrganizationUser("org-123", "user-1").catch((error) => {
-        expect(error).toBeInstanceOf(Error);
-        expect((error as { status?: number }).status).toBe(statusCode);
+      await expect(
+        removeOrganizationUser("org-123", "user-1"),
+      ).rejects.toMatchObject({
+        status: statusCode,
       });
     });
   });
@@ -391,9 +393,9 @@ describe("removeOrganizationUser", () => {
       throw new Error("Network error");
     });
 
-    await expect(
-      removeOrganizationUser("org-123", "user-1"),
-    ).rejects.toThrowError("Network error");
+    await expect(removeOrganizationUser("org-123", "user-1")).rejects.toThrow(
+      "Network error",
+    );
   });
 });
 

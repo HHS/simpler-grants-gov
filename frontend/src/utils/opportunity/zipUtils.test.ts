@@ -2,11 +2,11 @@
  * @jest-environment node
  */
 
-import { FakeHttpReader } from "__mocks__/zipjs";
 import {
   attachmentsToZipEntries,
   deduplicateFilename,
 } from "src/utils/opportunity/zipUtils";
+import { FakeHttpReader } from "zipjs";
 
 describe("deduplicateFilename", () => {
   it("returns original filename if no previous usage of name is found", () => {
