@@ -54,14 +54,18 @@ jobs:
           ulimit -c unlimited
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Run init first to generate JWT keys in override.env
-          make init
-          # Now run the seeding and populate commands
+          # Build containers and setup DB (without starting API yet)
+          make build setup-env-override-file init-db init-opensearch init-localstack init-mock-soap-services
+          # Now run the seeding and populate commands BEFORE starting API
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
+          # NOW start the API with fresh connections after seeding is complete
+          make start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
+          # Give API time to fully initialize
+          sleep 10
           ../api/bin/wait-for-api.sh
         shell: bash
 
