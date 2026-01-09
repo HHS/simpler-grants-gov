@@ -139,7 +139,7 @@ def build_opp(
 
 EDUCATION_AL = ("43.008", "Office of Stem Engagement (OSTEM)")
 SPACE_AL = ("43.012", "Space Technology")
-AERONAUTICS_AL = ("43.002", "Aeronautics")
+AERONAUTICS_AL = ("43.T02", "Aeronautics")
 LOC_AL = ("42.011", "Library of Congress Grants")
 AMERICAN_AL = ("19.441", "ECA - American Spaces")
 ECONOMIC_AL = ("11.307", "Economic Adjustment Assistance")
@@ -925,13 +925,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (get_search_request(assistance_listing_one_of=["43.012"]), [NASA_INNOVATIONS]),
-            (get_search_request(assistance_listing_one_of=["43.002"]), [NASA_SUPERSONIC]),
+            (get_search_request(assistance_listing_one_of=["43.T02"]), [NASA_SUPERSONIC]),
             (
                 get_search_request(assistance_listing_one_of=["43.008", "43.012"]),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
-                get_search_request(assistance_listing_one_of=["43.008", "43.012", "43.002"]),
+                get_search_request(assistance_listing_one_of=["43.008", "43.012", "43.T02"]),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_INNOVATIONS,
@@ -1480,7 +1480,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["11..11"]),
             get_search_request(assistance_listing_one_of=["A1..11"]),
             get_search_request(assistance_listing_one_of=["11.cC1"]),
-
         ],
     )
     def test_search_validate_assistance_listing_filters_422(
