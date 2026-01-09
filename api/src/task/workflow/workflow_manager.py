@@ -5,6 +5,7 @@ from sqlalchemy import select
 from statemachine.contrib.diagram import DotGraphMachine
 from statemachine.exceptions import TransitionNotAllowed
 from statemachine.event_data import EventData
+from statemachine import Event
 import statemachine
 from statemachine.states import States
 from statemachine.mixins import MachineMixin
@@ -16,6 +17,8 @@ from src.task import task_blueprint
 import dataclasses
 from enum import StrEnum
 import logging
+
+from src.task.workflow.workflow_errors import WorkflowDoesNotExistError, EntityNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +111,25 @@ class ExampleStateMachine(statemachine.StateMachine):
 
     # ALL workflows should have a start_workflow transition
     # So that we make an event even if the workflow can't do anything yet.
-    start_workflow = states.START.to(states.APPROVAL_NEEDED)
+    #start_workflow = states.START.to(states.APPROVAL_NEEDED)
+    start_workflow = Event(
+        states.START.to(states.APPROVAL_NEEDED),
+        # Whatever name we pass in will be used for our logging / auditing
+        # so we can set something meaningful to a user and keep simple technical things internally
+        name="Something about starting"
+    )
 
-    receive_approval = states.APPROVAL_NEEDED.to(states.APPROVAL_RECEIVED, after="check_approvers")
+    receive_approval = Event(
+        states.APPROVAL_NEEDED.to(states.APPROVAL_RECEIVED, after="check_approvers")
+    )
 
-    check_approvers = states.APPROVAL_RECEIVED.to(states.SEND_EMAIL, after="do_email_send", cond="has_enough_approvers") | states.APPROVAL_RECEIVED.to(states.APPROVAL_NEEDED)
-    do_email_send = states.SEND_EMAIL.to(states.END)
+    check_approvers = Event(
+        states.APPROVAL_RECEIVED.to(states.SEND_EMAIL, after="do_email_send", cond="has_enough_approvers")
+        | states.APPROVAL_RECEIVED.to(states.APPROVAL_NEEDED)
+    )
+    do_email_send = Event(
+        states.SEND_EMAIL.to(states.END)
+    )
 
     def __init__(self, model: OpportunityPersistentModel, **kwargs):
         super().__init__(model=model, **kwargs)
@@ -161,6 +177,23 @@ class AuditListener:
 def get_listeners() -> list:
     return [AuditListener()]
 
+# TODO - move this somewhere better
+WORKFLOW_TYPE_MAPPING = {
+    "example_workflow": ExampleStateMachine,
+}
+
+def get_state_machine(event_metadata: StartWorkflowEvent | ProcessWorkflowEvent) -> type[statemachine.StateMachine]:
+    # TODO - we'd want to have registry for this to query against
+    # We also need to get to this different for ProcessWorkflowEvent as it
+    # would come after fetching the workflow from the DB.
+
+    if isinstance(event_metadata, StartWorkflowEvent):
+        pass
+    else:
+        pass
+
+    return ExampleStateMachine
+
 def _handle_event(db_session: db.Session, event_metadata: StartWorkflowEvent | ProcessWorkflowEvent) -> statemachine.StateMachine:
 
     if isinstance(event_metadata, StartWorkflowEvent):
@@ -169,7 +202,7 @@ def _handle_event(db_session: db.Session, event_metadata: StartWorkflowEvent | P
         # assuming opportunity for now
         opportunity = db_session.execute(select(Opportunity).where(Opportunity.opportunity_id == event_metadata.opportunity_id)).scalar_one_or_none()
         if opportunity is None:
-            raise Exception("Opportunity not found")
+            raise EntityNotFound(f"Opportunity not found with ID {event_metadata.opportunity_id}")
 
         # TODO - probably some sort of check on whether
         # we can create the workflow.
@@ -193,8 +226,8 @@ def _handle_event(db_session: db.Session, event_metadata: StartWorkflowEvent | P
 
         workflow = db_session.execute(select(Workflow).where(Workflow.workflow_id == event_metadata.workflow_id)).scalar_one_or_none()
         if workflow is None:
-            # TODO - logging / better errors
-            raise Exception(f"No workflow found with ID {event_metadata.workflow_id}")
+            # TODO - logging
+            raise WorkflowDoesNotExistError(f"No workflow found with ID {event_metadata.workflow_id}")
 
         event = event_metadata.event
 
