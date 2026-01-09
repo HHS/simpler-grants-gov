@@ -6,12 +6,15 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import verify_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Form, FormInstruction
+from src.db.models.user_models import User
 
 logger = logging.getLogger(__name__)
 
 
-def update_form(db_session: db.Session, form_id: uuid.UUID, form_data: dict) -> Form:
+def update_form(db_session: db.Session, form_id: uuid.UUID, form_data: dict, user: User) -> Form:
     """
     Update or create a form in the database (upsert operation).
 
@@ -26,6 +29,8 @@ def update_form(db_session: db.Session, form_id: uuid.UUID, form_data: dict) -> 
     Raises:
         Flask error with appropriate status code if validation fails
     """
+    verify_access(user, {Privilege.UPDATE_FORM}, None)
+
     logger.info("Updating form", extra={"form_id": form_id})
 
     # Check if form exists

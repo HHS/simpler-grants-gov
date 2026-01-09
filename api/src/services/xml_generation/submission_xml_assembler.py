@@ -195,7 +195,7 @@ class SubmissionXMLAssembler:
         # Construct schema URL from competition's legacy_package_id
         schema_url = self._get_schema_location_url()
         if schema_url:
-            schema_location = f"http://apply.grants.gov/system/GrantsCommonTypes-V1.0 {schema_url}"
+            schema_location = f"{grant_ns} {schema_url}"
             root.set(
                 f"{{{nsmap['xsi']}}}schemaLocation",
                 schema_location,

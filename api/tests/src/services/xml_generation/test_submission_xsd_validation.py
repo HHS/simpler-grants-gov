@@ -526,7 +526,7 @@ class TestSubmissionXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         # Verify root element (with grant: namespace prefix)
-        grant_ns = "http://apply.grants.gov/system/GrantsCommonTypes-V1.0"
+        grant_ns = "http://apply.grants.gov/system/MetaGrantApplication"
         assert root.tag == f"{{{grant_ns}}}GrantApplication"
 
         # Verify required namespaces exist
