@@ -79,6 +79,7 @@ jobs:
       - name: Build a prod version of the site
         env:
           API_GW_AUTH: ${{ secrets.API_GW_AUTH }}
+          ENABLE_STANDALONE: "true"
         run: |
           # Create .env.local from base development env
           cp .env.development .env.local || true
