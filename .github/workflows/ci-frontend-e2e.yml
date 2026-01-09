@@ -54,11 +54,15 @@ jobs:
           ulimit -c unlimited
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Run init first to generate JWT keys in override.env
+          # Run init first to generate JWT keys in override.env and run migrations
           make init
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
+          # Restart API to ensure clean connection pool after seeding
+          docker compose restart grants-api
+          # Wait a few seconds for API to fully restart
+          sleep 10
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
