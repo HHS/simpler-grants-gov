@@ -22,8 +22,6 @@ def _write_token_to_file(token: str) -> None:
     write_to_file(path_to_tmp_token_file, token_declaration)
 
 
-
-
 def _build_users_and_tokens(db_session: db.Session) -> None:
     builder = UserBuilder(
         uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff"), db_session, "user for e2e"
