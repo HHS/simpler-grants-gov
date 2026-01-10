@@ -72,6 +72,7 @@ services:
       - default
 
   grants-api:
+    platform: linux/amd64
     build:
       context: .
       target: dev
