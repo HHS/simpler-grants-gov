@@ -23,7 +23,6 @@ Scenario: Application shell fails to load when starting a new application
   ###########################################################################
   # 2. Successful Submission – Backend Submission Error
   ###########################################################################
-  @negative @submission @workflow
   Scenario: Submission fails due to backend error
     Given the user has completed all required fields
     When the user clicks Submit
@@ -33,7 +32,6 @@ Scenario: Application shell fails to load when starting a new application
   ###########################################################################
   # 3. Data Persist on Refresh – Data Loss After Refresh
   ###########################################################################
-  @negative @persistence @workflow
   Scenario: Data does not persist after page refresh
     When the user attempts to refresh the page
     Then a warning dialog is displayed about unsaved changes
@@ -42,7 +40,6 @@ Scenario: Application shell fails to load when starting a new application
   ###########################################################################
   # 4. Save Fails
   ###########################################################################
-  @negative @saving @workflow
   Scenario: Save fails
   Given the user has entered progress in the application
   When the user selects "Save"
@@ -51,7 +48,6 @@ Scenario: Application shell fails to load when starting a new application
   ###########################################################################
   # 5. File Upload – Invalid File Rejected
   ###########################################################################
-  @negative @upload @workflow
   Scenario: User uploads invalid file type
   Given the user is on the file upload step
   When the user uploads a ".exe" file
@@ -61,7 +57,6 @@ Scenario: Application shell fails to load when starting a new application
   ###########################################################################
   # 6. Workflow Status – Status Fails to Load
   ###########################################################################
-  @negative @status @workflow
   Scenario: Workflow status cannot be retrieved
     Given the user views the application summary
     When the system loads workflow status
