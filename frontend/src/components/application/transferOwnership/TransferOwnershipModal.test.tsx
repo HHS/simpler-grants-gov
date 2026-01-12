@@ -26,27 +26,17 @@ jest.mock("next-intl", () => ({
         return <>{paragraphRenderer("Body paragraph")}</>;
       }
 
-      if (key === "footer.productSupport") {
-        const linkRenderer = values.link as RichRenderer;
-        const telRenderer = values.tel as RichRenderer;
-        return (
-          <>
-            {linkRenderer("email us")}
-            {telRenderer("555-555-5555")}
-          </>
-        );
-      }
-
-      if (key === "footer.alternativeMethodsOfApplying") {
-        const linkRenderer = values.link as RichRenderer;
-        return <>{linkRenderer("grants.gov")}</>;
-      }
-
       return translate(key);
     };
 
     return translate;
   },
+}));
+
+jest.mock("src/components/ModalFooterProductSupport", () => ({
+  ModalFooterProductSupport: () => (
+    <div data-testid="modal-footer-product-support" />
+  ),
 }));
 
 jest.mock("./TransferOwnershipOrganizationSelect", () => ({

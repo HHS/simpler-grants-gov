@@ -11,6 +11,7 @@ import {
   type ModalRef,
 } from "@trussworks/react-uswds";
 
+import { ModalFooterProductSupport } from "src/components/ModalFooterProductSupport";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { TransferOwnershipOrganizationSelect } from "./TransferOwnershipOrganizationSelect";
@@ -48,29 +49,6 @@ export const TransferOwnershipModal = ({
       t.rich("body", {
         strong: (content) => <strong>{content}</strong>,
         p: (content) => <p>{content}</p>,
-      }),
-    [t],
-  );
-
-  const productSupportText = useMemo(
-    () =>
-      t.rich("footer.productSupport", {
-        link: (content) => <a href="mailto:simpler@grants.gov">{content}</a>,
-        tel: (content) => {
-          const phoneNumber = String(content);
-          return <a href={`tel:${phoneNumber}`}>{phoneNumber}</a>;
-        },
-      }),
-    [t],
-  );
-
-  const alternativeMethodsOfApplyingText = useMemo(
-    () =>
-      t.rich("footer.alternativeMethodsOfApplying", {
-        link: (content) => {
-          const urlText = String(content);
-          return <a href={`https://${urlText}`}>{urlText}</a>;
-        },
       }),
     [t],
   );
@@ -132,14 +110,7 @@ export const TransferOwnershipModal = ({
           {t("actionCancel")}
         </ModalToggleButton>
       </ModalFooter>
-
-      <div className="margin-top-4">
-        <p>
-          {productSupportText}
-          <br />
-          {alternativeMethodsOfApplyingText}
-        </p>
-      </div>
+      <ModalFooterProductSupport />
     </SimplerModal>
   );
 };
