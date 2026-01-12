@@ -355,9 +355,7 @@ class OpportunitySearchFilterV1Schema(Schema):
     )
     assistance_listing_number = fields.Nested(
         StrSearchSchemaBuilder("AssistanceListingNumberFilterV1Schema")
-        .with_one_of(
-            example="45.149", pattern=r"^\d{2}\.[A-Za-z0-9]{2,3}$"
-        )  # Always of the format ##.## or ##.???
+        .with_one_of(example="45.149", pattern=r"^\d{2}\.[A-Za-z0-9]{2,3}$")
         .build()
     )
     is_cost_sharing = fields.Nested(
