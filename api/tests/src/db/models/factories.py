@@ -266,6 +266,8 @@ class CustomProvider(BaseProvider):
         "???-??-##-??",
     ]
 
+    ASSISTANCE_LISTING_NUMBER_FORMATS = ["##-???", "##-###"]
+
     def random_agency_code(self) -> str:
         pattern = self.bothify(self.random_element(self.AGENCY_CODE_FORMATS)).upper()
         return self.generator.parse(pattern)
@@ -311,6 +313,10 @@ class CustomProvider(BaseProvider):
 
     def yn_yesno_boolean(self) -> str:
         return self.random_element(self.YN_YESNO_BOOLEAN_VALUES)
+
+    def assistance_listing_number(self) -> str:
+        pattern = self.bothify(self.random_element(self.ASSISTANCE_LISTING_NUMBER_FORMATS)).upper()
+        return self.generator.parse(pattern)
 
 
 fake = faker.Faker()
@@ -773,9 +779,7 @@ class OpportunityAssistanceListingFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda a: a.opportunity.opportunity_id)
 
     program_title = factory.Faker("company")
-    assistance_listing_number = factory.LazyFunction(
-        lambda: f"{fake.random_int(min=1, max=99):02}.{fake.random_int(min=1, max=999):03}"
-    )
+    assistance_listing_number = factory.Faker("assistance_listing_number")
 
     class Params:
         # Set the timestamps in the past rather than using the default of "now"
