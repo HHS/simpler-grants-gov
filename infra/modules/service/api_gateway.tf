@@ -134,6 +134,21 @@ locals {
           "multipart/form-data" : local.alpha_applications_model_name
         }
       }],
+      "alpha/applications/{application_id}/attachments/{application_attachment_id}" = [{
+        "method" : "PUT",
+        "api_key_required" : true,
+        "method_parameters" : {
+          "method.request.path.application_id" = true,
+          "method.request.path.application_attachment_id" = true,
+        },
+        "request_parameters" : {
+          "integration.request.path.application_id" : "method.request.path.application_id",
+          "integration.request.path.application_attachment_id" : "method.request.path.application_attachment_id",
+        },
+        "request_models" : {
+          "multipart/form-data" : local.alpha_applications_model_name
+        }
+      }],
   }][var.enable_api_gateway ? 1 : 0]
 
   # In order to support multiple request methods, we need to be able to loop on all method types
