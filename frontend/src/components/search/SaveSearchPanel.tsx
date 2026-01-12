@@ -56,10 +56,7 @@ export function SaveSearchPanel() {
     return `${origin}${path}${query}`;
   }, [searchParams, path]);
 
-  const showSavedSearchUI = useMemo(
-    () => Boolean(user?.token),
-    [user?.token],
-  );
+  const showSavedSearchUI = useMemo(() => Boolean(user?.token), [user?.token]);
 
   const copyText = useMemo(
     () =>

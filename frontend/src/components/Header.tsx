@@ -146,13 +146,7 @@ const NavLinks = ({
       text: t("workspace"),
       children: workspaceSubNavs,
     });
-  }, [
-    t,
-    path,
-    getSearchLink,
-    user,
-    showUserAdminNavItems,
-  ]);
+  }, [t, path, getSearchLink, user, showUserAdminNavItems]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {
