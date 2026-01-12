@@ -44,8 +44,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             "application_info": {
                 "additional_funding": False,
                 "application_type": "New",
-                "primary_project_discipline": "History: U.S. History",
             },
+            "primary_project_discipline": "History: U.S. History",
         }
 
         service = XMLGenerationService()
@@ -92,8 +92,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
                 "application_info": {
                     "additional_funding": False,
                     "application_type": "New",
-                    "primary_project_discipline": display_value,
                 },
+                "primary_project_discipline": display_value,
             }
 
             service = XMLGenerationService()
@@ -131,8 +131,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
                 "application_info": {
                     "additional_funding": False,
                     "application_type": "New",
-                    "primary_project_discipline": "History: U.S. History",
                 },
+                "primary_project_discipline": "History: U.S. History",
             }
 
             service = XMLGenerationService()
@@ -163,8 +163,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
                 "additional_funding": True,
                 "additional_funding_explanation": "NSF pending grant application",
                 "application_type": "New",
-                "primary_project_discipline": "Philosophy: General",
             },
+            "primary_project_discipline": "Philosophy: General",
         }
 
         service = XMLGenerationService()
@@ -201,8 +201,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
                 "additional_funding_explanation": "State humanities council",
                 "application_type": "Supplement",
                 "supplemental_grant_numbers": "NEH-12345-20",
-                "primary_project_discipline": "Literature: General",
             },
+            "primary_project_discipline": "Literature: General",
         }
 
         service = XMLGenerationService()
@@ -236,8 +236,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             "application_info": {
                 "additional_funding": False,
                 "application_type": "New",
-                "primary_project_discipline": "Religion: General",
             },
+            "primary_project_discipline": "Religion: General",
         }
 
         service = XMLGenerationService()
@@ -267,10 +267,10 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             "application_info": {
                 "additional_funding": False,
                 "application_type": "New",
-                "primary_project_discipline": "Interdisciplinary: American Studies",
-                "secondary_project_discipline": "History: U.S. History",
-                "tertiary_project_discipline": "Literature: American Literature",
             },
+            "primary_project_discipline": "Interdisciplinary: American Studies",
+            "secondary_project_discipline": "History: U.S. History",
+            "tertiary_project_discipline": "Literature: American Literature",
         }
 
         service = XMLGenerationService()
@@ -302,8 +302,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             "application_info": {
                 "additional_funding": False,
                 "application_type": "New",
-                "primary_project_discipline": "Languages: English",
             },
+            "primary_project_discipline": "Languages: English",
         }
 
         service = XMLGenerationService()
@@ -335,8 +335,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             "application_info": {
                 "additional_funding": False,
                 "application_type": "New",
-                "primary_project_discipline": "History: U.S. History",
             },
+            "primary_project_discipline": "History: U.S. History",
         }
 
         service = XMLGenerationService()
@@ -373,8 +373,8 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
             "application_info": {
                 "additional_funding": False,
                 "application_type": "New",
-                "primary_project_discipline": "Interdisciplinary: General",
             },
+            "primary_project_discipline": "Interdisciplinary: General",
         }
 
         service = XMLGenerationService()
@@ -390,6 +390,87 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
 
         # Verify the additional field of study code
         assert "PDMajorField>2872<" in xml_data  # "Other: Digital Humanities" -> "2872"
+
+    def test_generate_neh_cover_sheet_xml_matches_legacy_structure(self):
+        """Test NEH Cover Sheet XML generation matches legacy XML structure exactly.
+
+        This test validates that generated XML contains all required elements and values
+        from the legacy system output, without enforcing element ordering.
+        """
+        # Input JSON matching database structure
+        application_data = {
+            "major_field": "Arts: General",
+            "organization_type": "1326: Center For Advanced Study/Research Institute",
+            "funding_group": {
+                "outright_funds": "1",
+                "federal_match": "2",
+                "total_from_neh": "3.00",
+                "total_project_costs": "3.00",
+            },
+            "application_info": {
+                "additional_funding": False,
+                "application_type": "New",
+            },
+            "primary_project_discipline": "Arts: General",
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data,
+            transform_config=NEH_COVER_SHEET_TRANSFORM_RULES,
+        )
+
+        response = service.generate_xml(request)
+
+        assert response.success is True
+        xml_data = response.xml_data
+
+        # Verify root element and namespaces
+        assert (
+            "SupplementaryCoverSheetforNEHGrantPrograms_3_0:SupplementaryCoverSheetforNEHGrantPrograms_3_0"
+            in xml_data
+        )
+        assert 'xmlns:att="http://apply.grants.gov/system/Attachments-V1.0"' in xml_data
+        assert 'xmlns:glob="http://apply.grants.gov/system/Global-V1.0"' in xml_data
+        assert 'xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"' in xml_data
+        assert 'FormVersion="3.0"' in xml_data
+        assert (
+            'xmlns:SupplementaryCoverSheetforNEHGrantPrograms_3_0="http://apply.grants.gov/forms/SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0"'
+            in xml_data
+        )
+
+        # Verify PDMajorField (Project Director Major Field)
+        assert "PDMajorField>117<" in xml_data  # "Arts: General" -> "117"
+
+        # Verify OrganizationType (passed through as-is)
+        assert "OrganizationType>1326: Center For Advanced Study/Research Institute<" in xml_data
+
+        # Verify ProjectFundingGroup structure
+        assert "ProjectFundingGroup>" in xml_data
+        assert "ReqOutrightAmount>1.00<" in xml_data
+        assert "ReqMatchAmount>2.00<" in xml_data
+        assert "TotalFromNEH>3.00<" in xml_data
+        assert "TotalProjectCosts>3.00<" in xml_data
+
+        # Verify ApplicationInfoGroup structure
+        assert "ApplicationInfoGroup>" in xml_data
+        assert "AdditionalFunding>No<" in xml_data  # False -> "No"
+        assert "TypeofApplication>New<" in xml_data
+
+        # CRITICAL: Verify ProjFieldCode is present and correctly nested in ApplicationInfoGroup
+        assert "ProjFieldCode>117<" in xml_data  # "Arts: General" -> "117"
+
+        # Verify ProjFieldCode appears after ApplicationInfoGroup opens (proper nesting)
+        # This ensures the field is inside the group, not at root level
+        app_info_start = xml_data.find("ApplicationInfoGroup>")
+        app_info_end = xml_data.find(
+            "</SupplementaryCoverSheetforNEHGrantPrograms_3_0:ApplicationInfoGroup"
+        )
+        proj_field_pos = xml_data.find("ProjFieldCode>117")
+
+        assert (
+            app_info_start < proj_field_pos < app_info_end
+        ), "ProjFieldCode must be nested inside ApplicationInfoGroup"
 
 
 @pytest.mark.xml_validation
@@ -474,9 +555,9 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
                     "additional_funding": True,
                     "additional_funding_explanation": "State Council pending",
                     "application_type": "New",
-                    "primary_project_discipline": "History: U.S. History",
-                    "secondary_project_discipline": "Interdisciplinary: American Studies",
                 },
+                "primary_project_discipline": "History: U.S. History",
+                "secondary_project_discipline": "Interdisciplinary: American Studies",
             },
         )
 
@@ -589,8 +670,8 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
                 "application_info": {
                     "additional_funding": False,
                     "application_type": "New",
-                    "primary_project_discipline": "Philosophy: General",
                 },
+                "primary_project_discipline": "Philosophy: General",
             },
         )
 

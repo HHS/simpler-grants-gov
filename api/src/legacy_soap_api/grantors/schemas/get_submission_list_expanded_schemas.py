@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema, SOAPInvalidEnvelope
 
@@ -19,6 +19,10 @@ class SubmissionInfo(BaseSOAPSchema):
     delinquent_federal_debt: str | None = Field(alias="DelinquentFederalDebt")
     active_exclusions: str | None = Field(alias="ActiveExclusions")
     uei: str | None = Field(alias="UEI")
+
+    @field_serializer("received_date_time")
+    def serialize_dt(self, dt: datetime) -> str:
+        return dt.isoformat(timespec="milliseconds")
 
 
 class GetSubmissionListExpandedResponse(BaseSOAPSchema):

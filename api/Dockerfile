@@ -1,5 +1,5 @@
 
-FROM ghcr.io/hhs/python-base-image:e648b66@sha256:09b3982fbb91701bdcbedcc1acc45eb9d8e6a4d7b4325eb7f6bc00ed76dc133c AS base
+FROM ghcr.io/hhs/python-base-image:8b8ce02@sha256:f5822def7eddfe5163ead820534c78012bcd4f333f553e03831a22f4cc5c9e3b AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -94,6 +94,10 @@ FROM base AS release
 COPY --from=base /api/.venv /api/.venv
 COPY --from=base /api/newrelic.ini /api/newrelic.ini
 COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
+
+# Fix /tmp permissions - COPY --from creates parent directories as root with
+# default permissions (755), overriding the 1777 set in the base stage
+RUN chmod 1777 /tmp
 
 # Clean up to reduce image size:
 # - Remove Python bytecode cache files

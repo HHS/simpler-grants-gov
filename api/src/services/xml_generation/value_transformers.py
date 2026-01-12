@@ -3,6 +3,7 @@
 import logging
 import re
 from collections.abc import Callable
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from .constants import CURRENCY_REGEX, NO_VALUE, YES_VALUE
@@ -43,16 +44,17 @@ def transform_boolean_to_yes_no(value: Any) -> str:
 
 
 def transform_currency_format(value: Any) -> str:
-    """Transform currency values to proper decimal format.
+    """Transform currency values to proper decimal format with 2 decimal places.
 
     Assumes input is already validated monetary string (per SF-424 regex constraints).
     Only supports string input to avoid float precision issues.
+    Ensures all currency values have exactly 2 decimal places (e.g., "1" -> "1.00").
 
     Args:
         value: Currency value as string (validated upstream)
 
     Returns:
-        Cleaned currency string (removes symbols, keeps numeric value)
+        Formatted currency string with exactly 2 decimal places
 
     Raises:
         ValueTransformationError: If value is not a string or cannot be parsed
@@ -68,7 +70,15 @@ def transform_currency_format(value: Any) -> str:
             f"Invalid currency format: '{value}' - must match pattern {CURRENCY_REGEX}"
         )
 
-    return value
+    # Convert to Decimal for precise formatting, then format with 2 decimal places
+    try:
+        decimal_value = Decimal(value)
+        # Format with exactly 2 decimal places
+        return f"{decimal_value:.2f}"
+    except InvalidOperation as err:
+        raise ValueTransformationError(
+            f"Cannot convert currency value to decimal: '{value}'"
+        ) from err
 
 
 def transform_string_case(value: Any, case_type: str) -> str:
