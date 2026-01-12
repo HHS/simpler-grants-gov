@@ -138,7 +138,7 @@ locals {
         "method" : "PUT",
         "api_key_required" : true,
         "method_parameters" : {
-          "method.request.path.application_id" = true,
+          "method.request.path.application_id"            = true,
           "method.request.path.application_attachment_id" = true,
         },
         "request_parameters" : {
