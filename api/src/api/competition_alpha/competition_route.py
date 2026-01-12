@@ -50,3 +50,25 @@ def update_competition_flag_route(
         competition = update_competition_flag(db_session, competition_id, is_enabled, user)
 
         return response.ApiResponse(message="Success", data=competition)
+
+
+@competition_blueprint.put("/competitions/<uuid:competition_id>/forms")
+@competition_blueprint.input(
+    competition_schema.CompetitionFormsReplaceAlphaRequestSchema, location="json"
+)
+@competition_blueprint.output(competition_schema.CompetitionResponseAlphaSchema())
+@competition_blueprint.auth_required(api_user_key_auth)
+@flask_db.with_db_session()
+def replace_competition_forms(
+    db_session: db.Session, competition_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"competition_id": competition_id})
+    logger.info("PUT /alpha/competitions/:competition_id/forms")
+
+    with db_session.begin():
+        user = api_user_key_auth.get_user()
+        db_session.add(user)
+
+        forms = replace_competition_forms(db_session, json_data)
+
+        return response.ApiResponse(message="Success", data=forms)
