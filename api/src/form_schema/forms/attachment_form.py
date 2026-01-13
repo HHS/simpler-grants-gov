@@ -6,6 +6,7 @@ from src.form_schema.shared import COMMON_SHARED_V1
 
 FORM_JSON_SCHEMA = {
     "type": "object",
+    # No required fields
     "properties": {
         "att1": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
