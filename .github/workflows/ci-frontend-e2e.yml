@@ -54,7 +54,7 @@ jobs:
           npx playwright install --with-deps
           docker rmi node:22 node:20 node:18
 
-      - name: Start API Server for e2e tests (seed DB first)
+      - name: Start API Server for e2e tests
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
