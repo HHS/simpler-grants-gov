@@ -26,16 +26,12 @@ jest.mock("next-intl", () => ({
         return <>{paragraphRenderer("Body paragraph")}</>;
       }
 
-      if (key === "errorMessage") {
-        const paragraphRenderer = values.p as RichRenderer;
+      if (key === "contactSupport") {
         const telRenderer = values.tel as RichRenderer;
         const linkRenderer = values.link as RichRenderer;
 
         return (
           <>
-            {paragraphRenderer("There was a technical problem on our end.")}
-            {paragraphRenderer("Please try again.")}
-            {paragraphRenderer("If the problem persists, contact:")}
             {telRenderer("1-800-518-4726")}
             {linkRenderer("simpler@grants.gov")}
           </>
@@ -179,7 +175,7 @@ describe("TransferOwnershipModal", () => {
     expect(screen.getByTestId("transfer-ownership-confirm")).toBeDisabled();
   });
 
-  it("shows rich error content when organizations fail to load", () => {
+  it("shows error message and contact links when organizations fail to load", () => {
     useUserOrganizationsMock.mockReturnValue({
       organizations: [],
       isLoading: false,
@@ -188,9 +184,7 @@ describe("TransferOwnershipModal", () => {
 
     renderModal();
 
-    expect(
-      screen.getByText("There was a technical problem on our end."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("errorMessage")).toBeInTheDocument();
 
     const phoneLink = screen.getByRole("link", { name: "1-800-518-4726" });
     expect(phoneLink).toHaveAttribute("href", "tel:1-800-518-4726");

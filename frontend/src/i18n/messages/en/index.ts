@@ -408,7 +408,9 @@ export const messages = {
       actionConfirm: "Transfer ownership",
       actionCancel: "Return to application",
       errorMessage:
-        "<p>We couldn't load your organizations right now. Please try again.</p><p>If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.</p>",
+        "We couldn't load your organizations right now. Please try again.",
+      contactSupport:
+        "If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",
     },
   },
   Index: {

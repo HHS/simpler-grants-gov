@@ -52,9 +52,9 @@ export const TransferOwnershipModal = ({
     [t],
   );
 
-  const errorText = useMemo(
+  const contactSupportText = useMemo(
     () =>
-      t.rich("errorMessage", {
+      t.rich("contactSupport", {
         tel: (content) => {
           const phoneNumber = String(content);
           return <a href={`tel:${phoneNumber}`}>{phoneNumber}</a>;
@@ -63,7 +63,6 @@ export const TransferOwnershipModal = ({
           const email = String(content);
           return <a href={`mailto:${email}`}>{email}</a>;
         },
-        p: (content) => <p>{content}</p>,
       }),
     [t],
   );
@@ -81,7 +80,9 @@ export const TransferOwnershipModal = ({
           slim
           className={hasError ? "" : "display-none"}
         >
-          {errorText}
+          {t("errorMessage")}
+          <br />
+          {contactSupportText}
         </Alert>
       </div>
 
