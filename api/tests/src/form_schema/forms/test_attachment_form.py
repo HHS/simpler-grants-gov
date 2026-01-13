@@ -1,7 +1,6 @@
 import pytest
 
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
-from tests.src.form_schema.forms.conftest import validate_required
 
 
 @pytest.fixture
