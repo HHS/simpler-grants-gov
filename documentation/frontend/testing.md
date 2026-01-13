@@ -2,13 +2,19 @@
 
 ## E2E testing
 
+### Scripting logins
+
+Any tests that rely on actually logging into the system do not work when running Playwright in Github Actions against a locally running application. Scripted logins do work when running against a deployed environment.
+
 ### Spoofing logins
 
 There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context.
 
 This system is based on a `createSpoofedSessionCookie` which will create a client side cookie on the browser context that will effectively log in a fake user with the API.
 
-Using this function, tests should work automatically in CI, but they will require a bit of manual setup to work locally.
+When Github Actions sets up a local environment for running E2E tests, it will run scripts to seed the database that will also allow Playwright to access the necessary token for a test user in order to get the spoofed login to work. With this in place, the `createSpoofedSessionCookie` function should work automatically in CI, but this will require a bit of manual setup to work when running locally.
+
+**Running against a deployed env TBA**
 
 #### Local setup
 

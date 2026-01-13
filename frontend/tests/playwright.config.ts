@@ -4,6 +4,12 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: path.resolve(__dirname, "..", ".env.local") });
 
+// oddly, this value is not available to tests via config, need to export it for use in individual tests
+export const baseURL =
+  process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
+
+export const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
