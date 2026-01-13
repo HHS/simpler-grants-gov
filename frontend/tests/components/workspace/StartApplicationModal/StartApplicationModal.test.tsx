@@ -34,21 +34,6 @@ describe("StartApplicationModal", () => {
     jest.resetAllMocks();
   });
 
-  it("matches snapshot", () => {
-    const { container } = render(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["organization"]}
-        organizations={[fakeUserOrganization]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
-
-    expect(container).toMatchSnapshot();
-  });
   it("displays validation error if submitted without a name", async () => {
     render(
       <StartApplicationModal

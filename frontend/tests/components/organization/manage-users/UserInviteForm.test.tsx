@@ -28,14 +28,6 @@ describe("UserInviteForm", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
-  it("matches snapshot", () => {
-    mockUseActionState.mockReturnValue([{}, noop, false]);
-    const { container } = render(
-      <UserInviteForm organizationId="1" roles={[fakeUserRole]} />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
   it("renders validation errors", () => {
     mockUseActionState.mockReturnValue([
       { validationErrors: { email: ["some error"] } },

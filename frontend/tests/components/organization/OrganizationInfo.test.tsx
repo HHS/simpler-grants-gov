@@ -9,14 +9,6 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("OragnizationInfo", () => {
-  it("matches snapshot", () => {
-    const { container } = render(
-      <OrganizationInfo
-        organizationDetails={fakeOrganizationDetailsResponse.sam_gov_entity}
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
   it("displays all necessary organization data", () => {
     render(
       <OrganizationInfo

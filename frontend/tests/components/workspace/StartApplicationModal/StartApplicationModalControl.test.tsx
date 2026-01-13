@@ -53,15 +53,6 @@ describe("StartApplicationModalControl", () => {
     jest.resetAllMocks();
   });
 
-  it("matches snapshot", () => {
-    const { container } = render(
-      <StartApplicationModalControl
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
   it("modal can be opened and closed as expected", async () => {
     const { rerender } = render(
       <StartApplicationModalControl

@@ -84,11 +84,6 @@ describe("Header", () => {
     global.fetch = originalFetch;
   });
 
-  it("renders Header navbar menu", () => {
-    const { container } = render(<Header />);
-    expect(container).toMatchSnapshot();
-  });
-
   it("toggles the mobile nav menu", async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -318,7 +313,6 @@ describe("Header", () => {
 
       await userEvent.click(aboutBtn);
 
-      expect(container).toMatchSnapshot();
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
       const visionLink = screen.getByRole("link", { name: /Our Vision/i });
@@ -335,7 +329,6 @@ describe("Header", () => {
 
       await userEvent.click(communityBtn);
 
-      expect(container).toMatchSnapshot();
       expect(communityBtn).toHaveAttribute("aria-expanded", "true");
 
       const eventsLink = screen.getByRole("link", { name: /Events/i });

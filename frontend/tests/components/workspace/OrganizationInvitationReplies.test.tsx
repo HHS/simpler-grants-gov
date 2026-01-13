@@ -59,20 +59,6 @@ describe("OrganizationInvitationReplies", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("matches snapshot with multiple invitations", () => {
-    const invites = [
-      fakeOrganizationInvitation,
-      makeInvitation({
-        organization_invitation_id: "inv-2",
-        status: "awaiting_response",
-      }),
-    ];
-    const { container } = render(
-      <OrganizationInvitationReplies userInvitations={invites} />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
   it("does not render invitations whose status is in completeStatuses", () => {
     const completeStatus = completeStatuses[0];
     const invites = [

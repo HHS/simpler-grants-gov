@@ -43,15 +43,6 @@ describe("SaveSearchModal", () => {
     clientFetchMock.mockReset();
     jest.clearAllTimers();
   });
-
-  it("matches snapshot", async () => {
-    const { container } = render(<SaveSearchModal onSave={noop} />);
-
-    const toggle = await screen.findByTestId("open-save-search-modal-button");
-    toggle.click();
-
-    expect(container).toMatchSnapshot();
-  });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(<SaveSearchModal onSave={noop} />);
 

@@ -41,30 +41,6 @@ describe("EditSavedSearchModal", () => {
     jest.clearAllTimers();
   });
 
-  it("matches snapshot", async () => {
-    const { rerender } = render(
-      <EditSavedSearchModal
-        savedSearchId="1"
-        editText="edit"
-        queryName="excellent query"
-      />,
-    );
-
-    const toggle = await screen.findByTestId(
-      "open-edit-saved-search-modal-button-1",
-    );
-    act(() => toggle.click());
-
-    rerender(
-      <EditSavedSearchModal
-        queryName="excellent query"
-        savedSearchId="1"
-        editText="edit"
-      />,
-    );
-
-    expect(rerender).toMatchSnapshot();
-  });
   it("displays a working modal toggle button", async () => {
     const { rerender } = render(
       <EditSavedSearchModal

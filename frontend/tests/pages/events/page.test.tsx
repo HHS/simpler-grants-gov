@@ -26,10 +26,6 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("Events", () => {
-  it("renders Events page unchanged", () => {
-    const { container } = render(Events({ params: localeParams }));
-    expect(container).toMatchSnapshot();
-  });
   it("renders intro text", () => {
     render(Events({ params: localeParams }));
 

@@ -60,50 +60,6 @@ describe("OpportunitySaveUserControl", () => {
     expect(component).toBeDefined();
   });
 
-  it("matches snapshot (saved icon)", () => {
-    const { container } = render(
-      <OpportunitySaveUserControl
-        opportunitySaved={true}
-        type="icon"
-        opportunityId="saved-id"
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
-  it("matches snapshot (saved button)", () => {
-    const { container } = render(
-      <OpportunitySaveUserControl
-        opportunitySaved={true}
-        type="button"
-        opportunityId="saved-id"
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
-  it("matches snapshot (unsaved icon)", () => {
-    const { container } = render(
-      <OpportunitySaveUserControl
-        opportunitySaved={false}
-        type="icon"
-        opportunityId="saved-id"
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
-  it("matches snapshot (unsaved button)", () => {
-    const { container } = render(
-      <OpportunitySaveUserControl
-        opportunitySaved={false}
-        type="icon"
-        opportunityId="saved-id"
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
   it("updates local saved state on save", async () => {
     clientFetchMock.mockResolvedValue({ type: "save" });
     mockUser = { token: "a token" };

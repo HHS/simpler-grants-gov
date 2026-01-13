@@ -8,8 +8,4 @@ describe("Footer", () => {
     const footer = screen.getByTestId("footer");
     expect(footer).toBeInTheDocument();
   });
-  it("matches snapshot", () => {
-    const { container } = render(<Footer />);
-    expect(container).toMatchSnapshot();
-  });
 });

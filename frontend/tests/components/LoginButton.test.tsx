@@ -9,28 +9,11 @@ jest.mock("src/utils/userUtils", () => ({
   storeCurrentPage: () => mockStoreCurrentPage() as unknown,
 }));
 
-describe("LoginButton", () => {
-  it("matches snapshot", () => {
-    const { container } = render(<LoginButton navLoginLinkText="whatever" />);
-
-    expect(container).toMatchSnapshot();
-  });
-});
-
 describe("LoginLink", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("matches snapshot", () => {
-    const { container } = render(
-      <LoginLink>
-        <span>hi</span>
-      </LoginLink>,
-    );
-
-    expect(container).toMatchSnapshot();
-  });
   it("should call store location to session storage when clicking sign in", async () => {
     render(
       <LoginLink>

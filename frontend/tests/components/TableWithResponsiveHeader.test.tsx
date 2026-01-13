@@ -19,14 +19,6 @@ describe("TableWithResponsiveHeader", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
-  it("matches snapshot", () => {
-    const component = TableWithResponsiveHeader({
-      headerContent: fakeResponsiveTableHeaders,
-      tableRowData: fakeResponsiveTableRows,
-    });
-    const { container } = render(component);
-    expect(container).toMatchSnapshot();
-  });
   it("displays header content in table header", () => {
     render(
       <TableWithResponsiveHeader

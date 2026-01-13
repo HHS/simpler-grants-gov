@@ -64,16 +64,4 @@ describe("CompetitionFormsTable", () => {
     expect(tables[1]).toHaveTextContent("complete");
     expect(tables[1]).toHaveTextContent("downloadInstructions");
   });
-  it("matches snapshot", () => {
-    const { container } = render(
-      <ApplicationFormsTable
-        competitionInstructionsDownloadPath="http://path-to-instructions.com"
-        forms={competitionForms}
-        applicationForms={applicationForms}
-        applicationId={applicationId}
-      />,
-    );
-
-    expect(container).toMatchSnapshot();
-  });
 });

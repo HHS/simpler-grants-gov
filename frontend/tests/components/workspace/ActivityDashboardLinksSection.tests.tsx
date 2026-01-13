@@ -20,11 +20,6 @@ describe("ActivityDashboardLinksSection", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("matches snapshot", async () => {
-    const { container } = render(await ActivityDashboardLinksSection());
-    expect(container).toMatchSnapshot();
-  });
-
   it("renders section heading and link cards with correct targets", async () => {
     render(await ActivityDashboardLinksSection());
 

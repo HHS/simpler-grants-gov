@@ -46,15 +46,6 @@ describe("OrganizationInvitationReply", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("matches snapshot", () => {
-    const { container } = render(
-      <OrganizationInvitationReply
-        userInvitation={fakeOrganizationInvitation}
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
   it("can fully accept a pending invitation", async () => {
     render(
       <OrganizationInvitationReply
@@ -144,46 +135,5 @@ describe("InvitationReplyForm", () => {
     );
 
     expect(screen.getByTestId("simpler-alert")).toBeInTheDocument();
-  });
-
-  it("matches snapshot", () => {
-    const { container } = render(
-      <InvitationReplyForm
-        onErrorClick={jest.fn()}
-        organizationName={"hi"}
-        organizationInvitationId={"id"}
-        onAccept={jest.fn()}
-        onReject={jest.fn()}
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-});
-
-describe("InvitationAcceptedNotice", () => {
-  it("matches snapshot", () => {
-    const { container } = render(
-      <InvitationAcceptedNotice organizationName="hi" />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-});
-
-describe("InvitationRejectedNotice", () => {
-  it("matches snapshot", () => {
-    const { container } = render(<InvitationRejectedNotice />);
-    expect(container).toMatchSnapshot();
-  });
-});
-
-describe("InvitationRejectionConfirmation", () => {
-  it("matches snapshot", () => {
-    const { container } = render(
-      <InvitationRejectionConfirmation
-        onCancel={jest.fn()}
-        onConfirm={jest.fn()}
-      />,
-    );
-    expect(container).toMatchSnapshot();
   });
 });

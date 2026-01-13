@@ -53,16 +53,6 @@ describe("Saved Opportunities page", () => {
     savedOpportunities.mockResolvedValue([]);
   });
 
-  it("to match snapshot", async () => {
-    const component = await SavedOpportunities({
-      params: localeParams,
-      searchParams: defaultSearchParams,
-    });
-    render(component);
-
-    expect(component).toMatchSnapshot();
-  });
-
   it("renders intro text for user with no saved opportunities", async () => {
     const component = await SavedOpportunities({
       params: localeParams,

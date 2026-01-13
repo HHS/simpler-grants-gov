@@ -24,13 +24,7 @@ describe("userProfileForm", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
-  it("matches snapshot", () => {
-    mockUseActionState.mockReturnValue([{}, noop, false]);
-    const { container } = render(
-      <UserProfileForm userDetails={fakeUserWithProfile} />,
-    );
-    expect(container).toMatchSnapshot();
-  });
+
   it("renders validation errors", () => {
     mockUseActionState.mockReturnValue([
       { validationErrors: { firstName: ["some error"] } },

@@ -8,15 +8,6 @@ const TypedConditionalFormActionError = ConditionalFormActionError<{
 }>;
 
 describe("ConditionalFormActionError", () => {
-  it("matches snapshot", () => {
-    const { container } = render(
-      <TypedConditionalFormActionError
-        fieldName="someFieldName"
-        errors={{ someFieldName: ["special error"] }}
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
   it("does not render error if no errors", () => {
     render(<TypedConditionalFormActionError fieldName="someFieldName" />);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

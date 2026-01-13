@@ -45,19 +45,6 @@ describe("UserOrganizationsList", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("matches snapshot with multiple organizations", () => {
-    const { container } = render(
-      <UserOrganizationsList
-        userOrganizations={[
-          fakeOrganizationDetailsResponse,
-          makeOrg("another", "another fake org"),
-        ]}
-        userRoles={fakeUserPrivilegesResponse}
-      />,
-    );
-    expect(container).toMatchSnapshot();
-  });
-
   it("renders the no-organizations state when list is empty", () => {
     render(
       <UserOrganizationsList

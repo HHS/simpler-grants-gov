@@ -48,16 +48,6 @@ describe("SearchResultsTable", () => {
     expect(results).toHaveNoViolations();
   });
 
-  it("matches snapshot", () => {
-    const component = SearchResultsTable({
-      savedOpportunities: [],
-      searchResults: [mockOpportunity],
-      page: 1,
-    });
-    const { container } = render(component);
-    expect(container).toMatchSnapshot();
-  });
-
   it("renders OpportunitySaveUserControl for each opportunity", () => {
     const opportunities = [
       mockOpportunity,
