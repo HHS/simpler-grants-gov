@@ -8,11 +8,8 @@ option to the is_selfsigned column due to null bytes being present for is_selfsi
 exclude columns option does not work on UPDATES so it causes errors every time an UPDATE is
 attempted when there's a null byte in is_selfsigned. Since null bytes don't seem to be an
 issue in production for that column we can let that be automatically generated.
-Note: the first line with the ALTER is to ensure that the user running the task will have correct access
-to the table.
 
 The command:
-ALTER DEFAULT PRIVILEGES IN SCHEMA legacy GRANT SELECT ON TABLES TO app;
 DROP FOREIGN TABLE IF EXISTS legacy.tcertificates;
 CREATE FOREIGN TABLE legacy.tcertificates (
     currentcertid TEXT OPTIONS (key 'true') NOT NULL,
@@ -22,7 +19,8 @@ CREATE FOREIGN TABLE legacy.tcertificates (
     expirationdate DATE,
     certemail TEXT NOT NULL,
     agencyid TEXT,
-    requestorlname TEXT,                                                                                                                                                                                                  requestorfname TEXT,
+    requestorlname TEXT,
+    requestorfname TEXT,
     requestoremail TEXT,
     requestorphone TEXT,
     created_date TIMESTAMP WITH TIME ZONE NOT NULL,
