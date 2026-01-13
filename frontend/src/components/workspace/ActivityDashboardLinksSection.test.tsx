@@ -29,7 +29,7 @@ describe("ActivityDashboardLinksSection", () => {
 
     // There should be two link targets for the two cards rendered
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(3);
 
     // Ensure links point to the expected pages
     const hrefs = links.map((link) => link.getAttribute("href"));
