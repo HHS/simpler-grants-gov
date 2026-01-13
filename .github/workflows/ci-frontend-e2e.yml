@@ -61,18 +61,14 @@ jobs:
           ulimit -c unlimited
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Build images and setup DB/search/mock services but don't start the API yet
-          make build setup-env-override-file init-db init-opensearch init-localstack init-mock-soap-services
-          # Run seeding and population while API is not running to avoid exhausting DB connections
+          # Run init first to generate JWT keys in override.env
+          make init
+          # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
-          # Now start the API with a fresh connection pool
-          make start
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
-          # Ensure the API wait script is executable and wait for health
+          # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
-          # Give API a short window to initialize
-          sleep 10
           ../api/bin/wait-for-api.sh
         shell: bash
 
@@ -81,28 +77,11 @@ jobs:
           API_GW_AUTH: ${{ secrets.API_GW_AUTH }}
           ENABLE_STANDALONE: "true"
         run: |
-          # Create .env.local from base development env
-          cp .env.development .env.local || true
-
-          # Append API public key (if present)
-          sed -n '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env >> .env.local || true
-
-          # Append E2E token if produced by seeding
-          if [ -f ../api/e2e_token.tmp ]; then
-            cat ../api/e2e_token.tmp >> .env.local
-          else
-            echo "# WARNING: ../api/e2e_token.tmp not found" >> .env.local
-          fi
-
-          # Add API gateway auth from secrets if provided
-          if [ -n "${API_GW_AUTH}" ]; then
-            echo "API_GW_AUTH=${API_GW_AUTH}" >> .env.local
-          fi
-
-          # Debug: show .env.local summary to logs (do NOT print secrets)
-          echo "=== .env.local contents (keys only) ==="
-          sed -n '1,200p' .env.local | sed -En "s/^([A-Z0-9_]+=).*$/\1/p" | sed -E 's/API_GW_AUTH=.*/API_GW_AUTH=***REDACTED***/' || true
-          echo "=== end .env.local summary ==="
+          {
+            cat .env.development
+            sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
+            cat ../api/e2e_token.tmp
+          } >> .env.local
 
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
