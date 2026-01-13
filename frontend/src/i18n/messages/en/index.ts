@@ -402,9 +402,9 @@ export const messages = {
       body: "<p>Choose the organization that should own this application. After ownership is transferred, you can continue your work and prepare for submission.</p> <p><strong>Don't see your organization?</strong> If your organization isn't listed, it may not be verified yet, or you may not have been invited. Contact your eBizPOC if you have questions about access.</p>",
       selectTitle: "Who is applying?",
       default: "- Select -",
-      warningTitle: "Important",
+      warningTitle: "Important to know about ownership",
       warningBody:
-        "Once you assign an organization, that choice is permanent. Ownership cannot be transferred again or returned to an individual.",
+        "Once you assign an organization, that choice is permanent. An application cannot be transferred to another organization or returned to an individual.",
       actionConfirm: "Transfer ownership",
       actionCancel: "Return to application",
       errorMessage:
