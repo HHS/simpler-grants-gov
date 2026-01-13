@@ -1,10 +1,10 @@
 name: CI Documentation Checks
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+  schedule:
+    # Run weekly on Monday at 9:00 AM EST
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
 
 jobs:
   lint-markdown:
