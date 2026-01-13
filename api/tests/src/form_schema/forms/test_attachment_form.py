@@ -1,6 +1,12 @@
 import pytest
 
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_form,
+)
+from src.validation.validation_constants import ValidationErrorType
+from tests.lib.data_factories import setup_application_for_form_validation
 
 
 @pytest.fixture
@@ -80,3 +86,42 @@ def test_attachment_form_v1_2_invalid_field_name(attachment_form_v1_2):
 
     assert len(validation_issues) == 1
     assert validation_issues[0].type == "additionalProperties"
+
+
+def test_attachment_form_v1_2_with_valid_attachments(
+    enable_factory_create, attachment_form_v1_2, verify_no_warning_error_logs
+):
+    application_form = setup_application_for_form_validation(
+        {
+            "att1": "c64b0b36-3298-4d63-982e-07ec50c79d81",
+            "att2": "dc435ad9-02a9-4e05-b28c-db6ba5fc39d7",
+        },
+        json_schema=attachment_form_v1_2.form_json_schema,
+        rule_schema=attachment_form_v1_2.form_rule_schema,
+        attachment_ids=[
+            "c64b0b36-3298-4d63-982e-07ec50c79d81",
+            "dc435ad9-02a9-4e05-b28c-db6ba5fc39d7",
+        ],
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    assert len(issues) == 0
+
+
+def test_attachment_form_v1_2_with_invalid_attachment(
+    enable_factory_create, attachment_form_v1_2, verify_no_warning_error_logs
+):
+    application_form = setup_application_for_form_validation(
+        {"att1": "e74282d5-f41c-4b38-b5a2-e0a5ccdc8b99"},
+        json_schema=attachment_form_v1_2.form_json_schema,
+        rule_schema=attachment_form_v1_2.form_rule_schema,
+        attachment_ids=["05056742-2b05-47bd-b5e7-8469fa9126ff"],
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    assert len(issues) == 1
+    assert issues[0].type == ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT
+    assert issues[0].message == "Field references application_attachment_id not on the application"
+    assert issues[0].value == "e74282d5-f41c-4b38-b5a2-e0a5ccdc8b99"
