@@ -261,6 +261,16 @@ exports[`Header About renders About submenu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/settings"
+              >
+                Settings
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
                 <svg
                   aria-hidden="true"
@@ -499,10 +509,32 @@ exports[`Header About renders About submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
+                  href="/dashboard"
+                >
+                  <div>
+                    Activity Dashboard
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
                   href="/applications"
                 >
                   <div>
                     Applications
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/organizations"
+                >
+                  <div>
+                    Organizations
                   </div>
                 </a>
               </li>
@@ -798,6 +830,16 @@ exports[`Header About renders Community submenu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/settings"
+              >
+                Settings
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
                 <svg
                   aria-hidden="true"
@@ -1036,10 +1078,32 @@ exports[`Header About renders Community submenu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
+                  href="/dashboard"
+                >
+                  <div>
+                    Activity Dashboard
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
                   href="/applications"
                 >
                   <div>
                     Applications
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/organizations"
+                >
+                  <div>
+                    Organizations
                   </div>
                 </a>
               </li>
@@ -1335,6 +1399,16 @@ exports[`Header renders Header navbar menu 1`] = `
             >
               <a
                 class="display-flex usa-button usa-button--unstyled text-no-underline"
+                href="/settings"
+              >
+                Settings
+              </a>
+            </li>
+            <li
+              class="usa-nav__submenu-item"
+            >
+              <a
+                class="display-flex usa-button usa-button--unstyled text-no-underline"
               >
                 <svg
                   aria-hidden="true"
@@ -1574,10 +1648,32 @@ exports[`Header renders Header navbar menu 1`] = `
                 class="usa-nav__submenu-item"
               >
                 <a
+                  href="/dashboard"
+                >
+                  <div>
+                    Activity Dashboard
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
                   href="/applications"
                 >
                   <div>
                     Applications
+                  </div>
+                </a>
+              </li>
+              <li
+                class="usa-nav__submenu-item"
+              >
+                <a
+                  href="/organizations"
+                >
+                  <div>
+                    Organizations
                   </div>
                 </a>
               </li>

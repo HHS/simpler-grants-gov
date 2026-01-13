@@ -43,14 +43,7 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-const userAdminOffFlag = jest.fn().mockReturnValue(true);
-
-const mockCheckFeatureFlag = jest.fn().mockImplementation((flagName) => {
-  if (flagName === "userAdminOff") {
-    return userAdminOffFlag() as boolean;
-  }
-  return true;
-});
+const mockCheckFeatureFlag = jest.fn().mockReturnValue(true);
 
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => ({
@@ -217,36 +210,6 @@ describe("Header", () => {
   });
 
   describe("Workspace", () => {
-    it("shows Activity Dashboard with FeatureFlag disabled", async () => {
-      userAdminOffFlag.mockReturnValue(false);
-      render(<Header {...props} />);
-
-      const workspaceButton = screen.getByRole("button", {
-        name: "Workspace",
-      });
-      await userEvent.click(workspaceButton);
-      const activityDashboardLink = screen.getByRole("link", {
-        name: "Activity Dashboard",
-      });
-
-      expect(activityDashboardLink).toBeInTheDocument();
-      expect(activityDashboardLink).toHaveAttribute("href", "/dashboard");
-      userAdminOffFlag.mockReturnValue(true); // resetting the mock
-    });
-
-    it("hides Activity Dashboard with FeatureFlag enabled", async () => {
-      render(<Header {...props} />);
-
-      const workspaceButton = screen.getByRole("button", {
-        name: "Workspace",
-      });
-      await userEvent.click(workspaceButton);
-      const activityDashboardLink = screen.queryByRole("link", {
-        name: "Activity Dashboard",
-      });
-      expect(activityDashboardLink).not.toBeInTheDocument();
-    });
-
     it("shows Applications", async () => {
       render(<Header {...props} />);
 
@@ -259,36 +222,6 @@ describe("Header", () => {
       });
       expect(applicationsLink).toBeInTheDocument();
       expect(applicationsLink).toHaveAttribute("href", "/applications");
-    });
-
-    it("shows Organizations with FeatureFlag disabled", async () => {
-      userAdminOffFlag.mockReturnValue(false);
-      render(<Header {...props} />);
-
-      const workspaceButton = screen.getByRole("button", {
-        name: "Workspace",
-      });
-      await userEvent.click(workspaceButton);
-      const organizationsLink = screen.getByRole("link", {
-        name: "Organizations",
-      });
-
-      expect(organizationsLink).toBeInTheDocument();
-      expect(organizationsLink).toHaveAttribute("href", "/organizations");
-      userAdminOffFlag.mockReturnValue(true); // resetting the mock
-    });
-
-    it("hides Organizations with FeatureFlag enabled", async () => {
-      render(<Header {...props} />);
-
-      const workspaceButton = screen.getByRole("button", {
-        name: "Workspace",
-      });
-      await userEvent.click(workspaceButton);
-      const organizationsLink = screen.queryByRole("link", {
-        name: "Organizations",
-      });
-      expect(organizationsLink).not.toBeInTheDocument();
     });
   });
 
