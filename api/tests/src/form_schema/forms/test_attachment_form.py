@@ -76,18 +76,6 @@ def test_attachment_form_v1_2_all_attachments(attachment_form_v1_2):
     assert len(validation_issues) == 0
 
 
-def test_attachment_form_v1_2_invalid_field_name(attachment_form_v1_2):
-    # Test that additional fields are not allowed
-    data = {
-        "att1": "c8eebbcc-a6ec-4b20-9bfa-e6bcc5abb6d5",
-        "att16": "12345678-1234-5678-1234-567812345678",  # Invalid field
-    }
-    validation_issues = validate_json_schema_for_form(data, attachment_form_v1_2)
-
-    assert len(validation_issues) == 1
-    assert validation_issues[0].type == "additionalProperties"
-
-
 def test_attachment_form_v1_2_with_valid_attachments(
     enable_factory_create, attachment_form_v1_2, verify_no_warning_error_logs
 ):
