@@ -302,14 +302,18 @@ describe("Header", () => {
       const homeLink = screen.getByRole("button", { name: /About/i });
       expect(homeLink).toHaveClass("usa-current");
     });
+
     it("renders About submenu", async () => {
+      const user = userEvent.setup();
+      render(<Header {...props} />);
+
       expect(
         screen.queryByRole("link", { name: /Our Vision/i }),
       ).not.toBeInTheDocument();
 
       const aboutBtn = screen.getByRole("button", { name: /About/i });
 
-      await userEvent.click(aboutBtn);
+      await user.click(aboutBtn);
 
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
@@ -317,13 +321,16 @@ describe("Header", () => {
       expect(visionLink).toBeInTheDocument();
     });
     it("renders Community submenu", async () => {
+      const user = userEvent.setup();
+      render(<Header {...props} />);
+
       expect(
         screen.queryByRole("link", { name: /Events/i }),
       ).not.toBeInTheDocument();
 
       const communityBtn = screen.getByRole("button", { name: /Community/i });
 
-      await userEvent.click(communityBtn);
+      await user.click(communityBtn);
 
       expect(communityBtn).toHaveAttribute("aria-expanded", "true");
 
