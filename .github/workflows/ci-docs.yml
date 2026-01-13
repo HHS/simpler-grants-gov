@@ -14,9 +14,8 @@ jobs:
       - uses: actions/checkout@v3
       # This is the GitHub Actions-friendly port of the linter used in the Makefile.
       - name: Link Checker
-              id: lychee
-              uses: lycheeverse/lychee-action@v2
-              args: |
-                --root-dir . --config ./github/workflows/lychee.toml
-              with:
-                fail: false
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--root-dir . --config ./.github/workflows/lychee.toml"
+          fail: false
