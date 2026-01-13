@@ -77,6 +77,7 @@ export const TransferOwnershipModal = ({
         <Alert
           headingLevel="h2"
           type="error"
+          noIcon
           slim
           className={hasError ? "" : "display-none"}
         >
@@ -101,6 +102,7 @@ export const TransferOwnershipModal = ({
         heading={t("warningTitle")}
         headingLevel="h2"
         type="warning"
+        noIcon
       >
         {t("warningBody")}
       </Alert>
