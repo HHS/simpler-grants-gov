@@ -15,4 +15,4 @@ LINK_CHECK_CONFIG=".github/workflows/lychee.toml"
 
 # Recursively find all markdown files (*.md) in this directory. Pass them in as args to the lint
 # command using the handy `xargs` command.
-lychee . --root-dir . --config $LINK_CHECK_CONFIG
+lychee . --root-dir . --quiet --config $LINK_CHECK_CONFIG
