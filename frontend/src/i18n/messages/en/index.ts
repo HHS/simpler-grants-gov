@@ -408,13 +408,7 @@ export const messages = {
       actionConfirm: "Transfer ownership",
       actionCancel: "Return to application",
       errorMessage:
-        "An error occurred and your request could not be completed. Please try again.",
-      footer: {
-        productSupport:
-          "For product support, contact us at <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",
-        alternativeMethodsOfApplying:
-          "You can also apply through <link>Grants.gov</link> if you prefer.",
-      },
+        "<p>We couldn't load your organizations right now. Please try again.</p><p>If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.</p>",
     },
   },
   Index: {

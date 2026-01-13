@@ -26,17 +26,27 @@ jest.mock("next-intl", () => ({
         return <>{paragraphRenderer("Body paragraph")}</>;
       }
 
+      if (key === "errorMessage") {
+        const paragraphRenderer = values.p as RichRenderer;
+        const telRenderer = values.tel as RichRenderer;
+        const linkRenderer = values.link as RichRenderer;
+
+        return (
+          <>
+            {paragraphRenderer("There was a technical problem on our end.")}
+            {paragraphRenderer("Please try again.")}
+            {paragraphRenderer("If the problem persists, contact:")}
+            {telRenderer("1-800-518-4726")}
+            {linkRenderer("simpler@grants.gov")}
+          </>
+        );
+      }
+
       return translate(key);
     };
 
     return translate;
   },
-}));
-
-jest.mock("src/components/ModalFooterProductSupport", () => ({
-  ModalFooterProductSupport: () => (
-    <div data-testid="modal-footer-product-support" />
-  ),
 }));
 
 jest.mock("./TransferOwnershipOrganizationSelect", () => ({
@@ -169,7 +179,7 @@ describe("TransferOwnershipModal", () => {
     expect(screen.getByTestId("transfer-ownership-confirm")).toBeDisabled();
   });
 
-  it("shows error message when organizations fail to load", () => {
+  it("shows rich error content when organizations fail to load", () => {
     useUserOrganizationsMock.mockReturnValue({
       organizations: [],
       isLoading: false,
@@ -178,7 +188,15 @@ describe("TransferOwnershipModal", () => {
 
     renderModal();
 
-    expect(screen.getByText("errorMessage")).toBeInTheDocument();
+    expect(
+      screen.getByText("There was a technical problem on our end."),
+    ).toBeInTheDocument();
+
+    const phoneLink = screen.getByRole("link", { name: "1-800-518-4726" });
+    expect(phoneLink).toHaveAttribute("href", "tel:1-800-518-4726");
+
+    const emailLink = screen.getByRole("link", { name: "simpler@grants.gov" });
+    expect(emailLink).toHaveAttribute("href", "mailto:simpler@grants.gov");
   });
 
   it("renders cancel button and it is clickable", () => {

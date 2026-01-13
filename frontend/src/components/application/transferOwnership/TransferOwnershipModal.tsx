@@ -11,7 +11,6 @@ import {
   type ModalRef,
 } from "@trussworks/react-uswds";
 
-import { ModalFooterProductSupport } from "src/components/ModalFooterProductSupport";
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { TransferOwnershipOrganizationSelect } from "./TransferOwnershipOrganizationSelect";
@@ -53,6 +52,22 @@ export const TransferOwnershipModal = ({
     [t],
   );
 
+  const errorText = useMemo(
+    () =>
+      t.rich("errorMessage", {
+        tel: (content) => {
+          const phoneNumber = String(content);
+          return <a href={`tel:${phoneNumber}`}>{phoneNumber}</a>;
+        },
+        link: (content) => {
+          const email = String(content);
+          return <a href={`mailto:${email}`}>{email}</a>;
+        },
+        p: (content) => <p>{content}</p>,
+      }),
+    [t],
+  );
+
   return (
     <SimplerModal
       modalId={modalId}
@@ -66,7 +81,7 @@ export const TransferOwnershipModal = ({
           slim
           className={hasError ? "" : "display-none"}
         >
-          {t("errorMessage")}
+          {errorText}
         </Alert>
       </div>
 
@@ -110,7 +125,6 @@ export const TransferOwnershipModal = ({
           {t("actionCancel")}
         </ModalToggleButton>
       </ModalFooter>
-      <ModalFooterProductSupport />
     </SimplerModal>
   );
 };
