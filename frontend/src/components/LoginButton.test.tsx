@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { LoginButton, LoginLink } from "src/components/LoginButton";
+import { LoginLink } from "src/components/LoginButton";
 
 const mockStoreCurrentPage = jest.fn();
 

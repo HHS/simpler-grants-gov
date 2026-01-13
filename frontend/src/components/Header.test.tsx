@@ -303,8 +303,6 @@ describe("Header", () => {
       expect(homeLink).toHaveClass("usa-current");
     });
     it("renders About submenu", async () => {
-      const { container } = render(<Header />);
-
       expect(
         screen.queryByRole("link", { name: /Our Vision/i }),
       ).not.toBeInTheDocument();
@@ -319,8 +317,6 @@ describe("Header", () => {
       expect(visionLink).toBeInTheDocument();
     });
     it("renders Community submenu", async () => {
-      const { container } = render(<Header />);
-
       expect(
         screen.queryByRole("link", { name: /Events/i }),
       ).not.toBeInTheDocument();

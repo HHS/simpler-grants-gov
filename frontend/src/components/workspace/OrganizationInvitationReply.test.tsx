@@ -5,9 +5,6 @@ import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import {
-  InvitationAcceptedNotice,
-  InvitationRejectedNotice,
-  InvitationRejectionConfirmation,
   InvitationReplyForm,
   OrganizationInvitationReply,
 } from "src/components/workspace/OrganizationInvitationReply";
