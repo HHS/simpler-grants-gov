@@ -303,7 +303,7 @@ class TestLoadOracleData(BaseTestClass):
 
         # Create a record in the foreign table with specific values
         # 'is_selfsigned' should be excluded
-        source_record = ForeignTcertificatesFactory.create(is_selfsigned=b"Y\x00")
+        source_record = ForeignTcertificatesFactory.create(is_selfsigned="Y")
 
         # Run the task with column exclusions
         task = load_oracle_data_task.LoadOracleDataTask(
