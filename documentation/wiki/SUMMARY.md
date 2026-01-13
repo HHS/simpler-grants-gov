@@ -49,7 +49,7 @@
       * [Make the API call](product/api/simpler-grants-api-tutorial/lets-make-a-python-script-to-use-the-api/make-the-api-call.md)
       * [Check the response status](product/api/simpler-grants-api-tutorial/lets-make-a-python-script-to-use-the-api/check-the-response-status.md)
       * [Handle the response](product/api/simpler-grants-api-tutorial/lets-make-a-python-script-to-use-the-api/handle-the-response.md)
-      * [Next Steps (optional)](product/api/simpler-grants-api-tutorial/lets-make-a-python-script-to-use-the-api/next-steps-optional.md)
+      * [Next Steps - optional](product/api/simpler-grants-api-tutorial/lets-make-a-python-script-to-use-the-api/next-steps-optional.md)
     * [You did it!](product/api/simpler-grants-api-tutorial/you-did-it.md)
     * [Common issues & solutions](product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md)
 * [Roadmap](product/product-roadmap.md)
