@@ -31,7 +31,6 @@ release-build:
 		--platform=linux/amd64 \
 		--build-arg RUN_USER=$(RUN_USER) \
 		--build-arg RUN_UID=$(RUN_UID) \
-		--build-arg ENABLE_STANDALONE=true \
 		$(OPTS) \
 		.
 
@@ -74,3 +73,4 @@ load-test-staging: # Load test the staging environment in aws
 
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	artillery run -e prod artillery-load-test.yml
+	
