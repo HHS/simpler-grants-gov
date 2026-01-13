@@ -81,14 +81,14 @@ def test_attachment_form_v1_2_with_valid_attachments(
 ):
     application_form = setup_application_for_form_validation(
         {
-            "att1": "c64b0b36-3298-4d63-982e-07ec50c79d81",
-            "att2": "dc435ad9-02a9-4e05-b28c-db6ba5fc39d7",
+            "att1": "a1111111-1111-1111-1111-111111111111",
+            "att2": "a2222222-2222-2222-2222-222222222222",
         },
         json_schema=attachment_form_v1_2.form_json_schema,
         rule_schema=attachment_form_v1_2.form_rule_schema,
         attachment_ids=[
-            "c64b0b36-3298-4d63-982e-07ec50c79d81",
-            "dc435ad9-02a9-4e05-b28c-db6ba5fc39d7",
+            "a1111111-1111-1111-1111-111111111111",
+            "a2222222-2222-2222-2222-222222222222",
         ],
     )
 
@@ -101,10 +101,10 @@ def test_attachment_form_v1_2_with_invalid_attachment(
     enable_factory_create, attachment_form_v1_2, verify_no_warning_error_logs
 ):
     application_form = setup_application_for_form_validation(
-        {"att1": "e74282d5-f41c-4b38-b5a2-e0a5ccdc8b99"},
+        {"att1": "a3333333-3333-3333-3333-333333333333"},
         json_schema=attachment_form_v1_2.form_json_schema,
         rule_schema=attachment_form_v1_2.form_rule_schema,
-        attachment_ids=["05056742-2b05-47bd-b5e7-8469fa9126ff"],
+        attachment_ids=["a4444444-4444-4444-4444-444444444444"],
     )
 
     issues = validate_application_form(application_form, ApplicationAction.MODIFY)
@@ -112,4 +112,4 @@ def test_attachment_form_v1_2_with_invalid_attachment(
     assert len(issues) == 1
     assert issues[0].type == ValidationErrorType.UNKNOWN_APPLICATION_ATTACHMENT
     assert issues[0].message == "Field references application_attachment_id not on the application"
-    assert issues[0].value == "e74282d5-f41c-4b38-b5a2-e0a5ccdc8b99"
+    assert issues[0].value == "a3333333-3333-3333-3333-333333333333"
