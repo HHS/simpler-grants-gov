@@ -26,7 +26,6 @@ This Test Plan covers functional and non\*functional aspects of the Apply Workfl
 - Required and conditionally required form validations
 - Optional form selection for submission
 - Document upload via forms and Attachments section
-- Navigation between steps
 - Review application
 - Submission flow and confirmation page
 - e2e workflows in a real environment
