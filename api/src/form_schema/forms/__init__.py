@@ -1,5 +1,6 @@
 from src.db.models.competition_models import Form
 
+from .attachment_form import AttachmentForm_v1_2
 from .budget_narrative_attachment import BudgetNarrativeAttachment_v1_2
 from .cd511 import CD511_v1_1
 from .epa_form_4700_4 import EPA_FORM_4700_4_v5_0
@@ -30,6 +31,7 @@ def get_active_forms() -> list[Form]:
         BudgetNarrativeAttachment_v1_2,
         ProjectNarrativeAttachment_v1_2,
         OtherNarrativeAttachment_v1_2,
+        AttachmentForm_v1_2,
         CD511_v1_1,
         SupplementaryNEHCoverSheet_v3_0,
         GG_LobbyingForm_v1_1,
