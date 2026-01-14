@@ -68,6 +68,9 @@ RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
 # Upgrade filelock to fix GHSA-w853-jp5j-5j7f
 RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
 
+# List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
+RUN python3 -m pip list -v
+
 # Remove pip from runtime (keep Poetry)
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
@@ -90,9 +93,6 @@ RUN rm -rf \
 
 # Compile stdlib to optimized bytecode
 RUN python3 -m compileall -f -o 1 /usr/local/lib/python${PY_MM}
-
-# List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
-RUN python3 -m pip list -v
 
 # Strip Python binary and extension modules
 RUN strip --strip-unneeded /usr/local/bin/python${PY_MM} || true; \
