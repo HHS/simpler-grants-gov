@@ -21,6 +21,7 @@ on:
         default: "staging"
         type: choice
         options:
+          - dev
           - staging
           - training
           - prod
@@ -112,6 +113,8 @@ jobs:
 
   # 3. Deploy NOFOs after Frontend completes successfully
   deploy-nofos:
+    # skip NOFOS as they deploy manually
+    if: ${{ 1 == 0 }}
     name: Deploy NOFOs
     needs: [nofos-checks, nofos-vulnerability-scans, deploy-frontend]
     uses: ./.github/workflows/deploy-nofos.yml
@@ -127,7 +130,7 @@ jobs:
   # 4. Deploy Analytics last, after NOFOs completes successfully
   deploy-analytics:
     name: Deploy Analytics
-    needs: [analytics-checks, analytics-vulnerability-scans, deploy-nofos]
+    needs: [analytics-checks, analytics-vulnerability-scans, deploy-api]
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1
