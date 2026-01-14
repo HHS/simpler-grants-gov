@@ -122,7 +122,7 @@ jobs:
     # skip NOFOS as they deploy manually
     if: ${{ 1 == 0 }}
     name: Deploy NOFOs
-    needs: [nofos-checks, nofos-vulnerability-scans, deploy-frontend]
+    needs: [nofos-checks, nofos-vulnerability-scans, deploy-api]
     uses: ./.github/workflows/deploy-nofos.yml
     strategy:
       max-parallel: 1
