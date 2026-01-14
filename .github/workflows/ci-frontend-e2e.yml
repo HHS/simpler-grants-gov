@@ -89,10 +89,7 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          npx playwright test \
-            --config=tests/playwright.config.ts \
-            ./e2e \
-            --shard="${CURRENT_SHARD}/${TOTAL_SHARDS}"
+          npm run test:e2e
 
       - name: Debug logging on failure
         if: failure()

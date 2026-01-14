@@ -53,65 +53,67 @@ export default defineConfig({
     total: parseInt(process.env.TOTAL_SHARDS || "1"),
     current: parseInt(process.env.CURRENT_SHARD || "1"),
   },
-  projects: [
-    // Local Desktop Chrome (exclude login)
-    {
-      name: "local-e2e-chromium",
-      testDir: "./e2e",
-      grepInvert: /@login/,
-      testIgnore: "login/**",
-      use: {
-        ...devices["Desktop Chrome"],
-        baseURL: localBaseUrl,
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-    {
-      name: "local-e2e-firefox",
-      testDir: "./e2e",
-      grepInvert: /@login/,
-      testIgnore: "login/**",
-      use: {
-        ...devices["Desktop Firefox"],
-        baseURL: localBaseUrl,
-        permissions: [],
-      },
-    },
-    {
-      name: "local-e2e-webkit",
-      testDir: "./e2e",
-      grepInvert: /@login/,
-      testIgnore: "login/**",
-      use: {
-        ...devices["Desktop Safari"],
-        baseURL: localBaseUrl,
-        permissions: ["clipboard-read"],
-      },
-    },
-    {
-      name: "local-e2e-mobile-chrome",
-      testDir: "./e2e",
-      grepInvert: /@login/,
-      testIgnore: "login/**",
-      use: {
-        ...devices["Pixel 7"],
-        baseURL: localBaseUrl,
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-
-    // Staging login tests
-    {
-      name: "login-staging-chromium",
-      testDir: "./e2e/login",
-      grep: /@login/,
-      use: {
-        ...devices["Desktop Chrome"],
-        baseURL: stagingBaseUrl,
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-  ],
+  projects:
+    ENV === "local"
+      ? [
+          {
+            name: "local-e2e-chromium",
+            testDir: "./e2e",
+            grepInvert: /@login/,
+            testIgnore: "login/**",
+            use: {
+              ...devices["Desktop Chrome"],
+              baseURL: localBaseUrl,
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "local-e2e-firefox",
+            testDir: "./e2e",
+            grepInvert: /@login/,
+            testIgnore: "login/**",
+            use: {
+              ...devices["Desktop Firefox"],
+              baseURL: localBaseUrl,
+              permissions: [],
+            },
+          },
+          {
+            name: "local-e2e-webkit",
+            testDir: "./e2e",
+            grepInvert: /@login/,
+            testIgnore: "login/**",
+            use: {
+              ...devices["Desktop Safari"],
+              baseURL: localBaseUrl,
+              permissions: ["clipboard-read"],
+            },
+          },
+          {
+            name: "local-e2e-mobile-chrome",
+            testDir: "./e2e",
+            grepInvert: /@login/,
+            testIgnore: "login/**",
+            use: {
+              ...devices["Pixel 7"],
+              baseURL: localBaseUrl,
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ]
+      : ENV === "staging"
+      ? [
+          {
+            name: "staging-e2e-chromium",
+            testDir: "./e2e",
+            use: {
+              ...devices["Desktop Chrome"],
+              baseURL: stagingBaseUrl,
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ]
+      : [],
 
   // Start local dev server only for local environment
   webServer:
