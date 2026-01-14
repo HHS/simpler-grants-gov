@@ -12,27 +12,15 @@ if (fs.existsSync(envPath)) {
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const ENV = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
-// Helper to get environment variables
-// Determine which environment to use for tests (local or staging).
-// Can be overridden via PLAYWRIGHT_TARGET_ENV environment variable.
-const getEnv = (name: string): string | undefined => {
-  return process.env[name];
+// Base URLs for each environment, read from .env.local if present, else fallback to defaults
+const BASE_URLS: Record<string, string> = {
+  local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:3000",
+  staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
-// Base URLs with defaults
-// Set base URLs for local and staging environments.
-// Fallback to sensible defaults if not provided in environment variables.
-const localBaseUrl = getEnv("LOCAL_BASE_URL") || "http://127.0.0.1:3000";
-const stagingBaseUrl =
-  getEnv("STAGING_BASE_URL") || "https://staging.simpler.grants.gov";
-
-// Use PLAYWRIGHT_BASE_URL or fallback based on environment
-const baseUrl =
-  process.env.PLAYWRIGHT_BASE_URL ||
-  (ENV === "staging" ? stagingBaseUrl : localBaseUrl);
+const baseUrl = BASE_URLS[ENV] || BASE_URLS.local;
 
 // Environment for web server
-// Prepare environment variables for the dev server, disabling New Relic for E2E tests.
 const webServerEnv: Record<string, string> = Object.fromEntries(
   Object.entries({
     ...process.env,
@@ -74,12 +62,11 @@ export default defineConfig({
   /*
    * Define test projects for different browsers and devices.
    * - Local: Multiple browsers, mobile emulation, excludes login tests.
-   * - Staging: Only Chromium, currently includes login via Logib.gov MFA test.
+   * - Staging: Only Chromium, currently includes login via Login.gov MFA test.
    */
   projects:
     ENV === "local"
       ? [
-          // Local Desktop Chrome (exclude login)
           {
             name: "local-e2e-chromium",
             testDir: "./e2e",
@@ -87,7 +74,7 @@ export default defineConfig({
             testIgnore: "login/**",
             use: {
               ...devices["Desktop Chrome"],
-              baseURL: localBaseUrl,
+              baseURL: baseUrl,
               permissions: ["clipboard-read", "clipboard-write"],
             },
           },
@@ -97,8 +84,8 @@ export default defineConfig({
             grepInvert: /@login/,
             testIgnore: "login/**",
             use: {
-              ...devices["Desktop Firefox"], // firefox doesn't support clipboard-write or clipboard-read
-              baseURL: localBaseUrl,
+              ...devices["Desktop Firefox"],
+              baseURL: baseUrl,
               permissions: [],
             },
           },
@@ -109,11 +96,10 @@ export default defineConfig({
             testIgnore: "login/**",
             use: {
               ...devices["Desktop Safari"],
-              baseURL: localBaseUrl,
-              permissions: ["clipboard-read"], // webkit doesn't support clipboard-write
+              baseURL: baseUrl,
+              permissions: ["clipboard-read"],
             },
           },
-          /* Test against mobile viewports. */
           {
             name: "local-e2e-mobile-chrome",
             testDir: "./e2e",
@@ -121,7 +107,7 @@ export default defineConfig({
             testIgnore: "login/**",
             use: {
               ...devices["Pixel 7"],
-              baseURL: localBaseUrl,
+              baseURL: baseUrl,
               permissions: ["clipboard-read", "clipboard-write"],
             },
           },
@@ -133,7 +119,7 @@ export default defineConfig({
               testDir: "./e2e",
               use: {
                 ...devices["Desktop Chrome"],
-                baseURL: stagingBaseUrl,
+                baseURL: baseUrl,
                 permissions: ["clipboard-read", "clipboard-write"],
               },
             },
