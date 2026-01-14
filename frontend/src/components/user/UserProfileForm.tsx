@@ -42,6 +42,12 @@ export function UserProfileForm({
   const lastName = state.data?.last_name || userDetails.profile?.last_name;
   const isMissingName = !firstName || !lastName;
 
+  // Create a key suffix that changes when state.data is updated (after form submission)
+  // This forces inputs to remount with new defaultValue when validation fails
+  const formDataKey = state.data
+    ? `${state.data.first_name || ""}-${state.data.middle_name || ""}-${state.data.last_name || ""}`
+    : "initial";
+
   // Dispatch event when profile is successfully updated
   useEffect(() => {
     if (state?.success) {
@@ -105,6 +111,7 @@ export function UserProfileForm({
             errors={state.validationErrors}
           />
           <TextInput
+            key={`firstName-${formDataKey}`}
             id="firstName"
             name="firstName"
             type="text"
@@ -116,6 +123,7 @@ export function UserProfileForm({
         <FormGroup>
           <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
           <TextInput
+            key={`middleName-${formDataKey}`}
             id="middle-name"
             name="middleName"
             type="text"
@@ -137,6 +145,7 @@ export function UserProfileForm({
             errors={state.validationErrors}
           />
           <TextInput
+            key={`lastName-${formDataKey}`}
             id="lastName"
             name="lastName"
             type="text"
