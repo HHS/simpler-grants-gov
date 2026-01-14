@@ -37,18 +37,19 @@ export const userProfileAction = async (
     };
   }
 
-  const validationErrors = await validateUserProfileAction(formData);
-  if (validationErrors) {
-    return {
-      validationErrors,
-    };
-  }
-
   const rawFormData = {
     first_name: formData.get("firstName") as string,
     middle_name: formData.get("middleName") as string,
     last_name: formData.get("lastName") as string,
   };
+
+  const validationErrors = await validateUserProfileAction(formData);
+  if (validationErrors) {
+    return {
+      validationErrors,
+      data: rawFormData,
+    };
+  }
 
   let userDetailsUpdateResponse;
   try {
@@ -66,6 +67,7 @@ export const userProfileAction = async (
     );
     return {
       errorMessage: error.message,
+      data: rawFormData,
     };
   }
 };

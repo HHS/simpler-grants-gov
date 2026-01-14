@@ -55,6 +55,8 @@ class LoadOracleDataTask(src.task.task.Task):
             tables_to_load = TABLES_TO_LOAD
 
         # Initialize columns_to_exclude if None
+        # Note: This does not work on UPDATES and can cause errors because the fields won't be excluded
+        # if the column has invalid data
         self.columns_to_exclude: dict[str, list[str]] = {"tcertificates": ["is_selfsigned"]}
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}

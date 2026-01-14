@@ -196,6 +196,15 @@ def _add_top_level_agency_prefix(
         filters.agency = None
 
 
+def _normalize_aln(filters: OpportunityFilters | None) -> None:
+    if not filters or not filters.assistance_listing_number:
+        return
+
+    one_of = filters.assistance_listing_number.one_of
+    if one_of:
+        filters.assistance_listing_number.one_of = [v.upper() for v in one_of]
+
+
 def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
     builder = search.SearchQueryBuilder()
 
@@ -216,6 +225,9 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
 
     # Filter Prefix
     _add_top_level_agency_prefix(builder, params.filters)
+
+    # Normalize ALN casing
+    _normalize_aln(params.filters)
 
     # Filters
     _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)
@@ -249,6 +261,7 @@ def search_opportunities(
 ) -> tuple[Sequence[dict], dict, PaginationInfo]:
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
+
     response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)

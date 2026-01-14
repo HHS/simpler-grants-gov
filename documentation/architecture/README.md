@@ -79,15 +79,15 @@ The "analytics" component of the application is the parts composed of the analyt
 
 ## Relevant ADRs
 
-- [CI/CD Task Runner](../wiki/decisions/adr/2023-06-29-ci-cd-task-runner.md)
-- [Database Choices](../wiki/decisions/adr/2023-07-05-db-choices.md)
-- [Front-End Language](../wiki/decisions/adr/2023-07-10-front-end-language.md)
-- [Front-end Framework](../wiki/decisions/adr/2023-07-14-front-end-framework.md)
-- [Back-end Language](../wiki/decisions/adr/2023-06-30-api-language.md)
-- [Back-End Framework](../wiki/decisions/adr/2023-07-07-api-framework.md)
-- [Application Infrastructure Service](../wiki/decisions/adr/2023-07-20-deployment-strategy.md)
-- [Analytics Data Storage](../wiki/decisions/adr/2024-03-19-dashboard-storage.md)
-- [Analytics Dashboard Tool](../wiki/decisions/adr/2024-04-10-dashboard-tool.md)
+- [CI/CD Task Runner](../wiki/product/decisions/adr/2023-06-29-ci-cd-task-runner.md)
+- [Database Choices](../wiki/product/decisions/adr/2023-07-05-db-choices.md)
+- [Front-End Language](../wiki/product/decisions/adr/2023-07-10-front-end-language.md)
+- [Front-end Framework](../wiki/product/decisions/adr/2023-07-14-front-end-framework.md)
+- [Back-end Language](../wiki/product/decisions/adr/2023-06-30-api-language.md)
+- [Back-End Framework](../wiki/product/decisions/adr/2023-07-07-api-framework.md)
+- [Application Infrastructure Service](../wiki/product/decisions/adr/2023-07-20-deployment-strategy.md)
+- [Analytics Data Storage](../wiki/product/decisions/adr/2024-03-19-dashboard-storage.md)
+- [Analytics Dashboard Tool](../wiki/product/decisions/adr/2024-04-10-dashboard-tool.md)
 
 ## Architecture Description
 

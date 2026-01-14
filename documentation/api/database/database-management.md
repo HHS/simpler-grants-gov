@@ -143,6 +143,8 @@ In order to remove a column, we'll first need to remove all usage of the column 
 
 However, since the column will still be in the database model, SQLAlchemy will still include it in `SELECT`s and `INSERT`s for the table. We'll need to set this column to `deferred`, in order to exclude it from queries, and to `evaluates_none`, to stop inserting null for it. This does require that the column be nullable to work, if it isn't you'll first need to make it nullable in an earlier migration.
 
+Note: `evaulates_none` is required if the column has a server_default as it will make it so if a field isn't set, rather than excluding it from the insert into the DB, it sets it to `null` so the server_default isn't used. If the column has no `server_default`, it isn't technically required to use it, but we recommend adding it because it's simpler to have a single pattern to follow rather than multiple.
+
 ```python
 class Example(ApiSchemaTable, TimestampMixin):
     __tablename__ = "example"
@@ -153,7 +155,7 @@ class Example(ApiSchemaTable, TimestampMixin):
 
     # The column we want to deprecate, needs both
     # the call to evaluates_none() and deferred=True
-    my_column: Mapped[str | None] = mapped_column(Text.evaluates_none(), deferred=True)
+    my_column: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
 ```
 
 **Second Deploy**

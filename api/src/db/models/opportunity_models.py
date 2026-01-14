@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -214,7 +214,8 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     funding_category_description: Mapped[str | None]
     applicant_eligibility_description: Mapped[str | None]
 
-    agency_phone_number: Mapped[str | None]
+    # SGG-7090, deprecate agency_phone_number usage - first deploy
+    agency_phone_number: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
     agency_email_address_description: Mapped[str | None]
@@ -225,8 +226,10 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     # Do not use these agency fields, they're kept for now, but
     # are simply copying behavior from the legacy system - prefer
     # the same named values in the opportunity itself
-    agency_code: Mapped[str | None]
-    agency_name: Mapped[str | None]
+
+    # SGG-7090, deprecate agency_code, agency_name usage - first deploy
+    agency_code: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
+    agency_name: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
 
     link_funding_instruments: Mapped[list[LinkOpportunitySummaryFundingInstrument]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
