@@ -48,6 +48,9 @@ test.describe("@login Login.gov tests", () => {
       authKey,
       "STAGING_TEST_USER_MFA_KEY",
     );
+
+    const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
+
     const playwriteBaseUrl: string = requireEnv(baseUrl, "STAGING_BASE_URL");
     // Optional tracing for CI debugging
     await context.tracing.start({ screenshots: true, snapshots: true });
@@ -169,10 +172,7 @@ test.describe("@login Login.gov tests", () => {
     await mfaSubmitButton.click();
 
     // --- Step 7: Handle mobile dropdown if needed and confirm login success ---
-    const viewport = page.viewportSize();
-    const isMobile = viewport ? viewport.width <= 480 : false;
-
-    if (isMobile) {
+    if (isMobileProject) {
       const dropdownButton = page
         .locator(
           'header >> role=button[name="User menu"], header >> [aria-label*="menu"], header >> [aria-label*="User"]',

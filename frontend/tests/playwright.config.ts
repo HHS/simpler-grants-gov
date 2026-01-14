@@ -102,18 +102,18 @@ export default defineConfig({
           },
         ]
       : ENV === "staging"
-      ? [
-          {
-            name: "staging-e2e-chromium",
-            testDir: "./e2e",
-            use: {
-              ...devices["Desktop Chrome"],
-              baseURL: stagingBaseUrl,
-              permissions: ["clipboard-read", "clipboard-write"],
+        ? [
+            {
+              name: "staging-e2e-chromium",
+              testDir: "./e2e",
+              use: {
+                ...devices["Desktop Chrome"],
+                baseURL: stagingBaseUrl,
+                permissions: ["clipboard-read", "clipboard-write"],
+              },
             },
-          },
-        ]
-      : [],
+          ]
+        : [],
 
   // Start local dev server only for local environment
   webServer:
