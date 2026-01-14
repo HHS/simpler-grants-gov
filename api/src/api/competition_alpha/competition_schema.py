@@ -126,7 +126,7 @@ class FormReplaceSchema(Schema):
     )
 
 
-class CompetitionFormsReplaceAlphaRequestSchema(Schema):
+class CompetitionFormsSetRequestSchema(Schema):
     forms = fields.List(
         fields.Nested(FormReplaceSchema),
         required=True,
