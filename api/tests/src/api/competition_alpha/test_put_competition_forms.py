@@ -9,7 +9,6 @@ from tests.src.db.models import factories
 def test_put_competition_forms_add_success(
     client,
     db_session,
-    user,
     internal_admin_user,
     internal_admin_user_api_key,
     enable_factory_create,
@@ -178,3 +177,24 @@ def test_put_competition_forms_form_deprecated(
     )
 
     assert resp.status_code == 404
+
+
+def test_put_competition_forms_unauthorized(
+    client,
+    db_session,
+    internal_admin_user_api_key,
+    enable_factory_create,
+):
+    """Test adding forms to a competition without the required privilege"""
+    competition = factories.CompetitionFactory.create(competition_forms=[])
+    form1 = factories.FormFactory.create()
+
+    payload = {
+        "forms": [
+            {"form_id": str(form1.form_id), "is_required": True},
+        ]
+    }
+    url = f"/alpha/competitions/{competition.competition_id}/forms"
+    resp = client.put(url, headers={"X-API-Key": internal_admin_user_api_key}, json=payload)
+
+    assert resp.status_code == 403
