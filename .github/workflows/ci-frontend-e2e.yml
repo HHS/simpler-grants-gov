@@ -26,9 +26,6 @@ jobs:
     name: Run Local E2E Tests
     runs-on: ubuntu-22.04
 
-    env:
-      PLAYWRIGHT_TARGET_ENV: local
-
     strategy:
       fail-fast: true
       matrix:
