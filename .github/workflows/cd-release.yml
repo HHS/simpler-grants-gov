@@ -2,7 +2,9 @@ name: Release Deploy
 run-name: Release Deploy to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
 
 # This workflow orchestrates deployments across all services in a specific order:
-# API -> Frontend -> NOFOs -> Analytics
+# API first
+# FE and Analytics next after API
+# Skip NOFOs (at least for now)
 #
 # This ensures backwards compatibility by deploying API first, allowing other
 # services to safely depend on API changes being available.
@@ -39,6 +41,8 @@ jobs:
     uses: ./.github/workflows/ci-frontend.yml
 
   nofos-checks:
+    # skip NOFOS as they deploy manually
+    if: ${{ 1 == 0 }}
     name: NOFOs Checks
     uses: ./.github/workflows/ci-nofos.yml
     with:
@@ -66,6 +70,8 @@ jobs:
 
   # NOFOs vulnerability scans need the cached Docker image from checks
   nofos-vulnerability-scans:
+    # skip NOFOS as they deploy manually
+    if: ${{ 1 == 0 }}
     name: NOFOs Vulnerability Scans
     needs: [nofos-checks]
     uses: ./.github/workflows/vulnerability-scans-nofos.yml
