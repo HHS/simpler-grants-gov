@@ -7,7 +7,12 @@ from tests.src.db.models import factories
 
 
 def test_put_competition_forms_add_success(
-    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+    client,
+    db_session,
+    user,
+    internal_admin_user,
+    internal_admin_user_api_key,
+    enable_factory_create,
 ):
     """Test adding forms to a competition with no existing forms"""
     add_manage_competition_privilege(db_session, internal_admin_user)
@@ -60,6 +65,18 @@ def test_put_competition_forms_update_existing(
     db_session.refresh(competition)
     assert len(competition.competition_forms) == 1
     assert competition.competition_forms[0].is_required is True
+    first_update_at = competition.competition_forms[0].updated_at
+
+    # update with same value
+    url = f"/alpha/competitions/{competition.competition_id}/forms"
+    resp = client.put(url, headers={"X-API-Key": internal_admin_user_api_key}, json=payload)
+
+    assert resp.status_code == 200
+    db_session.refresh(competition)
+
+    assert len(competition.competition_forms) == 1
+    assert competition.competition_forms[0].is_required is True
+    assert competition.competition_forms[0].updated_at == first_update_at  # No update
 
 
 def test_put_competition_forms_remove_missing(
@@ -67,7 +84,6 @@ def test_put_competition_forms_remove_missing(
 ):
     """Test removing forms not included in the request"""
     add_manage_competition_privilege(db_session, internal_admin_user)
-
     competition = factories.CompetitionFactory.create(competition_forms=[])
     form1 = factories.FormFactory.create()
     form2 = factories.FormFactory.create()
@@ -119,12 +135,38 @@ def test_put_competition_forms_form_not_found(
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
     existing_form = factories.FormFactory.create()
-    db_session.commit()
 
     payload = {
         "forms": [
             {"form_id": str(existing_form.form_id), "is_required": True},
             {"form_id": str(uuid4()), "is_required": False},
+        ]
+    }
+
+    url = f"/alpha/competitions/{competition.competition_id}/forms"
+    resp = client.put(
+        url,
+        headers={"X-API-Key": internal_admin_user_api_key},
+        json=payload,
+    )
+
+    assert resp.status_code == 404
+
+
+def test_put_competition_forms_form_deprecated(
+    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+):
+    """Test 404 when one of multiple requested forms is deprecated"""
+    add_manage_competition_privilege(db_session, internal_admin_user)
+
+    competition = factories.CompetitionFactory.create(competition_forms=[])
+    existing_form = factories.FormFactory.create()
+    deprecated_form = factories.FormFactory.create(is_deprecated=True)
+
+    payload = {
+        "forms": [
+            {"form_id": str(existing_form.form_id), "is_required": True},
+            {"form_id": deprecated_form.form_id, "is_required": False},
         ]
     }
 
