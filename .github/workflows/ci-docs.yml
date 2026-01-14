@@ -1,4 +1,4 @@
-name: CI Documentation Checks
+name: CI Documentation Linker Checks
 
 on:
   schedule:
