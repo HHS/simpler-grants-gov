@@ -1,5 +1,5 @@
 name: Deploy frontend
-run-name: Deploy ${{ inputs.version || 'main' }} to Frontend ${{ inputs.environment || (github.event_name == 'release' && 'prod') || 'nonprod' }}
+run-name: Deploy ${{ inputs.version || 'main' }} to Frontend ${{ inputs.environment || 'nonprod' }}
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - "frontend/**"
       - "infra/frontend/**"
       - "infra/modules/**"
-  release:
-    types: [published]
+  # Release deployments are handled by cd-release.yml to enforce deployment order
+  # (API -> Frontend -> NOFOs -> Analytics)
   workflow_dispatch:
     inputs:
       environment:
@@ -47,14 +47,14 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.event_name == 'release' && '["prod", "training"]' || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
     with:
       app_name: "frontend"
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
 
   send-slack-notification:
-    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: [frontend-checks, vulnerability-scans, deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
