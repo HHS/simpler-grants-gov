@@ -28,8 +28,6 @@ jobs:
 
     env:
       PLAYWRIGHT_TARGET_ENV: local
-      LOCAL_BASE_URL: http://127.0.0.1:3000
-      STAGING_BASE_URL: https://staging.simpler.grants.gov
 
     strategy:
       fail-fast: true
