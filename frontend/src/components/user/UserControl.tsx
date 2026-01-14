@@ -19,7 +19,7 @@ const TestApplicationLink = () => {
   return (
     <Link
       className="display-flex usa-button usa-button--unstyled text-no-underline"
-      href={`/workspace/applications/application/${testApplicationId}`}
+      href={`/applications/${testApplicationId}`}
     >
       {t("testApplication")}
     </Link>

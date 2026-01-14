@@ -66,9 +66,7 @@ const transformTableRowData = (
       },
       {
         cellData: (
-          <a
-            href={`/workspace/applications/application/${application.application_id}`}
-          >
+          <a href={`/applications/${application.application_id}`}>
             {application.application_name}
           </a>
         ),
