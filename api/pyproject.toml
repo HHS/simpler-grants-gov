@@ -142,6 +142,10 @@ ignore = [
     # saying to avoid shadowing other params to do my_var_, but while
     # that follows PEP8 formatting, it's not generally what I've seen
     "RUF052",
+    # Ruff doesn't want any code in __init__ files, but some of our
+    # libraries and patterns need a very small amount of code configured
+    # in these files.
+    "RUF067",
 ]
 
 # These are characters we are allowing to be confusing
