@@ -31,7 +31,7 @@ jobs:
               },
               {
                 "title": "Event Name",
-                "value": "'"${{ github.event_name }}"'
+                "value": "'"${{ github.event_name }}"'"
               },
               {
                 "title": "Ref Type",
@@ -39,7 +39,7 @@ jobs:
               },
               {
                 "title": "Ref Name",
-                "value": "'"${{ github.ref_type }}"'"
+                "value": "'"${{ github.ref_name }}"'"
               ,
               {
                 "title": "Event Path",

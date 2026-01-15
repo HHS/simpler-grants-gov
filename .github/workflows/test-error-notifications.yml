@@ -1,5 +1,5 @@
 name: Test Error Notifications
-run-name: Deploy ${{ inputs.version || 'main' }} to Analytics ${{ inputs.environment || 'nonprod' }}
+run-name: Test Error Notification
 
 on:
   push:
