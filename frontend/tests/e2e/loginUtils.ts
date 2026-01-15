@@ -1,8 +1,16 @@
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
+import { targetEnv } from "tests/playwright.config";
 
 /*
+
+  this file contains functionality for creating client side cookies to spoof a logged in user
+  for use in locally running Playwright targeted environments.
+
+  this won't work in any deployed environment
+
   most of this is copied from src/services/auth/session in order to keep app logic and test logic separate
+
 */
 
 const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
@@ -15,7 +23,7 @@ let clientJwtKey: Uint8Array;
 const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
 
-export const initializeSessionSecrets = () => {
+export const initializePlaywrightSessionSecrets = () => {
   if (!clientSessionSecret) {
     // eslint-disable-next-line
     console.debug("Api session key not present, cannot spoof login");
@@ -63,5 +71,6 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
   ]);
 };
 
-// Turning off for now, let's revisit in https://github.com/HHS/simpler-grants-gov/issues/7256
-// initializeSessionSecrets();
+if (targetEnv === "local") {
+  initializePlaywrightSessionSecrets();
+}

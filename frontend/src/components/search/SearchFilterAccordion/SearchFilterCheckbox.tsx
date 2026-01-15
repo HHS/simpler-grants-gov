@@ -32,7 +32,7 @@ const SearchFilterCheckbox = ({
 
   return (
     <FilterCheckbox
-      id={option.id} // could change this if the numerical ids are a problem
+      id={option.id}
       label={<FilterOptionLabel option={option} facetCounts={facetCounts} />}
       name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
