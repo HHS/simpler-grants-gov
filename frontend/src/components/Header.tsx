@@ -87,8 +87,6 @@ const NavLinks = ({
   );
   const { user } = useUser();
   const { checkFeatureFlag } = useFeatureFlags();
-  const showSavedSearch = checkFeatureFlag("savedSearchesOn");
-  const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -112,7 +110,7 @@ const NavLinks = ({
         ],
       },
     ];
-    if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
+    if (!user?.token) {
       return anonymousNavLinks;
     }
 
@@ -132,24 +130,21 @@ const NavLinks = ({
       href: "/organizations",
     });
 
-    if (showSavedOpportunities) {
-      workspaceSubNavs.push({
-        text: t("savedOpportunities"),
-        href: "/saved-opportunities",
-      });
-    }
-    if (showSavedSearch) {
-      workspaceSubNavs.push({
-        text: t("savedSearches"),
-        href: "/saved-search-queries",
-      });
-    }
+    workspaceSubNavs.push({
+      text: t("savedOpportunities"),
+      href: "/saved-opportunities",
+    });
+
+    workspaceSubNavs.push({
+      text: t("savedSearches"),
+      href: "/saved-search-queries",
+    });
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
       text: t("workspace"),
       children: workspaceSubNavs,
     });
-  }, [t, path, getSearchLink, user, showSavedOpportunities, showSavedSearch]);
+  }, [t, path, getSearchLink, user]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {
