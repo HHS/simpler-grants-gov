@@ -22,10 +22,6 @@ jobs:
               "title": "Workflow *'"${{ github.workflow }}"'* failed",
               "fields": [
               {
-                "title": "Job",
-                "value": "'"${{ github.job }}"'"
-              },
-              {
                 "title": "Run By",
                 "value": "'"${{ github.triggering_actor }}"'"
               },
@@ -40,10 +36,6 @@ jobs:
               {
                 "title": "Ref Name",
                 "value": "'"${{ github.ref_name }}"'"
-              },
-              {
-                "title": "Event Path",
-                "value": "'"${{ github.event_path }}"'"
               },
               {
                 "title": "Workflow URL",
