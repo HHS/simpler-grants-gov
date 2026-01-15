@@ -4480,6 +4480,7 @@ components:
           - GGLobbyingForm
           - EPAForm4700-4
           - EPAKeyContacts
+          - AttachmentForm
           type:
           - string
           - 'null'
@@ -4635,6 +4636,7 @@ components:
           - GGLobbyingForm
           - EPAForm4700-4
           - EPAKeyContacts
+          - AttachmentForm
           type:
           - string
           - 'null'
