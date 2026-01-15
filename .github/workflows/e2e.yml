@@ -4,6 +4,11 @@ on:
     branches: ["e2e-staging"]
 
   workflow_dispatch:
+    inputs:
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
 
 defaults:
   run:
@@ -32,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -50,8 +57,8 @@ jobs:
           CI: true
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
-          PLAYWRIGHT_BASE_URL: "https://staging.simpler.grants.gov" # we can make this dynamic later
-          PLAYWRIGHT_TARGET_ENV: "staging" # we can make this dynamic later
+          PLAYWRIGHT_BASE_URL: "https://staging.simpler.grants.gov"
+          PLAYWRIGHT_TARGET_ENV: "staging"
         run: |
           npm run test:e2e
 
