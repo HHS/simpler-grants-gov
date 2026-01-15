@@ -10,7 +10,7 @@ if (fs.existsSync(envPath)) {
 }
 
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
-const ENV = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+export const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 // Base URLs for each environment, read from .env.local if present, else fallback to defaults
 const BASE_URLS: Record<string, string> = {
@@ -18,7 +18,7 @@ const BASE_URLS: Record<string, string> = {
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
-export const baseUrl = BASE_URLS[ENV] || BASE_URLS.local;
+export const baseUrl = BASE_URLS[targetEnv] || BASE_URLS.local;
 
 // Environment for web server
 const webServerEnv: Record<string, string> = Object.fromEntries(
@@ -27,17 +27,6 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
     NEW_RELIC_ENABLED: "false", // disable New Relic for E2E
   }).filter(([, value]) => typeof value === "string"),
 );
-
-const testOpportunityIdMap: { [key: string]: string } = {
-  staging: "fa5703d3-a358-4969-9c1e-c5cc0ce21f63",
-  local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
-};
-
-const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
-
-// either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
-// note that this staging id may be subject to change
-const testOpportunityId = testOpportunityIdMap[targetEnv];
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -57,7 +46,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL,
+    baseURL: baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "on",
@@ -71,76 +60,40 @@ export default defineConfig({
     current: parseInt(process.env.CURRENT_SHARD || "1"),
   },
   /* Configure projects for major browsers */
-  /*
-   * Define test projects for different browsers and devices.
-   * - Local: Multiple browsers, mobile emulation, excludes login tests.
-   * - Staging: Only Chromium, currently includes login via Login.gov MFA test.
-   */
-  projects:
-    ENV === "local"
-      ? [
-          {
-            name: "local-e2e-chromium",
-            testDir: "./e2e",
-            grepInvert: /@login/,
-            testIgnore: "login/**",
-            use: {
-              ...devices["Desktop Chrome"],
-              baseURL: baseUrl,
-              permissions: ["clipboard-read", "clipboard-write"],
-            },
-          },
-          {
-            name: "local-e2e-firefox",
-            testDir: "./e2e",
-            grepInvert: /@login/,
-            testIgnore: "login/**",
-            use: {
-              ...devices["Desktop Firefox"],
-              baseURL: baseUrl,
-              permissions: [],
-            },
-          },
-          {
-            name: "local-e2e-webkit",
-            testDir: "./e2e",
-            grepInvert: /@login/,
-            testIgnore: "login/**",
-            use: {
-              ...devices["Desktop Safari"],
-              baseURL: baseUrl,
-              permissions: ["clipboard-read"],
-            },
-          },
-          {
-            name: "local-e2e-mobile-chrome",
-            testDir: "./e2e",
-            grepInvert: /@login/,
-            testIgnore: "login/**",
-            use: {
-              ...devices["Pixel 7"],
-              baseURL: baseUrl,
-              permissions: ["clipboard-read", "clipboard-write"],
-            },
-          },
-        ]
-      : ENV === "staging"
-        ? [
-            {
-              name: "staging-e2e-chromium",
-              testDir: "./e2e",
-              use: {
-                ...devices["Desktop Chrome"],
-                baseURL: baseUrl,
-                permissions: ["clipboard-read", "clipboard-write"],
-              },
-            },
-          ]
-        : [],
+  projects: [
+    {
+      name: "local-e2e-chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        permissions: ["clipboard-read", "clipboard-write"],
+      },
+    },
+    {
+      name: "local-e2e-firefox",
+      use: {
+        ...devices["Desktop Firefox"],
+        permissions: [],
+      },
+    },
+    {
+      name: "local-e2e-webkit",
+      use: {
+        ...devices["Desktop Safari"],
+        permissions: ["clipboard-read"],
+      },
+    },
+    {
+      name: "local-e2e-mobile-chrome",
+      use: {
+        ...devices["Pixel 7"],
+        permissions: ["clipboard-read", "clipboard-write"],
+      },
+    },
+  ],
 
   //  Only start the local dev server when running in the local environment.
   webServer:
-    ENV === "local"
+    targetEnv === "local"
       ? {
           command: "npm run start",
           url: baseUrl,

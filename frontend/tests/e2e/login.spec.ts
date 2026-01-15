@@ -13,7 +13,7 @@ const setupLoginRedirectSpoof = async (page: Page) => {
     {
       name: "_ff",
       value: JSON.stringify({ authOn: true }),
-      domain: "127.0.0.1",
+      domain: baseUrl,
       path: "/",
     },
   ]);
