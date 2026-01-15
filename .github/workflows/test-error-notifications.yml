@@ -23,7 +23,6 @@ jobs:
     steps:
       - name: Force Failure Step
         run: |
-          echo ${{ github.event }}
           exit 1
 
   send-slack-notification:
