@@ -1,6 +1,7 @@
 import logging
+import os
 from os.path import join
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
 from requests import Request, Session
 
@@ -10,7 +11,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
 )
-from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
+from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
@@ -50,39 +51,47 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
 
     logger.info("soap_client_certificate: Processing client certificate")
     # Handle cert based proxy request.
-    with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
+    temp_file_path = ""
+    try:
+        temp_cert_file = get_cert_file(soap_request, config)
         temp_file_path = temp_cert_file.name
-        try:
-            cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
-        except SOAPClientCertificateLookupError:
-            # This exception handles invalid client certs. We will continue to return the response
-            # from GG.
-            cert = ""
-            logger.info(
-                "soap_client_certificate: Unknown or invalid client certificate",
-                exc_info=True,
-                extra={"soap_api_event": LegacySoapApiEvent.UNKNOWN_INVALID_CLIENT_CERT},
-            )
-        except SOAPClientCertificateNotConfigured:
-            # This exception handles the case of a valid cert being passed, but not configured
-            # to use Simpler SOAP API.
-            logger.info(
-                "soap_client_certificate: Certificate validated but not configured",
-                exc_info=True,
-                extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
-            )
-            return get_soap_error_response(
-                faultstring="Client certificate not configured for Simpler SOAP."
-            )
-
-        temp_cert_file.write(cert)
-        temp_cert_file.flush()
-
+        return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
+    except SOAPClientCertificateLookupError:
+        # This exception handles invalid client certs. We will continue to return the response
+        # from GG.
         logger.info(
-            "soap_client_certificate: Sending soap request with client certificate",
-            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_CERT},
+            "soap_client_certificate: Unknown or invalid client certificate",
+            exc_info=True,
+            extra={"soap_api_event": LegacySoapApiEvent.UNKNOWN_INVALID_CLIENT_CERT},
         )
         return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
+    except SOAPClientCertificateNotConfigured:
+        # This exception handles the case of a valid cert being passed, but not configured
+        # to use Simpler SOAP API.
+        logger.info(
+            "soap_client_certificate: Certificate validated but not configured",
+            exc_info=True,
+            extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
+        )
+        return get_soap_error_response(
+            faultstring="Client certificate not configured for Simpler SOAP."
+        )
+    finally:
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+
+
+def get_cert_file(soap_request: SOAPRequest, config: LegacySoapAPIConfig) -> _TemporaryFileWrapper:
+    temp_cert_file = NamedTemporaryFile(mode="w", delete=False)
+    temp_file_path = temp_cert_file.name
+    cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
+    temp_cert_file.write(cert)
+    temp_cert_file.close()
+    logger.info(
+        "soap_client_certificate: Sending soap request with client certificate",
+        extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_CERT},
+    )
+    return temp_cert_file
 
 
 def _get_soap_response(
