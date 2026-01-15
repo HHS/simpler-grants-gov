@@ -40,7 +40,7 @@ jobs:
               {
                 "title": "Ref Name",
                 "value": "'"${{ github.ref_name }}"'"
-              ,
+              },
               {
                 "title": "Event Path",
                 "value": "'"${{ github.event_path }}"'"
