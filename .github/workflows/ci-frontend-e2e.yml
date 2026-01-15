@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   e2e-tests:
-    name: Run E2E Tests
+    name: Run Local E2E Tests
     runs-on: ubuntu-22.04
 
     strategy:
@@ -33,7 +33,8 @@ jobs:
         total_shards: [4]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -42,7 +43,8 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - run: |
+      - name: Install dependencies and Playwright
+        run: |
           npm ci
           npx playwright install --with-deps
           docker rmi node:22 node:20 node:18
@@ -151,9 +153,9 @@ jobs:
       - name: Merge Blob Reports into HTML
         run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-      - name: Verify Downloaded Artifacts
+      - name: Verify merged HTML report
         run: |
-          echo "Contents of all-blob-reports after download:"
+          echo "Contents of the merged Playwright HTML report:"
           ls -R playwright*
 
       - name: Upload Merged HTML Report
