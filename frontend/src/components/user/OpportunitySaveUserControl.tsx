@@ -1,7 +1,6 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useIsSSR } from "src/hooks/useIsSSR";
 import { useLoginModal } from "src/services/auth/LoginModalProvider";
 import { useUser } from "src/services/auth/useUser";
@@ -92,9 +91,6 @@ export const OpportunitySaveUserControl = ({
     : savedError
       ? t("saveMessage.errorSave")
       : t("saveMessage.unsave");
-
-  const { checkFeatureFlag } = useFeatureFlags();
-  if (!checkFeatureFlag("savedOpportunitiesOn")) return null;
 
   if (type === "icon") {
     return (
