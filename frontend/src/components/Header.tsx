@@ -86,7 +86,6 @@ const NavLinks = ({
     [t],
   );
   const { user } = useUser();
-  const { checkFeatureFlag } = useFeatureFlags();
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
