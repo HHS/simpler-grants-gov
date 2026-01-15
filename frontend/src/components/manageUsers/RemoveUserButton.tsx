@@ -63,12 +63,7 @@ export function RemoveUserButton({
 
   return (
     <>
-      <Button
-        type="button"
-        unstyled
-        onClick={openModal}
-        disabled={disabled}
-      >
+      <Button type="button" unstyled onClick={openModal} disabled={disabled}>
         {t("removeUser")}
       </Button>
       <RemoveUserModal

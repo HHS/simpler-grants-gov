@@ -60,8 +60,8 @@ export async function ActiveUsersSection({
   const transformTableRowData = (userDetails: UserDetail[]) =>
     userDetails.map((user) => {
       // Check if user is an ebiz poc (property may exist at runtime even if not in type)
-      const isEbizPoc = (user as UserDetail & { is_ebiz_poc?: boolean })
-        .is_ebiz_poc === true;
+      const isEbizPoc =
+        (user as UserDetail & { is_ebiz_poc?: boolean }).is_ebiz_poc === true;
 
       // Note: This does not take into account the case where a user has multiple roles
       // I assume the user's first role as their "current" role.
