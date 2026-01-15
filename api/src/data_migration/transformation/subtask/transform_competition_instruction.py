@@ -1,6 +1,7 @@
 import logging
 import uuid
 from collections.abc import Sequence
+from enum import StrEnum
 from typing import Any, Iterable
 
 from sqlalchemy import select, UnaryExpression, Result
@@ -102,7 +103,8 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
                     source_instruction, target_instruction, competition
                 )
 
-            except ValueError:
+            except ValueError as e:
+                print(e)
                 self.increment(
                     transform_constants.Metrics.TOTAL_ERROR_COUNT,
                     prefix=transform_constants.COMPETITION_INSTRUCTION,
@@ -120,6 +122,16 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         target_instruction: CompetitionInstruction | None,
         competition: Competition | None,
     ) -> None:
+        """Process a transformation for a competition instruction.
+
+        The following scenarios are accounted for (order matters / mutually exclusive)
+        1. Deleting an instruction record - includes cleaning up s3
+        2. Erroring if the competition does not exist
+        3. Skipping instructions missing legacy_package_id or extension (required for generating a filename)
+        4. Handling inserts / updates
+
+        If processing is successful, we update the transformed_at at the end
+        """
         self.increment(
             transform_constants.Metrics.TOTAL_RECORDS_PROCESSED,
             prefix=transform_constants.COMPETITION_INSTRUCTION,
@@ -127,6 +139,9 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         extra = transform_util.get_log_extra_competition_instruction(source_instruction)
         logger.info("Processing competition instruction", extra=extra)
 
+        ##########
+        # Delete
+        ##########
         if source_instruction.is_deleted:
             self._handle_delete(
                 source=source_instruction,
@@ -139,6 +154,9 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
             if target_instruction is not None:
                 file_util.delete_file(target_instruction.file_location)
 
+        ##########
+        # Null Competition
+        ##########
         elif competition is None:
             # This shouldn't be possible as the incoming data has foreign keys, but as a safety net
             # we'll make sure the opportunity actually exists
@@ -146,6 +164,27 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
                 "Opportunity instruction cannot be processed as the competition for it does not exist"
             )
 
+        ##########
+        # Null filename parameters
+        ##########
+        elif competition.legacy_package_id is None or source_instruction.extension is None:
+            # If the legacy package ID or extension is None
+            # we can't copy the file over as we can't determine
+            # a file name for it. However, in grants.gov
+            # these files also just don't function correctly.
+            # Since we can't copy it over, we're instead going to
+            # mark it as processed and leave a note.
+            self.increment(
+                transform_constants.Metrics.TOTAL_INVALID_RECORD_SKIPPED,
+                prefix=transform_constants.COMPETITION_INSTRUCTION,
+            )
+            logger.info("Cannot copy competition instructions, legacy_package_id and extension must both be non-null", extra=extra | {"legacy_package_id": competition.legacy_package_id, "extension": source_instruction.extension})
+            # transformed_at is added after the else below
+            source_instruction.transformation_notes = "Competition cannot have name generated due to missing required inputs - skipping"
+
+        ##########
+        # Insert / Update
+        ##########
         else:
             # To avoid incrementing metrics for records we fail to transform, record
             # here whether it's an insert/update and we'll increment after transforming
@@ -191,18 +230,22 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         source_instruction.transformed_at = self.transform_time
 
     def fetch_competition_instructions(self, batch_size: int, limit: int | None, order_by: UnaryExpression | None = None) -> Sequence[tuple[Tinstructions, Competition]]:
+        """
+        Fetch the tinstructions staged records + the corresponding competition
+        """
         # Note - this doesn't follow exactly the same pattern
         # as our other fetch functions defined in the base class
         # because the way the instructions are attached needs
         # some special treatment.
 
+        # TODO - a selectinload needs to be added
         stmt = (
             select(Tinstructions, Competition).join(
                 Competition,
                 Tinstructions.comp_id == Competition.legacy_competition_id,
                 isouter=True,
             )
-        ).where(Tinstructions.transformed_at.is_(None).execution_options(yield_per=batch_size))
+        ).where(Tinstructions.transformed_at.is_(None)).execution_options(yield_per=batch_size)
 
         if limit is not None:
             stmt = stmt.limit(limit)
@@ -248,6 +291,7 @@ def transform_competition_instruction(
     competition: Competition,
     s3_config: S3Config,
 ) -> CompetitionInstruction:
+    """Transform the Tinstructions record into a CompetitionInstruction one"""
     log_extra = transform_util.get_log_extra_competition_instruction(source_instruction)
 
     if existing_instruction is None:
@@ -267,6 +311,7 @@ def transform_competition_instruction(
 
     target_instruction = CompetitionInstruction(
         competition_instruction_id=instruction_id,
+        competition=competition,
         file_location=file_location,
         file_name=file_name,
     )

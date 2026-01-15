@@ -51,6 +51,8 @@ class Metrics(StrEnum):
 
     TOTAL_ERROR_COUNT = "total_error_count"
 
+    TOTAL_INVALID_RECORD_SKIPPED = "total_invalid_record_skipped"
+
 
 S = TypeVar("S", bound=StagingParamMixin)
 D = TypeVar("D", bound=ApiSchemaTable)

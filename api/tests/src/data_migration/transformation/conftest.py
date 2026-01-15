@@ -16,7 +16,7 @@ from src.data_migration.transformation.subtask.transform_competition_instruction
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models import staging
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import Competition
+from src.db.models.competition_models import Competition, CompetitionInstruction
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,
@@ -384,6 +384,7 @@ def setup_competition_instruction(
 
     instructions = f.StagingTinstructionsFactory.create(
         competition=None,
+        comp_id=competition.legacy_competition_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
     )
@@ -404,6 +405,29 @@ def setup_competition_instruction(
         )
 
     return instructions
+
+def validate_competition_instruction(
+        db_session,
+        source_instruction,
+        expected_filename: str,
+        expect_in_db: bool = True,
+        expect_values_to_match: bool = True,
+):
+    # TODO - do I just want to add the ID?
+    competition_instruction = db_session.query(CompetitionInstruction).filter(CompetitionInstruction.file_name == expected_filename).one_or_none()
+
+    if not expect_in_db:
+        assert competition_instruction is None
+        return
+
+    assert competition_instruction is not None
+    with file_util.open_stream(competition_instruction.file_location) as s3_file:
+        contents = s3_file.read()
+
+        if expect_values_to_match:
+            assert contents.encode() == source_instruction.instructions
+        else:
+            assert contents.encode() != source_instruction.file_lob
 
 
 def validate_matching_fields(
