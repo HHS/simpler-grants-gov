@@ -48,11 +48,6 @@ jobs:
           npm ci
           npx playwright install --with-deps
 
-      - name: Cleanup Docker disk space
-        run: |
-          docker rmi node:22 node:20 node:18 || true
-          docker image ls
-
       - name: Start API Server for e2e tests
         run: |
           cd ../api
