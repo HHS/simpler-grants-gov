@@ -59,6 +59,10 @@ export async function ActiveUsersSection({
 
   const transformTableRowData = (userDetails: UserDetail[]) =>
     userDetails.map((user) => {
+      // Check if user is an ebiz poc (property may exist at runtime even if not in type)
+      const isEbizPoc = (user as UserDetail & { is_ebiz_poc?: boolean })
+        .is_ebiz_poc === true;
+
       // Note: This does not take into account the case where a user has multiple roles
       // I assume the user's first role as their "current" role.
       // If the user has no roles, fall back to the first available org role,
@@ -72,40 +76,32 @@ export async function ActiveUsersSection({
       // - the roles fetch succeeded
       // - we have at least one role option from the org
       // - we have a non-empty currentRoleId to bind the picker to
+      // - the user is not an ebiz poc
       const canEditRoles =
-        !rolesFetchFailed && roleOptions.length > 0 && !!currentRoleId;
+        !rolesFetchFailed &&
+        roleOptions.length > 0 &&
+        !!currentRoleId &&
+        !isEbizPoc;
 
       // Prefer formatted full name; fall back to empty string if no name data is present.
       const name = formatFullName(user) || "";
 
-      let roleCell: React.ReactNode;
-
-      // Note: scaffolding this for future task to disable the dropdown for ebizpocs
-      // If editing is allowed, show the role dropdown+modal
-      // Otherwise, show the read-only role text
-      if (canEditRoles) {
-        roleCell = (
-          <RoleManager
-            organizationId={organizationId}
-            userId={user.user_id}
-            currentRoleId={currentRoleId}
-            roleOptions={roleOptions}
-          />
-        );
-      } else {
-        // Text to display when we are not rendering the RoleManager:
-        // join all assigned role names, or fall back is an empty string
-        const roleText =
-          (user.roles ?? []).map((r) => r.role_name).join(", ") || "";
-
-        roleCell = roleText;
-      }
+      const rowClassName = isEbizPoc ? "text-base-dark" : undefined;
 
       return [
-        { cellData: name },
-        { cellData: user.email },
+        { cellData: name, className: rowClassName },
+        { cellData: user.email, className: rowClassName },
         {
-          cellData: roleCell,
+          cellData: (
+            <RoleManager
+              organizationId={organizationId}
+              userId={user.user_id}
+              currentRoleId={currentRoleId}
+              roleOptions={roleOptions}
+              disabled={!canEditRoles}
+            />
+          ),
+          className: rowClassName,
         },
         {
           cellData: (
@@ -113,8 +109,10 @@ export async function ActiveUsersSection({
               organizationId={organizationId}
               userId={user.user_id}
               userName={name || user.email}
+              disabled={isEbizPoc}
             />
           ),
+          className: rowClassName,
         },
       ];
     });
