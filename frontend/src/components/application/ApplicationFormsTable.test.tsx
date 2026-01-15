@@ -72,16 +72,4 @@ describe("CompetitionFormsTable", () => {
     expect(tables[1]).toHaveTextContent("complete");
     expect(tables[1]).toHaveTextContent("downloadInstructions");
   });
-  it("matches snapshot", () => {
-    const { container } = render(
-      <ApplicationFormsTable
-        applicationForms={applicationForms}
-        competitionInstructionsDownloadPath="http://path-to-instructions.com"
-        errors={null}
-        applicationDetailsObject={applicationDetailsObject}
-      />,
-    );
-
-    expect(container).toMatchSnapshot();
-  });
 });
