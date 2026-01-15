@@ -1,6 +1,8 @@
 name: Slack Notification
 
-on: workflow_call
+on:
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   send-slack-notification:
@@ -17,7 +19,7 @@ jobs:
             "attachments": [
             {
               "color": "#ff0000",
-              "title": "Workflow *'"${{ github.workflow }}"'* failed",
+              "title": "Workflow *'"${{ github.workflow }}"'* run by *'"${{ github.triggering_actor }}"'* for *'"${{ github.event_name }}"'* *'"${{ github.ref_type }}"'* *'"${{ github.ref_name }}"'* failed",
               "fields": [
               {
                 "title": "Workflow URL",
