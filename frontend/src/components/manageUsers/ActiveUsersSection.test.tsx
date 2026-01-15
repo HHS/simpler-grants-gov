@@ -169,4 +169,87 @@ describe("ActiveUsersSection", () => {
     expect(actionsCellElement.props.userId).toBe("user-1");
     expect(actionsCellElement.props.userName).toBe("Ada Lovelace");
   });
+
+  it("disables row when user has is_ebiz_poc set to true", async () => {
+    const roles: UserRole[] = [
+      {
+        role_id: "role-1",
+        role_name: "Admin",
+        privileges: [],
+      },
+      {
+        role_id: "role-2",
+        role_name: "Member",
+        privileges: [],
+      },
+    ];
+
+    const users: (UserDetail & { is_ebiz_poc?: boolean })[] = [
+      {
+        user_id: "user-1",
+        email: "ebiz@example.com",
+        first_name: "Ebiz",
+        middle_name: undefined,
+        last_name: "POC",
+        roles: [roles[0]],
+        is_ebiz_poc: true,
+      },
+    ];
+
+    const activeUsers = makeResource({
+      data: users as UserDetail[],
+      statusCode: 200,
+    });
+
+    const rolesResource = makeResource({
+      data: roles,
+      statusCode: 200,
+    });
+
+    const component = await ActiveUsersSection({
+      organizationId: "org-123",
+      activeUsers,
+      roles: rolesResource,
+    });
+    render(component);
+
+    expect(await screen.findByTestId("active-users-table")).toBeVisible();
+    expect(tableWithResponsiveHeaderMock).toHaveBeenCalledTimes(1);
+
+    const tableProps = tableWithResponsiveHeaderMock.mock.calls[0][0] as {
+      headerContent: { cellData: string }[];
+      tableRowData: Array<Array<{ cellData: unknown; className?: string }>>;
+    };
+
+    const firstRow = tableProps.tableRowData[0];
+
+    // Check that all cells have the text-base-dark className for greyed out text
+    expect(firstRow[0].className).toBe("text-base-dark");
+    expect(firstRow[1].className).toBe("text-base-dark");
+    expect(firstRow[2].className).toBe("text-base-dark");
+    expect(firstRow[3].className).toBe("text-base-dark");
+
+    // Check that RoleManager is disabled
+    const roleCellElement = firstRow[2].cellData as React.ReactElement<{
+      organizationId: string;
+      userId: string;
+      currentRoleId: string;
+      roleOptions: Array<{ value: string; label: string }>;
+      disabled: boolean;
+    }>;
+
+    expect(roleCellElement).toBeTruthy();
+    expect(roleCellElement.props.disabled).toBe(true);
+
+    // Check that RemoveUserButton is disabled
+    const actionsCellElement = firstRow[3].cellData as React.ReactElement<{
+      organizationId: string;
+      userId: string;
+      userName: string;
+      disabled: boolean;
+    }>;
+
+    expect(actionsCellElement).toBeTruthy();
+    expect(actionsCellElement.props.disabled).toBe(true);
+  });
 });
