@@ -1,5 +1,5 @@
 from src.api.form_alpha.form_schema import FormAlphaSchema
-from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import CompetitionOpenToApplicant
@@ -103,6 +103,33 @@ class CompetitionAlphaSchema(Schema):
         metadata={"description": "Whether the competition is open and accepting applications"}
     )
 
+    is_simpler_grants_enabled = fields.Boolean(
+        metadata={"description": "Whether simpler grants are enabled for this competition"}
+    )
+
+
+class CompetitionFlagUpdateSchema(Schema):
+    is_simpler_grants_enabled = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether simpler grants are enabled for this competition"},
+    )
+
 
 class CompetitionResponseAlphaSchema(AbstractResponseSchema):
     data = fields.Nested(CompetitionAlphaSchema())
+
+
+class FormReplaceSchema(Schema):
+    form_id = fields.UUID(required=True, metadata={"description": "The primary key ID of the form"})
+    is_required = fields.Boolean(
+        required=True, metadata={"description": "Whether the form is required"}
+    )
+
+
+class CompetitionFormsSetRequestSchema(Schema):
+    forms = fields.List(
+        fields.Nested(FormReplaceSchema),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={"description": "List of forms to set on the competition"},
+    )

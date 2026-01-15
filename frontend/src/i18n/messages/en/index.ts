@@ -145,11 +145,10 @@ export const messages = {
         organizationIntro:
           "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
         pilotIntro:
-          "Welcome to our new, simpler application process. In partnership with the Bureau of Reclamation, we ensure your application is processed by the agency normally.",
+          "Welcome to our new, simpler application process. In partnership with the agency, we ensure your application is processed normally.",
         organizationApply: "To apply as part of an organization you must:",
         applyingForOrg:
           "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
-        poc: "Be the EBiz POC (Electronic Business Point of Contact) for your organization",
         uei: "Have a valid UEI (a Unique Entity ID <link>registered through SAM.gov</link>)",
         ineligibleGoToGrants:
           "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
@@ -942,7 +941,12 @@ export const messages = {
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
       "Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+    noMatchingStatus:
+      "No saved opportunities match the selected status filter.",
     searchButton: "Start a new search",
+    statusFilter: {
+      label: "Filter by status",
+    },
     title: "Saved Opportunities | Simpler.Grants.gov",
   },
   Roadmap: {
@@ -1468,15 +1472,21 @@ export const messages = {
       lastName: "Last name",
       email: "Email",
     },
-    save: "Save",
+    save: "Save changes",
     validationErrors: {
-      firstName: "You must enter a first name",
-      lastName: "You must enter a last name",
+      firstName: "You must enter a first name to complete your profile",
+      lastName: "You must enter a last name to complete your profile",
     },
     fetchError: "Error fetching user data. Please try refreshing the page.",
     pending: "Saving...",
     errorHeading: "Error",
     successHeading: "Account updated",
+    profileIncomplete: "Your profile is incomplete",
+    addFullNameDescription:
+      "Add your first and last name to complete your profile.",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
+    requiredForProfile: "Required to complete your profile.",
   },
   ActivityDashboard: {
     pageTitle: "Activity Dashboard | Simpler.Grants.gov",

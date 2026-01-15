@@ -87,9 +87,6 @@ const NavLinks = ({
   );
   const { user } = useUser();
   const { checkFeatureFlag } = useFeatureFlags();
-  const showSavedSearch = checkFeatureFlag("savedSearchesOn");
-  const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
-  const showDeveloperPortal = !checkFeatureFlag("developerPageOff");
   const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
 
   const navLinkList = useMemo(() => {
@@ -108,15 +105,13 @@ const NavLinks = ({
         children: [
           { text: t("newsletter"), href: "/newsletter" },
           { text: t("events"), href: "/events" },
-          ...(showDeveloperPortal
-            ? [{ text: t("developers"), href: "/developer" }]
-            : []),
+          { text: t("developers"), href: "/developer" },
           { text: t("wiki"), href: ExternalRoutes.WIKI },
           { text: t("forum"), href: ExternalRoutes.FORUM },
         ],
       },
     ];
-    if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
+    if (!user?.token) {
       return anonymousNavLinks;
     }
 
@@ -138,33 +133,20 @@ const NavLinks = ({
         href: "/organizations",
       });
     }
-    if (showSavedOpportunities) {
-      workspaceSubNavs.push({
-        text: t("savedOpportunities"),
-        href: "/saved-opportunities",
-      });
-    }
-    if (showSavedSearch) {
-      workspaceSubNavs.push({
-        text: t("savedSearches"),
-        href: "/saved-search-queries",
-      });
-    }
+    workspaceSubNavs.push({
+      text: t("savedOpportunities"),
+      href: "/saved-opportunities",
+    });
+    workspaceSubNavs.push({
+      text: t("savedSearches"),
+      href: "/saved-search-queries",
+    });
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
       text: t("workspace"),
       children: workspaceSubNavs,
     });
-  }, [
-    t,
-    path,
-    getSearchLink,
-    user,
-    showSavedOpportunities,
-    showSavedSearch,
-    showDeveloperPortal,
-    showUserAdminNavItems,
-  ]);
+  }, [t, path, getSearchLink, user, showUserAdminNavItems]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {

@@ -447,7 +447,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                     xml_content = xml_file.read()
                     # Parse to ensure it's valid XML
                     root = lxml_etree.fromstring(xml_content)
-                    assert root.tag == "GrantApplication"
+                    # Root element now includes namespace from constants refactoring
+                    grant_ns = "{http://apply.grants.gov/system/MetaGrantApplication}"
+                    assert root.tag == f"{grant_ns}GrantApplication"
 
                 # Verify manifest includes XML
                 with submission_zip.open("manifest.txt") as manifest_file:

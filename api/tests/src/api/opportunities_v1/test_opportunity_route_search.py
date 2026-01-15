@@ -19,7 +19,6 @@ from src.util.dict_util import flatten_dict
 from tests.conftest import BaseTestClass
 from tests.src.api.opportunities_v1.conftest import get_search_request
 from tests.src.db.models.factories import (
-    AgencyFactory,
     CurrentOpportunitySummaryFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -140,7 +139,7 @@ def build_opp(
 
 EDUCATION_AL = ("43.008", "Office of Stem Engagement (OSTEM)")
 SPACE_AL = ("43.012", "Space Technology")
-AERONAUTICS_AL = ("43.002", "Aeronautics")
+AERONAUTICS_AL = ("43.T02", "Aeronautics")
 LOC_AL = ("42.011", "Library of Congress Grants")
 AMERICAN_AL = ("19.441", "ECA - American Spaces")
 ECONOMIC_AL = ("11.307", "Economic Adjustment Assistance")
@@ -391,7 +390,10 @@ def search_scenario_id_fnc(val):
 class TestOpportunityRouteSearch(BaseTestClass):
     @pytest.fixture(scope="class", autouse=True)
     def setup_search_data(
-        self, opportunity_index, opportunity_index_alias, search_client, search_attachment_pipeline
+        self,
+        opportunity_index,
+        opportunity_index_alias,
+        search_client,
     ):
         # Load into the search index
         schema = OpportunityV1Schema()
@@ -416,7 +418,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
             opportunity_index,
             json_records,
             "opportunity_id",
-            pipeline=search_attachment_pipeline,
             refresh=True,
         )
 
@@ -924,13 +925,13 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 [NASA_SPACE_FELLOWSHIP, NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (get_search_request(assistance_listing_one_of=["43.012"]), [NASA_INNOVATIONS]),
-            (get_search_request(assistance_listing_one_of=["43.002"]), [NASA_SUPERSONIC]),
+            (get_search_request(assistance_listing_one_of=["43.t02"]), [NASA_SUPERSONIC]),
             (
                 get_search_request(assistance_listing_one_of=["43.008", "43.012"]),
                 [NASA_SPACE_FELLOWSHIP, NASA_INNOVATIONS, NASA_K12_DIVERSITY, LOC_TEACHING],
             ),
             (
-                get_search_request(assistance_listing_one_of=["43.008", "43.012", "43.002"]),
+                get_search_request(assistance_listing_one_of=["43.008", "43.012", "43.T02"]),
                 [
                     NASA_SPACE_FELLOWSHIP,
                     NASA_INNOVATIONS,
@@ -1454,6 +1455,10 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["12.345", "67.89"]),
             get_search_request(assistance_listing_one_of=["98.765"]),
             get_search_request(assistance_listing_one_of=["67.89", "54.24", "12.345", "86.753"]),
+            get_search_request(assistance_listing_one_of=["12.AB"]),
+            get_search_request(assistance_listing_one_of=["45.A19"]),
+            get_search_request(assistance_listing_one_of=["67.9C", "54.AB3", "12.Z9"]),
+            get_search_request(assistance_listing_one_of=["11.cC1"]),
         ],
     )
     def test_search_validate_assistance_listing_filters_200(
@@ -1474,6 +1479,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             get_search_request(assistance_listing_one_of=["12.hello"]),
             get_search_request(assistance_listing_one_of=["fourfive.sixseveneight"]),
             get_search_request(assistance_listing_one_of=["11..11"]),
+            get_search_request(assistance_listing_one_of=["A1..11"]),
         ],
     )
     def test_search_validate_assistance_listing_filters_422(
@@ -1720,39 +1726,12 @@ class TestOpportunityRouteSearch(BaseTestClass):
         )
         assert resp.status_code == 200
 
-    def test_search_experimental_attachment_200(
-        self, client, api_auth_token, search_client, opportunity_index_alias
-    ):
-        # Prepare the search request
-        search_request = get_search_request(
-            query="Space",
-            experimental={"scoring_rule": "attachment_only"},
-        )
-
-        resp = client.post(
-            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
-        )
-        data = resp.json["data"]
-
-        # Assert only NASA opportunities are returned
-        assert resp.status_code == 200
-        assert len(data) == 1
-
-        assert data[0]["opportunity_id"] == NASA_SPACE_FELLOWSHIP.opportunity_id
-
     def test_search_top_level_agency_200(
         self,
         client,
         db_session,
-        enable_factory_create,
         api_auth_token,
     ):
-        # setup-data
-        doc = AgencyFactory.create(agency_code="DOC")
-        AgencyFactory.create(
-            agency_code=DOC_SPACE_COAST.agency_code, top_level_agency_id=doc.agency_id
-        )
-
         resp = client.post(
             "/v1/opportunities/search",
             json=get_search_request(top_level_agency_one_of=["DOC", "DOS"]),
@@ -1767,14 +1746,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING, DOC_TOP_LEVEL]
         ]
 
-    def test_search_top_level_agency_and_sub_agencies_200(
-        self, client, db_session, enable_factory_create, api_auth_token
-    ):
-        # setup-data
-        dos = AgencyFactory.create(agency_code="DOS")
-        AgencyFactory.create(
-            agency_code=DOS_DIGITAL_LITERACY.agency_code, top_level_agency_id=dos.agency_id
-        )
+    def test_search_top_level_agency_and_sub_agencies_200(self, client, db_session, api_auth_token):
 
         resp = client.post(
             "/v1/opportunities/search",

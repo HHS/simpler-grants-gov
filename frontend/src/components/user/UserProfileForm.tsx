@@ -7,11 +7,18 @@ import {
 } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
-import { useActionState } from "react";
-import { Alert, Button, Label, TextInput } from "@trussworks/react-uswds";
+import { useActionState, useEffect } from "react";
+import {
+  Alert,
+  Button,
+  FormGroup,
+  Label,
+  TextInput,
+} from "@trussworks/react-uswds";
 
 import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
 import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 const UserProfileValidationError =
   ConditionalFormActionError<UserProfileValidationErrors>;
@@ -31,6 +38,23 @@ export function UserProfileForm({
     validationErrors: {},
   });
 
+  const firstName = state.data?.first_name || userDetails.profile?.first_name;
+  const lastName = state.data?.last_name || userDetails.profile?.last_name;
+  const isMissingName = !firstName || !lastName;
+
+  // Create a key suffix that changes when state.data is updated (after form submission)
+  // This forces inputs to remount with new defaultValue when validation fails
+  const formDataKey = state.data
+    ? `${state.data.first_name || ""}-${state.data.middle_name || ""}-${state.data.last_name || ""}`
+    : "initial";
+
+  // Dispatch event when profile is successfully updated
+  useEffect(() => {
+    if (state?.success) {
+      window.dispatchEvent(new CustomEvent("userProfileUpdated"));
+    }
+  }, [state?.success]);
+
   return (
     <>
       {state?.errorMessage && (
@@ -46,7 +70,24 @@ export function UserProfileForm({
       {state?.success && (
         <Alert heading={t("successHeading")} headingLevel="h2" type="success" />
       )}
-      <h3>{t("contactInfoHeading")}</h3>
+      {isMissingName && (
+        <Alert heading={t("profileIncomplete")} headingLevel="h2" type="error">
+          {state.validationErrors?.firstName ||
+          state.validationErrors?.lastName ? (
+            <ul>
+              {state.validationErrors?.firstName && (
+                <li>{t("firstNameRequired")}</li>
+              )}
+              {state.validationErrors?.lastName && (
+                <li>{t("lastNameRequired")}</li>
+              )}
+            </ul>
+          ) : (
+            t("addFullNameDescription")
+          )}
+        </Alert>
+      )}
+      <h2>{t("contactInfoHeading")}</h2>
       <p>
         {t.rich("contactInfoBody", {
           link: (chunk) => (
@@ -57,54 +98,80 @@ export function UserProfileForm({
         })}
       </p>
       <form action={formAction}>
-        <Label htmlFor="firstName">
-          <span>{t("inputs.firstName")}</span>
-          <RequiredFieldIndicator> *</RequiredFieldIndicator>
-        </Label>
-        <UserProfileValidationError
-          fieldName="firstName"
-          errors={state.validationErrors}
-        />
-        <TextInput
-          id="edit-user-first-name"
-          name="firstName"
-          type="text"
-          defaultValue={
-            state.data?.first_name || userDetails.profile?.first_name
-          }
-        />
-        <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
-        <TextInput
-          id="edit-user-middle-name"
-          name="middleName"
-          type="text"
-          defaultValue={
-            state.data?.middle_name || userDetails.profile?.middle_name
-          }
-        />
-        <Label htmlFor="lastName">
-          <span>{t("inputs.lastName")}</span>
-          <RequiredFieldIndicator> *</RequiredFieldIndicator>
-        </Label>
-        <UserProfileValidationError
-          fieldName="lastName"
-          errors={state.validationErrors}
-        />
-        <TextInput
-          id="edit-user-last-name"
-          name="lastName"
-          type="text"
-          defaultValue={state.data?.last_name || userDetails.profile?.last_name}
-        />
-        <Label htmlFor="email">{t("inputs.email")}</Label>
-        <TextInput
-          id="edit-user-email"
-          name="email"
-          type="text"
-          defaultValue={userDetails.email}
-          disabled
-        />
+        <FormGroup error={!!state.validationErrors?.firstName}>
+          <Label htmlFor="firstName">
+            <span>{t("inputs.firstName")}</span>
+            <RequiredFieldIndicator> *</RequiredFieldIndicator>
+          </Label>
+          <p className="text-base-dark margin-top-0">
+            {t("requiredForProfile")}
+          </p>
+          <UserProfileValidationError
+            fieldName="firstName"
+            errors={state.validationErrors}
+          />
+          <TextInput
+            key={`firstName-${formDataKey}`}
+            id="firstName"
+            name="firstName"
+            type="text"
+            defaultValue={
+              state.data?.first_name || userDetails.profile?.first_name
+            }
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="middle-name">{t("inputs.middleName")}</Label>
+          <TextInput
+            key={`middleName-${formDataKey}`}
+            id="middle-name"
+            name="middleName"
+            type="text"
+            defaultValue={
+              state.data?.middle_name || userDetails.profile?.middle_name
+            }
+          />
+        </FormGroup>
+        <FormGroup error={!!state.validationErrors?.lastName}>
+          <Label htmlFor="lastName">
+            <span>{t("inputs.lastName")}</span>
+            <RequiredFieldIndicator> *</RequiredFieldIndicator>
+          </Label>
+          <p className="text-base-dark margin-top-0">
+            {t("requiredForProfile")}
+          </p>
+          <UserProfileValidationError
+            fieldName="lastName"
+            errors={state.validationErrors}
+          />
+          <TextInput
+            key={`lastName-${formDataKey}`}
+            id="lastName"
+            name="lastName"
+            type="text"
+            defaultValue={
+              state.data?.last_name || userDetails.profile?.last_name
+            }
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label htmlFor="email">{t("inputs.email")}</Label>
+          <TextInput
+            id="email"
+            name="email"
+            type="text"
+            defaultValue={userDetails.email}
+            disabled
+          />
+        </FormGroup>
         <Button type="submit" disabled={isPending} className="margin-top-4">
+          {!isPending && (
+            <USWDSIcon
+              name="check_circle"
+              className="margin-right-05"
+              aria-hidden="true"
+            />
+          )}
           {t(isPending ? "pending" : "save")}
         </Button>
       </form>

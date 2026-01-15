@@ -98,48 +98,6 @@ paths:
       security:
       - ApiUserKeyAuth: []
       - ApiKeyAuth: []
-  /v1/agencies:
-    post:
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgencyListResponse'
-          description: Successful response
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation error
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Authentication error
-      tags:
-      - Agency v1
-      summary: Agencies Get
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AgencyListRequest'
-            examples:
-              example1:
-                summary: No filters
-                value:
-                  pagination:
-                    sort_order:
-                    - order_by: created_at
-                      sort_direction: descending
-                    page_offset: 1
-                    page_size: 25
-      security:
-      - ApiKeyAuth: []
   /v1/users/login:
     get:
       parameters: []
@@ -587,9 +545,8 @@ paths:
       tags:
       - Form Alpha
       summary: Form Get
-      security: &id001
+      security:
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
     put:
       parameters:
       - in: path
@@ -630,7 +587,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FormUpdateRequest'
-      security: *id001
+      security:
+      - ApiUserKeyAuth: []
   /common-grants/opportunities:
     get:
       parameters:
@@ -1083,8 +1041,8 @@ paths:
 
         '
       security:
+      - ApiJwtAuth: []
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/users/{user_id}/saved-searches:
     post:
       parameters:
@@ -1512,8 +1470,8 @@ paths:
 
         '
       security:
+      - ApiJwtAuth: []
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/organizations/{organization_id}/users:
     post:
       parameters:
@@ -1563,6 +1521,49 @@ paths:
               $ref: '#/components/schemas/OrganizationUsersListRequest'
       security:
       - ApiJwtAuth: []
+  /alpha/competitions/{competition_id}/flag:
+    put:
+      parameters:
+      - in: path
+        name: competition_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionResponseAlpha'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Competition Alpha
+      summary: Update Competition Flag Route
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionFlagUpdate'
+      security:
+      - ApiUserKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -2588,6 +2589,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
         '404':
           content:
             application/json:
@@ -2602,6 +2609,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/FormInstructionUploadRequest'
+      security:
+      - ApiUserKeyAuth: []
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -3074,7 +3083,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id002
+          type: &id001
           - object
           $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -3088,120 +3097,6 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ExtractMetadataResponse'
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
-    AgencyFilterV1:
-      type: object
-      properties:
-        agency_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        active:
-          type: boolean
-    SortOrderAgencyPaginationV1:
-      type: object
-      properties:
-        order_by:
-          type: string
-          enum:
-          - agency_code
-          - agency_name
-          - created_at
-          description: The field to sort the response by
-        sort_direction:
-          description: Whether to sort the response ascending or descending
-          enum:
-          - ascending
-          - descending
-          type:
-          - string
-      required:
-      - order_by
-      - sort_direction
-    AgencyPaginationV1:
-      type: object
-      properties:
-        sort_order:
-          type: array
-          default:
-          - order_by: agency_code
-            sort_direction: ascending
-          minItems: 1
-          maxItems: 5
-          description: The list of sorting rules
-          items:
-            type:
-            - object
-            $ref: '#/components/schemas/SortOrderAgencyPaginationV1'
-        page_size:
-          type: integer
-          minimum: 1
-          maximum: 5000
-          description: The size of the page to fetch
-          example: 25
-        page_offset:
-          type: integer
-          minimum: 1
-          description: The page number to fetch, starts counting from 1
-          example: 1
-      required:
-      - page_offset
-      - page_size
-    AgencyListRequest:
-      type: object
-      properties:
-        filters:
-          type:
-          - object
-          $ref: '#/components/schemas/AgencyFilterV1'
-        pagination:
-          type:
-          - object
-          $ref: '#/components/schemas/AgencyPaginationV1'
-      required:
-      - pagination
-    AgencyResponse:
-      type: object
-      properties:
-        agency_id:
-          type: string
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        agency_name:
-          type: string
-        agency_code:
-          type: string
-        top_level_agency:
-          type:
-          - object
-          $ref: '#/components/schemas/AgencyResponse'
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    AgencyListResponse:
-      type: object
-      properties:
-        pagination_info:
-          description: The pagination information for paginated endpoints
-          type: *id002
-          $ref: '#/components/schemas/PaginationInfo'
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          type: array
-          description: A list of agency records
-          items:
-            type:
-            - object
-            $ref: '#/components/schemas/AgencyResponse'
         status_code:
           type: integer
           description: The HTTP status code
@@ -3454,7 +3349,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -3604,7 +3499,7 @@ components:
           minItems: 1
           items:
             type: string
-            pattern: ^\d{2}\.\d{2,3}$
+            pattern: ^\d{2}\.[A-Za-z0-9]{2,3}$
             example: '45.149'
     IsCostSharingFilterV1:
       type: object
@@ -3806,7 +3701,6 @@ components:
           - default
           - expanded
           - agency
-          - attachment_only
           type:
           - string
     SortOrderOpportunityPaginationV1:
@@ -4210,7 +4104,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id003
+          enum: &id002
           - discretionary
           - mandatory
           - continuation
@@ -4229,23 +4123,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id004
+            type: &id003
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id005
+          type: &id004
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id006
+          enum: &id005
           - forecasted
           - posted
           - closed
           - archived
-          type: &id007
+          type: &id006
           - string
         created_at:
           type: string
@@ -4318,7 +4212,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -4417,6 +4311,13 @@ components:
           format: uuid
           description: Optional organization ID to associate with the application
           example: 456e7890-e12c-34f5-b678-901234567890
+        intends_to_add_organization:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the user intends to add an organization later when
+            applying as an individual
+          example: true
       required:
       - competition_id
     ApplicationStartResponseData:
@@ -4579,6 +4480,7 @@ components:
           - GGLobbyingForm
           - EPAForm4700-4
           - EPAKeyContacts
+          - AttachmentForm
           type:
           - string
           - 'null'
@@ -4623,7 +4525,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id008
+            type: &id007
             - object
             $ref: '#/components/schemas/ValidationIssue'
     FormUpdateRequest:
@@ -4734,6 +4636,7 @@ components:
           - GGLobbyingForm
           - EPAForm4700-4
           - EPAKeyContacts
+          - AttachmentForm
           type:
           - string
           - 'null'
@@ -5165,6 +5068,7 @@ components:
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
             - manage_internal_roles
+            - manage_competition
             type:
             - string
     UserOrganization:
@@ -5313,6 +5217,7 @@ components:
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
             - manage_internal_roles
+            - manage_competition
             type:
             - string
     UserCanAccessResponse:
@@ -6035,6 +5940,9 @@ components:
         is_open:
           type: boolean
           description: Whether the competition is open and accepting applications
+        is_simpler_grants_enabled:
+          type: boolean
+          description: Whether simpler grants are enabled for this competition
     OpportunityWithAttachmentsV1:
       type: object
       properties:
@@ -6087,7 +5995,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id003
+          enum: *id002
           type:
           - string
           - 'null'
@@ -6101,17 +6009,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id004
+            type: *id003
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id005
+          type: *id004
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id006
-          type: *id007
+          enum: *id005
+          type: *id006
         created_at:
           type: string
           format: date-time
@@ -6306,6 +6214,7 @@ components:
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
             - manage_internal_roles
+            - manage_competition
             type:
             - string
     UserInvitationItem:
@@ -6546,6 +6455,12 @@ components:
           anyOf:
           - $ref: '#/components/schemas/Organization'
           - type: 'null'
+        intends_to_add_organization:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the user intends to add an organization later when
+            applying as an individual
         form_validation_warnings:
           type: object
           description: Specific form validation issues
@@ -6571,7 +6486,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -6851,6 +6766,7 @@ components:
             - legacy_agency_grant_retriever
             - legacy_agency_assigner
             - manage_internal_roles
+            - manage_competition
             type:
             - string
     OrganizationUser:
@@ -6896,7 +6812,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -6913,6 +6829,14 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    CompetitionFlagUpdate:
+      type: object
+      properties:
+        is_simpler_grants_enabled:
+          type: boolean
+          description: Whether simpler grants are enabled for this competition
+      required:
+      - is_simpler_grants_enabled
     AbstractResponse:
       type: object
       properties:
@@ -7341,7 +7265,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7471,7 +7395,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7697,7 +7621,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7921,7 +7845,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id001
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8060,7 +7984,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -8225,7 +8149,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id007
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -8338,10 +8262,6 @@ components:
           description: The HTTP status code
           example: 200
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-Auth
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -8350,6 +8270,10 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Auth
     InternalApiJwtAuth:
       type: apiKey
       in: header
