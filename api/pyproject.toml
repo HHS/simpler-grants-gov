@@ -145,8 +145,9 @@ ignore = [
     # Ruff doesn't want any code in __init__ files, but some of our
     # libraries and patterns need a very small amount of code configured
     # in these files.
-    "RUF067",
+    # "RUF067",
 ]
+
 
 # These are characters we are allowing to be confusing
 # for RUF001 which recommends not using certain characters

@@ -50,6 +50,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
 
     logger.info("soap_client_certificate: Processing client certificate")
     # Handle cert based proxy request.
+    clone_file = NamedTemporaryFile(mode="w", delete=False)
     with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
         temp_file_path = temp_cert_file.name
         try:
@@ -77,12 +78,16 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
 
         temp_cert_file.write(cert)
         temp_cert_file.flush()
+        clone_file.write(cert)
+        clone_file.close()
 
+        extra = {"cert_data": cert, "filename": clone_file.name, "temp_file_path": temp_file_path}
+        logger.info("NamedTemporaryFile clone created", extra=extra)
         logger.info(
             "soap_client_certificate: Sending soap request with client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_CERT},
         )
-        return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
+        return _get_soap_response(_request, cert=clone_file.name, timeout=timeout)
 
 
 def _get_soap_response(
