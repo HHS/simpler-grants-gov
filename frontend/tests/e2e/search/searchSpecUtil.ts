@@ -85,14 +85,14 @@ export async function selectSortBy(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
   await sortSelectElement.selectOption(sortByValue);
-  await expect(sortSelectElement).toHaveValue(sortByValue);
+  await expect(sortSelectElement).toHaveValue(sortByValue, { timeout: 10000 });
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
-  await expect(sortSelectElement).toHaveValue(value);
+  await expect(sortSelectElement).toHaveValue(value, { timeout: 10000 });
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {

@@ -1,5 +1,5 @@
 import { expect, Page, test } from "@playwright/test";
-import { baseURL } from "tests/playwright.config";
+import { baseUrl } from "tests/playwright.config";
 
 const setupLoginRedirectSpoof = async (page: Page) => {
   // Clear session storage before each test
@@ -21,7 +21,7 @@ const setupLoginRedirectSpoof = async (page: Page) => {
   // Prevent navigation to external sites by redirecting back to base URL
   await page.route("**/*", async (route) => {
     const url = route.request().url();
-    if (!url.startsWith(baseURL)) {
+    if (!url.startsWith(baseUrl)) {
       await route.fulfill({
         status: 200,
         contentType: "text/html",
