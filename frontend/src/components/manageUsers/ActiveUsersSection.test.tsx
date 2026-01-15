@@ -108,7 +108,7 @@ describe("ActiveUsersSection", () => {
       statusCode: 200,
     });
 
-    // Roles fetch fails, so roles are rendered as read-only text.
+    // Roles fetch fails, so roles are rendered as a disabled dropdown.
     const rolesResource = makeResource({
       data: [] as UserRole[],
       error: "failed to load roles",
@@ -141,7 +141,22 @@ describe("ActiveUsersSection", () => {
 
     expect(firstRow[0].cellData).toBe("Ada Lovelace");
     expect(firstRow[1].cellData).toBe("ada@example.com");
-    expect(firstRow[2].cellData).toBe("Admin");
+
+    const roleCellElement = firstRow[2].cellData as React.ReactElement<{
+      organizationId: string;
+      userId: string;
+      currentRoleId: string;
+      roleOptions: Array<{ value: string; label: string }>;
+      disabled: boolean;
+    }>;
+
+    expect(roleCellElement).toBeTruthy();
+    expect(roleCellElement.type).toBeDefined();
+    expect(roleCellElement.props.organizationId).toBe("org-123");
+    expect(roleCellElement.props.userId).toBe("user-1");
+    expect(roleCellElement.props.currentRoleId).toBe("role-1");
+    expect(roleCellElement.props.roleOptions).toEqual([]);
+    expect(roleCellElement.props.disabled).toBe(true);
 
     const actionsCellElement = firstRow[3].cellData as React.ReactElement<{
       organizationId: string;
