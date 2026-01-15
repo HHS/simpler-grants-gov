@@ -34,7 +34,6 @@ export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
-  timeout = 30000, // query params get set after a debounce period
 ) {
   // const changeCheck = (pageUrl: string): boolean => {
   //   const url = new URL(pageUrl);

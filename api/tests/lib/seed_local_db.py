@@ -5,6 +5,7 @@ from datetime import timedelta
 
 import click
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 import src.adapters.db as db
 import src.logging
@@ -70,9 +71,20 @@ def _build_opportunities(
         )
 
         # hardcoded id for e2e usage
-        factories.OpportunityFactory.create(
-            has_long_descriptions=True, opportunity_id="6a483cd8-9169-418a-8dfb-60fa6e6f51e5"
-        )
+        # Check if it already exists before creating to allow running seed multiple times
+        e2e_opportunity_id = uuid.UUID("6a483cd8-9169-418a-8dfb-60fa6e6f51e5")
+        # Flush any pending changes to ensure we see all existing data
+        db_session.flush()
+        existing = db_session.get(Opportunity, e2e_opportunity_id)
+
+        if not existing:
+            try:
+                factories.OpportunityFactory.create(
+                    has_long_descriptions=True, opportunity_id=e2e_opportunity_id
+                )
+            except IntegrityError:
+                # Another run may have created it concurrently; keep going.
+                db_session.rollback()
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
