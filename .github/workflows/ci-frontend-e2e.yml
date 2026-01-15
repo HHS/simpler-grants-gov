@@ -47,7 +47,11 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps
-          docker rmi node:22 node:20 node:18
+
+      - name: Cleanup Docker disk space
+        run: |
+          docker rmi node:22 node:20 node:18 || true
+          docker image ls
 
       - name: Start API Server for e2e tests
         run: |
@@ -98,6 +102,9 @@ jobs:
           echo ""
           echo "=== Container Status ==="
           docker ps -a
+          echo ""
+          echo "=== Images ==="
+          docker image ls
           echo ""
           echo "=== Disk free ==="
           df -h
