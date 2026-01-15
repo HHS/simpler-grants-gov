@@ -81,7 +81,11 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
         clone_file.write(cert)
         clone_file.close()
 
-        extra = {"cert_data": cert, "filename": clone_file.name, "temp_file_path": temp_file_path}
+        extra = {
+            "cert_data": cert,
+            "clone_filename": clone_file.name,
+            "temp_file_path": temp_file_path,
+        }
         logger.info("NamedTemporaryFile clone created", extra=extra)
         logger.info(
             "soap_client_certificate: Sending soap request with client certificate",
