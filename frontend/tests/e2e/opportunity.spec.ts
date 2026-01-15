@@ -148,12 +148,7 @@ test("can navigate to grants.gov", async ({ page, context }) => {
   await page.getByRole("button", { name: "View on Grants.gov" }).click();
 
   const newPage = await newTabPromise;
-<<<<<<< HEAD
   expect(newPage.url()).toContain(
     "https://test.grants.gov/search-results-detail/",
-=======
-  await expect(newPage).toHaveURL(
-    `https://test.grants.gov/search-results-detail/${testOpportunityIdMap[targetEnv].legacy}`,
->>>>>>> 1727bf55f (further refinements for broken tests)
   );
 });
