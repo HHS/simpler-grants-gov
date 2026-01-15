@@ -145,7 +145,7 @@ ignore = [
     # Ruff doesn't want any code in __init__ files, but some of our
     # libraries and patterns need a very small amount of code configured
     # in these files.
-    # "RUF067",
+    "RUF067",
 ]
 
 
