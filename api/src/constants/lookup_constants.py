@@ -164,6 +164,8 @@ class FormType(StrEnum):
     EPA_FORM_4700_4 = "EPAForm4700-4"
     EPA_KEY_CONTACTS = "EPAKeyContacts"
 
+    ATTACHMENT_FORM = "AttachmentForm"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
