@@ -23,6 +23,14 @@ on:
 concurrency: cd-${{inputs.app_name}}-${{ inputs.environment }}
 
 jobs:
+  force-breaking-on-api:
+    name: Force breaking for API to test Release Deploy
+    runs-on: ubuntu-22.04
+    if: ${{ inputs.app_name == 'api' }}
+    steps:
+      - name: Exit with error
+        run: exit 1
+
   # Don't need to call the build-and-publish workflow since the database-migrations
   # workflow already calls it
   database-migrations:
