@@ -270,8 +270,10 @@ export const messages = {
       applicationDownloadInstructions: "Download application instructions",
       applicationDownloadInstructionsLabel: "Instructions",
       applicationSubmissionZipDownload: "Download your submitted application",
-      applicationSubmissionZipDownloadLabel: "Application submission zip download",
-      applicationSubmissionZipDownloadLoadingMessage: "We are preparing your submitted application for download. Please check back later.",
+      applicationSubmissionZipDownloadLabel:
+        "Application submission zip download",
+      applicationSubmissionZipDownloadLoadingMessage:
+        "We are preparing your submitted application for download. Please check back later.",
       specialInstructionsLabel: "Special instructions",
       specialInstructions: "No longer accepting applications",
       statusLabel: "Status",

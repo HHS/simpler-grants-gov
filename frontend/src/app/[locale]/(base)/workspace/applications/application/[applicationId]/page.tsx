@@ -7,8 +7,11 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getApplicationDetails,
   getApplicationHistory,
+  getApplicationSubmissions,
 } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
+import { Status } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -45,6 +48,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   let historyDetails = [] as ApplicationHistoryCardProps;
   let opportunity = {} as OpportunityDetail;
   let attachments = [] as Attachment[];
+  let latestApplicationSubmission = {} as ApplicationSubmission;
 
   try {
     const response = await getApplicationDetails(
@@ -103,6 +107,21 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     );
   }
 
+  // Submissions are only available if the application is in the ACCEPTED status.
+  if (details.application_status === Status.ACCEPTED) {
+    try {
+      const submissions = (
+        await getApplicationSubmissions(applicationId, userSession?.token)
+      ).data;
+      latestApplicationSubmission = submissions[0];
+    } catch (e) {
+      console.error(
+        `Error retrieving application submission for (${applicationId})`,
+        e,
+      );
+    }
+  }
+
   return (
     <>
       <GridContainer>
@@ -112,6 +131,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           opportunity={opportunity}
           attachments={attachments}
           applicationHistory={historyDetails}
+          latestApplicationSubmission={latestApplicationSubmission}
         />
       </GridContainer>
     </>

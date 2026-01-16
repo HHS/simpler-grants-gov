@@ -1,5 +1,6 @@
 "use client";
 
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
   SamGovEntity,
@@ -73,6 +74,7 @@ export const InformationCard = ({
   opportunityName,
   submissionLoading,
   instructionsDownloadPath,
+  latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
   applicationSubmitHandler: () => void;
@@ -80,6 +82,7 @@ export const InformationCard = ({
   opportunityName: string | null;
   submissionLoading: boolean;
   instructionsDownloadPath: string;
+  latestApplicationSubmission: ApplicationSubmission;
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
@@ -106,6 +109,42 @@ export const InformationCard = ({
           )}
         </dd>
       </div>
+    );
+  };
+
+  /**
+   * Application submission download will only be available when an application has
+   * a status of ACCEPTED. The following are cases of each application status
+   *
+   * IN_PROGRESS
+   *  - Has not been submitted, so do not render anything related to submission.
+   * SUBMITTED
+   *  - Submitted but does not yet have submission db entry and S3 download not available yet.
+   *  - Show message that download is being prepared.
+   * ACCEPTED
+   *  - Download available, render button to download submission zip.
+   */
+  const ApplicationSubmissionDownload = () => {
+    if (applicationDetails.application_status === Status.IN_PROGRESS)
+      return null;
+    if (applicationDetails.application_status === Status.SUBMITTED)
+      return (
+        <p data-testid={"application-submission-download-message"}>
+          {t("applicationSubmissionZipDownloadLoadingMessage")}
+        </p>
+      );
+    return (
+      <Link href={latestApplicationSubmission.download_path}>
+        <Button
+          type="button"
+          data-testid="application-submission-download"
+          disabled={submissionLoading}
+          outline
+        >
+          <USWDSIcon name="file_download" />
+          {t("applicationSubmissionZipDownload")}
+        </Button>
+      </Link>
     );
   };
 
@@ -219,6 +258,7 @@ export const InformationCard = ({
               loading={submissionLoading}
             />
           )}
+          <ApplicationSubmissionDownload />
         </Grid>
       </>
     );

@@ -1,4 +1,3 @@
-
 export interface ApplicationSubmission {
   application_submission_id: string;
   download_path: string;
