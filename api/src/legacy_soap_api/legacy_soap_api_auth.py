@@ -110,7 +110,7 @@ def get_soap_client_certificate(
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
 
-    serial_num = format(cert.serial_number, "x")
+    serial_num = format(int(cert.serial_number), "x")
     extra = {
         "cert_serial_number_check": str(serial_num).startswith("400195"),
         "first_eight": str(cert.serial_number)[:8],
