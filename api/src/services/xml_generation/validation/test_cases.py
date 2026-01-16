@@ -1632,6 +1632,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + PROJECT_ABSTRACT_SUMMARY_TEST_CASES
         + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
+        + ATTACHMENTFORM_TEST_CASES
     )
 
 
@@ -1646,3 +1647,171 @@ def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:
     """
     all_cases = get_all_test_cases()
     return [case for case in all_cases if case.get("form_name") == form_name]
+
+
+# Sample test cases for Attachment Form validation
+ATTACHMENTFORM_TEST_CASES = [
+    {
+        "name": "attachmentform_single_attachment",
+        "json_input": {
+            "att1": "11111111-1111-1111-1111-111111111111",
+        },
+        "form_name": "AttachmentForm_1_2",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "document1.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "document1.pdf"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            }
+        },
+    },
+    {
+        "name": "attachmentform_multiple_attachments",
+        "json_input": {
+            "att1": "11111111-1111-1111-1111-111111111111",
+            "att5": "55555555-5555-5555-5555-555555555555",
+            "att10": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        },
+        "form_name": "AttachmentForm_1_2",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "document1.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "document1.pdf"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "55555555-5555-5555-5555-555555555555": {
+                "FileName": "document5.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "document5.pdf"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
+                "FileName": "document10.docx",
+                "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "FileLocation": {"@href": "document10.docx"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+        },
+    },
+    {
+        "name": "attachmentform_all_15_attachments",
+        "json_input": {
+            "att1": "11111111-1111-1111-1111-111111111111",
+            "att2": "22222222-2222-2222-2222-222222222222",
+            "att3": "33333333-3333-3333-3333-333333333333",
+            "att4": "44444444-4444-4444-4444-444444444444",
+            "att5": "55555555-5555-5555-5555-555555555555",
+            "att6": "66666666-6666-6666-6666-666666666666",
+            "att7": "77777777-7777-7777-7777-777777777777",
+            "att8": "88888888-8888-8888-8888-888888888888",
+            "att9": "99999999-9999-9999-9999-999999999999",
+            "att10": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "att11": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "att12": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "att13": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+            "att14": "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+            "att15": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+        },
+        "form_name": "AttachmentForm_1_2",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "1234-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile1"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "22222222-2222-2222-2222-222222222222": {
+                "FileName": "1235-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile2"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "33333333-3333-3333-3333-333333333333": {
+                "FileName": "1236-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile3"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "44444444-4444-4444-4444-444444444444": {
+                "FileName": "1237-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile4"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "55555555-5555-5555-5555-555555555555": {
+                "FileName": "1238-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile5"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "66666666-6666-6666-6666-666666666666": {
+                "FileName": "1239-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile6"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "77777777-7777-7777-7777-777777777777": {
+                "FileName": "1240-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile7"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "88888888-8888-8888-8888-888888888888": {
+                "FileName": "1241-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile8"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "99999999-9999-9999-9999-999999999999": {
+                "FileName": "1242-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile9"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
+                "FileName": "1243-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile10"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb": {
+                "FileName": "1244-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile11"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "cccccccc-cccc-cccc-cccc-cccccccccccc": {
+                "FileName": "1245-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile12"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "dddddddd-dddd-dddd-dddd-dddddddddddd": {
+                "FileName": "1246-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile13"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", " #text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee": {
+                "FileName": "1247-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile14"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+            "ffffffff-ffff-ffff-ffff-ffffffffffff": {
+                "FileName": "1248-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": {"@href": "345205.AttachmentForm_1_2_P1.optionalFile0"},
+                "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "z6BBXu3Mn0jSA9h7KBWN9z9bitY="},
+            },
+        },
+    },
+]
