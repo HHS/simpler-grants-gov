@@ -175,9 +175,6 @@ const ApplicationTable = ({
           <th scope="col" className="bg-base-lightest padding-y-205">
             {t("updated")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
-            {t("updatedBy")}
-          </th>
         </tr>
       </thead>
       <tbody>
@@ -216,10 +213,7 @@ const ApplicationTable = ({
               />
             </td>
             <td data-label={t("updated")}>
-              <div> -- </div>
-            </td>
-            <td data-label={t("updatedBy")}>
-              <div> -- </div>
+              <div>{formatTimestamp(form.updated_at)}</div>
             </td>
           </tr>
         ))}
@@ -293,6 +287,19 @@ const InstructionsLink = ({
       )}
     </>
   );
+};
+
+const formatTimestamp = (time: string) => {
+  const date = new Date(time);
+  return `${date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })} ${date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "numeric",
+    timeZoneName: "short",
+  })}`;
 };
 
 const FormLink = ({
