@@ -42,7 +42,8 @@ export const TestUserSelect = ({ testUsers }: { testUsers: TestUser[] }) => {
     <Select
       className="maxw-card-lg margin-left-2 margin-bottom-1"
       id="test-users-select"
-      name="test-users=select"
+      name="test-users-select"
+      aria-label="Select a test user"
       onChange={(e) => logInTestUser(e.target.value)}
       disabled={loggingIn}
     >
