@@ -167,11 +167,11 @@ describe("createAndReturnSession", () => {
   });
 
   it("calls decrypt with the correct arguments and returns successfully", async () => {
-    decryptMock.mockReturnValueOnce({
+    decryptMock.mockReturnValue({
       arbitrary: "stuff",
     });
     const session = await createAndReturnSession("nothingSpecial", new Date(1));
-    expect(decryptMock).toHaveBeenCalledTimes(1);
+    expect(decryptMock).toHaveBeenCalledTimes(2);
     expect(decryptMock).toHaveBeenCalledWith([
       "nothingSpecial",
       "api secret",
@@ -218,11 +218,11 @@ describe("refreshSession", () => {
   });
 
   it("calls decrypt with the correct arguments and returns successfully", async () => {
-    decryptMock.mockReturnValueOnce({
+    decryptMock.mockReturnValue({
       arbitrary: "stuff",
     });
     const session = await createAndReturnSession("nothingSpecial", new Date(1));
-    expect(decryptMock).toHaveBeenCalledTimes(1);
+    expect(decryptMock).toHaveBeenCalledTimes(2);
     expect(decryptMock).toHaveBeenCalledWith([
       "nothingSpecial",
       "api secret",
