@@ -20,6 +20,7 @@ test.describe("Search error page", () => {
 
     await page.waitForURL(/closed/, {
       timeout: 5000,
+      waitUntil: "domcontentloaded",
     });
   });
 });

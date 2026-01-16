@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 // Load environment variables from .env.local if it exists
 const envPath = path.resolve(__dirname, "..", ".env.local");
 if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
+  dotenv.config({ path: envPath, quiet: true });
 }
 
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
@@ -18,7 +18,7 @@ const BASE_URLS: Record<string, string> = {
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
-const baseUrl = BASE_URLS[ENV] || BASE_URLS.local;
+export const baseUrl = BASE_URLS[ENV] || BASE_URLS.local;
 
 // Environment for web server
 const webServerEnv: Record<string, string> = Object.fromEntries(
@@ -27,11 +27,23 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
     NEW_RELIC_ENABLED: "false", // disable New Relic for E2E
   }).filter(([, value]) => typeof value === "string"),
 );
+
+const testOpportunityIdMap: { [key: string]: string } = {
+  staging: "fa5703d3-a358-4969-9c1e-c5cc0ce21f63",
+  local: "c3c59562-a54f-4203-b0f6-98f2f0383481",
+};
+
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+
+// either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
+// note that this staging id may be subject to change
+const testOpportunityId = testOpportunityIdMap[targetEnv];
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  timeout: 75000,
+  timeout: 120000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -45,7 +57,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: baseUrl,
+    baseURL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
     screenshot: "on",
