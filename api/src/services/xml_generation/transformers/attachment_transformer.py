@@ -142,18 +142,20 @@ class AttachmentTransformer:
         # Get the default namespace from nsmap (e.g., AttachmentForm_1_2)
         default_ns = None
         for prefix, uri in nsmap.items():
-            if 'AttachmentForm' in uri:  # Find the default form namespace
+            if "AttachmentForm" in uri:  # Find the default form namespace
                 default_ns = uri
                 break
-        
+
         # Create the wrapper element (e.g., <ATT1>) in the default namespace
         if default_ns:
             attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
-            file_elem = lxml_etree.SubElement(attachment_elem, f"{{{default_ns}}}{element_name}File")
+            file_elem = lxml_etree.SubElement(
+                attachment_elem, f"{{{default_ns}}}{element_name}File"
+            )
         else:
             attachment_elem = lxml_etree.SubElement(parent, element_name)
             file_elem = lxml_etree.SubElement(attachment_elem, f"{element_name}File")
-        
+
         # Populate the File element with attachment content
         self._populate_attachment_content(file_elem, attachment_data, nsmap)
 
@@ -217,16 +219,12 @@ class AttachmentTransformer:
 
         # Add FileName with att: namespace prefix
         if "FileName" in attachment_data:
-            filename_elem = lxml_etree.SubElement(
-                attachment_elem, f"{{{att_ns}}}FileName"
-            )
+            filename_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}FileName")
             filename_elem.text = str(attachment_data["FileName"])
 
         # Add MimeType with att: namespace prefix
         if "MimeType" in attachment_data:
-            mimetype_elem = lxml_etree.SubElement(
-                attachment_elem, f"{{{att_ns}}}MimeType"
-            )
+            mimetype_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}MimeType")
             mimetype_elem.text = str(attachment_data["MimeType"])
 
         # Add FileLocation with att:href attribute
@@ -241,9 +239,7 @@ class AttachmentTransformer:
 
         # Add HashValue with glob: prefix and glob:hashAlgorithm attribute
         if "HashValue" in attachment_data:
-            hashvalue_elem = lxml_etree.SubElement(
-                attachment_elem, f"{{{glob_ns}}}HashValue"
-            )
+            hashvalue_elem = lxml_etree.SubElement(attachment_elem, f"{{{glob_ns}}}HashValue")
             hash_data = attachment_data["HashValue"]
 
             if isinstance(hash_data, dict):
