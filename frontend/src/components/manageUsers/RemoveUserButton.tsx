@@ -13,12 +13,14 @@ interface RemoveUserButtonProps {
   organizationId: string;
   userId: string;
   userName: string;
+  disabled?: boolean;
 }
 
 export function RemoveUserButton({
   organizationId,
   userId,
   userName,
+  disabled = false,
 }: RemoveUserButtonProps) {
   const t = useTranslations("ManageUsers.removeUserModal");
   const router = useRouter();
@@ -61,7 +63,7 @@ export function RemoveUserButton({
 
   return (
     <>
-      <Button type="button" unstyled onClick={openModal}>
+      <Button type="button" unstyled onClick={openModal} disabled={disabled}>
         {t("removeUser")}
       </Button>
       <RemoveUserModal
