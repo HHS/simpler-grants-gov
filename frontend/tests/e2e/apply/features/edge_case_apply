@@ -1,0 +1,40 @@
+Feature: Apply Workflow Edge Cases
+
+#  Audit and Create Plan for priority E2E tests needed for Simpler Apply workflow #6146
+  
+  ###########################################################################
+    # Edge Case 1: Browser or network issues
+  ###########################################################################
+  Scenario: Apply shell partially loads due to slow network
+    Given I select "Start Application"
+    When the Apply shell loads partially or times out
+    Then I should see an error message or retry option
+    And the system should not allow submission until fully loaded
+    
+  ###########################################################################
+  # Edge Case 2: User navigates too quickly
+  ###########################################################################
+  Scenario: Rapid navigation between section
+    Given I am on the Apply shell
+    When I click "Section 1" and "Section 2" repeatedly in quick succession
+    Then no data should be lost
+    And validation errors should not trigger incorrectly
+
+  ###########################################################################
+  # Edge Case 3: Invalid input formats
+  ###########################################################################
+  Scenario: Entering unexpected data types in required fields
+    Given I am filling out required fields
+    When I enter special characters, HTML, or very long strings
+    Then the system should validate and show appropriate errors
+    And prevent incorrect submission
+    
+  ###########################################################################
+   # Edge Case 4: Page refresh at critical moments
+  ###########################################################################
+  Scenario: Refreshing page during submission
+    Given I have completed all required fields
+    When I refresh the page while submitting
+    Then my entered data should persist
+    And submission should resume or fail gracefully
+
