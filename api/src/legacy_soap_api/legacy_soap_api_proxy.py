@@ -8,6 +8,7 @@ from requests import Request, Session
 from src.legacy_soap_api.legacy_soap_api_auth import (
     MTLS_CERT_HEADER_KEY,
     SessionResumptionAdapter,
+    SOAPAuth,
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
 )
@@ -41,8 +42,9 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     )
 
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
+    soap_auth = soap_request.auth
 
-    if not soap_request.auth or config.soap_auth_map == {}:
+    if not soap_auth or config.soap_auth_map == {}:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
@@ -53,7 +55,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     # Handle cert based proxy request.
     temp_file_path = ""
     try:
-        temp_cert_file = get_cert_file(soap_request, config)
+        temp_cert_file = get_cert_file(soap_auth, config)
         temp_file_path = temp_cert_file.name
         return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
     except SOAPClientCertificateLookupError:
@@ -81,10 +83,9 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             os.remove(temp_file_path)
 
 
-def get_cert_file(soap_request: SOAPRequest, config: LegacySoapAPIConfig) -> _TemporaryFileWrapper:
+def get_cert_file(soap_auth: SOAPAuth, config: LegacySoapAPIConfig) -> _TemporaryFileWrapper:
     temp_cert_file = NamedTemporaryFile(mode="w", delete=False)
-    temp_file_path = temp_cert_file.name
-    cert = soap_request.auth.certificate.get_pem(config.soap_auth_map)
+    cert = soap_auth.certificate.get_pem(config.soap_auth_map)
     temp_cert_file.write(cert)
     temp_cert_file.close()
     logger.info(

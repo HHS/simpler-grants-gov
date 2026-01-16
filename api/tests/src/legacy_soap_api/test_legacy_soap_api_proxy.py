@@ -2,16 +2,13 @@ import logging
 import os
 from unittest.mock import ANY, MagicMock, patch
 
-import pytest
-from requests import Request, Response
-
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
 )
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.legacy_soap_api.legacy_soap_api_proxy import get_cert_file, get_proxy_response
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 
 SOAP_PAYLOAD = (
     '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
@@ -36,20 +33,19 @@ def test_get_cert_file_returns_cert_data_from_soap_request():
     mock_soap_request.auth = MagicMock()
     mock_soap_request.auth.certificate.get_pem.return_value = mock_cert_str
 
-    with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send, patch(
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as _, patch(
         "src.legacy_soap_api.legacy_soap_api_proxy.get_soap_config"
     ) as mock_get_config:
-
         mock_config = MagicMock(spec=LegacySoapAPIConfig)
         mock_config.gg_url = "https://grants.gov"
         mock_config.gg_s2s_proxy_header_key = "X-Gg-S2S-Uri"
         mock_config.soap_auth_map = {"test": "config"}
         mock_get_config.return_value = mock_config
 
-        tmp = get_cert_file(mock_soap_request, mock_config)
+        tmp = get_cert_file(mock_soap_request.auth, mock_config)
 
         assert os.path.exists(tmp.name) is True
-        with open(tmp.name, "r") as f:
+        with open(tmp.name) as f:
             assert f.read() == mock_cert_str
 
 
