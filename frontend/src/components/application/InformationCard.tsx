@@ -12,6 +12,7 @@ import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };
 
@@ -49,9 +50,11 @@ const OrganizationDetailsDisplay = ({
 const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
+  applicationId,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
+  applicationId: string;
 }) => {
   const t = useTranslations("Application.information");
   if (hasOrganization) {
@@ -61,7 +64,10 @@ const ApplicantDetails = ({
   return (
     <div className="margin-bottom-1">
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-      <dd>{t("applicantTypeIndividual")}</dd>
+      <dd>
+        {t("applicantTypeIndividual")}
+        <TransferOwnershipButton applicationId={applicationId} />
+      </dd>
     </div>
   );
 };
@@ -152,9 +158,6 @@ export const InformationCard = ({
   }) => {
     return (
       <>
-        {/*
-          TODO: Edit functionality in future task
-        */}
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
@@ -173,6 +176,7 @@ export const InformationCard = ({
             <ApplicantDetails
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
+              applicationId={applicationDetails.application_id}
             />
           </dl>
         </Grid>
