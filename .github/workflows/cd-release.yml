@@ -1,0 +1,158 @@
+name: Release Deploy
+run-name: Release Deploy to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
+
+# This workflow orchestrates deployments across all services in a specific order:
+# API first
+# FE and Analytics next after API
+# Skip NOFOs (at least for now)
+#
+# This ensures backwards compatibility by deploying API first, allowing other
+# services to safely depend on API changes being available.
+#
+# All CI checks and vulnerability scans run in parallel for speed.
+# Only the deployment phase is serialized.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - dev
+          - staging
+          - training
+          - prod
+
+jobs:
+  # =====================================================
+  # PHASE 1: Parallel CI Checks (all services at once)
+  # =====================================================
+  api-checks:
+    name: API Checks
+    uses: ./.github/workflows/ci-api.yml
+
+  frontend-checks:
+    name: Frontend Checks
+    uses: ./.github/workflows/ci-frontend.yml
+
+  nofos-checks:
+    # skip NOFOS as they deploy manually
+    if: ${{ inputs.environment == 'skip' }}
+    name: NOFOs Checks
+    uses: ./.github/workflows/ci-nofos.yml
+    with:
+      version: ${{ github.ref }}
+
+  analytics-checks:
+    name: Analytics Checks
+    uses: ./.github/workflows/ci-analytics.yml
+    secrets: inherit
+
+  # =====================================================
+  # PHASE 1: Parallel Vulnerability Scans
+  # =====================================================
+  api-vulnerability-scans:
+    name: API Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: api
+
+  frontend-vulnerability-scans:
+    name: Frontend Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: frontend
+
+  # NOFOs vulnerability scans need the cached Docker image from checks
+  nofos-vulnerability-scans:
+    # skip NOFOS as they deploy manually
+    if: ${{ inputs.environment == 'skip' }}
+    name: NOFOs Vulnerability Scans
+    needs: [nofos-checks]
+    uses: ./.github/workflows/vulnerability-scans-nofos.yml
+
+  analytics-vulnerability-scans:
+    name: Analytics Vulnerability Scans
+    uses: ./.github/workflows/vulnerability-scans.yml
+    with:
+      app_name: analytics
+
+  # =====================================================
+  # PHASE 2: Sequential Deploys (API -> FE -> NOFO -> Analytics)
+  # Each deployment waits for its own checks AND the previous service
+  # =====================================================
+
+  # 1. Deploy API first - all other services depend on this
+  deploy-api:
+    name: Deploy API
+    needs: [api-checks, api-vulnerability-scans]
+    uses: ./.github/workflows/deploy.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
+    with:
+      app_name: "api"
+      environment: ${{ matrix.envs }}
+      version: ${{ github.ref }}
+
+  # 2. Deploy Frontend after API completes successfully
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: [frontend-checks, frontend-vulnerability-scans, deploy-api]
+    uses: ./.github/workflows/deploy.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
+    with:
+      app_name: "frontend"
+      environment: ${{ matrix.envs }}
+      version: ${{ github.ref }}
+
+  # 3. Deploy NOFOs after Frontend completes successfully
+  deploy-nofos:
+    # skip NOFOS as they deploy manually
+    if: ${{ inputs.environment == 'skip' }}
+    name: Deploy NOFOs
+    needs: [nofos-checks, nofos-vulnerability-scans, deploy-api]
+    uses: ./.github/workflows/deploy-nofos.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
+    with:
+      environment: ${{ matrix.envs }}
+      version: ${{ github.ref }}
+
+  # 4. Deploy Analytics last, after NOFOs completes successfully
+  deploy-analytics:
+    name: Deploy Analytics
+    needs: [analytics-checks, analytics-vulnerability-scans, deploy-api]
+    uses: ./.github/workflows/deploy.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
+    with:
+      app_name: "analytics"
+      environment: ${{ matrix.envs }}
+      version: ${{ github.ref }}
+
+  # =====================================================
+  # Notification on failure
+  # =====================================================
+  send-slack-notification:
+    if: failure()
+    needs: [deploy-api, deploy-frontend, deploy-nofos, deploy-analytics]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
