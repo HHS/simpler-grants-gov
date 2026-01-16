@@ -135,12 +135,27 @@ class AttachmentTransformer:
 
         Args:
             parent: Parent XML element
-            element_name: Name of the attachment element
+            element_name: Name of the attachment element (e.g., "ATT1")
             attachment_data: Attachment data dictionary
             nsmap: Namespace map
         """
-        attachment_elem = lxml_etree.SubElement(parent, element_name)
-        self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
+        # Get the default namespace from nsmap (e.g., AttachmentForm_1_2)
+        default_ns = None
+        for prefix, uri in nsmap.items():
+            if 'AttachmentForm' in uri:  # Find the default form namespace
+                default_ns = uri
+                break
+        
+        # Create the wrapper element (e.g., <ATT1>) in the default namespace
+        if default_ns:
+            attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
+            file_elem = lxml_etree.SubElement(attachment_elem, f"{{{default_ns}}}{element_name}File")
+        else:
+            attachment_elem = lxml_etree.SubElement(parent, element_name)
+            file_elem = lxml_etree.SubElement(attachment_elem, f"{element_name}File")
+        
+        # Populate the File element with attachment content
+        self._populate_attachment_content(file_elem, attachment_data, nsmap)
 
     def _add_multiple_attachment_element(
         self,
@@ -200,24 +215,23 @@ class AttachmentTransformer:
         att_ns = nsmap.get("att", self.attachment_namespace)
         glob_ns = nsmap.get("glob", "http://apply.grants.gov/system/Global-V1.0")
 
-        # Add FileName with xmlns:att namespace declaration
-        # Create element with local nsmap to force namespace declaration on the element
+        # Add FileName with att: namespace prefix
         if "FileName" in attachment_data:
             filename_elem = lxml_etree.SubElement(
-                attachment_elem, "FileName", nsmap={"att": att_ns}
+                attachment_elem, f"{{{att_ns}}}FileName"
             )
             filename_elem.text = str(attachment_data["FileName"])
 
-        # Add MimeType with xmlns:att namespace declaration
+        # Add MimeType with att: namespace prefix
         if "MimeType" in attachment_data:
             mimetype_elem = lxml_etree.SubElement(
-                attachment_elem, "MimeType", nsmap={"att": att_ns}
+                attachment_elem, f"{{{att_ns}}}MimeType"
             )
             mimetype_elem.text = str(attachment_data["MimeType"])
 
-        # Add FileLocation with att:href attribute (namespace-prefixed)
+        # Add FileLocation with att:href attribute
         if "FileLocation" in attachment_data:
-            filelocation_elem = lxml_etree.SubElement(attachment_elem, "FileLocation")
+            filelocation_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}FileLocation")
             file_location_data = attachment_data["FileLocation"]
 
             if isinstance(file_location_data, dict) and "@href" in file_location_data:
@@ -225,10 +239,10 @@ class AttachmentTransformer:
             elif isinstance(file_location_data, str):
                 filelocation_elem.set(f"{{{att_ns}}}href", file_location_data)
 
-        # Add HashValue with glob:hashAlgorithm attribute and xmlns:glob declaration
+        # Add HashValue with glob: prefix and glob:hashAlgorithm attribute
         if "HashValue" in attachment_data:
             hashvalue_elem = lxml_etree.SubElement(
-                attachment_elem, "HashValue", nsmap={"glob": glob_ns}
+                attachment_elem, f"{{{glob_ns}}}HashValue"
             )
             hash_data = attachment_data["HashValue"]
 
