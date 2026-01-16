@@ -141,7 +141,7 @@ class AttachmentTransformer:
         """
         # Get the default namespace from nsmap (e.g., AttachmentForm_1_2)
         default_ns = None
-        for prefix, uri in nsmap.items():
+        for _, uri in nsmap.items():
             if "AttachmentForm" in uri:  # Find the default form namespace
                 default_ns = uri
                 break
