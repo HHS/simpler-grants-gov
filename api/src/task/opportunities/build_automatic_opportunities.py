@@ -409,7 +409,6 @@ class BuildAutomaticOpportunitiesTask(Task):
             additional_info_url_description=data.additional_info_url_description,
             funding_category_description=data.funding_category_description,
             applicant_eligibility_description=data.applicant_eligibility_description,
-            agency_phone_number=data.agency_phone_number,
             agency_contact_description=data.agency_contact_description,
             agency_email_address=data.agency_email_address,
             agency_email_address_description=data.agency_email_address_description,

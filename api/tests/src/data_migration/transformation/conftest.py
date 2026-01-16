@@ -514,7 +514,6 @@ def validate_opportunity_summary(
         ("modification_comments", "modification_comments"),
         ("oth_cat_fa_desc", "funding_category_description"),
         ("applicant_elig_desc", "applicant_eligibility_description"),
-        ("ac_name", "agency_name"),
         ("ac_email_addr", "agency_email_address"),
         ("ac_email_desc", "agency_email_address_description"),
     ]
@@ -523,8 +522,6 @@ def validate_opportunity_summary(
         matching_fields.extend(
             [
                 ("syn_desc", "summary_description"),
-                ("a_sa_code", "agency_code"),
-                ("ac_phone_number", "agency_phone_number"),
                 ("agency_contact_desc", "agency_contact_description"),
                 ("response_date", "close_date"),
                 ("response_date_desc", "close_date_description"),
@@ -535,8 +532,6 @@ def validate_opportunity_summary(
         matching_fields.extend(
             [
                 ("forecast_desc", "summary_description"),
-                ("agency_code", "agency_code"),
-                ("ac_phone", "agency_phone_number"),
                 ("est_synopsis_posting_date", "forecasted_post_date"),
                 ("est_appl_response_date", "forecasted_close_date"),
                 ("est_appl_response_date_desc", "forecasted_close_date_description"),

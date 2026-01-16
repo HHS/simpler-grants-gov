@@ -119,7 +119,6 @@ def build_opp(
         award_floor=award_floor,
         award_ceiling=award_ceiling,
         estimated_total_program_funding=estimated_total_program_funding,
-        agency_phone_number=agency_phone_number,
     )
 
     opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
