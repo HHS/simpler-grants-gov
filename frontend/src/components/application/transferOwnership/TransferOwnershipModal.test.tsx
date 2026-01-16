@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { UserOrganization } from "src/types/userTypes";
 
-import { createRef } from "react";
+import React, { createRef } from "react";
 import type { ModalRef } from "@trussworks/react-uswds";
 
 import { TransferOwnershipModal } from "./TransferOwnershipModal";
@@ -13,6 +13,22 @@ type UseUserOrganizationsResult = {
 };
 
 const useUserOrganizationsMock = jest.fn<UseUserOrganizationsResult, []>();
+
+jest.mock("src/hooks/useUserOrganizations", () => ({
+  useUserOrganizations: () => useUserOrganizationsMock(),
+}));
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: jest.fn(),
+  }),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: jest.fn(),
+  }),
+}));
 
 jest.mock("next-intl", () => ({
   useTranslations: () => {
@@ -76,10 +92,6 @@ jest.mock("./TransferOwnershipOrganizationSelect", () => ({
       ))}
     </select>
   ),
-}));
-
-jest.mock("src/hooks/useUserOrganizations", () => ({
-  useUserOrganizations: () => useUserOrganizationsMock(),
 }));
 
 jest.mock("src/components/SimplerModal", () => ({
@@ -152,7 +164,16 @@ describe("TransferOwnershipModal", () => {
 
   function renderModal(): void {
     const modalRef = createRef<ModalRef>();
-    render(<TransferOwnershipModal modalId={modalId} modalRef={modalRef} />);
+    const onAfterClose = jest.fn();
+
+    render(
+      <TransferOwnershipModal
+        applicationId="app-123"
+        modalId={modalId}
+        modalRef={modalRef}
+        onAfterClose={onAfterClose}
+      />,
+    );
   }
 
   beforeEach(() => {
@@ -184,7 +205,9 @@ describe("TransferOwnershipModal", () => {
 
     renderModal();
 
-    expect(screen.getByText("errorMessage")).toBeInTheDocument();
+    expect(
+      screen.getByText("failedFetchingOrganizationErrorMessage"),
+    ).toBeInTheDocument();
 
     const phoneLink = screen.getByRole("link", { name: "1-800-518-4726" });
     expect(phoneLink).toHaveAttribute("href", "tel:1-800-518-4726");
