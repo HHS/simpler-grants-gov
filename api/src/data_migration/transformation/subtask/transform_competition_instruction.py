@@ -57,8 +57,11 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         # Fetch a batch of competition instructions that
         # need to be processed.
         records: Sequence[
-            tuple[Tinstructions, Competition | None]
-        ] = self.fetch_competition_instructions(
+            tuple[Tinstructions, CompetitionInstruction | None, Competition | None]
+        ] = self.fetch_with_competition(
+            source_model=Tinstructions,
+            destination_model=CompetitionInstruction,
+            join_clause=[Tinstructions.comp_id == CompetitionInstruction.legacy_competition_id],
             # We load the instruction files into memory, so need to process very
             # small batches at a time to avoid running out of memory
             batch_size=self.config.transform_competition_instruction_batch_size,
@@ -84,20 +87,17 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
 
     def process_competition_instruction_group(
         self,
-        records: Sequence[tuple[Tinstructions, Competition | None]],
+        records: Sequence[tuple[Tinstructions, CompetitionInstruction | None, Competition | None]],
     ) -> int:
 
         records_processed = 0
-        for source_instruction, competition in records:
+        for source_instruction, target_instruction, competition in records:
             try:
                 # We want to increment even if we fail to process so that
                 # the batch size is correct.
                 records_processed += 1
                 self.total_instructions_processed += 1
 
-                # Find the existing competition instructions
-                # if there are any.
-                target_instruction = determine_competition_instruction(source_instruction, competition)
                 # Process the competition instructions
                 self.process_competition_instruction(
                     source_instruction, target_instruction, competition
@@ -229,31 +229,6 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         logger.info("Processed competition instruction", extra=extra)
         source_instruction.transformed_at = self.transform_time
 
-    def fetch_competition_instructions(self, batch_size: int, limit: int | None, order_by: UnaryExpression | None = None) -> Sequence[tuple[Tinstructions, Competition]]:
-        """
-        Fetch the tinstructions staged records + the corresponding competition
-        """
-        # Note - this doesn't follow exactly the same pattern
-        # as our other fetch functions defined in the base class
-        # because the way the instructions are attached needs
-        # some special treatment.
-
-        # TODO - a selectinload needs to be added
-        stmt = (
-            select(Tinstructions, Competition).join(
-                Competition,
-                Tinstructions.comp_id == Competition.legacy_competition_id,
-                isouter=True,
-            )
-        ).where(Tinstructions.transformed_at.is_(None)).execution_options(yield_per=batch_size)
-
-        if limit is not None:
-            stmt = stmt.limit(limit)
-
-        if order_by is not None:
-            stmt = stmt.order_by(order_by)
-
-        return self.db_session.execute(stmt)
 
 def build_competition_instruction_file_name(source_instruction: Tinstructions, competition: Competition) -> str:
     """Create the competition instruction file name
@@ -262,23 +237,21 @@ def build_competition_instruction_file_name(source_instruction: Tinstructions, c
        from the instruction table together.
     """
 
-    # This shouldn't happen, we haven't seen this value null
-    # in grants.gov in any environments.
+    # Note - we shouldn't ever hit these errors
+    # as we skip processing the instructions entirely if they're null.
+    # This is just to be certain / be type safe.
+    # Package ID shouldn't ever be null, we didn't see it null in any env.
+    # Extension is rarely null (~70 in prod)
     if competition.legacy_package_id is None:
         raise ValueError("Competition has no legacy package ID, cannot create a file name")
-
-    # While the extension is generally something like pdf or doc
-    # sometimes it's ".pdf" or "PDF". We're going to cleanup a bit
-    # of the inconsistency.
-    # Error if null, this shouldn't happen.
-    # TODO - prod alone has like 70 of these
-    #        from some quick testing, they don't work on grants.gov
-    #        the button does nothing, so do we ignore them?
     if source_instruction.extension is None:
         raise ValueError("Competition has no extension, cannot create a file name")
 
-    # TODO - do we want to deal with white space? "gov 2018.pdf" is a common one
-    # probably not?
+    # While the extension is generally something like pdf or doc
+    # sometimes it's ".pdf" or "PDF". We're going to cleanup a bit
+    # of the inconsistency and at least make these all lower case
+    # and remove the dot. This will result in very slightly different
+    # filenames, but "example.pdf" is better than "example..PDF"
 
     # Lowercase, remove any surrounding white space, and remove a leading '.'
     extension = source_instruction.extension.lower().strip().removeprefix(".")
@@ -314,6 +287,7 @@ def transform_competition_instruction(
         competition=competition,
         file_location=file_location,
         file_name=file_name,
+        legacy_competition_id=source_instruction.comp_id,
     )
 
     transform_util.transform_update_create_timestamp(
@@ -322,30 +296,6 @@ def transform_competition_instruction(
 
     return target_instruction
 
-def determine_competition_instruction(source_instruction: Tinstructions, competition: Competition | None) -> CompetitionInstruction | None:
-    """Figure out which existing competition instruction
-       record we want to copy the source instructions to.
-
-       If there are no existing competition instructions,
-       then this will return None.
-    """
-
-    # We handle erroring for competition being null
-    # later in processing, just skip over it for now
-    if competition is None:
-        return None
-
-    file_name = build_competition_instruction_file_name(source_instruction, competition)
-
-    # Try to find the competition instruction record we already have
-    # Note that this is JUST relying on the file names matching as
-    # that's the best we can do to match, grants.gov only ever had
-    # a single file per competition, so this should be fine.
-    for competition_instruction in competition.competition_instructions:
-        if file_name == competition_instruction.file_name:
-            return competition_instruction
-
-    return None
 
 
 def write_file(

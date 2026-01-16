@@ -379,6 +379,7 @@ def setup_competition_instruction(
         s3_config: S3Config,
         is_delete: bool = False,
         is_already_processed: bool = False,
+        extension: str = "pdf"
 ):
 
 
@@ -387,6 +388,7 @@ def setup_competition_instruction(
         comp_id=competition.legacy_competition_id,
         is_deleted=is_delete,
         already_transformed=is_already_processed,
+        extension=extension
     )
 
     if create_existing:
@@ -409,12 +411,12 @@ def setup_competition_instruction(
 def validate_competition_instruction(
         db_session,
         source_instruction,
-        expected_filename: str,
+        s3_config: S3Config,
+        expected_filename: str | None = None,
         expect_in_db: bool = True,
         expect_values_to_match: bool = True,
 ):
-    # TODO - do I just want to add the ID?
-    competition_instruction = db_session.query(CompetitionInstruction).filter(CompetitionInstruction.file_name == expected_filename).one_or_none()
+    competition_instruction = db_session.query(CompetitionInstruction).filter(CompetitionInstruction.legacy_competition_id == source_instruction.comp_id).one_or_none()
 
     if not expect_in_db:
         assert competition_instruction is None
@@ -426,8 +428,16 @@ def validate_competition_instruction(
 
         if expect_values_to_match:
             assert contents.encode() == source_instruction.instructions
+            assert competition_instruction.file_name == expected_filename
+
+            # If the competition is a draft it should be in the draft bucket.
+            if competition_instruction.competition.opportunity.is_draft:
+                assert s3_config.draft_files_bucket_path in competition_instruction.file_location
+            else:
+                assert s3_config.public_files_bucket_path in competition_instruction.file_location
         else:
             assert contents.encode() != source_instruction.file_lob
+            assert competition_instruction.file_name != expected_filename
 
 
 def validate_matching_fields(
