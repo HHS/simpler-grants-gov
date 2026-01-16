@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { noop } from "lodash";
 import { applicationTestUserId, testApplicationId } from "src/constants/auth";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
@@ -105,10 +104,6 @@ export const UserDropdown = ({
 }) => {
   const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
 
-  const { checkFeatureFlag } = useFeatureFlags();
-
-  const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
-
   return (
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative">
       <NavDropDownButton
@@ -143,7 +138,7 @@ export const UserDropdown = ({
         id="user-control"
         items={[
           <UserAccountItem key="account" isSubnav={true} />,
-          showUserAdminNavItems && <SettingsNavLink key="settings" />,
+          <SettingsNavLink key="settings" />,
           isApplicationTestUser && <TestApplicationLink />,
           <LogoutNavItem key="logout" />,
         ].filter(Boolean)}
