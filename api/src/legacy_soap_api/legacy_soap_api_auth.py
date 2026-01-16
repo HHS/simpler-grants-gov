@@ -110,9 +110,13 @@ def get_soap_client_certificate(
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
 
+    extra = {"cert_serial_number_check": str(cert.serial_number).startswith("400195")}
+    logger.info("soap_client_certificate: legacy_certificate check for serial_number", extra=extra)
+
     legacy_certificate = db_session.execute(
         select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
     ).scalar_one_or_none()
+
     if legacy_certificate:
         add_extra_data_to_current_request_logs(
             {

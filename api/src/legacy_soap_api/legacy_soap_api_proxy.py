@@ -87,7 +87,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
         clone_file.close()
 
         extra = {
-            "cert_data": clean_cert,
+            "cert_data_exists": "True" if clean_cert else "False",
             "clone_filename": clone_file.name,
             "temp_file_path": temp_file_path,
         }
