@@ -2,6 +2,7 @@
 
 from lxml import etree as lxml_etree
 
+from src.form_schema.forms.attachment_form import FORM_XML_TRANSFORM_RULES as ATTACHMENT_FORM_RULES
 from src.form_schema.forms.budget_narrative_attachment import (
     FORM_XML_TRANSFORM_RULES as BUDGET_NARRATIVE_RULES,
 )
@@ -191,10 +192,6 @@ class TestAttachmentFormXML:
 
     def test_generate_xml_with_single_attachment(self):
         """Test XML generation with a single attachment field."""
-        from src.form_schema.forms.attachment_form import (
-            FORM_XML_TRANSFORM_RULES as ATTACHMENT_FORM_RULES,
-        )
-
         service = XMLGenerationService()
 
         # Create attachment mapping

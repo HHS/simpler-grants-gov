@@ -7,6 +7,9 @@ from typing import Any
 
 import click
 
+from src.form_schema.forms.attachment_form import (
+    FORM_XML_TRANSFORM_RULES as ATTACHMENT_FORM_TRANSFORM_RULES,
+)
 from src.form_schema.forms.epa_form_4700_4 import (
     FORM_XML_TRANSFORM_RULES as EPA4700_4_TRANSFORM_RULES,
 )
@@ -26,6 +29,7 @@ FORM_TRANSFORM_RULES = {
     "SF424A": SF424A_TRANSFORM_RULES,
     "EPA4700_4": EPA4700_4_TRANSFORM_RULES,
     "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
+    "AttachmentForm_1_2": ATTACHMENT_FORM_TRANSFORM_RULES,
 }
 
 
