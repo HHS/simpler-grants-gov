@@ -27,7 +27,3 @@ class TopportunityCfda(foreignbase.ForeignBase, opportunity_mixin.TopportunityCf
         primaryjoin=lambda: TopportunityCfda.opportunity_id == foreign(Topportunity.opportunity_id),
         uselist=False,
     )
-
-
-class VOpportunitySummary(foreignbase.ForeignBase, opportunity_mixin.VOpportunitySummaryMixin):
-    __tablename__ = "v_opportunity_summary"

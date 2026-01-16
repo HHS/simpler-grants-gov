@@ -14,7 +14,6 @@ from src.task.ecs_background_task import ecs_background_task
 from src.task.opportunities.set_current_opportunities_task import SetCurrentOpportunitiesTask
 
 from ...task.opportunities.store_opportunity_version_task import StoreOpportunityVersionTask
-from ...task.opportunities.sync_opportunity_review_status_task import SyncOpportunityReviewStatus
 from ..data_migration_blueprint import data_migration_blueprint
 from ..load.load_oracle_data_task import LoadOracleDataTask
 from ..transformation.transform_oracle_data_task import TransformOracleDataTask
@@ -37,9 +36,6 @@ logger = logging.getLogger(__name__)
 @click.option(
     "--store-version/--no-store-version", default=False, help="run StoreOpportunityVersionTask"
 )
-@click.option(
-    "--sync-status/--no-sync-status", default=False, help="run SyncOpportunityReviewStatus"
-)
 @flask_db.with_db_session()
 @ecs_background_task(task_name="load-transform")
 def load_transform(
@@ -48,7 +44,6 @@ def load_transform(
     transform: bool,
     set_current: bool,
     store_version: bool,
-    sync_status: bool,
     insert_chunk_size: int,
     tables_to_load: list[str],
 ) -> None:
@@ -67,7 +62,5 @@ def load_transform(
         SetCurrentOpportunitiesTask(db_session).run()
     if store_version:
         StoreOpportunityVersionTask(db_session).run()
-    if sync_status:
-        SyncOpportunityReviewStatus(db_session).run()
 
     logger.info("load and transform complete")
