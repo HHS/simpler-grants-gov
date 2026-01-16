@@ -1,7 +1,7 @@
 """Add competition instruction legacy ID
 
 Revision ID: b471c2bbda51
-Revises: de02084c3fdd
+Revises: 649b1aa24f78
 Create Date: 2026-01-15 15:23:58.209118
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "b471c2bbda51"
-down_revision = "de02084c3fdd"
+down_revision = "649b1aa24f78"
 branch_labels = None
 depends_on = None
 
