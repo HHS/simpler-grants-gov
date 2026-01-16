@@ -93,7 +93,7 @@ Feature: Happy Path – Apply Workflow
 When the user goes to the search page
 And the user searches for the specific Funding Opportunity number
 Then the user scrolls to the search results table
-When the user clicks the Funding Opportunity number
+When the user clicks the Funding Opportunity title
 Then the user is taken to the Funding Opportunity details page
 
 #---- Completing Forms (Required or Conditionally Required) ---
