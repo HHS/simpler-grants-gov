@@ -165,8 +165,13 @@ resource "aws_ecs_task_definition" "app" {
         timeout  = 5,
         command  = var.healthcheck_command
       } : null,
-      environment = local.environment_variables,
-      secrets     = var.secrets,
+      environment = concat(local.environment_variables, [
+        {
+          name  = "TMPDIR"
+          value = "/tmp"
+        }
+      ]),
+      secrets = var.secrets,
       portMappings = [
         {
           containerPort = var.container_port,
@@ -174,23 +179,24 @@ resource "aws_ecs_task_definition" "app" {
           protocol      = "tcp"
         }
       ],
-      linuxParameters = var.drop_linux_capabilities ? {
-        capabilities = {
+      linuxParameters = {
+        capabilities = var.drop_linux_capabilities ? {
           add  = []
           drop = ["ALL"]
-        },
+          } : {
+          add  = []
+          drop = []
+        }
         initProcessEnabled = true
-      } : null,
+        tmpfs = [{
+          containerPath = "/tmp"
+          size          = 1024
+          mountOptions  = ["rw", "nosuid"]
+        }]
+      },
       logConfiguration = {
         logDriver = "awsfirelens",
       }
-      mountPoints = [
-        {
-          sourceVolume  = "tmp"
-          containerPath = "/tmp"
-          readOnly      = false
-        }
-      ]
       systemControls = []
       volumesFrom    = []
     },
@@ -255,11 +261,6 @@ resource "aws_ecs_task_definition" "app" {
 
   # Reference https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html
   network_mode = "awsvpc"
-
-  # Ephemeral volume for /tmp - required when readonlyRootFilesystem is true
-  volume {
-    name = "tmp"
-  }
 
   depends_on = [
     aws_cloudwatch_log_group.service_logs,

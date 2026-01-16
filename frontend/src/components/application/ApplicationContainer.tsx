@@ -46,6 +46,7 @@ const ApplicationContainer = ({
   const applicationForms = applicationDetails.application_forms;
   const applicationId = applicationDetails.application_id;
   const applicationStatus = applicationDetails.application_status;
+  const applicationDetailsObject = applicationDetails;
 
   const { user } = useUser();
   const token = user?.token || null;
@@ -168,10 +169,9 @@ const ApplicationContainer = ({
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
         applicationForms={applicationForms}
-        applicationId={applicationId}
-        forms={forms}
-        errors={validationErrors}
         competitionInstructionsDownloadPath={instructionsDownloadPath}
+        errors={validationErrors}
+        applicationDetailsObject={applicationDetailsObject}
       />
       <AttachmentsCard
         applicationId={applicationId}
