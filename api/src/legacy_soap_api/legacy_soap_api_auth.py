@@ -110,10 +110,7 @@ def get_soap_client_certificate(
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
     serial_number_hex = format(int(cert.serial_number), "032x")
-    print(f"{serial_number_hex=}")
-
     legacy_certificate = db_session.execute(
-        # select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
         select(LegacyCertificate).where(LegacyCertificate.serial_number == str(serial_number_hex))
     ).scalar_one_or_none()
     if legacy_certificate:
