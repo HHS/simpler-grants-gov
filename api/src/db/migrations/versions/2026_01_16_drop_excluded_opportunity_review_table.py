@@ -1,8 +1,8 @@
 """drop excluded opportunity review table
 
-Revision ID: 440d762b84dc
-Revises: de02084c3fdd
-Create Date: 2026-01-16 17:23:44.540205
+Revision ID: 7ffdb877509a
+Revises: 649b1aa24f78
+Create Date: 2026-01-16 21:00:16.518987
 
 """
 
@@ -11,8 +11,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "440d762b84dc"
-down_revision = "de02084c3fdd"
+revision = "7ffdb877509a"
+down_revision = "649b1aa24f78"
 branch_labels = None
 depends_on = None
 
