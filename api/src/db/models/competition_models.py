@@ -158,6 +158,11 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
     file_name: Mapped[str]
 
+    # In grants.gov, a competition could only have one instruction record
+    # and it reused the competition ID as its primary key. We copy that over
+    # when transforming as it makes joining the data much simpler.
+    legacy_competition_id: Mapped[int | None] = mapped_column(index=True)
+
     @property
     def download_path(self) -> str:
         return presign_or_s3_cdnify_url(self.file_location)
