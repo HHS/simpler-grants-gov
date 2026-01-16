@@ -10,6 +10,9 @@ describe("getNextRoutes", () => {
     expect(result).toEqual([
       "/(base)/[...not-found]",
       "/(base)/api-dashboard",
+      "/(base)/applications/[applicationId]/form/[appFormId]",
+      "/(base)/applications/[applicationId]/form/[appFormId]/success",
+      "/(base)/applications/[applicationId]",
       "/(base)/applications",
       "/(base)/dashboard",
       "/(base)/dev/feature-flags",
@@ -34,9 +37,6 @@ describe("getNextRoutes", () => {
       "/(base)/settings",
       "/(base)/unauthenticated",
       "/(base)/vision",
-      "/(base)/workspace/applications/application/[applicationId]/form/[appFormId]",
-      "/(base)/workspace/applications/application/[applicationId]/form/[appFormId]/success",
-      "/(base)/workspace/applications/application/[applicationId]",
       "/(print)/print/application/[applicationId]/form/[appFormId]",
     ]);
   });

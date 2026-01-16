@@ -85,7 +85,7 @@ export const StartApplicationModal = ({
     })
       .then((data) => {
         const { applicationId } = data;
-        router.push(`/workspace/applications/application/${applicationId}`);
+        router.push(`/applications/${applicationId}`);
       })
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
