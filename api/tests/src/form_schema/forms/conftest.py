@@ -4,6 +4,7 @@ import pytest
 
 from src.db.models.competition_models import Form
 from src.form_schema.forms import (
+    AttachmentForm_v1_2,
     BudgetNarrativeAttachment_v1_2,
     CD511_v1_1,
     EPA_FORM_4700_4_v5_0,
@@ -133,3 +134,8 @@ def epa_form_4700_4_v5_0():
 @pytest.fixture(scope="session")
 def epa_key_contact_v2_0():
     return setup_resolved_form(EPA_KEY_CONTACT_v2_0)
+
+
+@pytest.fixture(scope="session")
+def attachment_form_v1_2():
+    return setup_resolved_form(AttachmentForm_v1_2)
