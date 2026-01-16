@@ -84,7 +84,7 @@
     "@types/newrelic": "^9.14.6",
     "@types/node": "^22.10.5",
     "@types/node-fetch": "^2.6.11",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
@@ -115,7 +115,7 @@
     "typescript": "^5.0.0"
   },
   "overrides": {
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3"
   }
 }
