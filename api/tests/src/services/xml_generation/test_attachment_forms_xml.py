@@ -9,9 +9,6 @@ from src.form_schema.forms.budget_narrative_attachment import (
 from src.form_schema.forms.project_narrative_attachment import (
     FORM_XML_TRANSFORM_RULES as PROJECT_NARRATIVE_RULES,
 )
-from src.form_schema.forms.attachment_form import (
-    FORM_XML_TRANSFORM_RULES as ATTACHMENT_FORM_RULES,
-)
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
@@ -369,11 +366,11 @@ class TestAttachmentFormXML:
         assert att5_elem is not None, "ATT5 element not found in XML"
         att5_file_elem = att5_elem.find(".//af:ATT5File", namespaces)
         assert att5_file_elem is not None, "ATT5File element not found in XML"
-        
+
         att5_filename = att5_file_elem.find(".//att:FileName", namespaces)
         assert att5_filename is not None
         assert att5_filename.text == "doc5.pdf"
-        
+
         att5_hash = att5_file_elem.find(".//glob:HashValue", namespaces)
         assert att5_hash is not None
         assert att5_hash.text == "hash5"
@@ -383,11 +380,11 @@ class TestAttachmentFormXML:
         assert att15_elem is not None, "ATT15 element not found in XML"
         att15_file_elem = att15_elem.find(".//af:ATT15File", namespaces)
         assert att15_file_elem is not None, "ATT15File element not found in XML"
-        
+
         att15_filename = att15_file_elem.find(".//att:FileName", namespaces)
         assert att15_filename is not None
         assert att15_filename.text == "doc15.pdf"
-        
+
         att15_hash = att15_file_elem.find(".//glob:HashValue", namespaces)
         assert att15_hash is not None
         assert att15_hash.text == "hash15"
