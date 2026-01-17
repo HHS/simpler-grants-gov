@@ -54,6 +54,7 @@ class XMLGenerationService:
                 request.transform_config,
                 request.pretty_print,
                 request.attachment_mapping,
+                request.application_data,  # Pass original data for attachment fields
             )
 
             # Log transformation results for development
@@ -73,6 +74,7 @@ class XMLGenerationService:
         transform_config: dict,
         pretty_print: bool = True,
         attachment_mapping: dict[str, AttachmentInfo] | None = None,
+        original_data: dict | None = None,  # Original application data for attachments
     ) -> str:
         """Generate XML string from transformed data."""
         # Get XML configuration from the config metadata
@@ -99,6 +101,7 @@ class XMLGenerationService:
                 pretty_print,
                 transform_config,
                 attachment_mapping,
+                original_data or data,  # Use original data for attachments
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -113,6 +116,7 @@ class XMLGenerationService:
         pretty_print: bool = True,
         transform_config: dict | None = None,
         attachment_mapping: dict[str, AttachmentInfo] | None = None,
+        original_data: dict | None = None,  # Original application data for attachments
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
@@ -193,11 +197,13 @@ class XMLGenerationService:
         )
 
         # Add attachment elements if present in data
+        # Use original_data (application_data) for attachment fields,  not transformed data
+        attachment_source_data = original_data if original_data is not None else data
         attachment_transformer = AttachmentTransformer(
             attachment_mapping=attachment_mapping or {},
             attachment_field_config=attachment_field_config,
         )
-        attachment_transformer.add_attachment_elements(root, data, nsmap)
+        attachment_transformer.add_attachment_elements(root, attachment_source_data, nsmap)
 
         # Generate XML string
         if pretty_print:

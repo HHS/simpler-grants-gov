@@ -228,6 +228,94 @@ FORM_RULE_SCHEMA = {
     "att15": {"gg_validation": {"rule": "attachment"}},
 }
 
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for Attachment form",
+        "version": "1.0",
+        "form_name": "AttachmentForm_1_2",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/AttachmentForm_1_2-V1.2",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "xml_structure": {
+            "root_element": "AttachmentForm_1_2",
+            "root_attributes": {
+                "FormVersion": "1.2",  # Static value required by XSD
+            },
+        },
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+        },
+        "attachment_fields": {
+            "att1": {
+                "xml_element": "ATT1",
+                "type": "single",
+            },
+            "att2": {
+                "xml_element": "ATT2",
+                "type": "single",
+            },
+            "att3": {
+                "xml_element": "ATT3",
+                "type": "single",
+            },
+            "att4": {
+                "xml_element": "ATT4",
+                "type": "single",
+            },
+            "att5": {
+                "xml_element": "ATT5",
+                "type": "single",
+            },
+            "att6": {
+                "xml_element": "ATT6",
+                "type": "single",
+            },
+            "att7": {
+                "xml_element": "ATT7",
+                "type": "single",
+            },
+            "att8": {
+                "xml_element": "ATT8",
+                "type": "single",
+            },
+            "att9": {
+                "xml_element": "ATT9",
+                "type": "single",
+            },
+            "att10": {
+                "xml_element": "ATT10",
+                "type": "single",
+            },
+            "att11": {
+                "xml_element": "ATT11",
+                "type": "single",
+            },
+            "att12": {
+                "xml_element": "ATT12",
+                "type": "single",
+            },
+            "att13": {
+                "xml_element": "ATT13",
+                "type": "single",
+            },
+            "att14": {
+                "xml_element": "ATT14",
+                "type": "single",
+            },
+            "att15": {
+                "xml_element": "ATT15",
+                "type": "single",
+            },
+        },
+    },
+    # No explicit field mapping needed - attachments are handled automatically via attachment_fields config
+}
+
 AttachmentForm_v1_2 = Form(
     # https://grants.gov/forms/form-items-description/fid/540
     form_id=uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
@@ -240,6 +328,7 @@ AttachmentForm_v1_2 = Form(
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
     form_instruction_id=None,
     form_type=FormType.ATTACHMENT_FORM,
     sgg_version="1.0",
