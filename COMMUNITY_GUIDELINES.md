@@ -6,9 +6,9 @@ We know that we can learn from a wide variety of communities, including those wh
 
 We also recognize capacity building as a key part of involving a diverse open source community. We are doing our best to use accessible language, provide technical and process documents in multiple languages, and offer support to community members with a wide variety of backgrounds and skillsets. If you have ideas for how we can improve or add to our capacity building efforts and methods for welcoming people into our community, please let us know by filing an issue on our GitHub repository.
 
-## Principles
-
 Principles and guidelines for participating in our open source community are linked below. Please review these before joining or starting a conversation in this repo or one of the channels listed below. All community members are expected to adhere to these principles and guidelines and to the code of conduct when participating in community spaces such as code repositories, communication channels and venues, and events.
+
+## Principles
 
 The following principles guide our data, product, and process decisions, architecture, and approach:
 
