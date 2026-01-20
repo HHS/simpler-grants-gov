@@ -119,19 +119,19 @@ Scenario: Clicking the search button clears dropdown but maintains filters
 # --- reported as issue 8063 ---
 Scenario: Error displayed when search name is a duplicate
   Given I am logged in
-  And a saved search with name "My Search" exists
-  When I attempt to save a new search with the name "My Search"
+  And a saved search with name "<savedSearch>" exists
+  When I attempt to save a new search with the same name "<savedSearch>"
   Then I should see an error message indicating the name already exists
 
 # --- reported as issue 8045 ---
 Scenario: Saved search selection resets when navigating via top Search menu
   Given I am logged in
-  And I have selected a saved search "BR-Test-SS02"
+  And I have selected a saved search "<savedSearch>"
   When I navigate to the Search page via the top navigation menu
   Then the saved search dropdown should reset to "Select saved query"
   And filters should be cleared
   And search results should reset to default
-  When I attempt to reselect "BR-Test-SS02"
+  When I attempt to reselect "<savedSearch>"
   Then the saved search should be reapplied immediately
   And the results should update according to the selected saved search
 
