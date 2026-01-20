@@ -253,63 +253,63 @@ FORM_XML_TRANSFORM_RULES = {
         "attachment_fields": {
             "att1": {
                 "xml_element": "ATT1",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att2": {
                 "xml_element": "ATT2",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att3": {
                 "xml_element": "ATT3",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att4": {
                 "xml_element": "ATT4",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att5": {
                 "xml_element": "ATT5",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att6": {
                 "xml_element": "ATT6",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att7": {
                 "xml_element": "ATT7",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att8": {
                 "xml_element": "ATT8",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att9": {
                 "xml_element": "ATT9",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att10": {
                 "xml_element": "ATT10",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att11": {
                 "xml_element": "ATT11",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att12": {
                 "xml_element": "ATT12",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att13": {
                 "xml_element": "ATT13",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att14": {
                 "xml_element": "ATT14",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
             "att15": {
                 "xml_element": "ATT15",
-                "type": "single",
+                "type": "single_with_wrapper",
             },
         },
     },

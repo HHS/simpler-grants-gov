@@ -52,10 +52,12 @@ class AttachmentTransformer:
             field_type = field_config["type"]
             field_value = data[field_name]
 
-            if field_type == "single":
+            if field_type == "single" or field_type == "single_with_wrapper":
                 # Single attachment field - expect UUID string
                 attachment_dict = self._resolve_attachment_uuid(field_value, field_name)
-                self._add_single_attachment_element(parent, xml_element, attachment_dict, nsmap)
+                self._add_single_attachment_element(
+                    parent, xml_element, attachment_dict, nsmap, field_config
+                )
             elif field_type == "multiple":
                 # Multiple attachment field - expect list of UUIDs
                 self._add_multiple_attachment_from_uuids(
@@ -130,34 +132,59 @@ class AttachmentTransformer:
         element_name: str,
         attachment_data: dict[str, Any],
         nsmap: dict[str, str],
+        field_config: dict[str, Any] | None = None,
     ) -> None:
         """Add a single attachment element.
+
+        For forms that use the 'single_with_wrapper' type, each attachment slot is
+        wrapped in a nested structure with a File element.
+
+        Example structure with wrapper (type='single_with_wrapper'):
+        <AttachmentForm_1_2:ATT1>
+            <AttachmentForm_1_2:ATT1File>
+                <att:FileName>...</att:FileName>
+                ...
+            </AttachmentForm_1_2:ATT1File>
+        </AttachmentForm_1_2:ATT1>
+
+        Example structure without wrapper (type='single'):
+        <att:FileName>...</att:FileName>
+        <att:MimeType>...</att:MimeType>
+        ...
 
         Args:
             parent: Parent XML element
             element_name: Name of the attachment element (e.g., "ATT1")
             attachment_data: Attachment data dictionary
             nsmap: Namespace map
+            field_config: Field configuration containing type information
         """
-        # Get the default namespace from nsmap (e.g., AttachmentForm_1_2)
-        default_ns = None
-        for _, uri in nsmap.items():
-            if "AttachmentForm" in uri:  # Find the default form namespace
-                default_ns = uri
-                break
+        # Check if this field requires wrapper elements based on configuration
+        uses_wrapper = field_config and field_config.get("type") == "single_with_wrapper"
 
-        # Create the wrapper element (e.g., <ATT1>) in the default namespace
-        if default_ns:
-            attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
-            file_elem = lxml_etree.SubElement(
-                attachment_elem, f"{{{default_ns}}}{element_name}File"
-            )
+        if uses_wrapper:
+            # Get the default namespace from nsmap
+            default_ns = None
+            for _, uri in nsmap.items():
+                # Look for any namespace in the nsmap (first one is typically the default)
+                if not default_ns:
+                    default_ns = uri
+
+            # Create the wrapper element (e.g., <ATT1>) in the default namespace
+            if default_ns:
+                attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
+                file_elem = lxml_etree.SubElement(
+                    attachment_elem, f"{{{default_ns}}}{element_name}File"
+                )
+            else:
+                attachment_elem = lxml_etree.SubElement(parent, element_name)
+                file_elem = lxml_etree.SubElement(attachment_elem, f"{element_name}File")
+
+            # Populate the File element with attachment content
+            self._populate_attachment_content(file_elem, attachment_data, nsmap)
         else:
-            attachment_elem = lxml_etree.SubElement(parent, element_name)
-            file_elem = lxml_etree.SubElement(attachment_elem, f"{element_name}File")
-
-        # Populate the File element with attachment content
-        self._populate_attachment_content(file_elem, attachment_data, nsmap)
+            # No wrapper needed - populate content directly on parent
+            self._populate_attachment_content(parent, attachment_data, nsmap)
 
     def _add_multiple_attachment_element(
         self,
