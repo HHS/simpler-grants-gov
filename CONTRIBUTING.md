@@ -24,27 +24,23 @@ If you think you have found a bug in the code or static site, first [search our 
 - Include screenshots and animated GIFs if possible, which show you following the described steps and clearly demonstrate the problem.
 
 
-### Suggest an Enhancement
+## Request a feature
 
-If you don't have specific language or code to submit but would like to suggest a change, request a feature, or have something addressed, you can open an issue in this repository.
+If you don't have specific language or code to submit but would like to suggest a change, request a feature, or have something addressed, you can open an issue of type [Feature Request](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=enhancement&projects=&template=feature_request.yml&title=%5BFeature+Request%5D%3A+):
 
-Please open an issue of type [Feature request](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=enhancement&projects=&template=feature_request.yml&title=%5BFeature+Request%5D%3A+):
+In the issue, describe the use case for the proposed feature, including what you need, why you need it, and how it should work. Team members will respond to the feature request as soon as possible. Often, feature requests undergo a collaborative discussion with the community to help refine the need for the feature and how it can be implemented.
 
-In this issue, please describe the use case for the feature you would like to see -, what you need, why you need it, and how it should work. Team members will respond to the Feature request as soon as possible. Often, Feature request suggestions undergo a collaborative discussion with the community to help refine the need for the feature and how it can be implemented.
+## Contribute documentation
 
-### Non-Technical Contributions
+To contribute to documentation in this repository, use GitHub to submit a pull request for your changes. For general information about using the GitHub user interface for PRs, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). For more specific information about our PRs, see [Pull requests](#pull-requests).
 
-#### Documentation
-
-To contribute to documentation you find in this repository, feel free to use the GitHub user interface to submit a pull request for your changes. Find more information about using the GitHub user interface for PRs here.
-
-### Contribute to community discussions
+## Contribute to community discussions
 
 > 🚧 Tools and expanding avenues for community engagement are coming soon.
 
-### Sharing your story
+## Sharing your story
 
-Sharing how you or your organization have used the Simpler Grants project is an important way for us to raise awareness about the project and its impact. Please tell us your story by [sending us an email at `simpler-grants-gov@hhs.gov`](mailto:simpler-grants-gov@hhs.gov).
+Sharing how you or your organization have used the Simpler Grants project is an important way for us to raise awareness about the project and its impact. Feel free to tell us your story by [emailing us](mailto:simpler-grants-gov@hhs.gov). 
 
 ## Code Contributions
 
@@ -75,7 +71,7 @@ Each application has its own testing and linters. Every commit is tested to adhe
 
 External contributors should use the _Bug Report_ or _Feature Request_ [issue templates](https://github.com/HHS/simpler-grants-gov/issues/new/choose).
 
-### Pull Requests
+## Pull Requests
 
 Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md) with the following changes:
 
