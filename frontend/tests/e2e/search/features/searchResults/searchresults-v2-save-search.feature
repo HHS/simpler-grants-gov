@@ -106,13 +106,6 @@ Examples:
   | tablet    |
   | mobile    |
 
-# --- reported and awaiting confirmation on behavior ---
-Scenario: Error displayed when search name is a duplicate
-  Given I am logged in
-  And a saved search with name "My Search" exists
-  When I attempt to save a new search with the name "My Search"
-  Then I should see an error message indicating the name already exists
-
 # --- reported and awaiting confirmation on expected behavior ---
 Scenario: Clicking the search button clears dropdown but maintains filters
   Given I am logged in
@@ -122,6 +115,13 @@ Scenario: Clicking the search button clears dropdown but maintains filters
   And search results should reset to default
   # OR, if intended behavior is different, include alternative expected behavior:
   # Then the saved search remains selected and results remain filtered
+
+# --- reported as issue 8063 ---
+Scenario: Error displayed when search name is a duplicate
+  Given I am logged in
+  And a saved search with name "My Search" exists
+  When I attempt to save a new search with the name "My Search"
+  Then I should see an error message indicating the name already exists
 
 # --- reported as issue 8045 ---
 Scenario: Saved search selection resets when navigating via top Search menu
