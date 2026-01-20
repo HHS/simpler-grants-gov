@@ -32,7 +32,7 @@ Scenario: Save button remains visible after filters, sorting, and pagination
   And I navigate to page 2
   Then the "Save" button should still be displayed
 
-Scenario Outline: Save a search and verify applied criteria appear in the workspace
+Scenario: Save a search and verify applied criteria appear in the workspace
   Given I am logged in
   And I have applied search "<Criteria>" on the Search page
   When I click the "Save" button
