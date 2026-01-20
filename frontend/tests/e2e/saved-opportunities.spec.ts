@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl } from "tests/playwright.config";
+import { baseUrl, targetEnv } from "tests/playwright.config";
 
 import { createSpoofedSessionCookie } from "./loginUtils";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
+import { performStagingLogin } from "./utils/perform-login-utils";
 
 test.afterEach(async ({ context }) => {
   await context.close();
@@ -18,10 +19,20 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
 test("shows save / search cta if logged in", async ({ page, context }, {
   project,
 }) => {
-  await createSpoofedSessionCookie(context);
-  await page.goto(`${baseUrl}/?_ff=authOn:true`);
+  const isMobile = project.name.match(/[Mm]obile/);
+  if (targetEnv === "local") {
+    await createSpoofedSessionCookie(context);
+  } else if (targetEnv === "staging") {
+    await performStagingLogin(page, !!isMobile);
+  } else {
+    throw new Error(
+      `unsupported env ${targetEnv} - only able to run tests against local or staging`,
+    );
+  }
 
-  if (project.name.match(/[Mm]obile/)) {
+  await page.goto(baseUrl);
+
+  if (isMobile) {
     await openMobileNav(page);
   }
   const dropDownButton = page.locator("#nav-dropdown-button-4");

@@ -58,6 +58,7 @@ export const generateSpoofedSession = async (): Promise<string> => {
   return fakeToken;
 };
 
+// For bypassing login in LOCAL test runs
 // sets a spoofed login token on the cookie in order to allow for logging in without
 // clicking through the login process
 export const createSpoofedSessionCookie = async (context: BrowserContext) => {
