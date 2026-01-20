@@ -4,29 +4,25 @@
 
 🎉 First off, thanks for taking the time to contribute! 🎉
 
-We're so thankful you're considering contributing to an [open source project of the U.S. government](https://code.gov/)! If you're unsure about anything, just ask -- or submit the issue or pull request anyway. The worst that can happen is you'll be politely asked to change something. We appreciate all friendly contributions.
+We're so thankful you're considering contributing to an [open-source project of the U.S. government](https://code.gov/)! If you're unsure about anything, either ask someone or submit an issue or pull request without asking. (The worst that can happen is you'll be politely asked to change something.) We appreciate all friendly contributions.
 
-We encourage you to read this project's CONTRIBUTING-EXTERNAL policy (you are here), its [LICENSE](LICENSE.md), and its [README](README.md).
+While this page details how to contribute, we also encourage you to read this project's [license](LICENSE.md) and [README](README.md).
 
-> :information_source: This project initiated in third quarter of 2023, and is just ramping up efforts to include code contributors as well as contributors from many other disciplines in many different capacities.
-
-## How Can I Contribute?
+> :information_source: This project began in the third quarter of 2023 and is now starting to include code contributors as well as contributors from many other disciplines.
 
 There are a number of ways to contribute to this project.
 
-### Report a Bug
+## Report a Bug
 
-If you think you have found a bug in the code or static site, [search our issues list](https://github.com/HHS/simpler-grants-gov/issues) on GitHub for any similar bugs. If you find a similar bug, please update that issue with your details.
+If you think you have found a bug in the code or static site, first [search our issues list](https://github.com/HHS/simpler-grants-gov/issues) on GitHub for any similar bugs. If you find a similar bug, please update that issue with your details. If you do not find your bug in our issues list, file a bug report. When reporting the bug, please follow these guidelines:
 
-If you do not find your bug in our issues list, file a bug report. When reporting the bug, please follow these guidelines:
+- Use the [bug report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template to report bugs. The template is populated with information and questions that help grants.gov developers resolve the issue with the right information.
+- Use a clear and descriptive issue title for the issue.
+- List the exact steps necessary to reproduce the problem, in as much detail as possible. Start by explaining what you were attempting to do when the bug occurred and how you got to the page where you encountered the bug.
+- Describe the buggy behavior and why you consider it buggy behavior.
+- Detail the behavior you expected to see instead and why.**
+- Include screenshots and animated GIFs if possible, which show you following the described steps and clearly demonstrate the problem.
 
-- **Please use the [Bug Report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template** This is populated with information and questions that will help grants.gov developers resolve the issue with the right information
-- **Use a clear and descriptive issue title** for the issue to identify the problem.
-- **Describe the exact steps to reproduce the problem** in as much detail as possible. For example, start by explaining how you got to the page where you encountered the bug and what you were attempting to do when the bug occurred.
-- **Describe the behavior you observed after following the steps** and point out what exactly is the problem with that behavior.
-- **Explain which behavior you expected to see instead and why.**
-- **Include screenshots and animated GIFs** if possible, which show you following the described steps and clearly demonstrate the problem.
-- **If the problem wasn't triggered by a specific action**, describe what you were doing before the problem happened.
 
 ### Suggest an Enhancement
 
