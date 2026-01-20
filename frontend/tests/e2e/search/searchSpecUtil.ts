@@ -8,6 +8,7 @@ import {
   waitForURLContainsQueryParam,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
+import { targetEnv } from "tests/playwright.config";
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
@@ -81,20 +82,23 @@ export async function selectSortBy(
   sortByValue: string,
   drawer = false,
 ) {
+  const timeoutOption = targetEnv === "local" ? {} : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
   await sortSelectElement.selectOption(sortByValue);
-  await expect(sortSelectElement).toHaveValue(sortByValue, { timeout: 10000 });
+  await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
+  const timeoutOption = targetEnv === "local" ? {} : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
-  await expect(sortSelectElement).toHaveValue(value, { timeout: 10000 });
+  await expect(sortSelectElement).toHaveValue(value, timeoutOption);
 }
 
+// flaky
 export async function waitForSearchResultsInitialLoad(page: Page) {
   // // Wait for number of opportunities to show
   // const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
