@@ -69,47 +69,6 @@ Scenario: Clicking outside the save search modal closes it without saving
   Then the save search modal should close
   And the search should not be saved
 
-# --- awaiting confirmation on behavior ---
-Scenario: Error displayed when search name is a duplicate  
-  Given I am logged in
-  And a saved search with name "My Search" exists
-  When I attempt to save a new search with the name "My Search"
-  Then I should see an error message indicating the name already exists
-
-# --- reported as issue ---
-Scenario: Saved search selection resets when navigating via top Search menu  
-  Given I am logged in
-  And I have selected a saved search "BR-Test-SS02"
-  When I navigate to the Search page via the top navigation menu
-  Then the saved search dropdown should reset to "Select saved query"
-  And filters should be cleared
-  And search results should reset to default
-  When I attempt to reselect "BR-Test-SS02"
-  Then the saved search should be reapplied immediately
-  And the results should update according to the selected saved search
-
-# --- reported as issue and awaiting confirmation on expected behavior ---
-Scenario: Clicking the search button clears dropdown but maintains filters  
-  Given I am logged in
-  And I have selected a saved search "<firstSavedSearch>"
-  When I click the Search button next to the search input field
-  Then the saved search dropdown should reset to "Select saved query"
-  And search results should reset to default
-  # OR, if intended behavior is different, include alternative expected behavior:
-  # Then the saved search remains selected and results remain filtered
-
-Scenario: Saved search dropdown consistently reflects the applied selection  //reported as issue
-  Given I am logged in
-  And I have selected a saved search "<firstSavedSearch>"
-  Then the dropdown should show "<firstSavedSearch>" as selected
-  When I select a different saved search "<secondSavedSearch>"
-  Then the dropdown should show "<secondSavedSearch>" as selected
-  When I select another saved search "<thirdSavedSearch>"
-  Then the dropdown should show "<thirdSavedSearch>" as selected
-  # Repeatable behavior check (alternate selection test)
-  When I reselect "<secondSavedSearch>"
-  Then the dropdown should show "<secondSavedSearch>" as selected
-
 Scenario: Canceling save modal does not persist search
   Given I am logged in
   When I open the save search modal
@@ -146,3 +105,45 @@ Examples:
   | desktop   |
   | tablet    |
   | mobile    |
+
+# --- reported and awaiting confirmation on behavior ---
+Scenario: Error displayed when search name is a duplicate
+  Given I am logged in
+  And a saved search with name "My Search" exists
+  When I attempt to save a new search with the name "My Search"
+  Then I should see an error message indicating the name already exists
+
+# --- reported and awaiting confirmation on expected behavior ---
+Scenario: Clicking the search button clears dropdown but maintains filters
+  Given I am logged in
+  And I have selected a saved search "<firstSavedSearch>"
+  When I click the Search button next to the search input field
+  Then the saved search dropdown should reset to "Select saved query"
+  And search results should reset to default
+  # OR, if intended behavior is different, include alternative expected behavior:
+  # Then the saved search remains selected and results remain filtered
+
+# --- reported as issue 8045 ---
+Scenario: Saved search selection resets when navigating via top Search menu
+  Given I am logged in
+  And I have selected a saved search "BR-Test-SS02"
+  When I navigate to the Search page via the top navigation menu
+  Then the saved search dropdown should reset to "Select saved query"
+  And filters should be cleared
+  And search results should reset to default
+  When I attempt to reselect "BR-Test-SS02"
+  Then the saved search should be reapplied immediately
+  And the results should update according to the selected saved search
+
+# --- reported as issue 8052---
+Scenario: Saved search dropdown consistently reflects the applied selection
+  Given I am logged in
+  And I have selected a saved search "<firstSavedSearch>"
+  Then the dropdown should show "<firstSavedSearch>" as selected
+  When I select a different saved search "<secondSavedSearch>"
+  Then the dropdown should show "<secondSavedSearch>" as selected
+  When I select another saved search "<thirdSavedSearch>"
+  Then the dropdown should show "<thirdSavedSearch>" as selected
+  # Repeatable behavior check (alternate selection test)
+  When I reselect "<secondSavedSearch>"
+  Then the dropdown should show "<secondSavedSearch>" as selected
