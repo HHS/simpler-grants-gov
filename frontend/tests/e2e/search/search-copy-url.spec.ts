@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
-import { baseURL } from "tests/playwright.config";
+import { baseUrl } from "tests/playwright.config";
 
 import { fillSearchInputAndSubmit } from "./searchSpecUtil";
 
@@ -41,6 +41,6 @@ test("should copy search query URL to clipboard", async ({ page }, {
   await searchInput.press("ControlOrMeta+V");
 
   await expect(searchInput).toHaveValue(
-    `${baseURL}/search?query=education+grants`,
+    `${baseUrl}/search?query=education+grants`,
   );
 });
