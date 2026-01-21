@@ -2,7 +2,7 @@
 
 🎉 First off, thanks for taking the time to contribute! 🎉
 
-We're so thankful you're considering contributing to an [open-source project of the U.S. government](https://code.gov/)! If you're unsure about anything, either ask someone or submit an issue or pull request without asking. (The worst that can happen is you'll be politely asked to change something.) We appreciate all friendly contributions.
+We're so thankful you're considering contributing to an [open-source project of the U.S. government](https://code.gov/)! If you're unsure about anything, either ask someone or submit an issue or pull request (PR) without asking. (The worst that can happen is you'll be politely asked to change something.) We appreciate all friendly contributions.
 
 While this page details how to contribute, we also encourage you to read this project's [license](LICENSE.md) and [README](README.md).
 
@@ -14,7 +14,7 @@ There are a number of ways to contribute to this project.
 
 If you think you have found a bug in the code or static site, first [search our issues list](https://github.com/HHS/simpler-grants-gov/issues) on GitHub for any similar bugs. If you find a similar bug, please update that issue with your details. If you do not find your bug in our issues list, file a bug report. When reporting the bug, please follow these guidelines:
 
-- Use the [bug report](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=bug&projects=&template=bug_report.yml&title=%5BBug%5D%3A+) issue template to report bugs. The template is populated with information and questions that help grants.gov developers resolve the issue with the right information.
+- Use the [bug report](https://github.com/HHS/simpler-grants-gov/issues/new?template=1_bug_report.yml) issue template to report bugs. The template is populated with information and questions that help grants.gov developers resolve the issue with the right information.
 - Use a clear and descriptive issue title for the issue.
 - List the exact steps necessary to reproduce the problem, in as much detail as possible. Start by explaining what you were attempting to do when the bug occurred and how you got to the page where you encountered the bug.
 - Describe the buggy behavior and why you consider it buggy behavior.
@@ -24,13 +24,13 @@ If you think you have found a bug in the code or static site, first [search our 
 
 ## Request a feature
 
-If you don't have specific language or code to submit but would like to suggest a change, request a feature, or have something addressed, you can open an issue of type [Feature Request](https://github.com/HHS/simpler-grants-gov/issues/new?assignees=octocat&labels=enhancement&projects=&template=feature_request.yml&title=%5BFeature+Request%5D%3A+):
+If you don't have specific language or code to submit but would like to suggest a change, request a feature, or have something addressed, you can open an issue of type [Feature Request](https://github.com/HHS/simpler-grants-gov/issues/new?template=2_feature_request.yml):
 
 In the issue, describe the use case for the proposed feature, including what you need, why you need it, and how it should work. Team members will respond to the feature request as soon as possible. Often, feature requests undergo a collaborative discussion with the community to help refine the need for the feature and how it can be implemented.
 
 ## Contribute documentation
 
-To contribute to documentation in this repository, use GitHub to submit a pull request for your changes. For general information about using the GitHub user interface for PRs, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). For more specific information about our PRs, see [Pull requests](#pull-requests).
+To contribute to documentation in this repository, use GitHub to submit a PR for your changes. For general information about using the GitHub user interface for PRs, see [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). For more specific information about our PRs, see [Code contributions](#code-contributions).
 
 ## Contribute to community discussions
 
