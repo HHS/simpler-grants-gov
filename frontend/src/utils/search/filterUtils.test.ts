@@ -521,6 +521,55 @@ describe("formatPillLabel", () => {
   });
 });
 
+describe("formatPillLabel - Other filter disambiguation", () => {
+  const mockOptions = [
+    { value: "other", label: "Other", id: "other" },
+    { value: "grant", label: "Grant", id: "grant" },
+  ];
+
+  it('returns "Other - Funding instrument" for fundingInstrument other value', () => {
+    expect(formatPillLabel("fundingInstrument", "other", mockOptions)).toEqual(
+      "Other - Funding instrument",
+    );
+  });
+
+  it('returns "Other - Eligibility" for eligibility other value', () => {
+    expect(formatPillLabel("eligibility", "other", mockOptions)).toEqual(
+      "Other - Eligibility",
+    );
+  });
+
+  it('returns "Other - Category" for category other value', () => {
+    expect(formatPillLabel("category", "other", mockOptions)).toEqual(
+      "Other - Category",
+    );
+  });
+
+  it("returns standard label for fundingInstrument non-other value", () => {
+    expect(formatPillLabel("fundingInstrument", "grant", mockOptions)).toEqual(
+      "Grant",
+    );
+  });
+
+  it("returns standard label for eligibility non-other value", () => {
+    expect(
+      formatPillLabel("eligibility", "individuals", [
+        ...mockOptions,
+        { value: "individuals", label: "Individuals", id: "individuals" },
+      ]),
+    ).toEqual("Individuals");
+  });
+
+  it("returns standard label for category non-other value", () => {
+    expect(
+      formatPillLabel("category", "agriculture", [
+        ...mockOptions,
+        { value: "agriculture", label: "Agriculture", id: "agriculture" },
+      ]),
+    ).toEqual("Agriculture");
+  });
+});
+
 describe("formatPillLabels", () => {
   it("returns correctly formatted labels for all types of pills", () => {
     const result = formatPillLabels(
@@ -584,6 +633,48 @@ describe("formatPillLabels", () => {
           label: "ALN 15.808",
           queryParamKey: "assistanceListingNumber",
           queryParamValue: "15.808",
+        },
+      ]),
+    );
+  });
+
+  it("returns correctly formatted labels with distinct 'Other' pills", () => {
+    const result = formatPillLabels(
+      {
+        ...searchFetcherParams,
+        fundingInstrument: new Set(["grant", "other"]),
+        eligibility: new Set(["other"]),
+        category: new Set(["other", "agriculture"]),
+      },
+      [],
+    );
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        {
+          label: "Grant",
+          queryParamKey: "fundingInstrument",
+          queryParamValue: "grant",
+        },
+        {
+          label: "Other - Funding instrument",
+          queryParamKey: "fundingInstrument",
+          queryParamValue: "other",
+        },
+        {
+          label: "Other - Eligibility",
+          queryParamKey: "eligibility",
+          queryParamValue: "other",
+        },
+        {
+          label: "Other - Category",
+          queryParamKey: "category",
+          queryParamValue: "other",
+        },
+        {
+          label: "Agriculture",
+          queryParamKey: "category",
+          queryParamValue: "agriculture",
         },
       ]),
     );
