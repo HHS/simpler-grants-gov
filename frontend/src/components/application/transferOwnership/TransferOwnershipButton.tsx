@@ -1,8 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, type ModalRef } from "@trussworks/react-uswds";
-import { useTranslations } from "next-intl";
 
 import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
 import { USWDSIcon } from "src/components/USWDSIcon";

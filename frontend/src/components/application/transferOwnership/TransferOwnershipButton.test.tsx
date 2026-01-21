@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+
 import React from "react";
 
 import { TransferOwnershipButton } from "./TransferOwnershipButton";
@@ -51,8 +52,11 @@ jest.mock(
       // Simulate the modal having mounted and attaching to the ref
       if (modalRef.current === null) {
         // eslint-disable-next-line no-param-reassign
-        (modalRef as React.MutableRefObject<{ toggleModal?: () => void } | null>)
-          .current = {
+        (
+          modalRef as React.MutableRefObject<{
+            toggleModal?: () => void;
+          } | null>
+        ).current = {
           toggleModal: toggleModalMock,
         };
       }
@@ -82,9 +86,7 @@ describe("TransferOwnershipButton", () => {
 
     fireEvent.click(screen.getByTestId("transfer-ownership-open"));
 
-    expect(
-      screen.getByTestId("transfer-ownership-modal"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
   });
 
   it("unmounts the modal when onAfterClose is called", () => {
