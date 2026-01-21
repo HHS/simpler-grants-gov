@@ -1,41 +1,65 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 import { TransferOwnershipButton } from "./TransferOwnershipButton";
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
+const toggleModalMock = jest.fn();
 
 jest.mock("@trussworks/react-uswds", () => ({
-  ModalToggleButton: ({
+  Button: ({
     children,
     onClick,
+    className,
+    type,
     "data-testid": dataTestId,
   }: {
     children: React.ReactNode;
     onClick?: () => void;
+    className?: string;
+    type?: "button" | "submit" | "reset";
     "data-testid"?: string;
   }) => (
-    <button type="button" data-testid={dataTestId} onClick={onClick}>
+    <button
+      type={type ?? "button"}
+      className={className}
+      data-testid={dataTestId}
+      onClick={onClick}
+    >
       {children}
     </button>
   ),
 }));
 
-const transferOwnershipModalMock = jest.fn();
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
+jest.mock("src/components/USWDSIcon", () => ({
+  USWDSIcon: () => <span aria-hidden="true" />,
+}));
 
 jest.mock(
   "src/components/application/transferOwnership/TransferOwnershipModal",
   () => ({
-    TransferOwnershipModal: (props: { onAfterClose: () => void }) => {
-      transferOwnershipModalMock(props);
+    TransferOwnershipModal: ({
+      onAfterClose,
+      modalRef,
+    }: {
+      onAfterClose: () => void;
+      modalRef: React.RefObject<{ toggleModal?: () => void } | null>;
+    }) => {
+      // Simulate the modal having mounted and attaching to the ref
+      if (modalRef.current === null) {
+        // eslint-disable-next-line no-param-reassign
+        (modalRef as React.MutableRefObject<{ toggleModal?: () => void } | null>)
+          .current = {
+          toggleModal: toggleModalMock,
+        };
+      }
+
       return (
         <div data-testid="transfer-ownership-modal">
-          <button
-            type="button"
-            data-testid="close-modal"
-            onClick={props.onAfterClose}
-          >
+          <button type="button" onClick={onAfterClose}>
             Close
           </button>
         </div>
@@ -46,7 +70,7 @@ jest.mock(
 
 describe("TransferOwnershipButton", () => {
   beforeEach(() => {
-    transferOwnershipModalMock.mockClear();
+    jest.clearAllMocks();
   });
 
   it("does not render the modal until the button is clicked", () => {
@@ -58,8 +82,9 @@ describe("TransferOwnershipButton", () => {
 
     fireEvent.click(screen.getByTestId("transfer-ownership-open"));
 
-    expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
-    expect(transferOwnershipModalMock).toHaveBeenCalled();
+    expect(
+      screen.getByTestId("transfer-ownership-modal"),
+    ).toBeInTheDocument();
   });
 
   it("unmounts the modal when onAfterClose is called", () => {
@@ -68,9 +93,17 @@ describe("TransferOwnershipButton", () => {
     fireEvent.click(screen.getByTestId("transfer-ownership-open"));
     expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId("close-modal"));
+    fireEvent.click(screen.getByText("Close"));
+
     expect(
       screen.queryByTestId("transfer-ownership-modal"),
     ).not.toBeInTheDocument();
+  });
+
+  it("toggles the modal open after it mounts", () => {
+    render(<TransferOwnershipButton applicationId="app-123" />);
+
+    fireEvent.click(screen.getByTestId("transfer-ownership-open"));
+    expect(toggleModalMock).toHaveBeenCalledTimes(1);
   });
 });
