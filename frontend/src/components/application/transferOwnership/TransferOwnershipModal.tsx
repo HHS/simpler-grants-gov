@@ -53,8 +53,6 @@ export const TransferOwnershipModal = ({
     { authGatedRequest: true },
   );
 
-  // Unified close callback: SimplerModal will call this for X, overlay, and Escape.
-  // Do NOT toggle the modal here (Truss handles it); just run cleanup and let the parent unmount.
   const onClose = useCallback((): void => {
     setSubmitErrorMessage("");
     onAfterClose();
@@ -96,8 +94,6 @@ export const TransferOwnershipModal = ({
         setIsSubmittingTransfer(false);
       }
     })().catch(() => {
-      // This should be unreachable because we handle errors above,
-      // but it guarantees we never leave the promise unhandled.
       setIsSubmittingTransfer(false);
       setSubmitErrorMessage(t("transferErrorMessage"));
     });
@@ -151,7 +147,6 @@ export const TransferOwnershipModal = ({
       className="text-wrap maxw-tablet-lg"
       onClose={onClose}
     >
-      {/* Reserve space to avoid CLS */}
       <div aria-live="polite" style={{ minHeight: "3rem" }}>
         <Alert
           headingLevel="h2"

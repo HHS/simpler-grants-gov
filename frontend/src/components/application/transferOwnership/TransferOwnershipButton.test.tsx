@@ -49,9 +49,7 @@ jest.mock(
       onAfterClose: () => void;
       modalRef: React.RefObject<{ toggleModal?: () => void } | null>;
     }) => {
-      // Simulate the modal having mounted and attaching to the ref
       if (modalRef.current === null) {
-        // eslint-disable-next-line no-param-reassign
         (
           modalRef as React.MutableRefObject<{
             toggleModal?: () => void;
