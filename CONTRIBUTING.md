@@ -6,7 +6,8 @@ We're so thankful you're considering contributing to an [open-source project of 
 
 While this page details how to contribute, we also encourage you to read this project's [license](LICENSE.md) and [README](README.md).
 
-> :information_source: This project began in the third quarter of 2023 and is now starting to include code contributors as well as contributors from many other disciplines.
+> [!NOTE]
+> This project began in the third quarter of 2023 and is now starting to include code contributors as well as contributors from many other disciplines.
 
 There are a number of ways to contribute to this project.
 
