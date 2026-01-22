@@ -22,9 +22,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  get-commit-hash:
+    name: Get commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-commit-hash
+        run: |
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{github.sha}} "../api")
+          COMMIT_HASH=$(git rev-parse ${{ github.sha }})
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
   e2e-tests:
     name: Run Local E2E Tests
     runs-on: ubuntu-22.04
+    needs: ["get-commit-hash"]
 
     strategy:
       fail-fast: true
@@ -48,15 +66,49 @@ jobs:
           npm ci
           npx playwright install --with-deps
 
-      - name: Start API Server for e2e tests
+      - name: Check Docker image cached
+        id: check-docker-image-cached
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/docker-image.tar
+          lookup-only: true
+          key: api-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
+
+      - name: Restore cached Docker image
+        if: steps.check-docker-image-cached.outputs.cache-hit == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: api-docker-img-${{ needs.get-commit-hash.outputs.commit_hash }}
+
+      - name: Load cached Docker image
+        if: steps.check-docker-image-cached.outputs.cache-hit == 'true'
         run: |
-          cd ../api
+          docker load < /tmp/docker-image.tar
+
+      - name: Setup API Server for e2e tests
+        run: |
           # Enable core dumps for debugging segfaults
           ulimit -c unlimited
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Run init first to generate JWT keys in override.env
+          # Run init or init-ci first to generate JWT keys in override.env
+
+      - name: Init API Server for e2e tests without build
+        if: steps.check-docker-image-cached.outputs.cache-hit == 'true'
+        run: |
+          cd ../api
+          make init-ci
+
+      - name: Init API Server for e2e tests including build
+        if: steps.check-docker-image-cached.outputs.cache-hit != 'true'
+        run: |
+          cd ../api
           make init
+
+      - name: Seed and run API Server for e2e tests
+        run: |
+          cd ../api
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
