@@ -68,7 +68,7 @@ const ApplicationContainer = ({
     .competition_instructions.length
     ? applicationDetails.competition.competition_instructions[0].download_path
     : "";
-
+  const opportunityApplicantTypes = opportunity.summary?.applicant_types ?? [];
   const handleSubmit = useCallback(() => {
     if (!token) {
       return;
@@ -165,6 +165,7 @@ const ApplicationContainer = ({
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
         instructionsDownloadPath={instructionsDownloadPath}
+        opportunityApplicantTypes={opportunityApplicantTypes}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
