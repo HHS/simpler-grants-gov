@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import React from "react";
 
@@ -22,13 +21,13 @@ jest.mock("@trussworks/react-uswds", () => ({
 }));
 
 describe("InlineActionLink", () => {
-  it("calls onClick when clicked", async () => {
-    const user = userEvent.setup();
-    const onClick = jest.fn();
+  it("calls onClick when clicked", () => {
+    const onClickMock = jest.fn();
 
-    render(<InlineActionLink onClick={onClick}>Do thing</InlineActionLink>);
+    render(<InlineActionLink onClick={onClickMock}>Click me</InlineActionLink>);
 
-    await user.click(screen.getByRole("button", { name: "Do thing" }));
-    expect(onClick).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Click me" }));
+
+    expect(onClickMock).toHaveBeenCalledTimes(1);
   });
 });

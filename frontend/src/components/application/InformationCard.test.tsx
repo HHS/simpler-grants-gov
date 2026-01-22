@@ -16,22 +16,29 @@ jest.mock("next-intl", () => ({
     ) => string) & {
       rich: (
         key: string,
-        values: Record<string, (chunks: string) => React.ReactNode>,
+        values: Record<string, (chunks: React.ReactNode) => React.ReactNode>,
       ) => React.ReactNode;
     };
 
-    translationFunction.rich = (key, values) => {
+    translationFunction.rich = (
+      key: string,
+      values: Record<string, (chunks: React.ReactNode) => React.ReactNode>,
+    ) => {
       if (key === "unassociatedApplicationAlert.body") {
-        // clickable element in tests:
+        const linkRenderer = values.link;
+        if (!linkRenderer) {
+          return key;
+        }
+
         return (
           <>
-            You can continue working…{" "}
-            {values.link("Click here to transfer application ownership")}.
+            {"You can continue working... "}
+            {linkRenderer("Click here to transfer application ownership")}
+            {"."}
           </>
         );
       }
 
-      // fallback: just render the key
       return key;
     };
 
@@ -39,53 +46,16 @@ jest.mock("next-intl", () => ({
   },
 }));
 
-jest.mock("@trussworks/react-uswds", () => ({
-  Alert: ({
-    heading,
-    children,
-  }: {
-    heading?: string;
-    children: React.ReactNode;
-  }) => (
-    <div data-testid="alert">
-      {heading ? <div>{heading}</div> : null}
-      <div>{children}</div>
-    </div>
-  ),
-  Button: ({
-    children,
-    onClick,
-    disabled,
-    type,
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    disabled?: boolean;
-    type?: "button" | "submit" | "reset";
-  }) => (
-    <button type={type ?? "button"} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  ),
-  Grid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  GridContainer: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  ),
-}));
+jest.mock(
+  "src/components/application/editAppFilingName/EditAppFilingName",
+  () => ({
+    EditAppFilingName: () => <button>buttonText</button>,
+  }),
+);
 
 jest.mock("src/components/USWDSIcon", () => ({
   USWDSIcon: () => <span aria-hidden="true" />,
 }));
-
-jest.mock(
-  "src/components/application/editAppFilingName/EditAppFilingName",
-  () => ({
-    EditAppFilingName: () => <button type="button">buttonText</button>,
-  }),
-);
 
 jest.mock("src/components/InlineActionLink", () => ({
   InlineActionLink: ({
@@ -110,9 +80,8 @@ jest.mock(
       onAfterClose: () => void;
     }) => (
       <div data-testid="transfer-ownership-modal">
-        <div>modal</div>
         <button type="button" onClick={onAfterClose}>
-          Close modal
+          Close
         </button>
       </div>
     ),
@@ -123,8 +92,12 @@ jest.mock(
   "src/components/application/transferOwnership/TransferOwnershipButton",
   () => ({
     TransferOwnershipButton: ({ onClick }: { onClick: () => void }) => (
-      <button type="button" onClick={onClick}>
-        Transfer button
+      <button
+        type="button"
+        data-testid="transfer-ownership-open"
+        onClick={onClick}
+      >
+        Open transfer
       </button>
     ),
   }),
@@ -132,258 +105,282 @@ jest.mock(
 
 const mockApplicationDetails = applicationMock as unknown as ApplicationDetail;
 
-const makeBaseProps = () => ({
-  applicationDetails: mockApplicationDetails,
-  applicationSubmitHandler: jest.fn(),
-  applicationSubmitted: false,
-  opportunityName: "Test Opportunity",
-  submissionLoading: false,
-  instructionsDownloadPath: "http://path-to-instructions.com",
-  opportunityApplicantTypes: ["individuals"], // default: allows individuals
-});
-
 describe("InformationCard - Edit filing name button visibility", () => {
+  const defaultProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+  };
+
   it("shows Edit filing name button when application status is in_progress", () => {
-    const props = makeBaseProps();
     const inProgressApplication: ApplicationDetail = {
-      ...props.applicationDetails,
+      ...mockApplicationDetails,
       application_status: Status.IN_PROGRESS,
     };
 
     render(
-      <InformationCard {...props} applicationDetails={inProgressApplication} />,
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={inProgressApplication}
+      />,
     );
 
     expect(screen.getByText("buttonText")).toBeInTheDocument();
   });
 
   it("hides Edit filing name button when application status is submitted", () => {
-    const props = makeBaseProps();
     const submittedApplication: ApplicationDetail = {
-      ...props.applicationDetails,
+      ...mockApplicationDetails,
       application_status: Status.SUBMITTED,
     };
 
     render(
-      <InformationCard {...props} applicationDetails={submittedApplication} />,
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={submittedApplication}
+      />,
     );
 
     expect(screen.queryByText("buttonText")).not.toBeInTheDocument();
   });
 
   it("hides Edit filing name button when application status is accepted", () => {
-    const props = makeBaseProps();
     const acceptedApplication: ApplicationDetail = {
-      ...props.applicationDetails,
+      ...mockApplicationDetails,
       application_status: Status.ACCEPTED,
     };
 
     render(
-      <InformationCard {...props} applicationDetails={acceptedApplication} />,
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={acceptedApplication}
+      />,
     );
 
     expect(screen.queryByText("buttonText")).not.toBeInTheDocument();
   });
 });
 
-describe("InformationCard - No longer accepting applications message", () => {
-  it("shows the message when the competition is CLOSED (is_open=false)", () => {
-    const props = makeBaseProps();
+describe("InformationCard - Special instructions when closed", () => {
+  const defaultProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+  };
+
+  it("shows special instructions when competition is CLOSED (is_open=false)", () => {
     const closedApplication: ApplicationDetail = {
-      ...props.applicationDetails,
+      ...mockApplicationDetails,
       competition: {
-        ...props.applicationDetails.competition,
+        ...mockApplicationDetails.competition,
         is_open: false,
       },
     };
 
     render(
-      <InformationCard {...props} applicationDetails={closedApplication} />,
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={closedApplication}
+      />,
     );
 
     expect(screen.getByText("specialInstructions")).toBeInTheDocument();
   });
 
-  it("hides the message when the competition is OPEN (is_open=true)", () => {
-    const props = makeBaseProps();
+  it("hides special instructions when competition is OPEN (is_open=true)", () => {
     const openApplication: ApplicationDetail = {
-      ...props.applicationDetails,
+      ...mockApplicationDetails,
       competition: {
-        ...props.applicationDetails.competition,
+        ...mockApplicationDetails.competition,
         is_open: true,
       },
     };
 
-    render(<InformationCard {...props} applicationDetails={openApplication} />);
+    render(
+      <InformationCard
+        {...defaultProps}
+        applicationDetails={openApplication}
+      />,
+    );
 
     expect(screen.queryByText("specialInstructions")).not.toBeInTheDocument();
   });
 });
 
-describe("InformationCard - Submit button visibility and disabled state", () => {
-  it("shows the Submit button when is_open=true and application not submitted", () => {
-    const props = makeBaseProps();
+describe("InformationCard - Submit button", () => {
+  const baseProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+  };
+
+  it("shows submit when is_open=true and not submitted", () => {
     const openApplication: ApplicationDetail = {
-      ...props.applicationDetails,
-      competition: { ...props.applicationDetails.competition, is_open: true },
+      ...mockApplicationDetails,
+      competition: { ...mockApplicationDetails.competition, is_open: true },
     };
 
-    render(<InformationCard {...props} applicationDetails={openApplication} />);
+    render(
+      <InformationCard {...baseProps} applicationDetails={openApplication} />,
+    );
 
-    expect(screen.getByRole("button", { name: "submit" })).toBeInTheDocument();
+    expect(screen.getByText("submit")).toBeInTheDocument();
   });
 
-  it("hides the Submit button when competition is CLOSED (is_open=false)", () => {
-    const props = makeBaseProps();
-    const closed: ApplicationDetail = {
-      ...props.applicationDetails,
-      competition: { ...props.applicationDetails.competition, is_open: false },
+  it("hides submit when is_open=false", () => {
+    const closedApplication: ApplicationDetail = {
+      ...mockApplicationDetails,
+      competition: { ...mockApplicationDetails.competition, is_open: false },
     };
 
-    render(<InformationCard {...props} applicationDetails={closed} />);
+    render(
+      <InformationCard {...baseProps} applicationDetails={closedApplication} />,
+    );
 
-    expect(
-      screen.queryByRole("button", { name: "submit" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("submit")).not.toBeInTheDocument();
   });
 
-  it("hides the Submit button when application has already been submitted", () => {
-    const props = makeBaseProps();
-    const open: ApplicationDetail = {
-      ...props.applicationDetails,
-      competition: { ...props.applicationDetails.competition, is_open: true },
+  it("hides submit when applicationSubmitted=true", () => {
+    const openApplication: ApplicationDetail = {
+      ...mockApplicationDetails,
+      competition: { ...mockApplicationDetails.competition, is_open: true },
     };
 
     render(
       <InformationCard
-        {...props}
+        {...baseProps}
         applicationSubmitted={true}
-        applicationDetails={open}
+        applicationDetails={openApplication}
       />,
     );
 
-    expect(
-      screen.queryByRole("button", { name: "submit" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("submit")).not.toBeInTheDocument();
   });
 
-  it("disables the Submit button while submissionLoading=true", () => {
-    const props = makeBaseProps();
-    const open: ApplicationDetail = {
-      ...props.applicationDetails,
-      competition: { ...props.applicationDetails.competition, is_open: true },
+  it("disables submit when submissionLoading=true", () => {
+    const openApplication: ApplicationDetail = {
+      ...mockApplicationDetails,
+      competition: { ...mockApplicationDetails.competition, is_open: true },
     };
 
     render(
       <InformationCard
-        {...props}
+        {...baseProps}
         submissionLoading={true}
-        applicationDetails={open}
+        applicationDetails={openApplication}
       />,
     );
 
-    // When submitting, the button label becomes "Loading... "
-    const button = screen.getByRole("button", { name: /Loading/i });
-    expect(button).toBeDisabled();
+    // Button shows “Loading...” when isSubmitting
+    expect(screen.getByRole("button", { name: /loading/i })).toBeDisabled();
   });
 });
 
-describe("InformationCard - Org-only + unassociated application warning and modal entry points", () => {
-  it("shows the warning alert and disables submit when opportunity is org-only and application has no org", () => {
-    const props = makeBaseProps();
+describe("InformationCard - org-only eligibility", () => {
+  const baseProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+  };
 
-    // Make the opportunity org-only by removing "individuals"/"unrestricted"
-    const orgOnlyProps = {
-      ...props,
-      opportunityApplicantTypes: [
-        "for_profit_organizations_other_than_small_businesses",
-      ],
-    };
-
-    // Ensure app has no organization
-    const applicationWithNoOrg: ApplicationDetail = {
-      ...orgOnlyProps.applicationDetails,
+  it("shows warning alert and disables submit when competition is org-only and application has no org", () => {
+    const orgOnlyNoOrg: ApplicationDetail = {
+      ...mockApplicationDetails,
       organization: null,
       competition: {
-        ...orgOnlyProps.applicationDetails.competition,
+        ...mockApplicationDetails.competition,
         is_open: true,
+        open_to_applicants: ["organization"],
       },
     };
 
     render(
-      <InformationCard
-        {...orgOnlyProps}
-        applicationDetails={applicationWithNoOrg}
-      />,
+      <InformationCard {...baseProps} applicationDetails={orgOnlyNoOrg} />,
     );
 
-    // Alert title comes from translation key
     expect(
-      screen.getByText("unassociatedApplicationAlert.title"),
+      screen.getByTestId("unassociated-application-alert"),
     ).toBeInTheDocument();
 
-    // Submit is still rendered, but disabled
-    expect(screen.getByRole("button", { name: "submit" })).toBeDisabled();
+    // submit text is "submit" when not loading
+    const submitButton = screen.getByRole("button", { name: "submit" });
+    expect(submitButton).toBeDisabled();
   });
 
-  it("opens the transfer ownership modal when clicking the inline alert link", () => {
-    const props = makeBaseProps();
-
-    const orgOnlyProps = {
-      ...props,
-      opportunityApplicantTypes: ["some_org_type_only"],
-    };
-
-    const applicationWithNoOrg: ApplicationDetail = {
-      ...orgOnlyProps.applicationDetails,
+  it("does not show alert when competition allows individuals (individual+organization) even if application has no org", () => {
+    const mixedNoOrg: ApplicationDetail = {
+      ...mockApplicationDetails,
       organization: null,
       competition: {
-        ...orgOnlyProps.applicationDetails.competition,
+        ...mockApplicationDetails.competition,
         is_open: true,
+        open_to_applicants: ["individual", "organization"],
+      },
+    };
+
+    render(<InformationCard {...baseProps} applicationDetails={mixedNoOrg} />);
+
+    expect(
+      screen.queryByTestId("unassociated-application-alert"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens the transfer modal from the alert link", () => {
+    const orgOnlyNoOrg: ApplicationDetail = {
+      ...mockApplicationDetails,
+      organization: null,
+      competition: {
+        ...mockApplicationDetails.competition,
+        is_open: true,
+        open_to_applicants: ["organization"],
       },
     };
 
     render(
-      <InformationCard
-        {...orgOnlyProps}
-        applicationDetails={applicationWithNoOrg}
-      />,
+      <InformationCard {...baseProps} applicationDetails={orgOnlyNoOrg} />,
     );
 
-    // The rich body includes link text inside InlineActionLink button.
-    // useTranslationsMock returns keys, but the body still contains the <link> chunk.
-    // Easiest: click the first button inside the alert (InlineActionLink mock).
-    const buttons = screen.getAllByRole("button");
-    const inlineLinkButton = buttons.find(
-      (button) =>
-        button.textContent?.includes("unassociatedApplicationAlert.body") ||
-        button.textContent?.includes("Click here") ||
-        button.textContent?.includes("transfer"),
+    // translation mock returns the key string, but the body uses rich text content
+    // so we click by the literal text inside the <link> tag from your locale file:
+    // "Click here to transfer application ownership"
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Click here to transfer application ownership/i,
+      }),
     );
-
-    if (!inlineLinkButton) {
-      throw new Error("Could not find inline alert link button");
-    }
-
-    fireEvent.click(inlineLinkButton);
 
     expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
   });
 
-  it("opens the transfer ownership modal when clicking the TransferOwnershipButton", () => {
-    const props = makeBaseProps();
-
-    const applicationWithNoOrg: ApplicationDetail = {
-      ...props.applicationDetails,
+  it("opens the transfer modal from the transfer ownership button next to applicant type", () => {
+    const orgOnlyNoOrg: ApplicationDetail = {
+      ...mockApplicationDetails,
       organization: null,
-      competition: { ...props.applicationDetails.competition, is_open: true },
+      competition: {
+        ...mockApplicationDetails.competition,
+        is_open: true,
+        open_to_applicants: ["organization"],
+      },
     };
 
     render(
-      <InformationCard {...props} applicationDetails={applicationWithNoOrg} />,
+      <InformationCard {...baseProps} applicationDetails={orgOnlyNoOrg} />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Transfer button" }));
+    fireEvent.click(screen.getByTestId("transfer-ownership-open"));
+
     expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
   });
 });

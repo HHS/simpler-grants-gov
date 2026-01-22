@@ -5,10 +5,20 @@ import {
   type ApplicationDetail,
   type SamGovEntity,
 } from "src/types/applicationResponseTypes";
-import type { Competition } from "src/types/competitionsResponseTypes";
+import type {
+  ApplicantTypes,
+  Competition,
+} from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Alert,
   Button,
@@ -61,10 +71,12 @@ const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
   onOpenTransferModal,
+  competitionAllowsOrganizations,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
   onOpenTransferModal: () => void;
+  competitionAllowsOrganizations: boolean;
 }) => {
   const t = useTranslations("Application.information");
 
@@ -77,7 +89,9 @@ const ApplicantDetails = ({
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
       <dd>
         {t("applicantTypeIndividual")}
-        <TransferOwnershipButton onClick={onOpenTransferModal} />
+        {competitionAllowsOrganizations ? (
+          <TransferOwnershipButton onClick={onOpenTransferModal} />
+        ) : null}
       </dd>
     </div>
   );
@@ -99,16 +113,11 @@ const getApplicationStatusLabel = (
   }
 };
 
-const isOpportunityOrganizationOnly = (
-  opportunityApplicantTypes: string[],
-): boolean => {
-  // "unrestricted" can also mean individuals are allowed.
-  const allowsIndividuals =
-    opportunityApplicantTypes.includes("individuals") ||
-    opportunityApplicantTypes.includes("unrestricted");
-
-  return !allowsIndividuals;
-};
+const isCompetitionOrganizationOnly = (
+  openToApplicants: ApplicantTypes[],
+): boolean =>
+  openToApplicants.includes("organization") &&
+  !openToApplicants.includes("individual");
 
 export const InformationCard = ({
   applicationDetails,
@@ -117,7 +126,6 @@ export const InformationCard = ({
   opportunityName,
   submissionLoading,
   instructionsDownloadPath,
-  opportunityApplicantTypes,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
   applicationSubmitHandler: () => void;
@@ -125,17 +133,14 @@ export const InformationCard = ({
   opportunityName: string | null;
   submissionLoading: boolean;
   instructionsDownloadPath: string;
-  opportunityApplicantTypes: string[];
 }) => {
   const t = useTranslations("Application.information");
 
   const hasOrganization = Boolean(applicationDetails.organization);
   const competitionIsOpen = applicationDetails.competition.is_open;
 
-  // Single source of truth for the transfer modal
   const transferModalRef = useRef<ModalRef | null>(null);
   const transferModalId = "transfer-ownership-modal";
-
   const [isTransferModalOpen, setIsTransferModalOpen] =
     useState<boolean>(false);
 
@@ -147,7 +152,6 @@ export const InformationCard = ({
     setIsTransferModalOpen(false);
   }, []);
 
-  // open the modal once it exists in the DOM
   useEffect(() => {
     if (!isTransferModalOpen) {
       return;
@@ -156,20 +160,22 @@ export const InformationCard = ({
   }, [isTransferModalOpen]);
 
   const submitBlockedByEligibility = useMemo((): boolean => {
-    const opportunityIsOrgOnly = isOpportunityOrganizationOnly(
-      opportunityApplicantTypes,
+    const orgOnly = isCompetitionOrganizationOnly(
+      applicationDetails.competition.open_to_applicants,
     );
-    return opportunityIsOrgOnly && !hasOrganization;
-  }, [hasOrganization, opportunityApplicantTypes]);
+    return orgOnly && !hasOrganization;
+  }, [applicationDetails.competition.open_to_applicants, hasOrganization]);
 
   const submitDisabled =
     submissionLoading || isTransferModalOpen || submitBlockedByEligibility;
 
-  const alertBody = t.rich("unassociatedApplicationAlert.body", {
+  const alertBody: ReactNode = t.rich("unassociatedApplicationAlert.body", {
     link: (content) => (
       <InlineActionLink onClick={openTransferModal}>{content}</InlineActionLink>
     ),
   });
+  const competitionAllowsOrganizations =
+    applicationDetails.competition.open_to_applicants.includes("organization");
 
   const ApplicationInstructionsDownload = () => {
     return (
@@ -227,6 +233,7 @@ export const InformationCard = ({
             headingLevel="h2"
             heading={t("unassociatedApplicationAlert.title")}
             className="margin-top-2"
+            data-testid="unassociated-application-alert"
           >
             {alertBody}
           </Alert>
@@ -267,6 +274,7 @@ export const InformationCard = ({
                 hasOrganization={hasOrganization}
                 samGovEntity={applicationDetails.organization?.sam_gov_entity}
                 onOpenTransferModal={openTransferModal}
+                competitionAllowsOrganizations={competitionAllowsOrganizations}
               />
             </dl>
           </Grid>
