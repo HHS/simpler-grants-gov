@@ -22,7 +22,6 @@ If you think you have found a bug in the code or static site, first [search our 
 - Detail the behavior you expected to see instead and why.**
 - Include screenshots and animated GIFs if possible, which show you following the described steps and clearly demonstrate the problem.
 
-
 ## Request a feature
 
 If you don't have specific language or code to submit but would like to suggest a change, request a feature, or have something addressed, you can open an issue of type [Feature Request](https://github.com/HHS/simpler-grants-gov/issues/new?template=2_feature_request.yml):
@@ -35,9 +34,9 @@ To contribute to documentation in this repository, use GitHub to submit a PR for
 
 ## Contribute to community discussions
 
-> 🚧 Tools and expanding avenues for community engagement are coming soon.
+Tools and expanding avenues for community engagement are coming soon.
 
-## Sharing your story
+## Share your story
 
 Sharing how you or your organization have used the Simpler Grants project is an important way for us to raise awareness about the project and its impact. Feel free to tell us your story by [emailing us](mailto:simpler-grants-gov@hhs.gov). 
 
