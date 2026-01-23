@@ -1,6 +1,7 @@
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
-import { targetEnv } from "tests/playwright.config";
+
+import playwrightEnv from "./playwright-env";
 
 /*
 
@@ -15,23 +16,20 @@ import { targetEnv } from "tests/playwright.config";
 
 const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 
-const fakeServerToken = process.env.E2E_USER_AUTH_TOKEN;
-const clientSessionSecret = process.env.SESSION_SECRET;
-
 let clientJwtKey: Uint8Array;
 
 const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
 
 export const initializePlaywrightSessionSecrets = () => {
-  if (!clientSessionSecret) {
+  if (!playwrightEnv.clientSessionSecret) {
     // eslint-disable-next-line
     console.debug("Api session key not present, cannot spoof login");
     return;
   }
   // eslint-disable-next-line
   console.debug("Initializing Session Secrets");
-  clientJwtKey = encodeText(clientSessionSecret || "");
+  clientJwtKey = encodeText(playwrightEnv.clientSessionSecret || "");
 };
 
 // 5 minute expiration, could probably do less but just in case a test runs really long
@@ -45,11 +43,11 @@ export const generateSpoofedSession = async (): Promise<string> => {
     throw new Error("Unable to spoof login, missing auth key");
   }
 
-  if (!fakeServerToken) {
+  if (!playwrightEnv.fakeServerToken) {
     throw new Error("Unable to spoof login, missing server token");
   }
 
-  const fakeToken = await new SignJWT({ token: fakeServerToken })
+  const fakeToken = await new SignJWT({ token: playwrightEnv.fakeServerToken })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
     .setExpirationTime(newExpirationDate())
@@ -67,11 +65,11 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
     {
       name: "session",
       value: token,
-      url: "http://localhost:3000",
+      url: playwrightEnv.baseUrl,
     },
   ]);
 };
 
-if (targetEnv === "local") {
+if (playwrightEnv.targetEnv === "local") {
   initializePlaywrightSessionSecrets();
 }
