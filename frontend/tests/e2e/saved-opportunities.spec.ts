@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
-import { baseUrl, targetEnv } from "tests/playwright.config";
 
 import { createSpoofedSessionCookie } from "./loginUtils";
+import playwrightEnv from "./playwright-env";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 import { performStagingLogin } from "./utils/perform-login-utils";
 
@@ -9,35 +9,43 @@ test.afterEach(async ({ context }) => {
   await context.close();
 });
 
-test("shows unauthenticated state if not logged in", async ({ page }) => {
+test("Saved opportunities page shows unauthenticated state if not logged in", async ({
+  page,
+}) => {
   await page.goto("/saved-opportunities");
   const h4 = page.locator(".usa-alert__body .usa-alert__heading");
   await expect(h4).toHaveText("Not signed in");
 });
 
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
-test("shows save / search cta if logged in", async ({ page, context }, {
-  project,
-}) => {
+test("Working saved opportunities page link appears in nav when logged in", async ({
+  page,
+  context,
+}, { project }) => {
   const isMobile = project.name.match(/[Mm]obile/);
-  if (targetEnv === "local") {
+  if (playwrightEnv.targetEnv === "local") {
     await createSpoofedSessionCookie(context);
-  } else if (targetEnv === "staging") {
+  } else if (playwrightEnv.targetEnv === "staging") {
     await performStagingLogin(page, !!isMobile);
   } else {
     throw new Error(
-      `unsupported env ${targetEnv} - only able to run tests against local or staging`,
+      `unsupported env ${playwrightEnv.targetEnv} - only able to run tests against local or staging`,
     );
   }
 
-  await page.goto(baseUrl);
+  await page.goto(playwrightEnv.baseUrl);
 
   if (isMobile) {
     await openMobileNav(page);
   }
+
+  // find the Workspace nav dropdown item and open it
   const dropDownButton = page.locator("#nav-dropdown-button-4");
+  // const dropDownButton = page.getByRole("button", { name: "Workspace" });
+  await expect(dropDownButton).toBeInViewport();
   await dropDownButton.click();
 
+  // the fourth item in the dropdown should be the saved opportunities link
   const savedOpportunitiesNavItem = page.locator(
     "ul#Workspace li:nth-child(4)",
   );

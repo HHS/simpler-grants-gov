@@ -3,30 +3,16 @@ import path from "path";
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 
-// Load environment variables from .env.local if it exists
-const envPath = path.resolve(__dirname, "..", ".env.local");
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath, quiet: true });
-}
+import playwrightEnv from "./e2e/playwright-env";
 
-// Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
-export const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+// // Load environment variables from .env.local if it exists
+// const envPath = path.resolve(__dirname, "..", ".env.local");
+// if (fs.existsSync(envPath)) {
+//   dotenv.config({ path: envPath, quiet: true });
+// }
 
-// Base URLs for each environment, read from .env.local if present, else fallback to defaults
-const BASE_URLS: Record<string, string> = {
-  local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:3000",
-  staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
-};
-
-export const baseUrl = BASE_URLS[targetEnv] || BASE_URLS.local;
-
-// Environment for web server
-const webServerEnv: Record<string, string> = Object.fromEntries(
-  Object.entries({
-    ...process.env,
-    NEW_RELIC_ENABLED: "false", // disable New Relic for E2E
-  }).filter(([, value]) => typeof value === "string"),
-);
+const { baseUrl, targetEnv, webServerEnv, isCi, totalShards, currentShard } =
+  playwrightEnv;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -37,12 +23,12 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!isCi,
   /* Retry on CI only */
-  retries: process.env.CI ? 3 : 0,
+  retries: isCi ? 3 : 0,
   workers: 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
-  reporter: process.env.CI ? "blob" : "html",
+  reporter: isCi ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -55,35 +41,35 @@ export default defineConfig({
   // Enable test sharding for parallelization in CI.
   shard: {
     // Total number of shards is specified via env variable or defaults to 1
-    total: parseInt(process.env.TOTAL_SHARDS || "1"),
+    total: parseInt(totalShards || "1"),
     // Specifies which shard this job should execute
-    current: parseInt(process.env.CURRENT_SHARD || "1"),
+    current: parseInt(currentShard || "1"),
   },
   /* Configure projects for major browsers */
   projects: [
     {
-      name: "local-e2e-chromium",
+      name: "Chrome",
       use: {
         ...devices["Desktop Chrome"],
         permissions: ["clipboard-read", "clipboard-write"],
       },
     },
     {
-      name: "local-e2e-firefox",
+      name: "Firefox",
       use: {
         ...devices["Desktop Firefox"],
         permissions: [],
       },
     },
     {
-      name: "local-e2e-webkit",
+      name: "Webkit",
       use: {
         ...devices["Desktop Safari"],
         permissions: ["clipboard-read"],
       },
     },
     {
-      name: "local-e2e-mobile-chrome",
+      name: "Mobile chrome",
       use: {
         ...devices["Pixel 7"],
         permissions: ["clipboard-read", "clipboard-write"],
@@ -97,7 +83,7 @@ export default defineConfig({
       ? {
           command: "npm run start",
           url: baseUrl,
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: !isCi,
           env: webServerEnv,
         }
       : undefined,
