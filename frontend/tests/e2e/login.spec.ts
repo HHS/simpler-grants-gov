@@ -1,5 +1,8 @@
 import { expect, Page, test } from "@playwright/test";
-import { baseUrl } from "tests/playwright.config";
+
+import playwrightEnv from "./playwright-env";
+
+const { baseUrl } = playwrightEnv;
 
 const setupLoginRedirectSpoof = async (page: Page) => {
   // Clear session storage before each test

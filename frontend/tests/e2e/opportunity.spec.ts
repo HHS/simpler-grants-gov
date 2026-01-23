@@ -1,5 +1,6 @@
 import { test as base, expect } from "@playwright/test";
-import { targetEnv } from "tests/playwright.config";
+
+import playwrightEnv from "./playwright-env";
 
 type TestWithOpportunityId = {
   testOpportunityId: string;
@@ -23,7 +24,7 @@ const testOpportunityIdMap: {
 
 // either a statically seeded id or an id that exists in staging pointing to a fully populated opportunity
 // note that this staging id may be subject to change
-const testOpportunityId = testOpportunityIdMap[targetEnv];
+const testOpportunityId = testOpportunityIdMap[playwrightEnv.targetEnv];
 
 const test = base.extend<TestWithOpportunityId>({
   testOpportunityId,

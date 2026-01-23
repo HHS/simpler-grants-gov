@@ -4,11 +4,13 @@
 
 import { expect, Locator, Page } from "@playwright/test";
 import { camelCase } from "lodash";
+import playwrightEnv from "tests/e2e/playwright-env";
 import {
   waitForURLContainsQueryParam,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
-import { targetEnv } from "tests/playwright.config";
+
+const { targetEnv } = playwrightEnv;
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page

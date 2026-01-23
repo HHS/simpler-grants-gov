@@ -5,18 +5,17 @@ import {
   type Locator,
   type Page,
 } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
 import {
   clickSignIn,
   fillSignInForm,
   findSignOutButton,
   generateMfaAndSubmit,
   locateMfaInput,
-  testUserAuthKey,
-  testUserEmail,
-  testUserPassword,
 } from "tests/e2e/utils/perform-login-utils";
-import { baseUrl, targetEnv } from "tests/playwright.config";
 
+const { baseUrl, targetEnv, testUserAuthKey, testUserEmail, testUserPassword } =
+  playwrightEnv;
 // --- Timeouts ---
 const TIMEOUT_REDIRECT = 90000;
 

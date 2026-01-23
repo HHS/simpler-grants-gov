@@ -1,16 +1,13 @@
 import { Locator, Page } from "@playwright/test";
 import { authenticator } from "otplib";
-import { targetEnv } from "tests/playwright.config";
-
-// --- Environment Variables ---
-export const testUserEmail = process.env.STAGING_TEST_USER_EMAIL || "";
-export const testUserPassword = process.env.STAGING_TEST_USER_PASSWORD || "";
-export const testUserAuthKey = process.env.STAGING_TEST_USER_MFA_KEY || "";
+import playwrightEnv from "tests/e2e/playwright-env";
 
 // Error if env missing and running against staging
 if (
-  targetEnv === "staging" &&
-  (!testUserEmail || !testUserPassword || !testUserAuthKey)
+  playwrightEnv.targetEnv === "staging" &&
+  (!playwrightEnv.testUserEmail ||
+    !playwrightEnv.testUserPassword ||
+    !playwrightEnv.testUserAuthKey)
 ) {
   throw new Error("login credentials missing for staging test run");
 }
@@ -52,7 +49,9 @@ export const findSignOutButton = async (
 };
 
 export const generateMfaAndSubmit = async (page: Page, mfaInput: Locator) => {
-  const oneTimeCode: string = authenticator.generate(testUserAuthKey);
+  const oneTimeCode: string = authenticator.generate(
+    playwrightEnv.testUserAuthKey,
+  );
   await mfaInput.fill(oneTimeCode);
 
   const mfaSubmitButton: Locator = page
@@ -89,8 +88,11 @@ export const fillSignInForm = async (page: Page) => {
     state: "visible",
     timeout: TIMEOUT_HOME,
   });
-  await page.fill('input[name="user[email]"]', testUserEmail);
-  await page.fill('input[name="user[password]"]', testUserPassword);
+  await page.fill('input[name="user[email]"]', playwrightEnv.testUserEmail);
+  await page.fill(
+    'input[name="user[password]"]',
+    playwrightEnv.testUserPassword,
+  );
 
   const submitButton: Locator = page
     .locator('button[type="submit"]')
