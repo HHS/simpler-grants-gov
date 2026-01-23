@@ -40,7 +40,7 @@ Tools and expanding avenues for community engagement are coming soon.
 
 Sharing how you or your organization have used the Simpler Grants project is an important way for us to raise awareness about the project and its impact. Feel free to tell us your story by [emailing us](mailto:simpler-grants-gov@hhs.gov). 
 
-## Code Contributions
+## Code contributions
 
 The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
 
