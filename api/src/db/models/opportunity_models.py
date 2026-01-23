@@ -38,6 +38,8 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True, unique=True, nullable=True)
 
+    is_simpler_grants_opportunity: Mapped[bool] = mapped_column(default=False, index=True)
+
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
     agency_id: Mapped[uuid.UUID | None] = mapped_column(
