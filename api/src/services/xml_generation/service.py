@@ -77,14 +77,14 @@ class XMLGenerationService:
         original_data: dict | None = None,
     ) -> str:
         """Generate XML string from transformed data.
-        
+
         Args:
             data: Transformed data dictionary
             transform_config: Transform configuration rules
             pretty_print: Whether to format XML with indentation
             attachment_mapping: Mapping of UUIDs to attachment metadata
             original_data: Original untransformed application data (used for attachments)
-        
+
         Returns:
             XML string representation of the data
         """
