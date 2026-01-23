@@ -60,5 +60,31 @@ jobs:
                       ]
                     ]
                   }
+                    ,
+              {
+                "title": "Run By",
+                "value": "'"${{ github.triggering_actor }}"'"
+              },
+              {
+                "title": "Event Name",
+                "value": "'"${{ github.event_name }}"'"
+              },
+              {
+                "title": "Ref Type",
+                "value": "'"${{ github.ref_type }}"'"
+              },
+              {
+                "title": "Ref Name",
+                "value": "'"${{ github.ref_name }}"'"
+              },
+              {
+                "title": "Workflow URL",
+                "value": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
+              }
+              ],
+              "footer": "GitHub Actions",
+              "footer_icon": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              "ts": '$(date +%s)'
+            }
             ]
           }' https://slack.com/api/chat.postMessage
