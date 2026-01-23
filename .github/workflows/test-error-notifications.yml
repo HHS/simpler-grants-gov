@@ -3,9 +3,9 @@ run-name: Test Error Notification
 
 on:
   # uncomment to test on specific branch while making changes
-  push:
-    branches:
-      - "mdragon/8032-improve-action-slack-notifications"
+  #  push:
+  #    branches:
+  #      - "mdragon/8032-improve-action-slack-notifications"
 
   # Release deployments are handled by cd-release.yml to enforce deployment order
   # (API -> Frontend -> NOFOs -> Analytics)
