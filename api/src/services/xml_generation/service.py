@@ -54,7 +54,7 @@ class XMLGenerationService:
                 request.transform_config,
                 request.pretty_print,
                 request.attachment_mapping,
-                request.application_data,  # Pass original data for attachment fields
+                request.application_data,
             )
 
             # Log transformation results for development
@@ -74,9 +74,20 @@ class XMLGenerationService:
         transform_config: dict,
         pretty_print: bool = True,
         attachment_mapping: dict[str, AttachmentInfo] | None = None,
-        original_data: dict | None = None,  # Original application data for attachments
+        original_data: dict | None = None,
     ) -> str:
-        """Generate XML string from transformed data."""
+        """Generate XML string from transformed data.
+        
+        Args:
+            data: Transformed data dictionary
+            transform_config: Transform configuration rules
+            pretty_print: Whether to format XML with indentation
+            attachment_mapping: Mapping of UUIDs to attachment metadata
+            original_data: Original untransformed application data (used for attachments)
+        
+        Returns:
+            XML string representation of the data
+        """
         # Get XML configuration from the config metadata
         xml_config = transform_config.get("_xml_config", {})
         xml_structure = xml_config.get("xml_structure", {})
@@ -101,7 +112,9 @@ class XMLGenerationService:
                 pretty_print,
                 transform_config,
                 attachment_mapping,
-                original_data or data,  # Use original data for attachments
+                # Fallback to transformed data if original_data is None (e.g., in tests)
+                # Attachments need original data because UUIDs are not transformed
+                original_data or data,
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -116,7 +129,7 @@ class XMLGenerationService:
         pretty_print: bool = True,
         transform_config: dict | None = None,
         attachment_mapping: dict[str, AttachmentInfo] | None = None,
-        original_data: dict | None = None,  # Original application data for attachments
+        original_data: dict | None = None,
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
@@ -197,7 +210,6 @@ class XMLGenerationService:
         )
 
         # Add attachment elements if present in data
-        # Use original_data (application_data) for attachment fields,  not transformed data
         attachment_source_data = original_data if original_data is not None else data
         attachment_transformer = AttachmentTransformer(
             attachment_mapping=attachment_mapping or {},

@@ -253,6 +253,8 @@ SF424_TEST_CASES = [
         "form_name": "SF424_4_0",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "pretty_print": True,
+        # Note: FileLocation uses a simplified string format here. AttachmentTransformer
+        # supports both string format and dict format with "@href" key for backwards compatibility.
         "attachment_mapping": {
             "11111111-1111-1111-1111-111111111111": {
                 "FileName": "debt_explanation.pdf",
