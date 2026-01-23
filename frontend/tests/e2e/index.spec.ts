@@ -4,7 +4,7 @@ import playwrightEnv from "./playwright-env";
 import { openMobileNav } from "./playwrightUtils";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 });
 
 test.afterEach(async ({ context }) => {

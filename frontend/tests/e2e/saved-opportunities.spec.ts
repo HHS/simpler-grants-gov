@@ -24,12 +24,16 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
 }, { project }) => {
   const isMobile = project.name.match(/[Mm]obile/);
 
+  // get a test user logged in
   if (playwrightEnv.targetEnv === "local") {
     await createSpoofedSessionCookie(context);
-    await page.goto(playwrightEnv.baseUrl);
+    await page.goto("/", { waitUntil: "domcontentloaded" });
   } else if (playwrightEnv.targetEnv === "staging") {
-    await page.goto(playwrightEnv.baseUrl);
-    await performStagingLogin(page, !!isMobile);
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const signOutButton = await performStagingLogin(page, !!isMobile);
+    await expect(signOutButton).toHaveCount(1, {
+      timeout: 90000,
+    });
   } else {
     throw new Error(
       `unsupported env ${playwrightEnv.targetEnv} - only able to run tests against local or staging`,
@@ -42,7 +46,6 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
 
   // find the Workspace nav dropdown item and open it
   const dropDownButton = page.locator("#nav-dropdown-button-4");
-  // const dropDownButton = page.getByRole("button", { name: "Workspace" });
   await expect(dropDownButton).toBeInViewport();
   await dropDownButton.click();
 

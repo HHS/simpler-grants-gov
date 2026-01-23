@@ -20,7 +20,7 @@ const { baseUrl, targetEnv, testUserAuthKey, testUserEmail, testUserPassword } =
 const TIMEOUT_REDIRECT = 90000;
 
 // Tagging the test for config separation
-test.describe("@login Login.gov tests", () => {
+test.describe("Login.gov based authentication tests", () => {
   // Skip test if env missing
   const envMissing =
     targetEnv !== "staging" ||
