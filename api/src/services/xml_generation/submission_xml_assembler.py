@@ -227,12 +227,12 @@ class SubmissionXMLAssembler:
 
         Constructs the URL from competition's opportunity number.
         Format: https://apply07.grants.gov/apply/opportunities/schemas/applicant/opp{opportunity_number}.xsd
-        
+
         Returns:
             Schema location URL or None if opportunity_number is not set
         """
         opportunity_number = self.application.competition.opportunity.opportunity_number
-        
+
         if not opportunity_number:
             logger.warning(
                 "Competition opportunity_number is not set - cannot generate schema location",
@@ -242,11 +242,10 @@ class SubmissionXMLAssembler:
                 },
             )
             return None
-        
+
         # Construct XSD filename with 'opp' prefix + opportunity number
         xsd_filename = f"opp{opportunity_number}.xsd"
         return f"{SCHEMA_LOCATION_BASE_URL}/{xsd_filename}"
-
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""
