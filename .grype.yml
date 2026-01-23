@@ -75,3 +75,38 @@ ignore:
   # we are not using the plist file
   # Last checked: December 4th, 2025
   - vulnerability: CVE-2025-13837
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2026-0865
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-15282
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2026-0672
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-15366
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-15367
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-12781
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-11468
