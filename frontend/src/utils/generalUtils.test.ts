@@ -1,5 +1,6 @@
 import {
   findFirstWhitespace,
+  formatTimestamp,
   isCurrentPath,
   queryParamsToQueryString,
   splitMarkup,
@@ -126,5 +127,28 @@ describe("isCurrentPath", () => {
   it("returns false if the path does not match the regex with passed link", () => {
     expect(isCurrentPath("/hello/other-path", "/es/hello")).toEqual(false);
     expect(isCurrentPath("/hello", "/gr/hello")).toEqual(false);
+  });
+});
+
+describe("formatTimestamp", () => {
+  it("formats a valid ISO date string correctly", () => {
+    const result = formatTimestamp("2026-01-23T15:30:00Z");
+    expect(result).toContain("January 23, 2026");
+    expect(result).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it("includes date in long format with year, month, and day", () => {
+    const result = formatTimestamp("2025-12-25T10:15:00Z");
+    expect(result).toContain("December 25, 2025");
+  });
+
+  it("includes time with hours and minutes", () => {
+    const result = formatTimestamp("2026-06-15T08:45:30Z");
+    expect(result).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it("includes timezone abbreviation in the output", () => {
+    const result = formatTimestamp("2026-01-23T15:30:00Z");
+    expect(result).toMatch(/[A-Z]{2,4}$/);
   });
 });

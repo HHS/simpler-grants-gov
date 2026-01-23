@@ -141,3 +141,16 @@ export const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
     !isNumber(mightBeAnObject)
   );
 };
+
+export const formatTimestamp = (time: string) => {
+  const date = new Date(time);
+  return `${date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })} ${date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "numeric",
+    timeZoneName: "short",
+  })}`;
+};

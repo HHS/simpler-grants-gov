@@ -3,6 +3,7 @@ import {
   ApplicationFormDetail,
 } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
+import { formatTimestamp } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -289,19 +290,6 @@ const InstructionsLink = ({
       )}
     </>
   );
-};
-
-const formatTimestamp = (time: string) => {
-  const date = new Date(time);
-  return `${date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })} ${date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "numeric",
-    timeZoneName: "short",
-  })}`;
 };
 
 const FormLink = ({
