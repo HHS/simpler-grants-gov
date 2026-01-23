@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import playwrightEnv from "./playwright-env";
 import { openMobileNav } from "./playwrightUtils";
 
 test.beforeEach(async ({ page }) => {
@@ -35,7 +36,7 @@ test("skips to main content when navigating via keyboard", async ({
   // Firefox does not tab through links automatically and requires updating preferences at the
   // system settings level; https://www.a11yproject.com/posts/macos-browser-keyboard-navigation/
   test.skip(
-    browserName === "firefox" && !process.env.CI,
+    browserName === "firefox" && !playwrightEnv.isCi,
     "Firefox's built-in tabbing focuses only on buttons and inputs",
   );
 

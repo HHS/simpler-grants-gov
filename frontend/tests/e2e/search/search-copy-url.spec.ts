@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
-import { baseUrl } from "tests/playwright.config";
 
 import { fillSearchInputAndSubmit } from "./searchSpecUtil";
+
+const { baseUrl } = playwrightEnv;
 
 test("should copy search query URL to clipboard", async ({ page }, {
   project,

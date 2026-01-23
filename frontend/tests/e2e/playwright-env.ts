@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 
 // Load environment variables from .env.local if it exists
@@ -37,6 +36,9 @@ const playwrightEnv = {
   currentShard: process.env.CURRENT_SHARD,
   fakeServerToken: process.env.E2E_USER_AUTH_TOKEN,
   clientSessionSecret: process.env.SESSION_SECRET,
+  testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "",
+  testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
+  testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
 };
 
 export default playwrightEnv;

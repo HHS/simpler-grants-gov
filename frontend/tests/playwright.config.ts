@@ -1,15 +1,6 @@
-import fs from "fs";
-import path from "path";
 import { defineConfig, devices } from "@playwright/test";
-import dotenv from "dotenv";
 
 import playwrightEnv from "./e2e/playwright-env";
-
-// // Load environment variables from .env.local if it exists
-// const envPath = path.resolve(__dirname, "..", ".env.local");
-// if (fs.existsSync(envPath)) {
-//   dotenv.config({ path: envPath, quiet: true });
-// }
 
 const { baseUrl, targetEnv, webServerEnv, isCi, totalShards, currentShard } =
   playwrightEnv;

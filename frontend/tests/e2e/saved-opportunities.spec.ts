@@ -23,17 +23,18 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
   context,
 }, { project }) => {
   const isMobile = project.name.match(/[Mm]obile/);
+
   if (playwrightEnv.targetEnv === "local") {
     await createSpoofedSessionCookie(context);
+    await page.goto(playwrightEnv.baseUrl);
   } else if (playwrightEnv.targetEnv === "staging") {
+    await page.goto(playwrightEnv.baseUrl);
     await performStagingLogin(page, !!isMobile);
   } else {
     throw new Error(
       `unsupported env ${playwrightEnv.targetEnv} - only able to run tests against local or staging`,
     );
   }
-
-  await page.goto(playwrightEnv.baseUrl);
 
   if (isMobile) {
     await openMobileNav(page);
