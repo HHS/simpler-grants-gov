@@ -314,7 +314,7 @@ const FormLink = ({
       {formName && (
         <Link
           className="text-bold"
-          href={`/workspace/applications/application/${applicationId}/form/${appFormId}`}
+          href={`/applications/${applicationId}/form/${appFormId}`}
         >
           {formName}
         </Link>
