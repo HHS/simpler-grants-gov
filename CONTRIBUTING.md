@@ -42,39 +42,25 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 
 ## Code contributions
 
-The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
+This project is monorepo with several apps. For information about the SDLC of this project, see [Development](./DEVELOPMENT.md). For information on spinning up the project apps locally, see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs. For additional information, see the [project documentation](./documentation).
 
-### Getting Started
+This project follows [trunk-based development](./DEVELOPMENT.md#branching-model), so all contributions are PRs against the `main` branch. Use the following workflow to contribute code to the project:
 
-This project is monorepo with several apps. Please see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](./documentation) for more info.
+1.  Fork the project.
+1.  Check out the `main` branch.
+1.  Create a feature branch.
+1.  Write code and tests for your change.
+1.  From your branch, make a PR against `hhs/simpler-grants-gov/main`.
+1.  Work with repo maintainers to get your change reviewed.
+1.  Wait for your change to be merged into `hhs/simpler-grants-gov/main`.
+1. Delete your local feature branch.
 
-### Workflow and Branching
+Each application has its own testing and linters. Every commit is tested to adhere to tests and the linting guidelines. We recommend that you run tests and linters locally before committing.
 
-This project follows [trunk-based development](./DEVELOPMENT.md#branching-model), so all contributions are directed toward the `main` branch.
+PRs should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md) with the following changes:
 
-1.  Fork the project
-1.  Check out the `main` branch
-1.  Create a feature branch
-1.  Write code and tests for your change
-1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main`
-1.  Work with repo maintainers to get your change reviewed
-1.  Wait for your change to be pulled into `hhs/simpler-grants-gov/main`
-1.  Delete your feature branch
-
-### Testing, Coding Style and Linters
-
-Each application has its own testing and linters. Every commit is tested to adhere to tests and the linting guidelines. It is recommended to run tests and linters locally before committing.
-
-### Issues
-
-External contributors should use the _Bug Report_ or _Feature Request_ [issue templates](https://github.com/HHS/simpler-grants-gov/issues/new/choose).
-
-## Pull Requests
-
-Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md) with the following changes:
-
-1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External] Description` format.
-1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.
+1. Each PR should be titled with the format `[Issue <issue #>] <description>`. If there's no issue associated with the PR, use the `[External] <description>` format.
+1. External contributors can't merge their own PRs, so an internal team member merges the branch after the PR is approved.
 
 ## Policies
 
