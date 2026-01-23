@@ -132,7 +132,7 @@ export const performStagingLogin = async (
   const signInReady = await clickSignIn(page);
   if (!signInReady) {
     console.error("unable to access login gov sign in");
-    return false;
+    throw new Error("unable to access login gov sign in");
   }
   await fillSignInForm(page);
   let mfaInput: Locator | undefined;
@@ -147,6 +147,17 @@ export const performStagingLogin = async (
     }
   }
   if (!mfaInput) throw new Error("MFA input field was not found");
-  await generateMfaAndSubmit(page, mfaInput);
-  return await findSignOutButton(page, isMobileProject);
+
+  let signOutButton: Locator | undefined;
+  for (let attempt = 1; attempt <= 3 && !signOutButton; attempt++) {
+    try {
+      await generateMfaAndSubmit(page, mfaInput);
+      signOutButton = await findSignOutButton(page, isMobileProject);
+    } catch (e) {
+      if (page.isClosed()) throw e;
+      await page.waitForTimeout(3000);
+      if (attempt === 3) throw e;
+    }
+  }
+  return signOutButton;
 };
