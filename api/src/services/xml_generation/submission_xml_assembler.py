@@ -204,8 +204,8 @@ class SubmissionXMLAssembler:
         # Add header (must strip XML declaration and use just the element)
         root.append(header_element)
 
-        # Add Forms wrapper
-        forms_element = lxml_etree.SubElement(root, "Forms")
+        # Add Forms wrapper with grant: namespace prefix for consistency with legacy
+        forms_element = lxml_etree.SubElement(root, f"{{{grant_ns}}}Forms")
         for form_element in form_elements:
             forms_element.append(form_element)
 
@@ -225,11 +225,28 @@ class SubmissionXMLAssembler:
     def _get_schema_location_url(self) -> str | None:
         """Get the schema location URL for xsi:schemaLocation attribute.
 
-        Constructs the URL from competition's legacy_package_id.
+        Constructs the URL from competition's opportunity number.
+        Format: https://apply07.grants.gov/apply/opportunities/schemas/applicant/opp{opportunity_number}.xsd
+        
+        Returns:
+            Schema location URL or None if opportunity_number is not set
         """
-        return (
-            f"{SCHEMA_LOCATION_BASE_URL}/" f"{self.application.competition.legacy_package_id}.xsd"
-        )
+        opportunity_number = self.application.competition.opportunity.opportunity_number
+        
+        if not opportunity_number:
+            logger.warning(
+                "Competition opportunity_number is not set - cannot generate schema location",
+                extra={
+                    "application_id": self.application.application_id,
+                    "competition_id": self.application.competition.competition_id,
+                },
+            )
+            return None
+        
+        # Construct XSD filename with 'opp' prefix + opportunity number
+        xsd_filename = f"opp{opportunity_number}.xsd"
+        return f"{SCHEMA_LOCATION_BASE_URL}/{xsd_filename}"
+
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""
