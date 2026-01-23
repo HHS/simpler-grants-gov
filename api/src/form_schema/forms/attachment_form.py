@@ -4,6 +4,19 @@ from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.shared import COMMON_SHARED_V1
 
+INSTRUCTIONS = (
+    "Instructions: On this form, you will attach the various files that "
+    "make up your grant application. Please consult with the appropriate "
+    "Agency Guidelines for more information about each needed file. "
+    "Please remember that any files you attach must be in the document format "
+    "and named as specified in the Guidelines."
+)
+
+IMPORTANT = (
+    "Important: Please attach your files in the proper sequence."
+    " See the appropriate Agency Guidelines for details."
+)
+
 FORM_JSON_SCHEMA = {
     "type": "object",
     # No required fields
@@ -89,122 +102,136 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Attachment 1",
+        "label": "",
+        "name": "instructions",
+        "description": INSTRUCTIONS,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": "",
+        "name": "important",
+        "description": IMPORTANT,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": "1) Attachment 1",
         "name": "attachment1",
         "children": [
-            {"type": "field", "definition": "/properties/att1", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att1", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "2. Attachment 2",
+        "label": "2) Attachment 2",
         "name": "attachment2",
         "children": [
-            {"type": "field", "definition": "/properties/att2", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att2", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "3. Attachment 3",
+        "label": "3) Attachment 3",
         "name": "attachment3",
         "children": [
-            {"type": "field", "definition": "/properties/att3", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att3", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "4. Attachment 4",
+        "label": "4) Attachment 4",
         "name": "attachment4",
         "children": [
-            {"type": "field", "definition": "/properties/att4", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att4", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "5. Attachment 5",
+        "label": "5) Attachment 5",
         "name": "attachment5",
         "children": [
-            {"type": "field", "definition": "/properties/att5", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att5", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "6. Attachment 6",
+        "label": "6) Attachment 6",
         "name": "attachment6",
         "children": [
-            {"type": "field", "definition": "/properties/att6", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att6", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "7. Attachment 7",
+        "label": "7) Attachment 7",
         "name": "attachment7",
         "children": [
-            {"type": "field", "definition": "/properties/att7", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att7", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "8. Attachment 8",
+        "label": "8) Attachment 8",
         "name": "attachment8",
         "children": [
-            {"type": "field", "definition": "/properties/att8", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att8", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "9. Attachment 9",
+        "label": "9) Attachment 9",
         "name": "attachment9",
         "children": [
-            {"type": "field", "definition": "/properties/att9", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att9", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "10. Attachment 10",
+        "label": "10) Attachment 10",
         "name": "attachment10",
         "children": [
-            {"type": "field", "definition": "/properties/att10", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att10", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "11. Attachment 11",
+        "label": "11) Attachment 11",
         "name": "attachment11",
         "children": [
-            {"type": "field", "definition": "/properties/att11", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att11", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "12. Attachment 12",
+        "label": "12) Attachment 12",
         "name": "attachment12",
         "children": [
-            {"type": "field", "definition": "/properties/att12", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att12", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "13. Attachment 13",
+        "label": "13) Attachment 13",
         "name": "attachment13",
         "children": [
-            {"type": "field", "definition": "/properties/att13", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att13", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "14. Attachment 14",
+        "label": "14) Attachment 14",
         "name": "attachment14",
         "children": [
-            {"type": "field", "definition": "/properties/att14", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att14", "widget": "Attachment"},
         ],
     },
     {
         "type": "section",
-        "label": "15. Attachment 15",
+        "label": "15) Attachment 15",
         "name": "attachment15",
         "children": [
-            {"type": "field", "definition": "/properties/att15", "widget": "AttachmentSingle"},
+            {"type": "field", "definition": "/properties/att15", "widget": "Attachment"},
         ],
     },
 ]
