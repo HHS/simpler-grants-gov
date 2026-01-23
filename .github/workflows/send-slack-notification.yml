@@ -17,10 +17,11 @@ jobs:
             "channel": "${{ secrets.SLACK_ALERTS_CHANNEL_ID }}",
             "text": ":x: *GitHub Actions Failure Alert*",
             "attachments": [
-              {
-                "color": "#ff0000",
-                "title": "Workflow *'"${{ github.workflow }}"'* failed",
-                "blocks": [
+            {
+              "color": "#ff0000",
+              "title": "Workflow *'"${{ github.workflow }}"'* failed",
+              "blocks": [
+
                 	{
                     "type": "table",
                     "rows": [
@@ -59,7 +60,5 @@ jobs:
                       ]
                     ]
                   }
-                ]
-              }
             ]
           }' https://slack.com/api/chat.postMessage
