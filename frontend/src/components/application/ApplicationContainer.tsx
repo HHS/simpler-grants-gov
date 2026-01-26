@@ -43,7 +43,7 @@ const ApplicationContainer = ({
   attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
-  latestApplicationSubmission: ApplicationSubmission;
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;

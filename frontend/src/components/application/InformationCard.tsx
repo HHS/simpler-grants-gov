@@ -82,7 +82,7 @@ export const InformationCard = ({
   opportunityName: string | null;
   submissionLoading: boolean;
   instructionsDownloadPath: string;
-  latestApplicationSubmission: ApplicationSubmission;
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
@@ -125,7 +125,10 @@ export const InformationCard = ({
    *  - Download available, render button to download submission zip.
    */
   const ApplicationSubmissionDownload = () => {
-    if (applicationDetails.application_status === Status.IN_PROGRESS)
+    if (
+      latestApplicationSubmission === null ||
+      applicationDetails.application_status === Status.IN_PROGRESS
+    )
       return null;
     if (applicationDetails.application_status === Status.SUBMITTED)
       return (

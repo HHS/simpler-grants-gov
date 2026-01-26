@@ -1,4 +1,5 @@
 import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
 import {
   ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
@@ -58,20 +59,15 @@ export const handleSubmitApplication = async (
 export const getApplicationSubmissions = async (
   applicationId: string,
   token: string,
+  body: ApplicationSubmissionsRequestBody,
 ): Promise<ApplicationSubmissionsApiResponse> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
   const response = await fetchApplicationWithMethod("POST")({
+    body: { ...body },
     subPath: `${applicationId}/submissions`,
     additionalHeaders: ssgToken,
-    body: {
-      pagination: {
-        page_offset: 1,
-        page_size: 1,
-        sort_order: [{ order_by: "created_at", sort_direction: "descending" }],
-      },
-    },
   });
   return (await response.json()) as ApplicationSubmissionsApiResponse;
 };
