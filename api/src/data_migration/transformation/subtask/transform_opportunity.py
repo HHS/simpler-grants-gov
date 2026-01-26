@@ -121,7 +121,7 @@ class TransformOpportunity(AbstractTransformSubTask):
                         transformed_opportunity,
                     )
 
-                    for competition in target_opportunity.competitions:
+                    for competition in cast(Opportunity, target_opportunity).competitions:
                         self._move_competition_instructions_to_correct_bucket(competition)
 
         logger.info("Processed opportunity", extra=extra)

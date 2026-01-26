@@ -1,4 +1,3 @@
-import re
 import uuid
 
 from src.adapters.aws import S3Config

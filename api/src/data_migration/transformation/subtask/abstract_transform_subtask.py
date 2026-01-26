@@ -226,6 +226,6 @@ class AbstractTransformSubTask(SubTask):
             select_query = select_query.limit(limit)
 
         return cast(
-            list[tuple[transform_constants.S, transform_constants.D | None, Opportunity | None]],
+            list[tuple[transform_constants.S, transform_constants.D | None, Competition | None]],
             self.db_session.execute(select_query),
         )
