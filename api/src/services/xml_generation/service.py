@@ -112,9 +112,7 @@ class XMLGenerationService:
                 pretty_print,
                 transform_config,
                 attachment_mapping,
-                # Fallback to transformed data if original_data is None (e.g., in tests)
-                # Attachments need original data because UUIDs are not transformed
-                original_data or data,
+                original_data,
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -210,12 +208,11 @@ class XMLGenerationService:
         )
 
         # Add attachment elements if present in data
-        attachment_source_data = original_data if original_data is not None else data
         attachment_transformer = AttachmentTransformer(
             attachment_mapping=attachment_mapping or {},
             attachment_field_config=attachment_field_config,
         )
-        attachment_transformer.add_attachment_elements(root, attachment_source_data, nsmap)
+        attachment_transformer.add_attachment_elements(root, original_data, nsmap)
 
         # Generate XML string
         if pretty_print:
