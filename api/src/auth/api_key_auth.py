@@ -3,7 +3,7 @@ import os
 from dataclasses import dataclass
 
 import flask
-from apiflask import HTTPTokenAuth
+from apiflask import APIKeyHeaderAuth
 
 from src.api.route_utils import raise_flask_error
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # this needs to be attached to your
 # routes as `your_blueprint.auth_required(api_key_auth)`
 # in order to enable authorization
-api_key_auth = HTTPTokenAuth("ApiKey", header="X-Auth", security_scheme_name="ApiKeyAuth")
+api_key_auth = APIKeyHeaderAuth("ApiKey", param_name="X-Auth", security_scheme_name="ApiKeyAuth")
 
 
 @dataclass

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Create the internal JWT auth object with the specified configuration
 internal_jwt_auth = JwtUserHttpTokenAuth(
-    "ApiKey", header="X-SGG-Internal-Token", security_scheme_name="InternalApiJwtAuth"
+    "ApiKey", param_name="X-SGG-Internal-Token", security_scheme_name="InternalApiJwtAuth"
 )
 
 

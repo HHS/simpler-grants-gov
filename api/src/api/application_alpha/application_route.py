@@ -33,12 +33,7 @@ from src.api.application_alpha.application_schemas import (
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.multi_auth import (
-    jwt_key_or_internal_multi_auth,
-    jwt_key_or_internal_security_schemes,
-    jwt_or_user_api_key_multi_auth,
-    jwt_or_user_api_key_security_schemes,
-)
+from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_or_user_api_key_multi_auth
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.user_models import UserApiKey, UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -222,8 +217,8 @@ def application_form_inclusion_update(
     "/applications/<uuid:application_id>/application_form/<uuid:app_form_id>"
 )
 @application_blueprint.output(ApplicationFormGetResponseSchema)
-@application_blueprint.doc(responses=[200, 401, 404], security=jwt_key_or_internal_security_schemes)
-@jwt_key_or_internal_multi_auth.login_required
+@application_blueprint.doc(responses=[200, 401, 404])
+@application_blueprint.auth_required(jwt_key_or_internal_multi_auth)
 @flask_db.with_db_session()
 def application_form_get(
     db_session: db.Session, application_id: UUID, app_form_id: UUID
@@ -497,10 +492,8 @@ def application_audit_list(
 @application_blueprint.post("/applications/<uuid:application_id>/submissions")
 @application_blueprint.input(ApplicationSubmissionsRequestSchema())
 @application_blueprint.output(ApplicationSubmissionsResponseSchema())
-@application_blueprint.doc(
-    responses=[200, 401, 403, 404], security=jwt_or_user_api_key_security_schemes
-)
-@jwt_or_user_api_key_multi_auth.login_required
+@application_blueprint.doc(responses=[200, 401, 403, 404])
+@application_blueprint.auth_required(jwt_or_user_api_key_multi_auth)
 @flask_db.with_db_session()
 def application_submissions_list(
     db_session: db.Session, application_id: UUID, json_data: dict

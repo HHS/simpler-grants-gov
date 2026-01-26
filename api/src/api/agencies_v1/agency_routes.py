@@ -5,7 +5,7 @@ import src.api.response as response
 from src.adapters import search
 from src.adapters.search import flask_opensearch
 from src.api.agencies_v1.agency_blueprint import agency_blueprint
-from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
+from src.auth.multi_auth import api_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.agencies_v1.search_agencies import search_agencies
 from src.util.dict_util import flatten_dict
@@ -59,8 +59,7 @@ examples = {
     examples=examples,
 )
 @agency_blueprint.output(agency_schema.AgencySearchResponseV1Schema)
-@agency_blueprint.doc(security=api_key_multi_auth_security_schemes)
-@api_key_multi_auth.login_required
+@agency_blueprint.auth_required(api_key_multi_auth)
 @flask_opensearch.with_search_client()
 def agency_search(
     search_client: search.SearchClient, raw_search_params: dict

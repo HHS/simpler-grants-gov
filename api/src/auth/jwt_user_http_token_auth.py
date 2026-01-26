@@ -1,11 +1,11 @@
 from typing import cast
 
-from apiflask import HTTPTokenAuth
+from apiflask import APIKeyHeaderAuth
 
 from src.db.models.user_models import UserTokenSession
 
 
-class JwtUserHttpTokenAuth(HTTPTokenAuth):
+class JwtUserHttpTokenAuth(APIKeyHeaderAuth):
 
     def get_user_token_session(self) -> UserTokenSession:
         """Wrapper method around the current_user value to handle type issues

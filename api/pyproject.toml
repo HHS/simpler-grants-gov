@@ -18,7 +18,7 @@ botocore = "^1.31.62"
 boto3 = "^1.28.62"
 smart-open = "^7.0.0"
 pytz = "^2023.3.post1"
-APIFlask = "^2.1.0"
+APIFlask = "^3.0.0"
 marshmallow-dataclass = { extras = ["enum", "union"], version = "^8.5.8" }
 marshmallow = "^3.20.1"
 gunicorn = "^23.0.0"

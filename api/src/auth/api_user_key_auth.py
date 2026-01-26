@@ -1,7 +1,7 @@
 import logging
 from typing import cast
 
-from apiflask import HTTPTokenAuth
+from apiflask import APIKeyHeaderAuth
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -15,7 +15,7 @@ from src.logging.flask_logger import add_extra_data_to_current_request_logs
 logger = logging.getLogger(__name__)
 
 
-class ApiUserKeyHttpTokenAuth(HTTPTokenAuth):
+class ApiUserKeyHttpTokenAuth(APIKeyHeaderAuth):
     """Custom HTTPTokenAuth that provides typed access to the current user API key and user."""
 
     def get_user_api_key(self) -> UserApiKey:
@@ -39,7 +39,7 @@ class ApiUserKeyHttpTokenAuth(HTTPTokenAuth):
 # This uses the X-API-Key header which is the standard header that AWS API Gateway
 # forwards when api_key_required is set to true
 api_user_key_auth = ApiUserKeyHttpTokenAuth(
-    "ApiKey", header="X-API-Key", security_scheme_name="ApiUserKeyAuth"
+    "ApiKey", param_name="X-API-Key", security_scheme_name="ApiUserKeyAuth"
 )
 
 
