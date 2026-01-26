@@ -208,11 +208,13 @@ class XMLGenerationService:
         )
 
         # Add attachment elements if present in data
-        attachment_transformer = AttachmentTransformer(
-            attachment_mapping=attachment_mapping or {},
-            attachment_field_config=attachment_field_config,
-        )
-        attachment_transformer.add_attachment_elements(root, original_data, nsmap)
+        # Only process attachments if we have original_data (attachments use UUIDs from original data)
+        if original_data is not None:
+            attachment_transformer = AttachmentTransformer(
+                attachment_mapping=attachment_mapping or {},
+                attachment_field_config=attachment_field_config,
+            )
+            attachment_transformer.add_attachment_elements(root, original_data, nsmap)
 
         # Generate XML string
         if pretty_print:
