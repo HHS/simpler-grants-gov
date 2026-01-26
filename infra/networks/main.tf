@@ -46,7 +46,11 @@ locals {
 terraform {
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
   required_version = "1.14.3"
+=======
+  required_version = "~>1.10.0"
+>>>>>>> after updating
 =======
   required_version = "~>1.10.0"
 >>>>>>> after updating
@@ -77,6 +81,7 @@ module "project_config" {
   source = "../project-config"
 }
 
+<<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
 module "app_config" {
@@ -111,6 +116,9 @@ module "dms_networking" {
   grants_gov_oracle_cidr_block = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
 =======
 module "network" {
+=======
+module "network" {
+>>>>>>> after updating
   source                       = "../modules/network/resources"
   name                         = var.network_name
   has_database                 = local.has_database

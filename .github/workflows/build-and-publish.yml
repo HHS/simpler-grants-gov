@@ -36,6 +36,9 @@ jobs:
     runs-on: ubuntu-latest
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -46,6 +49,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
+<<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
           fetch-depth: 1000
@@ -67,12 +71,21 @@ jobs:
         id: get-commit-hash
         run: |
 >>>>>>> after updating
+=======
+
+      - name: Get commit hash
+        id: get-commit-hash
+        run: |
+>>>>>>> after updating
           # HEAD should be the same as inputs.ref since we checked out inputs.ref
           COMMIT_HASH=$(git rev-parse HEAD)
           echo "Commit hash: $COMMIT_HASH"
           echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -112,8 +125,11 @@ jobs:
         if: steps.check-image-published.outputs.is_image_published == 'false'
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
         run: make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
         id: build-release-image
@@ -121,6 +137,9 @@ jobs:
           app_name: ${{ inputs.app_name }}
           commit_hash: ${{ needs.get-commit-hash.outputs.commit_hash }}
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

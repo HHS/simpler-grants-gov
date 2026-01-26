@@ -1,4 +1,4 @@
-.PHONY : \
+.PHONY: \
 	release-build
 
 # Docker user configuration
@@ -33,6 +33,7 @@ release-build:
 		--build-arg RUN_UID=$(RUN_UID) \
 		$(OPTS) \
 		.
+<<<<<<< before updating
 
 ##################################################
 # Local development
@@ -73,3 +74,5 @@ load-test-staging: # Load test the staging environment in aws
 
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	artillery run -e prod artillery-load-test.yml
+=======
+>>>>>>> after updating

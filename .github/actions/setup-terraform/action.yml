@@ -2,7 +2,10 @@ name: "Set up Terraform"
 description: "Set up Terraform with the version stored in the .terraform-version file"
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 inputs:
@@ -10,6 +13,9 @@ inputs:
     description: "File containing the terraform version to use."
     default: ".terraform-version"
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

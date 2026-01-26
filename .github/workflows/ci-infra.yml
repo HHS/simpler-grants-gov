@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -48,6 +51,9 @@ jobs:
     runs-on: ubuntu-latest
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -61,6 +67,7 @@ jobs:
     name: Check Terraform format
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -79,11 +86,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 >>>>>>> after updating
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+>>>>>>> after updating
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -96,6 +112,7 @@ jobs:
     name: Validate Terraform modules
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -114,11 +131,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 >>>>>>> after updating
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+>>>>>>> after updating
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -133,6 +159,9 @@ jobs:
     runs-on: ubuntu-latest
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -147,6 +176,9 @@ jobs:
           python-version: "3.10"
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

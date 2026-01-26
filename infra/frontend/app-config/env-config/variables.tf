@@ -60,6 +60,16 @@ variable "extra_identity_provider_logout_urls" {
   default     = []
 }
 
+variable "feature_flag_overrides" {
+  type        = map(string)
+  description = "Map of overrides for feature flags"
+  default     = {}
+  validation {
+    condition     = length(setsubtract(keys(var.feature_flag_overrides), keys(local.feature_flag_defaults))) == 0
+    error_message = "All features in feature_flag_overrides must be declared in feature_flag_defaults."
+  }
+}
+
 variable "has_database" {
   type = bool
 }

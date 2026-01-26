@@ -1,3 +1,4 @@
+<<<<<<< before updating
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -27,6 +28,8 @@ data "aws_subnets" "public" {
   }
 }
 
+=======
+>>>>>>> after updating
 locals {
   # The prefix is used to create uniquely named resources per terraform workspace, which
   # are needed in CI/CD for preview environments and tests.
@@ -50,6 +53,7 @@ locals {
   bucket_name  = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
   is_temporary = terraform.workspace != "default"
 
+<<<<<<< before updating
   build_repository_config                        = module.app_config.build_repository_config
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
@@ -64,6 +68,17 @@ locals {
 
 terraform {
   required_version = "1.14.3"
+=======
+  build_repository_config = module.app_config.build_repository_config
+  environment_config      = module.app_config.environment_configs[var.environment_name]
+  service_config          = local.environment_config.service_config
+
+  service_name = "${local.prefix}${local.service_config.service_name}"
+}
+
+terraform {
+  required_version = "~>1.10.0"
+>>>>>>> after updating
 
   required_providers {
     aws = {
@@ -92,6 +107,7 @@ module "app_config" {
   source = "../app-config"
 }
 
+<<<<<<< before updating
 # Retrieve url for external incident management tool (e.g. Pagerduty, Splunk-On-Call)
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {
@@ -121,24 +137,33 @@ data "aws_acm_certificate" "certificate" {
 #   name  = local.network_config.domain_config.hosted_zone
 # }
 
+=======
+>>>>>>> after updating
 module "service" {
   source       = "../../modules/service"
-  service_name = local.service_config.service_name
+  service_name = local.service_name
 
   image_repository_arn = local.build_repository_config.repository_arn
   image_repository_url = local.build_repository_config.repository_url
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
 
+  domain_name     = module.domain.domain_name
+  hosted_zone_id  = module.domain.hosted_zone_id
+  certificate_arn = module.domain.certificate_arn
+
+<<<<<<< before updating
   domain_name    = local.service_config.domain_name
   hosted_zone_id = null
   # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
   hostname        = module.app_config.hostname
+=======
+  enable_waf = module.app_config.enable_waf
+>>>>>>> after updating
 
   fargate_cpu              = local.service_config.instance_cpu
   fargate_memory           = local.service_config.instance_memory
@@ -147,17 +172,30 @@ module "service" {
   min_capacity             = local.service_config.instance_scaling_min_capacity
   enable_autoscaling       = true
 
-  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
-
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
+<<<<<<< before updating
   enable_alb_cdn = true
 
+=======
+  db_vars = module.app_config.has_database ? {
+    security_group_ids         = module.database[0].security_group_ids
+    app_access_policy_arn      = module.database[0].app_access_policy_arn
+    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
+    connection_info = {
+      host        = module.database[0].host
+      port        = module.database[0].port
+      user        = module.database[0].app_username
+      db_name     = module.database[0].db_name
+      schema_name = module.database[0].schema_name
+    }
+  } : null
+>>>>>>> after updating
 
   extra_environment_variables = merge(
     {
-      BUCKET_NAME = local.storage_config.bucket_name
+      BUCKET_NAME = local.bucket_name
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
@@ -165,10 +203,11 @@ module "service" {
   )
 
   secrets = concat(
-    [for secret_name in keys(local.service_config.secrets) : {
+    [for secret_name, secret_arn in module.secrets.secret_arns : {
       name      = secret_name
-      valueFrom = module.secrets[secret_name].secret_arn
+      valueFrom = secret_arn
     }],
+    local.feature_flags_secrets,
     module.app_config.enable_identity_provider ? [{
       # name      = "COGNITO_CLIENT_SECRET"
       # valueFrom = module.identity_provider_client[0].client_secret_arn
@@ -180,6 +219,7 @@ module "service" {
       # storage_access = module.storage.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
+<<<<<<< before updating
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {}
   )
@@ -190,4 +230,16 @@ module "service" {
     "CMD-SHELL",
     "wget --no-verbose --tries=1 --spider http://localhost:8000${local.healthcheck_path} || exit 1"
   ]
+=======
+      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {},
+    module.app_config.enable_notifications ? {
+      notifications_access = module.notifications[0].access_policy_arn,
+    } : {},
+  )
+
+  ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
+
+  is_temporary = local.is_temporary
+>>>>>>> after updating
 }

@@ -24,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
 
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
