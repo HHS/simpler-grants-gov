@@ -8,7 +8,9 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 ### 🏗️ Development version
 
-For version 0.1.0, please install and use node <= v22.13.0.
+Running a local server requires the version of Node specified in [the .nvmrc file](https://github.com/HHS/simpler-grants-gov/blob/main/.nvmrc) to be installed.
+
+This project supports the use of NVM for node version management, so it is suggested you intall and use NVM. More infomrmation can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
 * **For Mac** - Run `npm install && npm run local` to install and start the application.
 * **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
@@ -21,7 +23,7 @@ npx next telemetry disable
 
 ### Configuration
 
-Create a local enviornment file in the frontend directory to hold your frontend application overrides.  To allows you to make specializations to your local setup outside of GitHub.
+Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
 
 On Mac, run `touch .env.local`
 
