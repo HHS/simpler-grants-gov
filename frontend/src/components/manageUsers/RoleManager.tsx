@@ -23,6 +23,7 @@ interface RoleManagerProps {
   userId: string;
   currentRoleId: string;
   roleOptions: RoleOption[];
+  disabled?: boolean;
 }
 
 export function RoleManager({
@@ -30,6 +31,7 @@ export function RoleManager({
   userId,
   currentRoleId,
   roleOptions,
+  disabled = false,
 }: RoleManagerProps) {
   const t = useTranslations("ManageUsers.roleManager");
   const [selectedRoleId, setSelectedRoleId] = useState(currentRoleId);
@@ -114,6 +116,7 @@ export function RoleManager({
           value={selectValue}
           onChange={handleSelectChange}
           aria-label={t("changeUserRole")}
+          disabled={disabled}
         >
           {roleOptions.map((role) => (
             <option key={role.value} value={role.value}>

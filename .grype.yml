@@ -19,59 +19,41 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # Zipfile Module
-  # We don't a potch available yet in the python 3.13.x version. The latest version 3.13.8 still has the vulnerability.
-  - vulnerability: CVE-2025-8291
-
-  # This is a vulnerability in python when using bytes.decode("unicode_escape", error="ignore|replace")
-  # We don't use this anywhere, and I can't find any uses of decode
-  # in this manner in any library we use (but won't guarantee there are zero).
-  # A fix hasn't been backported to python 3.13 yet.
-  #
-  # Last checked: May 20th, 2025
-  - vulnerability: CVE-2025-4516
-
-  # This is a vulnerability in html.parser.HTMLParser which we don't use
-  # Last checked: June 20th, 2025
-  - vulnerability: CVE-2025-6069
-
-  # This is a vulnerability in python's tarfile module when parsing tarfiles
-  # We don't use this anywhere, and it will be fixed in python 3.14
-  # Last checked: July 30th, 2025
-  - vulnerability: CVE-2025-8194
-
-  # Tornado has a vulnerability in it, but we don't use this library.
-  # This is one way you can run a gunicorn workers, but we don't.
-  # We don't even pull this package in ourselves, so we likely need
-  # an upstream library (gunicorn itself?) to update.
-  #
-  # Last checked: May 20th, 2025
-  - vulnerability: GHSA-7cx3-6m66-7c5m
-
   # https://github.com/HHS/simpler-grants-gov/issues/3855
   # esbuild fixed in a new minor version, but we don't install/call esbuild directly
   - vulnerability: GHSA-67mh-4wv8-2f99
 
-  # Last Check - October 14th
-  # Issue with zip64 in the zipfile module which we aren't using
-  # Fixed in latest Python version
-  - vulnerability: CVE-2025-8291
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2026-0865
 
-  # CVE-2025-6075: Python version finding (Low severity)
-  # This is flagging Python 3.13.9 as needing an upgrade to 3.15.0
-  # Python 3.15.0 does not exist yet - this appears to be a false positive
-  # or premature CVE. We are running the latest stable Python 3.13.x version.
-  # Last checked: November 12th, 2025
-  - vulnerability: CVE-2025-6075
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-15282
 
-  # CVE-2025-13836: Python vulnerability (Medium severity)
-  # technically possible to hit, but the only HTTP calls we’re doing are against login.gov,
-  # sam.gov and grants.gov. We will resolve this when upgrading to the latest
-  # python 3.14.x version.
-  # Last checked: December 4th, 2025
-  - vulnerability: CVE-2025-13836
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2026-0672
 
-  # CVE-2025-13837: Python vulnerability (Low severity)
-  # we are not using the plist file
-  # Last checked: December 4th, 2025
-  - vulnerability: CVE-2025-13837
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-15366
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-15367
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-12781
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 01/23/26
+  - vulnerability: CVE-2025-11468

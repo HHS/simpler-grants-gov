@@ -127,7 +127,7 @@ export const getApplicationHistory = async (
             "user_added",
             // "user_updated",
             // "user_removed",
-            // "organization_added",
+            "organization_added",
             "application_submit_rejected",
             // "submission_created",
           ],
