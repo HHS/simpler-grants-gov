@@ -41,7 +41,7 @@ locals {
       "--set-current",
       "--store-version"
     ],
-    test1 = [
+    grantee1 = [
       "poetry",
       "run",
       "flask",
@@ -90,14 +90,14 @@ locals {
     dev      = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     staging  = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     training = ["poetry", "run", "flask", "task", "sam-extracts"]
-    test1    = ["poetry", "run", "flask", "task", "sam-extracts"]
+    grantee1 = ["poetry", "run", "flask", "task", "sam-extracts"]
     prod     = ["poetry", "run", "flask", "task", "sam-extracts"]
   }
   build-automatic-opportunities-state = {
     dev      = "ENABLED"
     staging  = "ENABLED"
     training = "ENABLED"
-    test1    = "ENABLED"
+    grantee1 = "ENABLED"
     prod     = "DISABLED"
   }
   scheduled_jobs = {

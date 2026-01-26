@@ -1,14 +1,14 @@
-module "test1_config" {
+module "grantee1_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
-  environment                     = "test1"
-  network_name                    = "test1"
-  domain_name                     = "api.test1.simpler.grants.gov"
-  secondary_domain_names          = ["alb.test1.simpler.grants.gov"]
-  s3_cdn_domain_name              = "files.test1.simpler.grants.gov"
-  mtls_domain_name                = "soap.test1.simpler.grants.gov"
+  environment                     = "grantee1"
+  network_name                    = "grantee1"
+  domain_name                     = "api.grantee1.simpler.grants.gov"
+  secondary_domain_names          = ["alb.grantee1.simpler.grants.gov"]
+  s3_cdn_domain_name              = "files.grantee1.simpler.grants.gov"
+  mtls_domain_name                = "soap.grantee1.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
@@ -52,7 +52,7 @@ module "test1_config" {
     RESET_EMAILS_WITHOUT_SENDING = "false"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://test1.simpler.grants.gov"
+    FRONTEND_URL             = "https://grantee1.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
   }

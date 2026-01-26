@@ -3,9 +3,9 @@ module "prod_config" {
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
-  environment                     = "test1"
-  network_name                    = "test1"
-  domain_name                     = "staging.test1.grants.gov"
+  environment                     = "grantee1"
+  network_name                    = "grantee1"
+  domain_name                     = "staging.grantee1.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service

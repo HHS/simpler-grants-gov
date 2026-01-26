@@ -3,9 +3,9 @@ module "staging_config" {
   project_name   = local.project_name
   app_name       = local.app_name
   default_region = module.project_config.default_region
-  account_name   = "test1"
-  environment    = "test1"
-  network_name   = "test1"
+  account_name   = "grantee1"
+  environment    = "grantee1"
+  network_name   = "grantee1"
 
   database_instance_count = 2
   database_min_capacity   = 2
@@ -15,7 +15,7 @@ module "staging_config" {
     # In staging, post results to the #z_bot-analytics-ci-test channel in slack
     ACTION = "post-results"
   }
-  domain_name                     = "data.test1.simpler.grants.gov"
+  domain_name                     = "data.grantee1.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service

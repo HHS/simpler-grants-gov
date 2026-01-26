@@ -3,9 +3,9 @@ module "prod_config" {
   project_name   = local.project_name
   app_name       = local.app_name
   default_region = module.project_config.default_region
-  environment    = "test1"
-  network_name   = "test1"
-  domain_name    = "nofos.test1.simpler.grants.gov"
+  environment    = "grantee1"
+  network_name   = "grantee1"
+  domain_name    = "nofos.grantee1.simpler.grants.gov"
   enable_https   = true
 
   instance_desired_instance_count = 1
