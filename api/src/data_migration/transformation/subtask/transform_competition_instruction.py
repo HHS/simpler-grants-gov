@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from enum import StrEnum
 from typing import Any, Iterable
 
-from sqlalchemy import select, UnaryExpression, Result
+from sqlalchemy import Result, UnaryExpression, select
 from sqlalchemy.orm import selectinload
 
 import src.data_migration.transformation.transform_constants as transform_constants
@@ -34,6 +34,20 @@ class TransformCompetitionInstructionConfig(PydanticBaseEnvConfig):
 
 
 class TransformCompetitionInstruction(AbstractTransformSubTask):
+    """Transform a competition instruction from the legacy tinstructions table
+    to our competition_instruction table.
+
+    Notable details:
+    * The file name isn't directly stored in tinstructions and is calculated
+      based on legacy_package_id + an extension, so we have to calculate it
+      as we are doing the transformation. Rarely, an extension can be missing,
+      and in these cases we skip processing them as they don't function correctly
+      on grants.gov anyways.
+    * We process batches as the files are stored directly in grants.gov's DB
+      table so loading many records into memory is going to hit issues. After
+      the initial first time load, this won't matter much. This follows the same
+      pattern as transforming an opportunity attachment.
+    """
 
     def __init__(self, task: Task, s3_config: S3Config | None = None):
         super().__init__(task)
@@ -89,7 +103,11 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         self,
         records: Sequence[tuple[Tinstructions, CompetitionInstruction | None, Competition | None]],
     ) -> int:
-
+        """Process a competition instructions transform, taking in
+        * Tinstructions record to transform
+        * An existing CompetitionInstruction record (if doing an update)
+        * The Competition that the instruction is attached to (nullable to handle deletes, but will error otherwise)
+        """
         records_processed = 0
         for source_instruction, target_instruction, competition in records:
             try:
@@ -103,8 +121,7 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
                     source_instruction, target_instruction, competition
                 )
 
-            except ValueError as e:
-                print(e)
+            except ValueError:
                 self.increment(
                     transform_constants.Metrics.TOTAL_ERROR_COUNT,
                     prefix=transform_constants.COMPETITION_INSTRUCTION,
@@ -178,9 +195,18 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
                 transform_constants.Metrics.TOTAL_INVALID_RECORD_SKIPPED,
                 prefix=transform_constants.COMPETITION_INSTRUCTION,
             )
-            logger.info("Cannot copy competition instructions, legacy_package_id and extension must both be non-null", extra=extra | {"legacy_package_id": competition.legacy_package_id, "extension": source_instruction.extension})
+            logger.info(
+                "Cannot copy competition instructions, legacy_package_id and extension must both be non-null",
+                extra=extra
+                | {
+                    "legacy_package_id": competition.legacy_package_id,
+                    "extension": source_instruction.extension,
+                },
+            )
             # transformed_at is added after the else below
-            source_instruction.transformation_notes = "Competition cannot have name generated due to missing required inputs - skipping"
+            source_instruction.transformation_notes = (
+                "Competition cannot have name generated due to missing required inputs - skipping"
+            )
 
         ##########
         # Insert / Update
@@ -230,11 +256,13 @@ class TransformCompetitionInstruction(AbstractTransformSubTask):
         source_instruction.transformed_at = self.transform_time
 
 
-def build_competition_instruction_file_name(source_instruction: Tinstructions, competition: Competition) -> str:
+def build_competition_instruction_file_name(
+    source_instruction: Tinstructions, competition: Competition
+) -> str:
     """Create the competition instruction file name
-       in the same pattern that grants.gov did. They
-       take the package ID and add the extension
-       from the instruction table together.
+    in the same pattern that grants.gov did. They
+    take the package ID and add the extension
+    from the instruction table together.
     """
 
     # Note - we shouldn't ever hit these errors
@@ -257,6 +285,7 @@ def build_competition_instruction_file_name(source_instruction: Tinstructions, c
     extension = source_instruction.extension.lower().strip().removeprefix(".")
 
     return f"{competition.legacy_package_id}.{extension}"
+
 
 def transform_competition_instruction(
     source_instruction: Tinstructions,
@@ -295,7 +324,6 @@ def transform_competition_instruction(
     )
 
     return target_instruction
-
 
 
 def write_file(

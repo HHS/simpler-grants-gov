@@ -73,12 +73,19 @@ class TransformOpportunity(AbstractTransformSubTask):
             # Cleanup the attachments from s3
             if target_opportunity is not None:
                 for attachment in target_opportunity.opportunity_attachments:
+                    logger.info(
+                        "Deleting opportunity attachment as opportunity is being deleted.",
+                        extra=extra | {"s3_location": attachment.file_location},
+                    )
                     file_util.delete_file(attachment.file_location)
 
                 # Also cleanup competition instruction files
-                # TODO test this
                 for competition in target_opportunity.competitions:
                     for competition_instruction in competition.competition_instructions:
+                        logger.info(
+                            "Deleting competition instruction as opportunity is being deleted.",
+                            extra=extra | {"s3_location": competition_instruction.file_location},
+                        )
                         file_util.delete_file(competition_instruction.file_location)
 
         else:
@@ -133,17 +140,35 @@ class TransformOpportunity(AbstractTransformSubTask):
                 transformed_opportunity,
                 self.s3_config,
             )
+
+            logger.info(
+                "Moving opportunity attachment as opportunity is no longer a draft",
+                extra={
+                    "opportunity_id": transformed_opportunity.opportunity_id,
+                    "source_path": attachment.file_location,
+                    "destination_path": s3_path,
+                },
+            )
             file_util.move_file(attachment.file_location, s3_path)
             attachment.file_location = s3_path
 
     def _move_competition_instructions_to_correct_bucket(self, competition: Competition) -> None:
-        # TODO - test this
         for competition_instruction in competition.competition_instructions:
             s3_path = get_s3_competition_instruction_path(
                 competition_instruction.file_name,
                 competition_instruction.competition_instruction_id,
                 competition,
                 self.s3_config,
+            )
+
+            logger.info(
+                "Moving competition instruction as opportunity is no longer a draft",
+                extra={
+                    "opportunity_id": competition.opportunity_id,
+                    "competition_id": competition.competition_id,
+                    "source_path": competition_instruction.file_location,
+                    "destination_path": s3_path,
+                },
             )
             file_util.move_file(competition_instruction.file_location, s3_path)
             competition_instruction.file_location = s3_path

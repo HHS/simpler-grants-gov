@@ -103,7 +103,7 @@ class TransformCompetition(AbstractTransformSubTask):
             prefix=transform_constants.COMPETITION,
         )
 
-        extra = {"competition_id": source_competition.comp_id}
+        extra = {"competition_id": source_competition.comp_id, "opportunity_id": opportunity_id}
         logger.info("Processing competition", extra=extra)
 
         if source_competition.is_deleted:
@@ -116,9 +116,13 @@ class TransformCompetition(AbstractTransformSubTask):
             )
 
             # Cleanup competition instructions
-            # TODO - test this
             if target_competition is not None:
                 for competition_instruction in target_competition.competition_instructions:
+                    logger.info(
+                        "Deleting competition instruction as competition is being deleted.",
+                        extra=extra | {"s3_location": competition_instruction.file_location},
+                    )
+
                     file_util.delete_file(competition_instruction.file_location)
 
         elif opportunity_id is None:
