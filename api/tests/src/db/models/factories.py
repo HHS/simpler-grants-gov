@@ -554,13 +554,10 @@ class OpportunitySummaryFactory(BaseFactory):
         no_declaration=None,
     )
 
-    agency_code = factory.LazyAttribute(lambda s: s.opportunity.agency_code)
-    agency_name = factory.Faker("agency_name")
-    agency_phone_number = Generators.PhoneNumber
     agency_contact_description = factory.Faker("agency_contact_description")
     agency_email_address = factory.Faker("email")
     agency_email_address_description = factory.LazyAttribute(
-        lambda s: f"Contact {s.agency_name} via email"
+        lambda s: "Contact this agency via email"
     )
 
     # Forecasted values are only set if is_forecast=True
@@ -690,9 +687,6 @@ class OpportunitySummaryFactory(BaseFactory):
             modification_comments=None,
             funding_category_description=None,
             applicant_eligibility_description=None,
-            agency_code=None,
-            agency_name=None,
-            agency_phone_number=None,
             agency_contact_description=None,
             agency_email_address=None,
             agency_email_address_description=None,

@@ -252,14 +252,11 @@ def transform_opportunity_summary(
     target_summary.modification_comments = source_summary.modification_comments
     target_summary.funding_category_description = source_summary.oth_cat_fa_desc
     target_summary.applicant_eligibility_description = source_summary.applicant_elig_desc
-    target_summary.agency_name = source_summary.ac_name
     target_summary.agency_email_address = source_summary.ac_email_addr
     target_summary.agency_email_address_description = source_summary.ac_email_desc
     target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
 
     target_summary.summary_description = source_summary.description
-    target_summary.agency_code = source_summary.agency_code
-    target_summary.agency_phone_number = source_summary.agency_phone_number
 
     # These fields are only on synopsis records, use getattr to avoid isinstance
     target_summary.agency_contact_description = getattr(source_summary, "agency_contact_desc", None)

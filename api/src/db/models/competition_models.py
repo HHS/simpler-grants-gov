@@ -158,7 +158,6 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
     file_location: Mapped[str]
     file_name: Mapped[str]
 
-    # TODO - merge this change in
     # In grants.gov, a competition could only have one instruction record
     # and it reused the competition ID as its primary key. We copy that over
     # when transforming as it makes joining the data much simpler.
