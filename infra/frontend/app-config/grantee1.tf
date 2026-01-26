@@ -1,4 +1,4 @@
-module "prod_config" {
+module "grantee1_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
