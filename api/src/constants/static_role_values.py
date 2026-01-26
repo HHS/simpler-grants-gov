@@ -136,11 +136,28 @@ NAVA_INTERNAL_ROLE = Role(
     link_role_types=[LinkRoleRoleType(role_id=NAVA_INTERNAL_ROLE_ID, role_type=RoleType.INTERNAL)],
 )
 
+E2E_TEST_USER_ROLE_ID = uuid.UUID("a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d")
+E2E_TEST_USER_ROLE = Role(
+    role_id=E2E_TEST_USER_ROLE_ID,
+    role_name="E2E Test User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        E2E_TEST_USER_ROLE_ID,
+        [
+            Privilege.READ_TEST_USER_TOKEN,
+            Privilege.LIST_APPLICATION,
+            Privilege.VIEW_APPLICATION,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=E2E_TEST_USER_ROLE_ID, role_type=RoleType.INTERNAL)],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
     APPLICATION_OWNER,
     APPLICATION_CONTRIBUTOR,
+    E2E_TEST_USER_ROLE,
     LEGACY_AGENCY_S2S_ROLE,
     NAVA_INTERNAL_ROLE,
 ]

@@ -3,6 +3,8 @@ import os
 import uuid
 
 import src.adapters.db as db
+import tests.src.db.models.factories as factories
+from src.constants.lookup_constants import Privilege, RoleType
 from src.util.file_util import write_to_file
 from tests.lib.seed_data_utils import UserBuilder
 
@@ -23,8 +25,19 @@ def _write_token_to_file(token: str) -> None:
 
 
 def _build_users_and_tokens(db_session: db.Session) -> None:
+    e2e_role = factories.RoleFactory.create(
+        role_name="E2E Test Role", is_core=True, privileges=[Privilege.READ_TEST_USER_TOKEN]
+    )
+    factories.LinkRoleRoleTypeFactory.create(role=e2e_role, role_type=RoleType.INTERNAL)
+
     builder = UserBuilder(
         uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff"), db_session, "user for e2e"
     ).with_jwt_auth()
-    builder.build()
+
+    builder.with_api_key("e2e-test-key")
+
+    user = builder.build()
+
+    factories.InternalUserRoleFactory.create(user=user, role=e2e_role)
+
     _write_token_to_file(builder.jwt_token)

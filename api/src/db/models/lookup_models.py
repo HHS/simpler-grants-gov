@@ -232,6 +232,7 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.LEGACY_AGENCY_ASSIGNER, 14),
         LookupStr(Privilege.MANAGE_INTERNAL_ROLES, 15),
         LookupStr(Privilege.MANAGE_COMPETITION, 16),
+        LookupStr(Privilege.READ_TEST_USER_TOKEN, 17),
     ]
 )
 
