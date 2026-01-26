@@ -170,8 +170,10 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.GG_LOBBYING_FORM, 13),
         LookupStr(FormType.EPA_FORM_4700_4, 14),
         LookupStr(FormType.EPA_KEY_CONTACTS, 15),
+        LookupStr(FormType.ATTACHMENT_FORM, 16),
     ]
 )
+
 
 COMPETITION_OPEN_TO_APPLICANT_CONFIG: LookupConfig[CompetitionOpenToApplicant] = LookupConfig(
     [

@@ -29,14 +29,14 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Directions",
+        "label": "Directions",
         "name": "directions",
         "description": DIRECTIONS,
         "children": [],
     },
     {
         "type": "section",
-        "label": "2. Project Abstract File",
+        "label": "Project Abstract File",
         "name": "projectAbstract",
         "children": [
             {"type": "field", "definition": "/properties/attachment", "widget": "Attachment"},

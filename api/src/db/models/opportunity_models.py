@@ -214,19 +214,12 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     funding_category_description: Mapped[str | None]
     applicant_eligibility_description: Mapped[str | None]
 
-    agency_phone_number: Mapped[str | None]
     agency_contact_description: Mapped[str | None]
     agency_email_address: Mapped[str | None]
     agency_email_address_description: Mapped[str | None]
 
     version_number: Mapped[int | None]
     can_send_mail: Mapped[bool | None]
-
-    # Do not use these agency fields, they're kept for now, but
-    # are simply copying behavior from the legacy system - prefer
-    # the same named values in the opportunity itself
-    agency_code: Mapped[str | None]
-    agency_name: Mapped[str | None]
 
     link_funding_instruments: Mapped[list[LinkOpportunitySummaryFundingInstrument]] = relationship(
         back_populates="opportunity_summary", uselist=True, cascade="all, delete-orphan"
