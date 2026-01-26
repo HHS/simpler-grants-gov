@@ -141,7 +141,7 @@ const LATEST_APPLICATION_SUBMISSION_REQUEST: ApplicationSubmissionsRequestBody =
     },
   };
 
-export async function getLatestSubmission(
+async function getLatestSubmission(
   token: string,
   applicationId: string,
   applicationStatus: string,

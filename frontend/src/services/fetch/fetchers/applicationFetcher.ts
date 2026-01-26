@@ -11,6 +11,10 @@ import {
   ApplicationSubmitApiResponse,
 } from "src/types/applicationResponseTypes";
 
+/**
+ * Start Application
+ */
+
 export const handleStartApplication = async (
   applicationName: string,
   competitionID: string,
