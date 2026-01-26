@@ -12,7 +12,6 @@ export default function RoadmapWhatWereWorkingOn() {
   const messages = useMessages() as unknown as IntlMessages;
   const { contentItems } = messages.Roadmap.sections.progress;
 
-  console.log(contentItems)
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
       {contentItems.map((contentItemIdx, index) => (
@@ -20,21 +19,24 @@ export default function RoadmapWhatWereWorkingOn() {
           className="margin-bottom-4"
           key={`roadmap-what-were-working-on-${index}`}
         >
-          <h3>
-            {t(`contentItems.${index}.title`)}
-          </h3>
-          {t.rich(
-            `contentItems.${index}.content`,
-            {
-              p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
-              linkGithub7832: gitHubLinkForIssue(7832),
-              linkGithub7830: gitHubLinkForIssue(7830),
-              linkGithub7831: gitHubLinkForIssue(7831),
-              linkGithub7790: gitHubLinkForIssue(7790),
-              linkGithub7906: gitHubLinkForIssue(7906),
-              fiderBoardLink: (chunks) => <a href="https://simplergrants.fider.io/" target="_blank" className="usa-link--external">{chunks}</a>,
-            },
-          )}
+          <h3>{t(`contentItems.${index}.title`)}</h3>
+          {t.rich(`contentItems.${index}.content`, {
+            p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
+            linkGithub7832: gitHubLinkForIssue(7832),
+            linkGithub7830: gitHubLinkForIssue(7830),
+            linkGithub7831: gitHubLinkForIssue(7831),
+            linkGithub7790: gitHubLinkForIssue(7790),
+            linkGithub7906: gitHubLinkForIssue(7906),
+            fiderBoardLink: (chunks) => (
+              <a
+                href="https://simplergrants.fider.io/"
+                target="_blank"
+                className="usa-link--external"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         </div>
       ))}
       <p>

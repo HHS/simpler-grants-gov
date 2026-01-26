@@ -964,7 +964,8 @@ export const messages = {
               "<p>In collaboration with users from the Simpler Grants Co-Design Group, we’re prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
           },
           {
-            title: "Improve users’ confidence in choosing competitive, relevant opportunities",
+            title:
+              "Improve users’ confidence in choosing competitive, relevant opportunities",
             content:
               "<p>We’re excited to help you find and get opportunities you need. We are developing user-requested enhancements to Simpler Search, and we’re also developing a new set of initiatives to help organizations find opportunities that are better tailored to their needs. This will result in reducing the time and effort required to discover opportunities, determine whether they’re a strong fit, and align as a team to pursue them.</p><p><linkGithub7830>Follow #7830 on GitHub</linkGithub7830></p>",
           },
@@ -974,7 +975,8 @@ export const messages = {
               "<p>Simpler’s new, streamlined application experience will support enough forms to cover 35% of competitions on Grants.gov, enabling opportunities to be supported from more grantor agencies. This will be made possible with the addition of internal tools that reduce the manual effort needed to launch opportunities between different environments.</p><p><linkGithub7831>Follow #7831 on GitHub</linkGithub7831></p>",
           },
           {
-            title: "Community-prioritized improvements & Open Source involvement",
+            title:
+              "Community-prioritized improvements & Open Source involvement",
             content:
               "<p>We remain committed to open, participatory software development. We have deepened our collaboration with the Co-Design Group by establishing routine check-ins and workshops that directly involved them in the agile delivery process. We selected a key agile deliverable to pilot our co-planning methodology and successfully advanced community-prioritized improvements by delivering two highly voted items from the public voting board (known as our <fiderBoardLink>Fider board</fiderBoardLink>). We will continue to host co-planning and working sessions, and increase community engagement.</p><p><linkGithub7790>Follow #7790 on GitHub</linkGithub7790></p>",
           },
@@ -997,8 +999,7 @@ export const messages = {
               "<p>We proudly announced the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. <releaseNotesLink>Read the latest release notes on our public wiki</releaseNotesLink>.</p>",
           },
           {
-            title:
-              "Improving the application workflow",
+            title: "Improving the application workflow",
             content:
               "<p>We built on lessons learned from our 'Apply' workflow pilot, launching two opportunities for application through Simpler.Grants.gov while adding features based on direct user feedback and testing. We prepared to scale up to support more agencies. And we added an activity history that improves collaborating on applications.</p>",
           },
@@ -1052,7 +1053,7 @@ export const messages = {
                 content:
                   "<p>We built tools so authorized users can securely generate and manage their API keys independently without admin support.</p>",
               },
-            ]
+            ],
           },
           early2025: {
             sectionTitle: "Early 2025",
@@ -1063,7 +1064,8 @@ export const messages = {
                   "<p>We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.</p>",
               },
               {
-                title: "Full support for opportunity page  attachments (NOFOs/downloads)",
+                title:
+                  "Full support for opportunity page  attachments (NOFOs/downloads)",
                 content:
                   "<p>The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.</p>",
               },
@@ -1077,7 +1079,7 @@ export const messages = {
                 content:
                   "<p>Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.</p>",
               },
-            ]
+            ],
           },
           late2024: {
             sectionTitle: "Late 2024",
@@ -1112,7 +1114,7 @@ export const messages = {
                 content:
                   "<p>Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.</p>",
               },
-            ]
+            ],
           },
         },
       },

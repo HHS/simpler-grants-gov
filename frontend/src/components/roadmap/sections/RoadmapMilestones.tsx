@@ -37,21 +37,36 @@ export default function RoadmapMilestones() {
               key={`roadmap-milestones-${title}-key`}
             >
               <h4>{title}</h4>
-              {t.rich(
-                `contentItems.${key}.content`,
-                {
-                  p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
-                  releaseNotesLink: (chunks) => <a href="https://wiki.simpler.grants.gov/product/release-notes" target="_blank" className="usa-link--external">{chunks}</a>,
-                  commonGrantsProtocolLink: (chunks) => <a href="https://commongrants.org/" target="_blank" className="usa-link--external">{chunks}</a>,
-                },
-              )}
+              {t.rich(`contentItems.${key}.content`, {
+                p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
+                releaseNotesLink: (chunks) => (
+                  <a
+                    href="https://wiki.simpler.grants.gov/product/release-notes"
+                    target="_blank"
+                    className="usa-link--external"
+                  >
+                    {chunks}
+                  </a>
+                ),
+                commonGrantsProtocolLink: (chunks) => (
+                  <a
+                    href="https://commongrants.org/"
+                    target="_blank"
+                    className="usa-link--external"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
             </div>
           );
         })}
       {/* Accordion sections */}
       {archivedRoadmapSections &&
-        Object.keys(archivedRoadmapSections).map((sectionKey:string) => {
-          const sectionTitle = t(`archivedRoadmapSections.${sectionKey}.sectionTitle`);
+        Object.keys(archivedRoadmapSections).map((sectionKey: string) => {
+          const sectionTitle = t(
+            `archivedRoadmapSections.${sectionKey}.sectionTitle`,
+          );
           return (
             <div
               className="margin-bottom-4"
@@ -68,21 +83,29 @@ export default function RoadmapMilestones() {
                     id: `archived-roadmap-accordion--${sectionKey}`,
                     content: (
                       <div className="margin-top-2">
-                        {Object.keys(archivedRoadmapSections[sectionKey].sectionItems).map((sectionItemKey) => {
+                        {Object.keys(
+                          archivedRoadmapSections[sectionKey].sectionItems,
+                        ).map((sectionItemKey) => {
                           return (
-                            <div 
+                            <div
                               key={`archived-roadmap-sections-${sectionTitle}-sections-${sectionItemKey}-key`}
                               className="margin-bottom-4"
                             >
-                              <h4>{t(`archivedRoadmapSections.${sectionKey}.sectionItems.${sectionItemKey}.title`)}</h4>
+                              <h4>
+                                {t(
+                                  `archivedRoadmapSections.${sectionKey}.sectionItems.${sectionItemKey}.title`,
+                                )}
+                              </h4>
                               {t.rich(
                                 `archivedRoadmapSections.${sectionKey}.sectionItems.${sectionItemKey}.content`,
                                 {
-                                  p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
+                                  p: (chunks) => (
+                                    <p className="font-sans-xs">{chunks}</p>
+                                  ),
                                 },
                               )}
                             </div>
-                          )
+                          );
                         })}
                       </div>
                     ),
