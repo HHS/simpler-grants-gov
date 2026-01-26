@@ -397,6 +397,21 @@ export const messages = {
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
     },
+    transferOwnershipModal: {
+      title: "Transfer application ownership",
+      body: "<p>Choose the organization that should own this application. After ownership is transferred, you can continue your work and prepare for submission.</p> <p><strong>Don't see your organization?</strong> If your organization isn't listed, it may not be verified yet, or you may not have been invited. Contact your eBizPOC if you have questions about access.</p>",
+      selectTitle: "Who is applying?",
+      default: "- Select -",
+      warningTitle: "Important to know about ownership",
+      warningBody:
+        "Once you assign an organization, that choice is permanent. An application cannot be transferred to another organization or returned to an individual.",
+      actionConfirm: "Transfer ownership",
+      actionCancel: "Return to application",
+      errorMessage:
+        "We couldn't load your organizations right now. Please try again.",
+      contactSupport:
+        "If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",
+    },
   },
   Index: {
     pageTitle: "Simpler.Grants.gov",
@@ -1143,7 +1158,7 @@ export const messages = {
           {
             title: "Co-planning",
             content:
-              "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+              "We prioritize improvements to align with user needs through public ranking. Let us know what's important to you.",
             link: "https://simplergrants.fider.io",
             linkText: "Vote on our proposals board",
           },
@@ -1617,7 +1632,7 @@ export const messages = {
     uei: "UEI",
     expiration: "Exp",
     visitSam:
-      "Visit <link>sam.gov</link> to make changes to your organization’s details.",
+      "Visit <link>sam.gov</link> to make changes to your organization's details.",
     rosterTable: {
       title: "Organization roster",
       explanation: "Your organization's active members are listed below.",
@@ -1744,15 +1759,15 @@ export const messages = {
   },
   InviteLegacyUsers: {
     dataLoadingError:
-      "We’re having trouble loading your team from Grants.gov. Please try again later.",
+      "We're having trouble loading your team from Grants.gov. Please try again later.",
     emptyLegacyUsers:
       "It looks like there are no team members to import. Your organization does not have a legacy roster in Grants.gov, so there are no contacts available to add here. You can still invite people directly on your <manageUsersLink>Manage users page</manageUsersLink>.",
     inviteYourTeam: "Invite your team from Grants.gov",
     inviteYourTeamDetails:
-      "Add your team from Grants.gov to your organization in Simpler or remove anyone who’s no longer actively working with your team. Select the people to invite, and they’ll get an invitation to join you here in Simpler.",
+      "Add your team from Grants.gov to your organization in Simpler or remove anyone who's no longer actively working with your team. Select the people to invite, and they'll get an invitation to join you here in Simpler.",
     keyInformation: "Key information",
     keyInformationDetails:
-      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they’ve been added.",
+      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they've been added.",
     metaDescription: "Manage users from legacy integrations",
     pageHeading: "Legacy invite",
     pageTitle: "Legacy invite | Simpler.Grants.gov",
