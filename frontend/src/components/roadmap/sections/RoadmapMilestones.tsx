@@ -9,7 +9,7 @@ import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 export default function RoadmapMilestones() {
   const t = useTranslations("Roadmap.sections.milestones");
   const messages = useMessages() as unknown as IntlMessages;
-  const { contentItems = {}, archivedRoadmapSections } =
+  const { contentItems, archivedRoadmapSections } =
     messages.Roadmap.sections.milestones;
 
   return (
@@ -63,9 +63,9 @@ export default function RoadmapMilestones() {
         })}
       {/* Accordion sections */}
       {archivedRoadmapSections &&
-        Object.keys(archivedRoadmapSections).map((sectionKey: string) => {
+        Object.keys(archivedRoadmapSections).map((archivedSection, archivedSectionIdx) => {
           const sectionTitle = t(
-            `archivedRoadmapSections.${sectionKey}.sectionTitle`,
+            `archivedRoadmapSections.${archivedSectionIdx}.sectionTitle`,
           );
           return (
             <div
@@ -80,24 +80,24 @@ export default function RoadmapMilestones() {
                     headingLevel: "h3",
                     className: "",
                     expanded: false,
-                    id: `archived-roadmap-accordion--${sectionKey}`,
+                    id: `archived-roadmap-accordion--${archivedSectionIdx}`,
                     content: (
                       <div className="margin-top-2">
                         {Object.keys(
-                          archivedRoadmapSections[sectionKey].sectionItems,
-                        ).map((sectionItemKey) => {
+                          archivedRoadmapSections[archivedSectionIdx].sectionItems,
+                        ).map((archivedItem, archivedItemIdx) => {
                           return (
                             <div
-                              key={`archived-roadmap-sections-${sectionTitle}-sections-${sectionItemKey}-key`}
+                              key={`archived-roadmap-sections-${sectionTitle}-sections-${archivedItemIdx}-key`}
                               className="margin-bottom-4"
                             >
                               <h4>
                                 {t(
-                                  `archivedRoadmapSections.${sectionKey}.sectionItems.${sectionItemKey}.title`,
+                                  `archivedRoadmapSections.${archivedSectionIdx}.sectionItems.${archivedItemIdx}.title`,
                                 )}
                               </h4>
                               {t.rich(
-                                `archivedRoadmapSections.${sectionKey}.sectionItems.${sectionItemKey}.content`,
+                                `archivedRoadmapSections.${archivedSectionIdx}.sectionItems.${archivedItemIdx}.content`,
                                 {
                                   p: (chunks) => (
                                     <p className="font-sans-xs">{chunks}</p>

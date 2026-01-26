@@ -1019,8 +1019,8 @@ export const messages = {
               "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Activity Dashboard centralizes where users can manage their work and track their progress.</p>",
           },
         ],
-        archivedRoadmapSections: {
-          mid2025: {
+        archivedRoadmapSections: [
+          {
             sectionTitle: "Mid 2025",
             sectionItems: [
               {
@@ -1055,7 +1055,7 @@ export const messages = {
               },
             ],
           },
-          early2025: {
+          {
             sectionTitle: "Early 2025",
             sectionItems: [
               {
@@ -1081,7 +1081,7 @@ export const messages = {
               },
             ],
           },
-          late2024: {
+          {
             sectionTitle: "Late 2024",
             sectionItems: [
               {
@@ -1116,7 +1116,7 @@ export const messages = {
               },
             ],
           },
-        },
+        ],
       },
       process: {
         title: "How we work",
