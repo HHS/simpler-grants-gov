@@ -37,17 +37,24 @@ aws ecs wait services-stable --cluster "${cluster_name}" --services "${service_n
 
 service_endpoint="$(terraform -chdir="infra/${app_name}/service" output -raw service_endpoint)"
 pr_info=$(cat <<EOF
-<!-- begin PR environment info -->
-## Preview environment
+<!-- ${app_name} - begin PR environment info -->
+## Preview environment for ${app_name}
 - Service endpoint: ${service_endpoint}
 - Deployed commit: ${image_tag}
-<!-- end PR environment info -->
+<!-- ${app_name} - end PR environment info -->
 EOF
 )
 
 pr_body="$(gh pr view "${pr_number}" --json body | jq --raw-output .body)"
+
+# clean up older single-app section if present
 if [[ $pr_body == *"<!-- begin PR environment info -->"*"<!-- end PR environment info -->"* ]]; then
-  pr_body="${pr_body//<!-- begin PR environment info -->*<!-- end PR environment info -->/$pr_info}"
+  pr_body="${pr_body//<!-- begin PR environment info -->*<!-- end PR environment info -->}"
+fi
+
+# update or add the environment info
+if [[ $pr_body == *"<!-- ${app_name} - begin PR environment info -->"*"<!-- ${app_name} - end PR environment info -->"* ]]; then
+  pr_body="${pr_body//<!-- ${app_name} - begin PR environment info -->*<!-- ${app_name} - end PR environment info -->/$pr_info}"
 else
   pr_body="${pr_body}"$'\n\n'"${pr_info}"
 fi

@@ -1,0 +1,20 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "2025-01-21-example.md"
+    },
+    {
+      "pattern": "localhost"
+    },
+    {
+      "pattern": "127.0.0.1"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "{{BASEURL}}/"
+    }
+  ],
+  "retryOn429": true
+}

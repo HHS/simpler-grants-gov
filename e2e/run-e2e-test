@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Script to run Playwright tests with a specified app name.
+# APP_NAME is required to be set, while BASE_URL is optional.
+
+# Ensure APP_NAME is provided
+if [[ -z "${APP_NAME}" ]]; then
+  echo "You must pass in a specific APP_NAME. IE: APP_NAME=app npm test" >&2
+  exit 1
+fi
+
+# Inform about optional BASE_URL usage
+if [[ -z "${BASE_URL}" ]]; then
+  echo "BASE_URL not specified. Using default BASE_URL specified in playwright.config.js"
+fi
+
+npx playwright test --config "${APP_NAME}/playwright.config.js" "$@"

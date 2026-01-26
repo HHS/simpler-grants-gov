@@ -4,8 +4,6 @@ resource "aws_kms_key" "storage" {
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
-
-  # checkov:skip=CKV2_AWS_64:We're encrpying with KMS, I don't feel the need to specify a KMS policy as well
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "storage" {

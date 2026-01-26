@@ -18,9 +18,9 @@ echo "  image_tag=${image_tag}"
 terraform -chdir="infra/${app_name}/app-config" init > /dev/null
 terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
 image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".name")"
+region="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".region")"
 
-region=$(./bin/current-region)
-read -r image_registry_id image_repository_url <<< "$(aws ecr describe-repositories --repository-names "${image_repository_name}" --query "repositories[0].[registryId,repositoryUri]" --output text)"
+read -r image_registry_id image_repository_url <<< "$(aws ecr describe-repositories --region "${region}" --repository-names "${image_repository_name}" --query "repositories[0].[registryId,repositoryUri]" --output text)"
 image_registry="${image_registry_id}.dkr.ecr.${region}.amazonaws.com"
 
 echo "Build repository info:"

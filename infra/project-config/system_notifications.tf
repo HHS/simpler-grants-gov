@@ -37,12 +37,6 @@ locals {
         # "channel_id_secret_name"  = "SYSTEM_NOTIFICATIONS_SLACK_CHANNEL_ID"
         # "slack_token_secret_name" = "SYSTEM_NOTIFICATIONS_SLACK_BOT_TOKEN"
       }
-      security-alerts = {
-        # Uncomment if you want to send Security Hub alerts to Slack
-        # "type" = "slack"
-        # "channel_id_secret_name"  = "SECURITY_ALERTS_SLACK_CHANNEL_ID"
-        # "slack_token_secret_name" = "SECURITY_ALERTS_SLACK_BOT_TOKEN"
-      }
     }
   }
 }

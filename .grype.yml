@@ -1,5 +1,3 @@
-fail-on-severity: "medium"
-
 # List of vulnerabilities to ignore for the anchore scan
 # https://github.com/anchore/grype#specifying-matches-to-ignore
 # More info can be found in the docs/infra/vulnerability-management.md file
@@ -18,42 +16,5 @@ ignore:
   - fix-state: not-fixed
   - fix-state: wont-fix
   - fix-state: unknown
-
-  # https://github.com/HHS/simpler-grants-gov/issues/3855
-  # esbuild fixed in a new minor version, but we don't install/call esbuild directly
-  - vulnerability: GHSA-67mh-4wv8-2f99
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2026-0865
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-15282
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2026-0672
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-15366
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-15367
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-12781
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-11468
+  # https://github.com/anchore/grype/issues/1172
+  - vulnerability: GHSA-xqr8-7jwr-rhp7

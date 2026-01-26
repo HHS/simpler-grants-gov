@@ -1,0 +1,71 @@
+name: PR Environment Update
+run-name: Update PR Environment ${{ inputs.pr_number }}
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+      commit_hash:
+        required: true
+        type: string
+
+concurrency: pr-environment-${{ inputs.app_name }}-${{ inputs.pr_number }}
+
+jobs:
+  build-and-publish:
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    uses: ./.github/workflows/build-and-publish.yml
+    with:
+      app_name: ${{ inputs.app_name }}
+      ref: ${{ inputs.commit_hash }}
+
+  update:
+    name: Update environment
+    needs: [build-and-publish]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write # Needed to comment on PR
+      repository-projects: read # Workaround for GitHub CLI bug https://github.com/cli/cli/issues/6274
+
+    outputs:
+      service_endpoint: ${{ steps.update-environment.outputs.service_endpoint }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ inputs.app_name }}
+          environment: ${{ inputs.environment }}
+
+      - name: Update environment
+        id: update-environment
+        run: |
+          ./bin/update-pr-environment "${{ inputs.app_name }}" "${{ inputs.environment }}" "${{ inputs.pr_number }}" "${{ inputs.commit_hash }}"
+          service_endpoint=$(terraform -chdir="infra/${{ inputs.app_name }}/service" output -raw service_endpoint)
+          echo "service_endpoint=${service_endpoint}"
+          echo "service_endpoint=${service_endpoint}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  e2e-tests:
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    needs: [update]
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      service_endpoint: ${{ needs.update.outputs.service_endpoint }}
+      app_name: ${{ inputs.app_name }}

@@ -103,7 +103,7 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
           "LaunchType" : "FARGATE",
           "NetworkConfiguration" : {
             "AwsvpcConfiguration" : {
-              "Subnets" : var.private_subnet_ids,
+              "Subnets" : module.network.private_subnet_ids,
               "SecurityGroups" : [aws_security_group.app.id],
             }
           },
@@ -129,11 +129,6 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
 
   tracing_configuration {
     enabled = true
-  }
-
-  tags = {
-    job  = each.key
-    name = "${var.service_name}-${each.key}"
   }
 }
 

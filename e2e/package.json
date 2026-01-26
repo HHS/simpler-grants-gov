@@ -1,0 +1,20 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "format": "prettier --cache --cache-location='./.prettier-cache' --write .",
+    "format:check": "prettier --cache --cache-location='./.prettier-cache' --check .",
+    "merge-reports": "npx playwright merge-reports --reporter html blob-report",
+    "show-report": "npx playwright show-report",
+    "test": "./run-e2e-test",
+    "test:ui": "./run-e2e-test --ui",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

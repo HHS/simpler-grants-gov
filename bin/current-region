@@ -2,10 +2,26 @@
 # Print the current AWS region
 set -euo pipefail
 
-region=$(aws configure list | grep region | awk '{print $2}')
-if [ "$region" = ":" ]; then
-    echo "Newer AWS CLI adds : in the region output" >&2
-    # Newer AWS CLI has added : to the output of this command so if we see that in position 2, adjust
-    region=$(aws configure list | grep region | awk '{print $3}')
-fi
-echo -n "$region"
+# The output format of `aws configure list` has changed over time, in particular
+# the separator between config item name and value. We want to support both the
+# older format:
+#
+#   region                us-west-2              env    AWS_DEFAULT_REGION
+#
+# and the newer format:
+#
+#   region     : us-west-2                : env              : AWS_DEFAULT_REGION
+#
+# So tell Awk to use either whitespace OR `:` as the separator and grab the
+# second field. Also explicitly strip leading/trailing whitespace (as well as
+# collapsing all whitespace in general) with an initial call to Awk, as when
+# specifying a non-default field separator Awk will no longer do that
+# internally.
+#
+# Until such a time that `aws configure list` respects the `--output`/`--query`
+# flag[1] and we can more robustly fetch just the value needed or we move away
+# from calling it altogether.
+#
+# [1] https://github.com/aws/aws-cli/issues/7373
+region="$(aws configure list | grep region | awk '{$1=$1;print}' | awk -F '[ \t\n:]+' '{print $2}')"
+echo -n "${region}"

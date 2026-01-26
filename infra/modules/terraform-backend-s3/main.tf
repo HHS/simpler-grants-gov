@@ -11,7 +11,7 @@ locals {
 # Create the dynamodb table required for state locking.
 
 # Options for encryption are an AWS owned key, which is not unique to your account; AWS managed; or customer managed. The latter two options are more secure, and customer managed gives
-# control over the key. This allows for ability to restrict access by key as well as policies attached to roles or users.
+# control over the key. This allows for ability to restrict access by key as well as policies attached to roles or users. 
 # https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html
 resource "aws_kms_key" "tf_backend" {
   description = "KMS key for DynamoDB table ${local.tf_locks_table_name}"
@@ -19,14 +19,12 @@ resource "aws_kms_key" "tf_backend" {
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
-  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 resource "aws_dynamodb_table" "terraform_lock" {
-  name                        = local.tf_locks_table_name
-  hash_key                    = "LockID"
-  billing_mode                = "PAY_PER_REQUEST"
-  deletion_protection_enabled = true
+  name         = local.tf_locks_table_name
+  hash_key     = "LockID"
+  billing_mode = "PAY_PER_REQUEST"
 
   attribute {
     name = "LockID"
@@ -130,7 +128,7 @@ resource "aws_s3_bucket_policy" "tf_state" {
 
 # Create the S3 bucket to provide server access logging.
 #
-# Ignore bucket logging complaince check for this bucket since
+# Ignore bucket logging complaince check for this bucket since 
 # the bucket is used for logging only and doesn't need server access logging itself
 # (see https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html)
 # tfsec:ignore:aws-s3-enable-bucket-logging

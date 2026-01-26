@@ -16,16 +16,12 @@ locals {
 
 terraform {
 
-  required_version = "1.14.3"
+  required_version = "~>1.10.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.68.0"
-    }
-    newrelic = {
-      source  = "newrelic/newrelic"
-      version = "~> 3.57"
+      version = "~>5.6.0"
     }
   }
 
@@ -33,8 +29,6 @@ terraform {
     encrypt = "true"
   }
 }
-
-provider "newrelic" {}
 
 provider "aws" {
   region = local.region

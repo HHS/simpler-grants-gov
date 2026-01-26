@@ -2,6 +2,3 @@
 # To allow multiple files, use a list of names, example below. Make sure to remove the leading #
 # DOCKLE_ACCEPT_FILES="file1,path/to/file2,file3/path,etc"
 # https://github.com/goodwithtech/dockle#accept-suspicious-environment-variables--files--file-extensions
-# The apiflask/settings file is a stub file that apiflask creates, and has no sensitive data in. We are ignoring it since it is unused
-# The settings.py files under the docx have been reviewed and do not hold sensitive info in them.
-DOCKLE_ACCEPT_FILES=api/.venv/lib/python3.14/site-packages/newrelic/api/settings.py,api/.venv/lib/python3.14/site-packages/apiflask/settings.py,api/.venv/lib/python3.14/site-packages/docx/oxml/settings.py,api/.venv/lib/python3.14/site-packages/docx/parts/settings.py,api/.venv/lib/python3.14/site-packages/docx/settings.py,analytics/.venv/lib/python3.14/site-packages/newrelic/api/settings.py,analytics/.venv/lib/python3.14/site-packages/jedi/settings.py,app/.venv/lib/python3.14/site-packages/isort/settings.py,app/nofos/bloom_nofos/settings.py,app/.venv/lib/python3.14/site-packages/easyaudit/settings.py,app/.venv/lib/python3.14/site-packages/constance/settings.py,app/.venv/lib/python3.14/site-packages/cssutils/settings.py,app/.venv/lib/python3.14/site-packages/martor/settings.py

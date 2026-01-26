@@ -35,26 +35,3 @@ if ! wait_for_service_stability; then
 fi
 
 echo "Completed ${app_name} deploy of ${image_tag} to ${environment}"
-
-# Invalidate CloudFront cache for frontend deployments only
-if [ "$app_name" = "frontend" ]; then
-  echo "::group::Invalidating CloudFront cache"
-  cloudfront_distribution_id=$(terraform -chdir="infra/${app_name}/service" output -raw cloudfront_distribution_id 2>/dev/null || echo "")
-
-  if [ -n "$cloudfront_distribution_id" ] && [ "$cloudfront_distribution_id" != "null" ]; then
-    echo "CloudFront distribution ID: ${cloudfront_distribution_id}"
-    echo "Creating invalidation for all paths (/*)"
-
-    invalidation_id=$(aws cloudfront create-invalidation \
-      --distribution-id "${cloudfront_distribution_id}" \
-      --paths "/*" \
-      --query 'Invalidation.Id' \
-      --output text)
-
-    echo "Invalidation created with ID: ${invalidation_id}"
-    echo "CloudFront cache invalidation initiated successfully"
-  else
-    echo "No CloudFront distribution found for ${app_name} in ${environment}, skipping cache invalidation"
-  fi
-  echo "::endgroup::"
-fi

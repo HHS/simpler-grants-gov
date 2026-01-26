@@ -28,14 +28,22 @@ __check_defined = \
 
 .PHONY : \
 	e2e-build \
+	e2e-clean \
+	e2e-clean-image \
 	e2e-clean-report \
-	e2e-delete-image \
+	e2e-format \
+	e2e-format-check \
+	e2e-format-check-native \
+	e2e-format-native \
 	e2e-merge-reports \
+	e2e-setup \
 	e2e-setup-ci \
-	e2e-setup-native \
 	e2e-show-report \
 	e2e-test \
 	e2e-test-native \
+	e2e-test-native-ui \
+	e2e-type-check \
+	e2e-type-check-native \
 	help \
 	infra-check-app-database-roles \
 	infra-check-compliance-checkov \
@@ -49,11 +57,10 @@ __check_defined = \
 	infra-configure-network \
 	infra-format \
 	infra-lint \
-	infra-lint-markdown \
 	infra-lint-scripts \
 	infra-lint-terraform \
 	infra-lint-workflows \
-	infra-module-database-role-manager \
+	infra-module-database-role-manager-archive \
 	infra-set-up-account \
 	infra-test-service \
 	infra-update-app-build-repository \
@@ -63,7 +70,7 @@ __check_defined = \
 	infra-update-current-account \
 	infra-update-network \
 	infra-validate-modules \
-	invalidate-cloudfront-cache \
+	lint-markdown \
 	release-build \
 	release-deploy \
 	release-image-name \
@@ -75,51 +82,83 @@ __check_defined = \
 ## End-to-end (E2E) Testing ##
 ##############################
 
-e2e-build: ## Build the e2e Docker image, if not already built, using ./e2e/Dockerfile
-	docker build -t playwright-e2e -f ./e2e/Dockerfile .
+# Include project name in image name so that image name
+# does not conflict with other images during local development.
+# The e2e test image includes the test suite for all apps and therefore isn't specific to each app.
+E2E_IMAGE_NAME := $(PROJECT_ROOT)-e2e
 
-e2e-clean-report: ## Remove the local ./e2e/playwright-report and ./e2e/test-results folder and their contents
+e2e-build: ## Build the e2e Docker image, if not already built, using ./e2e/Dockerfile
+	docker build -t $(E2E_IMAGE_NAME) -f ./e2e/Dockerfile .
+
+e2e-clean: ## Clean both the e2e reports and e2e Docker image
+e2e-clean: e2e-clean-report e2e-clean-image
+
+e2e-clean-image: ## Clean the Docker image for e2e tests
+	docker rmi -f $(E2E_IMAGE_NAME) 2>/dev/null || echo "Docker image $(E2E_IMAGE_NAME) does not exist, skipping."
+
+e2e-clean-report: ## Remove the local e2e report folders and content
 	rm -rf ./e2e/playwright-report
 	rm -rf ./e2e/blob-report
 	rm -rf ./e2e/test-results
 
-e2e-delete-image: ## Delete the Docker image for e2e tests
-	@docker rmi -f playwright-e2e 2>/dev/null || echo "Docker image playwright-e2e does not exist, skipping."
+e2e-format: ## Format code with autofix inside Docker
+e2e-format: e2e-build
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run format
 
-e2e-merge-reports: ## Merge Playwright blob reports from multiple shards into an HTML report
-	@cd e2e && npx playwright merge-reports --reporter html blob-report
+e2e-format-check: ## Format check without autofix inside Docker
+e2e-format-check: e2e-build
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run format:check
+
+e2e-format-check-native: ## Format check without autofix natively
+	cd e2e && npm run format:check
+
+e2e-format-native: ## Format code with autofix natively
+	cd e2e && npm run format
+
+e2e-merge-reports: ## Merge E2E blob reports from multiple shards into an HTML report
+	cd e2e && npm run merge-reports
+
+e2e-setup: ## Setup end-to-end tests
+	cd e2e && npm install
 
 e2e-setup-ci: ## Setup end-to-end tests for CI
-	@cd e2e && npm ci
-	@cd e2e && npx playwright install --with-deps
+	cd e2e && npm ci
 
-e2e-setup-native: ## Setup end-to-end tests
-	@cd e2e && npm install
-	@cd e2e && npx playwright install --with-deps
+e2e-show-report: ## Show the E2E report
+	cd e2e && npm run show-report
 
-e2e-show-report: ## Show the ./e2e/playwright-report
-	@cd e2e && npx playwright show-report
-
-e2e-test: ## Run E2E Playwright tests in a Docker container and copy the report locally
+e2e-test: ## Run E2E tests in a Docker container and copy the report locally
 e2e-test: e2e-build
 	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
 	@:$(call check_defined, BASE_URL, You must pass in a BASE_URL)
 	docker run --rm\
-		--name playwright-e2e-container \
+		--name $(E2E_IMAGE_NAME)-container \
 		-e APP_NAME=$(APP_NAME) \
 		-e BASE_URL=$(BASE_URL) \
 		-e CURRENT_SHARD=$(CURRENT_SHARD) \
 		-e TOTAL_SHARDS=$(TOTAL_SHARDS) \
 		-e CI=$(CI) \
-		-v $(PWD)/e2e/playwright-report:/e2e/playwright-report \
-		-v $(PWD)/e2e/blob-report:/e2e/blob-report \
-		playwright-e2e
+		-v $(CURDIR)/e2e/playwright-report:/e2e/playwright-report \
+		-v $(CURDIR)/e2e/blob-report:/e2e/blob-report \
+		$(E2E_IMAGE_NAME) \
+		npm test -- $(E2E_ARGS)
+	@echo "Run 'make e2e-show-report' to view the test report"
 
-e2e-test-native: ## Run end-to-end tests
+e2e-test-native: ## Run end-to-end tests natively
 	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
-	@:$(call check_defined, BASE_URL, You must pass in a BASE_URL)
 	@echo "Running e2e tests with CI=${CI}, APP_NAME=${APP_NAME}, BASE_URL=${BASE_URL}"
-	@cd e2e/$(APP_NAME) && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npx playwright test $(E2E_ARGS)
+	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm test -- $(E2E_ARGS)
+
+e2e-test-native-ui: ## Run end-to-end tests natively in UI mode
+	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
+	@echo "Running e2e UI tests natively with APP_NAME=$(APP_NAME), BASE_URL=$(BASE_URL)"
+	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm run test:ui -- $(E2E_ARGS)
+
+e2e-type-check: ## Run TypeScript type checking in Docker
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run type-check -- $(TYPE_CHECK_ARGS)
+
+e2e-type-check-native: ## Run TypeScript type checking natively
+	cd e2e && npm run type-check -- $(TYPE_CHECK_ARGS)
 
 ###########
 ## Infra ##
@@ -172,8 +211,9 @@ infra-update-app-database: ## Create or update $APP_NAME's database module for $
 	terraform -chdir="infra/$(APP_NAME)/database" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-module-database-role-manager-archive: ## Build/rebuild role manager code package for Lambda deploys
-	pip3 install -r infra/modules/database/role_manager/requirements.txt -t infra/modules/database/role_manager/vendor --upgrade
-	zip -r infra/modules/database/role_manager.zip infra/modules/database/role_manager
+	rm -f infra/modules/database/resources/role_manager.zip
+	pip3 install -r infra/modules/database/resources/role_manager/requirements.txt -t infra/modules/database/resources/role_manager/vendor --upgrade
+	cd infra/modules/database/resources/role_manager/ && zip -r ../role_manager.zip *
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -185,13 +225,6 @@ infra-update-app-service: ## Create or update $APP_NAME's web service module
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	terraform -chdir="infra/$(APP_NAME)/service" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
 	terraform -chdir="infra/$(APP_NAME)/service" apply -var="environment_name=$(ENVIRONMENT)"
-
-infra-update-metabase-service: ## Create or update $APP_NAME's web service module
-	# APP_NAME has a default value defined above, but check anyways in case the default is ever removed
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
-	terraform -chdir="infra/analytics/metabase" init -input=false -reconfigure -backend-config="$(ENVIRONMENT).s3.tfbackend"
-	terraform -chdir="infra/analytics/metabase" apply -var="environment_name=$(ENVIRONMENT)"
 
 # The prerequisite for this rule is obtained by
 # prefixing each module with the string "infra-validate-module-"
@@ -222,10 +255,8 @@ infra-check-compliance-checkov: ## Run checkov compliance checks
 infra-check-compliance-tfsec: ## Run tfsec compliance checks
 	tfsec infra
 
-infra-lint: infra-lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
-
-infra-lint-markdown: ## Lint Markdown docs for broken links
-	./bin/lint-markdown.sh
+infra-lint: ## Lint infra code
+infra-lint: lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows
 
 infra-lint-scripts: ## Lint shell scripts
 	shellcheck bin/**
@@ -240,7 +271,8 @@ infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
 infra-test-service: ## Run service layer infra test suite
-	cd infra/test && go test -run TestService -v -timeout 30m
+	@:$(call check_defined, APP_NAME, "the name of subdirectory of /infra that holds the application's infrastructure code")
+	cd infra/test && APP_NAME=$(APP_NAME) go test -run TestService -v -timeout 30m
 
 #############
 ## Linting ##
@@ -257,39 +289,24 @@ lint-markdown: ## Lint Markdown docs for broken links
 # does not conflict with other images during local development
 IMAGE_NAME := $(PROJECT_ROOT)-$(APP_NAME)
 
-GIT_REPO_AVAILABLE := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
-
-
-ROOT_REV := $(shell git rev-parse HEAD)
-
-# Generate a unique tag based solely on the git hash.
-# This will be the identifier used for deployment via terraform.
-
-
-ifdef APP_NAME
-	APP_NAME_ARG := ${APP_NAME}
-else
-	APP_NAME_ARG := "."
-endif
-
-ifdef IMAGE_TAG
-else
-	ifdef GIT_REPO_AVAILABLE
-		IMAGE_TAG := $(shell git log --pretty=format:'%H' -n 1 "${ROOT_REV}" -- "${APP_NAME_ARG}")
-	else
-		IMAGE_TAG := "unknown-dev.$(DATE)"
-	endif
-endif
-
-
 # Generate an informational tag so we can see where every image comes from.
 DATE := $(shell date -u '+%Y%m%d.%H%M%S')
 INFO_TAG := $(DATE).$(USER)
 
+GIT_REPO_AVAILABLE := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
+
+# Generate a unique tag based solely on the git hash.
+# This will be the identifier used for deployment via terraform.
+ifdef GIT_REPO_AVAILABLE
+IMAGE_TAG := $(shell git rev-parse HEAD)
+else
+IMAGE_TAG := "unknown-dev.$(DATE)"
+endif
+
 release-build: ## Build release for $APP_NAME and tag it with current git hash
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	cd $(APP_NAME) && $(MAKE) release-build \
-		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) --load -t $(IMAGE_NAME):$(IMAGE_TAG) $(OPTIONAL_BUILD_FLAGS)"
+		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) $(OPTS)"
 
 release-publish: ## Publish release to $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -304,15 +321,6 @@ release-deploy: ## Deploy release to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/deploy-release $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
-
-metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
-	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/deploy-metabase $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
-
-invalidate-cloudfront-cache: ## Invalidate CloudFront cache for $ENVIRONMENT
-	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
-	./bin/invalidate-cloudfront-cache $(ENVIRONMENT)
 
 release-image-name: ## Prints the image name of the release image
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -331,9 +339,6 @@ help: ## Prints the help documentation and info about each command
 	awk -F':.*?## ' '{printf "\033[36m%s\033[0m\t%s\n", $$1, $$2}' | \
 	column -t -s "$$(printf '\t')"
 	@echo ""
-	@$(MAKE) dump-env
-
-dump-env:
 	@echo "APP_NAME=$(APP_NAME)"
 	@echo "ENVIRONMENT=$(ENVIRONMENT)"
 	@echo "IMAGE_NAME=$(IMAGE_NAME)"

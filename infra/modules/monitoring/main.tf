@@ -4,7 +4,7 @@
 resource "aws_sns_topic" "this" {
   name = "${var.service_name}-monitoring"
 
-  # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary
+  # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary 
 }
 
 # Create CloudWatch alarms for the service
@@ -55,9 +55,8 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   namespace           = "AWS/ApplicationELB"
   period              = 60
   statistic           = "Average"
-  threshold           = 0.5
+  threshold           = 0.2
   alarm_description   = "High target latency alert"
-  treat_missing_data  = "ignore"
   alarm_actions       = [aws_sns_topic.this.arn]
   ok_actions          = [aws_sns_topic.this.arn]
 
@@ -66,40 +65,10 @@ resource "aws_cloudwatch_metric_alarm" "high_app_response_time" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "service_errors" {
-  alarm_name          = "${var.service_name}-errors"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  metric_name         = "ErrorCount"
-  namespace           = var.service_name
-  period              = 60
-  statistic           = "Sum"
-  threshold           = 0
-  treat_missing_data  = "ignore"
-  alarm_description   = "Alarm for service errors"
-  alarm_actions       = [aws_sns_topic.this.arn]
-  ok_actions          = [aws_sns_topic.this.arn]
-}
-
-
-resource "aws_cloudwatch_log_metric_filter" "service_error_filter" {
-
-  name           = "service-error-filter"
-  pattern        = "%ERROR | Exception%"         # pattern can find events in unstructured logs
-  log_group_name = "service/${var.service_name}" # cloudwatch log group for the ecs service
-
-  metric_transformation {
-    name      = "ErrorCount"
-    namespace = var.service_name # destination namespace for the metrics;
-    value     = 1                # value published to the metric name when a Filter Pattern match occurs.
-    unit      = "None"           # default option, just looking for errors
-  }
-}
-
 #email integration
 
 resource "aws_sns_topic_subscription" "email_integration" {
-  for_each  = var.email_alerts_subscription_list
+  for_each  = var.email_alert_recipients
   topic_arn = aws_sns_topic.this.arn
   protocol  = "email"
   endpoint  = each.value
@@ -114,4 +83,3 @@ resource "aws_sns_topic_subscription" "incident_management_service_integration" 
   protocol               = "https"
   topic_arn              = aws_sns_topic.this.arn
 }
-
