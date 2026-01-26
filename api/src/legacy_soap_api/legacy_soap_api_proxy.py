@@ -54,6 +54,11 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     logger.info("soap_client_certificate: Processing client certificate")
     # Handle cert based proxy request.
     temp_file_path = ""
+    # We intentionally do not use a context manager for this file here
+    # due to an issue with Python locking the file while open and
+    # OpenSSL throwing a PEM error and is not able to read from it as a result
+    # Issue discussed here:
+    # https://github.com/python/cpython/issues/58451
     try:
         temp_cert_file = get_cert_file(soap_auth, config)
         temp_file_path = temp_cert_file.name
