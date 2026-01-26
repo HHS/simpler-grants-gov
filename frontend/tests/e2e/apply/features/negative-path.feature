@@ -49,7 +49,7 @@ Scenario: Application shell fails to load when starting a new application
   ###########################################################################
   # 5. Workflow Status – Status Fails to Load
   ###########################################################################
-  Scenario: Workflow status cannot be retrieved
+  Scenario: Application status cannot be retrieved
     Given the user views the application summary
     When the system loads workflow status
     Then an error occurs
