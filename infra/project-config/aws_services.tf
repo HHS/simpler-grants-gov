@@ -17,7 +17,12 @@ locals {
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
     "cloudfront",
+=======
+
+    // Amazon CloudWatch – Monitors and logs AWS resources and applications.
+>>>>>>> after updating
 =======
 
     // Amazon CloudWatch – Monitors and logs AWS resources and applications.

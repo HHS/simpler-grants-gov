@@ -1,3 +1,4 @@
+<<<<<<< before updating
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -16,6 +17,8 @@ data "aws_subnets" "database" {
   }
 }
 
+=======
+>>>>>>> after updating
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
   # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
@@ -34,11 +37,14 @@ locals {
 
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
-  network_config     = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
+<<<<<<< before updating
   required_version = "1.14.3"
+=======
+  required_version = "~>1.10.0"
+>>>>>>> after updating
 
   required_providers {
     aws = {
@@ -67,19 +73,8 @@ module "app_config" {
   source = "../app-config"
 }
 
-data "aws_security_groups" "aws_services" {
-  filter {
-    name   = "group-name"
-    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-}
-
 module "database" {
+<<<<<<< before updating
   source                      = "../../modules/database"
   name                        = "${local.prefix}${local.database_config.cluster_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
@@ -100,4 +95,12 @@ module "database" {
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
   is_temporary                   = local.is_temporary
+=======
+  source = "../../modules/database/resources"
+  name   = "${local.prefix}${local.database_config.cluster_name}"
+
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
+  is_temporary = local.is_temporary
+>>>>>>> after updating
 }

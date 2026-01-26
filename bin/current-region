@@ -5,6 +5,7 @@ set -euo pipefail
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
 region=$(aws configure list | grep region | awk '{print $2}')
 if [ "$region" = ":" ]; then
     echo "Newer AWS CLI adds : in the region output" >&2
@@ -13,6 +14,8 @@ if [ "$region" = ":" ]; then
 fi
 echo -n "$region"
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======
@@ -42,6 +45,9 @@ region="$(aws configure list | grep region | awk '{$1=$1;print}' | awk -F '[ \t\
 echo -n "${region}"
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

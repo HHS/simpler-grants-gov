@@ -3,7 +3,10 @@ description: "Set up Terraform with the version stored in the .terraform-version
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======
@@ -14,6 +17,9 @@ inputs:
     default: ".terraform-version"
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

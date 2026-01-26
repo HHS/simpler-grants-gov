@@ -1,6 +1,7 @@
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
 resource "aws_wafv2_web_acl" "waf" {
   count = var.enable_load_balancer ? 1 : 0
   name  = "${var.service_name}-wafv2-web-acl"
@@ -241,12 +242,17 @@ resource "aws_wafv2_web_acl_association" "WafWebAclAssociation" {
 >>>>>>> after updating
 =======
 >>>>>>> after updating
+=======
+>>>>>>> after updating
 resource "aws_wafv2_web_acl_association" "main" {
   count        = var.enable_waf ? 1 : 0
   resource_arn = aws_lb.alb.arn
   web_acl_arn  = module.network.waf_arn
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

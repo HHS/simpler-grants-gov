@@ -59,6 +59,9 @@ output "public_endpoint" {
   value       = "${var.certificate_arn != null ? "https" : "http"}://${local.domain_name != null ? local.domain_name : aws_lb.alb.dns_name}"
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

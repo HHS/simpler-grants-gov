@@ -23,6 +23,9 @@ image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output 
 region="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".region")"
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

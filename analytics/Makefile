@@ -1,3 +1,4 @@
+<<<<<<< before updating
 #############
 # Constants #
 #############
@@ -83,6 +84,10 @@ setup: install login
 
 build:
 	docker compose build
+=======
+.PHONY: \
+	release-build
+>>>>>>> after updating
 
 release-build:
 	docker buildx build \
@@ -92,6 +97,7 @@ release-build:
 		--build-arg RUN_UID=$(RUN_UID) \
 		$(OPTS) \
 		.
+<<<<<<< before updating
 
 #########
 # Tests #
@@ -186,3 +192,5 @@ mb-backup:
 	$(POETRY) analytics metabase backup
 	@echo "====================================================="
 
+=======
+>>>>>>> after updating

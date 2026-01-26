@@ -94,11 +94,14 @@ locals {
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
   # Environment variables for migrator task - uses same DB_USER as app
   # The migrator task uses the migrator_task IAM role for OpenSearch ingest permissions
   # but connects to the database as the app user (which has legacy schema access)
   migrator_environment_variables = local.environment_variables
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======
@@ -121,6 +124,9 @@ locals {
   }]
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating
@@ -197,6 +203,7 @@ resource "aws_ecs_task_definition" "app" {
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
         command  = var.healthcheck_command
       } : null,
       environment = concat(local.environment_variables, [
@@ -207,6 +214,8 @@ resource "aws_ecs_task_definition" "app" {
       ]),
       secrets = var.secrets,
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======
@@ -281,6 +290,7 @@ resource "aws_ecs_task_definition" "app" {
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
       }
       secrets = [
         {
@@ -309,6 +319,8 @@ resource "aws_ecs_task_definition" "app" {
   cpu    = var.fargate_cpu
   memory = var.fargate_memory
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======

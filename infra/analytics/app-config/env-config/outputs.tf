@@ -2,11 +2,31 @@ output "database_config" {
   value = local.database_config
 }
 
+<<<<<<< before updating
+=======
+output "feature_flags_config" {
+  value = local.feature_flags_config
+}
+
+output "scheduled_jobs" {
+  value = local.scheduled_jobs
+}
+
+output "monitoring_config" {
+  value = local.monitoring_config
+}
+
+>>>>>>> after updating
 output "network_name" {
   value = var.network_name
 }
 
+output "domain_config" {
+  value = local.domain_config
+}
+
 output "service_config" {
+<<<<<<< before updating
   value = {
     region                   = var.default_region
     service_name             = "${local.prefix}${var.app_name}-${var.environment}"
@@ -31,6 +51,9 @@ output "service_config" {
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }
   }
+=======
+  value = local.service_config
+>>>>>>> after updating
 }
 
 output "identity_provider_config" {

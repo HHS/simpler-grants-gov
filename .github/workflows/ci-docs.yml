@@ -17,6 +17,7 @@ jobs:
 <<<<<<< before updating
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
       - name: Link Checker
         id: lychee
         uses: lycheeverse/lychee-action@v2
@@ -24,6 +25,8 @@ jobs:
           args: "--quiet --config ./.github/workflows/lychee.toml ."
           fail: true
 =======
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======
@@ -36,6 +39,9 @@ jobs:
           base-branch: "main"
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 =======
 >>>>>>> after updating

@@ -26,9 +26,12 @@ resource "aws_security_group" "alb" {
   vpc_id = module.network.vpc_id
 <<<<<<< before updating
 <<<<<<< before updating
+<<<<<<< before updating
 
 }
 
+=======
+>>>>>>> after updating
 =======
 >>>>>>> after updating
 =======
