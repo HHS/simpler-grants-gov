@@ -3,6 +3,7 @@
 set -euo pipefail
 
 <<<<<<< before updating
+<<<<<<< before updating
 region=$(aws configure list | grep region | awk '{print $2}')
 if [ "$region" = ":" ]; then
     echo "Newer AWS CLI adds : in the region output" >&2
@@ -11,6 +12,8 @@ if [ "$region" = ":" ]; then
 fi
 echo -n "$region"
 =======
+=======
+>>>>>>> after updating
 # The output format of `aws configure list` has changed over time, in particular
 # the separator between config item name and value. We want to support both the
 # older format:
@@ -34,4 +37,7 @@ echo -n "$region"
 # [1] https://github.com/aws/aws-cli/issues/7373
 region="$(aws configure list | grep region | awk '{$1=$1;print}' | awk -F '[ \t\n:]+' '{print $2}')"
 echo -n "${region}"
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating

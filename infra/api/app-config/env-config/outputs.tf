@@ -1,3 +1,4 @@
+<<<<<<< before updating
 output "search_config" {
   value = var.has_search ? {
     instance_type           = var.search_data_instance_type
@@ -11,13 +12,34 @@ output "search_config" {
 
 output "database_config" {
   value = local.database_config
+=======
+output "database_config" {
+  value = local.database_config
+}
+
+output "feature_flags_config" {
+  value = local.feature_flags_config
+}
+
+output "scheduled_jobs" {
+  value = local.scheduled_jobs
+}
+
+output "monitoring_config" {
+  value = local.monitoring_config
+>>>>>>> after updating
 }
 
 output "network_name" {
   value = var.network_name
 }
 
+output "domain_config" {
+  value = local.domain_config
+}
+
 output "service_config" {
+<<<<<<< before updating
   value = {
     region                          = var.default_region
     instance_desired_instance_count = var.instance_desired_instance_count
@@ -51,6 +73,9 @@ output "service_config" {
       job_name => merge({ source_bucket = local.bucket_name }, job_config)
     }
   }
+=======
+  value = local.service_config
+>>>>>>> after updating
 }
 
 output "identity_provider_config" {

@@ -23,6 +23,9 @@ jobs:
 =======
     runs-on: ubuntu-latest
 
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
     steps:
       - name: Checkout code

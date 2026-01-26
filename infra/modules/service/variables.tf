@@ -1,4 +1,5 @@
 <<<<<<< before updating
+<<<<<<< before updating
 variable "aws_services_security_group_id" {
   type        = string
   description = "Security group ID for VPC endpoints that access AWS Services"
@@ -6,6 +7,8 @@ variable "aws_services_security_group_id" {
 
 variable "image_repository_name" {
 =======
+=======
+>>>>>>> after updating
 variable "certificate_arn" {
 >>>>>>> after updating
   type        = string
@@ -53,6 +56,9 @@ variable "cpu" {
   type        = number
   default     = 256
   description = "Number of cpu units used by the task, expressed as an integer value, e.g 512"
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 }
 
@@ -270,6 +276,7 @@ variable "fluent_bit_cpu" {
   description = "Amount of cpu used by the fluent bit container"
 }
 
+<<<<<<< before updating
 variable "fargate_cpu" {
   type        = number
   default     = 2048
@@ -288,6 +295,14 @@ variable "network_name" {
 
 }
 
+=======
+variable "network_name" {
+  type        = string
+  description = "The name of the network within which the service will run"
+
+}
+
+>>>>>>> after updating
 variable "project_name" {
   type        = string
   description = "The name of the project"
@@ -330,6 +345,7 @@ variable "ephemeral_write_volumes" {
   type        = set(string)
   description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These need to be declared with `VOLUME` instructions in the container build file."
   default     = []
+<<<<<<< before updating
 }
 
 variable "pinpoint_app_id" {
@@ -384,4 +400,6 @@ variable "opensearch_ingest_policy_arn" {
   description = "The ARN of the IAM policy for OpenSearch ingest operations. When provided, attaches to the migrator role for scheduled data loading jobs."
   type        = string
   default     = null
+=======
+>>>>>>> after updating
 }

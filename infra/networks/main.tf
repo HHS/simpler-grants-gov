@@ -45,7 +45,11 @@ locals {
 
 terraform {
 <<<<<<< before updating
+<<<<<<< before updating
   required_version = "1.14.3"
+=======
+  required_version = "~>1.10.0"
+>>>>>>> after updating
 =======
   required_version = "~>1.10.0"
 >>>>>>> after updating
@@ -74,6 +78,7 @@ module "project_config" {
 }
 
 <<<<<<< before updating
+<<<<<<< before updating
 module "app_config" {
   source = "../api/app-config"
 }
@@ -87,6 +92,15 @@ module "network" {
   second_octet                            = module.project_config.network_configs[var.environment_name].second_octet
   has_external_non_aws_service            = local.has_external_non_aws_service
   enable_command_execution                = local.enable_command_execution
+=======
+module "network" {
+  source                       = "../modules/network/resources"
+  name                         = var.network_name
+  has_database                 = local.has_database
+  has_external_non_aws_service = local.has_external_non_aws_service
+  enable_command_execution     = local.enable_command_execution
+  enable_notifications         = local.enable_notifications
+>>>>>>> after updating
 }
 
 module "dms_networking" {

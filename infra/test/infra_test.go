@@ -9,7 +9,11 @@ package test
 
 import (
 <<<<<<< before updating
+<<<<<<< before updating
 	"flag"
+=======
+	"crypto/tls"
+>>>>>>> after updating
 =======
 	"crypto/tls"
 >>>>>>> after updating
@@ -28,7 +32,11 @@ import (
 var uniqueId = strings.ToLower(generateTestId())
 var workspaceName = fmt.Sprintf("t-%s", uniqueId)
 <<<<<<< before updating
+<<<<<<< before updating
 var appName = flag.String("app_name", "", "name of subdirectory that holds the app's infrastructure code")
+=======
+var testAppName = os.Getenv("APP_NAME")
+>>>>>>> after updating
 =======
 var testAppName = os.Getenv("APP_NAME")
 >>>>>>> after updating
@@ -42,7 +50,11 @@ func TestService(t *testing.T) {
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		Reconfigure:  true,
 <<<<<<< before updating
+<<<<<<< before updating
 		TerraformDir: fmt.Sprintf("../%s/service/", *appName),
+=======
+		TerraformDir: fmt.Sprintf("../%s/service/", testAppName),
+>>>>>>> after updating
 =======
 		TerraformDir: fmt.Sprintf("../%s/service/", testAppName),
 >>>>>>> after updating
@@ -70,6 +82,7 @@ func TestService(t *testing.T) {
 	RunEndToEndTests(t, terraformOptions)
 }
 
+<<<<<<< before updating
 <<<<<<< before updating
 func BuildAndPublish(t *testing.T) {
 	fmt.Println("::group::Initialize build-repository module")
@@ -109,6 +122,11 @@ func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
 	fmt.Println("::group::Wait for service to be stable")
 	appName := testAppName
 >>>>>>> after updating
+=======
+func WaitForServiceToBeStable(t *testing.T, workspaceName string) {
+	fmt.Println("::group::Wait for service to be stable")
+	appName := testAppName
+>>>>>>> after updating
 	environmentName := "dev"
 	serviceName := fmt.Sprintf("%s-%s-%s", workspaceName, appName, environmentName)
 	shell.RunCommand(t, shell.Command{
@@ -132,11 +150,14 @@ func RunEndToEndTests(t *testing.T, terraformOptions *terraform.Options) {
 	tlsConfig := tls.Config{InsecureSkipVerify: true}
 
 	http_helper.HttpGetWithRetryWithCustomValidation(t, serviceEndpoint+"/health", &tlsConfig, 5, 1*time.Second, func(responseStatus int, responseBody string) bool {
+<<<<<<< before updating
 		return responseStatus == 200
 	})
 	// Hit feature flags endpoint to make sure Evidently integration is working
 	featureFlagsEndpoint := fmt.Sprintf("%s/feature-flags", serviceEndpoint)
 	http_helper.HttpGetWithRetryWithCustomValidation(t, featureFlagsEndpoint, nil, 5, 1*time.Second, func(responseStatus int, responseBody string) bool {
+=======
+>>>>>>> after updating
 		return responseStatus == 200
 	})
 	fmt.Println("::endgroup::")

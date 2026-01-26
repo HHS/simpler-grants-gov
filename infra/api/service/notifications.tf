@@ -1,4 +1,6 @@
 locals {
+  notifications_config = local.environment_config.notifications_config
+
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
   domain_identity_arn = local.notifications_config != null ? (
     !local.is_temporary ?
@@ -20,7 +22,8 @@ module "notifications_email_domain" {
   count  = local.notifications_config != null && !local.is_temporary ? 1 : 0
   source = "../../modules/notifications-email-domain/resources"
 
-  domain_name = local.network_config.domain_config.hosted_zone
+  domain_name    = module.domain.domain_name
+  hosted_zone_id = module.domain.hosted_zone_id
 }
 
 # If the app has `enable_notifications` set to true AND this *is* a temporary
@@ -29,7 +32,7 @@ module "existing_notifications_email_domain" {
   count  = local.notifications_config != null && local.is_temporary ? 1 : 0
   source = "../../modules/notifications-email-domain/data"
 
-  domain_name = local.network_config.domain_config.hosted_zone
+  domain_name = module.domain.domain_name
 }
 
 # If the app has `enable_notifications` set to true, create a new email notification

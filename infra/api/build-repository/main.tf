@@ -21,7 +21,11 @@ locals {
 }
 
 terraform {
+<<<<<<< before updating
   required_version = "1.14.3"
+=======
+  required_version = "~>1.10.0"
+>>>>>>> after updating
 
   required_providers {
     aws = {

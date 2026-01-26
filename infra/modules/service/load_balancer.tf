@@ -92,12 +92,15 @@ resource "aws_lb_listener_rule" "http_to_https_redirect" {
 
 resource "aws_lb_listener_rule" "app_http_forward" {
 <<<<<<< before updating
+<<<<<<< before updating
   # there is no mtls for http so we don't need to do the same dance here
   count = var.enable_load_balancer ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http[0].arn
   priority     = 111
 =======
+=======
+>>>>>>> after updating
   count = var.certificate_arn == null ? 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_http.arn
@@ -176,6 +179,7 @@ resource "aws_lb_target_group" "app_tg" {
   port                 = var.container_port
   protocol             = "HTTP"
   vpc_id               = module.network.vpc_id
+<<<<<<< before updating
   target_type          = "ip"
   deregistration_delay = "30"
 
@@ -204,6 +208,8 @@ resource "aws_lb_target_group" "mtls_tg" {
   port                 = var.container_port
   protocol             = "HTTP"
   vpc_id               = var.vpc_id
+=======
+>>>>>>> after updating
   target_type          = "ip"
   deregistration_delay = "30"
 

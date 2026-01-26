@@ -30,12 +30,18 @@ __check_defined = \
 	e2e-build \
 	e2e-clean-report \
 <<<<<<< before updating
+<<<<<<< before updating
 	e2e-delete-image \
 =======
+=======
+>>>>>>> after updating
 	e2e-format \
 	e2e-format-check \
 	e2e-format-check-native \
 	e2e-format-native \
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 	e2e-merge-reports \
 	e2e-setup \
@@ -48,6 +54,9 @@ __check_defined = \
 	e2e-test-native-ui \
 	e2e-type-check \
 	e2e-type-check-native \
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 	help \
 	infra-check-app-database-roles \
@@ -97,6 +106,7 @@ e2e-clean-report: ## Remove the local ./e2e/playwright-report and ./e2e/test-res
 	rm -rf ./e2e/test-results
 
 <<<<<<< before updating
+<<<<<<< before updating
 e2e-delete-image: ## Delete the Docker image for e2e tests
 	@docker rmi -f playwright-e2e 2>/dev/null || echo "Docker image playwright-e2e does not exist, skipping."
 
@@ -125,6 +135,19 @@ e2e-format-check: e2e-build
 e2e-format-check-native: ## Format check without autofix natively
 	cd e2e && npm run format:check
 
+=======
+e2e-format: ## Format code with autofix inside Docker
+e2e-format: e2e-build
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run format
+
+e2e-format-check: ## Format check without autofix inside Docker
+e2e-format-check: e2e-build
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run format:check
+
+e2e-format-check-native: ## Format check without autofix natively
+	cd e2e && npm run format:check
+
+>>>>>>> after updating
 e2e-format-native: ## Format code with autofix natively
 	cd e2e && npm run format
 
@@ -139,6 +162,9 @@ e2e-setup-ci: ## Setup end-to-end tests for CI
 
 e2e-show-report: ## Show the E2E report
 	cd e2e && npm run show-report
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 
 e2e-test: ## Run E2E Playwright tests in a Docker container and copy the report locally
@@ -153,10 +179,13 @@ e2e-test: e2e-build
 		-e TOTAL_SHARDS=$(TOTAL_SHARDS) \
 		-e CI=$(CI) \
 <<<<<<< before updating
+<<<<<<< before updating
 		-v $(PWD)/e2e/playwright-report:/e2e/playwright-report \
 		-v $(PWD)/e2e/blob-report:/e2e/blob-report \
 		playwright-e2e
 =======
+=======
+>>>>>>> after updating
 		-v $(CURDIR)/e2e/playwright-report:/e2e/playwright-report \
 		-v $(CURDIR)/e2e/blob-report:/e2e/blob-report \
 		$(E2E_IMAGE_NAME) \
@@ -169,8 +198,11 @@ e2e-test-native: ## Run end-to-end tests
 	@:$(call check_defined, BASE_URL, You must pass in a BASE_URL)
 	@echo "Running e2e tests with CI=${CI}, APP_NAME=${APP_NAME}, BASE_URL=${BASE_URL}"
 <<<<<<< before updating
+<<<<<<< before updating
 	@cd e2e/$(APP_NAME) && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npx playwright test $(E2E_ARGS)
 =======
+=======
+>>>>>>> after updating
 	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm test -- $(E2E_ARGS)
 
 e2e-test-native-ui: ## Run end-to-end tests natively in UI mode
@@ -183,6 +215,9 @@ e2e-type-check: ## Run TypeScript type checking in Docker
 
 e2e-type-check-native: ## Run TypeScript type checking natively
 	cd e2e && npm run type-check -- $(TYPE_CHECK_ARGS)
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 
 ###########
@@ -352,6 +387,7 @@ else
 	endif
 endif
 
+<<<<<<< before updating
 
 # Generate an informational tag so we can see where every image comes from.
 DATE := $(shell date -u '+%Y%m%d.%H%M%S')
@@ -361,6 +397,12 @@ release-build: ## Build release for $APP_NAME and tag it with current git hash
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	cd $(APP_NAME) && $(MAKE) release-build \
 		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) --load -t $(IMAGE_NAME):$(IMAGE_TAG) $(OPTIONAL_BUILD_FLAGS)"
+=======
+release-build: ## Build release for $APP_NAME and tag it with current git hash
+	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
+	cd $(APP_NAME) && $(MAKE) release-build \
+		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) $(OPTS)"
+>>>>>>> after updating
 =======
 release-build: ## Build release for $APP_NAME and tag it with current git hash
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

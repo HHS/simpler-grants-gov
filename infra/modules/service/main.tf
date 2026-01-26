@@ -92,11 +92,14 @@ locals {
   )
 
 <<<<<<< before updating
+<<<<<<< before updating
   # Environment variables for migrator task - uses same DB_USER as app
   # The migrator task uses the migrator_task IAM role for OpenSearch ingest permissions
   # but connects to the database as the app user (which has legacy schema access)
   migrator_environment_variables = local.environment_variables
 =======
+=======
+>>>>>>> after updating
   ephemeral_write_volumes_with_name = [for container_path in var.ephemeral_write_volumes : {
     container_path : container_path,
     # Derive the volume name from the destination path for simplicity, though
@@ -113,6 +116,9 @@ locals {
     },
     volume : { "name" : e.volume_name }
   }]
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 }
 
@@ -183,6 +189,7 @@ resource "aws_ecs_task_definition" "app" {
         retries  = 3,
         timeout  = 5,
 <<<<<<< before updating
+<<<<<<< before updating
         command  = var.healthcheck_command
       } : null,
       environment = concat(local.environment_variables, [
@@ -193,6 +200,8 @@ resource "aws_ecs_task_definition" "app" {
       ]),
       secrets = var.secrets,
 =======
+=======
+>>>>>>> after updating
         # If a `healthcheck` executable is available in the container's $PATH,
         # use that, otherwise fall back the first available of: wget, curl, or
         # bash.
@@ -261,6 +270,7 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
 <<<<<<< before updating
+<<<<<<< before updating
       }
       secrets = [
         {
@@ -289,6 +299,8 @@ resource "aws_ecs_task_definition" "app" {
   cpu    = var.fargate_cpu
   memory = var.fargate_memory
 =======
+=======
+>>>>>>> after updating
       },
       mountPoints    = local.ephemeral_write_volume_configs[*].mount_point
       systemControls = []

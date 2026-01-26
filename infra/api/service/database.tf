@@ -1,4 +1,7 @@
+<<<<<<< before updating
 
+=======
+>>>>>>> after updating
 locals {
   database_config = local.environment_config.database_config
 }

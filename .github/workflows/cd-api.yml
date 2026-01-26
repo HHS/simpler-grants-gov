@@ -1,5 +1,12 @@
+<<<<<<< before updating
 name: Deploy API
 run-name: Deploy ${{ inputs.version || 'main' }} to API ${{ inputs.environment || 'nonprod' }}
+=======
+name: Deploy api
+# Need to set a default value for when the workflow is triggered from a git push
+# which bypasses the default configuration for inputs
+run-name: Deploy ${{inputs.version || 'main' }} to api ${{ inputs.environment || 'dev' }}
+>>>>>>> after updating
 
 on:
   push:
@@ -7,10 +14,15 @@ on:
       - "main"
     paths:
       - "api/**"
+<<<<<<< before updating
       - "infra/api/**"
       - "infra/modules/**"
   # Release deployments are handled by cd-release.yml to enforce deployment order
   # (API -> Frontend -> NOFOs -> Analytics)
+=======
+      - "bin/**"
+      - "infra/**"
+>>>>>>> after updating
   workflow_dispatch:
     inputs:
       environment:
@@ -40,8 +52,12 @@ jobs:
       app_name: api
 
   deploy:
+<<<<<<< before updating
     name: Deploy
     needs: [api-checks, vulnerability-scans]
+=======
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+>>>>>>> after updating
     uses: ./.github/workflows/deploy.yml
     strategy:
       max-parallel: 1
@@ -50,6 +66,7 @@ jobs:
         envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]')  }}
     with:
       app_name: "api"
+<<<<<<< before updating
       environment: ${{ matrix.envs }}
       version: ${{ inputs.version || github.ref }}
 
@@ -57,4 +74,8 @@ jobs:
     if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: [api-checks, vulnerability-scans, deploy]
     uses: ./.github/workflows/send-slack-notification.yml
+=======
+      environment: ${{ inputs.environment || 'dev' }}
+      version: ${{ inputs.version || 'main' }}
+>>>>>>> after updating
     secrets: inherit

@@ -21,6 +21,9 @@ terraform -chdir="infra/${app_name}/app-config" init > /dev/null
 terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
 image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".name")"
 region="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".region")"
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
 
 result=""

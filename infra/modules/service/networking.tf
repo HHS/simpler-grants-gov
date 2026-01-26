@@ -24,9 +24,12 @@ resource "aws_security_group" "alb" {
   }
 
   vpc_id = module.network.vpc_id
+<<<<<<< before updating
 
 }
 
+=======
+>>>>>>> after updating
 
 resource "aws_security_group_rule" "http_ingress" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80

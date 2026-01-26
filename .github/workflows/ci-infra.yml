@@ -24,6 +24,9 @@ jobs:
 =======
     runs-on: ubuntu-latest
 
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +47,9 @@ jobs:
 =======
     runs-on: ubuntu-latest
 
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
     steps:
       - uses: actions/checkout@v4
@@ -54,30 +60,6 @@ jobs:
   check-terraform-format:
     name: Check Terraform format
 <<<<<<< before updating
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.14.3
-          terraform_wrapper: false
-=======
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Terraform
-        uses: ./.github/actions/setup-terraform
-
->>>>>>> after updating
-      - name: Run infra-lint-terraform
-        run: |
-          echo "If this fails, run 'make infra-format'"
-          make infra-lint-terraform
-
-  validate-terraform:
-    name: Validate Terraform modules
 <<<<<<< before updating
     runs-on: ubuntu-22.04
     steps:
@@ -91,10 +73,54 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+>>>>>>> after updating
 
       - name: Set up Terraform
         uses: ./.github/actions/setup-terraform
 
+<<<<<<< before updating
+>>>>>>> after updating
+=======
+>>>>>>> after updating
+      - name: Run infra-lint-terraform
+        run: |
+          echo "If this fails, run 'make infra-format'"
+          make infra-lint-terraform
+
+  validate-terraform:
+    name: Validate Terraform modules
+<<<<<<< before updating
+<<<<<<< before updating
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.3
+          terraform_wrapper: false
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+>>>>>>> after updating
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
       - name: Validate
         run: make infra-validate-modules
@@ -106,6 +132,9 @@ jobs:
 =======
     runs-on: ubuntu-latest
 
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
     steps:
       - uses: actions/checkout@v4
@@ -117,6 +146,9 @@ jobs:
 =======
           python-version: "3.10"
 
+<<<<<<< before updating
+>>>>>>> after updating
+=======
 >>>>>>> after updating
       - name: Run Checkov check
         # Pin to specific checkov version rather than running from checkov@master
