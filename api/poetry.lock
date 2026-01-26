@@ -52,22 +52,23 @@ trio = ["trio (>=0.31.0) ; python_version < \"3.10\"", "trio (>=0.32.0) ; python
 
 [[package]]
 name = "apiflask"
-version = "2.4.0"
-description = "A lightweight web API framework based on Flask and marshmallow-code projects."
+version = "3.0.2"
+description = "A lightweight web API framework based on Flask."
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "apiflask-2.4.0-py3-none-any.whl", hash = "sha256:a2a3fc8d5563609f7a1de573144b4ff5a73ffe07d6e56ab7790e41a07b8d87d4"},
-    {file = "apiflask-2.4.0.tar.gz", hash = "sha256:b7894741cdea90013276873cdf635d5150e1deb3fe20d02d429866af960f275f"},
+    {file = "apiflask-3.0.2-py3-none-any.whl", hash = "sha256:fd9865fd6d4e331b4e4c9482f1e1c43981b47b97eab68be0d81122398b6dad91"},
+    {file = "apiflask-3.0.2.tar.gz", hash = "sha256:106c3011da9f7fff86e33ea47294f84b4d0f7c121d67af6aac387363af997443"},
 ]
 
 [package.dependencies]
-apispec = ">=6"
-flask = ">=2"
-flask-httpauth = ">=4"
+apispec = ">=6.0.0"
+flask = ">=2.1.0"
+flask-httpauth = ">=4.8.0"
 flask-marshmallow = ">=1.0.0"
 marshmallow = ">=3.20"
+pydantic = {version = ">=2.0", extras = ["email"]}
 webargs = ">=8.3"
 
 [package.extras]
@@ -764,6 +765,27 @@ files = [
 ]
 
 [[package]]
+name = "dnspython"
+version = "2.8.0"
+description = "DNS toolkit"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af"},
+    {file = "dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f"},
+]
+
+[package.extras]
+dev = ["black (>=25.1.0)", "coverage (>=7.0)", "flake8 (>=7)", "hypercorn (>=0.17.0)", "mypy (>=1.17)", "pylint (>=3)", "pytest (>=8.4)", "pytest-cov (>=6.2.0)", "quart-trio (>=0.12.0)", "sphinx (>=8.2.0)", "sphinx-rtd-theme (>=3.0.0)", "twine (>=6.1.0)", "wheel (>=0.45.0)"]
+dnssec = ["cryptography (>=45)"]
+doh = ["h2 (>=4.2.0)", "httpcore (>=1.0.0)", "httpx (>=0.28.0)"]
+doq = ["aioquic (>=1.2.0)"]
+idna = ["idna (>=3.10)"]
+trio = ["trio (>=0.30)"]
+wmi = ["wmi (>=1.5.1) ; platform_system == \"Windows\""]
+
+[[package]]
 name = "docraptor"
 version = "3.1.0"
 description = "DocRaptor"
@@ -794,6 +816,22 @@ files = [
 
 [package.extras]
 dev = ["Sphinx", "coverage", "flake8", "lxml", "lxml-stubs", "memory-profiler", "memray", "mypy", "tox", "xmlschema (>=3.3.2)"]
+
+[[package]]
+name = "email-validator"
+version = "2.3.0"
+description = "A robust email address syntax and deliverability validation library."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4"},
+    {file = "email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426"},
+]
+
+[package.dependencies]
+dnspython = ">=2.0.0"
+idna = ">=2.0.0"
 
 [[package]]
 name = "eralchemy"
@@ -2375,6 +2413,7 @@ files = [
 
 [package.dependencies]
 annotated-types = ">=0.6.0"
+email-validator = {version = ">=2.0.0", optional = true, markers = "extra == \"email\""}
 pydantic-core = "2.41.5"
 typing-extensions = ">=4.14.1"
 typing-inspection = ">=0.4.2"
@@ -3658,4 +3697,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.14"
-content-hash = "f7882996509ae1da961daead4926e858d5de9fa15207001cac75ad8dd8e7c0ef"
+content-hash = "00e397c923fd84276404f42cb53822065bc9ae145ee3d29839c5bc0a3f9dcbc4"

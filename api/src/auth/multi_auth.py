@@ -1,9 +1,7 @@
-from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, cast
 
-from flask_httpauth import MultiAuth
+from apiflask import MultiAuth
 
 from ..db.models.competition_models import ShortLivedInternalToken
 from ..db.models.user_models import User, UserApiKey, UserTokenSession
@@ -29,7 +27,7 @@ class MultiAuthUser:
 class MultiHttpTokenAuth(MultiAuth):
 
     def get_user(self) -> MultiAuthUser:
-        current_user = self.current_user()
+        current_user = self.current_user
 
         if isinstance(current_user, ApiKeyUser):
             return MultiAuthUser(current_user, AuthType.API_KEY_AUTH)
@@ -48,7 +46,7 @@ class MultiHttpTokenAuth(MultiAuth):
 
 class MultiHttpTokenAuthSimpler(MultiAuth):
     def get_user(self) -> User:
-        current_user = self.current_user()
+        current_user = self.current_user
 
         if isinstance(current_user, UserTokenSession) or isinstance(current_user, UserApiKey):
             return current_user.user
@@ -96,45 +94,6 @@ api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
 jwt_or_api_user_key_multi_auth = MultiHttpTokenAuthSimpler(api_jwt_auth, api_user_key_auth)
 
 
-# Helper function to format security schemes for OpenAPI
-def _get_security_requirement(schemes: Sequence[str | None]) -> list[str | dict[str, list[Any]]]:
-    # Only include scheme names that are not None and cast to the expected type
-    # for APIScaffold.doc's security parameter
-    return cast(
-        list[str | dict[str, list[Any]]], [{scheme: []} for scheme in schemes if scheme is not None]
-    )
-
-
-# List of security scheme names
-jwt_or_key_security_schemes = _get_security_requirement(
-    [api_jwt_auth.security_scheme_name, api_key_auth.security_scheme_name]
-)
-
-# List of security scheme names for application endpoints
-jwt_key_or_internal_security_schemes = _get_security_requirement(
-    [
-        api_jwt_auth.security_scheme_name,
-        internal_jwt_auth.security_scheme_name,
-    ]
-)
-
-# List of security scheme names for API key multi-auth
-api_key_multi_auth_security_schemes = _get_security_requirement(
-    [
-        api_user_key_auth.security_scheme_name,
-        api_key_auth.security_scheme_name,
-    ]
-)
-
-# List of security scheme names for JWT or API User Key multi-auth
-jwt_or_api_user_key_security_schemes = _get_security_requirement(
-    [
-        api_jwt_auth.security_scheme_name,
-        api_user_key_auth.security_scheme_name,
-    ]
-)
-
-
 # Define the multi auth that supports both user-connected auth methods:
 # * User JWT auth (X-SGG-Token header)
 # * User API Key auth (X-API-Key header)
@@ -142,11 +101,3 @@ jwt_or_api_user_key_security_schemes = _get_security_requirement(
 # Both of these auth methods connect to a user, so the implementation is similar.
 # This is useful for application endpoints that need to support both auth types.
 jwt_or_user_api_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_user_key_auth)
-
-# List of security scheme names for JWT or User API Key multi-auth
-jwt_or_user_api_key_security_schemes = _get_security_requirement(
-    [
-        api_jwt_auth.security_scheme_name,
-        api_user_key_auth.security_scheme_name,
-    ]
-)
