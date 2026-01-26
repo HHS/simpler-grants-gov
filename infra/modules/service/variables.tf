@@ -1,9 +1,13 @@
+<<<<<<< before updating
 variable "aws_services_security_group_id" {
   type        = string
   description = "Security group ID for VPC endpoints that access AWS Services"
 }
 
 variable "image_repository_name" {
+=======
+variable "certificate_arn" {
+>>>>>>> after updating
   type        = string
   description = "The name of the container image repository"
   default     = null
@@ -15,6 +19,7 @@ variable "container_port" {
   default     = 8000
 }
 
+<<<<<<< before updating
 variable "environment_name" {
   type        = string
   description = "The name of the environment"
@@ -43,6 +48,12 @@ variable "enable_drafts_bucket" {
   description = "does the service need a private S3 bucket for draft document storage"
   type        = bool
   default     = false
+=======
+variable "cpu" {
+  type        = number
+  default     = 256
+  description = "Number of cpu units used by the task, expressed as an integer value, e.g 512"
+>>>>>>> after updating
 }
 
 variable "db_vars" {
@@ -78,6 +89,12 @@ variable "enable_command_execution" {
   type        = bool
   default     = false
   description = "Whether the service should enable ECS Exec, such as for debugging"
+}
+
+variable "enable_waf" {
+  type        = bool
+  description = "Whether to enable WAF protection for the load balancer"
+  default     = false
 }
 
 variable "extra_environment_variables" {
@@ -204,7 +221,7 @@ variable "file_upload_jobs" {
 
       ["python", "etl.py", "<object_key>"]
 
-    Then if an object was uploaded tos3://somebucket/path/to/file.txt, the
+    Then if an object was uploaded to s3://somebucket/path/to/file.txt, the
     task will execute the command:
 
       python etl.py path/to/file.txt
@@ -265,14 +282,15 @@ variable "fargate_memory" {
   description = "Total memory for all the containers in the task definiton, must be equal to or less than the total memory allocated for the app and fluentbit container"
 }
 
-variable "private_subnet_ids" {
-  type        = list(any)
-  description = "Private subnet ids in VPC"
+variable "network_name" {
+  type        = string
+  description = "The name of the network within which the service will run"
+
 }
 
-variable "public_subnet_ids" {
-  type        = list(any)
-  description = "Public subnet ids in VPC"
+variable "project_name" {
+  type        = string
+  description = "The name of the project"
 }
 
 variable "scheduled_jobs" {
@@ -308,9 +326,10 @@ variable "service_name" {
   }
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "Uniquely identifies the VPC."
+variable "ephemeral_write_volumes" {
+  type        = set(string)
+  description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These need to be declared with `VOLUME` instructions in the container build file."
+  default     = []
 }
 
 variable "pinpoint_app_id" {

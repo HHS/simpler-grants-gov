@@ -3,10 +3,6 @@ output "aws_services" {
   value       = local.aws_services
 }
 
-output "aws_services_security_group_name_prefix" {
-  value = local.aws_services_security_group_name_prefix
-}
-
 output "code_repository" {
   value       = regex("([-_\\w]+/[-_\\w]+)(\\.git)?$", local.code_repository_url)[0]
   description = "The 'org/repo' string of the repo (e.g. 'navapbc/template-infra'). This is extracted from the repo URL (e.g. 'git@github.com:navapbc/template-infra.git' or 'https://github.com/navapbc/template-infra.git')"

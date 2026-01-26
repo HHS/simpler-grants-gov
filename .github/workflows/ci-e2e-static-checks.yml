@@ -1,0 +1,47 @@
+name: CI E2E static checks
+run-name: CI E2E static checks
+
+on:
+  pull_request:
+    paths:
+      - "e2e/**"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  static-checks:
+    name: ${{ matrix.check.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - name: Format
+            command: make e2e-format-check-native
+          - name: Typecheck
+            command: make e2e-type-check-native
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cache Node.js dependencies
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache-node.outputs.cache-hit != 'true'
+        run: make e2e-setup-ci
+
+      - name: ${{ matrix.check.name }}
+        run: ${{ matrix.check.command }}

@@ -19,25 +19,41 @@ jobs:
     # Lint github actions files using https://github.com/rhysd/actionlint
     # This job configuration is largely copied from https://github.com/rhysd/actionlint/blob/main/docs/usage.md#use-actionlint-on-github-actions
     name: Lint GitHub Actions workflows
+<<<<<<< before updating
     runs-on: ubuntu-22.04
+=======
+    runs-on: ubuntu-latest
+
+>>>>>>> after updating
     steps:
       - uses: actions/checkout@v4
+
       - name: Download actionlint
         id: get_actionlint
         run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
         shell: bash
+
       - name: Check workflow files
         run: ${{ steps.get_actionlint.outputs.executable }} -color
         shell: bash
+
   lint-scripts:
     name: Lint scripts
+<<<<<<< before updating
     runs-on: ubuntu-22.04
+=======
+    runs-on: ubuntu-latest
+
+>>>>>>> after updating
     steps:
       - uses: actions/checkout@v4
+
       - name: Shellcheck
         run: make infra-lint-scripts
+
   check-terraform-format:
     name: Check Terraform format
+<<<<<<< before updating
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -45,12 +61,24 @@ jobs:
         with:
           terraform_version: 1.14.3
           terraform_wrapper: false
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+>>>>>>> after updating
       - name: Run infra-lint-terraform
         run: |
           echo "If this fails, run 'make infra-format'"
           make infra-lint-terraform
+
   validate-terraform:
     name: Validate Terraform modules
+<<<<<<< before updating
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -58,16 +86,38 @@ jobs:
         with:
           terraform_version: 1.14.3
           terraform_wrapper: false
-      - name: Validate
-        run: make infra-validate-modules
-  check-compliance-with-checkov:
-    name: Check compliance with checkov
-    runs-on: ubuntu-22.04
+=======
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+>>>>>>> after updating
+      - name: Validate
+        run: make infra-validate-modules
+
+  check-compliance-with-checkov:
+    name: Check compliance with checkov
+<<<<<<< before updating
+    runs-on: ubuntu-22.04
+=======
+    runs-on: ubuntu-latest
+
+>>>>>>> after updating
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
+<<<<<<< before updating
           python-version: "3.14"
+=======
+          python-version: "3.10"
+
+>>>>>>> after updating
       - name: Run Checkov check
         # Pin to specific checkov version rather than running from checkov@master
         # since checkov frequently adds new checks that can cause CI checks to fail unpredictably.
@@ -79,6 +129,7 @@ jobs:
           directory: infra
           framework: terraform
           quiet: true # only displays failed checks
+
   check-compliance-with-tfsec:
     name: Check compliance with tfsec
     runs-on: ubuntu-22.04
@@ -89,6 +140,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Run tfsec check
         uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
         with:

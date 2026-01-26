@@ -19,6 +19,5 @@ else
     link_check_cmd="npx markdown-link-check"
 fi
 
-# Recursively find all markdown files (*.md) in the current directory, excluding node_modules and .venv subfolders.
-# Pass them in as args to the lint command using the handy `xargs` command.
-find . -name \*.md -not -path "*/node_modules/*" -not -path "*/.venv/*" -not -path "*/.terraform/*" -print0 | xargs -0 -I{} sh -c "${link_check_cmd} --quiet --config ${link_check_config} {}"
+# Run the linter against each markdown file that's tracked in git
+git ls-files -z '*.md' | xargs -0 -I{} sh -c "${link_check_cmd} --quiet --config ${link_check_config} {}"

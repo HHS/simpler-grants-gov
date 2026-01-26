@@ -91,10 +91,29 @@ locals {
     ])
   )
 
+<<<<<<< before updating
   # Environment variables for migrator task - uses same DB_USER as app
   # The migrator task uses the migrator_task IAM role for OpenSearch ingest permissions
   # but connects to the database as the app user (which has legacy schema access)
   migrator_environment_variables = local.environment_variables
+=======
+  ephemeral_write_volumes_with_name = [for container_path in var.ephemeral_write_volumes : {
+    container_path : container_path,
+    # Derive the volume name from the destination path for simplicity, though
+    # note the name does have a limit of 255 characters.
+    #
+    # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specify-bind-mount-config.html
+    volume_name : replace(trim(container_path, "/"), "/", "_"),
+  }]
+  ephemeral_write_volume_configs = [for e in local.ephemeral_write_volumes_with_name : {
+    mount_point : {
+      "sourceVolume" : e.volume_name
+      "containerPath" : e.container_path,
+      "readOnly" : false
+    },
+    volume : { "name" : e.volume_name }
+  }]
+>>>>>>> after updating
 }
 
 #-------------------
@@ -117,7 +136,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     assign_public_ip = false
-    subnets          = var.private_subnet_ids
+    subnets          = module.network.private_subnet_ids
     security_groups  = [aws_security_group.app.id]
   }
 
@@ -163,6 +182,7 @@ resource "aws_ecs_task_definition" "app" {
         interval = 30,
         retries  = 3,
         timeout  = 5,
+<<<<<<< before updating
         command  = var.healthcheck_command
       } : null,
       environment = concat(local.environment_variables, [
@@ -172,6 +192,17 @@ resource "aws_ecs_task_definition" "app" {
         }
       ]),
       secrets = var.secrets,
+=======
+        # If a `healthcheck` executable is available in the container's $PATH,
+        # use that, otherwise fall back the first available of: wget, curl, or
+        # bash.
+        command = ["CMD-SHELL",
+          "([ -x \"$(command -v healthcheck)\" ] && healthcheck) || ([ -x \"$(command -v wget)\" ] && wget --quiet --output-document=/dev/null http://127.0.0.1:$PORT/health) || ([ -x \"$(command -v curl)\" ] && curl --fail --silent http://localhost:$PORT/health > /dev/null) || ([ -x \"$(command -v bash)\" ] && bash -c \"exec 3<>/dev/tcp/127.0.0.1/$PORT;echo -e 'GET /health HTTP/1.1\\r\\nHost: http://localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3;grep -q '^HTTP/.* 200 OK' <&3\") || exit 1"
+        ]
+      },
+      environment = local.environment_variables,
+      secrets     = var.secrets,
+>>>>>>> after updating
       portMappings = [
         {
           containerPort = var.container_port,
@@ -229,6 +260,7 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
+<<<<<<< before updating
       }
       secrets = [
         {
@@ -256,6 +288,24 @@ resource "aws_ecs_task_definition" "app" {
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
   cpu    = var.fargate_cpu
   memory = var.fargate_memory
+=======
+      },
+      mountPoints    = local.ephemeral_write_volume_configs[*].mount_point
+      systemControls = []
+      volumesFrom    = []
+    }
+  ])
+
+  dynamic "volume" {
+    for_each = local.ephemeral_write_volume_configs[*].volume
+    content {
+      name = volume.value["name"]
+    }
+  }
+
+  cpu    = var.cpu
+  memory = var.memory
+>>>>>>> after updating
 
   requires_compatibilities = ["FARGATE"]
 

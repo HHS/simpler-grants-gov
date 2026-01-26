@@ -4,7 +4,11 @@ locals {
   project_name = "simpler-grants-gov"
 
   # Project owner (e.g. navapbc). Used for tagging infra resources.
+<<<<<<< before updating
   owner = "navapbc"
+=======
+  owner = "HHS"
+>>>>>>> after updating
 
   # URL of project source code repository
   code_repository_url = "https://github.com/HHS/simpler-grants-gov"
@@ -14,6 +18,10 @@ locals {
   # otherwise us-east-1 is a good default
   default_region = "us-east-1"
 
+<<<<<<< before updating
   github_actions_role_name                = "${local.project_name}-github-actions"
   aws_services_security_group_name_prefix = "aws-service-vpc-endpoints"
+=======
+  github_actions_role_name = "${local.project_name}-github-actions"
+>>>>>>> after updating
 }

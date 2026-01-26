@@ -30,6 +30,7 @@ output "migrator_role_arn" {
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
 
+<<<<<<< before updating
 output "cluster_arn" {
   value = aws_ecs_cluster.cluster.arn
 }
@@ -52,4 +53,9 @@ output "app_security_group_id" {
 
 output "service_logs_arn" {
   value = aws_cloudwatch_log_group.service_logs.arn
+=======
+output "public_endpoint" {
+  description = "The public endpoint for the service."
+  value       = "${var.certificate_arn != null ? "https" : "http"}://${local.domain_name != null ? local.domain_name : aws_lb.alb.dns_name}"
+>>>>>>> after updating
 }

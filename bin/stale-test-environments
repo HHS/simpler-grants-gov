@@ -1,0 +1,63 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# This script checks for orphaned environments created by infra service tests
+# by checking if the environment is older than a certain threshold.
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+source bin/util.sh
+
+GITHUB_STEP_SUMMARY=${GITHUB_STEP_SUMMARY:-/dev/null}
+
+# 24 hours in seconds
+MAX_ENVIRONMENT_AGE_MILLIS=86400
+
+app_name="$1"
+
+echo "::group::Initialize Terraform"
+echo terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+terraform -chdir="infra/${app_name}/service" init -input=false -reconfigure -backend-config="dev.s3.tfbackend"
+echo "::endgroup::"
+
+echo "::group::List test IDs of test environments"
+echo terraform -chdir="infra/${app_name}/service" workspace list
+workspaces="$(terraform -chdir="infra/${app_name}/service" workspace list)"
+# grep will exit with code `1` if there's no match, so ignore that for when
+# there are no PR workspaces for the application
+test_ids="$(echo "${workspaces}" | { grep -o 't-[A-Za-z0-9]\+' || test $? = 1; } | sed 's/t-//')"
+echo "Test IDs"
+echo "${test_ids}"
+echo "::endgroup::"
+
+echo "::group::Check age of each test environment"
+stale_tests=()
+for test_id in $test_ids; do
+  # Base 62 decode the test ID to get the timestamp
+  test_timestamp="$(base62_decode "${test_id}")"
+  current_timestamp="$(date +%s)"
+  age="$((current_timestamp - test_timestamp))"
+
+  if [ "${age}" -gt "${MAX_ENVIRONMENT_AGE_MILLIS}" ]; then
+    echo "stale ID:   ${test_id}   age: $((age / 3600)) hours   started: $(date -r "${test_timestamp}")"
+    echo "stale ID:   ${test_id}   age: $((age / 3600)) hours   started: $(date -r "${test_timestamp}")" >> "${GITHUB_STEP_SUMMARY}"
+    stale_tests+=("${test_id}")
+  fi
+
+  # If age is less than 0, the test ID is invalid
+  if [ "${age}" -lt 0 ]; then
+    echo "invalid ID: ${test_id}"
+    echo "invalid ID: ${test_id}" >> "${GITHUB_STEP_SUMMARY}"
+    stale_tests+=("${test_id}")
+  fi
+done
+echo "::endgroup::"
+
+# if stale_tests is not empty exit with 1 otherwise exit with 0
+if [ ${#stale_tests[@]} -gt 0 ]; then
+  echo "🧹 Found stale test environments for the following test IDs: **${stale_tests[*]}**"
+  echo "🧹 Found stale test environments for the following test IDs: **${stale_tests[*]}**" >> "${GITHUB_STEP_SUMMARY}"
+  exit 1
+fi
+
+echo "✅ No stale test environments"
+echo "✅ No stale test environments" >> "${GITHUB_STEP_SUMMARY}"
