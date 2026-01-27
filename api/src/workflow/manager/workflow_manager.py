@@ -56,6 +56,10 @@ class WorkflowManager:
     def _register_signal_handlers(self) -> None:
         """Register signal handlers to handle expected
         signals like keyboard interrupts and kill commands.
+
+        This changes the default behavior of "end the program instantly"
+        into a more graceful approach. Note that not all signals
+        can be caught, and many that indicate hardware faults shouldn't.
         """
         # Make it so if a SIGTERM is received, it doesn't
         # cause the process to instantly exit so we can gracefully
@@ -74,7 +78,7 @@ class WorkflowManager:
 
         # Most other signals indicate either errors or
         # more significant kill signals that we are fine
-        # just killing the program outright.
+        # with causing the program to exit instantly as normal.
 
     def handle_exit(self, signum: int, frame: FrameType | None) -> None:
         logger.info(
@@ -101,7 +105,10 @@ class WorkflowManager:
         return events
 
     def process_events(self) -> None:
-        """Process events constantly,"""
+        """Process workflow events constantly
+
+        The 'main' loop of the workflow manager.
+        """
         logger.info("Processing workflow events")
 
         batch_count = 0
@@ -124,6 +131,8 @@ class WorkflowManager:
                 logger.info("Exiting after receiving SIGTERM.")
                 break
 
+            # For the purposes of testing, we can configure a maximum batch
+            # size count to break the loop after a certain number of iterations
             if (
                 self.config.workflow_maximum_batch_count is not None
                 and batch_count >= self.config.workflow_maximum_batch_count
