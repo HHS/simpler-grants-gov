@@ -124,7 +124,10 @@ const MultipleAttachmentUploadWidget = ({
   ]);
 
   const handleFileChange = async (files: FileList | null): Promise<void> => {
-    if (!files || !applicationId) return;
+    if (!files || !applicationId) {
+      console.error("file object or application id missing");
+      return;
+    }
 
     const newFiles: UploadedFile[] = [];
 

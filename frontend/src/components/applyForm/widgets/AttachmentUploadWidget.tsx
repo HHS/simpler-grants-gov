@@ -103,7 +103,10 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
     event: React.ChangeEvent<HTMLInputElement>,
   ): Promise<void> => {
     const file = event.target.files?.[0];
-    if (!file || !applicationId) return;
+    if (!file || !applicationId) {
+      console.error("file object or application id missing");
+      return;
+    }
 
     const uploadedId = await uploadAttachment(applicationId, file);
     if (uploadedId) {
