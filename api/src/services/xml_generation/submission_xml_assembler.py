@@ -225,8 +225,10 @@ class SubmissionXMLAssembler:
     def _get_schema_location_url(self) -> str | None:
         """Get the schema location URL for xsi:schemaLocation attribute.
 
-        Constructs the URL from competition's opportunity number.
-        Format: https://apply07.grants.gov/apply/opportunities/schemas/applicant/opp{opportunity_number}.xsd
+        Constructs the URL from competition's opportunity number and CFDA number.
+        Format: https://apply07.grants.gov/apply/opportunities/schemas/agency/oppOPP_NUMBER-cfdaCFDA_NUMBER.xsd
+
+        Example: https://trainingapply.grants.gov/apply/opportunities/schemas/agency/oppSIMP-QUAD4-FORMS-10202025-cfda00.000.xsd
 
         Returns:
             Schema location URL or None if opportunity_number is not set
@@ -243,8 +245,36 @@ class SubmissionXMLAssembler:
             )
             return None
 
-        # Construct XSD filename with 'opp' prefix + opportunity number
-        xsd_filename = f"opp{opportunity_number}.xsd"
+        # Get CFDA number from the opportunity
+        # Note: An opportunity can have multiple CFDA numbers, we use the first one
+        # The cfdas relationship only exists on legacy/foreign Topportunity models
+        cfda_suffix = ""
+        opportunity = self.application.competition.opportunity
+
+        # Check if the opportunity has cfdas (only present in foreign/legacy schema)
+        if hasattr(opportunity, "cfdas") and opportunity.cfdas and len(opportunity.cfdas) > 0:
+            cfda_number = opportunity.cfdas[0].cfdanumber
+            if cfda_number:
+                cfda_suffix = f"-cfda{cfda_number}"
+            else:
+                logger.info(
+                    "CFDA entry exists but cfdanumber is None - XSD filename will not include CFDA",
+                    extra={
+                        "application_id": self.application.application_id,
+                        "opportunity_id": opportunity.opportunity_id,
+                    },
+                )
+        else:
+            logger.info(
+                "No CFDA numbers found for opportunity - XSD filename will not include CFDA",
+                extra={
+                    "application_id": self.application.application_id,
+                    "opportunity_id": opportunity.opportunity_id,
+                },
+            )
+
+        # Construct XSD filename with 'opp' prefix + opportunity number + optional CFDA suffix
+        xsd_filename = f"opp{opportunity_number}{cfda_suffix}.xsd"
         return f"{SCHEMA_LOCATION_BASE_URL}/{xsd_filename}"
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:

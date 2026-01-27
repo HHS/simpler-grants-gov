@@ -203,6 +203,7 @@ class TestSubmissionXMLAssembler:
         assert len(sf424_elements) == 1
 
         # Verify schemaLocation is set correctly
+        # Note: No CFDA in this fixture, so filename won't include CFDA suffix
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
@@ -213,6 +214,33 @@ class TestSubmissionXMLAssembler:
         footer_ns = f"{{{Namespace.FOOTER}}}"
         footer_elements = root.findall(f".//{footer_ns}GrantSubmissionFooter")
         assert len(footer_elements) == 1
+
+    def test_generate_complete_submission_xml_includes_cfda_when_present(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that schema location includes CFDA number when present on opportunity."""
+        # Create a mock for the CFDA object
+        class MockCfda:
+            cfdanumber = "93.123"
+
+        # Mock the cfdas relationship on the opportunity
+        # The assembler checks hasattr(opportunity, "cfdas")
+        sample_application.competition.opportunity.cfdas = [MockCfda()]
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Parse XML to verify structure
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        # Verify schemaLocation is set correctly (includes CFDA number)
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert "oppTEST-OPP-001-cfda93.123.xsd" in schema_location
+        assert "None.xsd" not in schema_location
 
     def test_generate_complete_submission_xml_contains_header_data(
         self, sample_application, sample_application_submission
