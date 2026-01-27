@@ -1,9 +1,10 @@
 from copy import deepcopy
 
 import pytest
-from sqlalchemy import update
+from sqlalchemy import select, update
 
 from src.db.models.competition_models import Form
+from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -91,6 +92,57 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 1
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 11
+
+
+def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
+    """Test that opportunities with hard-coded IDs maintain the same IDs across runs"""
+    # First run - create all opportunities
+    task1 = BuildAutomaticOpportunitiesTask(db_session)
+    task1.run()
+
+    # Collect opportunity IDs from first run (excluding the all-forms opportunity which has force_create=True)
+    first_run_ids = {}
+    for opp in task1.opportunities:
+        if not opp.opportunity_number.startswith("SGG-ALL-Forms-"):
+            first_run_ids[opp.opportunity_number] = opp.opportunity_id
+
+    # Second run - should skip existing opportunities
+    task2 = BuildAutomaticOpportunitiesTask(db_session)
+    task2.run()
+
+    # Manually query all opportunities from database to verify IDs
+    all_opportunities = db_session.scalars(select(Opportunity)).all()
+
+    # Build a mapping of opportunity_number to opportunity_id from database
+    db_ids = {}
+    for opp in all_opportunities:
+        if not opp.opportunity_number.startswith("SGG-ALL-Forms-"):
+            db_ids[opp.opportunity_number] = opp.opportunity_id
+
+    # Verify that all opportunities from first run have the same IDs in the database
+    for opp_number, opp_id in first_run_ids.items():
+        assert opp_number in db_ids, f"Opportunity {opp_number} not found in database"
+        assert db_ids[opp_number] == opp_id, (
+            f"Opportunity ID mismatch for {opp_number}: "
+            f"expected {opp_id}, got {db_ids[opp_number]}"
+        )
+
+    # Verify specific hard-coded UUIDs for the named scenarios
+    import uuid
+
+    expected_ids = {
+        "SGG-org-only-test": uuid.UUID("10000000-0000-0000-0000-000000000001"),
+        "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
+        "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
+        "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
+    }
+
+    for opp_number, expected_id in expected_ids.items():
+        assert opp_number in db_ids, f"Expected opportunity {opp_number} not found"
+        assert db_ids[opp_number] == expected_id, (
+            f"Opportunity {opp_number} has incorrect ID: "
+            f"expected {expected_id}, got {db_ids[opp_number]}"
+        )
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):
