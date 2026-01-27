@@ -41,9 +41,9 @@ export default function RoadmapMilestones() {
                 p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
                 releaseNotesLink: (chunks) => (
                   <a
-                    href="https://wiki.simpler.grants.gov/product/release-notes"
                     target="_blank"
                     className="usa-link--external"
+                    href={ExternalRoutes.WIKI_RELEASE_NOTES}
                   >
                     {chunks}
                   </a>
