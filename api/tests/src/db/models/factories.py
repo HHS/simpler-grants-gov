@@ -2839,6 +2839,8 @@ class StagingTinstructionsFactory(AbstractStagingFactory):
     last_update = factory.Faker("date_between", start_date="-1y", end_date="today")
     created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 
+    instructions = factory.LazyFunction(lambda: fake.sentence(25).encode())
+
 
 class StagingTcertificatesFactory(AbstractStagingFactory):
     class Meta:
