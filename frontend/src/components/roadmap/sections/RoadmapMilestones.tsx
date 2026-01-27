@@ -64,58 +64,57 @@ export default function RoadmapMilestones() {
       {/* Accordion sections */}
       {archivedRoadmapSections &&
         archivedRoadmapSections.map((_archivedSection, archivedSectionIdx) => {
-            const sectionTitle = t(
-              `archivedRoadmapSections.${archivedSectionIdx}.sectionTitle`,
-            );
-            return (
-              <div
-                className="margin-bottom-4"
-                key={`archived-roadmap-sections-${sectionTitle}-key`}
-              >
-                <Accordion
-                  bordered
-                  items={[
-                    {
-                      title: sectionTitle,
-                      headingLevel: "h3",
-                      className: "",
-                      expanded: false,
-                      id: `archived-roadmap-accordion--${archivedSectionIdx}`,
-                      content: (
-                        <div className="margin-top-2">
-                          {archivedRoadmapSections[
-                            archivedSectionIdx
-                          ].sectionItems.map((_archivedItem, archivedItemIdx) => {
-                            return (
-                              <div
-                                key={`archived-roadmap-sections-${sectionTitle}-sections-${archivedItemIdx}-key`}
-                                className="margin-bottom-4"
-                              >
-                                <h4>
-                                  {t(
-                                    `archivedRoadmapSections.${archivedSectionIdx}.sectionItems.${archivedItemIdx}.title`,
-                                  )}
-                                </h4>
-                                {t.rich(
-                                  `archivedRoadmapSections.${archivedSectionIdx}.sectionItems.${archivedItemIdx}.content`,
-                                  {
-                                    p: (chunks) => (
-                                      <p className="font-sans-xs">{chunks}</p>
-                                    ),
-                                  },
+          const sectionTitle = t(
+            `archivedRoadmapSections.${archivedSectionIdx}.sectionTitle`,
+          );
+          return (
+            <div
+              className="margin-bottom-4"
+              key={`archived-roadmap-sections-${sectionTitle}-key`}
+            >
+              <Accordion
+                bordered
+                items={[
+                  {
+                    title: sectionTitle,
+                    headingLevel: "h3",
+                    className: "",
+                    expanded: false,
+                    id: `archived-roadmap-accordion--${archivedSectionIdx}`,
+                    content: (
+                      <div className="margin-top-2">
+                        {archivedRoadmapSections[
+                          archivedSectionIdx
+                        ].sectionItems.map((_archivedItem, archivedItemIdx) => {
+                          return (
+                            <div
+                              key={`archived-roadmap-sections-${sectionTitle}-sections-${archivedItemIdx}-key`}
+                              className="margin-bottom-4"
+                            >
+                              <h4>
+                                {t(
+                                  `archivedRoadmapSections.${archivedSectionIdx}.sectionItems.${archivedItemIdx}.title`,
                                 )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ),
-                    },
-                  ]}
-                />
-              </div>
-            );
-          },
-        )}
+                              </h4>
+                              {t.rich(
+                                `archivedRoadmapSections.${archivedSectionIdx}.sectionItems.${archivedItemIdx}.content`,
+                                {
+                                  p: (chunks) => (
+                                    <p className="font-sans-xs">{chunks}</p>
+                                  ),
+                                },
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+          );
+        })}
     </RoadmapPageSection>
   );
 }
