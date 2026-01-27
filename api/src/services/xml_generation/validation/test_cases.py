@@ -253,11 +253,13 @@ SF424_TEST_CASES = [
         "form_name": "SF424_4_0",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
         "pretty_print": True,
+        # Note: FileLocation uses a simplified string format here. AttachmentTransformer
+        # supports both string format and dict format with "@href" key for backwards compatibility.
         "attachment_mapping": {
             "11111111-1111-1111-1111-111111111111": {
                 "FileName": "debt_explanation.pdf",
                 "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/debt_explanation.pdf"},
+                "FileLocation": "./attachments/debt_explanation.pdf",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "aGVsbG8gd29ybGQxMjM0NTY3ODk=",
@@ -320,7 +322,7 @@ SF424_TEST_CASES = [
             "22222222-2222-2222-2222-222222222222": {
                 "FileName": "project_description.pdf",
                 "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/project_description.pdf"},
+                "FileLocation": "./attachments/project_description.pdf",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "cHJvamVjdERlc2NyaXB0aW9uSGFzaA==",
@@ -329,7 +331,7 @@ SF424_TEST_CASES = [
             "33333333-3333-3333-3333-333333333333": {
                 "FileName": "project_timeline.xlsx",
                 "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "FileLocation": {"@href": "./attachments/project_timeline.xlsx"},
+                "FileLocation": "./attachments/project_timeline.xlsx",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "cHJvamVjdFRpbWVsaW5lSGFzaA==",
@@ -396,7 +398,7 @@ SF424_TEST_CASES = [
             "44444444-4444-4444-4444-444444444444": {
                 "FileName": "additional_districts.pdf",
                 "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/additional_districts.pdf"},
+                "FileLocation": "./attachments/additional_districts.pdf",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "YWRkaXRpb25hbERpc3RyaWN0c0hhc2g=",
@@ -405,7 +407,7 @@ SF424_TEST_CASES = [
             "55555555-5555-5555-5555-555555555555": {
                 "FileName": "geographic_areas.pdf",
                 "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/geographic_areas.pdf"},
+                "FileLocation": "./attachments/geographic_areas.pdf",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "Z2VvZ3JhcGhpY0FyZWFzSGFzaA==",
@@ -414,7 +416,7 @@ SF424_TEST_CASES = [
             "66666666-6666-6666-6666-666666666666": {
                 "FileName": "debt_explanation_detailed.docx",
                 "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "FileLocation": {"@href": "./attachments/debt_explanation_detailed.docx"},
+                "FileLocation": "./attachments/debt_explanation_detailed.docx",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "ZGVidEV4cGxhbmF0aW9uSGFzaA==",
@@ -423,7 +425,7 @@ SF424_TEST_CASES = [
             "77777777-7777-7777-7777-777777777777": {
                 "FileName": "project_overview.pdf",
                 "MimeType": "application/pdf",
-                "FileLocation": {"@href": "./attachments/project_overview.pdf"},
+                "FileLocation": "./attachments/project_overview.pdf",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "cHJvamVjdE92ZXJ2aWV3SGFzaA==",
@@ -432,7 +434,7 @@ SF424_TEST_CASES = [
             "88888888-8888-8888-8888-888888888888": {
                 "FileName": "project_budget.xlsx",
                 "MimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "FileLocation": {"@href": "./attachments/project_budget.xlsx"},
+                "FileLocation": "./attachments/project_budget.xlsx",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "cHJvamVjdEJ1ZGdldEhhc2g=",
@@ -441,7 +443,7 @@ SF424_TEST_CASES = [
             "99999999-9999-9999-9999-999999999999": {
                 "FileName": "project_partners.txt",
                 "MimeType": "text/plain",
-                "FileLocation": {"@href": "./attachments/project_partners.txt"},
+                "FileLocation": "./attachments/project_partners.txt",
                 "HashValue": {
                     "@hashAlgorithm": "SHA-1",
                     "#text": "cHJvamVjdFBhcnRuZXJzSGFzaA==",
@@ -1632,6 +1634,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + PROJECT_ABSTRACT_SUMMARY_TEST_CASES
         + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
+        + ATTACHMENTFORM_TEST_CASES
     )
 
 
@@ -1646,3 +1649,190 @@ def get_test_cases_by_form(form_name: str) -> list[dict[str, Any]]:
     """
     all_cases = get_all_test_cases()
     return [case for case in all_cases if case.get("form_name") == form_name]
+
+
+# Sample test cases for Attachment Form validation
+ATTACHMENTFORM_TEST_CASES = [
+    {
+        "name": "attachmentform_single_attachment",
+        "json_input": {
+            "att1": "11111111-1111-1111-1111-111111111111",
+        },
+        "form_name": "AttachmentForm_1_2",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "document1.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "document1.pdf",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            }
+        },
+    },
+    {
+        "name": "attachmentform_multiple_attachments",
+        "json_input": {
+            "att1": "11111111-1111-1111-1111-111111111111",
+            "att5": "55555555-5555-5555-5555-555555555555",
+            "att10": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        },
+        "form_name": "AttachmentForm_1_2",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "document1.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "document1.pdf",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "55555555-5555-5555-5555-555555555555": {
+                "FileName": "document5.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "document5.pdf",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
+                "FileName": "document10.docx",
+                "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "FileLocation": "document10.docx",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+        },
+    },
+    {
+        "name": "attachmentform_all_15_attachments",
+        "json_input": {
+            "att1": "11111111-1111-1111-1111-111111111111",
+            "att2": "22222222-2222-2222-2222-222222222222",
+            "att3": "33333333-3333-3333-3333-333333333333",
+            "att4": "44444444-4444-4444-4444-444444444444",
+            "att5": "55555555-5555-5555-5555-555555555555",
+            "att6": "66666666-6666-6666-6666-666666666666",
+            "att7": "77777777-7777-7777-7777-777777777777",
+            "att8": "88888888-8888-8888-8888-888888888888",
+            "att9": "99999999-9999-9999-9999-999999999999",
+            "att10": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "att11": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "att12": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "att13": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+            "att14": "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+            "att15": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+        },
+        "form_name": "AttachmentForm_1_2",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/AttachmentForm_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "1234-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile1",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "22222222-2222-2222-2222-222222222222": {
+                "FileName": "1235-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile2",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "33333333-3333-3333-3333-333333333333": {
+                "FileName": "1236-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile3",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "44444444-4444-4444-4444-444444444444": {
+                "FileName": "1237-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile4",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "55555555-5555-5555-5555-555555555555": {
+                "FileName": "1238-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile5",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "66666666-6666-6666-6666-666666666666": {
+                "FileName": "1239-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile6",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "77777777-7777-7777-7777-777777777777": {
+                "FileName": "1240-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile7",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "88888888-8888-8888-8888-888888888888": {
+                "FileName": "1241-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile8",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "99999999-9999-9999-9999-999999999999": {
+                "FileName": "1242-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile9",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": {
+                "FileName": "1243-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile10",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb": {
+                "FileName": "1244-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile11",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "cccccccc-cccc-cccc-cccc-cccccccccccc": {
+                "FileName": "1245-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile12",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "dddddddd-dddd-dddd-dddd-dddddddddddd": {
+                "FileName": "1246-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile13",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee": {
+                "FileName": "1247-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile14",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "ffffffff-ffff-ffff-ffff-ffffffffffff": {
+                "FileName": "1248-PDF_TestPage.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "345205.AttachmentForm_1_2_P1.optionalFile0",
+                "HashValue": "z6BBXu3Mn0jSA9h7KBWN9z9bitY=",
+                "HashAlgorithm": "SHA-1",
+            },
+        },
+    },
+]

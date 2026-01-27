@@ -12,8 +12,8 @@ Running a local server requires the version of Node specified in [the .nvmrc fil
 
 This project supports the use of NVM for node version management, so it is suggested you intall and use NVM. More infomrmation can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
-- **For Mac** - Run `npm install && npm run local` to install and start the application.
-- **For Windows** - Install NVM, then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx run dev` afterwards to start the application.
+* **For Mac** - Run `npm install && npm run local` to install and start the application.
+* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
 
 Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
 
