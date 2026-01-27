@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
 
 import { toggleCheckbox, toggleFilterDrawer } from "./searchSpecUtil";
+
+const SEARCH_TIMEOUT = playwrightEnv.targetEnv === "staging" ? 15000 : 5000;
 
 test.describe("Search error page", () => {
   test("should return an error page when expected", async ({ page }) => {
@@ -19,8 +22,7 @@ test.describe("Search error page", () => {
     await toggleCheckbox(page, "status-closed");
 
     await page.waitForURL(/closed/, {
-      timeout: 5000,
-      waitUntil: "domcontentloaded",
+      timeout: SEARCH_TIMEOUT,
     });
   });
 });

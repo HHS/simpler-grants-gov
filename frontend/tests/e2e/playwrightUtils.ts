@@ -30,15 +30,22 @@ export async function waitForURLChange(
   throw new Error(`URL did not update as expected within ${timeout}ms`);
 }
 
+const getPageUrlParam = (
+  rawUrl: string,
+  queryParamName: string,
+): string | null => {
+  const url = new URL(rawUrl);
+  const params = new URLSearchParams(url.search);
+  return params.get(queryParamName);
+};
+
 export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
 ) {
   const changeCheck = (pageUrl: string): boolean => {
-    const url = new URL(pageUrl);
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
+    const actualValue = getPageUrlParam(pageUrl, queryParamName);
 
     return actualValue === queryParamValue;
   };
@@ -50,7 +57,9 @@ export async function waitForURLContainsQueryParamValue(
     );
   }
 
-  return expect(page.url()).toContain(`${queryParamName}=${queryParamValue}`);
+  return expect(getPageUrlParam(page.url(), queryParamName)).toBe(
+    queryParamValue,
+  );
 
   // potentially an easier implementation, may not need our own "waitForURLChange" function
   // const expectedQueryString = `${queryParamName}=${queryParamValue}`;
