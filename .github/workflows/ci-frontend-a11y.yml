@@ -15,7 +15,7 @@ jobs:
         working-directory: ./frontend
 
     env:
-      NODE_VERSION: 22
+      NODE_VERSION: 24
       LOCKFILE_PATH: ./frontend/package-lock.json
       PACKAGE_MANAGER: npm
 

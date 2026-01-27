@@ -54,6 +54,7 @@ class XMLGenerationService:
                 request.transform_config,
                 request.pretty_print,
                 request.attachment_mapping,
+                request.application_data,
             )
 
             # Log transformation results for development
@@ -73,8 +74,20 @@ class XMLGenerationService:
         transform_config: dict,
         pretty_print: bool = True,
         attachment_mapping: dict[str, AttachmentInfo] | None = None,
+        original_data: dict | None = None,
     ) -> str:
-        """Generate XML string from transformed data."""
+        """Generate XML string from transformed data.
+
+        Args:
+            data: Transformed data dictionary
+            transform_config: Transform configuration rules
+            pretty_print: Whether to format XML with indentation
+            attachment_mapping: Mapping of UUIDs to attachment metadata
+            original_data: Original untransformed application data (used for attachments)
+
+        Returns:
+            XML string representation of the data
+        """
         # Get XML configuration from the config metadata
         xml_config = transform_config.get("_xml_config", {})
         xml_structure = xml_config.get("xml_structure", {})
@@ -99,6 +112,7 @@ class XMLGenerationService:
                 pretty_print,
                 transform_config,
                 attachment_mapping,
+                original_data,
             )
         else:
             # Fallback to simple ElementTree for backward compatibility
@@ -113,6 +127,7 @@ class XMLGenerationService:
         pretty_print: bool = True,
         transform_config: dict | None = None,
         attachment_mapping: dict[str, AttachmentInfo] | None = None,
+        original_data: dict | None = None,
     ) -> str:
         """Generate XML with namespace support using lxml."""
         default_namespace = namespace_config.get("default", "")
@@ -193,11 +208,13 @@ class XMLGenerationService:
         )
 
         # Add attachment elements if present in data
-        attachment_transformer = AttachmentTransformer(
-            attachment_mapping=attachment_mapping or {},
-            attachment_field_config=attachment_field_config,
-        )
-        attachment_transformer.add_attachment_elements(root, data, nsmap)
+        # Only process attachments if we have original_data (attachments use UUIDs from original data)
+        if original_data is not None:
+            attachment_transformer = AttachmentTransformer(
+                attachment_mapping=attachment_mapping or {},
+                attachment_field_config=attachment_field_config,
+            )
+            attachment_transformer.add_attachment_elements(root, original_data, nsmap)
 
         # Generate XML string
         if pretty_print:

@@ -198,9 +198,7 @@ describe("StartApplicationModal", () => {
       />,
     );
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        `/workspace/applications/application/999`,
-      );
+      expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
     });
   });
   it("renders an ineligible view if competition is org only and user has no orgs", () => {

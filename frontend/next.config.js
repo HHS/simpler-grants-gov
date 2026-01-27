@@ -217,6 +217,11 @@ const nextConfig = {
         destination: "/organizations/:segments*",
         permanent: false,
       },
+      {
+        source: "/workspace/applications/application/:segments*",
+        destination: "/applications/:segments*",
+        permanent: false,
+      },
     ];
   },
 };
