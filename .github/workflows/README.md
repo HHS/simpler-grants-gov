@@ -8,13 +8,13 @@ The CI/CD for this project uses [reusable Github Actions workflows](https://docs
 
 Each app should have:
 
-- `ci-<APP_NAME>`: must be created; should run linting and testing
-- `ci-<APP_NAME>-vulnerability-scans`: calls `vulnerability-scans`
-  - Based on [ci-{{app_name}}-vulnerability-scans](https://github.com/navapbc/template-infra/blob/main/.github/workflows/ci-{{app_name}}-vulnerability-scans.yml.jinja)
-- `ci-<APP_NAME>-pr-environment-checks.yml`: calls `pr-environment-checks.yml` to create or update a pull request environment (see [pull request environments](/docs/infra/pull-request-environments.md))
-  - Based on [ci-{{app_name}}-pr-environment-checks.yml](https://github.com/navapbc/template-infra/blob/main/.github/workflows/ci-{{app_name}}-pr-environment-checks.yml.jinja)
-- `ci-<APP_NAME>-pr-environment-destroy.yml`: calls `pr-environment-destroy.yml` to destroy the pull request environment (see [pull request environments](/docs/infra/pull-request-environments.md))
-  - Based on [ci-{{app_name}}-pr-environment-destroy.yml](https://github.com/navapbc/template-infra/blob/main/.github/workflows/ci-{{app_name}}-pr-environment-destroy.yml.jinja)
+- `ci-[app_name]`: must be created; should run linting and testing
+- `ci-[app_name]-vulnerability-scans`: calls `vulnerability-scans`
+  - Based on [ci-app-vulnerability-scans](https://github.com/navapbc/template-infra/blob/main/.github/workflows/ci-app-vulnerability-scans.yml)
+- `ci-[app_name]-pr-environment-checks.yml`: calls `pr-environment-checks.yml` to create or update a pull request environment (see [pull request environments](/docs/infra/pull-request-environments.md))
+  - Based on [ci-app-pr-environment-checks.yml](/.github/workflows/ci-app-pr-environment-checks.yml)
+- `ci-[app_name]-pr-environment-destroy.yml`: calls `pr-environment-destroy.yml` to destroy the pull request environment (see [pull request environments](/docs/infra/pull-request-environments.md))
+  - Based on [ci-app-pr-environment-destroy.yml](https://github.com/navapbc/template-infra/blob/main/.github/workflows/ci-app-pr-environment-destroy.yml)
 
 ### App-agnostic workflows
 
@@ -26,8 +26,8 @@ Each app should have:
 
 Each app should have:
 
-- `cd-<APP_NAME>`: deploys an application
-  - Based on [`cd-{{app_name}}`](https://github.com/navapbc/template-infra/blob/main/.github/workflows/cd-{{app_name}}.yml.jinja)
+- `cd-[app_name]`: deploys an application
+  - Based on [`cd-app`](https://github.com/navapbc/template-infra/blob/main/.github/workflows/cd-app.yml)
 
 The CD workflow uses these reusable workflows:
 
@@ -47,4 +47,4 @@ graph TD
 
 ## ⛑️ Helper workflows
 
-- [`check-ci-cd-auth`](./check-ci-cd-auth.yml): verifies that the project's Github repo is able to connect to AWS
+- [`check-ci-cd-auth`](./check-ci-cd-auth.yml): verifes that the project's Github repo is able to connect to AWS

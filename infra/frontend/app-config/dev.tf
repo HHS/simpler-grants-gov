@@ -26,12 +26,9 @@ module "dev_config" {
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
 
-<<<<<<< before updating
   enable_identity_provider = local.enable_identity_provider
-=======
   # Uncomment to override default feature flag values
   # feature_flag_overrides = {
   #   BAR = true
   # }
->>>>>>> after updating
 }

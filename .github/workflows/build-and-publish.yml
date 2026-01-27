@@ -30,32 +30,13 @@ on:
 jobs:
   get-commit-hash:
     name: Get commit hash
-<<<<<<< before updating
     runs-on: ubuntu-22.04
-=======
-    runs-on: ubuntu-latest
-
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
     outputs:
       commit_hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
-
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
           fetch-depth: 1000
       - name: Get commit hash
         id: get-commit-hash
@@ -64,49 +45,11 @@ jobs:
           COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
-=======
-
-      - name: Get commit hash
-        id: get-commit-hash
-        run: |
-=======
-
-      - name: Get commit hash
-        id: get-commit-hash
-        run: |
->>>>>>> after updating
-=======
-
-      - name: Get commit hash
-        id: get-commit-hash
-        run: |
->>>>>>> after updating
-=======
-
-      - name: Get commit hash
-        id: get-commit-hash
-        run: |
->>>>>>> after updating
-          # HEAD should be the same as inputs.ref since we checked out inputs.ref
-          COMMIT_HASH=$(git rev-parse HEAD)
-          echo "Commit hash: $COMMIT_HASH"
-          echo "commit_hash=$COMMIT_HASH" >> "$GITHUB_OUTPUT"
-
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-22.04
     needs: get-commit-hash
-    concurrency: build-and-publish-${{ inputs.app_name }}-${{ needs.get-commit-hash.outputs.commit_hash }}
+    concurrency: ${{ github.workflow }}-${{ needs.get-commit-hash.outputs.commit_hash }}
 
     permissions:
       contents: read
@@ -134,34 +77,9 @@ jobs:
           echo "Is image published: $is_image_published"
           echo "is_image_published=$is_image_published" >> "$GITHUB_OUTPUT"
 
-      - uses: ./.github/actions/build-release-image
+      - name: Build release
         if: steps.check-image-published.outputs.is_image_published == 'false'
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
         run: make APP_NAME=${{ inputs.app_name }} IMAGE_TAG=${{needs.get-commit-hash.outputs.commit_hash }} release-build
-=======
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-        id: build-release-image
-        with:
-          app_name: ${{ inputs.app_name }}
-          commit_hash: ${{ needs.get-commit-hash.outputs.commit_hash }}
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
 
       - name: Publish release
         if: steps.check-image-published.outputs.is_image_published == 'false'

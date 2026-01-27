@@ -14,20 +14,16 @@ jobs:
   collect-configs:
     name: Collect configs
     runs-on: ubuntu-latest
-
     outputs:
       root_module_configs: ${{ steps.collect-infra-deploy-status-check-configs.outputs.root_module_configs }}
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Collect root module configurations
         id: collect-infra-deploy-status-check-configs
         run: |
           root_module_configs="$(./bin/infra-deploy-status-check-configs)"
           echo "${root_module_configs}"
           echo "root_module_configs=${root_module_configs}" >> "$GITHUB_OUTPUT"
-
   check:
     name: ${{ matrix.root_module_subdir }} ${{ matrix.backend_config_name }}
     runs-on: ubuntu-latest
@@ -74,25 +70,3 @@ jobs:
           echo "::endgroup::"
         env:
           TF_IN_AUTOMATION: "true"
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-=======
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-
-  notify:
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
-    needs: check
-    if: failure()
-    uses: ./.github/workflows/send-system-notification.yml
-    with:
-      channel: "workflow-failures"
-      message: "🔍 [Infrastructure state differs from configuration](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-    secrets: inherit
->>>>>>> after updating

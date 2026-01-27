@@ -1,6 +1,5 @@
 locals {
   database_config = var.has_database ? {
-<<<<<<< before updating
     region                      = var.default_region
     cluster_name                = "${var.app_name}-${var.environment}"
     app_username                = "app"
@@ -11,10 +10,6 @@ locals {
     min_capacity                = var.database_min_capacity
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
-=======
-    region       = var.default_region
-    cluster_name = "${var.app_name}-${var.environment}"
->>>>>>> after updating
 
     # Enable extensions that require the rds_superuser role to be created here
     # See docs/infra/set-up-database.md for more information

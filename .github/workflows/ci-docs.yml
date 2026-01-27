@@ -12,38 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       # This is the GitHub Actions-friendly port of the linter used in the Makefile.
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
       - name: Link Checker
         id: lychee
         uses: lycheeverse/lychee-action@v2
         with:
           args: "--quiet --config ./.github/workflows/lychee.toml ."
           fail: true
-=======
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-      - uses: tcort/github-action-markdown-link-check@v1
-        with:
-          use-quiet-mode: "yes" # errors only.
-          config-file: ".github/workflows/markdownlint-config.json"
-          check-modified-files-only: ${{ github.event_name == 'pull_request' && 'yes' || 'no' }}
-          base-branch: "main"
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating

@@ -1,4 +1,3 @@
-<<<<<<< before updating
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -17,8 +16,6 @@ data "aws_subnets" "database" {
   }
 }
 
-=======
->>>>>>> after updating
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
   # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
@@ -40,11 +37,7 @@ locals {
 }
 
 terraform {
-<<<<<<< before updating
-  required_version = "1.14.3"
-=======
   required_version = "~>1.10.0"
->>>>>>> after updating
 
   required_providers {
     aws = {
@@ -74,7 +67,6 @@ module "app_config" {
 }
 
 module "database" {
-<<<<<<< before updating
   source                      = "../../modules/database"
   name                        = "${local.prefix}${local.database_config.cluster_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
@@ -95,12 +87,4 @@ module "database" {
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
   is_temporary                   = local.is_temporary
-=======
-  source = "../../modules/database/resources"
-  name   = "${local.prefix}${local.database_config.cluster_name}"
-
-  network_name = local.environment_config.network_name
-  project_name = module.project_config.project_name
-  is_temporary = local.is_temporary
->>>>>>> after updating
 }

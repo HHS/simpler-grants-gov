@@ -26,25 +26,19 @@ jobs:
   # Don't need to call the build-and-publish workflow since the database-migrations
   # workflow already calls it
   database-migrations:
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    name: Database migrations
     uses: ./.github/workflows/database-migrations.yml
     with:
       app_name: ${{ inputs.app_name }}
       environment: ${{ inputs.environment }}
       version: ${{ inputs.version }}
-
   deploy:
     name: Deploy
     runs-on: ubuntu-22.04
     needs: [database-migrations]
-
     permissions:
       contents: read
       id-token: write
-
-    outputs:
-      service_endpoint: ${{ steps.deploy-release.outputs.service_endpoint }}
-
     steps:
       - uses: actions/checkout@v4
 
@@ -58,32 +52,4 @@ jobs:
           environment: ${{ inputs.environment }}
 
       - name: Deploy release
-        id: deploy-release
-        run: |
-          make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ needs.database-migrations.outputs.commit_hash }}
-          service_endpoint=$(terraform -chdir="infra/${{ inputs.app_name }}/service" output -raw service_endpoint)
-          echo "service_endpoint=${service_endpoint}"
-          echo "service_endpoint=${service_endpoint}" >> "$GITHUB_OUTPUT"
-
-  e2e:
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
-
-    # By default, don't run e2e tests on production to avoid generating
-    # junk data that may interfere with production metrics and business operations
-    if: inputs.environment != 'prod'
-    needs: deploy
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      app_name: ${{ inputs.app_name }}
-      service_endpoint: ${{ needs.deploy.outputs.service_endpoint }}
-
-  notify:
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
-    needs: e2e
-    if: failure()
-    uses: ./.github/workflows/send-system-notification.yml
-    with:
-      channel: "workflow-failures"
-      message: "❌ [Failed deploying ${{ inputs.version }} to ${{ inputs.app_name }} ${{ inputs.environment }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-    secrets: inherit
-    
+        run: make release-deploy APP_NAME=${{ inputs.app_name }} ENVIRONMENT=${{ inputs.environment }} IMAGE_TAG=${{ needs.database-migrations.outputs.commit_hash }}

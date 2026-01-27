@@ -14,27 +14,10 @@ locals {
 
     // AWS Backup – Centralized service for automating backups across AWS resources.
     "backup",
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
+
     "cloudfront",
-=======
 
     // Amazon CloudWatch – Monitors and logs AWS resources and applications.
->>>>>>> after updating
-=======
-
-    // Amazon CloudWatch – Monitors and logs AWS resources and applications.
->>>>>>> after updating
-=======
-
-    // Amazon CloudWatch – Monitors and logs AWS resources and applications.
->>>>>>> after updating
-=======
-
-    // Amazon CloudWatch – Monitors and logs AWS resources and applications.
->>>>>>> after updating
     "cloudwatch",
 
     // Amazon Cognito Identity Provider – Manages authentication and authorization for applications.

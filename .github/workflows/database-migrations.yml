@@ -24,12 +24,11 @@ concurrency: database-migrations-${{ inputs.app_name }}-${{ inputs.environment }
 
 jobs:
   build-and-publish:
-    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    name: Build
     uses: ./.github/workflows/build-and-publish.yml
     with:
       app_name: ${{ inputs.app_name }}
       ref: ${{ inputs.version }}
-
   run-migrations:
     name: Run migrations
     runs-on: ubuntu-22.04
