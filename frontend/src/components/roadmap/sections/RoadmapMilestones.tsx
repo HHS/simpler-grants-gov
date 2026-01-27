@@ -63,8 +63,7 @@ export default function RoadmapMilestones() {
         })}
       {/* Accordion sections */}
       {archivedRoadmapSections &&
-        Object.keys(archivedRoadmapSections).map(
-          (archivedSection, archivedSectionIdx) => {
+        archivedRoadmapSections.map((_archivedSection, archivedSectionIdx) => {
             const sectionTitle = t(
               `archivedRoadmapSections.${archivedSectionIdx}.sectionTitle`,
             );
@@ -84,10 +83,9 @@ export default function RoadmapMilestones() {
                       id: `archived-roadmap-accordion--${archivedSectionIdx}`,
                       content: (
                         <div className="margin-top-2">
-                          {Object.keys(
-                            archivedRoadmapSections[archivedSectionIdx]
-                              .sectionItems,
-                          ).map((archivedItem, archivedItemIdx) => {
+                          {archivedRoadmapSections[
+                            archivedSectionIdx
+                          ].sectionItems.map((_archivedItem, archivedItemIdx) => {
                             return (
                               <div
                                 key={`archived-roadmap-sections-${sectionTitle}-sections-${archivedItemIdx}-key`}
