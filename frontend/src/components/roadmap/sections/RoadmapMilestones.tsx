@@ -50,9 +50,9 @@ export default function RoadmapMilestones() {
                 ),
                 commonGrantsProtocolLink: (chunks) => (
                   <a
-                    href="https://commongrants.org/"
                     target="_blank"
                     className="usa-link--external"
+                    href={ExternalRoutes.COMMON_GRANTS}
                   >
                     {chunks}
                   </a>
