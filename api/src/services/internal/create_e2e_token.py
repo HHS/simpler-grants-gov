@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 def create_e2e_token(db_session: db.Session, user: User) -> dict:
-    if os.getenv("APP_ENV") == "production":
+    if os.getenv("ENVIRONMENT") not in ["local", "dev", "staging", "training"]:
         logger.warning("Attempted to access E2E token endpoint in production")
-        raise_flask_error(404)
+        raise_flask_error(403, "Forbidden")
 
     verify_access(user, {Privilege.READ_TEST_USER_TOKEN}, None)
 
-    logger.info("Generating E2E bypass token", extra={"auth.user_id": str(user.user_id)})
+    logger.info("Generating E2E bypass token")
 
     jwt_str, token_session = create_jwt_for_user(user, db_session)
 

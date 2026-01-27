@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @internal_blueprint.put("/roles")
 @internal_blueprint.input(internal_schema.InternalRoleAssignmentRequestSchema, location="json")
 @internal_blueprint.output(internal_schema.InternalRoleAssignmentResponseSchema)
+@internal_blueprint.doc(hide=True)
 @internal_blueprint.auth_required(api_user_key_auth)
 @flask_db.with_db_session()
 def update_internal_roles(
@@ -38,6 +39,7 @@ def update_internal_roles(
 
 @internal_blueprint.post("/e2e-token")
 @internal_blueprint.output(internal_schema.E2ETokenResponseSchema)
+@internal_blueprint.doc(hide=True)
 @internal_blueprint.auth_required(api_user_key_auth)
 @flask_db.with_db_session()
 def get_e2e_token(db_session: db.Session) -> response.ApiResponse:
@@ -47,9 +49,10 @@ def get_e2e_token(db_session: db.Session) -> response.ApiResponse:
     """
     logger.info("POST /v1/internal/e2e-token")
 
-    user = api_user_key_auth.get_user()  #
-    user = db_session.merge(user, load=False)
+    with db_session.begin():
+        user = api_user_key_auth.get_user()
+        user = db_session.merge(user, load=False)
 
-    token_data = create_e2e_token(db_session, user)
+        token_data = create_e2e_token(db_session, user)
 
     return response.ApiResponse(message="Success", data=token_data)

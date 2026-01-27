@@ -145,8 +145,6 @@ E2E_TEST_USER_ROLE = Role(
         E2E_TEST_USER_ROLE_ID,
         [
             Privilege.READ_TEST_USER_TOKEN,
-            Privilege.LIST_APPLICATION,
-            Privilege.VIEW_APPLICATION,
         ],
     ),
     link_role_types=[LinkRoleRoleType(role_id=E2E_TEST_USER_ROLE_ID, role_type=RoleType.INTERNAL)],
