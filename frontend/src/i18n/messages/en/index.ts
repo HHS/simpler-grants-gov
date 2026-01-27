@@ -279,7 +279,6 @@ export const messages = {
       statusLabel: "Status",
       statusInProgress: "In progress",
       statusSubmitted: "Submitted",
-      statusAccepted: "Accepted",
       uei: "UEI",
       renewal: "Renewal",
       closeDate: "Close date",

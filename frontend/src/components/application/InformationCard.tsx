@@ -175,13 +175,11 @@ export const InformationCard = ({
 
   const applicationStatus = () => {
     switch (applicationDetails.application_status) {
-      case Status.ACCEPTED:
-        return t("statusAccepted");
       case Status.IN_PROGRESS:
         return t("statusInProgress");
+      case Status.ACCEPTED:
       case Status.SUBMITTED:
         return t("statusSubmitted");
-
       default:
         return "-";
     }
