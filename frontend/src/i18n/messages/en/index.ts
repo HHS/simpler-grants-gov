@@ -976,22 +976,22 @@ export const messages = {
           {
             title: "Piloting smarter, easier budget forms",
             content:
-              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we’re prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
+              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
           },
           {
             title:
-              "Improve users’ confidence in choosing competitive, relevant opportunities",
+              "Improve users' confidence in choosing competitive, relevant opportunities",
             content:
-              "<p>We’re excited to help you find and get opportunities you need. We are developing user-requested enhancements to Simpler Search, and we’re also developing a new set of initiatives to help organizations find opportunities that are better tailored to their needs. This will result in reducing the time and effort required to discover opportunities, determine whether they’re a strong fit, and align as a team to pursue them.</p><p><linkGithub7830>Follow #7830 on GitHub</linkGithub7830></p>",
+              "<p>We're excited to help you find and get opportunities you need. We are developing user-requested enhancements to Simpler Search, and we're also developing a new set of initiatives to help organizations find opportunities that are better tailored to their needs. This will result in reducing the time and effort required to discover opportunities, determine whether they're a strong fit, and align as a team to pursue them.</p><p><linkGithub7830>Follow #7830 on GitHub</linkGithub7830></p>",
           },
           {
             title: "Scale opportunity coverage and form creation",
             content:
-              "<p>Simpler’s new, streamlined application experience will support enough forms to cover 35% of competitions on Grants.gov, enabling opportunities to be supported from more grantor agencies. This will be made possible with the addition of internal tools that reduce the manual effort needed to launch opportunities between different environments.</p><p><linkGithub7831>Follow #7831 on GitHub</linkGithub7831></p>",
+              "<p>Simpler's new, streamlined application experience will support enough forms to cover 35% of competitions on Grants.gov, enabling opportunities to be supported from more grantor agencies. This will be made possible with the addition of internal tools that reduce the manual effort needed to launch opportunities between different environments.</p><p><linkGithub7831>Follow #7831 on GitHub</linkGithub7831></p>",
           },
           {
             title:
-              "Community-prioritized improvements & Open Source involvement",
+              "Community-prioritized improvements & open source involvement",
             content:
               "<p>We remain committed to open, participatory software development. We have deepened our collaboration with the Co-Design Group by establishing routine check-ins and workshops that directly involved them in the agile delivery process. We selected a key agile deliverable to pilot our co-planning methodology and successfully advanced community-prioritized improvements by delivering two highly voted items from the public voting board (known as our <fiderBoardLink>Fider board</fiderBoardLink>). We will continue to host co-planning and working sessions, and increase community engagement.</p><p><linkGithub7790>Follow #7790 on GitHub</linkGithub7790></p>",
           },
@@ -1171,7 +1171,7 @@ export const messages = {
             date: "Early 2026",
             title: "A new way to apply",
             content:
-              "<p>Simpler Search is now the default search for funding opportunities, and we’re testing a simpler, more intuitive application workflow with a small number of partner agencies and funding opportunities.</p>",
+              "<p>Simpler Search is now the default search for funding opportunities, and we're testing a simpler, more intuitive application workflow with a small number of partner agencies and funding opportunities.</p>",
           },
           {
             date: "Mid-2026",
