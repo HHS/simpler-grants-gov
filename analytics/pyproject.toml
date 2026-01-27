@@ -26,7 +26,7 @@ boto3 = "^1.35.56"
 boto3-stubs = "^1.35.56"
 psycopg = { extras = ["binary"], version = "^3.2.3" }
 smart-open = "^7.0.5"
-newrelic = "11.2.0"
+newrelic = "11.3.0"
 requests = "^2.32.5"
 urllib3 = "^2.6.3"
 
