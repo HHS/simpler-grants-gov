@@ -165,7 +165,7 @@ async function getLatestSubmission(
     return submissionsResponse.data[0];
   } catch (e) {
     console.error(
-      `Error retrieving application submission for (${applicationId})`,
+      `Error retrieving latest application submission for (${applicationId})`,
     );
   }
   return null;

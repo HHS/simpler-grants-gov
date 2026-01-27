@@ -125,17 +125,17 @@ export const InformationCard = ({
    *  - Download available, render button to download submission zip.
    */
   const ApplicationSubmissionDownload = () => {
-    if (
-      latestApplicationSubmission === null ||
-      applicationDetails.application_status === Status.IN_PROGRESS
-    )
-      return null;
     if (applicationDetails.application_status === Status.SUBMITTED)
       return (
         <p data-testid={"application-submission-download-message"}>
           {t("applicationSubmissionZipDownloadLoadingMessage")}
         </p>
       );
+    if (
+      latestApplicationSubmission === null ||
+      applicationDetails.application_status === Status.IN_PROGRESS
+    )
+      return null;
     return (
       <Link href={latestApplicationSubmission.download_path}>
         <Button
@@ -253,7 +253,11 @@ export const InformationCard = ({
           )}
         </Grid>
 
-        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+        <Grid
+          tablet={{ col: 6 }}
+          mobile={{ col: 12 }}
+          className={"margin-bottom-2"}
+        >
           {!applicationSubmitted && is_open && (
             <SubmitApplicationButton
               buttonText={t("submit")}
