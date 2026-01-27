@@ -12,6 +12,8 @@ import {
 
 const { targetEnv } = playwrightEnv;
 
+const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 15000 : 5000;
+
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
     .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
@@ -265,8 +267,16 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
+  await filterButton.waitFor({
+    state: "visible",
+    timeout: FILTER_OPTIONS_TIMEOUT,
+  });
   await filterButton.click();
+
   const filterOptions = page.locator(`input[name="${filterType}-*"]`);
-  await filterOptions.isVisible();
+  await filterOptions.waitFor({
+    state: "visible",
+    timeout: FILTER_OPTIONS_TIMEOUT,
+  });
   await filterButton.click();
 };
