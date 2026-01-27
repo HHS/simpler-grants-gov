@@ -1,10 +1,10 @@
 "use client";
 
 import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
-import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
+import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -39,7 +39,7 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
   const { attachments, setAttachmentsChanged } = useApplicationAttachments();
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
-  const applicationId = useApplicationId();
+  const { applicationId } = useParams<{ applicationId: string }>();
 
   const { uploadAttachment } = useAttachmentUpload();
   const [attachmentId, setAttachmentId] = useState<string | null>(
