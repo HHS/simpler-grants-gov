@@ -13,7 +13,7 @@ Our development team curates "help wanted" issues for open source developers lik
 ### A. Code style and standards
 
 * Follow the established code style and standards.&#x20;
-* Use clear and description variable names, comments and documentation where necessary.
+* Use clear and descriptive variable names, comments, and documentation where necessary.
 
 ### B. Testing
 
