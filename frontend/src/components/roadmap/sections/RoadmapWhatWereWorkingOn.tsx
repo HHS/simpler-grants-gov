@@ -14,13 +14,13 @@ export default function RoadmapWhatWereWorkingOn() {
 
   return (
     <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
-      {contentItems.map((contentItemIdx, index) => (
+      {contentItems.map((_contentItem, contentItemIdx) => (
         <div
           className="margin-bottom-4"
-          key={`roadmap-what-were-working-on-${index}`}
+          key={`roadmap-what-were-working-on-${contentItemIdx}`}
         >
-          <h3>{t(`contentItems.${index}.title`)}</h3>
-          {t.rich(`contentItems.${index}.content`, {
+          <h3>{t(`contentItems.${contentItemIdx}.title`)}</h3>
+          {t.rich(`contentItems.${contentItemIdx}.content`, {
             p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
             linkGithub7832: gitHubLinkForIssue(7832),
             linkGithub7830: gitHubLinkForIssue(7830),
