@@ -3,10 +3,10 @@ import logging
 import os
 import random
 import uuid
-import click
 from datetime import date
 from enum import StrEnum
 
+import click
 from sqlalchemy import select
 
 from src.adapters import db
@@ -165,7 +165,6 @@ class BuildAutomaticOpportunitiesTask(Task):
     class Metrics(StrEnum):
         OPPORTUNITY_CREATED_COUNT = "opportunity_created_count"
         OPPORTUNITY_ALREADY_EXIST_COUNT = "opportunity_already_exist_count"
-
 
     def __init__(
         self,
@@ -370,9 +369,7 @@ class BuildAutomaticOpportunitiesTask(Task):
         # unless the flag passed in says to do so
         existing_opportunity = (
             self.db_session.execute(
-                select(Opportunity).where(
-                    Opportunity.opportunity_number == data.opportunity_number
-                )
+                select(Opportunity).where(Opportunity.opportunity_number == data.opportunity_number)
             )
             .scalars()
             .first()
@@ -387,8 +384,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                         "opportunity_id": existing_opportunity.opportunity_id,
                         "opportunity_number": data.opportunity_number,
                         "force_create": force_create,
-                        "id_mismatch": existing_opportunity.opportunity_id
-                        != data.opportunity_id,
+                        "id_mismatch": existing_opportunity.opportunity_id != data.opportunity_id,
                     },
                 )
                 self.db_session.delete(existing_opportunity)
@@ -564,9 +560,7 @@ class BuildAutomaticOpportunitiesTask(Task):
 @task_blueprint.cli.command(
     "build-automatic-opportunities", help="Utility to automatically create opportunities for forms"
 )
-@click.option(
-    "--force-recreate", is_flag=True, default=False, help="Force recreate opportunities"
-)
+@click.option("--force-recreate", is_flag=True, default=False, help="Force recreate opportunities")
 @flask_db.with_db_session()
 @ecs_background_task(task_name="build-automatic-opportunities")
 def generate_opportunity_sql(db_session: db.Session, force_recreate: bool) -> None:

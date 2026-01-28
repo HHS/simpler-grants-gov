@@ -100,7 +100,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
     task1 = BuildAutomaticOpportunitiesTask(db_session)
     task1.run()
 
-    # Collect opportunity IDs from first run (excluding the all-forms opportunity which has force_create=True)
+    # Collect opportunity IDs from first run (excluding the all-forms opportunity which has test_b=True)
     first_run_ids = {}
     for opp in task1.opportunities:
         if not opp.opportunity_number.startswith("SGG-ALL-Forms-"):
@@ -149,3 +149,75 @@ def test_does_not_work_in_prod(db_session, monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "prod")
     with pytest.raises(Exception, match="This task is not meant to be run in production"):
         BuildAutomaticOpportunitiesTask(db_session).run()
+
+
+def test_force_recreate_flag_recreates_opportunities(enable_factory_create, db_session, forms):
+    """Test that force_recreate=True causes opportunities to be deleted and recreated with new IDs"""
+    # 1. Run initially to create opportunities
+    task1 = BuildAutomaticOpportunitiesTask(db_session)
+    task1.run()
+
+    # Store original IDs
+    original_ids = {}
+    for opp in task1.opportunities:
+        original_ids[opp.opportunity_number] = opp.opportunity_id
+
+    # 2. Run again with force_recreate=True
+    task2 = BuildAutomaticOpportunitiesTask(db_session, force_recreate=True)
+    task2.run()
+
+    assert task2.metrics[task2.Metrics.OPPORTUNITY_CREATED_COUNT] > 0
+    assert task2.metrics[task2.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
+
+
+def test_id_mismatch_triggers_recreation(enable_factory_create, db_session, forms):
+    """Test that a mismatch in existing opportunity ID triggers recreation"""
+    import uuid
+
+    # 1. Run initially
+    task = BuildAutomaticOpportunitiesTask(db_session)
+    task.run()
+
+    target_opp_num = "SGG-org-only-test"
+    target_opp_id = uuid.UUID("10000000-0000-0000-0000-000000000001")
+
+    # Verify it exists with correct ID
+    opp = (
+        db_session.execute(
+            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
+        )
+        .scalars()
+        .one()
+    )
+    assert opp.opportunity_id == target_opp_id
+
+    db_session.delete(opp)
+    db_session.flush()
+
+    fake_id = uuid.uuid4()
+    fake_opp = Opportunity(
+        opportunity_id=fake_id,
+        legacy_opportunity_id=999999999,
+        opportunity_number=target_opp_num,
+        opportunity_title="Fake Opp",
+        agency_code="FAKE",
+        is_draft=False,
+    )
+    db_session.add(fake_opp)
+    db_session.commit()
+
+    # 3. Run task again (WITHOUT force_recreate)
+    task2 = BuildAutomaticOpportunitiesTask(db_session)
+    task2.run()
+
+    # 4. Verify the opportunity back to the CORRECT ID
+    opp_refreshed = (
+        db_session.execute(
+            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
+        )
+        .scalars()
+        .one()
+    )
+
+    assert opp_refreshed.opportunity_id == target_opp_id
+    assert opp_refreshed.opportunity_id != fake_id
