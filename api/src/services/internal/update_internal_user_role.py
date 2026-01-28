@@ -4,15 +4,25 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import RoleType
-from src.db.models.user_models import InternalUserRole, LinkExternalUser, LinkRoleRoleType, Role
+from src.auth.endpoint_access_util import verify_access
+from src.constants.lookup_constants import Privilege, RoleType
+from src.db.models.user_models import (
+    InternalUserRole,
+    LinkExternalUser,
+    LinkRoleRoleType,
+    Role,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def update_internal_user_role(
-    db_session: db.Session, internal_role_id: str, user_email: str
+    db_session: db.Session, internal_role_id: str, user_email: str, user: User
 ) -> None:
+
+    verify_access(user, {Privilege.MANAGE_INTERNAL_ROLES}, None)
+
     # Query the role table and verify it is an internal role
     role_stmt = (
         select(Role)

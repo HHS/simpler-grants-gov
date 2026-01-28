@@ -240,6 +240,7 @@ class Privilege(StrEnum):
     LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
     MANAGE_COMPETITION = "manage_competition"
+    READ_TEST_USER_TOKEN = "read_test_user_token"
 
 
 class RoleType(StrEnum):

@@ -6,6 +6,7 @@ from typing import Self
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import ApiJwtConfig, create_jwt_for_user
+from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.competition_models import Competition, Form
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import OrganizationUserRole, Role, User
@@ -108,6 +109,17 @@ class UserBuilder:
             )
 
         org_user.organization_user_roles = organization_user_roles
+
+        return self
+
+    def with_internal_role(self, role_name: str, privileges: list[Privilege]) -> Self:
+        """Assign an internal role with specific privileges to the user"""
+        role = factories.RoleFactory.create(
+            role_name=role_name, is_core=True, privileges=privileges
+        )
+        factories.LinkRoleRoleTypeFactory.create(role=role, role_type=RoleType.INTERNAL)
+
+        factories.InternalUserRoleFactory.create(user=self.user, role=role)
 
         return self
 
