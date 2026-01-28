@@ -17,10 +17,6 @@ DEFAULT = [
 EXPANDED = [
     "agency",
     "agency.keyword",
-    "agency_code",
-    "agency_code.keyword",
-    "top_level_agency_code",
-    "top_level_agency_code.keyword",
     "agency_name",
     "top_level_agency_name",
     "opportunity_title",
@@ -38,10 +34,6 @@ EXPANDED = [
 AGENCY = [
     "agency",
     "agency.keyword",
-    "agency_code",
-    "agency_code.keyword",
-    "top_level_agency_code",
-    "top_level_agency_code.keyword",
     "agency_name",
     "top_level_agency_name",
     "summary.agency_contact_description",
