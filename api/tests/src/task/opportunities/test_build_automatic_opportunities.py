@@ -151,7 +151,7 @@ def test_does_not_work_in_prod(db_session, monkeypatch):
 
 
 def test_force_recreate_flag_recreates_opportunities(enable_factory_create, db_session, forms):
-    """Test that force_recreate=True causes opportunities to be deleted and recreated with new IDs"""
+    """Test that force_recreate=True only recreates opportunities that allow it (hardcoded test scenarios)"""
     # 1. Run initially to create opportunities
     task1 = BuildAutomaticOpportunitiesTask(db_session)
     task1.run()
@@ -165,8 +165,12 @@ def test_force_recreate_flag_recreates_opportunities(enable_factory_create, db_s
     task2 = BuildAutomaticOpportunitiesTask(db_session, force_recreate=True)
     task2.run()
 
-    assert task2.metrics[task2.Metrics.OPPORTUNITY_CREATED_COUNT] > 0
-    assert task2.metrics[task2.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
+    # The 4 hardcoded test scenarios should be recreated (allow_force_recreate=True)
+    # The 7 form-based opportunities + ALL-forms should be skipped (allow_force_recreate=False)
+    assert task2.metrics[task2.Metrics.OPPORTUNITY_CREATED_COUNT] == 4  # 4 test scenarios
+    assert (
+        task2.metrics[task2.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 8
+    )  # 7 form-based + 1 ALL-forms
 
 
 def test_id_mismatch_does_not_trigger_recreation_without_flag(
@@ -230,7 +234,7 @@ def test_id_mismatch_does_not_trigger_recreation_without_flag(
 
     # Verify warning was logged
     assert "Skipping creating opportunity" in caplog.text
-    assert "BUT has a different ID" in caplog.text
+    assert "Run with --force-recreate" in caplog.text
 
 
 def test_id_mismatch_triggers_recreation_with_flag(enable_factory_create, db_session, forms):

@@ -64,6 +64,9 @@ class OpportunityContainer:
     opportunity_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
     agency_code: str = "SGG"
     category: OpportunityCategory = OpportunityCategory.DISCRETIONARY
+    # If True, this opportunity can be deleted and recreated when --force-recreate is used
+    # Only set this to True for hardcoded test scenarios, never for form-based opportunities
+    allow_force_recreate: bool = False
 
     ### Assistance listing number
     # Note - only 1 is supported at the moment
@@ -236,6 +239,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_title="Opportunity open to only organizations",
                 opportunity_number="SGG-org-only-test",
                 opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000001"),
+                allow_force_recreate=True,
             ),
             competitions=[
                 CompetitionContainer(
@@ -253,6 +257,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_title="Opportunity open to only individuals",
                 opportunity_number="SGG-indv-only-test",
                 opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000002"),
+                allow_force_recreate=True,
             ),
             competitions=[
                 CompetitionContainer(
@@ -294,6 +299,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 applicant_types=[
                     ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS
                 ],
+                allow_force_recreate=True,
                 opportunity_attachment_file_name=None,  # We'll manually upload files
             ),
             competitions=[
@@ -345,6 +351,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3,
                     ApplicantType.OTHER,
                 ],
+                allow_force_recreate=True,
                 opportunity_attachment_file_name=None,  # We'll manually upload files
             ),
             competitions=[
@@ -377,17 +384,21 @@ class BuildAutomaticOpportunitiesTask(Task):
         )
 
         if existing_opportunity:
-            # If we're forcing recreate, or if the IDs don't match, we need to delete the old one
-            # If we're forcing recreate we delete the old one
-            if force_create:
+            # Determine if we should delete:
+            # 1. If force_create is True but NOT from the global flag, always delete (per-opportunity override)
+            # 2. If force_create is True from the global flag, only delete if allow_force_recreate is True
+            is_global_force = force_create and force_create == self.force_recreate
+            should_delete = force_create and (not is_global_force or data.allow_force_recreate)
+
+            if should_delete:
                 logger.info(
                     f"Deleting existing opportunity '{data.opportunity_number}' to recreate it",
                     extra={
                         "opportunity_id": existing_opportunity.opportunity_id,
                         "opportunity_number": data.opportunity_number,
                         "force_create": force_create,
-                        "id_mismatch": existing_opportunity.opportunity_id
-                        != data.opportunity_id,
+                        "allow_force_recreate": data.allow_force_recreate,
+                        "id_mismatch": existing_opportunity.opportunity_id != data.opportunity_id,
                     },
                 )
                 self.db_session.delete(existing_opportunity)
