@@ -57,3 +57,9 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 01/23/26
   - vulnerability: CVE-2025-11468
+
+  # Next.js 15.4.10 -> 15.5.10 upgrade causes breaking changes in next.config.js
+  # The fix requires path pattern syntax updates that need more testing
+  # https://github.com/advisories/GHSA-9g9p-9gw9-jx7f
+  # Last checked: 01/28/26
+  - vulnerability: GHSA-9g9p-9gw9-jx7f
