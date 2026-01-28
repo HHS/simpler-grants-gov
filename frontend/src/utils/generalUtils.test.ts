@@ -1,5 +1,7 @@
 import {
   findFirstWhitespace,
+  formatTimestamp,
+  getModifiedTimeDisplay,
   isCurrentPath,
   queryParamsToQueryString,
   splitMarkup,
@@ -126,5 +128,95 @@ describe("isCurrentPath", () => {
   it("returns false if the path does not match the regex with passed link", () => {
     expect(isCurrentPath("/hello/other-path", "/es/hello")).toEqual(false);
     expect(isCurrentPath("/hello", "/gr/hello")).toEqual(false);
+  });
+});
+
+describe("formatTimestamp", () => {
+  it("formats a valid ISO date string correctly", () => {
+    const result = formatTimestamp("2026-01-23T15:30:00Z");
+    expect(result).toContain("January 23, 2026");
+    expect(result).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it("includes date in long format with year, month, and day", () => {
+    const result = formatTimestamp("2025-12-25T10:15:00Z");
+    expect(result).toContain("December 25, 2025");
+  });
+
+  it("includes time with hours and minutes", () => {
+    const result = formatTimestamp("2026-06-15T08:45:30Z");
+    expect(result).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it("includes timezone abbreviation in the output", () => {
+    const result = formatTimestamp("2026-01-23T15:30:00Z");
+    expect(result).toMatch(/[A-Z]{2,4}$/);
+  });
+});
+
+describe("getModifiedTimeDisplay", () => {
+  it("returns the custom string when timestamps are identical", () => {
+    const timestamp = "2026-01-23T15:30:00Z";
+    const result = getModifiedTimeDisplay(timestamp, timestamp, "--");
+    expect(result).toEqual("--");
+  });
+
+  it("returns the custom string when timestamps differ by milliseconds only", () => {
+    const created = "2026-01-23T15:30:00.000Z";
+    const updated = "2026-01-23T15:30:00.500Z";
+    const result = getModifiedTimeDisplay(updated, created, "--");
+    expect(result).toEqual("--");
+  });
+
+  it("returns the custom string when timestamps differ by less than 5 seconds", () => {
+    const created = "2026-01-23T15:30:00Z";
+    const updated = "2026-01-23T15:30:04Z";
+    const result = getModifiedTimeDisplay(updated, created, "--");
+    expect(result).toEqual("--");
+  });
+
+  it("returns the custom string when timestamps differ by exactly 5 seconds", () => {
+    const created = "2026-01-23T15:30:00Z";
+    const updated = "2026-01-23T15:30:05Z";
+    const result = getModifiedTimeDisplay(updated, created, "--");
+    expect(result).toEqual("--");
+  });
+
+  it("returns formatted timestamp when timestamps differ by more than 5 seconds", () => {
+    const created = "2026-01-23T15:30:00Z";
+    const updated = "2026-01-23T15:30:06Z";
+    const result = getModifiedTimeDisplay(updated, created, "--");
+    expect(result).not.toEqual("--");
+    expect(result).toContain("January 23, 2026");
+  });
+
+  it("returns formatted timestamp when timestamps differ by more than 5 seconds with different custom string", () => {
+    const created = "2026-01-23T15:30:00Z";
+    const updated = "2026-01-23T15:31:00Z";
+    const result = getModifiedTimeDisplay(updated, created, "N/A");
+    expect(result).not.toEqual("N/A");
+    expect(result).toContain("January 23, 2026");
+  });
+
+  it("returns custom string with large time differences of exactly 5 seconds or less", () => {
+    const created = "2026-01-23T15:30:00Z";
+    const updated = "2026-01-23T15:30:05Z";
+    const result = getModifiedTimeDisplay(updated, created, "modified");
+    expect(result).toEqual("modified");
+  });
+
+  it("works correctly when created_at is after updated_at", () => {
+    const created = "2026-01-23T15:30:10Z";
+    const updated = "2026-01-23T15:30:05Z";
+    const result = getModifiedTimeDisplay(updated, created, "--");
+    expect(result).toEqual("--");
+  });
+
+  it("returns formatted timestamp when time difference is more than 5 seconds in either direction", () => {
+    const created = "2026-01-23T15:30:10Z";
+    const updated = "2026-01-23T15:30:00Z";
+    const result = getModifiedTimeDisplay(updated, created, "--");
+    expect(result).not.toEqual("--");
+    expect(result).toContain("January 23, 2026");
   });
 });

@@ -141,3 +141,32 @@ export const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
     !isNumber(mightBeAnObject)
   );
 };
+
+export const formatTimestamp = (time: string) => {
+  const date = new Date(time);
+  return `${date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })} ${date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "numeric",
+    timeZoneName: "short",
+  })}`;
+};
+
+export const getModifiedTimeDisplay = (
+  updated_at: string,
+  created_at: string,
+  returnStr: string,
+) => {
+  const updatedTime = new Date(updated_at).getTime();
+  const createdTime = new Date(created_at).getTime();
+  const timeDiff = Math.abs(updatedTime - createdTime);
+
+  if (timeDiff <= 5000) {
+    return returnStr;
+  }
+
+  return formatTimestamp(updated_at);
+};
