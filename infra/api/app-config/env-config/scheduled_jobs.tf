@@ -105,6 +105,7 @@ locals {
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+      role_override       = "opensearch-write"
     }
     export-opportunity-data = {
       task_command = ["poetry", "run", "flask", "task", "export-opportunity-data"]
@@ -132,6 +133,7 @@ locals {
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
+      role_override       = "opensearch-write"
     }
     email_notification_opportunity = {
       task_command = ["poetry", "run", "flask", "task", "email-notifications"]

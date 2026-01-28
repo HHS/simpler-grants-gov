@@ -287,6 +287,9 @@ variable "scheduled_jobs" {
       Name  = string
       Value = string
     })), [])
+    # Role override: "opensearch-write" uses the opensearch-write role, "migrator" uses the migrator role.
+    # If not specified or null, defaults to the app role.
+    role_override = optional(string, null)
   }))
   default = {}
 }
