@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, Locator, test } from "@playwright/test";
 
 import { createSpoofedSessionCookie } from "./loginUtils";
 import playwrightEnv from "./playwright-env";
@@ -30,7 +30,10 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
     await page.goto("/", { waitUntil: "domcontentloaded" });
   } else if (playwrightEnv.targetEnv === "staging") {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const signOutButton = await performStagingLogin(page, !!isMobile);
+    const signOutButton = (await performStagingLogin(
+      page,
+      !!isMobile,
+    )) as Locator;
     await expect(signOutButton).toHaveCount(1, {
       timeout: 90000,
     });

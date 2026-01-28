@@ -16,17 +16,11 @@ if (
 const TIMEOUT_HOME = 60000;
 const TIMEOUT_MFA = 120000;
 
-// // --- Helper to require env variables ---
-// export const requireEnv = (value: string | undefined, name: string): string => {
-//   if (!value) throw new Error(`${name} is not defined`);
-//   return value;
-// };
-
 export const findSignOutButton = async (
   page: Page,
   isMobileProject: boolean,
 ): Promise<Locator> => {
-  // --- Step 7: Handle mobile dropdown if needed and confirm login success ---
+  // --- Handle mobile dropdown if needed and confirm login success ---
   if (isMobileProject) {
     const dropdownButton = page
       .locator(
@@ -40,7 +34,7 @@ export const findSignOutButton = async (
     }
   }
 
-  // --- Step 8: Confirm Account element is visible ---
+  // --- Confirm Account element is visible ---
   const signOutButton = page.locator(
     'button:has-text("Sign out"), a:has-text("Sign out")',
   );
@@ -102,7 +96,6 @@ export const fillSignInForm = async (page: Page) => {
 };
 
 export const clickSignIn = async (page: Page): Promise<boolean> => {
-  // --- Step 2: Click Sign In ---
   let signInButton: Locator = page
     .locator('button:has-text("Sign In")')
     .filter({ visible: true })
@@ -153,9 +146,12 @@ export const performStagingLogin = async (
     try {
       await generateMfaAndSubmit(page, mfaInput);
       signOutButton = await findSignOutButton(page, isMobileProject);
+      if (!signOutButton) {
+        await page.waitForTimeout(TIMEOUT_MFA);
+      }
     } catch (e) {
       if (page.isClosed()) throw e;
-      await page.waitForTimeout(3000);
+      await page.waitForTimeout(TIMEOUT_MFA);
       if (attempt === 3) throw e;
     }
   }
