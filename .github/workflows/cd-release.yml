@@ -26,6 +26,7 @@ on:
           - dev
           - staging
           - training
+          - grantee1
           - prod
 
 jobs:
