@@ -54,6 +54,7 @@ export const searchFetcherParams: QueryParamData = {
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
+  postedDate: new Set(),
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
@@ -138,6 +139,9 @@ export const fakeFacetCounts = {
     arbitraryKey: 1,
   },
   close_date: {
+    arbitraryKey: 1,
+  },
+  post_date: {
     arbitraryKey: 1,
   },
   is_cost_sharing: {
