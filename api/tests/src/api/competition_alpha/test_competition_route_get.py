@@ -8,11 +8,11 @@ import src.util.file_util as file_util
 from tests.src.db.models.factories import CompetitionFactory
 
 
-def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory_create):
+def test_competition_get_200_with_user_api_key(client, user_api_key_id, enable_factory_create):
     competition = CompetitionFactory.create()
 
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-API-Key": user_api_key_id}
     )
 
     assert resp.status_code == 200
@@ -36,7 +36,7 @@ def test_competition_get_200_with_api_key(client, api_auth_token, enable_factory
 
 
 def test_competition_get_with_instructions_200(
-    client, api_auth_token, enable_factory_create, monkeypatch, mock_s3_bucket
+    client, user_auth_token, enable_factory_create, monkeypatch, mock_s3_bucket
 ):
     monkeypatch.setattr(file_util, "_s3_config", None)
 
@@ -48,7 +48,8 @@ def test_competition_get_with_instructions_200(
 
     # Make the GET request
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        f"/alpha/competitions/{competition.competition_id}",
+        headers={"X-SGG-Token": user_auth_token},
     )
 
     assert resp.status_code == 200
@@ -77,7 +78,7 @@ def test_competition_get_with_instructions_200(
 
 
 def test_competition_get_with_cdn_instructions_200(
-    client, api_auth_token, enable_factory_create, monkeypatch, mock_s3_bucket
+    client, user_api_key_id, enable_factory_create, monkeypatch, mock_s3_bucket
 ):
     monkeypatch.setattr(file_util, "_s3_config", None)
 
@@ -93,7 +94,7 @@ def test_competition_get_with_cdn_instructions_200(
 
     # Make the GET request
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-API-Key": user_api_key_id}
     )
 
     assert resp.status_code == 200
@@ -172,7 +173,7 @@ def test_competition_get_200_with_jwt(client, user_auth_token, enable_factory_cr
 @freeze_time("2025-01-15 12:00:00", tz_offset=0)
 def test_competition_get_200_is_open(
     client,
-    api_auth_token,
+    user_api_key_id,
     enable_factory_create,
     opening_date,
     closing_date,
@@ -186,7 +187,7 @@ def test_competition_get_200_is_open(
     assert competition.has_open_date == expected_is_open
 
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-API-Key": user_api_key_id}
     )
 
     assert resp.status_code == 200
@@ -197,7 +198,7 @@ def test_competition_get_200_is_open(
 
 def test_competition_get_200_is_simpler_grants_enabled_false(
     client,
-    api_auth_token,
+    user_api_key_id,
     enable_factory_create,
 ):
     """Test that competitions with is_simpler_grants_enabled=False are not open"""
@@ -206,7 +207,7 @@ def test_competition_get_200_is_simpler_grants_enabled_false(
     )
 
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-API-Key": user_api_key_id}
     )
 
     assert resp.status_code == 200
@@ -216,7 +217,7 @@ def test_competition_get_200_is_simpler_grants_enabled_false(
 
 def test_competition_get_200_is_simpler_grants_enabled_null(
     client,
-    api_auth_token,
+    user_api_key_id,
     enable_factory_create,
 ):
     """Test that competitions with is_simpler_grants_enabled=None are not open"""
@@ -225,7 +226,7 @@ def test_competition_get_200_is_simpler_grants_enabled_null(
     )
 
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": api_auth_token}
+        f"/alpha/competitions/{competition.competition_id}", headers={"X-API-Key": user_api_key_id}
     )
 
     assert resp.status_code == 200
@@ -236,7 +237,7 @@ def test_competition_get_200_is_simpler_grants_enabled_null(
 @freeze_time("2025-01-15 12:00:00", tz_offset=0)
 def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     client,
-    api_auth_token,
+    user_api_key_id,
     enable_factory_create,
 ):
     """Test that competitions with is_simpler_grants_enabled=True still respect date checks"""
@@ -268,7 +269,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert competition_disabled.has_open_date is True
     resp = client.get(
         f"/alpha/competitions/{competition_disabled.competition_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-API-Key": user_api_key_id},
     )
     assert resp.status_code == 200
     assert resp.get_json()["data"]["is_open"] is False
@@ -277,7 +278,7 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert competition_enabled_open.has_open_date is True
     resp = client.get(
         f"/alpha/competitions/{competition_enabled_open.competition_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-API-Key": user_api_key_id},
     )
     assert resp.status_code == 200
     assert resp.get_json()["data"]["is_open"] is True
@@ -286,29 +287,29 @@ def test_competition_get_200_is_simpler_grants_enabled_true_and_date_checks(
     assert competition_enabled_closed.has_open_date is False
     resp = client.get(
         f"/alpha/competitions/{competition_enabled_closed.competition_id}",
-        headers={"X-Auth": api_auth_token},
+        headers={"X-API-Key": user_api_key_id},
     )
     assert resp.status_code == 200
     assert resp.get_json()["data"]["is_open"] is False
 
 
-def test_competition_get_404_not_found(client, api_auth_token):
+def test_competition_get_404_not_found(client, user_api_key_id):
     competition_id = uuid.uuid4()
-    resp = client.get(f"/alpha/competitions/{competition_id}", headers={"X-Auth": api_auth_token})
+    resp = client.get(
+        f"/alpha/competitions/{competition_id}", headers={"X-API-Key": user_api_key_id}
+    )
 
     assert resp.status_code == 404
     assert resp.get_json()["message"] == f"Could not find Competition with ID {competition_id}"
 
 
-def test_competition_get_401_unauthorized(client, api_auth_token, enable_factory_create):
+def test_competition_get_401_unauthorized(client, user_api_key_id, enable_factory_create):
     competition = CompetitionFactory.create()
 
     resp = client.get(
-        f"/alpha/competitions/{competition.competition_id}", headers={"X-Auth": "some-other-token"}
+        f"/alpha/competitions/{competition.competition_id}",
+        headers={"X-SGG-Token": "some-other-token"},
     )
 
     assert resp.status_code == 401
-    assert (
-        resp.get_json()["message"]
-        == "The server could not verify that you are authorized to access the URL requested"
-    )
+    assert resp.get_json()["message"] == "Unable to process token"
