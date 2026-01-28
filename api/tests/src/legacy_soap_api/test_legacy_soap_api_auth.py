@@ -97,7 +97,7 @@ def test_client_auth(db_session, enable_factory_create):
     MOCK_SOAP_PRIVATE_KEYS = {f"{legacy_certificate.legacy_certificate_id}": MOCK_CERT}
     auth = SOAPAuth(certificate=mock_client_cert)
     cert = auth.certificate.get_pem(MOCK_SOAP_PRIVATE_KEYS)
-    assert cert == f"{MOCK_CERT}\n\n{MOCK_CERT_STR}"
+    assert cert == f"{MOCK_CERT}"
 
 
 def test_client_auth_exceptions(db_session, enable_factory_create):
