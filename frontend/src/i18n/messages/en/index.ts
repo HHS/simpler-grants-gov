@@ -789,6 +789,7 @@ export const messages = {
         agency: "Agency",
         category: "Category",
         status: "Opportunity status",
+        postedDate: "Posted Date",
         closeDate: "Closing date range",
         costSharing: "Cost sharing",
       },
