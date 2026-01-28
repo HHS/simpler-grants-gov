@@ -411,6 +411,16 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 }
             ]
 
+            if opportunity.opportunity_id in [
+                DOC_SPACE_COAST.opportunity_id,
+                DOC_MANUFACTURING.opportunity_id,
+            ]:
+                json_record["top_level_agency_name"] = "Department of Commerce"
+                json_record["top_level_agency_code"] = DOC_TOP_LEVEL.agency_code
+            if opportunity.opportunity_id == DOC_TOP_LEVEL.opportunity_id:
+                json_record["agency_name"] = "Department of Commerce"
+                json_record["top_level_agency_code"] = None
+
             json_records.append(json_record)
 
         search_client.bulk_upsert(
@@ -1759,3 +1769,89 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert [opp["opportunity_id"] for opp in data] == [
             opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
         ]
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "opportunity_id", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                    query="DOC",  # search by top-level agency code
+                ),
+                [
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
+                ],
+            ),
+        ],
+        ids=["top_level_agency_doc"],
+    )
+    def test_search_by_top_level_agency(
+        self, client, api_auth_token, search_request, expected_results
+    ):
+        """
+        Test that searching by a top-level agency code (DOC) returns all opportunities
+        for its sub-agencies and itself.
+        """
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    @pytest.mark.parametrize(
+        "search_request, expected",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "relevancy", "sort_direction": SortDirection.DESCENDING}
+                    ],
+                    query="DOC",
+                ),
+                DOC_TOP_LEVEL,
+            ),
+        ],
+        ids=["top_level_doc_first"],
+    )
+    def test_top_level_agency_returns_first(self, client, api_auth_token, search_request, expected):
+        """
+        Test that when searching by a top-level agency (DOC), the top-level agency's
+        own opportunities are returned before its sub-agencies.
+        """
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=search_request,
+            headers={"X-Auth": api_auth_token},
+        )
+        response_json = resp.get_json()
+        opportunities = response_json["data"]
+        first_opportunity = opportunities[0]
+        assert first_opportunity["opportunity_id"] == str(expected.opportunity_id)
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "opportunity_id", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                    query="Department of Commerce",
+                ),
+                [
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
+                ],
+            ),
+        ],
+        ids=["agency_name_doc"],
+    )
+    def test_search_by_agency_name(self, client, api_auth_token, search_request, expected_results):
+        """
+        Test that searching by an agency name returns matching opportunities.
+
+        This test validates that opportunities are returned when their agency_name
+        or top_level_agency_name matches the query.
+        """
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
