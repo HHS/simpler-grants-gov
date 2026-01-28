@@ -39,7 +39,6 @@ services:
     networks:
       - default
 
-  # opensearch-dashboards disabled to save resources in CI
   opensearch-dashboards:
    image: opensearchproject/opensearch-dashboards:2
    container_name: opensearch-dashboards
