@@ -109,7 +109,7 @@ const headers = [
   },
   // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved:path*",
+    source: "/saved/:path*",
     headers: [
       {
         key: "Cache-Control",

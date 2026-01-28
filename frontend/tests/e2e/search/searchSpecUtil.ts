@@ -2,12 +2,20 @@
 // Search Test Helper Functions
 // =========================
 
-import { expect, Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { camelCase } from "lodash";
 import {
   waitForURLContainsQueryParam,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
+
+// Target the filter drawer dialog when it's open,
+// otherwise use the page root.
+async function getActiveFilterRoot(page: Page): Promise<Locator> {
+  const filterDialog = page.getByRole("dialog", { name: /filters/i });
+  const isDialogVisible = await filterDialog.isVisible().catch(() => false);
+  return isDialogVisible ? filterDialog : page.locator("body");
+}
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
@@ -46,7 +54,10 @@ export async function expectCheckboxIDIsChecked(
   page: Page,
   idWithHash: string,
 ) {
-  const checkbox: Locator = page.locator(idWithHash);
+  const root = await getActiveFilterRoot(page);
+  const checkbox = root.locator(idWithHash);
+
+  await expect(checkbox).toBeAttached();
   await expect(checkbox).toBeChecked();
 }
 
@@ -57,8 +68,10 @@ export async function toggleCheckboxes(
   startingQueryParams?: string,
 ) {
   let runningQueryParams = startingQueryParams ?? "";
+
   for (const [checkboxID, queryParamValue] of Object.entries(checkboxObject)) {
     await toggleCheckbox(page, checkboxID);
+
     runningQueryParams += runningQueryParams
       ? `,${queryParamValue}`
       : queryParamValue;
@@ -71,9 +84,11 @@ export async function toggleCheckboxes(
 }
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
-  const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  await expect(checkBox).toBeEnabled();
-  await checkBox.click();
+  const root = await getActiveFilterRoot(page);
+  const checkboxLabel = root.locator(`label[for="${idWithoutHash}"]`);
+  await expect(checkboxLabel).toBeVisible();
+  await expect(checkboxLabel).toBeEnabled();
+  await checkboxLabel.click();
 }
 
 export async function selectSortBy(
@@ -84,7 +99,7 @@ export async function selectSortBy(
   await page
     .locator(`#search-sort-by-select${drawer ? "-drawer" : ""}`)
     .selectOption(sortByValue);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await page.waitForTimeout(1000);
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
@@ -95,9 +110,10 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h3:has-text("Opportunities")');
-  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  const resultsHeading = page.locator(
+    "div[data-testid='search-results-controls'] h3",
+  );
+  await expect(resultsHeading).toBeVisible({ timeout: 60000 });
 }
 
 export async function clickAccordionWithTitle(
@@ -153,7 +169,7 @@ export async function getLastSearchResultTitle(page: Page) {
 export async function selectOppositeSortOption(page: Page) {
   const sortByDropdown = page.locator("#search-sort-by-select");
   const currentValue = await sortByDropdown.inputValue();
-  let oppositeValue;
+  let oppositeValue: string;
 
   if (currentValue.includes("Asc")) {
     oppositeValue = currentValue.replace("Asc", "Desc");
@@ -202,8 +218,6 @@ export const selectAllTopLevelFilterOptions = async (
   page: Page,
   filterType: string,
 ): Promise<undefined> => {
-  // gather number of (top level) filter options for filter type
-
   // click select all for filter type
   const selectAllButton = page
     .locator(`#opportunity-filter-${filterType} button:has-text("Select All")`)
@@ -243,7 +257,9 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
   await filterButton.click();
-  const filterOptions = page.locator(`input[name="${filterType}-*"]`);
+  const filterOptions = page.locator(`input[name^="${filterType}-"]`);
+  await expect(filterOptions.first()).toBeVisible();
   await filterOptions.isVisible();
+
   await filterButton.click();
 };
