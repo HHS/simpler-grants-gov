@@ -54,7 +54,7 @@ const headers = [
   {
     // static pages are stored for 6 hours, refreshed in the background for
     // up to 10 minutes, and up to 12 hours if there is an error
-    source: "/:path*",
+    source: "/(.*)",
     headers: [
       {
         key: "Cache-Control",
@@ -89,7 +89,7 @@ const headers = [
   },
   // don't cache the form
   {
-    source: "/subscribe/:path*",
+    source: "/subscribe/(.*)",
     headers: [
       {
         key: "Cache-Control",
@@ -99,7 +99,7 @@ const headers = [
   },
   // don't cache the api
   {
-    source: "/api/:path*",
+    source: "/api/(.*)",
     headers: [
       {
         key: "Cache-Control",
@@ -109,7 +109,7 @@ const headers = [
   },
   // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved:path*",
+    source: "/saved-(.*)",
     headers: [
       {
         key: "Cache-Control",
@@ -129,7 +129,7 @@ const headers = [
   },
   // don't cache if users has a session cookie
   {
-    source: "/:path*",
+    source: "/(.*)",
     has: [{ type: "cookie", key: "session" }],
     headers: [
       {
@@ -152,13 +152,6 @@ if (!isCi)
 const nextConfig = {
   async headers() {
     return headers;
-  },
-  // see https://nextjs.org/docs/messages/api-routes-response-size-limit
-  // warning about unrecognized key can be ignored
-  api: {
-    bodyParser: {
-      sizeLimit: "2000mb",
-    },
   },
   basePath,
   reactStrictMode: true,
@@ -213,13 +206,13 @@ const nextConfig = {
         permanent: false,
       },
       {
-        source: "/organization/:segments*",
-        destination: "/organizations/:segments*",
+        source: "/organization/:segments+",
+        destination: "/organizations/:segments+",
         permanent: false,
       },
       {
-        source: "/workspace/applications/application/:segments*",
-        destination: "/applications/:segments*",
+        source: "/workspace/applications/application/:segments+",
+        destination: "/applications/:segments+",
         permanent: false,
       },
     ];
