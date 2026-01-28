@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import uuid
+import click
 from datetime import date
 from enum import StrEnum
 
@@ -165,13 +166,20 @@ class BuildAutomaticOpportunitiesTask(Task):
         OPPORTUNITY_CREATED_COUNT = "opportunity_created_count"
         OPPORTUNITY_ALREADY_EXIST_COUNT = "opportunity_already_exist_count"
 
-    def __init__(self, db_session: db.Session, s3_config: S3Config | None = None) -> None:
+
+    def __init__(
+        self,
+        db_session: db.Session,
+        s3_config: S3Config | None = None,
+        force_recreate: bool = False,
+    ) -> None:
         super().__init__(db_session)
 
         if s3_config is None:
             s3_config = S3Config()
 
         self.s3_config = s3_config
+        self.force_recreate = force_recreate
         # This just exists to make tests easier to find the opportunities created
         self.opportunities: list[Opportunity] = []
 
@@ -200,6 +208,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     opportunity_id=form_opportunity_id,
                 ),
                 competitions=[CompetitionContainer(optional_form_ids=[form.form_id])],
+                force_create=self.force_recreate,
             )
 
         # Always create an opportunity with all forms
@@ -235,6 +244,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                 )
             ],
+            force_create=self.force_recreate,
         )
 
         ### Only open to individuals
@@ -251,6 +261,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
                 )
             ],
+            force_create=self.force_recreate,
         )
 
         ### Mock BOR Opportunity
@@ -302,6 +313,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     competition_instructions_file_name=None,  # We'll manually upload files
                 )
             ],
+            force_create=self.force_recreate,
         )
 
         ### Mock DOJ Opportunity
@@ -345,6 +357,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     competition_instructions_file_name=None,  # We'll manually upload files
                 )
             ],
+            force_create=self.force_recreate,
         )
 
     def create_opportunity(
@@ -355,17 +368,32 @@ class BuildAutomaticOpportunitiesTask(Task):
     ) -> None:
         # We won't always remake the opportunities every time
         # unless the flag passed in says to do so
-        if not force_create:
-            existing_opportunity = (
-                self.db_session.execute(
-                    select(Opportunity).where(
-                        Opportunity.opportunity_number == data.opportunity_number
-                    )
+        existing_opportunity = (
+            self.db_session.execute(
+                select(Opportunity).where(
+                    Opportunity.opportunity_number == data.opportunity_number
                 )
-                .scalars()
-                .first()
             )
-            if existing_opportunity is not None:
+            .scalars()
+            .first()
+        )
+
+        if existing_opportunity:
+            # If we're forcing recreate, or if the IDs don't match, we need to delete the old one
+            if force_create or existing_opportunity.opportunity_id != data.opportunity_id:
+                logger.info(
+                    f"Deleting existing opportunity '{data.opportunity_number}' to recreate it",
+                    extra={
+                        "opportunity_id": existing_opportunity.opportunity_id,
+                        "opportunity_number": data.opportunity_number,
+                        "force_create": force_create,
+                        "id_mismatch": existing_opportunity.opportunity_id
+                        != data.opportunity_id,
+                    },
+                )
+                self.db_session.delete(existing_opportunity)
+                self.db_session.flush()  # Ensure deletion happens before we try to insert
+            else:
                 logger.info(
                     f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
                     extra={
@@ -536,7 +564,10 @@ class BuildAutomaticOpportunitiesTask(Task):
 @task_blueprint.cli.command(
     "build-automatic-opportunities", help="Utility to automatically create opportunities for forms"
 )
+@click.option(
+    "--force-recreate", is_flag=True, default=False, help="Force recreate opportunities"
+)
 @flask_db.with_db_session()
 @ecs_background_task(task_name="build-automatic-opportunities")
-def generate_opportunity_sql(db_session: db.Session) -> None:
-    BuildAutomaticOpportunitiesTask(db_session).run()
+def generate_opportunity_sql(db_session: db.Session, force_recreate: bool) -> None:
+    BuildAutomaticOpportunitiesTask(db_session, force_recreate=force_recreate).run()
