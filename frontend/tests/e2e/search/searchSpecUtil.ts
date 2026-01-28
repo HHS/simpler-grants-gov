@@ -42,7 +42,10 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   await submitButton.click();
 }
 
-export function expectURLContainsQueryParam(page: Page, queryParamName: string) {
+export function expectURLContainsQueryParam(
+  page: Page,
+  queryParamName: string,
+) {
   const currentURL = page.url();
   expect(currentURL).toContain(queryParamName);
 }
@@ -122,7 +125,10 @@ export async function clickAccordionWithTitle(
     .click();
 }
 
-export async function clickPaginationPageNumber(page: Page, pageNumber: number) {
+export async function clickPaginationPageNumber(
+  page: Page,
+  pageNumber: number,
+) {
   const paginationButton = page.locator(
     `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
   );
