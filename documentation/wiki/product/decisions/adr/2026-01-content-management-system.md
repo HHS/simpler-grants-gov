@@ -5,7 +5,7 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 # \[Draft] Content Management System
 
 * **Status:** Active
-* **Last Modified:** 2026-01-27
+* **Last Modified:** 2026-01-28
 * **Related Issue:** [#6559](https://github.com/HHS/simpler-grants-gov/issues/6559)
 * **Deciders:** Julius, Jay (contributors: Doug, Andy, Matt, Yan-Yin)&#x20;
 * **Tags:** cms, storyblok, drupal, content&#x20;
@@ -73,6 +73,8 @@ If managed hosting is preferred _**and**_ FedRAMP certification is a requirement
 ## Feature & price comparisons
 
 <table data-full-width="false"><thead><tr><th width="225.890625">BASIC FEATURES</th><th align="center">Storyblok</th><th align="center">Drupal</th><th align="center">Directus</th><th align="center">Payload</th></tr></thead><tbody><tr><td>RBAC</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr><tr><td>Publishing workflow</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr><tr><td>Self-hosted</td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr><tr><td>Vendor-hosted</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">❌</td></tr><tr><td>FedRAMP certification</td><td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">❌</td></tr><tr><td>Open source</td><td align="center">❌</td><td align="center">✅ </td><td align="center">✅<br><sup>(w/ license)</sup></td><td align="center">✅</td></tr></tbody></table>
+
+Estimates, based on conversations with each product's support/sales team:
 
 <table><thead><tr><th valign="top">Storyblok</th><th valign="top">Drupal (self-hosted)</th><th valign="top">Acquia</th><th valign="top">Directus</th></tr></thead><tbody><tr><td valign="top"><p><strong>$51–75K</strong>/year</p><p></p><p>"Enterprise Elite" plan</p><p></p><p><em>* $64K plan recommended, pending usage requirements</em></p></td><td valign="top"><p><strong>$15K–25K</strong>/year</p><p></p><p><em>* infrastructure costs only (additional maintenance cost for engineering time)</em> </p></td><td valign="top"><p><strong>$168K–213K</strong>/year </p><p></p><p>"FedRAMP Acquia Cloud Plus &#x26; Enterprise Security Package" </p><p></p><p><em>* $92.5k (base) + $75k (VPN/VPC) + $45k (technical account mgmt team)</em></p></td><td valign="top"><p><strong>$35,520</strong>/year</p><p></p><p>"Tier 3 Enterprise Cloud" plan (including a 20% open-source/gov discount)</p><p></p><p><em>* lower tier would likely suffice: $19,200/year for Tier 1, and $25,920/year for Tier 2</em> </p></td></tr></tbody></table>
 
