@@ -925,6 +925,7 @@ export const messages = {
       page: "Page",
       sortby: "Sort by",
       closeDate: "Close date",
+      postedDate: "Posted date",
       costSharing: "Cost sharing",
       topLevelAgency: "Top level agency",
       andOr: "Query and/or operator",

@@ -96,7 +96,7 @@ const toRelativeDateRangeFilter = (
 ): RelativeDateRangeFilter => {
   const convertedData = Array.from(data);
   const days = parseInt(convertedData[0], 10);
-  
+
   if (direction === "backward") {
     // For backward ranges (posted date), use start_date_relative with negative value
     // e.g., 7 becomes -7 meaning "from 7 days ago to now"
