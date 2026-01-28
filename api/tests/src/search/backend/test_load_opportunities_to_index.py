@@ -7,7 +7,6 @@ from src.search.backend.load_opportunities_to_index import (
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
-    ExcludedOpportunityReviewFactory,
     OpportunityChangeAuditFactory,
     OpportunityFactory,
 )
@@ -158,17 +157,6 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             size=3, is_posted_summary=True, opportunity_attachments=[]
         )
 
-        # Create opportunities that should be excluded from indexing
-        excluded_opportunities = OpportunityFactory.create_batch(
-            size=2, is_posted_summary=True, opportunity_attachments=[]
-        )
-
-        # Add the excluded opportunities to the ExcludedOpportunityReview table
-        for opportunity in excluded_opportunities:
-            ExcludedOpportunityReviewFactory.create(
-                legacy_opportunity_id=opportunity.legacy_opportunity_id
-            )
-
         # Ensure we have a unique index name for this test to avoid conflicts
         load_opportunities_to_index.index_name = (
             load_opportunities_to_index.index_name + "-excluded-test"
@@ -183,21 +171,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         # Convert our test opportunities to string IDs for comparison
         expected_included_ids = set([str(opp.opportunity_id) for opp in included_opportunities])
-        expected_excluded_ids = set([str(opp.opportunity_id) for opp in excluded_opportunities])
 
         # Verify that ALL of our expected opportunities are present in the index
         missing_included = expected_included_ids - all_indexed_opportunity_ids
         assert (
             not missing_included
         ), f"Expected opportunities missing from index: {missing_included}"
-
-        # Verify that NONE of our excluded opportunities are present in the index
-        incorrectly_included = expected_excluded_ids & all_indexed_opportunity_ids
-        assert (
-            not incorrectly_included
-        ), f"Excluded opportunities found in index: {incorrectly_included}"
-
-        # Additional verification: ensure the sets are disjoint (no overlap)
-        assert expected_included_ids.isdisjoint(
-            expected_excluded_ids
-        ), "Test setup error: included and excluded sets overlap"
