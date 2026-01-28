@@ -219,6 +219,7 @@ class TestSubmissionXMLAssembler:
         self, sample_application, sample_application_submission
     ):
         """Test that schema location includes CFDA number when present on opportunity."""
+
         # Create a mock for the CFDA object
         class MockCfda:
             cfdanumber = "93.123"
