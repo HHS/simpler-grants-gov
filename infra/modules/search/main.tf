@@ -30,7 +30,7 @@ resource "aws_cloudwatch_log_resource_policy" "opensearch" {
 }
 
 resource "aws_opensearch_domain" "opensearch" {
-  depends_on = [aws_cloudwatch_log_resource_policy.opensearch]
+  depends_on     = [aws_cloudwatch_log_resource_policy.opensearch]
   domain_name    = var.service_name
   engine_version = var.engine_version
 
