@@ -12,9 +12,9 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 
 ## Context and Problem Statement
 
-[Simpler.Grants.gov](http://simpler.grants.gov) needs a content management system to 1) reduce the time it takes for content changes to get into production, 2) enable content creators to self serve, and 3) reduce the dependency on developers to make content changes. Current bottlenecks can delay critical updates by days or weeks and distract frontend developers from focusing on more impactful feature improvements.&#x20;
+Simpler.Grants.gov needs a content management system to 1) reduce the time it takes for content changes to get into production, 2) enable content creators to self serve, and 3) reduce the dependency on developers to make content changes. Current bottlenecks can delay critical updates by days or weeks and distract frontend developers from focusing on more impactful feature improvements.&#x20;
 
-**Which content management system is best suited for** [**Simpler.Grants.gov**](http://simpler.grants.gov)**?**&#x20;
+**Which content management system is best suited for Simpler.Grants.gov?**&#x20;
 
 ## Decision Drivers
 
@@ -29,7 +29,7 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 
 ## Options Considered
 
-Nava explored the current headless CMS SaaS market landscape. Four options stood out as most appropriate for [Simpler.Grants.gov](http://simpler.grants.gov). All provide the functionalities required by Simpler, including custom roles & permissions and configurable publishing workflows.&#x20;
+Nava explored the current headless CMS SaaS market landscape. Four options stood out as most appropriate for Simpler.Grants.gov. All provide the functionalities required by Simpler, including custom roles & permissions and configurable publishing workflows.&#x20;
 
 * [**Storyblok**](https://www.storyblok.com/)&#x20;
 * [**Decoupled Drupal**](https://www.drupal.org/docs/develop/decoupled-drupal)&#x20;
@@ -44,7 +44,7 @@ _<mark style="color:$info;">(Other options considered, but determined inappropri
 
 Storyblok is the most feature-rich option out-of-the-box, with more advanced features that we're likely to actually use than other options. The Office of Grants is also already very familiar with using Storyblok to manage content.&#x20;
 
-However, Storyblok is only recommended if [Simpler.Grants.gov](http://simpler.grants.gov)'s static site content can be hosted on Storyblok's managed hosting. Storyblok offers the choice of US-based servers, but they are not FedRAMP certified. And the Storyblok support team does not recommend (or want to support) running their product outside of their own cloud servers.&#x20;
+However, Storyblok is only recommended if Simpler.Grants.gov's static site content can be hosted on Storyblok's managed hosting. Storyblok offers the choice of US-based servers, but they are not FedRAMP certified. And the Storyblok support team does not recommend (or want to support) running their product outside of their own cloud servers.&#x20;
 
 ### Alternative options:&#x20;
 
@@ -52,11 +52,11 @@ However, Storyblok is only recommended if [Simpler.Grants.gov](http://simpler.gr
 
 If FedRAMP certification is a requirement for managed hosting, we would instead recommend self hosting Drupal over Storyblok. Drupal provides full compliance control through AWS GovCloud or similar FedRAMP infrastructure. Being open-source, with a long history of support from an active community, Drupal is likely to remain relevant for beyond the life of this project's current vendors/contracts.&#x20;
 
-A self-hosted Drupal instance is by far the least expensive option. Although it comes with a cost of developer time in maintenance, Nava engineers have a great deal of Drupal experience that can be leveraged to provide a custom-tailored content management system solution for [Simpler.Grants.gov](http://simpler.grants.gov).&#x20;
+A self-hosted Drupal instance is by far the least expensive option. Although it comes with a cost of developer time in maintenance, Nava engineers have a great deal of Drupal experience that can be leveraged to provide a custom-tailored content management system solution for Simpler.Grants.gov.&#x20;
 
 #### **3rd choice: Drupal** (managed hosting)&#x20;
 
-If managed hosting is preferred _**and**_ FedRAMP certification is a requirement, Acquia provides FedRAMP-certified Drupal hosting. However, this is the most expensive option considered (far more expensive than developer time needed to manage a self-hosted Drupal instance). This service comes at a premium, considering [Simpler.Grants.gov](http://simpler.grants.gov)'s basic needs of a content management system.&#x20;
+If managed hosting is preferred _**and**_ FedRAMP certification is a requirement, Acquia provides FedRAMP-certified Drupal hosting. However, this is the most expensive option considered (far more expensive than developer time needed to manage a self-hosted Drupal instance). This service comes at a premium, considering Simpler.Grants.gov's basic needs of a content management system.&#x20;
 
 ## Pros and Cons of the Options
 
