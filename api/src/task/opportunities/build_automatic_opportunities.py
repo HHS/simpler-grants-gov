@@ -215,8 +215,9 @@ class BuildAutomaticOpportunitiesTask(Task):
         # and we don't have to adjust something existing
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
-                opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
+                opportunity_title="Opportunity with ALL forms",
+                opportunity_number="SGG-ALL-Forms",
+                opportunity_id=uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms"),
             ),
             competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
             force_create=True,
@@ -377,26 +378,38 @@ class BuildAutomaticOpportunitiesTask(Task):
 
         if existing_opportunity:
             # If we're forcing recreate, or if the IDs don't match, we need to delete the old one
-            if force_create or existing_opportunity.opportunity_id != data.opportunity_id:
+            # If we're forcing recreate we delete the old one
+            if force_create:
                 logger.info(
                     f"Deleting existing opportunity '{data.opportunity_number}' to recreate it",
                     extra={
                         "opportunity_id": existing_opportunity.opportunity_id,
                         "opportunity_number": data.opportunity_number,
                         "force_create": force_create,
-                        "id_mismatch": existing_opportunity.opportunity_id != data.opportunity_id,
+                        "id_mismatch": existing_opportunity.opportunity_id
+                        != data.opportunity_id,
                     },
                 )
                 self.db_session.delete(existing_opportunity)
                 self.db_session.flush()  # Ensure deletion happens before we try to insert
             else:
-                logger.info(
-                    f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
-                    extra={
-                        "opportunity_id": existing_opportunity.opportunity_id,
-                        "opportunity_number": data.opportunity_number,
-                    },
-                )
+                if existing_opportunity.opportunity_id != data.opportunity_id:
+                    logger.warning(
+                        f"Skipping creating opportunity '{data.opportunity_number}', it already exists. Run with --force-recreate.",
+                        extra={
+                            "existing_opportunity_id": existing_opportunity.opportunity_id,
+                            "expected_opportunity_id": data.opportunity_id,
+                            "opportunity_number": data.opportunity_number,
+                        },
+                    )
+                else:
+                    logger.info(
+                        f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
+                        extra={
+                            "opportunity_id": existing_opportunity.opportunity_id,
+                            "opportunity_number": data.opportunity_number,
+                        },
+                    )
                 self.increment(self.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT)
                 return
 

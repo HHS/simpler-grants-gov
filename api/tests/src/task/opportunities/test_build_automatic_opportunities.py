@@ -100,11 +100,10 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
     task1 = BuildAutomaticOpportunitiesTask(db_session)
     task1.run()
 
-    # Collect opportunity IDs from first run (excluding the all-forms opportunity which has test_b=True)
+    # Collect opportunity IDs from first run
     first_run_ids = {}
     for opp in task1.opportunities:
-        if not opp.opportunity_number.startswith("SGG-ALL-Forms-"):
-            first_run_ids[opp.opportunity_number] = opp.opportunity_id
+        first_run_ids[opp.opportunity_number] = opp.opportunity_id
 
     # Second run - should skip existing opportunities
     task2 = BuildAutomaticOpportunitiesTask(db_session)
@@ -116,8 +115,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
     # Build a mapping of opportunity_number to opportunity_id from database
     db_ids = {}
     for opp in all_opportunities:
-        if not opp.opportunity_number.startswith("SGG-ALL-Forms-"):
-            db_ids[opp.opportunity_number] = opp.opportunity_id
+        db_ids[opp.opportunity_number] = opp.opportunity_id
 
     # Verify that all opportunities from first run have the same IDs in the database
     for opp_number, opp_id in first_run_ids.items():
@@ -135,6 +133,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
+        "SGG-ALL-Forms": uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms"),
     }
 
     for opp_number, expected_id in expected_ids.items():
@@ -170,14 +169,18 @@ def test_force_recreate_flag_recreates_opportunities(enable_factory_create, db_s
     assert task2.metrics[task2.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
 
-def test_id_mismatch_triggers_recreation(enable_factory_create, db_session, forms):
-    """Test that a mismatch in existing opportunity ID triggers recreation"""
+def test_id_mismatch_does_not_trigger_recreation_without_flag(
+    enable_factory_create, db_session, forms, caplog
+):
+    """Test that a mismatch in existing opportunity ID triggers a warning but NOT a recreation without the flag"""
+    import logging
     import uuid
 
     # 1. Run initially
     task = BuildAutomaticOpportunitiesTask(db_session)
     task.run()
 
+    # Pick a scenario opportunity (e.g. SGG-org-only-test) which has a fixed ID
     target_opp_num = "SGG-org-only-test"
     target_opp_id = uuid.UUID("10000000-0000-0000-0000-000000000001")
 
@@ -191,6 +194,7 @@ def test_id_mismatch_triggers_recreation(enable_factory_create, db_session, form
     )
     assert opp.opportunity_id == target_opp_id
 
+    # 2. Hack the DB to change the ID
     db_session.delete(opp)
     db_session.flush()
 
@@ -207,7 +211,65 @@ def test_id_mismatch_triggers_recreation(enable_factory_create, db_session, form
     db_session.commit()
 
     # 3. Run task again (WITHOUT force_recreate)
-    task2 = BuildAutomaticOpportunitiesTask(db_session)
+    # We expect a warning
+    with caplog.at_level(logging.WARNING):
+        task2 = BuildAutomaticOpportunitiesTask(db_session)
+        task2.run()
+
+    # 4. Verify the opportunity STILL has the WRONG ID (not recreated)
+    opp_refreshed = (
+        db_session.execute(
+            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
+        )
+        .scalars()
+        .one()
+    )
+
+    assert opp_refreshed.opportunity_id == fake_id
+    assert opp_refreshed.opportunity_id != target_opp_id
+
+    # Verify warning was logged
+    assert "Skipping creating opportunity" in caplog.text
+    assert "BUT has a different ID" in caplog.text
+
+
+def test_id_mismatch_triggers_recreation_with_flag(enable_factory_create, db_session, forms):
+    """Test that a mismatch in existing opportunity ID triggers recreation WITH the flag"""
+    import uuid
+
+    # 1. Run initially
+    task = BuildAutomaticOpportunitiesTask(db_session)
+    task.run()
+
+    # Pick a scenario opportunity
+    target_opp_num = "SGG-org-only-test"
+    target_opp_id = uuid.UUID("10000000-0000-0000-0000-000000000001")
+
+    # 2. Hack the DB to change the ID
+    opp = (
+        db_session.execute(
+            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
+        )
+        .scalars()
+        .one()
+    )
+    db_session.delete(opp)
+    db_session.flush()
+
+    fake_id = uuid.uuid4()
+    fake_opp = Opportunity(
+        opportunity_id=fake_id,
+        legacy_opportunity_id=999999999,
+        opportunity_number=target_opp_num,
+        opportunity_title="Fake Opp",
+        agency_code="FAKE",
+        is_draft=False,
+    )
+    db_session.add(fake_opp)
+    db_session.commit()
+
+    # 3. Run task again (WITH force_recreate)
+    task2 = BuildAutomaticOpportunitiesTask(db_session, force_recreate=True)
     task2.run()
 
     # 4. Verify the opportunity back to the CORRECT ID
