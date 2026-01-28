@@ -15,7 +15,8 @@ NO_VALUE = "N: No"
 
 # Base URL for schema locations
 # This matches the legacy Grants.gov URL structure
-SCHEMA_LOCATION_BASE_URL = "https://apply07.grants.gov/apply/opportunities/schemas/applicant"
+# Format: https://apply07.grants.gov/apply/opportunities/schemas/agency/oppOPP_NUMBER-cfdaCFDA_NUMBER.xsd
+SCHEMA_LOCATION_BASE_URL = "https://apply07.grants.gov/apply/opportunities/schemas/agency"
 
 # Namespace Definitions
 # These match the legacy Grants.gov XML structures
