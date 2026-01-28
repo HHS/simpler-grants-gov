@@ -104,6 +104,10 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             [record["opportunity_id"] for record in resp.records]
         )
 
+        first_record = resp.records[0]
+        assert "top_level_agency_code" in first_record
+        assert first_record["top_level_agency_code"] == parent_agency.agency_code
+
         # Rerunning without changing anything about the data in the DB doesn't meaningfully change anything
         load_opportunities_to_index.index_name = load_opportunities_to_index.index_name + "-another"
         load_opportunities_to_index.run()
