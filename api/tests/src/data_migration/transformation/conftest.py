@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, datetime
 
 import pytest
@@ -11,10 +12,13 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
 )
+from src.data_migration.transformation.subtask.transform_competition_instruction import (
+    build_competition_instruction_file_name,
+)
 from src.data_migration.transformation.transform_oracle_data_task import TransformOracleDataTask
 from src.db.models import staging
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import Competition
+from src.db.models.competition_models import Competition, CompetitionInstruction
 from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,
@@ -23,6 +27,9 @@ from src.db.models.opportunity_models import (
     OpportunityAssistanceListing,
     OpportunityAttachment,
     OpportunitySummary,
+)
+from src.services.competition_alpha.competition_instruction_util import (
+    get_s3_competition_instruction_path,
 )
 from src.services.opportunity_attachments import attachment_util
 from src.util import file_util
@@ -370,6 +377,93 @@ def setup_opportunity_attachment(
     return synopsis_attachment
 
 
+def setup_competition_instruction(
+    create_existing: bool,
+    competition: Competition,
+    s3_config: S3Config,
+    is_delete: bool = False,
+    is_already_processed: bool = False,
+    extension: str = "pdf",
+    has_file_contents: bool = True,
+):
+
+    source_values = {}
+    if not has_file_contents:
+        source_values["instructions"] = None
+
+    instructions = f.StagingTinstructionsFactory.create(
+        competition=None,
+        comp_id=competition.legacy_competition_id,
+        is_deleted=is_delete,
+        already_transformed=is_already_processed,
+        extension=extension,
+        **source_values,
+    )
+
+    if create_existing:
+        instruction_id = uuid.uuid4()
+        file_name = build_competition_instruction_file_name(instructions, competition)
+        s3_path = get_s3_competition_instruction_path(
+            file_name, instruction_id, competition, s3_config
+        )
+
+        f.CompetitionInstructionFactory.create(
+            competition_instruction_id=instruction_id,
+            competition=competition,
+            file_location=s3_path,
+            file_name=file_name,
+            legacy_competition_id=competition.legacy_competition_id,
+        )
+
+    return instructions
+
+
+def validate_competition_instruction(
+    db_session,
+    source_instruction,
+    s3_config: S3Config,
+    expected_filename: str | None = None,
+    expect_in_db: bool = True,
+    expect_values_to_match: bool = True,
+    is_null_package_or_extension: bool = False,
+):
+    competition_instruction = (
+        db_session.query(CompetitionInstruction)
+        .filter(CompetitionInstruction.legacy_competition_id == source_instruction.comp_id)
+        .one_or_none()
+    )
+
+    if is_null_package_or_extension:
+        assert source_instruction.transformed_at is not None
+        assert (
+            source_instruction.transformation_notes
+            == "Competition cannot have name generated due to missing required inputs - skipping"
+        )
+
+    if not expect_in_db:
+        assert competition_instruction is None
+        return
+
+    assert source_instruction.transformed_at is not None
+
+    assert competition_instruction is not None
+    with file_util.open_stream(competition_instruction.file_location) as s3_file:
+        contents = s3_file.read()
+
+        if expect_values_to_match:
+            assert contents.encode() == source_instruction.instructions
+            assert competition_instruction.file_name == expected_filename
+
+            # If the competition is a draft it should be in the draft bucket.
+            if competition_instruction.competition.opportunity.is_draft:
+                assert s3_config.draft_files_bucket_path in competition_instruction.file_location
+            else:
+                assert s3_config.public_files_bucket_path in competition_instruction.file_location
+        else:
+            assert contents.encode() != source_instruction.instructions
+            assert competition_instruction.file_name != expected_filename
+
+
 def validate_matching_fields(
     source, destination, fields: list[tuple[str, str]], expect_all_to_match: bool
 ):
@@ -514,7 +608,6 @@ def validate_opportunity_summary(
         ("modification_comments", "modification_comments"),
         ("oth_cat_fa_desc", "funding_category_description"),
         ("applicant_elig_desc", "applicant_eligibility_description"),
-        ("ac_name", "agency_name"),
         ("ac_email_addr", "agency_email_address"),
         ("ac_email_desc", "agency_email_address_description"),
     ]
@@ -523,8 +616,6 @@ def validate_opportunity_summary(
         matching_fields.extend(
             [
                 ("syn_desc", "summary_description"),
-                ("a_sa_code", "agency_code"),
-                ("ac_phone_number", "agency_phone_number"),
                 ("agency_contact_desc", "agency_contact_description"),
                 ("response_date", "close_date"),
                 ("response_date_desc", "close_date_description"),
@@ -535,8 +626,6 @@ def validate_opportunity_summary(
         matching_fields.extend(
             [
                 ("forecast_desc", "summary_description"),
-                ("agency_code", "agency_code"),
-                ("ac_phone", "agency_phone_number"),
                 ("est_synopsis_posting_date", "forecasted_post_date"),
                 ("est_appl_response_date", "forecasted_close_date"),
                 ("est_appl_response_date_desc", "forecasted_close_date_description"),
