@@ -56,7 +56,7 @@ A self-hosted Drupal instance is by far the least expensive option. Although it 
 
 #### **3rd choice: Drupal** (managed hosting)&#x20;
 
-If FedRAMP certification is a requirement for managed hosting _**and**_ self hosting is not preferred, Acquia provides FedRAMP-certified Drupal hosting. However, this is the most expensive option considered (far more expensive than developer time needed to manage a self-hosted Drupal instance). This service comes at a premium, considering [Simpler.Grants.gov](http://simpler.grants.gov)'s basic needs of a content management system.&#x20;
+If managed hosting is preferred _**and**_ FedRAMP certification is a requirement, Acquia provides FedRAMP-certified Drupal hosting. However, this is the most expensive option considered (far more expensive than developer time needed to manage a self-hosted Drupal instance). This service comes at a premium, considering [Simpler.Grants.gov](http://simpler.grants.gov)'s basic needs of a content management system.&#x20;
 
 ## Pros and Cons of the Options
 
