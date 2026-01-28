@@ -11,6 +11,7 @@ describe("BadRequestError (as an example of other error types)", () => {
     assistanceListingNumber: new Set(["15.817"]),
     category: new Set(["science"]),
     closeDate: new Set(["500"]),
+    postedDate: new Set(),
     costSharing: new Set(["true"]),
     topLevelAgency: new Set(["CDC"]),
     query: "space exploration",
