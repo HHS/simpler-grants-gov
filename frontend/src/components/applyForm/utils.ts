@@ -1,4 +1,3 @@
-import $Refparser from "@apidevtools/json-schema-ref-parser";
 import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
@@ -757,13 +756,8 @@ export const isFieldRequired = (
     .some((clean) => requiredFields.includes(clean));
 };
 
-// dereferences all def links so that all necessary property definitions
-// can be found directly within the property without referencing $defs.
-// also resolves "allOf" references within "properties" or "$defs" fields.
-// not merging the entire schema because many schemas have top level
-// "allOf" blocks that often contain "if"/"then" statements or other things
-// that the mergeAllOf library can't handle out of the box, and we don't need
-// to condense in any case
+// Backend provides fully-resolved properties;
+// frontend still strips conditionals and merges safe allOf blocks in properties.
 export const processFormSchema = async (
   formSchema: RJSFSchema,
 ): Promise<{
@@ -771,22 +765,24 @@ export const processFormSchema = async (
   conditionalValidationRules: RJSFSchema;
 }> => {
   try {
-    const dereferenced = await $Refparser.dereference(formSchema);
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
       extricateConditionalValidationRules(
-        dereferenced.properties as JSONSchema7,
+        (formSchema.properties ?? {}) as JSONSchema7,
       );
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
     const condensed = {
-      ...dereferenced,
+      ...formSchema,
       ...condensedProperties,
     };
-    return { formSchema: condensed as RJSFSchema, conditionalValidationRules };
-  } catch (e) {
+    return Promise.resolve({
+      formSchema: condensed as RJSFSchema,
+      conditionalValidationRules,
+    });
+  } catch (error) {
     console.error("Error processing schema");
-    throw e;
+    return Promise.reject(error);
   }
 };
 

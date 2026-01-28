@@ -26,7 +26,6 @@ type FormActionResult = Promise<{
 const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
 const mockRevalidateTag = jest.fn<void, [string]>();
 const getSessionMock = jest.fn();
-const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
 
 jest.mock("src/components/applyForm/actions", () => ({
@@ -45,10 +44,6 @@ jest.mock("react", () => ({
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
-}));
-
-jest.mock("@apidevtools/json-schema-ref-parser", () => ({
-  dereference: () => mockDereference() as unknown,
 }));
 
 jest.mock("json-schema-merge-allof", () => ({
