@@ -52,7 +52,7 @@ Scenario: Clicking Clear Filters with no filters selected does nothing
     Then no filters should be selected
     And results should remain unchanged
 
-Scenario: Clear Filters does not remove filters applied outside the drawer
+Scenario: Clear Filters does not remove an applied search term
     Given a filter is applied via the search bar
     And I have selected additional filters in the drawer
     When I click the Clear Filters button
