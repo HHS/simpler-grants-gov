@@ -31,7 +31,12 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         load_opportunities_to_index,
     ):
         # Create an agency that some records will be connected to
-        agency = AgencyFactory.create(agency_code="FUN-AGENCY", is_test_agency=False)
+        parent_agency = AgencyFactory.create(agency_code="FUN")
+        agency = AgencyFactory.create(
+            agency_code=f"{parent_agency.agency_code}-AGENCY",
+            is_test_agency=False,
+            top_level_agency=parent_agency,
+        )
 
         # Create 25 opportunities we will load into the search index
         opportunities = []
@@ -62,7 +67,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             OpportunityFactory.create_batch(
                 size=6,
                 is_archived_forecast_summary=True,
-                agency_code=agency.agency_code,
+                agency_code=parent_agency.agency_code,
                 opportunity_attachments=[],
             )
         )
