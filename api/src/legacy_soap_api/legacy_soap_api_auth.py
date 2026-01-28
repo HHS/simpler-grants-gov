@@ -52,7 +52,7 @@ class SOAPClientCertificate(BaseModel):
             ) from None
         try:
             value = key_map[str(self.legacy_certificate.legacy_certificate_id)]
-            return f"{value}\n\n{self.cert}"
+            return f"{value}"
         except KeyError:
             raise SOAPClientCertificateNotConfigured("cert is not configured") from None
         except Exception:
