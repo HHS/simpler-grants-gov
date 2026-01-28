@@ -8,7 +8,29 @@ resource "aws_cloudwatch_log_group" "opensearch" {
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
+resource "aws_cloudwatch_log_resource_policy" "opensearch" {
+  policy_name = "${var.service_name}-opensearch-logs"
+
+  policy_document = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "es.amazonaws.com"
+        }
+        Action = [
+          "logs:PutLogEvents",
+          "logs:CreateLogStream"
+        ]
+        Resource = "${aws_cloudwatch_log_group.opensearch.arn}:*"
+      }
+    ]
+  })
+}
+
 resource "aws_opensearch_domain" "opensearch" {
+  depends_on = [aws_cloudwatch_log_resource_policy.opensearch]
   domain_name    = var.service_name
   engine_version = var.engine_version
 

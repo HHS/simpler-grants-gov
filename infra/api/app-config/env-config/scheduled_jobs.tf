@@ -97,15 +97,43 @@ locals {
     dev      = "ENABLED"
     staging  = "ENABLED"
     training = "ENABLED"
-    grantee1 = "ENABLED"
+    grantee1 = "DISABLED"
     prod     = "DISABLED"
+  }
+  load-transform-state = {
+    dev      = "ENABLED"
+    staging  = "ENABLED"
+    training = "ENABLED"
+    grantee1 = "DISABLED"
+    prod     = "ENABLED"
+  }
+  sam-extracts-state = {
+    dev      = "ENABLED"
+    staging  = "ENABLED"
+    training = "ENABLED"
+    grantee1 = "DISABLED"
+    prod     = "ENABLED"
+  }
+  create-analytics-db-csvs-state = {
+    dev      = "ENABLED"
+    staging  = "ENABLED"
+    training = "ENABLED"
+    grantee1 = "DISABLED"
+    prod     = "ENABLED"
+  }
+  email-notification-opportunity-state = {
+    dev      = "ENABLED"
+    staging  = "ENABLED"
+    training = "ENABLED"
+    grantee1 = "DISABLED"
+    prod     = "ENABLED"
   }
   scheduled_jobs = {
     load-transform = {
       task_command = local.load-transform-args[var.environment]
       # Every hour at the top of the hour
       schedule_expression = "cron(0 * * * ? *)"
-      state               = "ENABLED"
+      state               = local.load-transform-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
@@ -132,7 +160,7 @@ locals {
       task_command = ["poetry", "run", "flask", "task", "create-analytics-db-csvs"]
       # Every day at 5am Eastern Time during DST. 6am during non-DST.
       schedule_expression = "cron(0 10 * * ? *)"
-      state               = "ENABLED"
+      state               = local.create-analytics-db-csvs-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
@@ -150,7 +178,7 @@ locals {
       task_command = ["poetry", "run", "flask", "task", "email-notifications"]
       # Every day at 11:40am Eastern Time during DST. 12:40pm during non-DST.
       schedule_expression = "cron(40 16 * * ? *)"
-      state               = "ENABLED"
+      state               = local.email-notification-opportunity-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
@@ -159,7 +187,7 @@ locals {
       task_command = local.sam-extract-args[var.environment]
       # Every day at 8am Eastern Time during DST. 9am during non-DST.
       schedule_expression = "cron(0 13 * * ? *)"
-      state               = "ENABLED"
+      state               = local.sam-extracts-state[var.environment]
       cpu                 = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem                 = try(local.scheduled_jobs_config[var.environment].mem, null)
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
