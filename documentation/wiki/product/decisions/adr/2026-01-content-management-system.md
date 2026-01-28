@@ -42,7 +42,7 @@ _<mark style="color:$info;">(Other options considered, but determined inappropri
 
 ### Chosen option: **Storyblok** ("Enterprise Elite" plan)&#x20;
 
-Storyblok is the most feature-rich option out-of-the-box, with more advanced features that we're likely to actually use than other options. The Office of Grants is also already very familiar with using Storyblok to manage content.&#x20;
+Storyblok is the most feature-rich option out-of-the-box, with more advanced features that we're likely to actually use than other options. The Office of Grants is also already very familiar with using Storyblok to manage content on the existing Grants.gov.&#x20;
 
 However, Storyblok is only recommended if Simpler.Grants.gov's static site content can be hosted on Storyblok's managed hosting. Storyblok offers the choice of US-based servers, but they are not FedRAMP certified. And the Storyblok support team does not recommend (or want to support) running their product outside of their own cloud servers.&#x20;
 
