@@ -5,9 +5,9 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 # \[Draft] Content Management System
 
 * **Status:** Active
-* **Last Modified:** 2026-01-27
+* **Last Modified:** 2026-01-28
 * **Related Issue:** [#6559](https://github.com/HHS/simpler-grants-gov/issues/6559)
-* **Deciders:** [Andy Cochran](https://app.gitbook.com/u/lcQCDQDQ89bczhJijH2pkU1TvRD3 "mention"), [Doug Schrashun](https://app.gitbook.com/u/5h0M5no8r0g9AIhCavDL31iuGKJ3 "mention"), [Matt Dragon](https://app.gitbook.com/u/CyuO2uFtgbcij80PZx6GDpee6UP2 "mention")&#x20;
+* **Deciders:** Julius, Jay (contributors: Doug, Andy, Matt, Yan-Yin)&#x20;
 * **Tags:** cms, storyblok, drupal, content&#x20;
 
 ## Context and Problem Statement
@@ -42,31 +42,43 @@ _<mark style="color:$info;">(Other options considered, but determined inappropri
 
 ### Chosen option: **Storyblok** ("Enterprise Elite" plan)&#x20;
 
-Storyblok is the most feature-rich option out-of-the-box, with more advanced features that we're likely to actually use than other options. The Office of Grants is also already very familiar with using Storyblok to manage content.&#x20;
+Storyblok is the most feature-rich option out-of-the-box, with more advanced features that we're likely to actually use than other options. The Office of Grants is also already very familiar with using Storyblok to manage content on the existing Grants.gov.&#x20;
 
 However, Storyblok is only recommended if Simpler.Grants.gov's static site content can be hosted on Storyblok's managed hosting. Storyblok offers the choice of US-based servers, but they are not FedRAMP certified. And the Storyblok support team does not recommend (or want to support) running their product outside of their own cloud servers.&#x20;
+
+#### Advantages:&#x20;
+
+* Short-term, we can get Storyblok set up and running quickly
+* Medium-term, training OG staff will be simple (already trained on existing instance)&#x20;
+* Long-term, low maintenance burden directs more engineering resources to product development&#x20;
+
+#### Risks:&#x20;
+
+* May prevent long-term FedRAMP certification for Simpler.Grants.gov&#x20;
 
 ### Alternative options:&#x20;
 
 #### **2nd choice: Drupal** (self-hosted)
 
-If FedRAMP certification is a requirement for managed hosting, we would instead recommend self hosting Drupal over Storyblok. Drupal provides full compliance control through AWS GovCloud or similar FedRAMP infrastructure. Being open-source, with a long history of support from an active community, Drupal is likely to remain relevant for beyond the life of this project's current vendors/contracts.&#x20;
+If Storyblok cannot be chosen because managed hosting requires FedRAMP certification, we would instead recommend self hosting Drupal.&#x20;
 
-A self-hosted Drupal instance is by far the least expensive option. Although it comes with a cost of developer time in maintenance, Nava engineers have a great deal of Drupal experience that can be leveraged to provide a custom-tailored content management system solution for Simpler.Grants.gov.&#x20;
+Drupal provides full compliance control through AWS GovCloud or similar FedRAMP infrastructure. Being open-source, with a long history of support from an active community, Drupal is likely to remain relevant for beyond the life of this project's current vendors/contracts.&#x20;
+
+A self-hosted Drupal instance is by far the least expensive option. Although it comes with a cost of developer time in maintenance, Nava engineers have a great deal of Drupal experience that can be leveraged to provide a simple, streamlined content management system solution.&#x20;
 
 #### **3rd choice: Drupal** (managed hosting)&#x20;
 
-If managed hosting is preferred _**and**_ FedRAMP certification is a requirement, Acquia provides FedRAMP-certified Drupal hosting. However, this is the most expensive option considered (far more expensive than developer time needed to manage a self-hosted Drupal instance). This service comes at a premium, considering Simpler.Grants.gov's basic needs of a content management system.&#x20;
+If managed hosting is preferred _**and**_ FedRAMP certification is a requirement, [Acquia](https://www.acquia.com/) is _**the**_ trusted provider of managed, FedRAMP-certified Drupal hosting. However, this is the most expensive option considered. It's far more expensive than developer time needed to manage a self-hosted Drupal instance. The service comes at a premium, and provides features and functionalities we'd likely not leverage, considering the basic needs Simpler.Grants.gov has of a content management system.&#x20;
 
-## Pros and Cons of the Options
-
-### Basic feature comparison
+## Feature & price comparisons
 
 <table data-full-width="false"><thead><tr><th width="225.890625">BASIC FEATURES</th><th align="center">Storyblok</th><th align="center">Drupal</th><th align="center">Directus</th><th align="center">Payload</th></tr></thead><tbody><tr><td>RBAC</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr><tr><td>Publishing workflow</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr><tr><td>Self-hosted</td><td align="center">❌</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td></tr><tr><td>Vendor-hosted</td><td align="center">✅</td><td align="center">✅</td><td align="center">✅</td><td align="center">❌</td></tr><tr><td>FedRAMP certification</td><td align="center">❌</td><td align="center">✅</td><td align="center">❌</td><td align="center">❌</td></tr><tr><td>Open source</td><td align="center">❌</td><td align="center">✅ </td><td align="center">✅<br><sup>(w/ license)</sup></td><td align="center">✅</td></tr></tbody></table>
 
-### Price comparison (estimates)
+Estimates, based on conversations with each product's support/sales team:
 
-<table><thead><tr><th valign="top">Storyblok</th><th valign="top">Drupal (self-hosted)</th><th valign="top">Acquia</th><th valign="top">Directus</th></tr></thead><tbody><tr><td valign="top"><p>$51–75K/year</p><p></p><p>"Enterprise Elite" plan</p><p></p><p><em>* $64K plan recommended, pending usage requirements</em></p></td><td valign="top"><p>$15K–25K/year</p><p></p><p><em>* infrastructure costs only (additional maintenance cost for engineering time)</em> </p></td><td valign="top"><p>$168K–213K/year </p><p></p><p>"FedRAMP Acquia Cloud Plus &#x26; Enterprise Security Package" </p><p></p><p><em>* $92.5k (base) + $75k (VPN/VPC) + $45k (technical account mgmt team)</em></p></td><td valign="top"><p>$35,520/year</p><p></p><p>"Tier 3 Enterprise Cloud" plan (including a 20% open-source/gov discount)</p><p></p><p><em>* lower tier would likely suffice: $19,200/year for Tier 1, and $25,920/year for Tier 2</em> </p></td></tr></tbody></table>
+<table><thead><tr><th valign="top">Storyblok</th><th valign="top">Drupal (self-hosted)</th><th valign="top">Acquia</th><th valign="top">Directus</th></tr></thead><tbody><tr><td valign="top"><p><strong>$51–75K</strong>/year</p><p></p><p>"Enterprise Elite" plan</p><p></p><p><em>* $64K plan recommended, pending usage requirements</em></p></td><td valign="top"><p><strong>$15K–25K</strong>/year</p><p></p><p><em>* infrastructure costs only (additional maintenance cost for engineering time)</em> </p></td><td valign="top"><p><strong>$168K–213K</strong>/year </p><p></p><p>"FedRAMP Acquia Cloud Plus &#x26; Enterprise Security Package" </p><p></p><p><em>* $92.5k (base) + $75k (VPN/VPC) + $45k (technical account mgmt team)</em></p></td><td valign="top"><p><strong>$35,520</strong>/year</p><p></p><p>"Tier 3 Enterprise Cloud" plan (including a 20% open-source/gov discount)</p><p></p><p><em>* lower tier would likely suffice: $19,200/year for Tier 1, and $25,920/year for Tier 2</em> </p></td></tr></tbody></table>
+
+## Advantages & risks of the options
 
 ### [**Storyblok**](https://www.storyblok.com/)&#x20;
 
@@ -80,37 +92,55 @@ Their pricing tiers are based on usage:
 
 All tiers include: 10 user seats, 2 spaces (prod + non-prod), unlimited custom roles/workflows, US server location.&#x20;
 
-* **Pros**
+* **Advantages**
   * Office of Grants is already very familiar with using Storyblok to manage content&#x20;
   * Best "WYSIWYG" visual editor that shows exactly how changes appear before publishing
   * Great separation of code and content, easy to integrate into out stack&#x20;
   * Managed hosting (can choose to host on US-based servers only) keeps us up-to-date with the latest features, w/ zero maintenance burden on internal dev team&#x20;
   * Very responsive support team (plan includes dedicated point of contact / solutions engineer)&#x20;
-* **Cons**
-  * Not FedRAMP certified&#x20;
+* **Risks**
+  * May prevent long-term FedRAMP certification for Simpler.Grants.gov&#x20;
   * Not open-source
-  * A few fancy features we'd likely not leverage (e.g. AI content generation)&#x20;
+  * Includes fancy features we'd likely not leverage (e.g. AI content generation)&#x20;
 
 _See_ [_**Storyblok CMS Evaluation**_](https://navasage.atlassian.net/wiki/spaces/Grantsgov/pages/2286354433/Storyblok+CMS+Evaluation)&#x20;
 
 ### [**Self-hosted Drupal**](https://www.drupal.org/docs/develop/decoupled-drupal)&#x20;
 
-{example | description | pointer to more information | ...}
+Drupal stands out as a battle-tested, enterprise-grade content management system for federal agencies modernizing digital services. With more than two decades of active development and a mature government user base, it is an open-source, secure, and scalable solution that lowers total cost of ownership without compromising on capabilities.&#x20;
 
-* **Pros**
-  * Open-source
-  * Large community
-* **Cons**
-  *
+* **Advantages**
+  * Open source (with a large community)&#x20;
+  * Significant cost savings ($0 licensing fees)&#x20;
+  * Nava expertise and experience (while reducing vendor lock-in with an open, competitive market of qualified government contractors ensuring flexibility)
+  * Enterprise-grade security and compliance that's trusted across government (Drupal powers over 400 U.S. government websites, including VA, SEC, NASA, FEMA, Department of Energy, NIH, U.S. Courts…)
+  * Rapid patch response from a dedicated security team and public vulnerability disclosure process that ensure swift mitigation of threats&#x20;
+  * Natively supports federal mandates: Section 508, FISMA, and FedRAMP-compliant implementations are standard practice&#x20;
+  * Handles millions of visitors per month for high-demand public sites&#x20;
+  * Flexible architecture for future needs&#x20;
+* **Risks**
+  * Requires internal developer time to configure, maintain, upgrade, patch
+  * Marginally increased AWS costs (esitimated $300/month)&#x20;
+  * Its generic, utilitarian UI/UX is not as intuitive or polished as Storyblok
 
 ### [Acquia](https://www.acquia.com/)
 
-{example | description | pointer to more information | ...}
+In addition to the benefits of self-hosted Drupal (listed above), [Acquia](https://www.acquia.com/) provides enterprise-level managed hosting and support. It's the clear (only?) choice for FedRAMP-certified, managed Drupal hosting.&#x20;
 
-* **Pros**
-  *
-* **Cons**
-  *
+Cost is estimated at $168K–213K/year:&#x20;
+
+* FedRAMP Acquia Cloud Plus (5M views) and Enterprise Security Package: $92.5k
+* Optional Add ons:&#x20;
+  * $75k Acquia Shield VPN/VPC
+  * $45k Technical Account Management Team
+
+(depends on secutity and support needs)&#x20;
+
+* **Advantages**
+  * Managed hosting = less internal developer time maintaining, upgrading, patching
+* **Risks**
+  * More expensive than developer time needed to manage a self-hosted Drupal instance
+  * Provides level of support we'd likely not leverage&#x20;
 
 _See_ [_**Acquia Drupal CMS Evaluation**_](https://navasage.atlassian.net/wiki/spaces/Grantsgov/pages/2425456172/Acquia+Drupal+CMS+Evaluation)
 
@@ -126,35 +156,35 @@ Regardless of hosting, additional user licenses are $15/month (10 are included).
 
 Directus also provides basic support for $300/month (free with Enterprise Cloud plans) or premium support for an additional $300/month with either hosting option. Basic support will likely suffice for our implementation.&#x20;
 
-**Pros**
+**Advantages**
 
 * Kind of a middle ground between Drupal and Storyblok in terms of what they offer.&#x20;
 * Likely more user friendly than Drupal, while still being an open source offering.&#x20;
 * Ideal for developers who want full control over their database and who prefer to adapt the CMS to an existing schema. Intended for projects requiring a high degree of customization and flexibility (or with existing SQL/schemas).
 * Since it can be self- or vendor-hosted, it would be a matter of preference.
 
-**Cons**
+**Risks**
 
 * Not FedRAMP certified&#x20;
-* Tho open-source, requires a licensing fee
+* Although the code is open-source, it is unclear how the required licensing fee might affect cost and usage long-term&#x20;
 * Potentially more difficult to use than other options, and may require more customization
 
 _See_ [_**Draft Directus CMS Evaluation**_](https://navasage.atlassian.net/wiki/spaces/Grantsgov/pages/2518515777/Draft+Directus+CMS+Evaluation)&#x20;
 
 ### [**Payload CMS**](https://payloadcms.com/)
 
-Payload CMS is a newer, developer-focused content management system built for integrating tightly with Next.js applications. It's gaining rapid traction among Next.js developers. So we did our due diligence to understand its appropriateness for Simpler.&#x20;
+Payload CMS is a newer, developer-focused content management system built for integrating tightly with Next.js applications. It's gaining rapid traction among Next.js developers. So we did our due diligence to understand its appropriateness for Simpler. In summary, Payload is very cool, but we'd not leverage its most impressive features.&#x20;
 
-TL;DR = Payload is very cool. But we would not leverage its most impressive features.&#x20;
-
-* **Pros**
+* **Advantages**
   * Tightly coupled w/ Next.js
-* **Cons**
+* **Risks**
   * Tightly coupling a non-critical service to a critical one is something we should try to avoid
   * Would require major code refactor&#x20;
   * Self-hosted only (not a managed-hosting option)&#x20;
 
 _See_ [_**Payload CMS Evaluation**_](https://navasage.atlassian.net/wiki/spaces/Grantsgov/pages/2236088328/Payload+CMS+Evaluation)
+
+
 
 
 
