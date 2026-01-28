@@ -8,7 +8,7 @@ export default function RoadmapTimeline() {
   const { contentItems = {} } = messages.Roadmap.sections.timeline;
 
   return (
-    <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
+    <RoadmapPageSection title={t("title")}>
       {contentItems &&
         Object.keys(contentItems).map((key) => {
           const title = t(`contentItems.${key}.title`);

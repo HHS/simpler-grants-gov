@@ -319,4 +319,4 @@ Balances technical expertise and team capacity, but depends on clear coordinatio
 
 * Requires ongoing coordination and knowledge sharing
 * Potential delays if ownership boundaries are unclear
-* Slightly higher operational overhead during incidents\
+* Slightly higher operational overhead during incidents<br>

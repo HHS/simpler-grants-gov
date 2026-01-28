@@ -1564,6 +1564,49 @@ paths:
               $ref: '#/components/schemas/CompetitionFlagUpdate'
       security:
       - ApiUserKeyAuth: []
+  /alpha/competitions/{competition_id}/forms:
+    put:
+      parameters:
+      - in: path
+        name: competition_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionResponseAlpha'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Competition Alpha
+      summary: Put Competition Forms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionFormsSetRequest'
+      security:
+      - ApiUserKeyAuth: []
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -6837,6 +6880,33 @@ components:
           description: Whether simpler grants are enabled for this competition
       required:
       - is_simpler_grants_enabled
+    FormReplace:
+      type: object
+      properties:
+        form_id:
+          type: string
+          format: uuid
+          description: The primary key ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_required:
+          type: boolean
+          description: Whether the form is required
+      required:
+      - form_id
+      - is_required
+    CompetitionFormsSetRequest:
+      type: object
+      properties:
+        forms:
+          type: array
+          minItems: 1
+          description: List of forms to set on the competition
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/FormReplace'
+      required:
+      - forms
     AbstractResponse:
       type: object
       properties:

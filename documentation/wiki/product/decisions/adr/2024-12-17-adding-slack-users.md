@@ -84,4 +84,4 @@ In this instance, some users would be added as Slack Connect users which would a
 
 [Slack connect guide](https://slack.com/help/articles/115004151203-Slack-Connect-guide--work-with-external-organizations#slack-connect-for-channels)
 
-\
+<br>

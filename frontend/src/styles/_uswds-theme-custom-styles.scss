@@ -756,3 +756,19 @@ dl {
     border-top: 0;
   }
 }
+
+.usa-select:disabled {
+  color: #76766a;
+  background-color: white;
+  border-color: #e6e6e2;
+  background-image: none; // Removes the dropdown arrow icon
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: #76766a;
+    background-color: white;
+    border-color: #e6e6e2;
+    background-image: none;
+  }
+}

@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.8.3
+          terraform_version: 1.14.3
           terraform_wrapper: false
 
       - name: Configure AWS credentials
@@ -63,7 +63,7 @@ jobs:
           echo terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
           terraform -chdir="infra/${{ matrix.root_module_subdir }}" init -input=false -reconfigure -backend-config="${{ matrix.backend_config_name }}.s3.tfbackend"
           echo "::endgroup::"
-          
+
           echo "::group::Check Terraform plan"
           echo terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode ${{ matrix.extra_params }}
           terraform -chdir="infra/${{ matrix.root_module_subdir }}" plan -input=false -detailed-exitcode ${{ matrix.extra_params }}

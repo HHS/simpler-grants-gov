@@ -169,4 +169,4 @@ LibreOffice, the successor to OpenOffice, is compatible with O365 files and is b
 * [Gitbook](https://www.gitbook.com/)
 * [LibreOffice](https://www.libreoffice.org/)
 
-\
+<br>

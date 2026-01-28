@@ -49,7 +49,7 @@ export default function RoadmapProcess() {
   ];
 
   return (
-    <RoadmapPageSection className={"bg-white"} title={t("title")}>
+    <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
       <p>{t("sectionSummary")}</p>
       {roadmapProcesSectionGridRows.map((sectionRow, sectionRoadIdx) => (
         <div

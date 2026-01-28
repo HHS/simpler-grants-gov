@@ -1,0 +1,33 @@
+name: Test Error Notifications
+run-name: Test Error Notification
+
+on:
+  # uncomment to test on specific branch while making changes
+  #  push:
+  #    branches:
+  #      - "mdragon/8032-improve-action-slack-notifications"
+
+  # Release deployments are handled by cd-release.yml to enforce deployment order
+  # (API -> Frontend -> NOFOs -> Analytics)
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        default: "main"
+        description: Tag or branch or SHA to deploy
+
+jobs:
+  force-failure-job:
+    runs-on: ubuntu-22.04
+    name: Force Failure Job
+
+    steps:
+      - name: Force Failure Step
+        run: |
+          exit 1
+
+  send-slack-notification:
+    if: failure()
+    needs: [force-failure-job]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit

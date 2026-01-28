@@ -1,11 +1,9 @@
 import { Metadata } from "next";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserDetails } from "src/services/fetch/fetchers/userFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
@@ -50,6 +48,4 @@ async function Settings() {
   );
 }
 
-export default withFeatureFlag<object, never>(Settings, "userAdminOff", () =>
-  redirect("/maintenance"),
-);
+export default Settings;

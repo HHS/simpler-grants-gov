@@ -23,6 +23,7 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.staging.attachment import TsynopsisAttachment
+from src.db.models.staging.instructions import Tinstructions
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
 from src.util import datetime_util
@@ -251,14 +252,11 @@ def transform_opportunity_summary(
     target_summary.modification_comments = source_summary.modification_comments
     target_summary.funding_category_description = source_summary.oth_cat_fa_desc
     target_summary.applicant_eligibility_description = source_summary.applicant_elig_desc
-    target_summary.agency_name = source_summary.ac_name
     target_summary.agency_email_address = source_summary.ac_email_addr
     target_summary.agency_email_address_description = source_summary.ac_email_desc
     target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
 
     target_summary.summary_description = source_summary.description
-    target_summary.agency_code = source_summary.agency_code
-    target_summary.agency_phone_number = source_summary.agency_phone_number
 
     # These fields are only on synopsis records, use getattr to avoid isinstance
     target_summary.agency_contact_description = getattr(source_summary, "agency_contact_desc", None)
@@ -516,4 +514,10 @@ def get_log_extra_opportunity_attachment(source_attachment: TsynopsisAttachment)
     return {
         "opportunity_id": source_attachment.opportunity_id,
         "syn_att_id": source_attachment.syn_att_id,
+    }
+
+
+def get_log_extra_competition_instruction(source_instruction: Tinstructions) -> dict:
+    return {
+        "competition_id": source_instruction.comp_id,
     }

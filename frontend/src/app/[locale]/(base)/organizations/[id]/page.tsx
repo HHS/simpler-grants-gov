@@ -1,11 +1,10 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { OrganizationDetail } from "src/components/organization/OrganizationDetail";
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
@@ -64,8 +63,4 @@ async function OrganizationDetailPage({ params }: OrganizationDetailPageProps) {
   );
 }
 
-export default withFeatureFlag<OrganizationDetailPageProps, never>(
-  OrganizationDetailPage,
-  "userAdminOff",
-  () => redirect("/maintenance"),
-);
+export default OrganizationDetailPage;

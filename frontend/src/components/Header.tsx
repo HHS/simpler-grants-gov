@@ -86,8 +86,6 @@ const NavLinks = ({
     [t],
   );
   const { user } = useUser();
-  const { checkFeatureFlag } = useFeatureFlags();
-  const showUserAdminNavItems = !checkFeatureFlag("userAdminOff");
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -117,26 +115,25 @@ const NavLinks = ({
 
     const workspaceSubNavs = [];
 
-    if (showUserAdminNavItems) {
-      workspaceSubNavs.push({
-        text: t("activityDashboard"),
-        href: "/dashboard",
-      });
-    }
+    workspaceSubNavs.push({
+      text: t("activityDashboard"),
+      href: "/dashboard",
+    });
+
     workspaceSubNavs.push({
       text: t("applications"),
       href: "/applications",
     });
-    if (showUserAdminNavItems) {
-      workspaceSubNavs.push({
-        text: t("organizations"),
-        href: "/organizations",
-      });
-    }
+    workspaceSubNavs.push({
+      text: t("organizations"),
+      href: "/organizations",
+    });
+
     workspaceSubNavs.push({
       text: t("savedOpportunities"),
       href: "/saved-opportunities",
     });
+
     workspaceSubNavs.push({
       text: t("savedSearches"),
       href: "/saved-search-queries",
@@ -146,7 +143,7 @@ const NavLinks = ({
       text: t("workspace"),
       children: workspaceSubNavs,
     });
-  }, [t, path, getSearchLink, user, showUserAdminNavItems]);
+  }, [t, path, getSearchLink, user]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {

@@ -52,10 +52,12 @@ class AttachmentTransformer:
             field_type = field_config["type"]
             field_value = data[field_name]
 
-            if field_type == "single":
+            if field_type == "single" or field_type == "single_with_wrapper":
                 # Single attachment field - expect UUID string
                 attachment_dict = self._resolve_attachment_uuid(field_value, field_name)
-                self._add_single_attachment_element(parent, xml_element, attachment_dict, nsmap)
+                self._add_single_attachment_element(
+                    parent, xml_element, attachment_dict, nsmap, field_config
+                )
             elif field_type == "multiple":
                 # Multiple attachment field - expect list of UUIDs
                 self._add_multiple_attachment_from_uuids(
@@ -130,17 +132,59 @@ class AttachmentTransformer:
         element_name: str,
         attachment_data: dict[str, Any],
         nsmap: dict[str, str],
+        field_config: dict[str, Any] | None = None,
     ) -> None:
         """Add a single attachment element.
 
+        For forms that use the 'single_with_wrapper' type, each attachment slot is
+        wrapped in a nested structure with a File element.
+
+        Example structure with wrapper (type='single_with_wrapper'):
+        <AttachmentForm_1_2:ATT1>
+            <AttachmentForm_1_2:ATT1File>
+                <att:FileName>...</att:FileName>
+                ...
+            </AttachmentForm_1_2:ATT1File>
+        </AttachmentForm_1_2:ATT1>
+
+        Example structure without wrapper (type='single'):
+        <att:FileName>...</att:FileName>
+        <att:MimeType>...</att:MimeType>
+        ...
+
         Args:
             parent: Parent XML element
-            element_name: Name of the attachment element
+            element_name: Name of the attachment element (e.g., "ATT1")
             attachment_data: Attachment data dictionary
             nsmap: Namespace map
+            field_config: Field configuration containing type information
         """
-        attachment_elem = lxml_etree.SubElement(parent, element_name)
-        self._populate_attachment_content(attachment_elem, attachment_data, nsmap)
+        # Check if this field requires wrapper elements based on configuration
+        uses_wrapper = field_config and field_config.get("type") == "single_with_wrapper"
+
+        if uses_wrapper:
+            # Get the default namespace from nsmap
+            default_ns = None
+            for _, uri in nsmap.items():
+                # Look for any namespace in the nsmap (first one is typically the default)
+                if not default_ns:
+                    default_ns = uri
+
+            # Create the wrapper element (e.g., <ATT1>) in the default namespace
+            if default_ns:
+                attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
+                file_elem = lxml_etree.SubElement(
+                    attachment_elem, f"{{{default_ns}}}{element_name}File"
+                )
+            else:
+                attachment_elem = lxml_etree.SubElement(parent, element_name)
+                file_elem = lxml_etree.SubElement(attachment_elem, f"{element_name}File")
+
+            # Populate the File element with attachment content
+            self._populate_attachment_content(file_elem, attachment_data, nsmap)
+        else:
+            # No wrapper needed - populate content directly on parent
+            self._populate_attachment_content(parent, attachment_data, nsmap)
 
     def _add_multiple_attachment_element(
         self,
@@ -200,24 +244,19 @@ class AttachmentTransformer:
         att_ns = nsmap.get("att", self.attachment_namespace)
         glob_ns = nsmap.get("glob", "http://apply.grants.gov/system/Global-V1.0")
 
-        # Add FileName with xmlns:att namespace declaration
-        # Create element with local nsmap to force namespace declaration on the element
+        # Add FileName with att: namespace prefix
         if "FileName" in attachment_data:
-            filename_elem = lxml_etree.SubElement(
-                attachment_elem, "FileName", nsmap={"att": att_ns}
-            )
+            filename_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}FileName")
             filename_elem.text = str(attachment_data["FileName"])
 
-        # Add MimeType with xmlns:att namespace declaration
+        # Add MimeType with att: namespace prefix
         if "MimeType" in attachment_data:
-            mimetype_elem = lxml_etree.SubElement(
-                attachment_elem, "MimeType", nsmap={"att": att_ns}
-            )
+            mimetype_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}MimeType")
             mimetype_elem.text = str(attachment_data["MimeType"])
 
-        # Add FileLocation with att:href attribute (namespace-prefixed)
+        # Add FileLocation with att:href attribute
         if "FileLocation" in attachment_data:
-            filelocation_elem = lxml_etree.SubElement(attachment_elem, "FileLocation")
+            filelocation_elem = lxml_etree.SubElement(attachment_elem, f"{{{att_ns}}}FileLocation")
             file_location_data = attachment_data["FileLocation"]
 
             if isinstance(file_location_data, dict) and "@href" in file_location_data:
@@ -225,11 +264,9 @@ class AttachmentTransformer:
             elif isinstance(file_location_data, str):
                 filelocation_elem.set(f"{{{att_ns}}}href", file_location_data)
 
-        # Add HashValue with glob:hashAlgorithm attribute and xmlns:glob declaration
+        # Add HashValue with glob: prefix and glob:hashAlgorithm attribute
         if "HashValue" in attachment_data:
-            hashvalue_elem = lxml_etree.SubElement(
-                attachment_elem, "HashValue", nsmap={"glob": glob_ns}
-            )
+            hashvalue_elem = lxml_etree.SubElement(attachment_elem, f"{{{glob_ns}}}HashValue")
             hash_data = attachment_data["HashValue"]
 
             if isinstance(hash_data, dict):

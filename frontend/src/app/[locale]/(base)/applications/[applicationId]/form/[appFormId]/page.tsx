@@ -108,11 +108,11 @@ async function FormPage({ params }: formPageProps) {
             { title: "home", path: "/" },
             {
               title: applicationName,
-              path: `/workspace/applications/application/${applicationId}`,
+              path: `/applications/${applicationId}`,
             },
             {
               title: formName,
-              path: `/workspace/applications/application/${applicationId}/form/${formId}`,
+              path: `/applications/${applicationId}/form/${formId}`,
             },
           ]}
         />

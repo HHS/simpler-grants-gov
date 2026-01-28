@@ -43,7 +43,7 @@ See [our CI code](https://github.com/HHS/simpler-grants-gov/blob/1b85220c7369d40
 
 Note that, as mentioned above, NODE_ENV will be set to "production" here due to use of `npm run build && npm start`.
 
-As a result, environment variables are gathered from the .env.production file.
+As a result, environment variables are gathered from the .env.production file rather than .env.development. If you are using `npm start` to test a production-like build locally, be aware that unless you have the necessary env vars stored in your .env.local or .env.production files, they will not be picked up by the application in this scenario.
 
 ## Deployment
 
@@ -51,14 +51,15 @@ As a result, environment variables are gathered from the .env.production file.
 
 Will add image directly to document later.
 
-### Tricky Stuff
+## Providing environment variables to the client
 
-Docker and Next (and ECS) combine to create an interesting situation when trying to figure out how to provide environment variables to the deployed application. Here are a few interesting facts:
+One thing to keep in mind regarding environment variables is that the value for each variable is read from SSM, applied to the ECS task definition, and picked up by the NextJS server at runtime, rather than at build time. Client code, which is defined at build time, will thus always initially be built without any environment variable values.
 
-- any environment variables that we want to be directly available in client code in a Next app need to be prefixed with the `NEXT_PUBLIC_` string. See [Next docs here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser).
-- any `NEXT_PUBLIC_` variables must be initially referenced in the code directly from process.env (`const yrVar = process.env.NEXT_PUBLIC_YR_VAR`), rather than destructured (`const { NEXT_PUBLIC_YR_VAR } = process.env`)), but can be exported from one file to another after definition
-- these variables must be available at build time (ie `next build` rather than `next start`), and can be referenced in any components when exported from a server side file, directly referenced from process.env, or passed as a prop
-- however, currently, all environment variables are passed from the ECS task definition to the application at Docker run time. This means that the `NEXT_PUBLIC_` prefix and usage as described above is not effective in our application
-- since variables defined at Docker runtime cannot be not made available directly to client components via an import or process.env reference, to make any environment variables available to client components, we will need to
-  - import the variable into a server component
-  - pass it as a prop to client component child, or implement it within a context provider
+Due to this complexity around the timing of environment variable definition, combined with the complexity of server side and client side rendering, to reference the correct value for a environment variable within a client component, you must:
+
+- import the environment variable from the "environments" file within the closest server component parent to the client component
+- drill the environment variable value down as a prop to the client component
+
+Importing the environments file directly into a client component, rather than drilling from the server, will result in importing default values only, rather than actual values that were set at server runtime.
+
+Note that NextJS's documentation suggests that it's possible to make environment variables directly available in client code by prefixing them with the `NEXT_PUBLIC_` string. See [Next docs here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser). Based on the fact the way that our application is set up, however - where all environment variables are passed from the ECS task definition to the application at Docker run time - this method of exposing env vars to the client does not work.

@@ -58,6 +58,7 @@ const fakeParamDisplayMapping = {
   page: "page",
   sortby: "sortby",
   closeDate: "closeDate",
+  postedDate: "postedDate",
   costSharing: "costSharing",
   topLevelAgency: "topLevelAgency",
   andOr: "andOr",

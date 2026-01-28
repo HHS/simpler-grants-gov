@@ -25,6 +25,7 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Amit Desai
 * Hao Wang
 * Kenny Krug
+* Daniel Ghazvini
 
 ## Content and Design
 

@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { ACTIVITY_DASHBOARD_CRUMBS } from "src/constants/breadcrumbs";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import {
   getUserInvitations,
@@ -11,7 +10,6 @@ import { LocalizedPageProps } from "src/types/intl";
 import { OrganizationInvitation } from "src/types/userTypes";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
@@ -93,8 +91,4 @@ async function ActivityDashboard() {
   );
 }
 
-export default withFeatureFlag<object, never>(
-  ActivityDashboard,
-  "userAdminOff",
-  () => redirect("/maintenance"),
-);
+export default ActivityDashboard;
