@@ -193,6 +193,9 @@ function convertSearchInputSetsToArrays(
       : [],
     category: searchInputs.category ? Array.from(searchInputs.category) : [],
     closeDate: searchInputs.closeDate ? Array.from(searchInputs.closeDate) : [],
+    postedDate: searchInputs.postedDate
+      ? Array.from(searchInputs.postedDate)
+      : [],
     costSharing: searchInputs.costSharing
       ? Array.from(searchInputs.costSharing)
       : [],
