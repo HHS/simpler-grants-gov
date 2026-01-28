@@ -1,17 +1,13 @@
-Feature: Filter Drawer - Mobile Sort
+Feature: Filter Drawer - Sort
   As a user
-  I want to use the sort dropdown in the filter drawer on mobile
-  So that I can order search results according to my preference
+  I want the sort UI to appear in the correct location based on my device
+  So that sorting behaves consistently while matching the intended layout
 
 Background:
     Given I am on the Search Funding Opportunity page
     And my login state is "<loginState>"
     And the viewport is set to "<viewport>"
     And I open the filter drawer
-
-# Positive Scenarios
-Scenario: Sort dropdown is visible on mobile
-    Then the sort dropdown should be visible in the drawer
 
 Examples:
     | loginState    | viewport  |
@@ -20,6 +16,26 @@ Examples:
     | logged in     | desktop   |
     | not logged in | desktop   |
 
+# Mobile-specific behavior
+Scenario: Sort dropdown appears in the filter drawer on mobile
+  Given the viewport is set to "mobile"
+  When I open the filter drawer
+  Then the sort dropdown should be visible in the drawer
+  And the sort dropdown should not be visible on the main search page
+
+# Desktop-specific behavior
+Scenario: Sort dropdown appears on the main search page on desktop
+  Given the viewport is set to "desktop"
+  Then the sort dropdown should be visible on the main search page
+  And the sort dropdown should not be visible in the filter drawer
+
+# Tablet behavior (if applicable)
+Scenario: Sort dropdown placement on tablet
+  Given the viewport is set to "tablet"
+  Then the sort dropdown should appear on the main search page
+  And the sort dropdown should not be visible in the filter drawer
+
+# Positive Scenarios
 Scenario: Selecting a sort option updates results
     When I select the sort option "<sortOption>"
     Then the results should be updated according to "<sortOption>"
@@ -44,10 +60,6 @@ Scenario: Drawer open/close does not affect selected sort
     Then the sort dropdown should still show "<sortOption>"
 
 # Negative / Edge Scenarios
-Scenario: Sort dropdown is hidden or disabled on desktop
-    Given the viewport is set to "desktop"
-    Then the sort dropdown should be hidden or disabled
-
 Scenario: Sort dropdown handles empty result sets gracefully
     Given there are no matching search results
     Then selecting any sort option should not break the page
