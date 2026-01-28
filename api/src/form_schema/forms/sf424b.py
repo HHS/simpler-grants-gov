@@ -70,7 +70,7 @@ FORM_JSON_SCHEMA = {
         },
         "date_signed": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
-            "title": "Date Submitted",
+            "title": "Date submitted",
         },
     },
 }
