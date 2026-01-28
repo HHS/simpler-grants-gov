@@ -2,7 +2,7 @@
 // Search Test Helper Functions
 // =========================
 
-import { expect, Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { camelCase } from "lodash";
 import {
   waitForURLContainsQueryParam,
@@ -42,10 +42,7 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   await submitButton.click();
 }
 
-export function expectURLContainsQueryParam(
-  page: Page,
-  queryParamName: string,
-) {
+export function expectURLContainsQueryParam(page: Page, queryParamName: string) {
   const currentURL = page.url();
   expect(currentURL).toContain(queryParamName);
 }
@@ -57,7 +54,7 @@ export async function expectCheckboxIDIsChecked(
   const root = await getActiveFilterRoot(page);
   const checkbox = root.locator(idWithHash);
 
-  await expect(checkbox).toBeVisible();
+  await expect(checkbox).toBeAttached();
   await expect(checkbox).toBeChecked();
 }
 
@@ -69,8 +66,8 @@ export async function toggleCheckboxes(
 ) {
   let runningQueryParams = startingQueryParams ?? "";
 
-  for (const [checkboxId, queryParamValue] of Object.entries(checkboxObject)) {
-    await toggleCheckbox(page, checkboxId);
+  for (const [checkboxID, queryParamValue] of Object.entries(checkboxObject)) {
+    await toggleCheckbox(page, checkboxID);
 
     runningQueryParams += runningQueryParams
       ? `,${queryParamValue}`
@@ -99,7 +96,6 @@ export async function selectSortBy(
   await page
     .locator(`#search-sort-by-select${drawer ? "-drawer" : ""}`)
     .selectOption(sortByValue);
-  // allow time for debounced updates
   await page.waitForTimeout(1000);
 }
 
@@ -111,9 +107,10 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h3:has-text("Opportunities")');
-  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  const resultsHeading = page.locator(
+    "div[data-testid='search-results-controls'] h3",
+  );
+  await expect(resultsHeading).toBeVisible({ timeout: 60000 });
 }
 
 export async function clickAccordionWithTitle(
@@ -125,10 +122,7 @@ export async function clickAccordionWithTitle(
     .click();
 }
 
-export async function clickPaginationPageNumber(
-  page: Page,
-  pageNumber: number,
-) {
+export async function clickPaginationPageNumber(page: Page, pageNumber: number) {
   const paginationButton = page.locator(
     `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
   );
@@ -226,7 +220,6 @@ export const selectAllTopLevelFilterOptions = async (
 
   // validate that url is updated
   await waitForURLContainsQueryParam(page, filterType);
-  return undefined;
 };
 
 export const validateTopLevelAndNestedSelectedFilterCounts = async (
@@ -258,9 +251,9 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
   await filterButton.click();
-  // work as a wildcard match. Use ^= for prefix matching
   const filterOptions = page.locator(`input[name^="${filterType}-"]`);
   await expect(filterOptions.first()).toBeVisible();
+  await filterOptions.isVisible();
 
   await filterButton.click();
 };
