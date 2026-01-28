@@ -50,6 +50,7 @@ export interface ApplicationFormDetail {
   is_required: boolean;
   is_included_in_submission?: boolean | null;
   updated_at: RegexMatchedString<typeof iso8601Date>;
+  created_at: RegexMatchedString<typeof iso8601Date>;
 }
 
 export interface ApplicationDetail {

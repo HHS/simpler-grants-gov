@@ -3,7 +3,7 @@ import {
   ApplicationFormDetail,
 } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
-import { formatTimestamp } from "src/utils/generalUtils";
+import { getModifiedTimeDisplay } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -216,7 +216,9 @@ const ApplicationTable = ({
               />
             </td>
             <td data-label={t("updated")}>
-              <div>{formatTimestamp(form.updated_at)}</div>
+              <div>
+                {getModifiedTimeDisplay(form.updated_at, form.created_at, "--")}
+              </div>
             </td>
           </tr>
         ))}

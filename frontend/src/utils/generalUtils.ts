@@ -154,3 +154,19 @@ export const formatTimestamp = (time: string) => {
     timeZoneName: "short",
   })}`;
 };
+
+export const getModifiedTimeDisplay = (
+  updated_at: string,
+  created_at: string,
+  returnStr: string,
+) => {
+  const updatedTime = new Date(updated_at).getTime();
+  const createdTime = new Date(created_at).getTime();
+  const timeDiff = Math.abs(updatedTime - createdTime);
+
+  if (timeDiff <= 5000) {
+    return returnStr;
+  }
+
+  return formatTimestamp(updated_at);
+};
