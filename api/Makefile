@@ -195,9 +195,9 @@ start-opensearch:
 	docker compose up --detach opensearch-node
 	./bin/wait-for-local-opensearch.sh
 
-init-opensearch-dashboards: start-opensearch-dashboard
+init-opensearch-dashboards: start-opensearch-dashboards
 
-start-opensearch-dashboard:
+start-opensearch-dashboards:
 	docker compose up --detach opensearch-dashboards
 
 ##################################################
