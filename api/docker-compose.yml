@@ -38,18 +38,17 @@ services:
       - 9600:9600 # Performance Analyzer
     networks:
       - default
-
   opensearch-dashboards:
-   image: opensearchproject/opensearch-dashboards:2
-   container_name: opensearch-dashboards
-   ports:
+    image: opensearchproject/opensearch-dashboards:2
+    container_name: opensearch-dashboards
+    ports:
      - 5601:5601 # Map host port 5601 to container port 5601
-   expose:
+    expose:
      - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
-   environment:
+    environment:
      - 'OPENSEARCH_HOSTS=["http://opensearch-node:9200"]'
      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true # disables security dashboards plugin in OpenSearch Dashboards
-   networks:
+    networks:
      - default
 
   localstack:
