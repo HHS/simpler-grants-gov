@@ -244,10 +244,10 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
         
-         ###------------------------ Test data - Start ------------------------ 
-        
-                                    ### Only open to individuals - For test data 1
-                                    self.create_opportunity(
+               ###------------------------ Test data - Start ------------------------ 
+
+        ### Only open to individuals - For test data 1
+        self.create_opportunity(
                                         OpportunityContainer(
                                             opportunity_title="Test data individuals - All forms required",
                                             opportunity_number="SGG-indv-test-0001",
@@ -268,20 +268,24 @@ class BuildAutomaticOpportunitiesTask(Task):
                                             )
                                         ],
                                     )
-                                     ### Only open to individuals - For test data 2
-                                    self.create_opportunity(
+        ### Only open to individuals - For test data 2
+        ####7297: Create simple opportunity to be used for priority workflow E2E test creation
+
+        self.create_opportunity(
                                         OpportunityContainer(
                                             opportunity_title="Test data individuals - One form required",
                                             opportunity_number="SGG-indv-test-0002",
                                         ),
                                         competitions=[
                                             CompetitionContainer(
-                                                required_form_ids= [SF424_v4_0.form_id],
+                                                required_form_ids= 
+                                                    [SF424_v4_0.form_id,
+                                                    ProjectAbstractSummary_v2_0.form_id
+                                                    ],
                                                 optional_form_ids=
                                                     [
                                                         SF424a_v1_0.form_id,
-                                                        SF424b_v1_1.form_id, 
-                                                        ProjectAbstractSummary_v2_0.form_id, 
+                                                        SF424b_v1_1.form_id,                                                          
                                                         ProjectNarrativeAttachment_v1_2.form_id,
                                                         BudgetNarrativeAttachment_v1_2.form_id, 
                                                         SFLLL_v2_0.form_id
@@ -290,8 +294,8 @@ class BuildAutomaticOpportunitiesTask(Task):
                                             )
                                         ],
                                     )
-                                    ### Only open to individuals - For test data 3
-                                    self.create_opportunity(
+        ### Only open to individuals - For test data 3
+        self.create_opportunity(
                                         OpportunityContainer(
                                             opportunity_title="Test data individuals - Zero forms required",
                                             opportunity_number="SGG-indv-test-0003",
