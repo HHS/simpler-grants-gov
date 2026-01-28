@@ -243,7 +243,78 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-
+        
+         ###------------------------ Test data - Start ------------------------ 
+        
+                                    ### Only open to individuals - For test data 1
+                                    self.create_opportunity(
+                                        OpportunityContainer(
+                                            opportunity_title="Test data individuals - All forms required",
+                                            opportunity_number="SGG-indv-test-0001",
+                                        ),
+                                        competitions=[
+                                            CompetitionContainer(
+                                                required_form_ids=
+                                                    [
+                                                        SF424_v4_0.form_id,
+                                                        SF424a_v1_0.form_id,
+                                                        SF424b_v1_1.form_id, 
+                                                        ProjectAbstractSummary_v2_0.form_id, 
+                                                        ProjectNarrativeAttachment_v1_2.form_id,
+                                                        BudgetNarrativeAttachment_v1_2.form_id, 
+                                                        SFLLL_v2_0.form_id
+                                                    ],
+                                                open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                                            )
+                                        ],
+                                    )
+                                     ### Only open to individuals - For test data 2
+                                    self.create_opportunity(
+                                        OpportunityContainer(
+                                            opportunity_title="Test data individuals - One form required",
+                                            opportunity_number="SGG-indv-test-0002",
+                                        ),
+                                        competitions=[
+                                            CompetitionContainer(
+                                                required_form_ids= [SF424_v4_0.form_id],
+                                                optional_form_ids=
+                                                    [
+                                                        SF424a_v1_0.form_id,
+                                                        SF424b_v1_1.form_id, 
+                                                        ProjectAbstractSummary_v2_0.form_id, 
+                                                        ProjectNarrativeAttachment_v1_2.form_id,
+                                                        BudgetNarrativeAttachment_v1_2.form_id, 
+                                                        SFLLL_v2_0.form_id
+                                                    ],
+                                                open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                                            )
+                                        ],
+                                    )
+                                    ### Only open to individuals - For test data 3
+                                    self.create_opportunity(
+                                        OpportunityContainer(
+                                            opportunity_title="Test data individuals - Zero forms required",
+                                            opportunity_number="SGG-indv-test-0003",
+                                        ),
+                                        competitions=[
+                                            CompetitionContainer(
+                                                optional_form_ids=
+                                                    [
+                                                        SF424_v4_0.form_id,
+                                                        SF424a_v1_0.form_id,
+                                                        SF424b_v1_1.form_id, 
+                                                        ProjectAbstractSummary_v2_0.form_id, 
+                                                        ProjectNarrativeAttachment_v1_2.form_id,
+                                                        BudgetNarrativeAttachment_v1_2.form_id, 
+                                                        SFLLL_v2_0.form_id
+                                                    ],
+                                                open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                                            )
+                                        ],
+                                    )
+        
+        ###------------------------ Test data - End ------------------------ 
+        
         ### Mock BOR Opportunity
         self.create_opportunity(
             OpportunityContainer(
@@ -366,7 +437,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 return
 
         logger.info(f"Creating opportunity for scenario '{data.opportunity_number}'")
-        current_date = datetime_util.get_now_us_eastern_date()
+        SGG-SIMPLE-2025-08-11 = datetime_util.get_now_us_eastern_date()
 
         ### Opportunity
         opportunity = Opportunity(
