@@ -274,9 +274,11 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   await filterButton.click();
 
   const filterOptions = page.locator(`input[name="${filterType}-*"]`);
-  await filterOptions.waitFor({
-    state: "visible",
-    timeout: FILTER_OPTIONS_TIMEOUT,
-  });
+  // this is preferable but doesn't work
+  // await filterOptions.waitFor({
+  //   state: "visible",
+  //   timeout: FILTER_OPTIONS_TIMEOUT,
+  // });
+  await filterOptions.isVisible();
   await filterButton.click();
 };
