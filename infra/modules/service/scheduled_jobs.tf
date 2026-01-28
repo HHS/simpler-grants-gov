@@ -24,14 +24,30 @@ resource "aws_scheduler_schedule" "scheduled_jobs" {
   }
 }
 
+locals {
+  # Map role_override values to actual role ARNs
+  # null or unspecified = app_service role (default)
+  # "opensearch-write" = opensearch_write role (for OpenSearch sync jobs)
+  # "migrator" = migrator_task role (for database migration jobs during CI/CD)
+  scheduled_job_role_arns = {
+    for job_name, job_config in var.scheduled_jobs : job_name => (
+      job_config.role_override == "opensearch-write" && length(aws_iam_role.opensearch_write) > 0 ? aws_iam_role.opensearch_write[0].arn :
+      job_config.role_override == "migrator" && length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn :
+      aws_iam_role.app_service.arn
+    )
+  }
+}
+
 resource "aws_sfn_state_machine" "scheduled_jobs" {
   for_each = var.scheduled_jobs
 
   name     = "${var.service_name}-${each.key}"
   role_arn = aws_iam_role.workflow_orchestrator.arn
 
-  # Use migrator task definition which has OpenSearch ingest permissions for write operations
-  # Falls back to app task definition if migrator is not available (no database configured)
+  # Always use the app task definition. Role overrides are handled via TaskRoleArn in Overrides.
+  # - Default (no role_override): uses app_service role
+  # - role_override = "opensearch-write": uses opensearch_write role (for OpenSearch sync jobs)
+  # - role_override = "migrator": uses migrator_task role (for database migrations during CI/CD)
   definition = jsonencode({
     "StartAt" : "RunTask",
     "States" : {
@@ -41,7 +57,7 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
         "Resource" : "arn:aws:states:::ecs:runTask.sync",
         "Parameters" : {
           "Cluster" : aws_ecs_cluster.cluster.arn,
-          "TaskDefinition" : length(aws_ecs_task_definition.migrator) > 0 ? aws_ecs_task_definition.migrator[0].arn : aws_ecs_task_definition.app.arn,
+          "TaskDefinition" : aws_ecs_task_definition.app.arn,
           "LaunchType" : "FARGATE",
           "NetworkConfiguration" : {
             "AwsvpcConfiguration" : {
@@ -52,6 +68,7 @@ resource "aws_sfn_state_machine" "scheduled_jobs" {
           "Overrides" : {
             "Cpu" : tostring(each.value.cpu),
             "Memory" : tostring(each.value.mem),
+            "TaskRoleArn" : local.scheduled_job_role_arns[each.key],
             "ContainerOverrides" : [
               {
                 "Name" : var.service_name,
