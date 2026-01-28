@@ -113,6 +113,16 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         uselist=True,
         cascade="all, delete-orphan",
     )
+    
+    derived_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
+        back_populates="derived_opportunity", uselist=True, cascade="all, delete-orphan",
+        foreign_keys="[ReferencedOpportunity.original_opportunity_id]"
+    )
+    
+    original_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
+        back_populates="original_opportunity", uselist=True, cascade="all, delete-orphan",
+        foreign_keys="[ReferencedOpportunity.derived_opportunity_id]"
+    )
 
     @property
     def top_level_agency_name(self) -> str | None:
@@ -451,6 +461,39 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
     is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
+
+
+class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "referenced_opportunity"
+    
+    __table_args__ = (
+        UniqueConstraint("derived_opportunity_id"),
+        ApiSchemaTable.__table_args__
+    )
+
+    referenced_opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    
+    original_opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.opportunity.opportunity_id"), index=True
+    )
+    
+    derived_opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey("api.opportunity.opportunity_id"), index=True
+    )
+    
+    original_opportunity: Mapped["Opportunity"] = relationship(
+        Opportunity,
+        foreign_keys=[original_opportunity_id],
+        uselist=False,
+        back_populates="derived_opportunities"
+    )
+    
+    derived_opportunity: Mapped["Opportunity"] = relationship(
+        Opportunity,
+        foreign_keys=[derived_opportunity_id],
+        uselist=False,
+        back_populates="original_opportunities"
+    )
 
 
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):
