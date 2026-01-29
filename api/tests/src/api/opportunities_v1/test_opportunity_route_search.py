@@ -1701,6 +1701,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "opportunity_status",
             "is_cost_sharing",
             "close_date",
+            "post_date",
         }
 
     @pytest.mark.parametrize(
