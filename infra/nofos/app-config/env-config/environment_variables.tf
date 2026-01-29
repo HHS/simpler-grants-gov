@@ -27,9 +27,9 @@ locals {
       secret_store_name = "/nofos/${var.environment}/grabzit-application-key"
     }
 
-    GRABZIT_SECRET_KEY = {
+    GRABZIT_APPLICATION_SECRET = {
       manage_method     = "manual"
-      secret_store_name = "/nofos/${var.environment}/grabzit-secret-key"
+      secret_store_name = "/nofos/${var.environment}/grabzit-application-secret"
     }
 
     SECRET_KEY = {
