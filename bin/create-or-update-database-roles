@@ -2,8 +2,9 @@
 # -----------------------------------------------------------------------------
 # Script that invokes the database role-manager AWS Lambda function to create
 # or update the Postgres user roles for a particular environment.
-# The Lambda function is created by the infra/app/database root module and is
-# defined in the infra/app/database child module.
+#
+# The Lambda function is created by the infra/modules/database root module and is
+# defined in the infra/<APP_NAME>/database child module.
 #
 # Positional parameters:
 #   app_name (required) – the name of subdirectory of /infra that holds the

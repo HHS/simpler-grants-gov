@@ -1,4 +1,6 @@
 locals {
+  identity_provider_config = local.environment_config.identity_provider_config
+
   # If this is a temporary environment, re-use an existing Cognito user pool. Otherwise, create a new one.
   identity_provider_user_pool_id = module.app_config.enable_identity_provider ? (
     local.is_temporary ? module.existing_identity_provider[0].user_pool_id : module.identity_provider[0].user_pool_id
@@ -22,7 +24,6 @@ module "identity_provider" {
   temporary_password_validity_days = local.identity_provider_config.password_policy.temporary_password_validity_days
   verification_email_message       = local.identity_provider_config.verification_email.verification_email_message
   verification_email_subject       = local.identity_provider_config.verification_email.verification_email_subject
-  domain_name                      = local.network_config.domain_config.hosted_zone
   domain_identity_arn              = local.notifications_config == null ? null : local.domain_identity_arn
   sender_email                     = local.notifications_config == null ? null : local.notifications_config.sender_email
   sender_display_name              = local.notifications_config == null ? null : local.notifications_config.sender_display_name

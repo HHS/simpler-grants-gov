@@ -59,11 +59,11 @@ locals {
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
 
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
+  service_name = "${local.prefix}${local.service_config.service_name}"
 }
 
 terraform {
-  required_version = "1.14.3"
+  required_version = "~>1.10.0"
 
   required_providers {
     aws = {
@@ -131,27 +131,29 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 
 module "service" {
   source       = "../../modules/service"
-  service_name = local.service_config.service_name
+  service_name = local.service_name
 
   image_repository_arn = local.build_repository_config.repository_arn
   image_repository_url = local.build_repository_config.repository_url
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
+
+  domain_name     = module.domain.domain_name
+  hosted_zone_id  = module.domain.hosted_zone_id
+  certificate_arn = module.domain.certificate_arn
 
   domain_name     = null
   hosted_zone_id  = null
   certificate_arn = null
+  enable_waf = module.app_config.enable_waf
 
   fargate_cpu              = local.service_config.cpu
   fargate_memory           = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
-
-  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
   file_upload_jobs = local.service_config.file_upload_jobs
   scheduled_jobs   = local.environment_config.scheduled_jobs
@@ -184,10 +186,11 @@ module "service" {
   )
 
   secrets = concat(
-    [for secret_name in keys(local.service_config.secrets) : {
+    [for secret_name, secret_arn in module.secrets.secret_arns : {
       name      = secret_name
-      valueFrom = module.secrets[secret_name].secret_arn
+      valueFrom = secret_arn
     }],
+    local.feature_flags_secrets,
     module.app_config.enable_identity_provider ? [{
       # name      = "COGNITO_CLIENT_SECRET"
       # valueFrom = module.identity_provider_client[0].client_secret_arn
@@ -200,9 +203,14 @@ module "service" {
       # storage_access              = module.storage.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
-      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {}
+      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {},
+    module.app_config.enable_notifications ? {
+      notifications_access = module.notifications[0].access_policy_arn,
+    } : {},
   )
+
+  ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
 
   is_temporary = local.is_temporary
 }

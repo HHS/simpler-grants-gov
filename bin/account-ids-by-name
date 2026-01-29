@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # We use script dir to make this script agnostic to where it's called from.
-# This is needed since this script its called from infra/<app>/build-repository
+# This is needed since this script its called from infra/<APP_NAME>/build-repository
 # in an external data source
 script_dir=$(dirname "$0")
 

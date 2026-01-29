@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# https://www.gnu.org/software/wget/manual/wget.html
+
+# --spider causes a HEAD request instead of GET, which while not that different
+# and in most frameworks where you implement a GET handler it will automatically
+# handle HEAD requests as well, some checkers (like AWS ALBs) specifically send
+# GET requests, so we should match.
+#
+# So use --output-document instead, throwing away the response.
+wget --tries=1 --quiet --output-document=/dev/null http://127.0.0.1:"${PORT}"/health
