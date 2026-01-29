@@ -505,13 +505,62 @@ describe("formatPillLabel", () => {
       ]),
     ).toEqual("Cost sharing: sure");
   });
+
   it("returns correct label for close date", () => {
     expect(
-      formatPillLabel("closeDate", "yes", [
-        { value: "yes", label: "sure", id: "yes" },
+      formatPillLabel("closeDate", "30", [
+        { value: "30", label: "sure", id: "30" },
       ]),
-    ).toEqual("Closing within yes days");
+    ).toEqual("Closing within 30 days");
   });
+
+  it("returns correct label for close date with various day values", () => {
+    expect(formatPillLabel("closeDate", "7", [])).toEqual(
+      "Closing within 7 days",
+    );
+    expect(formatPillLabel("closeDate", "90", [])).toEqual(
+      "Closing within 90 days",
+    );
+    expect(formatPillLabel("closeDate", "365", [])).toEqual(
+      "Closing within 365 days",
+    );
+  });
+
+  it("returns correct label for posted date", () => {
+    expect(
+      formatPillLabel("postedDate", "14", [
+        { value: "14", label: "sure", id: "14" },
+      ]),
+    ).toEqual("Posted within last 14 days");
+  });
+
+  it("returns correct label for posted date with various day values", () => {
+    expect(formatPillLabel("postedDate", "1", [])).toEqual(
+      "Posted within last 1 days",
+    );
+    expect(formatPillLabel("postedDate", "30", [])).toEqual(
+      "Posted within last 30 days",
+    );
+    expect(formatPillLabel("postedDate", "180", [])).toEqual(
+      "Posted within last 180 days",
+    );
+  });
+
+  it("returns correct label for assistance listing number", () => {
+    expect(formatPillLabel("assistanceListingNumber", "15.808", [])).toEqual(
+      "ALN 15.808",
+    );
+  });
+
+  it("returns correct label for assistance listing number with various formats", () => {
+    expect(formatPillLabel("assistanceListingNumber", "10.001", [])).toEqual(
+      "ALN 10.001",
+    );
+    expect(formatPillLabel("assistanceListingNumber", "93.558", [])).toEqual(
+      "ALN 93.558",
+    );
+  });
+
   it("returns correct label for everything else", () => {
     expect(
       formatPillLabel("status", "yes", [

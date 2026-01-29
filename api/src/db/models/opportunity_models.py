@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
@@ -158,6 +158,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         # Utility method for getting all forecasted summary records attached to the opportunity
         # Note this will include historical and deleted records.
         return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
+
+    @property
+    def top_level_agency_code(self) -> str | None:
+        if self.agency_record is not None and self.agency_record.top_level_agency is not None:
+            return self.agency_record.top_level_agency.agency_code
+
+        return self.agency_code
 
 
 class OpportunitySummary(ApiSchemaTable, TimestampMixin):
@@ -464,12 +471,3 @@ class OpportunityVersion(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity, back_populates="versions")
 
     opportunity_data: Mapped[dict] = mapped_column(JSONB)
-
-
-class ExcludedOpportunityReview(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "excluded_opportunity_review"
-
-    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    omb_review_status_display: Mapped[str]
-    omb_review_status_date: Mapped[datetime | None]
-    last_update_date: Mapped[datetime | None]

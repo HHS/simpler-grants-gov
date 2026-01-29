@@ -46,7 +46,7 @@ module "dev_config" {
     # Login.gov OAuth
     ENABLE_XML_GENERATION = 1
 
-
+    ENABLE_WORKFLOW_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"

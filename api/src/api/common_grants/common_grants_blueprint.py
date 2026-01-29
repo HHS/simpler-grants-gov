@@ -2,7 +2,6 @@ import click
 import yaml
 from apiflask import APIBlueprint, APIFlask
 
-from src.api.common_grants.common_grants_openapi import transform_spec_composition_to_cg
 from src.api.schemas import response_schema
 
 common_grants_blueprint = APIBlueprint(
@@ -35,9 +34,7 @@ def generate_openapi_spec(output_file: str | None) -> None:
     app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     app.register_blueprint(common_grants_blueprint)
 
-    # Transform the APIFlask OpenAPI spec composition to meet CG expectations
-    spec = transform_spec_composition_to_cg(app.spec)  # type: ignore[arg-type]
-    yaml_content = yaml.dump(spec, sort_keys=False)
+    yaml_content = yaml.dump(app.spec, sort_keys=False)
 
     if output_file:
         with open(output_file, "w") as f:
