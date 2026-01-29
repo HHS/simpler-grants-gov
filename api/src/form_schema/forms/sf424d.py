@@ -4,7 +4,7 @@ from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.shared import COMMON_SHARED_V1
 
-BURDEN_STATMENT="""Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0042), Washington, DC 20503."""
+BURDEN_STATEMENT="""Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0042), Washington, DC 20503."""
 
 DIRECTIONS = """NOTE: Certain of these assurances may not be applicable to your project or program. If you have questions, please contact the Awarding Agency. Further, certain Federal assistance awarding agencies may require applicants to certify to additional assurances. If such is the case, you will be notified.
 
