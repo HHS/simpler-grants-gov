@@ -1,7 +1,7 @@
 """add lookup tables enums for workflow
 
 Revision ID: f6cb2434a583
-Revises: b471c2bbda51
+Revises: 05111bf05f30
 Create Date: 2026-01-29 03:31:23.826497
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "f6cb2434a583"
-down_revision = "b471c2bbda51"
+down_revision = "05111bf05f30"
 branch_labels = None
 depends_on = None
 

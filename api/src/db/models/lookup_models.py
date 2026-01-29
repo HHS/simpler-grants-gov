@@ -6,6 +6,8 @@ from src.constants.lookup_constants import (
     ApplicantType,
     ApplicationAuditEvent,
     ApplicationStatus,
+    ApprovalResponseType,
+    ApprovalType,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -24,8 +26,6 @@ from src.constants.lookup_constants import (
     SamGovProcessingStatus,
     UserType,
     WorkflowType,
-    ApprovalType,
-    ApprovalResponseType,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
@@ -598,7 +598,7 @@ class LkOrganizationAuditEvent(LookupTable, TimestampMixin):
         return LkOrganizationAuditEvent(
             organization_audit_event_id=lookup.lookup_val, description=lookup.get_description()
         )
-    
+
 
 @LookupRegistry.register_lookup(WORKFLOW_TYPE_CONFIG)
 class LkWorkflowType(LookupTable, TimestampMixin):
@@ -609,8 +609,10 @@ class LkWorkflowType(LookupTable, TimestampMixin):
 
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkWorkflowType:
-        return LkWorkflowType(workflow_type_id=lookup.lookup_val, description=lookup.get_description())
-    
+        return LkWorkflowType(
+            workflow_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
 
 @LookupRegistry.register_lookup(APPROVAL_TYPE_CONFIG)
 class LkApprovalType(LookupTable, TimestampMixin):
@@ -621,8 +623,10 @@ class LkApprovalType(LookupTable, TimestampMixin):
 
     @classmethod
     def from_lookup(cls, lookup: Lookup) -> LkApprovalType:
-        return LkApprovalType(approval_type_id=lookup.lookup_val, description=lookup.get_description())
-    
+        return LkApprovalType(
+            approval_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
 
 @LookupRegistry.register_lookup(APPROVAL_RESPONSE_TYPE_CONFIG)
 class LkApprovalResponseType(LookupTable, TimestampMixin):
