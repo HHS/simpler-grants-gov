@@ -15,7 +15,7 @@ def minimal_valid_sf424d_v1_1() -> dict:
 
 @pytest.fixture
 def full_valid_sf424d_v1_1(minimal_valid_sf424d_v1_1) -> dict:
-    return minimal_valid_sf424d_v1_1 | {"date_signed": "2025-06-15"}
+    return minimal_valid_sf424d_v1_1 | {"date_submitted": "2025-06-15"}
 
 
 def test_sf424d_v1_1_minimal_valid_json(minimal_valid_sf424d_v1_1, sf424d_v1_1):
@@ -42,7 +42,7 @@ def test_sf424d_v1_1_min_length(sf424d_v1_1):
         "signature": "",
         "title": "",
         "applicant_organization": "",
-        "date_signed": "2025-01-01",
+        "date_submitted": "2025-01-01",
     }
     validation_issues = validate_json_schema_for_form(data, sf424d_v1_1)
 
@@ -63,7 +63,7 @@ def test_sf424d_v1_1_max_length(sf424d_v1_1):
         "signature": "a" * 145,
         "title": "b" * 46,
         "applicant_organization": "c" * 61,
-        "date_signed": "2025-01-01",
+        "date_submitted": "2025-01-01",
     }
     validation_issues = validate_json_schema_for_form(data, sf424d_v1_1)
 
