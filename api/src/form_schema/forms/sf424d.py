@@ -72,7 +72,7 @@ FORM_JSON_SCHEMA = {
             "title": "Applicant Organization",
             "description": "This should match the 'Legal Name' field from the SF-424 form",
         },
-        "date_submitted": {
+        "date_signed": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
             "title": "Date Submitted",
         },
@@ -102,7 +102,7 @@ FORM_UI_SCHEMA = [
             {"type": "null", "definition": "/properties/signature"},
             {"type": "field", "definition": "/properties/title"},
             {"type": "field", "definition": "/properties/applicant_organization"},
-            {"type": "null", "definition": "/properties/date_submitted"},
+            {"type": "null", "definition": "/properties/date_signed"},
         ],
     },
 ]
@@ -110,7 +110,7 @@ FORM_UI_SCHEMA = [
 FORM_RULE_SCHEMA = {
     ##### POST-POPULATION RULES
     "signature": {"gg_post_population": {"rule": "signature"}},
-    "date_submitted": {"gg_post_population": {"rule": "current_date"}},
+    "date_signed": {"gg_post_population": {"rule": "current_date"}},
 }
 
 # XML Transformation Rules for SF-424D v1.1 (Assurances for Construction Programs)
@@ -165,7 +165,7 @@ FORM_XML_TRANSFORM_RULES = {
         }
     },
     # SubmittedDate (optional) - xs:date
-    "date_submitted": {
+    "date_signed": {
         "xml_transform": {
             "target": "SubmittedDate",
         }
