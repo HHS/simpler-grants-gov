@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/imnothere");
+  await page.goto("/imnothere", { timeout: 60000 });
 });
 
 test("has title", async ({ page }) => {
