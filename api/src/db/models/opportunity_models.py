@@ -159,6 +159,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         # Note this will include historical and deleted records.
         return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
 
+    @property
+    def top_level_agency_code(self) -> str | None:
+        if self.agency_record is not None and self.agency_record.top_level_agency is not None:
+            return self.agency_record.top_level_agency.agency_code
+
+        return self.agency_code
+
 
 class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_summary"
