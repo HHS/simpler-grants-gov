@@ -6,6 +6,7 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
+import click
 from sqlalchemy import select
 
 from src.adapters import db
@@ -60,8 +61,12 @@ class OpportunityContainer:
     ### Opportunity
     opportunity_title: str
     opportunity_number: str
+    opportunity_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
     agency_code: str = "SGG"
     category: OpportunityCategory = OpportunityCategory.DISCRETIONARY
+    # If True, this opportunity can be deleted and recreated when --force-recreate is used
+    # Only set this to True for hardcoded test scenarios, never for form-based opportunities
+    allow_force_recreate: bool = False
 
     ### Assistance listing number
     # Note - only 1 is supported at the moment
@@ -164,13 +169,19 @@ class BuildAutomaticOpportunitiesTask(Task):
         OPPORTUNITY_CREATED_COUNT = "opportunity_created_count"
         OPPORTUNITY_ALREADY_EXIST_COUNT = "opportunity_already_exist_count"
 
-    def __init__(self, db_session: db.Session, s3_config: S3Config | None = None) -> None:
+    def __init__(
+        self,
+        db_session: db.Session,
+        s3_config: S3Config | None = None,
+        force_recreate: bool = False,
+    ) -> None:
         super().__init__(db_session)
 
         if s3_config is None:
             s3_config = S3Config()
 
         self.s3_config = s3_config
+        self.force_recreate = force_recreate
         # This just exists to make tests easier to find the opportunities created
         self.opportunities: list[Opportunity] = []
 
@@ -186,13 +197,20 @@ class BuildAutomaticOpportunitiesTask(Task):
         forms = self.db_session.scalars(select(Form).where(Form.is_deprecated.isnot(True))).all()
 
         # For each form, create an opportunity with just that form
+        # Use uuid5 to create deterministic UUIDs based on form ID
         for form in forms:
+            # Create a deterministic UUID based on the form ID
+            form_opportunity_id = uuid.uuid5(
+                uuid.NAMESPACE_DNS, f"simpler-grants-gov.form.{form.form_id}"
+            )
             self.create_opportunity(
                 OpportunityContainer(
                     opportunity_title=f"Opportunity for form {form.short_form_name}",
                     opportunity_number=f"SGG-{form.short_form_name}",
+                    opportunity_id=form_opportunity_id,
                 ),
                 competitions=[CompetitionContainer(optional_form_ids=[form.form_id])],
+                force_create=self.force_recreate,
             )
 
         # Always create an opportunity with all forms
@@ -200,8 +218,9 @@ class BuildAutomaticOpportunitiesTask(Task):
         # and we don't have to adjust something existing
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
-                opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
+                opportunity_title="Opportunity with ALL forms",
+                opportunity_number="SGG-ALL-Forms",
+                opportunity_id=uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms"),
             ),
             competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
             force_create=True,
@@ -219,6 +238,8 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="Opportunity open to only organizations",
                 opportunity_number="SGG-org-only-test",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000001"),
+                allow_force_recreate=True,
             ),
             competitions=[
                 CompetitionContainer(
@@ -227,6 +248,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                 )
             ],
+            force_create=self.force_recreate,
         )
 
         ### Only open to individuals
@@ -234,6 +256,8 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="Opportunity open to only individuals",
                 opportunity_number="SGG-indv-only-test",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000002"),
+                allow_force_recreate=True,
             ),
             competitions=[
                 CompetitionContainer(
@@ -242,6 +266,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
                 )
             ],
+            force_create=self.force_recreate,
         )
 
         ### Mock BOR Opportunity
@@ -249,6 +274,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="MOCK PILOT - Native American Affairs: Technical Assistance to Tribes for Fiscal Year 2025",
                 opportunity_number="MOCK-R25AS00293-Dec102025",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000003"),
                 agency_code="DOI-BOR",
                 category=OpportunityCategory.DISCRETIONARY,
                 assistance_listing_number="15.519",
@@ -273,6 +299,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 applicant_types=[
                     ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS
                 ],
+                allow_force_recreate=True,
                 opportunity_attachment_file_name=None,  # We'll manually upload files
             ),
             competitions=[
@@ -292,6 +319,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     competition_instructions_file_name=None,  # We'll manually upload files
                 )
             ],
+            force_create=self.force_recreate,
         )
 
         ### Mock DOJ Opportunity
@@ -299,6 +327,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="DOJ Mock Opportunity",
                 opportunity_number="MOCK-O-OVW-2025-172425-Dec102025",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000004"),
                 agency_code="USDOJ-OJP-OVW",
                 category=OpportunityCategory.MANDATORY,
                 assistance_listing_number="16.557",
@@ -322,6 +351,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     ApplicantType.NONPROFITS_NON_HIGHER_EDUCATION_WITH_501C3,
                     ApplicantType.OTHER,
                 ],
+                allow_force_recreate=True,
                 opportunity_attachment_file_name=None,  # We'll manually upload files
             ),
             competitions=[
@@ -334,6 +364,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                     competition_instructions_file_name=None,  # We'll manually upload files
                 )
             ],
+            force_create=self.force_recreate,
         )
 
     def create_opportunity(
@@ -344,24 +375,52 @@ class BuildAutomaticOpportunitiesTask(Task):
     ) -> None:
         # We won't always remake the opportunities every time
         # unless the flag passed in says to do so
-        if not force_create:
-            existing_opportunity = (
-                self.db_session.execute(
-                    select(Opportunity).where(
-                        Opportunity.opportunity_number == data.opportunity_number
-                    )
-                )
-                .scalars()
-                .first()
+        existing_opportunity = (
+            self.db_session.execute(
+                select(Opportunity).where(Opportunity.opportunity_number == data.opportunity_number)
             )
-            if existing_opportunity is not None:
+            .scalars()
+            .first()
+        )
+
+        if existing_opportunity:
+            # Determine if we should delete:
+            # 1. If force_create is True but NOT from the global flag, always delete (per-opportunity override)
+            # 2. If force_create is True from the global flag, only delete if allow_force_recreate is True
+            is_global_force = force_create and force_create == self.force_recreate
+            should_delete = force_create and (not is_global_force or data.allow_force_recreate)
+
+            if should_delete:
                 logger.info(
-                    f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
+                    f"Deleting existing opportunity '{data.opportunity_number}' to recreate it",
                     extra={
                         "opportunity_id": existing_opportunity.opportunity_id,
                         "opportunity_number": data.opportunity_number,
+                        "force_create": force_create,
+                        "allow_force_recreate": data.allow_force_recreate,
+                        "id_mismatch": existing_opportunity.opportunity_id != data.opportunity_id,
                     },
                 )
+                self.db_session.delete(existing_opportunity)
+                self.db_session.flush()  # Ensure deletion happens before we try to insert
+            else:
+                if existing_opportunity.opportunity_id != data.opportunity_id:
+                    logger.warning(
+                        f"Skipping creating opportunity '{data.opportunity_number}', it already exists. Run with --force-recreate.",
+                        extra={
+                            "existing_opportunity_id": existing_opportunity.opportunity_id,
+                            "expected_opportunity_id": data.opportunity_id,
+                            "opportunity_number": data.opportunity_number,
+                        },
+                    )
+                else:
+                    logger.info(
+                        f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
+                        extra={
+                            "opportunity_id": existing_opportunity.opportunity_id,
+                            "opportunity_number": data.opportunity_number,
+                        },
+                    )
                 self.increment(self.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT)
                 return
 
@@ -370,7 +429,7 @@ class BuildAutomaticOpportunitiesTask(Task):
 
         ### Opportunity
         opportunity = Opportunity(
-            opportunity_id=uuid.uuid4(),
+            opportunity_id=data.opportunity_id,
             legacy_opportunity_id=random.randint(100_000_000, 999_999_999),
             opportunity_number=data.opportunity_number,
             opportunity_title=data.opportunity_title,
@@ -525,7 +584,8 @@ class BuildAutomaticOpportunitiesTask(Task):
 @task_blueprint.cli.command(
     "build-automatic-opportunities", help="Utility to automatically create opportunities for forms"
 )
+@click.option("--force-recreate", is_flag=True, default=False, help="Force recreate opportunities")
 @flask_db.with_db_session()
 @ecs_background_task(task_name="build-automatic-opportunities")
-def generate_opportunity_sql(db_session: db.Session) -> None:
-    BuildAutomaticOpportunitiesTask(db_session).run()
+def generate_opportunity_sql(db_session: db.Session, force_recreate: bool) -> None:
+    BuildAutomaticOpportunitiesTask(db_session, force_recreate=force_recreate).run()
