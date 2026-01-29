@@ -71,7 +71,6 @@ describe("Drawer", () => {
 
   // the same test passes for DrawerControl, and can't figure the difference here, but this is not passing
   // skipping for now
-
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip("should call ref toggle function on close button click", async () => {
     const ref = createModalRef();

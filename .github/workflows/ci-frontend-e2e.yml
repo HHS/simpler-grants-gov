@@ -75,7 +75,7 @@ jobs:
           } >> .env.local
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
-          npm run build -- --no-lint
+          npm run build
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
         env:

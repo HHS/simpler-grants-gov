@@ -16,7 +16,10 @@ const mockUseUser = jest.fn(() => ({
   },
   hasBeenLoggedOut: false,
   resetHasBeenLoggedOut: jest.fn(),
+<<<<<<< HEAD
   logoutLocalUser: mockLogoutLocalUser,
+=======
+>>>>>>> 14fced80b (all next 16 upgrade related changes)
 }));
 
 jest.mock("src/hooks/useFeatureFlags", () => ({
