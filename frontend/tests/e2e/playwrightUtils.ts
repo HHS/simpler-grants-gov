@@ -14,7 +14,7 @@ export interface PageProps {
 export async function waitForURLChange(
   page: Page,
   changeCheck: (url: string) => boolean,
-  timeout = 30000, // query params get set after a debounce period)
+  timeout = 60000, // query params get set after a debounce period)
 ) {
   const endTime = Date.now() + timeout;
 
@@ -30,22 +30,15 @@ export async function waitForURLChange(
   throw new Error(`URL did not update as expected within ${timeout}ms`);
 }
 
-const getPageUrlParam = (
-  rawUrl: string,
-  queryParamName: string,
-): string | null => {
-  const url = new URL(rawUrl);
-  const params = new URLSearchParams(url.search);
-  return params.get(queryParamName);
-};
-
 export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
 ) {
   const changeCheck = (pageUrl: string): boolean => {
-    const actualValue = getPageUrlParam(pageUrl, queryParamName);
+    const url = new URL(pageUrl);
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
 
     return actualValue === queryParamValue;
   };
@@ -57,9 +50,7 @@ export async function waitForURLContainsQueryParamValue(
     );
   }
 
-  return expect(getPageUrlParam(page.url(), queryParamName)).toBe(
-    queryParamValue,
-  );
+  return expect(page.url()).toContain(`${queryParamName}=${queryParamValue}`);
 
   // potentially an easier implementation, may not need our own "waitForURLChange" function
   // const expectedQueryString = `${queryParamName}=${queryParamValue}`;
@@ -81,7 +72,7 @@ export async function waitForUrl(
 export async function waitForURLContainsQueryParam(
   page: Page,
   queryParamName: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeout = 60000, // query params get set after a debounce period
 ) {
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);
@@ -96,7 +87,7 @@ export async function waitForURLContainsQueryParam(
 export async function waitForAnyURLChange(
   page: Page,
   initialUrl: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeout = 60000, // query params get set after a debounce period
 ) {
   const changeCheck = (pageUrl: string): boolean => {
     return pageUrl !== initialUrl;

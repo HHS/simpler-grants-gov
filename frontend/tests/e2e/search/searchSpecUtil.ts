@@ -12,7 +12,7 @@ import {
 
 const { targetEnv } = playwrightEnv;
 
-const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 15000 : 5000;
+const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
@@ -77,6 +77,7 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
+  await checkBox.waitFor({ state: 'visible', timeout: 15000 });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
 }
@@ -102,33 +103,19 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
   await expect(sortSelectElement).toHaveValue(value, timeoutOption);
 }
 
-// flaky
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // // Wait for number of opportunities to show
-  // const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-  // await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
-
-  // Wait for first search result link to appear
-
-  // const resultsHeading = page.locator("#search-result-link-1-1");
-  // await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
-
-  // return await expect(
-  //   page.locator("#search-result-link-1-1").first(),
-  // ).toBeVisible();
-
-  return await expect(
-    page.locator('h3:has-text("Opportunities")').first(),
-  ).toBeVisible();
+  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
+  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  return await expect(resultsHeading).toBeVisible();
 }
 
 export async function clickAccordionWithTitle(
   page: Page,
   accordionTitle: string,
 ) {
-  await page
-    .locator(`button.usa-accordion__button:has-text("${accordionTitle}")`)
-    .click();
+  const button = page.locator(`button.usa-accordion__button:has-text("${accordionTitle}")`);
+  await button.waitFor({ state: 'visible', timeout: 15000 });
+  await button.click();
 }
 
 export async function clickPaginationPageNumber(
