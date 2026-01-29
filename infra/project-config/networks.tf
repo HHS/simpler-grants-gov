@@ -62,7 +62,7 @@ locals {
       vpc_name                     = "prod"
       second_octet                 = 3               # The second octet our the VPC CIDR block
       grants_gov_oracle_cidr_block = "10.250.0.0/16" # MicroHealth managed CIDR block where the prod origin Oracle database for Grants.gov is located
-      account_name = "prod"
+      account_name                 = "prod"
       domain_config = {
         manage_dns  = false
         hosted_zone = "simpler.grants.gov"
