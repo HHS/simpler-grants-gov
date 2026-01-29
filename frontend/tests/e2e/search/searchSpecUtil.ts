@@ -4,10 +4,15 @@
 
 import { expect, Locator, Page } from "@playwright/test";
 import { camelCase } from "lodash";
+import playwrightEnv from "tests/e2e/playwright-env";
 import {
   waitForURLContainsQueryParam,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
+
+const { targetEnv } = playwrightEnv;
+
+const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 15000 : 5000;
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
@@ -46,7 +51,7 @@ export async function expectCheckboxIDIsChecked(
   page: Page,
   idWithHash: string,
 ) {
-  const checkbox: Locator = page.locator(idWithHash);
+  const checkbox: Locator = page.locator(idWithHash).first();
   await expect(checkbox).toBeChecked();
 }
 
@@ -81,23 +86,40 @@ export async function selectSortBy(
   sortByValue: string,
   drawer = false,
 ) {
-  await page
-    .locator(`#search-sort-by-select${drawer ? "-drawer" : ""}`)
-    .selectOption(sortByValue);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-}
-
-export async function expectSortBy(page: Page, value: string, drawer = false) {
+  const timeoutOption = targetEnv === "local" ? {} : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
-  await expect(sortSelectElement).toHaveValue(value);
+  await sortSelectElement.selectOption(sortByValue);
+  await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
 }
 
+export async function expectSortBy(page: Page, value: string, drawer = false) {
+  const timeoutOption = targetEnv === "local" ? {} : { timeout: 10000 };
+  const sortSelectElement = page.locator(
+    `#search-sort-by-select${drawer ? "-drawer" : ""}`,
+  );
+  await expect(sortSelectElement).toHaveValue(value, timeoutOption);
+}
+
+// flaky
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h3:has-text("Opportunities")');
-  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  // // Wait for number of opportunities to show
+  // const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
+  // await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+
+  // Wait for first search result link to appear
+
+  // const resultsHeading = page.locator("#search-result-link-1-1");
+  // await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+
+  // return await expect(
+  //   page.locator("#search-result-link-1-1").first(),
+  // ).toBeVisible();
+
+  return await expect(
+    page.locator('h3:has-text("Opportunities")').first(),
+  ).toBeVisible();
 }
 
 export async function clickAccordionWithTitle(
@@ -117,9 +139,7 @@ export async function clickPaginationPageNumber(
     `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
   );
   await paginationButton.first().click();
-
-  // Delay for pagination debounce
-  await page.waitForTimeout(400);
+  await waitForURLContainsQueryParamValue(page, "page", pageNumber.toString());
 }
 
 export async function clickLastPaginationPage(page: Page) {
@@ -129,10 +149,15 @@ export async function clickLastPaginationPage(page: Page) {
   // must be more than 1 page
   if (count > 2) {
     const button = paginationButtons.nth(count - 1);
+    const pageNumber = await button.textContent();
+    if (!pageNumber) {
+      throw new Error("unable to click pagination button, button has no label");
+    }
     await button.click();
+    await waitForURLContainsQueryParamValue(page, "page", pageNumber);
+  } else {
+    console.error("not clicking on last page, only one page exists!");
   }
-  // Delay for pagination debounce
-  await page.waitForTimeout(400);
 }
 
 export async function getFirstSearchResultTitle(page: Page) {
@@ -242,8 +267,18 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
+  await filterButton.waitFor({
+    state: "visible",
+    timeout: FILTER_OPTIONS_TIMEOUT,
+  });
   await filterButton.click();
+
   const filterOptions = page.locator(`input[name="${filterType}-*"]`);
+  // this is preferable but doesn't work
+  // await filterOptions.waitFor({
+  //   state: "visible",
+  //   timeout: FILTER_OPTIONS_TIMEOUT,
+  // });
   await filterOptions.isVisible();
   await filterButton.click();
 };
