@@ -6,6 +6,7 @@ export const backendFilterNames = [
   "assistance_listing_number",
   "funding_category",
   "close_date",
+  "post_date",
   "is_cost_sharing",
 ] as const;
 
@@ -16,6 +17,7 @@ export const searchFilterNames = [
   "agency",
   "category",
   "closeDate",
+  "postedDate",
   "costSharing",
   "topLevelAgency",
   "assistanceListingNumber",

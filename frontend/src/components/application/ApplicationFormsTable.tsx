@@ -3,6 +3,7 @@ import {
   ApplicationFormDetail,
 } from "src/types/applicationResponseTypes";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
+import { getModifiedTimeDisplay } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -176,9 +177,6 @@ const ApplicationTable = ({
           <th scope="col" className="bg-base-lightest padding-y-205">
             {t("updated")}
           </th>
-          <th scope="col" className="bg-base-lightest padding-y-205">
-            {t("updatedBy")}
-          </th>
         </tr>
       </thead>
       <tbody>
@@ -218,10 +216,9 @@ const ApplicationTable = ({
               />
             </td>
             <td data-label={t("updated")}>
-              <div> -- </div>
-            </td>
-            <td data-label={t("updatedBy")}>
-              <div> -- </div>
+              <div>
+                {getModifiedTimeDisplay(form.updated_at, form.created_at, "--")}
+              </div>
             </td>
           </tr>
         ))}
