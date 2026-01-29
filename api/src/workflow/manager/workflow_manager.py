@@ -11,16 +11,21 @@ from sqlalchemy import text
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.util.env_config import PydanticBaseEnvConfig
+from src.workflow.workflow_background_task import workflow_transaction
 from src.workflow.workflow_errors import NonRetryableWorkflowError, RetryableWorkflowError
 
 logger = logging.getLogger(__name__)
 
+# Stub event types just to have something to differentiate transactions
+# for the purposes of logging, will be changed later.
+STUB_EVENT_TYPES = ["event_type1", "event_type2"]
 
 @dataclass
 class StubEvent:
     # Placeholder class until we have the
     # actual event types setup.
     event_data: str
+    event_type: str
 
 
 class WorkflowManagerConfig(PydanticBaseEnvConfig):
@@ -100,7 +105,8 @@ class WorkflowManager:
         # Generate 1-5 random events
         events = []
         for i in range(random.randint(1, 5)):
-            events.append(StubEvent(f"Random event {i}"))
+            event_type = random.choice(STUB_EVENT_TYPES)
+            events.append(StubEvent(f"Random event {i}", event_type))
 
         return events
 
@@ -175,13 +181,15 @@ class WorkflowManager:
 
 @flask_db.with_db_session()
 def handle_event(db_session: db.Session, event: StubEvent) -> None:
-    logger.info("Processing event", extra={"event_data": event.event_data})
-    with db_session.begin():
-        # Just verify that the DB connection works for now
-        # by doing a very simple query.
-        # Will replace later with more meaningful logic.
-        result = db_session.scalar(text("SELECT 1 AS healthy"))
-        if result != 1:
-            raise Exception("Cannot query DB")
+    with workflow_transaction(event.event_type):
+        logger.info("Processing event", extra={"event_data": event.event_data, "event_type": event.event_type})
+        with db_session.begin():
+            # Just verify that the DB connection works for now
+            # by doing a very simple query.
+            # Will replace later with more meaningful logic.
+            result = db_session.scalar(text("SELECT 1 AS healthy"))
+            if result != 1:
+                raise Exception("Cannot query DB")
 
-    logger.info("Finished processing event", extra={"event_data": event.event_data})
+
+        logger.info("Finished processing event", extra={"event_data": event.event_data, "event_type": event.event_type})
