@@ -8,8 +8,6 @@ import { LayoutProps } from "src/types/generalTypes";
 
 import RootLayoutWrapper from "src/components/RootLayoutWrapper";
 
-import "src/styles/styles.scss";
-
 export const metadata: Metadata = {
   icons: [`${environment.NEXT_PUBLIC_BASE_PATH}/img/favicon.ico`],
 };
