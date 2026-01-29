@@ -83,7 +83,9 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
-    const navigationPromise = page.waitForURL("/opportunities", { timeout: 5000 }).catch(() => {});
+    const navigationPromise = page.waitForURL("/opportunities", { timeout: 5000 }).catch(
+      (error) => console.debug("Navigation timeout expected", error),
+    );
     await page.goto(`/login`);
     // The "Redirecting..." message appears briefly during navigation
     // We check for it or wait for the redirect to complete

@@ -12,7 +12,7 @@ export default defineConfig({
   timeout: targetEnv === "local" ? 75000 : 120000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
-  fullyParallel: targetEnv === "staging" ? false : true,
+  fullyParallel: targetEnv !== "staging",
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCi,
   /* Retry on CI only, but reduce retries for staging */
