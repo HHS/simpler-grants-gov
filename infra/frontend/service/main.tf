@@ -133,16 +133,12 @@ module "service" {
   network_name = local.environment_config.network_name
   project_name = module.project_config.project_name
 
-  domain_name     = module.domain.domain_name
-  hosted_zone_id  = module.domain.hosted_zone_id
-  certificate_arn = module.domain.certificate_arn
-
   domain_name    = local.service_config.domain_name
   hosted_zone_id = null
   # hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
   hostname        = module.app_config.hostname
-  enable_waf = module.app_config.enable_waf
+  enable_waf      = module.app_config.enable_waf
 
   fargate_cpu              = local.service_config.instance_cpu
   fargate_memory           = local.service_config.instance_memory
@@ -195,8 +191,11 @@ module "service" {
       # storage_access = module.storage.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
-      # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {}
+      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {},
+    module.app_config.enable_notifications ? {
+      notifications_access = module.notifications[0].access_policy_arn,
+    } : {},
   )
 
   healthcheck_path = local.healthcheck_path
@@ -204,12 +203,6 @@ module "service" {
     "CMD-SHELL",
     "wget --no-verbose --tries=1 --spider http://localhost:8000${local.healthcheck_path} || exit 1"
   ]
-      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {},
-    module.app_config.enable_notifications ? {
-      notifications_access = module.notifications[0].access_policy_arn,
-    } : {},
-  )
 
   ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
 

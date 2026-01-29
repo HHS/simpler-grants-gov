@@ -58,8 +58,6 @@ locals {
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
-
-  service_name = "${local.prefix}${local.service_config.service_name}"
 }
 
 terraform {
@@ -141,14 +139,10 @@ module "service" {
   network_name = local.environment_config.network_name
   project_name = module.project_config.project_name
 
-  domain_name     = module.domain.domain_name
-  hosted_zone_id  = module.domain.hosted_zone_id
-  certificate_arn = module.domain.certificate_arn
-
   domain_name     = null
   hosted_zone_id  = null
   certificate_arn = null
-  enable_waf = module.app_config.enable_waf
+  enable_waf      = module.app_config.enable_waf
 
   fargate_cpu              = local.service_config.cpu
   fargate_memory           = local.service_config.memory

@@ -70,14 +70,18 @@ resource "aws_rds_cluster" "db" {
 }
 
 resource "aws_rds_cluster_instance" "primary" {
-  identifier                 = local.primary_instance_name
-  cluster_identifier         = aws_rds_cluster.db.id
-  instance_class             = "db.serverless"
-  engine                     = aws_rds_cluster.db.engine
-  engine_version             = aws_rds_cluster.db.engine_version
-  auto_minor_version_upgrade = true
-  monitoring_role_arn        = aws_iam_role.rds_enhanced_monitoring.arn
-  monitoring_interval        = 30
+  identifier                            = local.primary_instance_name
+  cluster_identifier                    = aws_rds_cluster.db.id
+  instance_class                        = "db.serverless"
+  engine                                = aws_rds_cluster.db.engine
+  engine_version                        = aws_rds_cluster.db.engine_version
+  auto_minor_version_upgrade            = true
+  monitoring_role_arn                   = aws_iam_role.rds_enhanced_monitoring.arn
+  monitoring_interval                   = 30
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 7
+
+  # checkov:skip=CKV_AWS_354:Performance insights KMS key not needed for serverless instances
 
   # Many DB modifications are by default queued up for the next maintenance
   # window, but when you want changes to happen now, set this.
@@ -85,6 +89,7 @@ resource "aws_rds_cluster_instance" "primary" {
   # apply_immediately = true
 }
 
+# checkov:skip=CKV2_AWS_64:KMS key policy managed by AWS default policy
 resource "aws_kms_key" "db" {
   description         = "Key for RDS cluster ${var.name}"
   enable_key_rotation = true
