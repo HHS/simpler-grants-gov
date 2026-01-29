@@ -22,10 +22,6 @@ test.beforeEach(async ({ page }) => {
   await page.waitForURL("/search?query=" + searchTerm);
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test.describe("Search page results tests", () => {
   test("should return at least 1 result when searching with valid term", async ({
     page,

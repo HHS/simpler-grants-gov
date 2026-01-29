@@ -7,10 +7,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test("has title", async ({ page }) => {
   await expect(page).toHaveTitle(/Simpler.Grants.gov/);
 });

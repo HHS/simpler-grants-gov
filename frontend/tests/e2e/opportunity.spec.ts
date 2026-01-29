@@ -34,10 +34,6 @@ test.beforeEach(async ({ page, testOpportunityId }) => {
   await page.goto(`/opportunity/${testOpportunityId}`);
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test("has title", async ({ page }) => {
   await expect(page).toHaveTitle(/^Opportunity Listing - */);
 });

@@ -5,10 +5,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/vision", { waitUntil: "domcontentloaded" });
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Vision | Simpler.Grants.gov");
 });

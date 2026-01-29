@@ -4,10 +4,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/imnothere");
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Oops, we can't find that page.");
 });

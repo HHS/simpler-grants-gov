@@ -5,10 +5,6 @@ import playwrightEnv from "./playwright-env";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 import { performStagingLogin } from "./utils/perform-login-utils";
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test("Saved opportunities page shows unauthenticated state if not logged in", async ({
   page,
 }) => {

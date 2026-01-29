@@ -32,10 +32,6 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
 test("has title", async ({ page }) => {
   await expect(page).toHaveTitle(/Subscribe | Simpler.Grants.gov/);
 });
