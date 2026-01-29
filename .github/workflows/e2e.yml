@@ -1,7 +1,7 @@
 name: Dynamic E2E Tests
 on:
   push:
-    branches: ["e2e-staging"]
+    branches: ["e2e-staging-run"]
 
   workflow_dispatch:
     inputs:
