@@ -295,6 +295,11 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_code = fields.String(
+        allow_none=True,
+        metadata={"description": "The top-level (parent) agency", "example": "HHS"},
+    )
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 

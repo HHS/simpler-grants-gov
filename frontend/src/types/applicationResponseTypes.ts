@@ -5,6 +5,7 @@ import { ApplicationSubmission } from "./application/applicationSubmissionTypes"
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 import { FormDetail } from "./formResponseTypes";
+import { iso8601Date, RegexMatchedString } from "./generalTypes";
 
 export interface ApplicationResponseDetail {
   [key: string]: string;
@@ -49,6 +50,8 @@ export interface ApplicationFormDetail {
   application_name: string;
   is_required: boolean;
   is_included_in_submission?: boolean | null;
+  updated_at: RegexMatchedString<typeof iso8601Date>;
+  created_at: RegexMatchedString<typeof iso8601Date>;
 }
 
 export interface ApplicationDetail {
