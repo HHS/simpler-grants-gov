@@ -32,7 +32,7 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^14.2.1",
     "@newrelic/next": "^0.10.0",
-    "@next/third-parties": "^15.5.11",
+    "@next/third-parties": "^15.5.10",
     "@opentelemetry/api": "^1.8.0",
     "@rjsf/utils": "^5.24.8",
     "@trussworks/react-uswds": "^10.2.0",
@@ -53,7 +53,7 @@
     "json-schema-merge-allof": "^0.8.1",
     "lodash": "^4.17.23",
     "newrelic": "^12.7.0",
-    "next": "15.6.0-canary.61",
+    "next": "^15.5.10",
     "next-intl": "^3.2.1",
     "next-navigation-guard": "^0.2.0",
     "pino": "^9.6.0",
