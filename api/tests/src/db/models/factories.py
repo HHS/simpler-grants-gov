@@ -495,11 +495,22 @@ class OpportunityVersionFactory(BaseFactory):
 class ReferencedOpportunityFactory(BaseFactory):
     class Meta:
         model = opportunity_models.ReferencedOpportunity
+        exclude = ('original_opportunity', 'derived_opportunity')
 
     referenced_opportunity_id = Generators.UuidObj
     
-    original_opportunity_id = factory.LazyFunction(lambda: OpportunityFactory.create().opportunity_id)
-    derived_opportunity_id = factory.LazyFunction(lambda: OpportunityFactory.create().opportunity_id)
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        # Create two separate opportunities first
+        original = OpportunityFactory.create()
+        derived = OpportunityFactory.create()
+        
+        # Create the referenced opportunity with just the IDs
+        kwargs['original_opportunity_id'] = original.opportunity_id
+        kwargs['derived_opportunity_id'] = derived.opportunity_id
+        
+        # Let the normal creation process handle the rest
+        return super()._create(model_class, *args, **kwargs)
 
 
 class OpportunitySummaryFactory(BaseFactory):

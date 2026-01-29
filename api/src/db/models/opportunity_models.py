@@ -36,9 +36,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True, unique=True, nullable=True)
+    legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True, unique=True)
 
-    is_simpler_grants_opportunity: Mapped[bool] = mapped_column(default=False, index=True)
+    is_simpler_grants_opportunity: Mapped[bool | None] = mapped_column(index=True)
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
@@ -481,11 +481,11 @@ class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
     referenced_opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     
     original_opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("api.opportunity.opportunity_id"), index=True
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     
     derived_opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey("api.opportunity.opportunity_id"), index=True
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     
     original_opportunity: Mapped["Opportunity"] = relationship(
