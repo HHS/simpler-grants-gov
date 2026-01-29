@@ -1,8 +1,8 @@
 """add_referenced_opportunity_table
 
-Revision ID: ceec62799c46
-Revises: 05111bf05f30
-Create Date: 2026-01-29 18:59:06.976968
+Revision ID: 7c846224d158
+Revises: f6cb2434a583
+Create Date: 2026-01-29 23:27:54.112474
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "ceec62799c46"
-down_revision = "05111bf05f30"
+revision = "7c846224d158"
+down_revision = "f6cb2434a583"
 branch_labels = None
 depends_on = None
 
