@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # for the purposes of logging, will be changed later.
 STUB_EVENT_TYPES = ["event_type1", "event_type2"]
 
+
 @dataclass
 class StubEvent:
     # Placeholder class until we have the
@@ -182,7 +183,10 @@ class WorkflowManager:
 @flask_db.with_db_session()
 def handle_event(db_session: db.Session, event: StubEvent) -> None:
     with workflow_transaction(event.event_type):
-        logger.info("Processing event", extra={"event_data": event.event_data, "event_type": event.event_type})
+        logger.info(
+            "Processing event",
+            extra={"event_data": event.event_data, "event_type": event.event_type},
+        )
         with db_session.begin():
             # Just verify that the DB connection works for now
             # by doing a very simple query.
@@ -191,5 +195,7 @@ def handle_event(db_session: db.Session, event: StubEvent) -> None:
             if result != 1:
                 raise Exception("Cannot query DB")
 
-
-        logger.info("Finished processing event", extra={"event_data": event.event_data, "event_type": event.event_type})
+        logger.info(
+            "Finished processing event",
+            extra={"event_data": event.event_data, "event_type": event.event_type},
+        )

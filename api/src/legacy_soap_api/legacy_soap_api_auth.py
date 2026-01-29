@@ -32,7 +32,7 @@ class SOAPClientCertificateLookupError(Exception):
 
 class SOAPClientCertificate(BaseModel):
     cert: str
-    serial_number: int
+    serial_number: str
     fingerprint: str
     legacy_certificate: LegacyCertificate | None = None
 
@@ -52,7 +52,7 @@ class SOAPClientCertificate(BaseModel):
             ) from None
         try:
             value = key_map[str(self.legacy_certificate.legacy_certificate_id)]
-            return f"{value}\n\n{self.cert}"
+            return f"{value}"
         except KeyError:
             raise SOAPClientCertificateNotConfigured("cert is not configured") from None
         except Exception:
@@ -109,9 +109,9 @@ def get_soap_client_certificate(
 ) -> SOAPClientCertificate:
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
-
+    serial_number_hex = format(int(cert.serial_number), "032x")
     legacy_certificate = db_session.execute(
-        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(serial_number_hex))
     ).scalar_one_or_none()
     if legacy_certificate:
         add_extra_data_to_current_request_logs(
@@ -130,7 +130,7 @@ def get_soap_client_certificate(
         cert=cert_str,
         fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
         issuer=cert.issuer.rfc4514_string(),
-        serial_number=cert.serial_number,
+        serial_number=str(serial_number_hex),
         legacy_certificate=legacy_certificate,
     )
 
