@@ -4250,6 +4250,11 @@ components:
           description: The counts of close_date values in the full response
           additionalProperties:
             type: integer
+        post_date:
+          type: object
+          description: The counts of post_date values in the full response
+          additionalProperties:
+            type: integer
     OpportunitySearchResponseV1:
       type: object
       properties:

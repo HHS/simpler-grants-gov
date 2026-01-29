@@ -467,6 +467,14 @@ class OpportunityFacetV1Schema(Schema):
         },
     )
 
+    post_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of post_date values in the full response",
+        },
+    )
+
 
 class ExperimentalV1Schema(Schema):
     scoring_rule = fields.Enum(
