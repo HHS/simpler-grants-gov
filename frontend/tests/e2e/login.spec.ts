@@ -83,8 +83,9 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
-    // eslint-disable-next-line no-console
+    
     const navigationPromise = page.waitForURL("/opportunities", { timeout: 5000 }).catch(
+      // eslint-disable-next-line no-console
       (error) => console.debug("Navigation timeout expected", error),
     );
     await page.goto(`/login`);
