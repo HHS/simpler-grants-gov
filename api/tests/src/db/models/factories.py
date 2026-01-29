@@ -492,6 +492,16 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
 
 
+class ReferencedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.ReferencedOpportunity
+
+    referenced_opportunity_id = Generators.UuidObj
+    
+    original_opportunity_id = factory.LazyFunction(lambda: OpportunityFactory.create().opportunity_id)
+    derived_opportunity_id = factory.LazyFunction(lambda: OpportunityFactory.create().opportunity_id)
+
+
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
