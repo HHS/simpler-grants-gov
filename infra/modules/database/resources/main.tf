@@ -89,8 +89,8 @@ resource "aws_rds_cluster_instance" "primary" {
   # apply_immediately = true
 }
 
-# checkov:skip=CKV2_AWS_64:KMS key policy managed by AWS default policy
 resource "aws_kms_key" "db" {
+  # checkov:skip=CKV2_AWS_64:KMS key policy managed by AWS default policy
   description         = "Key for RDS cluster ${var.name}"
   enable_key_rotation = true
 }

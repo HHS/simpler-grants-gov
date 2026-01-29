@@ -18,6 +18,7 @@ resource "random_password" "secrets" {
 }
 
 resource "aws_ssm_parameter" "secrets" {
+  # checkov:skip=CKV_AWS_337:SSM SecureString uses default AWS managed KMS key
   for_each = local.generated_secrets
 
   name  = each.value.secret_store_name

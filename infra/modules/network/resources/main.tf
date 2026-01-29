@@ -11,8 +11,8 @@ module "interface" {
   name   = var.name
 }
 
-# checkov:skip=CKV_TF_1:Using Terraform Registry versioned module source
 module "aws_vpc" {
+  # checkov:skip=CKV_TF_1:Using Terraform Registry versioned module source
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.2.0"
 
