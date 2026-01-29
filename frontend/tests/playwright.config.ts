@@ -15,9 +15,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCi,
-  /* Retry on CI only */
-  retries: isCi ? 3 : 0,
-  workers: 10,
+  /* Retry on CI only, but reduce retries for staging */
+  retries: isCi && targetEnv === "staging" ? 1 : isCi ? 3 : 0,
+  // Reduce workers for staging to prevent resource exhaustion
+  workers: targetEnv === "staging" ? 2 : 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: isCi ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -37,36 +38,47 @@ export default defineConfig({
     current: parseInt(currentShard || "1"),
   },
   /* Configure projects for major browsers */
-  projects: [
-    {
-      name: "Chrome",
-      use: {
-        ...devices["Desktop Chrome"],
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-    {
-      name: "Firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-        permissions: [],
-      },
-    },
-    {
-      name: "Webkit",
-      use: {
-        ...devices["Desktop Safari"],
-        permissions: ["clipboard-read"],
-      },
-    },
-    {
-      name: "Mobile chrome",
-      use: {
-        ...devices["Pixel 7"],
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-  ],
+  projects:
+    targetEnv === "staging"
+      ? [
+          {
+            name: "Chrome",
+            use: {
+              ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ]
+      : [
+          {
+            name: "Chrome",
+            use: {
+              ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "Firefox",
+            use: {
+              ...devices["Desktop Firefox"],
+              permissions: [],
+            },
+          },
+          {
+            name: "Webkit",
+            use: {
+              ...devices["Desktop Safari"],
+              permissions: ["clipboard-read"],
+            },
+          },
+          {
+            name: "Mobile chrome",
+            use: {
+              ...devices["Pixel 7"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ],
 
   //  Only start the local dev server when running in the local environment.
   webServer:
