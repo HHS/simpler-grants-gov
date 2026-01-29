@@ -11,26 +11,10 @@ git_ref="$2"
 image_tag=$(git log --pretty=format:'%H' -n 1 "${git_ref}" "${app_name}")
 
 # Need to init module when running in CD since GitHub actions does a fresh checkout of repo
-<<<<<<< before updating
 terraform -chdir="infra/$app_name/app-config" init >/dev/null
 terraform -chdir="infra/$app_name/app-config" apply -auto-approve >/dev/null
 image_repository_name=$(terraform -chdir="infra/$app_name/app-config" output -raw image_repository_name)
 region=$(./bin/current-region)
-=======
-terraform -chdir="infra/${app_name}/app-config" init > /dev/null
-terraform -chdir="infra/${app_name}/app-config" apply -auto-approve > /dev/null
-image_repository_name="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".name")"
-region="$(terraform -chdir="infra/${app_name}/app-config" output -json build_repository_config | jq -r ".region")"
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
 
 result=""
 result=$(aws ecr describe-images --repository-name "$image_repository_name" --image-ids "imageTag=$image_tag" --region "$region" 2>/dev/null) || true

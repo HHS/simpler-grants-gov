@@ -30,7 +30,6 @@ task_role_arn=""
 workspace_name=""
 while :; do
   case "$1" in
-<<<<<<< before updating
   --environment-variables)
     environment_variables="$2"
     shift 2
@@ -42,23 +41,6 @@ while :; do
   *)
     break
     ;;
-=======
-    --environment-variables)
-      environment_variables="$2"
-      shift 2
-      ;;
-    --task-role-arn)
-      task_role_arn="$2"
-      shift 2
-      ;;
-    --workspace)
-      workspace_name="$2"
-      shift 2
-      ;;
-    *)
-      break
-      ;;
->>>>>>> after updating
   esac
 done
 
@@ -150,27 +132,6 @@ ecs_task_id=$(basename "${task_arn}")
 echo "Task information"
 echo "  task_arn=${task_arn}"
 echo "  task_id=${ecs_task_id}"
-<<<<<<< before updating
-=======
-echo "  log_stream=${log_stream}"
-
-num_retries_waiting_for_logs=0
-while true; do
-  num_retries_waiting_for_logs=$((num_retries_waiting_for_logs+1))
-  if [ "${num_retries_waiting_for_logs}" -eq 20 ]; then
-    echo "Timing out task ${ecs_task_id} waiting for logs"
-    exit 1
-  fi
-  is_log_stream_created=$(aws logs describe-log-streams --no-cli-pager --log-group-name "${log_group}" --log-stream-name-prefix "${log_stream}" --query "length(logStreams)")
-  if [ "${is_log_stream_created}" == "1" ]; then
-    break
-  fi
-  sleep 5
-  echo -n "."
-done
-echo
-echo
->>>>>>> after updating
 
 echo
 echo "Waiting for task to complete"

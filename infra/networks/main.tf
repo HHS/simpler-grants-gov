@@ -44,23 +44,7 @@ locals {
 }
 
 terraform {
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
   required_version = "1.14.3"
-=======
-  required_version = "~>1.10.0"
->>>>>>> after updating
-=======
-  required_version = "~>1.10.0"
->>>>>>> after updating
-=======
-  required_version = "~>1.10.0"
->>>>>>> after updating
-=======
-  required_version = "~>1.10.0"
->>>>>>> after updating
 
   required_providers {
     aws = {
@@ -85,10 +69,6 @@ module "project_config" {
   source = "../project-config"
 }
 
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
 module "app_config" {
   source = "../api/app-config"
 }
@@ -102,15 +82,6 @@ module "network" {
   second_octet                            = module.project_config.network_configs[var.environment_name].second_octet
   has_external_non_aws_service            = local.has_external_non_aws_service
   enable_command_execution                = local.enable_command_execution
-=======
-module "network" {
-  source                       = "../modules/network/resources"
-  name                         = var.network_name
-  has_database                 = local.has_database
-  has_external_non_aws_service = local.has_external_non_aws_service
-  enable_command_execution     = local.enable_command_execution
-  enable_notifications         = local.enable_notifications
->>>>>>> after updating
 }
 
 module "dms_networking" {
@@ -119,26 +90,4 @@ module "dms_networking" {
   our_vpc_id                   = module.network.vpc_id
   our_cidr_block               = module.network.vpc_cidr
   grants_gov_oracle_cidr_block = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
-=======
-module "network" {
-=======
-module "network" {
->>>>>>> after updating
-=======
-module "network" {
->>>>>>> after updating
-  source                       = "../modules/network/resources"
-  name                         = var.network_name
-  has_database                 = local.has_database
-  has_external_non_aws_service = local.has_external_non_aws_service
-  enable_command_execution     = local.enable_command_execution
-  enable_notifications         = local.enable_notifications
-}
-
-module "domain" {
-  source              = "../modules/domain/resources"
-  name                = local.domain_config.hosted_zone
-  manage_dns          = local.domain_config.manage_dns
-  certificate_configs = local.domain_config.certificate_configs
->>>>>>> after updating
 }

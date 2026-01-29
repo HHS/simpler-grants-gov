@@ -1,4 +1,3 @@
-<<<<<<< before updating
 ##################################################
 # Constants
 ##################################################
@@ -64,10 +63,6 @@ endif
 
 export RUN_USER
 export RUN_UID
-=======
-.PHONY: \
-	release-build
->>>>>>> after updating
 
 release-build:
 	docker buildx build \
@@ -77,7 +72,6 @@ release-build:
 		--build-arg RUN_UID=$(RUN_UID) \
 		$(OPTS) \
 		.
-<<<<<<< before updating
 
 ##################################################
 # Local Development Environment Setup
@@ -397,5 +391,3 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
-=======
->>>>>>> after updating

@@ -123,6 +123,16 @@ variable "service_cpu" {
   default = 3
 }
 
+variable "service_memory" {
+  type    = number
+  default = 2048
+}
+
+variable "service_desired_instance_count" {
+  type    = number
+  default = 1
+}
+
 variable "search_data_volume_size" {
   type    = number
   default = 20

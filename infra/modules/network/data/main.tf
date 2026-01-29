@@ -43,8 +43,4 @@ data "aws_security_groups" "aws_services" {
   }
 }
 
-data "aws_wafv2_web_acl" "network" {
-  name  = module.interface.waf_acl_name
-  scope = "REGIONAL"
-}
 

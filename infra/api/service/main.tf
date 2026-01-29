@@ -1,4 +1,3 @@
-<<<<<<< before updating
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
@@ -28,8 +27,6 @@ data "aws_subnets" "public" {
   }
 }
 
-=======
->>>>>>> after updating
 locals {
   # The prefix is used to create uniquely named resources per terraform workspace, which
   # are needed in CI/CD for preview environments and tests.
@@ -51,7 +48,6 @@ locals {
 
   is_temporary = terraform.workspace != "default"
 
-<<<<<<< before updating
   # Include project name in bucket name since buckets need to be globally unique across AWS
   bucket_name = "${local.prefix}${module.project_config.project_name}-${module.app_config.app_name}-${var.environment_name}"
 
@@ -62,21 +58,11 @@ locals {
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
-=======
-  build_repository_config = module.app_config.build_repository_config
-  environment_config      = module.app_config.environment_configs[var.environment_name]
-  service_config          = local.environment_config.service_config
->>>>>>> after updating
-
-  service_name = "${local.prefix}${local.service_config.service_name}"
+  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
-<<<<<<< before updating
   required_version = "1.14.3"
-=======
-  required_version = "~>1.10.0"
->>>>>>> after updating
 
   required_providers {
     aws = {
@@ -105,7 +91,6 @@ module "app_config" {
   source = "../app-config"
 }
 
-<<<<<<< before updating
 data "aws_rds_cluster" "db_cluster" {
   count              = module.app_config.has_database ? 1 : 0
   cluster_identifier = local.database_config.cluster_name
@@ -169,11 +154,6 @@ module "service" {
   source           = "../../modules/service"
   service_name     = local.service_config.service_name
   environment_name = var.environment_name
-=======
-module "service" {
-  source       = "../../modules/service"
-  service_name = local.service_name
->>>>>>> after updating
 
   image_repository_arn = local.build_repository_config.repository_arn
   image_repository_url = local.build_repository_config.repository_url
@@ -183,20 +163,12 @@ module "service" {
   network_name = local.environment_config.network_name
   project_name = module.project_config.project_name
 
-  domain_name     = module.domain.domain_name
-  hosted_zone_id  = module.domain.hosted_zone_id
-  certificate_arn = module.domain.certificate_arn
-
-<<<<<<< before updating
   certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
   domain_name            = local.service_config.domain_name
   s3_cdn_domain_name     = local.service_config.s3_cdn_domain_name
   s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
 
   hosted_zone_id = null
-=======
-  enable_waf = module.app_config.enable_waf
->>>>>>> after updating
 
   # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
   enable_mtls_load_balancer = true
@@ -212,7 +184,6 @@ module "service" {
   min_capacity             = local.service_config.instance_scaling_min_capacity
   enable_autoscaling       = true
 
-<<<<<<< before updating
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
   file_upload_jobs     = local.service_config.file_upload_jobs
@@ -226,10 +197,6 @@ module "service" {
   enable_api_gateway         = true
   optional_extra_alb_domains = toset(lookup(local.service_config, "secondary_domain_names", []))
   optional_extra_alb_certs   = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
-=======
-  file_upload_jobs = local.service_config.file_upload_jobs
-  scheduled_jobs   = local.environment_config.scheduled_jobs
->>>>>>> after updating
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
@@ -279,7 +246,6 @@ module "service" {
       # storage_access = module.storage.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
-<<<<<<< before updating
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {},
     # OpenSearch IAM policy for query operations
@@ -290,16 +256,6 @@ module "service" {
 
   # OpenSearch ingest policy for migrator role (scheduled data loading jobs)
   opensearch_ingest_policy_arn = local.search_config != null ? data.aws_iam_policy.opensearch_ingest[0].arn : null
-=======
-      identity_provider_access = module.identity_provider_client[0].access_policy_arn,
-    } : {},
-    module.app_config.enable_notifications ? {
-      notifications_access = module.notifications[0].access_policy_arn,
-    } : {},
-  )
-
-  ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
->>>>>>> after updating
 
   is_temporary = local.is_temporary
 }

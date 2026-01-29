@@ -21,7 +21,3 @@ output "private_subnet_ids" {
 output "vpc_id" {
   value = data.aws_vpc.network.id
 }
-
-output "waf_arn" {
-  value = data.aws_wafv2_web_acl.network.arn
-}

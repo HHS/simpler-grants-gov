@@ -43,6 +43,10 @@ output "project_name" {
   value = local.project_name
 }
 
+output "aws_services_security_group_name_prefix" {
+  value = local.aws_services_security_group_name_prefix
+}
+
 output "system_notifications_config" {
   value = local.system_notifications_config
 }

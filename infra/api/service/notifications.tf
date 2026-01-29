@@ -1,6 +1,4 @@
 locals {
-  notifications_config = local.environment_config.notifications_config
-
   # If this is a temporary environment, re-use an existing email identity. Otherwise, create a new one.
   domain_identity_arn = local.notifications_config != null ? (
     !local.is_temporary ?

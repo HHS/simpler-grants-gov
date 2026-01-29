@@ -24,18 +24,8 @@ resource "aws_security_group" "alb" {
   }
 
   vpc_id = module.network.vpc_id
-<<<<<<< before updating
-<<<<<<< before updating
-<<<<<<< before updating
 
 }
-
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
-=======
->>>>>>> after updating
 
 resource "aws_security_group_rule" "http_ingress" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
@@ -136,7 +126,6 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-<<<<<<< before updating
   egress {
     description = "All TCP traffic outbound"
     from_port   = 80
@@ -144,11 +133,6 @@ resource "aws_security_group" "app" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-=======
-resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_service" {
-  security_group_id = module.network.aws_services_security_group_id
-  description       = "Allow inbound requests to VPC endpoints from role manager"
->>>>>>> after updating
 
   egress {
     description = "All TCP traffic outbound"
