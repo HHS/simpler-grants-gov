@@ -77,7 +77,7 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  await checkBox.waitFor({ state: 'visible', timeout: 15000 });
+  await checkBox.waitFor({ state: "visible", timeout: 15000 });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
 }
@@ -113,8 +113,10 @@ export async function clickAccordionWithTitle(
   page: Page,
   accordionTitle: string,
 ) {
-  const button = page.locator(`button.usa-accordion__button:has-text("${accordionTitle}")`);
-  await button.waitFor({ state: 'visible', timeout: 15000 });
+  const button = page.locator(
+    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+  );
+  await button.waitFor({ state: "visible", timeout: 15000 });
   await button.click();
 }
 
