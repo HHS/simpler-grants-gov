@@ -24,13 +24,13 @@ All community members are expected to adhere to our [Code of Conduct](CODE_OF_CO
 
 ## Community Guidelines
 
-When participating in the Simpler Grants open-source community conversations and spaces, we ask individuals to follow the following guidelines:
-
+- When participating in the Simpler Grants open source community conversations and spaces, we ask individuals to follow the following guidelines:
 - When joining a conversation for the first time, please introduce yourself by providing a brief intro that includes:
-  - your related organization (if applicable).
-  - your pronouns (optional).
-  - disclosure of any current or potential financial interest in this work.
-  - your superpower, and how you hope to use it for this project.
-- Embrace a culture of learning, and educate each other. Each person participating starts from a different point and with a different background. There are no dumb questions.
-- Be courteous, respectful, and welcoming. We encourage individuals to voice their opinions and provide contributions, and we will do our best to welcome and encourage individuals who may be struggling to participate. Likewise, we expect individuals to recognize when they may be unknowingly intimidating others from participating and to temporarily step back to allow everyone else to participate.
-- Contribute when joining synchronous conversations such as our community chats. Please don't feel the need to just sit back and observe while others talk!
+  - your related organization (if applicable)
+  - your pronouns, if you would like to share those
+  - disclosure of any current or potential financial interest in this work
+  - your superpower, and how you hope to use it for this project
+- Embrace a culture of learning, and educate each other. We are all entering this conversation from different starting points and with different backgrounds. There are no dumb questions.
+- Take space and give space. We strive to create an equitable environment in which all are welcome and able to participate. We hope individuals feel comfortable voicing their opinions and providing contributions and will do our best to recognize and make space for individuals who may be struggling to find space here. Likewise, we expect individuals to recognize when they are taking up significant space and take a step back to allow room for others.
+- Be present when joining synchronous conversations such as our community chat. Why be here if you're not going to be here?
+- Be respectful.
