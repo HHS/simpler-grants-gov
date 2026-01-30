@@ -109,6 +109,11 @@ variable "service_memory" {
   default = 512
 }
 
+variable "service_desired_instance_count" {
+  type    = number
+  default = 1
+}
+
 variable "instance_desired_instance_count" {
   type    = number
   default = 1
