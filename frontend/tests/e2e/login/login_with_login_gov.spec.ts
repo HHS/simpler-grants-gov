@@ -162,7 +162,14 @@ test.describe("@login Login.gov tests", () => {
     });
 
     // --- Step 6: Generate OTP and submit ---
-    const oneTimeCode: string = authenticator.generate(loginAuthKey);
+    type AuthenticatorClient = {
+      generate: (secret: string) => string;
+    };
+
+    const authenticatorClient: AuthenticatorClient =
+      authenticator as unknown as AuthenticatorClient;
+
+    const oneTimeCode: string = authenticatorClient.generate(loginAuthKey);
     await mfaInput.fill(oneTimeCode);
 
     const mfaSubmitButton: Locator = page

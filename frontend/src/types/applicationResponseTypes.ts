@@ -61,7 +61,7 @@ export interface ApplicationDetail {
   application_status: string;
   competition: Competition;
   form_validation_warnings?: FormValidationWarnings;
-  organization: Organization;
+  organization?: Organization | null;
   users: {
     email: string;
     user_id: string;
@@ -142,3 +142,11 @@ export interface ApplicationDetailApiResponse extends APIResponse {
 export interface ApplicationHistoryApiResponse extends APIResponse {
   data: ApplicationHistory[];
 }
+
+export type StartApplicationFetcherOptions = {
+  applicationName: string;
+  competitionId: string;
+  token: string;
+  organizationId?: string;
+  intendsToAddOrganization?: boolean;
+};
