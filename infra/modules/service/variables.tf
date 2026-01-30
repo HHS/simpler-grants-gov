@@ -287,7 +287,17 @@ variable "scheduled_jobs" {
       Name  = string
       Value = string
     })), [])
+    # Role override: "opensearch-write" uses the opensearch-write role, "migrator" uses the migrator role.
+    # If not specified or null, defaults to the app role.
+    role_override = optional(string, null)
   }))
+  validation {
+    condition = alltrue([
+      for job_name, job_config in var.scheduled_jobs :
+      job_config.role_override == null || contains(["opensearch-write", "migrator"], job_config.role_override)
+    ])
+    error_message = "role_override must be null, \"opensearch-write\", or \"migrator\". Check for typos (e.g., use hyphen not underscore)."
+  }
   default = {}
 }
 

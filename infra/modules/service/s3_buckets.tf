@@ -44,7 +44,8 @@ data "aws_iam_policy_document" "s3_buckets_put_access" {
       type = "AWS"
       identifiers = concat(
         [aws_iam_role.app_service.arn],
-        var.db_vars != null ? [aws_iam_role.migrator_task[0].arn] : []
+        var.db_vars != null ? [aws_iam_role.migrator_task[0].arn] : [],
+        length(aws_iam_role.opensearch_write) > 0 ? [aws_iam_role.opensearch_write[0].arn] : []
       )
     }
   }
