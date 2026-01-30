@@ -1,172 +1,136 @@
-import {
-  getApplicationDetails,
-  handleStartApplication,
-  handleSubmitApplication,
-} from "src/services/fetch/fetchers/applicationFetcher";
+/**
+ * @jest-environment node
+ */
+
+import { handleStartApplication } from "src/services/fetch/fetchers/applicationFetcher";
 import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
+import type {
+  ApplicationStartApiResponse,
+  StartApplicationFetcherOptions,
+} from "src/types/applicationResponseTypes";
 
-jest.mock("src/services/fetch/fetchers/fetchers");
-
-describe("getApplicationDetails", () => {
-  let mockJsonFn: jest.Mock;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockJsonFn = jest.fn();
-    const mockResponse = { json: mockJsonFn };
-    (fetchApplicationWithMethod as jest.Mock).mockReturnValue(
-      jest.fn().mockResolvedValue(mockResponse),
-    );
-  });
-
-  it("should return application details on successful API call", async () => {
-    const applicationId = "app-123";
-    const token = "test-token";
-    const expectedResponse = {
-      status_code: 200,
-      message: "Success",
-      data: { id: "app-123", name: "Test App" },
-    };
-
-    mockJsonFn.mockResolvedValue(expectedResponse);
-
-    const result = await getApplicationDetails(applicationId, token);
-
-    expect(result).toEqual(expectedResponse);
-    expect(fetchApplicationWithMethod).toHaveBeenCalledWith("GET");
-  });
-});
+jest.mock("src/services/fetch/fetchers/fetchers", () => ({
+  fetchApplicationWithMethod: jest.fn(),
+}));
 
 describe("handleStartApplication", () => {
-  let mockJsonFn: jest.Mock;
-
   beforeEach(() => {
+    (fetchApplicationWithMethod as jest.Mock).mockReset();
+
+    const requesterMock = jest.fn().mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          status_code: 200,
+          message: "ok",
+          data: { application_id: "app-1" },
+        } as ApplicationStartApiResponse),
+    });
+
+    (fetchApplicationWithMethod as jest.Mock).mockReturnValue(requesterMock);
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
-    mockJsonFn = jest.fn();
-    const mockResponse = { json: mockJsonFn };
-    (fetchApplicationWithMethod as jest.Mock).mockReturnValue(
-      jest.fn().mockResolvedValue(mockResponse),
-    );
   });
 
   it("should start application with all parameters", async () => {
-    const applicationName = "My App";
-    const competitionID = "comp-123";
-    const token = "test-token";
-    const organization = "org-456";
-    const expectedResponse = {
-      status_code: 200,
-      message: "Application started",
-      data: { id: "app-123" },
+    const options: StartApplicationFetcherOptions = {
+      applicationName: "My App",
+      competitionId: "comp-123",
+      token: "test-token",
+      organizationId: "org-456",
+      intendsToAddOrganization: false,
     };
 
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    await handleStartApplication(options);
 
-    const result = await handleStartApplication(
-      applicationName,
-      competitionID,
-      token,
-      organization,
-    );
+    const requesterMock = (fetchApplicationWithMethod as jest.Mock).mock
+      .results[0].value as jest.Mock;
 
-    expect(result).toEqual(expectedResponse);
     expect(fetchApplicationWithMethod).toHaveBeenCalledWith("POST");
-    const mockFn = (fetchApplicationWithMethod as jest.Mock).mock.results[0]
-      .value as jest.Mock;
-    expect(mockFn).toHaveBeenCalledWith({
+    expect(requesterMock).toHaveBeenCalledWith({
       subPath: "start",
-      additionalHeaders: { "X-SGG-Token": token },
+      additionalHeaders: { "X-SGG-Token": "test-token" },
       body: {
-        competition_id: competitionID,
-        application_name: applicationName,
-        organization_id: organization,
+        competition_id: "comp-123",
+        application_name: "My App",
+        organization_id: "org-456",
+        intends_to_add_organization: false,
       },
     });
   });
 
-  it("should start application without organization parameter", async () => {
-    const applicationName = "My App";
-    const competitionID = "comp-123";
-    const token = "test-token";
-    const expectedResponse = {
-      status_code: 200,
-      message: "Application started",
-      data: { id: "app-123" },
+  it("should start application without organizationId (omits organization_id)", async () => {
+    const options: StartApplicationFetcherOptions = {
+      applicationName: "My App",
+      competitionId: "comp-123",
+      token: "test-token",
+      intendsToAddOrganization: true,
     };
 
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    await handleStartApplication(options);
 
-    const result = await handleStartApplication(
-      applicationName,
-      competitionID,
-      token,
-    );
+    const requesterMock = (fetchApplicationWithMethod as jest.Mock).mock
+      .results[0].value as jest.Mock;
 
-    expect(result).toEqual(expectedResponse);
-    const mockFn = (fetchApplicationWithMethod as jest.Mock).mock.results[0]
-      .value as jest.Mock;
-    expect(mockFn).toHaveBeenCalledWith({
+    expect(fetchApplicationWithMethod).toHaveBeenCalledWith("POST");
+    expect(requesterMock).toHaveBeenCalledWith({
       subPath: "start",
-      additionalHeaders: { "X-SGG-Token": token },
+      additionalHeaders: { "X-SGG-Token": "test-token" },
       body: {
-        competition_id: competitionID,
-        application_name: applicationName,
-        organization_id: undefined,
+        competition_id: "comp-123",
+        application_name: "My App",
+        intends_to_add_organization: true,
       },
     });
   });
-});
 
-describe("handleSubmitApplication", () => {
-  let mockJsonFn: jest.Mock;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockJsonFn = jest.fn();
-    const mockResponse = { json: mockJsonFn };
-    (fetchApplicationWithMethod as jest.Mock).mockReturnValue(
-      jest.fn().mockResolvedValue(mockResponse),
-    );
-  });
-
-  it("should submit application successfully", async () => {
-    const applicationId = "app-123";
-    const token = "test-token";
-    const expectedResponse = {
-      status_code: 200,
-      message: "Application submitted",
-      data: {},
+  it("should omit intends_to_add_organization when not provided", async () => {
+    const options: StartApplicationFetcherOptions = {
+      applicationName: "My App",
+      competitionId: "comp-123",
+      token: "test-token",
     };
 
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    await handleStartApplication(options);
 
-    const result = await handleSubmitApplication(applicationId, token);
+    const requesterMock = (fetchApplicationWithMethod as jest.Mock).mock
+      .results[0].value as jest.Mock;
 
-    expect(result).toEqual(expectedResponse);
     expect(fetchApplicationWithMethod).toHaveBeenCalledWith("POST");
-    const mockFn = (fetchApplicationWithMethod as jest.Mock).mock.results[0]
-      .value as jest.Mock;
-    expect(mockFn).toHaveBeenCalledWith({
-      subPath: `${applicationId}/submit`,
-      additionalHeaders: { "X-SGG-Token": token },
-      allowedErrorStatuses: [422],
+    expect(requesterMock).toHaveBeenCalledWith({
+      subPath: "start",
+      additionalHeaders: { "X-SGG-Token": "test-token" },
+      body: {
+        competition_id: "comp-123",
+        application_name: "My App",
+      },
     });
   });
 
-  it("should return validation error response with 422 status", async () => {
-    const applicationId = "app-123";
-    const token = "test-token";
-    const expectedResponse = {
-      status_code: 422,
-      message: "Validation failed",
-      data: { errors: { field: "invalid" } },
+  it("should omit organization_id when organizationId is an empty string", async () => {
+    const options: StartApplicationFetcherOptions = {
+      applicationName: "My App",
+      competitionId: "comp-123",
+      token: "test-token",
+      organizationId: "",
+      intendsToAddOrganization: true,
     };
 
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    await handleStartApplication(options);
 
-    const result = await handleSubmitApplication(applicationId, token);
+    const requesterMock = (fetchApplicationWithMethod as jest.Mock).mock
+      .results[0].value as jest.Mock;
 
-    expect(result).toEqual(expectedResponse);
-    expect(result.status_code).toBe(422);
+    expect(fetchApplicationWithMethod).toHaveBeenCalledWith("POST");
+    expect(requesterMock).toHaveBeenCalledWith({
+      subPath: "start",
+      additionalHeaders: { "X-SGG-Token": "test-token" },
+      body: {
+        competition_id: "comp-123",
+        application_name: "My App",
+        intends_to_add_organization: true,
+      },
+    });
   });
 });

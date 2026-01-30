@@ -7,30 +7,45 @@ import {
   ApplicationResponseDetail,
   ApplicationStartApiResponse,
   ApplicationSubmitApiResponse,
+  StartApplicationFetcherOptions,
 } from "src/types/applicationResponseTypes";
 
 /**
  * Start Application
  */
 
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
 export const handleStartApplication = async (
-  applicationName: string,
-  competitionID: string,
-  token: string,
-  organization?: string,
+  options: StartApplicationFetcherOptions,
 ): Promise<ApplicationStartApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
+  const headers = {
+    "X-SGG-Token": options.token,
   };
 
+  const body: {
+    competition_id: string;
+    application_name: string | null;
+    organization_id?: string | null;
+    intends_to_add_organization?: boolean | null;
+  } = {
+    competition_id: options.competitionId,
+    application_name: options.applicationName,
+  };
+
+  if (isNonEmptyString(options.organizationId)) {
+    body.organization_id = options.organizationId;
+  }
+
+  if (typeof options.intendsToAddOrganization === "boolean") {
+    body.intends_to_add_organization = options.intendsToAddOrganization;
+  }
+
   const response = await fetchApplicationWithMethod("POST")({
-    subPath: `start`,
-    additionalHeaders: ssgToken,
-    body: {
-      competition_id: competitionID,
-      application_name: applicationName,
-      organization_id: organization,
-    },
+    subPath: "start",
+    additionalHeaders: headers,
+    body,
   });
 
   return (await response.json()) as ApplicationStartApiResponse;

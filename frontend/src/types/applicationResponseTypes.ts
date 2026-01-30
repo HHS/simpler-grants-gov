@@ -142,3 +142,11 @@ export interface ApplicationDetailApiResponse extends APIResponse {
 export interface ApplicationHistoryApiResponse extends APIResponse {
   data: ApplicationHistory[];
 }
+
+export type StartApplicationFetcherOptions = {
+  applicationName: string;
+  competitionId: string;
+  token: string;
+  organizationId?: string;
+  intendsToAddOrganization?: boolean;
+};

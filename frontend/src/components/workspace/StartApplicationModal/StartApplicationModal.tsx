@@ -1,10 +1,12 @@
+"use client";
+
 import { useClientFetch } from "src/hooks/useClientFetch";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { RefObject, useCallback, useState } from "react";
+import React, { RefObject, useCallback, useState } from "react";
 import {
   Button,
   ErrorMessage,
@@ -15,12 +17,22 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
-import { IneligibleApplicationStart } from "./IneligibleStartApplicationModal";
 import { StartApplicationDescription } from "./StartApplicationDescription";
 import {
   StartApplicationNameInput,
   StartApplicationOrganizationInput,
 } from "./StartApplicationInputs";
+
+type StartApplicationClientRequestBody = {
+  applicationName: string;
+  competitionId: string;
+  organizationId?: string;
+  intendsToAddOrganization?: boolean;
+};
+
+type ErrorWithCause = {
+  cause?: unknown;
+};
 
 export const StartApplicationModal = ({
   opportunityTitle,
@@ -41,112 +53,111 @@ export const StartApplicationModal = ({
 }) => {
   const t = useTranslations("OpportunityListing.startApplicationModal");
   const router = useRouter();
+
   const { clientFetch } = useClientFetch<{ applicationId: string }>(
     "Error starting application",
   );
 
-  const [nameValidationError, setNameValidationError] = useState<string>();
-  const [orgValidationError, setOrgValidationError] = useState<string>();
-  const [savedApplicationName, setSavedApplicationName] = useState<string>();
-  const [selectedOrganization, setSelectedOrganization] = useState<string>();
-  const [error, setError] = useState<string>();
-  const [updating, setUpdating] = useState<boolean>();
+  const [nameValidationError, setNameValidationError] = useState<string>("");
+  const [savedApplicationName, setSavedApplicationName] = useState<string>("");
+  const [selectedOrganization, setSelectedOrganization] = useState<string>("");
+  const [requestErrorMessage, setRequestErrorMessage] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const validateSubmission = useCallback((): boolean => {
-    let valid = !!token;
+    let isValid = Boolean(token);
 
-    setOrgValidationError("");
     setNameValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
-      valid = false;
+      isValid = false;
     }
-    if (!applicantTypes.includes("individual") && !selectedOrganization) {
-      setOrgValidationError(t("fields.organizationSelect.validationError"));
-      valid = false;
-    }
-    return valid;
-  }, [token, savedApplicationName, applicantTypes, selectedOrganization, t]);
+
+    // Organization selection is optional even for org-only competitions.
+    // Users can start as an individual and transfer ownership later.
+    return isValid;
+  }, [token, savedApplicationName, t]);
 
   const handleSubmit = useCallback(() => {
-    const valid = validateSubmission();
-    if (!valid) {
+    const isValid = validateSubmission();
+    if (!isValid) {
       return;
     }
-    setUpdating(true);
+
+    setIsSubmitting(true);
+
+    const requestBody: StartApplicationClientRequestBody = {
+      applicationName: savedApplicationName,
+      competitionId,
+    };
+
+    if (selectedOrganization) {
+      requestBody.organizationId = selectedOrganization;
+      requestBody.intendsToAddOrganization = false;
+    } else {
+      requestBody.intendsToAddOrganization = true;
+    }
+
     clientFetch("/api/applications/start", {
       method: "POST",
-      body: JSON.stringify({
-        applicationName: savedApplicationName,
-        competitionId,
-        organization: selectedOrganization,
-      }),
+      body: JSON.stringify(requestBody),
     })
       .then((data) => {
-        const { applicationId } = data;
-        router.push(`/applications/${applicationId}`);
+        router.push(`/applications/${data.applicationId}`);
       })
-      .catch((error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.cause === "401") {
-          setError(t("loggedOut"));
+      .catch((e: unknown) => {
+        const maybeErrorWithCause = e as ErrorWithCause;
+        if (maybeErrorWithCause.cause === "401") {
+          setRequestErrorMessage(t("loggedOut"));
         } else {
-          setError(t("error"));
+          setRequestErrorMessage(t("error"));
         }
-        console.error(error);
       })
       .finally(() => {
-        setUpdating(false);
+        setIsSubmitting(false);
       });
   }, [
+    clientFetch,
     competitionId,
     router,
     savedApplicationName,
-    t,
     selectedOrganization,
+    t,
     validateSubmission,
-    clientFetch,
   ]);
 
   const onClose = useCallback(() => {
-    setError("");
-    setUpdating(false);
+    setRequestErrorMessage("");
+    setIsSubmitting(false);
     setNameValidationError("");
-    setOrgValidationError("");
     setSavedApplicationName("");
+    setSelectedOrganization("");
   }, []);
 
-  const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSavedApplicationName(e.target.value);
-  }, []);
-
-  const onOrganizationChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedOrganization(e.target.value);
+  const onNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSavedApplicationName(event.target.value);
     },
     [],
   );
-
-  if (!organizations.length && !applicantTypes.includes("individual")) {
-    return (
-      <IneligibleApplicationStart
-        modalRef={modalRef}
-        cancelText={t("cancelButtonText")}
-        onClose={onClose}
-        organizations={organizations}
-        applicantTypes={applicantTypes}
-      />
-    );
-  }
+  const onOrganizationChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedOrganization(event.target.value);
+    },
+    [],
+  );
+  const hasAnyError = Boolean(nameValidationError || requestErrorMessage);
   return (
     <SimplerModal
       modalRef={modalRef}
       className="text-wrap maxw-tablet-lg font-sans-xs"
       modalId={"start-application"}
       titleText={t("title")}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") handleSubmit();
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          handleSubmit();
+        }
       }}
       onClose={onClose}
     >
@@ -158,32 +169,33 @@ export const StartApplicationModal = ({
         {t("applyingFor")} {opportunityTitle}
       </p>
       <p className="font-sans-3xs">{t("requiredText")}</p>
-      <FormGroup
-        error={!!(nameValidationError || orgValidationError || error)}
-        className="margin-top-1"
-      >
-        {applicantTypes.includes("organization") && (
+      <FormGroup error={hasAnyError} className="margin-top-1">
+        {applicantTypes.includes("organization") ? (
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
-            validationError={orgValidationError}
+            // Organization selection is optional at application start.
+            // Validation is deferred until submission on the apply page.
+            validationError={""}
             organizations={organizations}
             selectedOrganization={selectedOrganization}
           />
-        )}
+        ) : null}
         <StartApplicationNameInput
           validationError={nameValidationError}
           onNameChange={onNameChange}
         />
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {requestErrorMessage ? (
+          <ErrorMessage>{requestErrorMessage}</ErrorMessage>
+        ) : null}
       </FormGroup>
       <ModalFooter>
         <Button
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={!!loading}
+          disabled={Boolean(loading) || isSubmitting}
         >
-          {loading || updating ? "Loading..." : t("saveButtonText")}
+          {loading || isSubmitting ? "Loading..." : t("saveButtonText")}
         </Button>
         <ModalToggleButton
           modalRef={modalRef}
