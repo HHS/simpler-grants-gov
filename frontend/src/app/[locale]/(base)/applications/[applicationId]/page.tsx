@@ -7,6 +7,7 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getApplicationDetails,
   getApplicationHistory,
+  getLatestApplicationSubmission,
 } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { Attachment } from "src/types/attachmentTypes";
@@ -103,6 +104,12 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     );
   }
 
+  const latestApplicationSubmission = await getLatestApplicationSubmission(
+    userSession?.token,
+    applicationId,
+    details.application_status,
+  );
+
   return (
     <>
       <GridContainer>
@@ -112,6 +119,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           opportunity={opportunity}
           attachments={attachments}
           applicationHistory={historyDetails}
+          latestApplicationSubmission={latestApplicationSubmission}
         />
       </GridContainer>
     </>

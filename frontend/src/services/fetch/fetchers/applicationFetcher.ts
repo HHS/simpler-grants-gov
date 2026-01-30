@@ -1,4 +1,6 @@
 import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { ApplicationSubmissionsRequestBody } from "src/types/application/applicationSubmissionRequestTypes";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationAttachmentUploadResponse,
   ApplicationDetailApiResponse,
@@ -6,7 +8,9 @@ import {
   ApplicationHistoryApiResponse,
   ApplicationResponseDetail,
   ApplicationStartApiResponse,
+  ApplicationSubmissionsApiResponse,
   ApplicationSubmitApiResponse,
+  Status,
 } from "src/types/applicationResponseTypes";
 
 /**
@@ -56,6 +60,61 @@ export const handleSubmitApplication = async (
   });
 
   return (await response.json()) as ApplicationSubmitApiResponse;
+};
+
+export const getApplicationSubmissions = async (
+  applicationId: string,
+  token: string,
+  body: ApplicationSubmissionsRequestBody,
+): Promise<ApplicationSubmissionsApiResponse> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const response = await fetchApplicationWithMethod("POST")({
+    body: { ...body },
+    subPath: `${applicationId}/submissions`,
+    additionalHeaders: ssgToken,
+  });
+  return (await response.json()) as ApplicationSubmissionsApiResponse;
+};
+
+export const getLatestApplicationSubmission = async (
+  token: string,
+  applicationId: string,
+  applicationStatus: string,
+): Promise<ApplicationSubmission | null> => {
+  // Submissions are only available if the application is in the ACCEPTED status.
+  if (applicationStatus !== Status.ACCEPTED) return null;
+
+  // Request body to list endpoint to get latest app submission.
+  const body: ApplicationSubmissionsRequestBody = {
+    pagination: {
+      page_offset: 1,
+      page_size: 1,
+      sort_order: [{ order_by: "created_at", sort_direction: "descending" }],
+    },
+  };
+
+  let submissionsResponse: ApplicationSubmissionsApiResponse | null = null;
+  try {
+    submissionsResponse = await getApplicationSubmissions(
+      applicationId,
+      token,
+      body,
+    );
+    if (submissionsResponse.data.length !== 1) {
+      console.error(
+        `Expected 1 application submission but received ${submissionsResponse.data.length}`,
+      );
+      return null;
+    }
+    return submissionsResponse.data[0];
+  } catch (e) {
+    console.error(
+      `Error retrieving latest application submission for (${applicationId})`,
+    );
+  }
+  return null;
 };
 
 /**

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 
@@ -26,6 +27,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
   it("shows Edit filing name button when application status is in_progress", () => {
@@ -88,6 +90,7 @@ describe("InformationCard - No longer accepting applications message", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
   it("shows the message when the competition is CLOSED (is_open=false)", () => {
@@ -138,6 +141,7 @@ describe("InformationCard - Submit button visibility", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
   it("shows the Submit button when is_open=true and application not submitted", () => {
@@ -197,5 +201,78 @@ describe("InformationCard - Submit button visibility", () => {
 
     const button = screen.getByRole("button", { name: /loading/i });
     expect(button).toBeDisabled();
+  });
+});
+
+describe("InformationCard - Download submission button visibility and content", () => {
+  const submissionButtonTestId = "application-submission-download";
+  const submissionMessageTestId = "application-submission-download-message";
+  const baseProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
+  };
+
+  it("shows the download submission button when status is accepted", () => {
+    const acceptedApplication = {
+      ...mockApplicationDetails,
+      application_status: Status.ACCEPTED,
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={acceptedApplication}
+      />,
+    );
+
+    expect(screen.queryByTestId(submissionButtonTestId)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(submissionMessageTestId),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows download processing message if in submitted status", () => {
+    const submittedApplication = {
+      ...mockApplicationDetails,
+      application_status: Status.SUBMITTED,
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={submittedApplication}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId(submissionButtonTestId),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId(submissionMessageTestId)).toBeInTheDocument();
+  });
+
+  it("shows does not render if application is in in_progress status", () => {
+    const inProgressApplication = {
+      ...mockApplicationDetails,
+      application_status: Status.IN_PROGRESS,
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={inProgressApplication}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId(submissionButtonTestId),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(submissionMessageTestId),
+    ).not.toBeInTheDocument();
   });
 });
