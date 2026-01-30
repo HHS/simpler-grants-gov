@@ -299,11 +299,62 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
+# Build custom competitions for 8037 testing
+def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
+    logger.info("Creating 8037 custom opportunities and competitions")
+    # Open to both orgs and individuals
+    both_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="TEST-BR-8037-IOU-OT01",
+        opportunity__opportunity_number="TEST-BR-8037-IOU-ON01",
+        competition_title="TEST-BR-8037-IOU-CT01",
+        competition_forms=[],
+        open_to_applicants=[
+            CompetitionOpenToApplicant.ORGANIZATION,
+            CompetitionOpenToApplicant.INDIVIDUAL,
+        ],
+        with_instruction=True,
+    )
+    # Only open to organizations
+    org_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="TEST-BR-8037-OU-OT01",
+        opportunity__opportunity_number="TEST-BR-8037-OU-ON01",
+        competition_title="TEST-BR-8037-OU-CT01",
+        competition_forms=[],
+        open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+        with_instruction=True,
+    )
+    # Only open to individuals
+    ind_competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="TEST-BR-8037-IT-OT01",
+        opportunity__opportunity_number="TEST-BR-8037-IU-ON01",
+        competition_title="TEST-BR-8037-IU-CT01",
+        competition_forms=[],
+        open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+        with_instruction=True,
+    )
+
+    # Add forms to each competition
+    for competition, opp_num, comp_title in [
+        (both_competition, "TEST-BR-8037-IOU-ON01", "TEST-BR-8037-IOU-CT01"),
+        (org_competition, "TEST-BR-8037-OU-ON01", "TEST-BR-8037-OU-CT01"),
+        (ind_competition, "TEST-BR-8037-IU-ON01", "TEST-BR-8037-IU-CT01"),
+    ]:
+        factories.CompetitionFormFactory.create(
+            competition=competition, form=forms["SF424B"], is_required=True
+        )
+        factories.CompetitionFormFactory.create(
+            competition=competition, form=forms["SFLLL_2_0"], is_required=False
+        )
+        logger.info(
+            f"Created 8037 competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
+        )
+
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
     logger.info("Creating competitions")
     _build_pilot_competition(forms_map)
     _build_individual_only_competition(forms_map)
     _build_organization_only_competition(forms_map)
+    _build_8037_custom_competitions(forms_map)
 
     forms = list(forms_map.values())
 
