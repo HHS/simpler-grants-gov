@@ -161,6 +161,10 @@ export const performSignIn = async (page: Page, project: FullProject) => {
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   await menuOpener.click();
+  const nav = page.locator(".usa-nav");
+  const overlay = page.locator(".usa-overlay");
+  await expect(nav).toHaveClass(/is-visible/, { timeout: 10000 });
+  await expect(overlay).toBeVisible({ timeout: 10000 });
   return menuOpener;
 };
 
