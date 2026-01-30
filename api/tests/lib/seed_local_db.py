@@ -69,6 +69,16 @@ def _build_opportunities(
             size=2, agency_code="ARCHIVED", is_archived_non_forecast_summary=True
         )
 
+        # hardcoded id for e2e usage
+        # Check if it already exists before creating to allow running seed multiple times
+        e2e_opportunity_id = uuid.UUID("6a483cd8-9169-418a-8dfb-60fa6e6f51e5")
+        existing_e2e_opportunity = db_session.get(Opportunity, e2e_opportunity_id)
+
+        if not existing_e2e_opportunity:
+            factories.OpportunityFactory.create(
+                has_long_descriptions=True, opportunity_id=e2e_opportunity_id
+            )
+
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
             size=5, all_fields_null=True

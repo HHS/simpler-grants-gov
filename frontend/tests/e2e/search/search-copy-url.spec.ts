@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
 
 import { fillSearchInputAndSubmit } from "./searchSpecUtil";
+
+const { baseUrl } = playwrightEnv;
 
 test("should copy search query URL to clipboard", async ({ page }, {
   project,
@@ -40,6 +43,6 @@ test("should copy search query URL to clipboard", async ({ page }, {
   await searchInput.press("ControlOrMeta+V");
 
   await expect(searchInput).toHaveValue(
-    "http://127.0.0.1:3000/search?query=education+grants",
+    `${baseUrl}/search?query=education+grants`,
   );
 });
