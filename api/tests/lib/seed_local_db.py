@@ -349,6 +349,7 @@ def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
             f"Created 8037 competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
 
+
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
     logger.info("Creating competitions")
     _build_pilot_competition(forms_map)
