@@ -4,7 +4,7 @@
 
 ### Deploying Every Service
 
-This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
+This series of commands will deploy every non-prod service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
 
 ```bash
 terraform -chdir="infra/api/service" init -backend-config="dev.s3.tfbackend" -reconfigure

@@ -59,16 +59,6 @@ class MultiHttpTokenAuthSimpler(MultiAuth):
 # Define the multi auth that supports
 # * User JWT auth
 # * API Key Auth
-#
-# Note that the order defined matters - earlier ones will take precedence in
-# the event a user provides us with multiple auth approaches at once, only the first
-# relevant one will be used
-jwt_or_key_multi_auth = MultiHttpTokenAuth(api_jwt_auth, api_key_auth)
-
-
-# Define the multi auth that supports
-# * User JWT auth
-# * API Key Auth
 # * Internal JWT auth
 #
 # This is specifically for application endpoints that need to support internal services
@@ -104,11 +94,6 @@ def _get_security_requirement(schemes: Sequence[str | None]) -> list[str | dict[
         list[str | dict[str, list[Any]]], [{scheme: []} for scheme in schemes if scheme is not None]
     )
 
-
-# List of security scheme names
-jwt_or_key_security_schemes = _get_security_requirement(
-    [api_jwt_auth.security_scheme_name, api_key_auth.security_scheme_name]
-)
 
 # List of security scheme names for application endpoints
 jwt_key_or_internal_security_schemes = _get_security_requirement(

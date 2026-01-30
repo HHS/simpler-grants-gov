@@ -27,13 +27,8 @@ import {
   shapeFormData,
 } from "src/components/applyForm/utils";
 
-const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
 const mockExtricateConditionalValidationRules = jest.fn();
-
-jest.mock("@apidevtools/json-schema-ref-parser", () => ({
-  dereference: () => mockDereference() as unknown,
-}));
 
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,
@@ -488,23 +483,8 @@ describe("getFieldNameForHtml", () => {
 
 describe("processFormSchema", () => {
   beforeEach(() => {
-    mockDereference.mockResolvedValue({
-      others: {
-        just: "for fun",
-      },
-      properties: {
-        dereferenced: "stuff",
-        allOf: "things",
-      },
-    });
-    mockMergeAllOf.mockImplementation(
-      (processMe: { properties?: { allOf: unknown } }): unknown => {
-        if (processMe.properties) {
-          delete processMe.properties.allOf;
-        }
-        return processMe;
-      },
-    );
+    mockMergeAllOf.mockImplementation((input: unknown) => input);
+
     mockExtricateConditionalValidationRules.mockImplementation(
       (properties: RJSFSchema) => ({
         propertiesWithoutComplexConditionals: properties,
@@ -512,34 +492,87 @@ describe("processFormSchema", () => {
       }),
     );
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it("calls the dereference function", async () => {
-    await processFormSchema({});
-    expect(mockDereference).toHaveBeenCalled();
-  });
-  it("calls allOf merge function", async () => {
-    await processFormSchema({ properties: {} });
-    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
-  });
-  it("calls mockExtricateConditionalValidationRules function", async () => {
-    await processFormSchema({ properties: {} });
+
+  it("calls extricateConditionalValidationRules with formSchema.properties", () => {
+    const properties: NonNullable<RJSFSchema["properties"]> = {
+      foo: { type: "string" },
+    };
+
+    processFormSchema({ properties });
+
     expect(mockExtricateConditionalValidationRules).toHaveBeenCalledTimes(1);
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledWith(
+      properties,
+    );
   });
-  it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
-    const processed = await processFormSchema({});
-    expect(processed.formSchema).toEqual({
-      others: {
-        just: "for fun",
-      },
+
+  it("defaults to empty properties when formSchema.properties is undefined", () => {
+    processFormSchema({});
+
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledTimes(1);
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledWith({});
+  });
+
+  it("calls mergeAllOf with the properties returned from extricateConditionalValidationRules", () => {
+    const propertiesWithoutComplexConditionals: NonNullable<
+      RJSFSchema["properties"]
+    > = {
+      keepMe: { type: "string" },
+      allOf: { type: "string" },
+    };
+
+    mockExtricateConditionalValidationRules.mockReturnValue({
+      propertiesWithoutComplexConditionals:
+        propertiesWithoutComplexConditionals,
+      conditionalValidationRules: { path: [{ rule: "something " }] },
+    });
+
+    processFormSchema({ properties: { ignored: { type: "string" } } });
+
+    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
+    expect(mockMergeAllOf).toHaveBeenCalledWith({
+      properties: propertiesWithoutComplexConditionals,
+    });
+  });
+
+  it("returns the expected combination of original schema and merged properties", () => {
+    mockMergeAllOf.mockImplementation((input: unknown) => {
+      const typedInput = input as { properties?: Record<string, unknown> };
+      const copiedProperties = { ...(typedInput.properties ?? {}) };
+      delete copiedProperties.allOf;
+      return { properties: copiedProperties };
+    });
+
+    const processed = processFormSchema({
+      others: { just: "for fun" },
       properties: {
-        dereferenced: "stuff",
+        dereferenced: { type: "string" },
+        allOf: { type: "string" },
       },
     });
+
+    expect(processed.formSchema).toEqual({
+      others: { just: "for fun" },
+      properties: {
+        dereferenced: { type: "string" },
+      },
+    });
+
     expect(processed.conditionalValidationRules).toEqual({
       path: [{ rule: "something " }],
     });
+  });
+
+  it("rethrows if a processor throws", () => {
+    mockExtricateConditionalValidationRules.mockImplementation(() => {
+      throw new Error("boom");
+    });
+
+    expect(() => processFormSchema({ properties: {} })).toThrow("boom");
   });
 });
 
