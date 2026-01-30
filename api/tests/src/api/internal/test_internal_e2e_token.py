@@ -20,7 +20,6 @@ def setup_e2e_privileges(db_session, api_key_value, has_privilege=True):
 
 def test_get_e2e_token_success(client, db_session, enable_factory_create, monkeypatch):
     """Test successful token retrieval in a lower environment"""
-    monkeypatch.setenv("ENVIRONMENT", "local")
     api_key = "privileged-e2e-key"
     setup_e2e_privileges(db_session, api_key, has_privilege=True)
 
@@ -35,7 +34,6 @@ def test_get_e2e_token_success(client, db_session, enable_factory_create, monkey
 
 def test_get_e2e_token_forbidden(client, db_session, enable_factory_create, monkeypatch):
     """Test that a valid key without the specific privilege returns 403"""
-    monkeypatch.setenv("ENVIRONMENT", "local")
     api_key = "unprivileged-key"
     setup_e2e_privileges(db_session, api_key, has_privilege=False)
 
@@ -55,7 +53,6 @@ def test_get_e2e_token_unauthorized(client, enable_factory_create):
 
 def test_get_e2e_token_production_guard_403(client, db_session, enable_factory_create, monkeypatch):
     """Test that the endpoint returns a 403 in production, even with valid auth"""
-    monkeypatch.setenv("ENVIRONMENT", "production")
     api_key = "prod-test-key"
     setup_e2e_privileges(db_session, api_key, has_privilege=True)
 

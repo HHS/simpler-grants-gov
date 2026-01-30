@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 @internal_blueprint.put("/roles")
 @internal_blueprint.input(internal_schema.InternalRoleAssignmentRequestSchema, location="json")
 @internal_blueprint.output(internal_schema.InternalRoleAssignmentResponseSchema)
-@internal_blueprint.doc(hide=True)
 @internal_blueprint.auth_required(api_user_key_auth)
 @flask_db.with_db_session()
 def update_internal_roles(
@@ -51,7 +50,7 @@ def get_e2e_token(db_session: db.Session) -> response.ApiResponse:
 
     with db_session.begin():
         user = api_user_key_auth.get_user()
-        user = db_session.merge(user, load=False)
+        db_session.add(user)
 
         token_data = create_e2e_token(db_session, user)
 
