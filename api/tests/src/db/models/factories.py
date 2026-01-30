@@ -497,10 +497,10 @@ class ReferencedOpportunityFactory(BaseFactory):
         model = opportunity_models.ReferencedOpportunity
 
     referenced_opportunity_id = Generators.UuidObj
-    
+
     original_opportunity = factory.SubFactory(OpportunityFactory)
     original_opportunity_id = factory.LazyAttribute(lambda a: a.original_opportunity.opportunity_id)
-    
+
     derived_opportunity = factory.SubFactory(OpportunityFactory)
     derived_opportunity_id = factory.LazyAttribute(lambda a: a.derived_opportunity.opportunity_id)
 
