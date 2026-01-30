@@ -115,12 +115,12 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
     )
     
     derived_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
-        back_populates="derived_opportunity", uselist=True, cascade="all, delete-orphan",
+        uselist=True, cascade="all, delete-orphan",
         foreign_keys="[ReferencedOpportunity.original_opportunity_id]"
     )
     
     original_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
-        back_populates="original_opportunity", uselist=True, cascade="all, delete-orphan",
+        uselist=True, cascade="all, delete-orphan",
         foreign_keys="[ReferencedOpportunity.derived_opportunity_id]"
     )
 
