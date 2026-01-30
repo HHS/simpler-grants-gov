@@ -32,7 +32,7 @@ export default defineConfig({
     launchOptions:
       targetEnv === "staging"
         ? {
-            args: ["--disable-dev-shm-usage", "--no-sandbox"],
+            args: ["--disable-dev-shm-usage"],
           }
         : undefined,
   },
@@ -51,6 +51,13 @@ export default defineConfig({
             name: "Chrome",
             use: {
               ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "Mobile chrome",
+            use: {
+              ...devices["Pixel 7"],
               permissions: ["clipboard-read", "clipboard-write"],
             },
           },
