@@ -56,12 +56,11 @@ export async function waitForURLContainsQueryParamValue(
     );
   }
 
-  return expect(page.url()).toContain(`${queryParamName}=${queryParamValue}`);
-
-  // potentially an easier implementation, may not need our own "waitForURLChange" function
-  // const expectedQueryString = `${queryParamName}=${queryParamValue}`;
-
-  // return await page.waitForURL(new RegExp(expectedQueryString));
+  // Verify using URLSearchParams to handle URL encoding correctly
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName);
+  return expect(actualValue).toBe(queryParamValue);
 }
 
 export async function waitForUrl(
