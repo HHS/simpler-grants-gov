@@ -87,7 +87,7 @@ export async function selectSortBy(
   sortByValue: string,
   drawer = false,
 ) {
-  const timeoutOption = targetEnv === "local" ? {} : { timeout: 10000 };
+  const timeoutOption = targetEnv === "staging" ? { timeout: 30000 } : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
@@ -96,7 +96,7 @@ export async function selectSortBy(
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
-  const timeoutOption = targetEnv === "local" ? {} : { timeout: 10000 };
+  const timeoutOption = targetEnv === "staging" ? { timeout: 30000 } : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
