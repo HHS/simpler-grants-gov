@@ -74,14 +74,11 @@ module "app_config" {
 }
 
 module "network" {
-  source                                  = "../modules/network"
-  name                                    = var.environment_name
-  has_database                            = local.has_database
-  database_subnet_group_name              = var.environment_name
-  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
-  second_octet                            = module.project_config.network_configs[var.environment_name].second_octet
-  has_external_non_aws_service            = local.has_external_non_aws_service
-  enable_command_execution                = local.enable_command_execution
+  source                       = "../modules/network/resources"
+  name                         = var.environment_name
+  has_database                 = local.has_database
+  has_external_non_aws_service = local.has_external_non_aws_service
+  enable_command_execution     = local.enable_command_execution
 }
 
 module "dms_networking" {

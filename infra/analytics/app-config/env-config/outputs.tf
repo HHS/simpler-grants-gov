@@ -41,10 +41,6 @@ output "storage_config" {
   }
 }
 
-output "scheduled_jobs" {
-  value = local.scheduled_jobs
-}
-
 output "domain" {
   value = var.domain
 }
