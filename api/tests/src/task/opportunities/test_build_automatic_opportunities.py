@@ -1,3 +1,5 @@
+import logging
+import uuid
 from copy import deepcopy
 
 import pytest
@@ -126,8 +128,6 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         )
 
     # Verify specific hard-coded UUIDs for the named scenarios
-    import uuid
-
     expected_ids = {
         "SGG-org-only-test": uuid.UUID("10000000-0000-0000-0000-000000000001"),
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
@@ -177,9 +177,6 @@ def test_id_mismatch_does_not_trigger_recreation_without_flag(
     enable_factory_create, db_session, forms, caplog
 ):
     """Test that a mismatch in existing opportunity ID triggers a warning but NOT a recreation without the flag"""
-    import logging
-    import uuid
-
     # 1. Run initially
     task = BuildAutomaticOpportunitiesTask(db_session)
     task.run()
@@ -239,8 +236,6 @@ def test_id_mismatch_does_not_trigger_recreation_without_flag(
 
 def test_id_mismatch_triggers_recreation_with_flag(enable_factory_create, db_session, forms):
     """Test that a mismatch in existing opportunity ID triggers recreation WITH the flag"""
-    import uuid
-
     # 1. Run initially
     task = BuildAutomaticOpportunitiesTask(db_session)
     task.run()
