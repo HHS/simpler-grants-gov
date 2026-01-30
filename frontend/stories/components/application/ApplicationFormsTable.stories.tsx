@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "@storybook/nextjs";
 import { ApplicationDetail } from "src/types/applicationResponseTypes";
 
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";

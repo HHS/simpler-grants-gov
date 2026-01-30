@@ -2,7 +2,7 @@
  * @file Storybook decorator, enabling internationalization for each story.
  * @see https://storybook.js.org/docs/writing-stories/decorators
  */
-import { StoryContext } from "@storybook/react";
+import { StoryContext } from "@storybook/nextjs";
 import { defaultLocale, formats, timeZone } from "src/i18n/config";
 
 import { NextIntlClientProvider } from "next-intl";

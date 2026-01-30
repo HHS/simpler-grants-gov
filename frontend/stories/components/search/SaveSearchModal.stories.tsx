@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "@storybook/nextjs";
 
 import { SaveSearchModal } from "src/components/search/SaveSearchModal";
 

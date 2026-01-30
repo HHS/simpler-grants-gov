@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "@storybook/nextjs";
 
 import ContentLayout from "src/components/ContentLayout";
 

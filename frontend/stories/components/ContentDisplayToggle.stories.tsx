@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "@storybook/nextjs";
 import { identity } from "lodash";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";

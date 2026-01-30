@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "@storybook/nextjs";
 import { OpportunityOverview } from "src/types/opportunity/opportunityResponseTypes";
 
 import { OpportunityCard } from "src/components/application/OpportunityCard";

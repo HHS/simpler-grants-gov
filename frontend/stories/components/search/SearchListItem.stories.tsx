@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/react";
+import { Meta } from "@storybook/nextjs";
 
 import Item from "src/components/search/SearchResultsListItem";
 

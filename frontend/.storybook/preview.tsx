@@ -2,7 +2,7 @@
  * @file Setup the toolbar, styling, and global context for each Storybook story.
  * @see https://storybook.js.org/docs/configure#configure-story-rendering
  */
-import { Loader, Preview } from "@storybook/react";
+import { Loader, Preview } from "@storybook/nextjs";
 
 import "src/styles/styles.scss";
 

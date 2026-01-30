@@ -1,4 +1,11 @@
-import path from "path";
+// This file has been automatically migrated to valid ESM format by Storybook.
+import { fileURLToPath } from "node:url";
+import path, { dirname } from "path";
+
+// import { uswdsCssPaths } from "../scripts/sassOptions";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * @file Storybook's main configuration file that controls the generation of Storybook.
@@ -27,10 +34,14 @@ function blockSearchEnginesInHead(head) {
  */
 const config = {
   stories: ["../stories/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
-  addons: ["@storybook/addon-essentials", "@chromatic-com/storybook"],
+  addons: [
+    "@chromatic-com/storybook",
+    "@storybook/addon-docs",
+    // "@storybook/addon-styling-webpack"
+  ],
 
   framework: {
-    name: "@storybook/nextjs",
+    name: "@storybook/nextjs-vite",
     options: {
       nextConfigPath: path.resolve(__dirname, "../next.config.js"),
       builder: {
@@ -63,5 +74,37 @@ const config = {
   typescript: {
     reactDocgen: "react-docgen-typescript",
   },
+  async viteFinal(config) {
+    // Merge custom configuration into the default config
+    const { mergeConfig } = await import("vite");
+
+    return mergeConfig(config, {
+      css: {
+        preprocessorOptions: {
+          scss: {
+            loadPaths: [
+              "./node_modules/@uswds",
+              "./node_modules/@uswds/uswds/packages",
+            ],
+          },
+        },
+      },
+    });
+  },
+
+  // webpackFinal: (config) => ({
+  //   // stuff for sass paths?
+  //   ...config,
+  //   module: {
+  //     ...config.module,
+  //     rules: [
+  //       ...config.module.rules,
+  //       {
+  //         test: /\.s[ac]ss$/i,
+  //         use: ["sass-loader"],
+  //       },
+  //     ],
+  //   },
+  // }),
 };
 export default config;
