@@ -11,11 +11,6 @@ function sassOptions(basePath = "") {
       "./node_modules/@uswds",
       "./node_modules/@uswds/uswds/packages",
     ],
-    functions: {
-      "add-base-path($path)": (path) => {
-        return new sass.SassString(`${basePath}${path.getValue()}`);
-      },
-    },
   };
 }
 

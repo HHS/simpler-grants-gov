@@ -13,7 +13,6 @@ jest.mock("react", () => ({
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-  unstable_setRequestLocale: identity,
 }));
 
 jest.mock("next-intl", () => ({
