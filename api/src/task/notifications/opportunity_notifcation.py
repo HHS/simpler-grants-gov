@@ -287,10 +287,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         ]
 
         if len(after) > TRUNCATION_THRESHOLD:
-            truncated = after[:TRUNCATION_THRESHOLD]
-
-            if contains_regex(truncated, r"<[^>]+>"):
-                truncated = truncate_html_safe(truncated)
+            truncated = truncate_html_safe(after, TRUNCATION_THRESHOLD)
 
             read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
             description_section_parts.append(

@@ -41,8 +41,7 @@ def is_valid_uuid(value: str) -> bool:
 def contains_regex(value: str, regex: str) -> bool:
     return bool(re.search(regex, value))
 
-
-def truncate_html_safe(html_str: str) -> str:
+def _truncate_preserving_html(html_str: str) -> str:
     tag_stack: list = []  # Keep track of open tags
     output_tokens: list = []  # list of tokens
 
@@ -65,7 +64,7 @@ def truncate_html_safe(html_str: str) -> str:
             )
             if tag_name and token[1] == "/":  # Closing tag
                 if tag_stack and tag_stack[-1] == tag_name.group(
-                    1
+                        1
                 ):  # check if closing tag matches the last opened tag
                     tag_stack.pop()  # remove matched tag
             else:
@@ -90,3 +89,14 @@ def truncate_html_safe(html_str: str) -> str:
     closing_tags = [f"</{tag}>" for tag in reversed(tag_stack) if tag not in BLOCK_TAGS]
 
     return "".join(output_tokens) + "".join(closing_tags)
+
+
+def truncate_html_safe(value: str, max_length: int) -> str:
+    if not value or len(value) <= max_length:
+        return value
+
+    truncated = value[:max_length]
+    if contains_regex(truncated, r"<[^>]+>"):
+        truncated = _truncate_preserving_html(truncated)
+
+    return truncated
