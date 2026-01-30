@@ -53,6 +53,7 @@ def test_get_e2e_token_unauthorized(client, enable_factory_create):
 
 def test_get_e2e_token_production_guard_403(client, db_session, enable_factory_create, monkeypatch):
     """Test that the endpoint returns a 403 in production, even with valid auth"""
+    monkeypatch.setenv("ENVIRONMENT", "production")
     api_key = "prod-test-key"
     setup_e2e_privileges(db_session, api_key, has_privilege=True)
 
