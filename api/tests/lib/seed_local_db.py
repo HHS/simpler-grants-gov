@@ -299,7 +299,7 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
-# Build custom competitions for 8037 testing
+# Build custom competitions 8037 for testing 7953
 def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
     logger.info("Creating 8037 custom opportunities and competitions")
     # Open to both orgs and individuals
