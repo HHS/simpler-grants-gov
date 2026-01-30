@@ -77,7 +77,8 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  await checkBox.waitFor({ state: "visible", timeout: 15000 });
+  const timeout = targetEnv === "staging" ? 30000 : 15000;
+  await checkBox.waitFor({ state: "visible", timeout });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
 }
@@ -89,9 +90,9 @@ export async function selectSortBy(
 ) {
   const timeoutOption =
     targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
-  const sortSelectElement = page.locator(
-    `#search-sort-by-select${drawer ? "-drawer" : ""}`,
-  );
+  const sortSelectElement = drawer
+    ? page.locator("#search-sort-by-select-drawer")
+    : page.locator("#search-sort-by-select").first();
   await sortSelectElement.selectOption(sortByValue);
   // For mobile drawer on staging, wait longer as it can be very slow
   if (drawer && targetEnv === "staging") {
@@ -103,9 +104,9 @@ export async function selectSortBy(
 export async function expectSortBy(page: Page, value: string, drawer = false) {
   const timeoutOption =
     targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
-  const sortSelectElement = page.locator(
-    `#search-sort-by-select${drawer ? "-drawer" : ""}`,
-  );
+  const sortSelectElement = drawer
+    ? page.locator("#search-sort-by-select-drawer")
+    : page.locator("#search-sort-by-select").first();
   await expect(sortSelectElement).toHaveValue(value, timeoutOption);
 }
 

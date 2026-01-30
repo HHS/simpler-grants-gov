@@ -161,16 +161,16 @@ export const performSignIn = async (page: Page, project: FullProject) => {
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   await menuOpener.click();
-  
+
   // Wait for animation to complete on slow staging environment
   if (targetEnv === "staging") {
     await page.waitForTimeout(1000);
   }
-  
+
   const nav = page.locator(".usa-nav");
   const overlay = page.locator(".usa-overlay");
   const timeout = targetEnv === "staging" ? 30000 : 10000;
-  
+
   await expect(nav).toHaveClass(/is-visible/, { timeout });
   await expect(overlay).toBeVisible({ timeout });
   return menuOpener;

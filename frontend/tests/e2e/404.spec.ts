@@ -1,7 +1,15 @@
 import { expect, test } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
+
+const { targetEnv } = playwrightEnv;
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/imnothere", { timeout: 60000 });
+  const timeout = targetEnv === "staging" ? 120000 : 60000;
+  await page.goto("/imnothere", { timeout });
+  // Wait for staging to stabilize
+  if (targetEnv === "staging") {
+    await page.waitForTimeout(2000);
+  }
 });
 
 test("has title", async ({ page }) => {
