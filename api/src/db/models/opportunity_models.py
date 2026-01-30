@@ -489,14 +489,14 @@ class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
 
-    original_opportunity: Mapped["Opportunity"] = relationship(
+    original_opportunity: Mapped[Opportunity] = relationship(
         Opportunity,
         foreign_keys=[original_opportunity_id],
         uselist=False,
         back_populates="derived_opportunities",
     )
 
-    derived_opportunity: Mapped["Opportunity"] = relationship(
+    derived_opportunity: Mapped[Opportunity] = relationship(
         Opportunity,
         foreign_keys=[derived_opportunity_id],
         uselist=False,
