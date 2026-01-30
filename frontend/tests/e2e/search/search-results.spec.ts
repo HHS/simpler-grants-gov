@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 
 import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
-import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 
 test.beforeEach(async ({ page }) => {
   const searchTerm = "grants";

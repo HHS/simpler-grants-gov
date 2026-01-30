@@ -3,6 +3,9 @@ import {
   // NextFixture,
   test,
 } from "next/experimental/testmode/playwright";
+import playwrightEnv from "./playwright-env";
+
+const { targetEnv } = playwrightEnv;
 
 // function mockAPIEndpoints(next: NextFixture, responseText = "1") {
 //   next.onFetch((request: Request) => {
@@ -19,7 +22,8 @@ import {
 //   });
 // }
 test.beforeEach(async ({ page }) => {
-  await page.goto("/newsletter", { waitUntil: "domcontentloaded" });
+  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  await page.goto("/newsletter", { waitUntil: "domcontentloaded", timeout });
   await page.route("**/newsletter", async (route) => {
     if (route.request().method() === "POST") {
       await route.fulfill({

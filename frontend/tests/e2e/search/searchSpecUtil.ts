@@ -77,7 +77,7 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  const timeout = targetEnv === "staging" ? 30000 : 15000;
+  const timeout = targetEnv === "staging" ? 60000 : 15000;
   await checkBox.waitFor({ state: "visible", timeout });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
