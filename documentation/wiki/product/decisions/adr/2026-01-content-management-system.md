@@ -54,7 +54,7 @@ However, Storyblok is only recommended if Simpler.Grants.gov's static site conte
 
 #### Risks:&#x20;
 
-* May prevent long-term FedRAMP certification for Simpler.Grants.gov&#x20;
+* Long-term, a non-FedRAMP solution might affect Simpler Grants' own FedRAMP Certification efforts
 
 ### Alternative options:&#x20;
 

@@ -300,3 +300,29 @@ class OrganizationAuditEvent(StrEnum):
     USER_ADDED = "user_added"
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
+
+
+class WorkflowType(StrEnum):
+    OPPORTUNITY_PUBLISH = "opportunity_publish"
+    APPLICATION_SUBMISSION = "application_submission"
+    INITIAL_PROTOTYPE = "initial_prototype"
+
+
+class ApprovalType(StrEnum):
+    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+
+class ApprovalResponseType(StrEnum):
+    APPROVED = "approved"
+    DECLINED = "declined"
+    REQUIRES_MODIFICATION = "requires_modification"
+
+
+class WorkflowEntityType(StrEnum):
+    OPPORTUNITY = "opportunity"
+    APPLICATION = "application"
+
+
+class WorkflowEventType(StrEnum):
+    START_WORKFLOW = "start_workflow"
+    PROCESS_WORKFLOW = "process_workflow"

@@ -22,6 +22,7 @@ on:
           - dev
           - staging
           - training
+          - grantee1
           - prod
       version:
         required: true
