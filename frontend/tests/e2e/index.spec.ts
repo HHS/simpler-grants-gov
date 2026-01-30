@@ -3,8 +3,11 @@ import { expect, test } from "@playwright/test";
 import playwrightEnv from "./playwright-env";
 import { openMobileNav } from "./playwrightUtils";
 
+const { targetEnv } = playwrightEnv;
+
 test.beforeEach(async ({ page }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  await page.goto("/", { waitUntil: "domcontentloaded", timeout });
 });
 
 test("has title", async ({ page }) => {

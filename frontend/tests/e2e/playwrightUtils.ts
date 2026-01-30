@@ -166,12 +166,12 @@ export const openMobileNav = async (page: Page) => {
 
   // Wait for animation to complete on slow staging environment
   if (targetEnv === "staging") {
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
   }
 
   const nav = page.locator(".usa-nav");
   const overlay = page.locator(".usa-overlay");
-  const timeout = targetEnv === "staging" ? 30000 : 10000;
+  const timeout = targetEnv === "staging" ? 60000 : 10000;
 
   await expect(nav).toHaveClass(/is-visible/, { timeout });
   await expect(overlay).toBeVisible({ timeout });
