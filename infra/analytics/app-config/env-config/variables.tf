@@ -135,6 +135,18 @@ variable "service_memory" {
   default = 512
 }
 
+variable "instance_scaling_max_capacity" {
+  description = "Maximum number of ECS container instances for the service"
+  type        = number
+  default     = 1
+}
+
+variable "instance_scaling_min_capacity" {
+  description = "Minimum number of ECS container instances for the service"
+  type        = number
+  default     = 1
+}
+
 variable "service_override_extra_environment_variables" {
   type        = map(string)
   description = <<EOT
