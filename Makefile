@@ -53,7 +53,7 @@ __check_defined = \
 	infra-lint-scripts \
 	infra-lint-terraform \
 	infra-lint-workflows \
-	infra-module-database-role-manager \
+	infra-module-database-role-manager-archive \
 	infra-set-up-account \
 	infra-test-service \
 	infra-update-app-build-repository \
@@ -172,8 +172,9 @@ infra-update-app-database: ## Create or update $APP_NAME's database module for $
 	terraform -chdir="infra/$(APP_NAME)/database" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-module-database-role-manager-archive: ## Build/rebuild role manager code package for Lambda deploys
-	pip3 install -r infra/modules/database/role_manager/requirements.txt -t infra/modules/database/role_manager/vendor --upgrade
-	zip -r infra/modules/database/role_manager.zip infra/modules/database/role_manager
+	rm -f infra/modules/database/resources/role_manager.zip
+	pip3 install -r infra/modules/database/resources/role_manager/requirements.txt -t infra/modules/database/resources/role_manager/vendor --upgrade
+	cd infra/modules/database/resources/role_manager/ && zip -r ../role_manager.zip *
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -240,7 +241,8 @@ infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
 infra-test-service: ## Run service layer infra test suite
-	cd infra/test && go test -run TestService -v -timeout 30m
+	@:$(call check_defined, APP_NAME, "the name of subdirectory of /infra that holds the application's infrastructure code")
+	cd infra/test && APP_NAME=$(APP_NAME) go test -run TestService -v -timeout 30m
 
 #############
 ## Linting ##

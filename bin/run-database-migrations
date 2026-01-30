@@ -37,9 +37,8 @@ if [ "${has_database}" = "false" ]; then
   exit 0
 fi
 
-db_migrator_user=$(terraform -chdir="infra/${app_name}/app-config" output -json environment_configs | jq -r ".${environment}.database_config.migrator_username")
-
 ./bin/terraform-init "infra/${app_name}/service" "${environment}"
+db_migrator_user=$(terraform -chdir="infra/${app_name}/service" output -raw migrator_username)
 migrator_role_arn=$(terraform -chdir="infra/${app_name}/service" output -raw migrator_role_arn)
 
 echo

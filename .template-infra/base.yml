@@ -1,4 +1,8 @@
 # Changes here will be overwritten by Copier
-_commit: platform-cli-migration/v0.14.3
+_commit: v0.15.7
 _src_path: https://github.com/navapbc/template-infra
+base_code_repository_url: https://github.com/HHS/simpler-grants-gov
+base_default_region: us-east-1
+base_owner: HHS
+base_project_name: simpler-grants-gov
 template: base
