@@ -87,16 +87,22 @@ export async function selectSortBy(
   sortByValue: string,
   drawer = false,
 ) {
-  const timeoutOption = targetEnv === "staging" ? { timeout: 30000 } : { timeout: 10000 };
+  const timeoutOption =
+    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );
   await sortSelectElement.selectOption(sortByValue);
+  // For mobile drawer on staging, wait longer as it can be very slow
+  if (drawer && targetEnv === "staging") {
+    await page.waitForTimeout(5000);
+  }
   await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
-  const timeoutOption = targetEnv === "staging" ? { timeout: 30000 } : { timeout: 10000 };
+  const timeoutOption =
+    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
   const sortSelectElement = page.locator(
     `#search-sort-by-select${drawer ? "-drawer" : ""}`,
   );

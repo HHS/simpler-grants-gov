@@ -74,7 +74,8 @@ test.describe("Login Page Redirect", () => {
       sessionStorage.setItem("login-redirect", "https://external.com");
     });
     await page.goto(`/login`);
-    await expect(page).toHaveURL(`/`);
+    await page.waitForTimeout(2000); // Give staging time to load
+    await expect(page).toHaveURL(`/`, { timeout: 10000 });
   });
 
   test('should display "Redirecting..." text while redirecting', async ({
