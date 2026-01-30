@@ -204,8 +204,8 @@ class SubmissionXMLAssembler:
         # Add header (must strip XML declaration and use just the element)
         root.append(header_element)
 
-        # Add Forms wrapper
-        forms_element = lxml_etree.SubElement(root, "Forms")
+        # Add Forms wrapper with grant: namespace prefix for consistency with legacy
+        forms_element = lxml_etree.SubElement(root, f"{{{grant_ns}}}Forms")
         for form_element in form_elements:
             forms_element.append(form_element)
 
@@ -225,11 +225,57 @@ class SubmissionXMLAssembler:
     def _get_schema_location_url(self) -> str | None:
         """Get the schema location URL for xsi:schemaLocation attribute.
 
-        Constructs the URL from competition's legacy_package_id.
+        Constructs the URL from competition's opportunity number and CFDA number.
+        Format: https://apply07.grants.gov/apply/opportunities/schemas/agency/oppOPP_NUMBER-cfdaCFDA_NUMBER.xsd
+
+        Example: https://trainingapply.grants.gov/apply/opportunities/schemas/agency/oppSIMP-QUAD4-FORMS-10202025-cfda00.000.xsd
+
+        Returns:
+            Schema location URL or None if opportunity_number is not set
         """
-        return (
-            f"{SCHEMA_LOCATION_BASE_URL}/" f"{self.application.competition.legacy_package_id}.xsd"
-        )
+        opportunity_number = self.application.competition.opportunity.opportunity_number
+
+        if not opportunity_number:
+            logger.warning(
+                "Competition opportunity_number is not set - cannot generate schema location",
+                extra={
+                    "application_id": self.application.application_id,
+                    "competition_id": self.application.competition.competition_id,
+                },
+            )
+            return None
+
+        # Get CFDA number from the opportunity
+        # Note: An opportunity can have multiple CFDA numbers, we use the first one
+        # The cfdas relationship only exists on legacy/foreign Topportunity models
+        cfda_suffix = ""
+        opportunity = self.application.competition.opportunity
+
+        # Check if the opportunity has cfdas (only present in foreign/legacy schema)
+        if hasattr(opportunity, "cfdas") and opportunity.cfdas and len(opportunity.cfdas) > 0:
+            cfda_number = opportunity.cfdas[0].cfdanumber
+            if cfda_number:
+                cfda_suffix = f"-cfda{cfda_number}"
+            else:
+                logger.info(
+                    "CFDA entry exists but cfdanumber is None - XSD filename will not include CFDA",
+                    extra={
+                        "application_id": self.application.application_id,
+                        "opportunity_id": opportunity.opportunity_id,
+                    },
+                )
+        else:
+            logger.info(
+                "No CFDA numbers found for opportunity - XSD filename will not include CFDA",
+                extra={
+                    "application_id": self.application.application_id,
+                    "opportunity_id": opportunity.opportunity_id,
+                },
+            )
+
+        # Construct XSD filename with 'opp' prefix + opportunity number + optional CFDA suffix
+        xsd_filename = f"opp{opportunity_number}{cfda_suffix}.xsd"
+        return f"{SCHEMA_LOCATION_BASE_URL}/{xsd_filename}"
 
     def _parse_xml_string(self, xml_string: str) -> lxml_etree.Element:
         """Parse XML string into element tree."""
