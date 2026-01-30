@@ -77,7 +77,7 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  const timeout = targetEnv === "staging" ? 60000 : 15000;
+  const timeout = targetEnv === "staging" ? 120000 : 15000;
   await checkBox.waitFor({ state: "visible", timeout });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
@@ -112,7 +112,7 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-  const timeout = targetEnv === "staging" ? 120000 : 60000;
+  const timeout = targetEnv === "staging" ? 180000 : 60000;
   await resultsHeading.waitFor({ state: "visible", timeout });
   return await expect(resultsHeading).toBeVisible();
 }
