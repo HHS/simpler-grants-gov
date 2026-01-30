@@ -31,8 +31,8 @@ locals {
   # "migrator" = migrator_task role (for database migration jobs during CI/CD)
   scheduled_job_role_arns = {
     for job_name, job_config in var.scheduled_jobs : job_name => (
-      job_config.role_override == "opensearch-write" && length(aws_iam_role.opensearch_write) > 0 ? aws_iam_role.opensearch_write[0].arn :
-      job_config.role_override == "migrator" && length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn :
+      job_config.role_override == "opensearch-write" ? aws_iam_role.opensearch_write[0].arn :
+      job_config.role_override == "migrator" ? aws_iam_role.migrator_task[0].arn :
       aws_iam_role.app_service.arn
     )
   }
