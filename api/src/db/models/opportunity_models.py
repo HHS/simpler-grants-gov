@@ -113,15 +113,17 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         uselist=True,
         cascade="all, delete-orphan",
     )
-    
+
     derived_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
-        uselist=True, cascade="all, delete-orphan",
-        foreign_keys="[ReferencedOpportunity.original_opportunity_id]"
+        uselist=True,
+        cascade="all, delete-orphan",
+        foreign_keys="[ReferencedOpportunity.original_opportunity_id]",
     )
-    
+
     original_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
-        uselist=True, cascade="all, delete-orphan",
-        foreign_keys="[ReferencedOpportunity.derived_opportunity_id]"
+        uselist=True,
+        cascade="all, delete-orphan",
+        foreign_keys="[ReferencedOpportunity.derived_opportunity_id]",
     )
 
     @property
@@ -472,34 +474,33 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
 
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "referenced_opportunity"
-    
-    __table_args__ = (
-        UniqueConstraint("derived_opportunity_id"),
-        ApiSchemaTable.__table_args__
+
+    __table_args__ = (UniqueConstraint("derived_opportunity_id"), ApiSchemaTable.__table_args__)
+
+    referenced_opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
     )
 
-    referenced_opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    
     original_opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
-    
+
     derived_opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
-    
+
     original_opportunity: Mapped["Opportunity"] = relationship(
         Opportunity,
         foreign_keys=[original_opportunity_id],
         uselist=False,
-        back_populates="derived_opportunities"
+        back_populates="derived_opportunities",
     )
-    
+
     derived_opportunity: Mapped["Opportunity"] = relationship(
         Opportunity,
         foreign_keys=[derived_opportunity_id],
         uselist=False,
-        back_populates="original_opportunities"
+        back_populates="original_opportunities",
     )
 
 
