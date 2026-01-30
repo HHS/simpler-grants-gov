@@ -34,7 +34,10 @@ test("can navigate to wiki in new tab", async ({ page, context }, testInfo) => {
   );
 });
 
-test("can navigate to ethnio in new tab", async ({ page, context }, testInfo) => {
+test("can navigate to ethnio in new tab", async ({
+  page,
+  context,
+}, testInfo) => {
   const ethnioLink = page.getByRole("link", {
     name: /Sign up to participate in future user studies/i,
   });
