@@ -130,8 +130,9 @@ module "service" {
 
   image_tag = local.image_tag
 
-  network_name = local.environment_config.network_name
-  project_name = module.project_config.project_name
+  network_name                   = local.environment_config.network_name
+  project_name                   = module.project_config.project_name
+  aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
   domain_name    = local.service_config.domain_name
   hosted_zone_id = null
