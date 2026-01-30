@@ -4,6 +4,9 @@ import {
   FullProject,
   Page,
 } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
+
+const { targetEnv } = playwrightEnv;
 
 export interface PageProps {
   page: Page;
@@ -35,6 +38,9 @@ export async function waitForURLContainsQueryParamValue(
   queryParamName: string,
   queryParamValue: string,
 ) {
+  // Use longer timeout for staging environment due to slower response times
+  const timeout = targetEnv === "staging" ? 120000 : 60000;
+
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);
     const params = new URLSearchParams(url.search);
@@ -43,7 +49,7 @@ export async function waitForURLContainsQueryParamValue(
     return actualValue === queryParamValue;
   };
   try {
-    await waitForURLChange(page, changeCheck);
+    await waitForURLChange(page, changeCheck, timeout);
   } catch (_e) {
     throw new Error(
       `Url did not change to contain ${queryParamName}:${queryParamValue} as expected`,

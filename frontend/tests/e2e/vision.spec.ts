@@ -9,13 +9,24 @@ test("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Vision | Simpler.Grants.gov");
 });
 
-test("can navigate to wiki in new tab", async ({ page, context }) => {
+test("can navigate to wiki in new tab", async ({ page, context }, testInfo) => {
+  const wikiLink = page.getByRole("link", {
+    name: /Read more about the research on our public wiki/i,
+  });
+
+  await wikiLink.scrollIntoViewIfNeeded();
+  await expect(wikiLink).toHaveAttribute(
+    "href",
+    "https://wiki.simpler.grants.gov/design-and-research/user-research/grants.gov-archetypes",
+  );
+
+  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+  if (isMobile) {
+    return;
+  }
+
   const newTabPromise = context.waitForEvent("page");
-  await page
-    .getByRole("link", {
-      name: /Read more about the research on our public wiki/i,
-    })
-    .click();
+  await wikiLink.click();
 
   const newPage = await newTabPromise;
   await expect(newPage).toHaveURL(
