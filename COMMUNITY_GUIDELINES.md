@@ -1,8 +1,8 @@
 # Community Organization and Governance
 
-The grants.gov team is taking a community-first and open source approach to the product development of this tool. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
+The grants.gov team is taking a community-first and open source approach to the product development of Simpler Grants. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
 
-We know that we can learn from a wide variety of communities, including those who will use or will be impacted by the tool, who are experts in technology, or who have experience with similar technologies deployed in other spaces. We are dedicated to creating forums for continuous conversation and feedback to help shape the design and development of the tool.
+We know that we can learn from a wide variety of communities, including those who will use or will be impacted by Simpler Grants, who are experts in technology, or who have experience with similar technologies deployed in other spaces. We are dedicated to creating forums for continuous conversation and feedback to help shape the design and development of Simpler Grants.
 
 We also recognize capacity building as a key part of involving a diverse open source community. We are doing our best to use accessible language, provide technical and process documents in multiple languages, and offer support to community members with a wide variety of backgrounds and skillsets. If you have ideas for how we can improve or add to our capacity building efforts and methods for welcoming people into our community, please let us know by filing an issue on our GitHub repository.
 
