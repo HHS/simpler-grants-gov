@@ -1,6 +1,6 @@
 # Community Organization and Governance
 
-The grants.gov team is taking a community-first and open-source approach to the product development of this tool. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
+The grants.gov team is taking a community-first and open source approach to the product development of this tool. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
 
 We know that we can learn from a wide variety of communities, including those who will use or will be impacted by the tool, who are experts in technology, or who have experience with similar technologies deployed in other spaces. We are dedicated to creating forums for continuous conversation and feedback to help shape the design and development of the tool.
 
@@ -14,7 +14,7 @@ The following principles guide our data, product, and process decisions, archite
 
 - "Open" means *transparent* and *participatory*.
 - We take a modular and modern approach to software development.
-- We build open-source software and open-source processes.
+- We build open source software and open source processes.
 - We value ease of implementation.
 - Fostering community includes building capacity and making our software and processes accessible to participants with diverse backgrounds and skillsets.
 - Data (and data science) is as important as software and process. We build open data sets where possible.
