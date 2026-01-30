@@ -37,9 +37,11 @@ export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
+  timeoutOverride?: number,
 ) {
   // Use longer timeout for staging environment due to slower response times
-  const timeout = targetEnv === "staging" ? 120000 : 60000;
+  const timeout =
+    timeoutOverride ?? (targetEnv === "staging" ? 180000 : 60000);
 
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);

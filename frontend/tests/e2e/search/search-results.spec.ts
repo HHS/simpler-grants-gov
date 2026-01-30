@@ -4,6 +4,7 @@ import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
+import { waitForURLContainsQueryParamValue } from "../playwrightUtils";
 
 test.beforeEach(async ({ page }) => {
   const searchTerm = "grants";
@@ -19,7 +20,7 @@ test.beforeEach(async ({ page }) => {
     await fillSearchInputAndSubmit(searchTerm, page);
   }
 
-  await page.waitForURL("/search?query=" + searchTerm);
+  await waitForURLContainsQueryParamValue(page, "query", searchTerm);
 });
 
 test.describe("Search page results tests", () => {

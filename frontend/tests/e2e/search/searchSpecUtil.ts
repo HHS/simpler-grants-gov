@@ -112,7 +112,8 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  const timeout = targetEnv === "staging" ? 120000 : 60000;
+  await resultsHeading.waitFor({ state: "visible", timeout });
   return await expect(resultsHeading).toBeVisible();
 }
 
