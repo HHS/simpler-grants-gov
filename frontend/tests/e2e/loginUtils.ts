@@ -1,3 +1,8 @@
+// Load environment variables explicitly before anything else
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../../.env.local") });
+
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
 
@@ -58,7 +63,9 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
     {
       name: "session",
       value: token,
-      url: "http://localhost:3000",
+      domain: "localhost",
+      path: "/",
+      sameSite: "Lax",
     },
   ]);
 };

@@ -1,0 +1,48 @@
+[
+  {
+    "step": 1,
+    "action": "Home page loaded",
+    "url": "http://localhost:3000/?_ff=authOn:true",
+    "title": "Simpler.Grants.gov",
+    "screenshotPath": "01-home.png",
+    "visibleElements": [
+      "H1: Let's build a simpler Grants.gov together"
+    ],
+    "buttons": [
+      "Here’s how you know",
+      "Menu",
+      "About",
+      "Community",
+      "Use the new simpler search"
+    ],
+    "timestamp": 1769833348066
+  },
+  {
+    "step": 2,
+    "action": "Opportunity page loaded",
+    "url": "http://localhost:3000/opportunity/e7349d47-4c62-41e8-a92d-a2f219ebaf7c?_ff=authOn:true",
+    "title": "",
+    "screenshotPath": "02-opportunity.png",
+    "visibleElements": [],
+    "buttons": [
+      "01 Issue",
+      "Show More",
+      "Show 10 ignore-listed frame(s)"
+    ],
+    "timestamp": 1769833378791
+  },
+  {
+    "step": 3,
+    "action": "After clicking button",
+    "url": "http://localhost:3000/opportunity/e7349d47-4c62-41e8-a92d-a2f219ebaf7c?_ff=authOn:true",
+    "title": "",
+    "screenshotPath": "03-after-click.png",
+    "visibleElements": [],
+    "buttons": [
+      "01 Issue",
+      "Show More",
+      "Show 10 ignore-listed frame(s)"
+    ],
+    "timestamp": 1769833381236
+  }
+]
