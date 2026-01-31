@@ -1292,7 +1292,7 @@ paths:
       summary: Competition Get
       security:
       - ApiJwtAuth: []
-      - ApiKeyAuth: []
+      - ApiUserKeyAuth: []
   /common-grants/opportunities/{oppId}:
     get:
       parameters:
@@ -5124,6 +5124,7 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
             type:
             - string
     UserOrganization:
@@ -5273,6 +5274,7 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
             type:
             - string
     UserCanAccessResponse:
@@ -6276,6 +6278,7 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
             type:
             - string
     UserInvitationItem:
@@ -6828,6 +6831,7 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
             type:
             - string
     OrganizationUser:
