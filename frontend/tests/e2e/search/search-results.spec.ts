@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 
 import {
   fillSearchInputAndSubmit,
@@ -19,11 +20,7 @@ test.beforeEach(async ({ page }) => {
     await fillSearchInputAndSubmit(searchTerm, page);
   }
 
-  await page.waitForURL("/search?query=" + searchTerm);
-});
-
-test.afterEach(async ({ context }) => {
-  await context.close();
+  await waitForURLContainsQueryParamValue(page, "query", searchTerm);
 });
 
 test.describe("Search page results tests", () => {

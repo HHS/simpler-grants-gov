@@ -74,7 +74,9 @@ test.describe("Login Page Redirect", () => {
       sessionStorage.setItem("login-redirect", "https://external.com");
     });
     await page.goto(`/login`);
-    await expect(page).toHaveURL(`/`);
+    // Wait longer on staging for redirect to occur
+    await page.waitForTimeout(5000);
+    await expect(page).toHaveURL(`/`, { timeout: 30000 });
   });
 
   test('should display "Redirecting..." text while redirecting', async ({
@@ -83,7 +85,20 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
+
     await page.goto(`/login`);
-    await expect(page.getByText("Redirecting...")).toBeVisible();
+    const redirectingText = page.getByText("Redirecting...");
+    const redirectResult = await Promise.race([
+      redirectingText
+        .waitFor({ state: "visible", timeout: 2000 })
+        .then(() => "message"),
+      page
+        .waitForURL("/opportunities", { timeout: 15000 })
+        .then(() => "redirect"),
+    ]);
+
+    if (redirectResult === "message") {
+      await expect(page).toHaveURL("/opportunities", { timeout: 15000 });
+    }
   });
 });

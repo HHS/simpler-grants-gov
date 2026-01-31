@@ -12,12 +12,13 @@ export default defineConfig({
   timeout: targetEnv === "local" ? 75000 : 120000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: targetEnv !== "staging",
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCi,
-  /* Retry on CI only */
-  retries: isCi ? 3 : 0,
-  workers: 10,
+  /* Retry on CI only, but reduce retries for staging */
+  retries: isCi && targetEnv === "staging" ? 1 : isCi ? 3 : 0,
+  // Reduce workers for staging to prevent resource exhaustion
+  workers: targetEnv === "staging" ? 1 : 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: isCi ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -25,9 +26,15 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
-    screenshot: "on",
-    video: "on-first-retry",
+    trace: targetEnv === "staging" ? "off" : "on-first-retry",
+    screenshot: targetEnv === "staging" ? "off" : "on",
+    video: targetEnv === "staging" ? "off" : "on-first-retry",
+    launchOptions:
+      targetEnv === "staging"
+        ? {
+            args: ["--disable-dev-shm-usage"],
+          }
+        : undefined,
   },
   // Enable test sharding for parallelization in CI.
   shard: {
@@ -37,36 +44,54 @@ export default defineConfig({
     current: parseInt(currentShard || "1"),
   },
   /* Configure projects for major browsers */
-  projects: [
-    {
-      name: "Chrome",
-      use: {
-        ...devices["Desktop Chrome"],
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-    {
-      name: "Firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-        permissions: [],
-      },
-    },
-    {
-      name: "Webkit",
-      use: {
-        ...devices["Desktop Safari"],
-        permissions: ["clipboard-read"],
-      },
-    },
-    {
-      name: "Mobile chrome",
-      use: {
-        ...devices["Pixel 7"],
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-  ],
+  projects:
+    targetEnv === "staging"
+      ? [
+          {
+            name: "Chrome",
+            use: {
+              ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "Mobile chrome",
+            use: {
+              ...devices["Pixel 7"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ]
+      : [
+          {
+            name: "Chrome",
+            use: {
+              ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "Firefox",
+            use: {
+              ...devices["Desktop Firefox"],
+              permissions: [],
+            },
+          },
+          {
+            name: "Webkit",
+            use: {
+              ...devices["Desktop Safari"],
+              permissions: ["clipboard-read"],
+            },
+          },
+          {
+            name: "Mobile chrome",
+            use: {
+              ...devices["Pixel 7"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ],
 
   //  Only start the local dev server when running in the local environment.
   webServer:
