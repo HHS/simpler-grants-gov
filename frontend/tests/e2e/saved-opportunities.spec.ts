@@ -5,6 +5,8 @@ import playwrightEnv from "./playwright-env";
 import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 import { performStagingLogin } from "./utils/perform-login-utils";
 
+const { targetEnv } = playwrightEnv;
+
 test.afterEach(async ({ context }) => {
   await context.close();
 });
@@ -65,5 +67,8 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
   await savedOpportunitiesNavItem.click();
 
   await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
-  await expect(page).toHaveTitle("Saved Opportunities | Simpler.Grants.gov");
+  const timeout = targetEnv === "staging" ? 30000 : 5000;
+  await expect(page).toHaveTitle("Saved Opportunities | Simpler.Grants.gov", {
+    timeout,
+  });
 });
