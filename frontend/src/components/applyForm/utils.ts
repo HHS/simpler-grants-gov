@@ -437,7 +437,7 @@ export const getFieldConfig = ({
   let fieldSchema = {} as RJSFSchema;
   let fieldName = "";
   let htmlFieldName = "";
-  let value = "" as string | number | object | undefined;
+  let value = "" as string | unknown[] | Record<string, unknown> | undefined;
   let rawErrors: string[] | FormattedFormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {

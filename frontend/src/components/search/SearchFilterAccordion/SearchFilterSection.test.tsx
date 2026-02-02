@@ -21,7 +21,10 @@ import SearchFilterSection from "src/components/search/SearchFilterAccordion/Sea
 
 const mockSetQueryParam = jest.fn();
 
-jest.spyOn(AllOptionCheckboxImport, "AllOptionCheckbox");
+const AllOptionCheckboxMock = jest.spyOn(
+  AllOptionCheckboxImport,
+  "AllOptionCheckbox",
+);
 
 const defaultProps = {
   queryParamKey: "agency" as ValidSearchQueryParam,

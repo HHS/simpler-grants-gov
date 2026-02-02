@@ -23,7 +23,6 @@ const GlobalProviders = ({ children }: { children: React.ReactNode }) => {
       formats={formats}
       timeZone={timeZone}
       locale={defaultLocale}
-      // @ts-expect-error messages
       messages={messages}
     >
       {children}
