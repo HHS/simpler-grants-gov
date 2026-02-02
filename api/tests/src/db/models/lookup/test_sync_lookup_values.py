@@ -1,16 +1,18 @@
 import logging
 import uuid
 from enum import StrEnum
-from typing import Type
 
 import pytest
 from sqlalchemy import inspect
 
 import src.adapters.db as db
 import src.db.models as db_models
+from src.constants.lookup_constants import Privilege, RoleType
+from src.constants.static_role_values import APPLICATION_CONTRIBUTOR, CORE_ROLES, ORG_MEMBER
 from src.db.models.lookup import LookupConfig, LookupRegistry, LookupStr, LookupTable
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.lookup_models import LkOpportunityCategory
+from src.db.models.user_models import Role
 from tests.lib import db_testing
 
 
@@ -32,7 +34,7 @@ def schema_no_lookup(monkeypatch) -> db.PostgresDBClient:
 
 
 def validate_lookup_synced_to_table(
-    db_session, table: Type[LookupTable], lookup_config: LookupConfig
+    db_session, table: type[LookupTable], lookup_config: LookupConfig
 ):
     db_lookup_values = db_session.query(table).all()
 
@@ -102,6 +104,7 @@ def test_sync_lookup_for_table(schema_no_lookup, caplog: pytest.LogCaptureFixtur
     # Running sync again won't cause any change
     caplog.clear()
     sync_lookup_values(schema_no_lookup)
+
     assert "No modified lookup values for table lk_opportunity_category" in caplog.text
 
     # Modify the lookup values used for one of the lookups
@@ -121,3 +124,43 @@ def test_sync_lookup_for_table(schema_no_lookup, caplog: pytest.LogCaptureFixtur
 
     finally:
         LookupRegistry._lookup_registry[LkOpportunityCategory] = existing_suffix_config
+
+
+def test_sync_roles(schema_no_lookup, caplog):
+    caplog.set_level(logging.INFO)
+    with schema_no_lookup.get_session() as db_session:
+        assert db_session.query(Role).count() == 0
+
+    sync_lookup_values(schema_no_lookup)
+    with schema_no_lookup.get_session() as db_session:
+        db_static_values = db_session.query(Role).all()
+        assert len(db_static_values) == len(CORE_ROLES)
+
+    # Assert no changes when run again
+    sync_lookup_values(schema_no_lookup)
+
+    assert caplog.text.count("No modified values for role") == len(CORE_ROLES)
+
+    # Save original static values
+    original_org_member_privs = ORG_MEMBER.privileges[:]
+    original_app_cont_types = APPLICATION_CONTRIBUTOR.role_types[:]
+
+    # Make updates to static roles
+    new_org_member_privs = [Privilege.VIEW_ORG_MEMBERSHIP]
+    new_app_cont_types = [RoleType.INTERNAL]
+
+    ORG_MEMBER.privileges = new_org_member_privs
+    APPLICATION_CONTRIBUTOR.role_types = new_app_cont_types
+
+    assert ORG_MEMBER.privileges == new_org_member_privs
+    assert APPLICATION_CONTRIBUTOR.role_types == new_app_cont_types
+
+    caplog.clear()
+    sync_lookup_values(schema_no_lookup)
+
+    assert "Updated role: Organization Member" in caplog.text
+    assert "Updated role: Application Contributor" in caplog.text
+
+    # Restore original static values
+    ORG_MEMBER.privileges = original_org_member_privs
+    APPLICATION_CONTRIBUTOR.role_types = original_app_cont_types

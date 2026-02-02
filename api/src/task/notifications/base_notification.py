@@ -6,7 +6,7 @@ from src.adapters import db
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications import constants
-from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.config import EmailNotificationConfig, get_email_config
 from src.task.notifications.constants import Metrics, UserEmailNotification
 from src.task.task import Task
 
@@ -26,7 +26,7 @@ class BaseNotificationTask(Task):
         )
 
         if notification_config is None:
-            notification_config = EmailNotificationConfig()
+            notification_config = get_email_config()
         self.notification_config = notification_config
 
     @abstractmethod
@@ -56,7 +56,26 @@ class BaseNotificationTask(Task):
                 notification_sent=False,  # Default to False, update on success
             )
             self.db_session.add(notification_log)
+
             try:
+                if self.notification_config.reset_emails_without_sending:
+                    self.increment(Metrics.NOTIFICATIONS_RESET)
+                    logger.info(
+                        "Skipping notification to user due to reset flag",
+                        extra={
+                            "user_id": user_notification.user_id,
+                            "notification_reason": user_notification.notification_reason,
+                            "notification_log_id": notification_log.user_notification_log_id,
+                        },
+                    )
+
+                    # still set notified/sent, so that we update the user_saved_opportunity.last_notified_at
+                    # that opportunity version change notifications check
+                    notification_log.notification_sent = True
+                    user_notification.is_notified = True
+
+                    return
+
                 response = send_pinpoint_email_raw(
                     to_address=user_notification.user_email,
                     subject=user_notification.subject,
@@ -94,7 +113,7 @@ class BaseNotificationTask(Task):
                 self.increment(Metrics.USERS_NOTIFIED)
 
             except Exception:
-                # Notification log will be updated in the finally block
+                # Notification log will be updated in the post notification process
                 logger.exception(
                     "Failed to send notification email",
                     extra={

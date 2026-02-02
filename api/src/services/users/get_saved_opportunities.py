@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -16,11 +16,17 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
+from src.search.search_models import StrSearchFilter
 
 logger = logging.getLogger(__name__)
 
 
+class SavedOpportunityFilterParams(BaseModel):
+    opportunity_status: StrSearchFilter | None = None
+
+
 class SavedOpportunityListParams(BaseModel):
+    filters: SavedOpportunityFilterParams | None = None
     pagination: PaginationParams
 
 
@@ -47,9 +53,23 @@ def add_sort_order(stmt: Select, sort_order: list) -> Select:
     return stmt.order_by(*order_cols)
 
 
+def add_opportunity_status_filter(
+    stmt: Select, filters: SavedOpportunityFilterParams | None
+) -> Select:
+    if filters is None:
+        return stmt
+
+    if filters.opportunity_status is not None and filters.opportunity_status.one_of:
+        stmt = stmt.where(
+            CurrentOpportunitySummary.opportunity_status.in_(filters.opportunity_status.one_of)
+        )
+
+    return stmt
+
+
 def get_saved_opportunities(
     db_session: db.Session, user_id: UUID, raw_opportunity_params: dict
-) -> Tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
     logger.info(f"Getting saved opportunities for user {user_id}")
 
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)
@@ -73,9 +93,14 @@ def get_saved_opportunities(
             CurrentOpportunitySummary.opportunity_summary_id
             == OpportunitySummary.opportunity_summary_id,
         )
-        .options(selectinload("*"))
+        .options(
+            selectinload(Opportunity.current_opportunity_summary).selectinload(
+                CurrentOpportunitySummary.opportunity_summary
+            )
+        )
     )
 
+    stmt = add_opportunity_status_filter(stmt, opportunity_params.filters)
     stmt = add_sort_order(stmt, opportunity_params.pagination.sort_order)
 
     paginator: Paginator[Opportunity] = Paginator(

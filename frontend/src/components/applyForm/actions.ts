@@ -1,6 +1,5 @@
 "use server";
 
-import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { RJSFSchema } from "@rjsf/utils";
 import { getSession } from "src/services/auth/session";
 import { handleUpdateApplicationForm } from "src/services/fetch/fetchers/applicationFetcher";
@@ -8,7 +7,7 @@ import { getFormDetails } from "src/services/fetch/fetchers/formsFetcher";
 import { ApplicationResponseDetail } from "src/types/applicationResponseTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
-import { shapeFormData } from "./utils";
+import { processFormSchema, shapeFormData } from "./utils";
 
 type ApplyFormResponse = {
   applicationId: string;
@@ -19,10 +18,10 @@ type ApplyFormResponse = {
 };
 
 export async function handleFormAction(
-  _prevState: ApplyFormResponse,
+  prevState: ApplyFormResponse,
   formData: FormData,
 ) {
-  const { formId, applicationId } = _prevState;
+  const { formId, applicationId } = prevState;
   const session = await getSession();
   if (!session || !session.token) {
     return {
@@ -30,7 +29,7 @@ export async function handleFormAction(
       error: true,
       formData,
       formId,
-      saved: true,
+      saved: false,
     };
   }
 
@@ -41,9 +40,11 @@ export async function handleFormAction(
       error: true,
       formData,
       formId,
-      saved: true,
+      saved: false,
     };
   }
+
+  // this generic typing isn't correct - we'll end up with a nested object
   const applicationFormData = shapeFormData<ApplicationResponseDetail>(
     formData,
     formSchema,
@@ -69,7 +70,7 @@ export async function handleFormAction(
       error: true,
       formData,
       formId,
-      saved: true,
+      saved: false,
     };
   }
 }
@@ -100,6 +101,7 @@ const handleSave = async (
   }
 };
 
+// get and process the form schema, which is then used to determing proper typing for save form payload data
 async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   let formDetail = <FormDetail>{};
   try {
@@ -114,11 +116,11 @@ async function getFormSchema(formId: string): Promise<RJSFSchema | undefined> {
   } catch (e) {
     console.error(`Error retrieving form details for formID (${formId})`, e);
   }
-  let formSchema = {};
   try {
-    formSchema = await $RefParser.dereference(formDetail.form_json_schema);
+    const { formSchema } = processFormSchema(formDetail.form_json_schema);
+    return formSchema;
   } catch (e) {
-    console.error("Error parsing JSON schema", e);
+    console.error(`Error parsing JSON schema for ${formId}`, e);
+    return undefined;
   }
-  return formSchema;
 }

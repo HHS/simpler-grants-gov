@@ -8,10 +8,12 @@ import {
 } from "@rjsf/utils";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, FormGroup, TextInput } from "@trussworks/react-uswds";
+import { FormGroup, TextInput } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.
  *
@@ -24,7 +26,7 @@ function TextWidget<
 >({
   id,
   disabled,
-  readonly,
+  readOnly,
   required,
   schema,
   value,
@@ -32,10 +34,13 @@ function TextWidget<
   options = {},
   rawErrors = [],
   updateOnInput = false,
+  placeholder,
   // passing on* functions made optional
   onBlur = () => ({}),
   onChange = () => ({}),
   onFocus = () => ({}),
+  formClassName,
+  inputClassName,
 }: UswdsWidgetProps<T, S, F>) {
   const {
     title,
@@ -46,7 +51,9 @@ function TextWidget<
     type,
     examples,
     default: defaultValue,
+    pattern,
   } = schema as S;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   let inputValue: string | number | undefined;
   if (type === "number" || type === "integer") {
@@ -82,6 +89,7 @@ function TextWidget<
     [onFocus, id],
   );
   const error = rawErrors.length ? true : undefined;
+
   const describedby = error
     ? `error-for-${id}`
     : title
@@ -89,18 +97,24 @@ function TextWidget<
       : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel
+    <FormGroup
+      className={formClassName}
+      key={`form-group__text-input--${id}`}
+      error={error}
+    >
+      <DynamicFieldLabel
         idFor={id}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
       {error && (
-        <ErrorMessage id={`error-for-${id}`}>{rawErrors[0]}</ErrorMessage>
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       <TextInput
         data-testid={id}
+        className={inputClassName}
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}
         id={id}
@@ -110,7 +124,8 @@ function TextWidget<
         name={id}
         aria-required={required}
         disabled={disabled}
-        readOnly={readonly}
+        readOnly={readOnly}
+        placeholder={placeholder ?? undefined}
         list={examples ? examplesId<T>(id) : undefined}
         aria-describedby={describedby}
         onChange={updateOnInput ? _onChange : undefined}
@@ -119,6 +134,7 @@ function TextWidget<
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         validationStatus={error ? "error" : undefined}
+        pattern={pattern || undefined}
       />
       {Array.isArray(examples) && (
         <datalist

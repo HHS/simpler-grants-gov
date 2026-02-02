@@ -5,6 +5,7 @@ import {
   costSharingOptions,
   eligibilityOptions,
   fundingOptions,
+  postedDateOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
@@ -39,6 +40,7 @@ export async function SearchDrawerFilters({
     status,
     agency,
     closeDate,
+    postedDate,
     costSharing,
     sortby,
     query,
@@ -62,7 +64,7 @@ export async function SearchDrawerFilters({
   return (
     <>
       <div className="display-block tablet:display-none">
-        <SearchSortBy sortby={sortby} queryTerm={query} />
+        <SearchSortBy sortby={sortby} queryTerm={query} drawer={true} />
       </div>
       <CheckboxFilter
         filterOptions={statusOptions}
@@ -111,6 +113,7 @@ export async function SearchDrawerFilters({
           agencyOptionsPromise={agenciesPromise}
           topLevelQuery={topLevelAgency}
           className="width-100 padding-right-5"
+          selectedStatuses={Array.from(status)}
         />
       </Suspense>
       <CheckboxFilter
@@ -120,6 +123,13 @@ export async function SearchDrawerFilters({
         title={t("accordion.titles.category")}
         facetCounts={facetCounts?.funding_category || {}}
         contentClassName="maxh-mobile-lg overflow-auto position-relative"
+      />
+      <RadioButtonFilter
+        filterOptions={postedDateOptions}
+        query={postedDate}
+        queryParamKey={"postedDate"}
+        title={t("accordion.titles.postedDate")}
+        facetCounts={facetCounts?.post_date}
       />
       <RadioButtonFilter
         filterOptions={closeDateOptions}

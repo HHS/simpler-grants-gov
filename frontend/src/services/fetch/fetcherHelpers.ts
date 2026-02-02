@@ -27,13 +27,19 @@ export interface HeadersDict {
 }
 
 // Configuration of headers to send with all requests
-export function getDefaultHeaders(): HeadersDict {
+export function getDefaultHeaders(addContentType = true): HeadersDict {
   const headers: HeadersDict = {};
+
+  if (environment.API_GW_AUTH) {
+    headers["X-API-KEY"] = environment.API_GW_AUTH;
+  }
 
   if (environment.API_AUTH_TOKEN) {
     headers["X-AUTH"] = environment.API_AUTH_TOKEN;
   }
-  headers["Content-Type"] = "application/json";
+  if (addContentType) {
+    headers["Content-Type"] = "application/json";
+  }
   return headers;
 }
 
@@ -43,13 +49,10 @@ export function createRequestUrl(
   version: string,
   namespace: string,
   subPath = "",
-  body?: JSONRequestBody,
+  body?: JSONRequestBody | FormData,
 ) {
-  // Remove leading slash
-  const cleanedPaths = compact([basePath, version, namespace, subPath]).map(
-    removeLeadingSlash,
-  );
-  let url = [...cleanedPaths].join("/");
+  const cleanedPaths = compact([basePath, version, namespace, subPath]);
+  let url = [...cleanedPaths].map(removeRedundantSlashes).join("/");
   if (method === "GET" && body && !(body instanceof FormData)) {
     // Append query string to URL
     const newBody: { [key: string]: string } = {};
@@ -66,17 +69,17 @@ export function createRequestUrl(
 }
 
 /**
- * Remove leading slash
+ * Remove leading slash and (non protocol related) double slashes (in case a segment such a version is not provided)
  */
-function removeLeadingSlash(path: string) {
-  return path.replace(/^\//, "");
+export function removeRedundantSlashes(path: string) {
+  return path.replace(/^\//, "").replace(/(?<!:)\/\//g, "/");
 }
 
 /**
  * Transform the request body into a format that fetch expects
  */
 export function createRequestBody(
-  payload?: JSONRequestBody,
+  payload?: JSONRequestBody | FormData,
 ): XMLHttpRequestBodyInit {
   if (payload instanceof FormData) {
     return payload;

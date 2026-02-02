@@ -8,15 +8,18 @@ export const startApplicationHandler = async (request: Request) => {
     if (!session || !session.token) {
       throw new UnauthorizedError("No active session start application");
     }
-    const { competitionId, applicationName } = (await request.json()) as {
-      competitionId: string;
-      applicationName: string;
-    };
+    const { competitionId, applicationName, organization } =
+      (await request.json()) as {
+        competitionId: string;
+        applicationName: string;
+        organization?: string;
+      };
 
     const response = await handleStartApplication(
       applicationName,
       competitionId,
       session.token,
+      organization,
     );
 
     if (!response || response.status_code !== 200) {

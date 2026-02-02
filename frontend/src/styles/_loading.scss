@@ -8,6 +8,11 @@ $spinner-size: units(4);
   height: $spinner-size;
   width: $spinner-size;
 
+  &.sm {
+    height: units(2);
+    width: units(2);
+  }
+
   // Spinner icon pieces (full and partial circles)
   &::before,
   &::after {

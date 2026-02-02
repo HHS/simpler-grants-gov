@@ -1,4 +1,8 @@
+import { JSONSchema7 } from "json-schema";
+import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { Organization } from "src/types/applicationResponseTypes";
+import { UserProfile } from "src/types/authTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -9,13 +13,24 @@ import { ValidSearchQueryParamData } from "src/types/search/searchQueryTypes";
 import {
   PaginationOrderBy,
   PaginationSortDirection,
+  QueryOperator,
   QueryParamData,
   SearchAPIResponse,
   SearchFetcherActionType,
 } from "src/types/search/searchRequestTypes";
+import {
+  OrganizationInvitation,
+  TestUser,
+  UserDetail,
+  UserDetailWithProfile,
+  UserOrganization,
+  UserPrivilegesResponse,
+  UserRole,
+} from "src/types/userTypes";
 
 export const mockOpportunity: BaseOpportunity = {
-  opportunity_id: 12345,
+  opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
+  legacy_opportunity_id: 12345,
   opportunity_title: "Test Opportunity",
   opportunity_status: "posted",
   summary: {
@@ -34,13 +49,15 @@ export const searchFetcherParams: QueryParamData = {
   status: new Set(["forecasted", "posted"]),
   fundingInstrument: new Set(["grant", "cooperative_agreement"]),
   agency: new Set(),
+  assistanceListingNumber: new Set(),
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
+  postedDate: new Set(),
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
-  sortby: "opportunityNumberAsc",
+  sortby: "opportunityTitleAsc",
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
   andOr: "OR",
@@ -69,18 +86,27 @@ export const fakeSavedSearch = {
   filters: fakeSearchFilterRequestBody,
   pagination: arbitrarySearchPagination,
   query: "something to search for",
+  query_operator: "OR" as QueryOperator,
 };
 
 export const fakeSearchQueryParamData: ValidSearchQueryParamData = {
   query: "search term",
   status: "forecasted,closed",
-  fundingInstrument: "Cooperative Agreement",
-  eligibility: "Individuals",
-  agency: "Economic Development Administration",
-  category: "Recovery Act",
+  fundingInstrument: "cooperative_agreement",
+  eligibility: "individuals",
+  agency: "DOC-EDA",
+  category: "recovery_act",
   page: "1",
   sortby: "relevancy",
 };
+
+export const fakeAgencyOptions: FilterOption[] = [
+  {
+    id: "1",
+    label: "Economic Development Administration",
+    value: "DOC-EDA",
+  },
+];
 
 const fakePaginationInfo: PaginationInfo = {
   order_by: "opportunity_number",
@@ -96,6 +122,9 @@ export const fakeFacetCounts = {
     posted: 1,
     forecasted: 1,
   },
+  assistance_listing_number: {
+    "15.808": 1,
+  },
   funding_instrument: {
     arbitraryKey: 1,
   },
@@ -109,6 +138,9 @@ export const fakeFacetCounts = {
     arbitraryKey: 1,
   },
   close_date: {
+    arbitraryKey: 1,
+  },
+  post_date: {
     arbitraryKey: 1,
   },
   is_cost_sharing: {
@@ -156,6 +188,7 @@ export const initialFilterOptions: FilterOption[] = [
     value: "other",
   },
 ];
+
 export const filterOptionsWithChildren = [
   {
     id: "AGNC",
@@ -364,3 +397,326 @@ export const fakeFilterPillLabelData: FilterPillLabelData[] = [
     queryParamValue: "again",
   },
 ];
+
+export const fakeUserOrganization: UserOrganization = {
+  is_organization_owner: true,
+  organization_id: "great id",
+  sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
+
+export const fakeOrganizationDetailsResponse: Organization = {
+  organization_id: "great id",
+  sam_gov_entity: {
+    ebiz_poc_email: "email@email.email",
+    ebiz_poc_first_name: "first",
+    ebiz_poc_last_name: "last",
+    expiration_date: "1-1-25",
+    legal_business_name: "Completely Legal Organization",
+    uei: "unique entity identifier",
+  },
+};
+
+export const fakeCompetition = {
+  closing_date: "1-1-30",
+  competition_forms: [
+    {
+      form: {
+        form_id: "123e4567-e89b-12d3-a456-426614174000",
+        form_json_schema: {
+          properties: {
+            ApplicationNumber: {
+              maxLength: 120,
+              minLength: 1,
+              title: "Application number",
+              type: "number",
+            },
+            Date: {
+              format: "date",
+              title: "Date of application ",
+              type: "string",
+            },
+            Description: {
+              maxLength: 15,
+              minLength: 0,
+              title: "Description for application",
+              type: "string",
+            },
+            Title: {
+              maxLength: 60,
+              minLength: 1,
+              title: "Title",
+              type: "string",
+            },
+          },
+          title: "Test form for testing",
+          type: "object",
+        },
+      },
+      is_required: true,
+    },
+  ],
+  competition_id: "1",
+  competition_info: "info",
+  competition_instructions: [
+    {
+      created_at: "2025-06-13T20:17:16.491Z",
+      download_path:
+        "https://cdn.example.com/competition-instructions/file.pdf",
+      file_name: "competition_instructions.pdf",
+      updated_at: "2025-06-13T20:17:16.491Z",
+    },
+  ],
+  competition_title: "cool competition",
+  contact_info: null,
+  is_open: true,
+  open_to_applicants: ["individual", "organization"],
+  opening_date: "1-1-25",
+  opportunity_assistance_listings: [
+    {
+      assistance_listing_number: "43.012",
+      program_title: "Space Technology",
+    },
+  ],
+  opportunity_id: "2",
+};
+
+// API Key fixtures
+/**
+ * Base API key fixture that can be used across tests
+ */
+export const baseApiKey: ApiKey = {
+  api_key_id: "test-key-id",
+  key_name: "Test API Key",
+  key_id: "abc123",
+  created_at: "2023-01-01T00:00:00Z",
+  last_used: null,
+  is_active: true,
+};
+
+/**
+ * API key fixture with last_used date
+ */
+export const usedApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "used-key-id",
+  key_name: "Used API Key",
+  key_id: "def456",
+  last_used: "2023-06-01T12:00:00Z",
+};
+
+/**
+ * Inactive API key fixture
+ */
+export const inactiveApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "inactive-key-id",
+  key_name: "Inactive API Key",
+  key_id: "ghi789",
+  is_active: false,
+  last_used: "2023-05-01T10:30:00Z",
+};
+
+/**
+ * API key with long name for testing UI edge cases
+ */
+export const longNameApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "long-name-key-id",
+  key_name:
+    "This is a very long API key name that might cause display issues in the UI",
+  key_id: "jkl012",
+};
+
+/**
+ * API key with special characters for testing
+ */
+export const specialCharApiKey: ApiKey = {
+  ...baseApiKey,
+  api_key_id: "special-char-key-id",
+  key_name: "API Key with Special-Characters & Symbols!",
+  key_id: "mno345",
+};
+
+/**
+ * Collection of multiple API keys for testing lists
+ */
+export const mockApiKeys: ApiKey[] = [baseApiKey, usedApiKey, inactiveApiKey];
+
+/**
+ * Helper function to create a custom API key with overrides
+ */
+export const createMockApiKey = (overrides: Partial<ApiKey> = {}): ApiKey => ({
+  ...baseApiKey,
+  ...overrides,
+});
+
+export const fakeFieldSchema: JSONSchema7 = {
+  maxLength: 15,
+  minLength: 0,
+  title: "Description for application",
+  type: "string",
+};
+
+export const fakeWidgetProps = {
+  id: "some-id",
+  key: "some-id",
+  disabled: false,
+  required: false,
+  minLength: fakeFieldSchema.minLength,
+  maxLength: fakeFieldSchema.maxLength,
+  schema: fakeFieldSchema,
+  rawErrors: [],
+  value: "hi",
+  options: {},
+};
+
+export const fakeUser: UserDetail = {
+  user_id: "1",
+  email: "not-the-real-email@fake.com",
+  first_name: "joe",
+  last_name: "quisling",
+};
+
+export const fakeUserWithProfile: UserDetailWithProfile = {
+  user_id: "1",
+  email: "not-the-real-email@fake.com",
+  external_user_type: "whatever",
+  profile: {
+    first_name: "joe",
+    last_name: "quisling",
+  },
+};
+
+export const fakeUserRole: UserRole = {
+  role_id: "1",
+  role_name: "role_1",
+  privileges: ["view_application", "manage_org_members"],
+};
+
+export const fakeUserPrivilegesResponse: UserPrivilegesResponse = {
+  user_id: "1",
+  organization_users: [
+    {
+      organization: {
+        organization_id: "1",
+      },
+      organization_user_roles: [
+        {
+          role_id: "1",
+          role_name: "role_1",
+          privileges: ["view_application", "manage_org_members"],
+        },
+      ],
+    },
+    {
+      organization: {
+        organization_id: "4",
+      },
+      organization_user_roles: [
+        {
+          role_id: "4",
+          role_name: "role_4",
+          privileges: ["view_application", "get_submitted_applications"],
+        },
+      ],
+    },
+  ],
+  application_users: [
+    {
+      application: {
+        application_id: "1",
+      },
+      application_user_roles: [
+        {
+          role_id: "2",
+          role_name: "role_2",
+          privileges: ["view_application"],
+        },
+      ],
+    },
+  ],
+  agency_users: [
+    {
+      agency: {
+        agency_id: "3",
+      },
+      agency_user_roles: [
+        {
+          role_id: "3",
+          role_name: "role_3",
+          privileges: ["manage_agency_members"],
+        },
+      ],
+    },
+    {
+      agency: {
+        agency_id: "5",
+      },
+      agency_user_roles: [
+        {
+          role_id: "5",
+          role_name: "role_5",
+          privileges: ["manage_agency_members"],
+        },
+      ],
+    },
+  ],
+};
+
+export const fakeOrganizationInviteRecord = {
+  organization_invitation_id: "1",
+  organization_id: "2",
+  invitee_email: "not-a-real@email.org",
+  status: "pending",
+  roles: [
+    {
+      role_id: "5",
+      role_name: "role_5",
+    },
+  ],
+};
+
+export const fakeOrganizationInvitation: OrganizationInvitation = {
+  organization_invitation_id: "uuid",
+  organization: {
+    organization_id: "uuid",
+    organization_name: "Example Organization",
+  },
+  status: "pending",
+  created_at: "2024-0108T13:00Z",
+  expires_at: "2024-0115T13:00Z",
+  inviter: {
+    first_name: "John",
+    last_name: "Doe",
+    email: "admin@org.com",
+    user_id: "1",
+  },
+  roles: [
+    {
+      role_id: "uuid",
+      role_name: "Organization Member",
+      privileges: ["view_org_membership", "start_application"],
+    },
+  ],
+};
+
+export const fakeTestUser: TestUser = {
+  first_name: "hi",
+  last_name: "there",
+  oauth_id: "id",
+  user_api_key: "key",
+  user_id: "user",
+  user_jwt: "jwt",
+};
+
+export const fakeUserProfile: UserProfile = {
+  token: "a token",
+  user_id: "an id",
+};

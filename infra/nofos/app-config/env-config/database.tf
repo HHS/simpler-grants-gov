@@ -8,6 +8,7 @@ locals {
     instance_count              = var.database_instance_count
     max_capacity                = var.database_max_capacity
     min_capacity                = var.database_min_capacity
+    engine_version              = var.database_engine_version
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
     enable_http_endpoint        = true

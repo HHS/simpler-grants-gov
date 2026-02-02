@@ -3,10 +3,12 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
-import { ErrorMessage, FormGroup, Textarea } from "@trussworks/react-uswds";
+import { FormGroup, Textarea } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextareaWidget` is a widget for rendering input fields as textarea.
  *
@@ -20,7 +22,7 @@ function TextAreaWidget<
   id,
   disabled,
   required,
-  readonly,
+  readOnly,
   schema,
   value,
   autofocus = false,
@@ -32,7 +34,8 @@ function TextAreaWidget<
   onChange = () => ({}),
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
-  const { title, maxLength, minLength } = schema;
+  const { description, title, maxLength, minLength } = schema;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
 
   const handleBlur = useCallback(
     ({ target }: FocusEvent<HTMLTextAreaElement>) =>
@@ -60,10 +63,17 @@ function TextAreaWidget<
   const inputValue = value !== undefined ? String(value) : "";
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel idFor={id} title={title} required={required} />
-
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
+    <FormGroup error={error} key={`form-group__text-area--${id}`}>
+      <DynamicFieldLabel
+        idFor={id}
+        title={title}
+        required={required}
+        description={description as string}
+        labelType={labelType}
+      />
+      {error && (
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
+      )}
       <Textarea
         minLength={(minLength as number) ?? undefined}
         maxLength={(maxLength as number) ?? undefined}
@@ -74,7 +84,7 @@ function TextAreaWidget<
         // update to let form validation happen on the updateOnInput
         aria-required={required}
         disabled={disabled}
-        readOnly={readonly}
+        readOnly={readOnly}
         onChange={updateOnInput ? handleChange : undefined}
         onBlur={updateOnInput ? handleBlur : undefined}
         onFocus={updateOnInput ? handleFocus : undefined}
@@ -82,6 +92,7 @@ function TextAreaWidget<
         defaultValue={updateOnInput ? undefined : inputValue}
         value={updateOnInput ? inputValue : undefined}
         rows={options.rows}
+        error={error}
       />
     </FormGroup>
   );

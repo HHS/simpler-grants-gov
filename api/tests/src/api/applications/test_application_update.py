@@ -1,8 +1,14 @@
 import pytest
 
-from src.constants.lookup_constants import ApplicationStatus
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
 from src.validation.validation_constants import ValidationErrorType
-from tests.src.db.models.factories import ApplicationFactory, ApplicationUserFactory
+from tests.lib.application_test_utils import create_user_in_app
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    ApplicationUserFactory,
+    ApplicationUserRoleFactory,
+    RoleFactory,
+)
 
 
 def test_application_update_success(
@@ -13,11 +19,15 @@ def test_application_update_success(
     application = ApplicationFactory.create(application_name="Original Name")
 
     # Associate the user with the application using factory
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Update the application name
     new_name = "Updated Application Name"
     request_data = {"application_name": new_name}
+
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json=request_data,
@@ -31,6 +41,13 @@ def test_application_update_success(
     # Refresh the application from the database before checking
     db_session.refresh(application)
     assert application.application_name == new_name
+
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.APPLICATION_NAME_CHANGED
+    )
+    assert application.application_audits[0].user_id == user.user_id
 
 
 def test_application_update_unauthorized(client, enable_factory_create, db_session):
@@ -57,7 +74,10 @@ def test_application_update_empty_name(
     application = ApplicationFactory.create(application_name="Original Name")
 
     # Associate the user with the application using factory
-    ApplicationUserFactory.create(user=user, application=application)
+    ApplicationUserRoleFactory(
+        application_user=ApplicationUserFactory.create(user=user, application=application),
+        role=RoleFactory(privileges=[Privilege.MODIFY_APPLICATION]),
+    )
 
     # Try to update with empty name
     request_data = {"application_name": ""}
@@ -103,19 +123,18 @@ def test_application_update_missing_field(
     "initial_status", [ApplicationStatus.SUBMITTED, ApplicationStatus.ACCEPTED]
 )
 def test_application_form_update_forbidden_not_in_progress(
-    client, enable_factory_create, db_session, user_auth_token, user, initial_status
+    client, enable_factory_create, db_session, initial_status
 ):
     """Test application update fails if application is not in IN_PROGRESS status"""
     # Create an application with a status other than IN_PROGRESS
-    application = ApplicationFactory.create(application_status=initial_status)
-
-    # Associate user with application
-    ApplicationUserFactory.create(user=user, application=application)
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION], status=initial_status
+    )
 
     response = client.put(
         f"/alpha/applications/{application.application_id}",
         json={"application_name": "something new"},
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     # Assert forbidden response
@@ -133,3 +152,26 @@ def test_application_form_update_forbidden_not_in_progress(
 
     db_session.refresh(application)
     assert application.application_name != "something new"
+
+
+def test_application_update_403_access(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test forbidden update of an application's name"""
+    # Create application
+    application = ApplicationFactory.create(application_name="Original Name")
+
+    # Associate the user with the application using factory
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Update the application name
+    new_name = "Updated Application Name"
+    request_data = {"application_name": new_name}
+    response = client.put(
+        f"/alpha/applications/{application.application_id}",
+        json=request_data,
+        headers={"X-SGG-Token": user_auth_token},
+    )
+    # Check response
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"

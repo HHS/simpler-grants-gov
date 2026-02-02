@@ -5,7 +5,8 @@ test.describe("Search results export", () => {
     project,
   }) => {
     // downloads work manually in safari, but can't get the test to work
-    if (project.name.match(/webkit/)) {
+    // export button not available in mobile
+    if (project.name.match(/webkit/) || project.name.match(/[Mm]obile/)) {
       return;
     }
     const downloadPromise = page.waitForEvent("download");

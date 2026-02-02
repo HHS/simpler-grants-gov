@@ -6,7 +6,9 @@ module "dev_config" {
   environment                     = "dev"
   network_name                    = "dev"
   domain_name                     = "api.dev.simpler.grants.gov"
+  secondary_domain_names          = ["alb.dev.simpler.grants.gov"]
   s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
+  mtls_domain_name                = "soap.dev.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
@@ -42,9 +44,17 @@ module "dev_config" {
   service_override_extra_environment_variables = {
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT   = 1
-    ENABLE_APPLY_ENDPOINTS = 1
-    ENABLE_SOAP_API        = 1
+    ENABLE_XML_GENERATION = 1
+
+    ENABLE_WORKFLOW_ENDPOINTS = 1
+
+    # Email notification
+    RESET_EMAILS_WITHOUT_SENDING = "false"
+
+    # PDF Generation - Dev overrides
+    FRONTEND_URL             = "https://dev.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE      = "true"
+    PDF_GENERATION_USE_MOCKS = "false"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

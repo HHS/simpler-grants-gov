@@ -18,7 +18,7 @@ export default function RoadmapHeader() {
           <Grid tablet={{ col: 6 }} tabletLg={{ col: "auto" }}>
             <Grid className="display-flex flex-justify-center flex-align-center margin-x-neg-2 tablet:margin-x-0">
               <Image
-                src="/img/roadmap-header-image.png"
+                src="/img/bridge.png"
                 alt="Picture of person on a journey"
                 priority={false}
                 width={360}

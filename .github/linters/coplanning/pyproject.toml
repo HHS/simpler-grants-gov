@@ -1,0 +1,10 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61.0"]
+
+[project]
+name = "coplanning"
+version = "0.1.0"
+
+[tool.setuptools.packages.find]
+where = ["."]

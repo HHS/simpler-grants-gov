@@ -40,12 +40,12 @@ locals {
 }
 
 terraform {
-  required_version = "< 1.10"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.68.0"
+      version = "~> 6.13.0"
     }
   }
 
@@ -97,6 +97,7 @@ module "database" {
   min_capacity                   = local.database_config.min_capacity
   enable_http_endpoint           = local.database_config.enable_http_endpoint
   vpc_id                         = data.aws_vpc.network.id
+  engine_version                 = local.database_config.engine_version
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
   database_subnet_group_name     = var.environment_name

@@ -13,6 +13,7 @@ class OpportunityTables(StrEnum):
     CURRENT_OPPORTUNITY_SUMMARY = "current_opportunity_summary"
     USER_SAVED_OPPORTUNITY = "user_saved_opportunity"
     USER_SAVED_SEARCH = "user_saved_search"
+    USER_DATA = "user_data"
 
 
 LK_OPPORTUNITY_STATUS_COLS = (
@@ -30,6 +31,7 @@ LK_OPPORTUNITY_CATEGORY_COLS = (
 )
 OPPORTUNITY_COLS = (
     "OPPORTUNITY_ID",
+    "LEGACY_OPPORTUNITY_ID",
     "OPPORTUNITY_NUMBER",
     "OPPORTUNITY_TITLE",
     "AGENCY_CODE",
@@ -38,14 +40,13 @@ OPPORTUNITY_COLS = (
     "IS_DRAFT",
     "REVISION_NUMBER",
     "MODIFIED_COMMENTS",
-    "PUBLISHER_USER_ID",
-    "PUBLISHER_PROFILE_ID",
     "CREATED_AT",
     "UPDATED_AT",
 )
 OPOORTUNITY_SUMMARY_COLS = (
     "OPPORTUNITY_SUMMARY_ID",
     "OPPORTUNITY_ID",
+    "LEGACY_OPPORTUNITY_ID",
     "SUMMARY_DESCRIPTION",
     "IS_COST_SHARING",
     "IS_FORECAST",
@@ -69,20 +70,13 @@ OPOORTUNITY_SUMMARY_COLS = (
     "MODIFICATION_COMMENTS",
     "FUNDING_CATEGORY_DESCRIPTION",
     "APPLICANT_ELIGIBILITY_DESCRIPTION",
-    "AGENCY_CODE",
-    "AGENCY_NAME",
-    "AGENCY_PHONE_NUMBER",
     "AGENCY_CONTACT_DESCRIPTION",
     "AGENCY_EMAIL_ADDRESS",
     "AGENCY_EMAIL_ADDRESS_DESCRIPTION",
+    "VERSION_NUMBER",
     "CAN_SEND_MAIL",
-    "PUBLISHER_PROFILE_ID",
-    "PUBLISHER_USER_ID",
-    "UPDATED_BY",
-    "CREATED_BY",
     "CREATED_AT",
     "UPDATED_AT",
-    "VERSION_NUMBER",
 )
 CURRENT_OPPORTUNITY_SUMMARY_COLS = (
     "OPPORTUNITY_ID",
@@ -95,19 +89,27 @@ CURRENT_OPPORTUNITY_SUMMARY_COLS = (
 USER_SAVED_OPPORTUNITY_COLS = (
     "USER_ID",
     "OPPORTUNITY_ID",
+    "LAST_NOTIFIED_AT",
+    "IS_DELETED",
     "CREATED_AT",
     "UPDATED_AT",
-    "LAST_NOTIFIED_AT",
 )
 USER_SAVED_SEARCH_COLS = (
     "SAVED_SEARCH_ID",
     "USER_ID",
     "SEARCH_QUERY",
     "NAME",
-    "CREATED_AT",
-    "UPDATED_AT",
     "LAST_NOTIFIED_AT",
     "SEARCHED_OPPORTUNITY_IDS",
+    "IS_DELETED",
+    "CREATED_AT",
+    "UPDATED_AT",
+)
+
+USER_COLS = (
+    "USER_ID",
+    "CREATED_AT",
+    "UPDATED_AT",
 )
 
 MAP_TABLES_TO_COLS: dict[OpportunityTables, tuple[str, ...]] = {
@@ -118,4 +120,11 @@ MAP_TABLES_TO_COLS: dict[OpportunityTables, tuple[str, ...]] = {
     OpportunityTables.CURRENT_OPPORTUNITY_SUMMARY: CURRENT_OPPORTUNITY_SUMMARY_COLS,
     OpportunityTables.USER_SAVED_OPPORTUNITY: USER_SAVED_OPPORTUNITY_COLS,
     OpportunityTables.USER_SAVED_SEARCH: USER_SAVED_SEARCH_COLS,
+    OpportunityTables.USER_DATA: USER_COLS,
+}
+
+# Optional mapping for cases where file name differs from table name
+# If a table is not in this mapping, the file name will be the same as the table name
+MAP_TABLE_TO_FILE_NAME: dict[OpportunityTables, str] = {
+    OpportunityTables.USER_DATA: "user",
 }

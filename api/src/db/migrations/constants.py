@@ -2,7 +2,7 @@ opportunity_search_index_queue_trigger_function = """
 CREATE OR REPLACE FUNCTION api.update_opportunity_search_queue()
 RETURNS TRIGGER AS $$
 DECLARE
-    opp_id bigint;
+    opp_id uuid;
 BEGIN
     -- Determine the opportunity_id based on the table
     CASE TG_TABLE_NAME
@@ -23,7 +23,7 @@ BEGIN
     INSERT INTO api.opportunity_change_audit (opportunity_id)
     VALUES (opp_id)
     ON CONFLICT (opportunity_id)
-    DO UPDATE SET updated_at = CURRENT_TIMESTAMP, is_loaded_to_search = FALSE;
+    DO UPDATE SET updated_at = CURRENT_TIMESTAMP, is_loaded_to_search = FALSE, is_loaded_to_version_table=FALSE;
 
     RETURN NEW;
 END;

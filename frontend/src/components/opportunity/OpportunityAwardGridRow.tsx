@@ -22,7 +22,7 @@ const OpportunityAwardGridRow = ({ title, content }: Props) => {
       <p className="font-sans-sm text-bold margin-bottom-0">
         {content || defaultContentByType(title)}
       </p>
-      <p className="desktop-lg:font-sans-sm margin-top-0">{t(`${title}`)}</p>
+      <p className="desktop-lg:font-sans-sm">{t(`${title}`)}</p>
     </div>
   );
 };

@@ -106,7 +106,7 @@ def test_user_get_saved_opportunities(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 1
-    assert response.json["data"][0]["opportunity_id"] == opportunity.opportunity_id
+    assert response.json["data"][0]["opportunity_id"] == str(opportunity.opportunity_id)
     assert response.json["data"][0]["opportunity_title"] == opportunity.opportunity_title
 
 
@@ -205,7 +205,7 @@ def test_get_saved_opportunities_sorting(
 
     assert len(opportunities) == len(expected_result)
     assert [opp["opportunity_id"] for opp in opportunities] == [
-        opp.opportunity_id for opp in expected_result
+        str(opp.opportunity_id) for opp in expected_result
     ]
 
 
@@ -247,9 +247,9 @@ def test_user_get_only_own_saved_opportunities(
     opportunity_ids = [opp["opportunity_id"] for opp in response.json["data"]]
 
     # Verify that the user sees their own opportunities but not the other user's
-    assert user_opportunity.opportunity_id in opportunity_ids
-    assert shared_opportunity.opportunity_id in opportunity_ids
-    assert other_opportunity.opportunity_id not in opportunity_ids
+    assert str(user_opportunity.opportunity_id) in opportunity_ids
+    assert str(shared_opportunity.opportunity_id) in opportunity_ids
+    assert str(other_opportunity.opportunity_id) not in opportunity_ids
 
     # Verify the opportunity titles
     opportunity_titles = [opp["opportunity_title"] for opp in response.json["data"]]
@@ -284,4 +284,144 @@ def test_user_get_saved_opportunities_deleted(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 1
-    assert response.json["data"][0]["opportunity_id"] is active_opp.opportunity_id
+    assert response.json["data"][0]["opportunity_id"] == str(active_opp.opportunity_id)
+
+
+def test_user_get_saved_opportunities_filter_by_status(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    """Test that users can filter saved opportunities by opportunity status"""
+    # Create opportunities with different statuses using factory traits
+    posted_opp = OpportunityFactory.create(
+        opportunity_title="Posted Opportunity",
+        is_posted_summary=True,
+    )
+    forecasted_opp = OpportunityFactory.create(
+        opportunity_title="Forecasted Opportunity",
+        is_forecasted_summary=True,
+    )
+    closed_opp = OpportunityFactory.create(
+        opportunity_title="Closed Opportunity",
+        is_closed_summary=True,
+    )
+
+    # Save all opportunities for the user
+    UserSavedOpportunityFactory.create(user=user, opportunity=posted_opp)
+    UserSavedOpportunityFactory.create(user=user, opportunity=forecasted_opp)
+    UserSavedOpportunityFactory.create(user=user, opportunity=closed_opp)
+
+    # Filter by posted status only
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+            "filters": {
+                "opportunity_status": {
+                    "one_of": ["posted"],
+                },
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    assert len(response.json["data"]) == 1
+    assert response.json["data"][0]["opportunity_id"] == str(posted_opp.opportunity_id)
+    assert response.json["data"][0]["opportunity_title"] == "Posted Opportunity"
+
+
+def test_user_get_saved_opportunities_filter_by_multiple_statuses(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    """Test that users can filter saved opportunities by multiple statuses"""
+    # Create opportunities with different statuses using factory traits
+    posted_opp = OpportunityFactory.create(
+        opportunity_title="Posted Opportunity",
+        is_posted_summary=True,
+    )
+    forecasted_opp = OpportunityFactory.create(
+        opportunity_title="Forecasted Opportunity",
+        is_forecasted_summary=True,
+    )
+    closed_opp = OpportunityFactory.create(
+        opportunity_title="Closed Opportunity",
+        is_closed_summary=True,
+    )
+
+    # Save all opportunities for the user
+    UserSavedOpportunityFactory.create(user=user, opportunity=posted_opp)
+    UserSavedOpportunityFactory.create(user=user, opportunity=forecasted_opp)
+    UserSavedOpportunityFactory.create(user=user, opportunity=closed_opp)
+
+    # Filter by posted and forecasted statuses
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+            "filters": {
+                "opportunity_status": {
+                    "one_of": ["posted", "forecasted"],
+                },
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    assert len(response.json["data"]) == 2
+    opportunity_ids = [opp["opportunity_id"] for opp in response.json["data"]]
+    assert str(posted_opp.opportunity_id) in opportunity_ids
+    assert str(forecasted_opp.opportunity_id) in opportunity_ids
+    assert str(closed_opp.opportunity_id) not in opportunity_ids
+
+
+def test_user_get_saved_opportunities_no_filter_returns_all(
+    client,
+    enable_factory_create,
+    db_session,
+    user,
+    user_auth_token,
+):
+    """Test that without a filter, all saved opportunities are returned"""
+    # Create opportunities with different statuses using factory traits
+    posted_opp = OpportunityFactory.create(
+        opportunity_title="Posted Opportunity",
+        is_posted_summary=True,
+    )
+    forecasted_opp = OpportunityFactory.create(
+        opportunity_title="Forecasted Opportunity",
+        is_forecasted_summary=True,
+    )
+
+    # Save all opportunities for the user
+    UserSavedOpportunityFactory.create(user=user, opportunity=posted_opp)
+    UserSavedOpportunityFactory.create(user=user, opportunity=forecasted_opp)
+
+    # Request without filter
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    assert len(response.json["data"]) == 2

@@ -9,23 +9,9 @@ from src.db.models.legacy_mixin import user_mixin
 from . import foreignbase
 
 
-class TuserAccountMapper(foreignbase.ForeignBase, user_mixin.TuserAccountMapperMixin):
-    __tablename__ = "tuser_account_mapper"
+class VuserAccount(foreignbase.ForeignBase, user_mixin.VuserAccountMixin):
+    __tablename__ = "vuser_account"
 
 
-class TuserAccount(foreignbase.ForeignBase, user_mixin.TuserAccountMixin):
-    __tablename__ = "tuser_account"
-
-
-class TsubscriptionMixin(foreignbase.ForeignBase, user_mixin.TsubscriptionMixin):
-    __tablename__ = "tsubscription"
-
-
-class TsubscriptionSearchMixin(foreignbase.ForeignBase, user_mixin.TsubscriptionSearchMixin):
-    __tablename__ = "tsubscription_search"
-
-
-class TsubscriptionOpportunityMixin(
-    foreignbase.ForeignBase, user_mixin.TsubscriptionOpportunityMixin
-):
-    __tablename__ = "tsubscription_opportunity"
+class TuserProfile(foreignbase.ForeignBase, user_mixin.TuserProfileMixin):
+    __tablename__ = "tuser_profile"

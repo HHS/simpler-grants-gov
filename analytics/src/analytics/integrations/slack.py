@@ -1,10 +1,10 @@
-# ruff: noqa: T201
 """Integrate with Slack to post messages and get channel information."""
 
 import functools
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError

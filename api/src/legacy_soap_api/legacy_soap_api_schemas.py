@@ -1,4 +1,17 @@
+from collections.abc import Iterator
+
 from pydantic import BaseModel, ConfigDict
+
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
+from src.legacy_soap_api.legacy_soap_api_config import (
+    SimplerSoapAPI,
+    SOAPOperationConfig,
+    get_soap_operation_config,
+)
+from src.legacy_soap_api.soap_payload_handler import (
+    get_soap_envelope_from_payload,
+    get_soap_operation_name,
+)
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -9,20 +22,97 @@ class SOAPClientCertificateParsingError(Exception):
     pass
 
 
+class SOAPOperationNotSupported(Exception):
+    pass
+
+
+class SOAPInvalidEnvelope(Exception):
+    pass
+
+
+class SOAPInvalidRequestOperationName(Exception):
+    pass
+
+
 class SOAPRequest(BaseModel):
     data: bytes
     full_path: str
     headers: dict
     method: str
+    api_name: SimplerSoapAPI
+    auth: SOAPAuth | None = None
+    operation_name: str = ""
+
+    def get_soap_request_operation_config(self) -> SOAPOperationConfig:
+        """Get operation config
+
+        This method returns the relevant Simpler SOAP API operation configuration.
+
+        Every SOAP operation that Simpler SOAP API will support will need to have a corresponding entry in SIMPLER_SOAP_OPERATION_CONFIGS.
+
+        All existing grants.gov SOAP operations can be found here:
+        Applicants: https://grants.gov/system-to-system/applicant-system-to-system/web-services
+        Grantors: https://grants.gov/system-to-system/grantor-system-to-system/web-services
+
+        These configs store data for processing SOAP XML data within simpler.
+        """
+        envelope = get_soap_envelope_from_payload(self.data.decode()).envelope
+        if not envelope:
+            raise SOAPInvalidEnvelope(f"Error processing SOAP envelope for {self.api_name.value}")
+
+        operation_name = (
+            get_soap_operation_name(envelope) if not self.operation_name else self.operation_name
+        )
+        if not operation_name:
+            raise SOAPInvalidRequestOperationName(
+                f"Could not get SOAP operation name for {self.api_name.value}"
+            )
+
+        operation_config = get_soap_operation_config(self.api_name, operation_name)
+        if not operation_config:
+            raise SOAPOperationNotSupported(
+                f"Simpler {self.api_name.value} SOAP API does not support {operation_name}"
+            )
+
+        if operation_config.privileges is None:
+            raise SOAPOperationNotSupported(
+                f"Simpler {self.api_name.value} SOAP API has no privileges set for {operation_name}"
+            )
+
+        return operation_config
 
 
 class SOAPResponse(BaseModel):
-    data: bytes
+    data: bytes | Iterator[bytes] | list[bytes]
     status_code: int
     headers: dict
+    _cached_bytes: bytes | None = None
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def to_flask_response(self) -> tuple:
-        return self.data, self.status_code, self.headers
+        response_data = self.data if isinstance(self.data, bytes) else self.stream()
+        return response_data, self.status_code, self.headers
+
+    def to_bytes(self) -> bytes:
+        if isinstance(self.data, bytes):
+            return self.data
+        if self._cached_bytes is None:
+            self._cached_bytes = b"".join(iter(self.data))
+        return self._cached_bytes
+
+    def stream(self) -> Iterator[bytes] | list[bytes]:
+
+        def _data_generator(data: bytes) -> Iterator[bytes]:
+            data_length = len(data)
+            for i in range(0, data_length, 4000):
+                yield data[i : i + 4000]
+
+        if self._cached_bytes:
+            return _data_generator(self._cached_bytes)
+        if isinstance(self.data, bytes):
+            return _data_generator(self.data)
+        return self.data
 
 
 class BaseSOAPSchema(BaseModel):
@@ -36,6 +126,17 @@ class BaseSOAPSchema(BaseModel):
     """
 
     model_config = ConfigDict(populate_by_name=True)
+
+    def to_soap_envelope_dict(self, operation_name: str) -> dict:
+        return {
+            "Envelope": {
+                "Body": {
+                    operation_name: {
+                        **self.model_dump(mode="json", by_alias=True, exclude_none=True)
+                    }
+                }
+            }
+        }
 
 
 class FaultMessage(BaseModel):

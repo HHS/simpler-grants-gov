@@ -1,3 +1,4 @@
+from src.constants.static_role_values import ORG_ADMIN
 from src.services.users.organization_from_ebiz_poc import (
     find_sam_gov_entities_for_ebiz_poc,
     handle_ebiz_poc_organization_during_login,
@@ -57,10 +58,21 @@ def test_handle_ebiz_poc_organization_during_login_not_ebiz_poc(db_session, enab
     assert result is None
 
 
+def test_handle_ebiz_poc_organization_during_login_blank_email(db_session, enable_factory_create):
+    """Test that we return None when user email is blank"""
+    SamGovEntityFactory.create(ebiz_poc_email="")
+    external_user = LinkExternalUserFactory.create(email="")
+
+    result = handle_ebiz_poc_organization_during_login(db_session, external_user.user)
+
+    assert result is None
+
+
 def test_handle_ebiz_poc_organization_during_login_creates_organization(
     db_session, enable_factory_create
 ):
     """Test that we create organization when user is an ebiz POC with no existing organization"""
+
     # Create SAM.gov entity without an organization
     sam_gov_entity = SamGovEntityFactory.create(
         ebiz_poc_email="creates@example.com",
@@ -77,13 +89,18 @@ def test_handle_ebiz_poc_organization_during_login_creates_organization(
     org_user = result[0]
     assert org_user.user == user
     assert org_user.organization.sam_gov_entity == sam_gov_entity
-    assert org_user.is_organization_owner is True
+
+    db_session.flush()
+
+    assert len(org_user.organization_user_roles) == 1
+    assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
 
 def test_handle_ebiz_poc_organization_during_login_existing_organization(
     db_session, enable_factory_create
 ):
     """Test that we link user to existing organization when they are an ebiz POC"""
+
     # Create organization first
     organization = OrganizationFactory.create(no_sam_gov_entity=True)
 
@@ -111,7 +128,12 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization(
     org_user = result[0]
     assert org_user.user == user
     assert org_user.organization == organization
-    assert org_user.is_organization_owner is True
+
+    db_session.flush()
+
+    # Verify the user has the Organization Admin role
+    assert len(org_user.organization_user_roles) == 1
+    assert org_user.organization_user_roles[0].role_id == ORG_ADMIN.role_id
 
 
 def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
@@ -136,7 +158,8 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
     user = UserFactory.create()
     LinkExternalUserFactory.create(user=user, email="ebiz_update@example.com")
     org_user = OrganizationUserFactory.create(
-        organization=organization, user=user, is_organization_owner=False
+        organization=organization,
+        user=user,
     )
     db_session.flush()
 
@@ -146,7 +169,6 @@ def test_handle_ebiz_poc_organization_during_login_existing_organization_user(
     assert len(result) == 1
     returned_org_user = result[0]
     assert returned_org_user == org_user
-    assert returned_org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
@@ -164,12 +186,11 @@ def test_handle_ebiz_poc_organization_during_login_multiple_sam_entities(
     # Should create organizations for all entities and return all organization users created
     assert result is not None
     assert len(result) == 2  # Should return both organization users
-    assert len(user.organizations) == 2  # User should be linked to both organizations
+    assert len(user.organization_users) == 2  # User should be linked to both organizations
 
     # All organization users should be marked as owners
     for org_user in result:
         assert org_user.user == user
-        assert org_user.is_organization_owner is True
 
 
 def test_handle_ebiz_poc_organization_during_login_rollback_on_error(

@@ -9,6 +9,17 @@ import {
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
 
+export async function toggleFilterDrawer(page: Page) {
+  const modalOpen = await page
+    .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
+    .isVisible();
+  const drawerToggleButtonSelector = modalOpen
+    ? "button[data-testid='close-drawer']"
+    : "button[data-testid='toggle-drawer']";
+  const filterDrawerButton = page.locator(drawerToggleButtonSelector);
+  await filterDrawerButton.click();
+}
+
 export function getSearchInput(page: Page) {
   return page.locator("#query");
 }
@@ -16,7 +27,9 @@ export function getSearchInput(page: Page) {
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
-  await searchInput.fill(term);
+  // this needs to be `pressSequentially` rather than `fill` because `fill` was not
+  // reliably triggering onChange handlers in webkit
+  await searchInput.pressSequentially(term);
   await expect(searchInput).toHaveValue(term);
   await submitButton.click();
 }
@@ -63,25 +76,27 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   await checkBox.click();
 }
 
-export async function refreshPageWithCurrentURL(page: Page) {
-  const currentURL = page.url();
-  await page.goto(currentURL); // go to new url in same tab
-  return page;
-}
-
-export async function selectSortBy(page: Page, sortByValue: string) {
-  await page.locator("#search-sort-by-select").selectOption(sortByValue);
+export async function selectSortBy(
+  page: Page,
+  sortByValue: string,
+  drawer = false,
+) {
+  await page
+    .locator(`#search-sort-by-select${drawer ? "-drawer" : ""}`)
+    .selectOption(sortByValue);
   await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
-export async function expectSortBy(page: Page, value: string) {
-  const sortSelectElement = page.locator('select[name="search-sort-by"]');
+export async function expectSortBy(page: Page, value: string, drawer = false) {
+  const sortSelectElement = page.locator(
+    `#search-sort-by-select${drawer ? "-drawer" : ""}`,
+  );
   await expect(sortSelectElement).toHaveValue(value);
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
   // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h2:has-text("Opportunities")');
+  const resultsHeading = page.locator('h3:has-text("Opportunities")');
   await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
 }
 
@@ -122,14 +137,14 @@ export async function clickLastPaginationPage(page: Page) {
 
 export async function getFirstSearchResultTitle(page: Page) {
   const firstResultSelector = page.locator(
-    ".usa-list--unstyled > li:first-child h2 a",
+    ".simpler-responsive-table tr:first-child a",
   );
   return await firstResultSelector.textContent();
 }
 
 export async function getLastSearchResultTitle(page: Page) {
   const lastResultSelector = page.locator(
-    ".usa-list--unstyled > li:last-child h2 a",
+    ".simpler-responsive-table tr:last-child a",
   );
   return await lastResultSelector.textContent();
 }
@@ -161,18 +176,11 @@ export async function waitForLoaderToBeHidden(page: Page) {
 export async function getNumberOfOpportunitySearchResults(page: Page) {
   await waitForLoaderToBeHidden(page);
   const opportunitiesText = await page
-    .locator("h2.tablet-lg\\:grid-col-fill")
+    .locator("div[data-testid='search-results-controls'] h3")
     .textContent();
   return opportunitiesText
     ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
     : 0;
-}
-
-export async function toggleMobileSearchFilters(page: Page) {
-  const toggleButton = page.locator(
-    "div[data-testid='content-display-toggle'] .usa-button--unstyled",
-  );
-  await toggleButton.click();
 }
 
 export const getCountOfTopLevelFilterOptions = async (

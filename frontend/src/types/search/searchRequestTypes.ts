@@ -6,16 +6,20 @@ import { FilterQueryParamData } from "./searchQueryTypes";
 import { SortOptions } from "./searchSortTypes";
 
 export type OneOfFilter = { one_of: string[] };
-export type RelativeDateRangeFilter = { end_date_relative: string };
+export type RelativeDateRangeFilter =
+  | { end_date_relative: number }
+  | { start_date_relative: number };
 export type BooleanFilter = { one_of: boolean[] };
 
 export interface SearchFilterRequestBody {
   opportunity_status?: OneOfFilter;
+  assistance_listing_number?: OneOfFilter;
   funding_instrument?: OneOfFilter;
   applicant_type?: OneOfFilter;
   agency?: OneOfFilter;
   funding_category?: OneOfFilter;
   close_date?: RelativeDateRangeFilter;
+  post_date?: RelativeDateRangeFilter;
   is_cost_sharing?: BooleanFilter;
   top_level_agency?: OneOfFilter;
 }
@@ -28,6 +32,7 @@ export type PaginationOrderBy =
   | "opportunity_number"
   | "opportunity_title"
   | "agency_name"
+  | "assistance_listing_number"
   | "top_level_agency_name"
   | "post_date"
   | "close_date";
@@ -61,6 +66,7 @@ export type SavedSearchQuery = {
   filters: SearchFilterRequestBody;
   pagination: PaginationRequestBody;
   query: string;
+  query_operator: QueryOperator;
 };
 
 // relevant portions of the response payload from fetching a user's saved searches

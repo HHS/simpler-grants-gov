@@ -9,6 +9,8 @@ on:
       - ".github/workflows/*-nofos.yml"
       - "infra/nofos/**"
       - "infra/modules/**"
+  # Release deployments are handled by cd-release.yml to enforce deployment order
+  # (API -> Frontend -> NOFOs -> Analytics)
   workflow_dispatch:
     inputs:
       environment:
@@ -18,6 +20,8 @@ on:
         type: choice
         options:
           - dev
+          - training
+          - grantee1
           - prod
       version:
         description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
@@ -39,14 +43,20 @@ jobs:
 
   deploy:
     name: Deploy
+    if: github.event_name != 'push' || inputs.environment != null
     needs: [checks, vulnerability-scans]
     uses: ./.github/workflows/deploy-nofos.yml
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["dev"]')  }}
     with:
-      environment: ${{ inputs.environment || 'dev' }}
-      version: ${{ inputs.version || 'main' }}
+      environment: ${{ matrix.envs }}
+      version: ${{ inputs.version || github.ref || 'main' }}
 
   send-slack-notification:
-    if: failure()
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: [checks, deploy, vulnerability-scans]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

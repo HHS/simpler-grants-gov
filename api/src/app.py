@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Any, Tuple
+from typing import Any
 
 from apiflask import APIFlask, exceptions
 from flask import Response
@@ -18,24 +18,29 @@ import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
+from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
+from src.api.internal import internal_blueprint
+from src.api.local import local_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
+from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
 from src.api.users.user_blueprint import user_blueprint
+from src.api.workflows import workflow_blueprint
 from src.app_config import AppConfig
 from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
 from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.legacy_soap_api import init_app as init_legacy_soap_api
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -51,11 +56,14 @@ See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#releas
 
 
 class EndpointConfig(PydanticBaseEnvConfig):
-    auth_endpoint: bool = Field(False, alias="ENABLE_AUTH_ENDPOINT")
-
-    enable_apply_endpoints: bool = Field(False, alias="ENABLE_APPLY_ENDPOINTS")
     domain_verification_content: str | None = Field(None, alias="DOMAIN_VERIFICATION_CONTENT")
     domain_verification_map: dict = Field(default_factory=dict)
+
+    enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
+
+    # Do not ever change this to True, this controls endpoints we only
+    # want to exist for local development.
+    enable_local_endpoints: bool = Field(False, alias="ENABLE_LOCAL_ENDPOINTS")
 
     def model_post_init(self, _context: Any) -> None:
         self.domain_verification_map = {}
@@ -84,12 +92,10 @@ def create_app() -> APIFlask:
     register_search_client(app)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        initialize_login_gov_config()
-        initialize_jwt_auth()
+    initialize_login_gov_config()
+    initialize_jwt_auth()
 
-    if LegacySoapAPIConfig().soap_api_enabled:
-        init_legacy_soap_api(app)
+    init_legacy_soap_api(app)
 
     register_well_known(app, endpoint_config.domain_verification_map)
 
@@ -113,6 +119,9 @@ def register_search_client(app: APIFlask) -> None:
 
 def configure_app(app: APIFlask) -> None:
     app_config = AppConfig()
+
+    # Set maximum file upload size (2 GB)
+    app.config["MAX_CONTENT_LENGTH"] = app_config.max_file_upload_size_bytes
 
     # Modify the response schema to instead use the format of our ApiResponse class
     # which adds additional details to the object.
@@ -151,7 +160,7 @@ def configure_app(app: APIFlask) -> None:
     app.security_schemes = get_app_security_scheme()
 
     @app.error_processor
-    def error_processor(error: exceptions.HTTPError) -> Tuple[dict, int, Any]:
+    def error_processor(error: exceptions.HTTPError) -> tuple[dict, int, Any]:
         return restructure_error_response(error)
 
 
@@ -160,21 +169,31 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(opportunities_v1_blueprint)
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
+    app.register_blueprint(organizations_v1_blueprint)
+    app.register_blueprint(internal_blueprint)
 
     endpoint_config = EndpointConfig()
-    if endpoint_config.auth_endpoint:
-        app.register_blueprint(user_blueprint)
+    app.register_blueprint(user_blueprint)
 
     # Endpoints for apply functionality
-    if endpoint_config.enable_apply_endpoints:
-        app.register_blueprint(application_blueprint)
-        app.register_blueprint(form_blueprint)
-        app.register_blueprint(competition_blueprint)
+    app.register_blueprint(application_blueprint)
+    app.register_blueprint(form_blueprint)
+    app.register_blueprint(competition_blueprint)
+
+    # CommonGrants Protocol endpoints
+    app.register_blueprint(common_grants_blueprint)
+
+    # Local endpoints for development, will error
+    # if this is ever enabled non-locally.
+    if endpoint_config.enable_local_endpoints:
+        error_if_not_local()
+        app.register_blueprint(local_blueprint)
 
     # Non-api blueprints
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
+    app.register_blueprint(workflow_blueprint)
 
 
 def get_project_root_dir() -> str:

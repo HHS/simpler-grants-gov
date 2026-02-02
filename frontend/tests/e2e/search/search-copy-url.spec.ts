@@ -1,16 +1,17 @@
 import { expect, test } from "@playwright/test";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
 
-import {
-  fillSearchInputAndSubmit,
-  toggleMobileSearchFilters,
-} from "./searchSpecUtil";
+import { fillSearchInputAndSubmit } from "./searchSpecUtil";
 
 test("should copy search query URL to clipboard", async ({ page }, {
   project,
 }) => {
   // clipboard testing does not work in webkit
   if (project.name.match(/[Ww]ebkit/)) {
+    return;
+  }
+  // copy button is not visible in mobile
+  if (project.name.match(/[Mm]obile/)) {
     return;
   }
 
@@ -23,10 +24,6 @@ test("should copy search query URL to clipboard", async ({ page }, {
     await fillSearchInputAndSubmit("education grants", page);
   } catch (e) {
     await fillSearchInputAndSubmit("education grants", page);
-  }
-
-  if (project.name.match(/[Mm]obile/)) {
-    await toggleMobileSearchFilters(page);
   }
 
   const copyButton = page.getByText("Copy this search query");

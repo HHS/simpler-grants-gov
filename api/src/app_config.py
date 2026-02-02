@@ -13,3 +13,6 @@ class AppConfig(PydanticBaseEnvConfig):
     # For the OpenAPI docs, set whether the auth tokens are stored
     # across refreshes of the page. Currently we only set this to true locally
     persist_authorization_openapi: bool = False
+
+    # Maximum file upload size in bytes (2 GB)
+    max_file_upload_size_bytes: int = 2 * 1024 * 1024 * 1024

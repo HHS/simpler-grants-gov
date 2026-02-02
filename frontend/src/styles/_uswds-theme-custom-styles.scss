@@ -335,7 +335,8 @@ h6 {
 }
 
 .usa-footer__secondary-section {
-  background-color: color("mint-5");
+  height: 0;
+  padding: 0;
 }
 
 .footer-logo-container {
@@ -413,6 +414,10 @@ button.usa-pagination__button.usa-button {
   }
 }
 
+.usa-pagination .usa-current {
+  background-color: color("mint-60") !important;
+}
+
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
@@ -438,14 +443,16 @@ button.usa-pagination__button.usa-button {
         color: white;
       }
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_less.svg"),
+        mask-image:
+          url("/uswds/img/usa-icons/expand_less.svg"),
           linear-gradient(transparent, transparent);
         background-color: white;
       }
     }
     button[aria-expanded="false"] {
       span:after {
-        mask-image: url("/uswds/img/usa-icons/expand_more.svg"),
+        mask-image:
+          url("/uswds/img/usa-icons/expand_more.svg"),
           linear-gradient(transparent, transparent);
       }
     }
@@ -503,6 +510,33 @@ button.usa-pagination__button.usa-button {
   &.overflow-wrap {
     overflow-wrap: break-word;
   }
+  &.application-attachments-table {
+    td {
+      height: 65px;
+    }
+    .grants-spinner {
+      float: left;
+      margin-right: 0.5rem;
+    }
+    .highlight {
+      td {
+        background-color: color(gold-5v);
+        line-height: 1rem;
+      }
+    }
+  }
+}
+
+.table-layout-auto {
+  table-layout: auto !important;
+}
+
+.verticle-align-bottom {
+  vertical-align: bottom;
+}
+
+.verticle-align-top {
+  vertical-align: top;
 }
 
 // Accordions
@@ -563,6 +597,7 @@ dl {
 }
 
 .simpler-responsive-table {
+  min-width: 100%;
   thead {
     @include at-media("tablet-lg") {
       display: table-header-group;
@@ -588,5 +623,152 @@ dl {
         }
       }
     }
+  }
+}
+
+.simpler-selected-filter {
+  .usa-accordion__button {
+    background-color: color($theme-color-secondary-lightest);
+  }
+}
+
+// roadmap timeline
+.roadmap-row {
+  div:first-child:after {
+    content: "";
+    position: absolute;
+    top: 1.2rem;
+    left: 0;
+    margin-left: calc(-0.5rem - 1px);
+    height: 1rem;
+    width: 1rem;
+    background-color: color("base-darkest");
+    border-radius: 100%;
+    @include at-media("tablet") {
+      left: 100%;
+      margin-left: calc(-0.5rem + 1px);
+    }
+  }
+
+  &:last-child div:last-child:after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: -1px;
+    height: 0.75rem;
+    width: 0.75rem;
+    border-left: 2px solid color("base-darkest");
+    border-bottom: 2px solid color("base-darkest");
+    transform: rotate(-45deg);
+    transform-origin: left bottom;
+  }
+}
+
+#opportunity-detail-content {
+  p:first-child {
+    margin-top: 1rem;
+  }
+  p:last-child {
+    margin-bottom: 1rem;
+  }
+}
+
+.simpler-currency-input-wrapper {
+  position: relative;
+  display: inline-block;
+  &::after {
+    content: "$";
+    position: absolute;
+    left: 10px;
+    bottom: -0.5rem;
+    transform: translateY(-50%);
+  }
+
+  input {
+    padding-left: 25px;
+    margin-top: 0 !important;
+  }
+}
+
+.simpler-page-anchor-offset {
+  @include at-media("desktop") {
+    scroll-margin-top: 6rem;
+  }
+}
+
+.simpler-apply-form {
+  .usa-input,
+  .usa-select,
+  fieldset[id^="form-section"] {
+    @include at-media("desktop") {
+      scroll-margin-top: 6rem;
+    }
+  }
+  aside {
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+.simpler-application-forms-table {
+  table-layout: auto;
+
+  tr[id^="form"] {
+    @include at-media("desktop") {
+      scroll-margin-top: 6rem;
+    }
+  }
+}
+
+// SF 424 A Budget Form
+
+.sf424__table {
+  .usa-error-message {
+    display: none !important;
+  }
+
+  .usa-form-group {
+    border-left: 0;
+    margin-left: 0;
+    padding: 0;
+  }
+}
+
+.sf424a__row {
+  height: fit-content;
+  .sf424a__cell {
+    height: inherit;
+    vertical-align: bottom;
+
+    &--row-headers {
+      span {
+        margin-top: auto;
+        padding-bottom: 0.5rem;
+      }
+    }
+  }
+}
+
+#user-control {
+  .usa-button {
+    font-size: 0.88rem;
+  }
+  .usa-nav__submenu-item {
+    border-top: 0;
+  }
+}
+
+.usa-select:disabled {
+  color: #76766a;
+  background-color: white;
+  border-color: #e6e6e2;
+  background-image: none; // Removes the dropdown arrow icon
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: #76766a;
+    background-color: white;
+    border-color: #e6e6e2;
+    background-image: none;
   }
 }

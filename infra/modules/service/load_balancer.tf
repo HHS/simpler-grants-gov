@@ -4,10 +4,13 @@
 
 # ALB for an app running in ECS
 resource "aws_lb" "alb" {
+  # checkov:skip=CKV2_AWS_76:No Java in our stack, with the intro of the mTLS and the SOAP it supports we likely won't put this behind a WAF ever
+
   # we need an identical alb, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true
-  count      = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
-  depends_on = [aws_s3_bucket_policy.access_logs]
+  count           = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  depends_on      = [aws_s3_bucket_policy.access_logs]
+  ip_address_type = "dualstack"
   # adjust name for the mtls alb that's in slot 1
   name            = count.index == 0 ? var.service_name : format("%s-mtls", var.service_name)
   idle_timeout    = "120"
@@ -87,8 +90,7 @@ resource "aws_lb_listener" "alb_listener_https" {
   load_balancer_arn = aws_lb.alb[count.index].arn
   port              = 443
   protocol          = "HTTPS"
-  #TODO: figure out how we get soap. certificate here for false option
-  certificate_arn = count.index == 0 ? var.certificate_arn : var.certificate_arn
+  certificate_arn   = count.index == 0 ? var.certificate_arn : var.mtls_certificate_arn
   mutual_authentication {
     mode = count.index == 1 ? "passthrough" : "off"
   }
@@ -105,6 +107,14 @@ resource "aws_lb_listener" "alb_listener_https" {
       status_code  = "404"
     }
   }
+}
+
+# Optional resource, used for if the ALB has multiple certificates
+resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs" {
+  for_each = toset(var.enable_load_balancer ? var.optional_extra_alb_certs : [])
+
+  listener_arn    = aws_lb_listener.alb_listener_https[0].arn
+  certificate_arn = each.value
 }
 
 resource "aws_lb_listener_rule" "app_https_forward" {

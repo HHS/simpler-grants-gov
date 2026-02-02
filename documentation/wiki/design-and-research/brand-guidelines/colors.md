@@ -1,17 +1,3 @@
----
-layout:
-  title:
-    visible: true
-  description:
-    visible: false
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
----
-
 # Colors
 
 Color plays a significant role in our brand. The following values represent our core palette. These are used most often in the system and should be relied on when the color palette must be limited. Each of our colors is named for ideas that represent trust and accessibility.&#x20;

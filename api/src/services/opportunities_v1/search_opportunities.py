@@ -1,5 +1,6 @@
 import logging
-from typing import Sequence, Tuple
+import uuid
+from collections.abc import Sequence
 
 from pydantic import BaseModel, Field
 
@@ -16,7 +17,6 @@ from src.search.search_models import (
 )
 from src.services.opportunities_v1.experimental_constant import (
     AGENCY,
-    ATTACHMENT_ONLY,
     DEFAULT,
     EXPANDED,
     ScoringRule,
@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # the query we want to use the raw value rather than the tokenized one
 # See: https://opensearch.org/docs/latest/field-types/supported-field-types/keyword/
 OPP_REQUEST_FIELD_NAME_MAPPING = {
+    "opportunity_id": "opportunity_id.keyword",
     "opportunity_number": "opportunity_number.keyword",
     "opportunity_title": "opportunity_title.keyword",
     "post_date": "summary.post_date",
@@ -49,13 +50,13 @@ OPP_REQUEST_FIELD_NAME_MAPPING = {
     "award_floor": "summary.award_floor",
     "award_ceiling": "summary.award_ceiling",
     "estimated_total_program_funding": "summary.estimated_total_program_funding",
+    "assistance_listing_number": "opportunity_assistance_listings.assistance_listing_number.keyword",
 }
 
 FILTER_RULE_MAPPING = {
     ScoringRule.EXPANDED: EXPANDED,
     ScoringRule.AGENCY: AGENCY,
     ScoringRule.DEFAULT: DEFAULT,
-    ScoringRule.ATTACHMENT_ONLY: ATTACHMENT_ONLY,
 }
 
 STATIC_PAGINATION = {
@@ -70,6 +71,22 @@ STATIC_PAGINATION = {
         ],
     }
 }
+
+STATIC_DATE_RANGES: list = [
+    {"from": "now", "to": "now+7d/d", "key": "7"},
+    {"from": "now", "to": "now+30d/d", "key": "30"},
+    {"from": "now", "to": "now+60d/d", "key": "60"},
+    {"from": "now", "to": "now+90d/d", "key": "90"},
+    {"from": "now", "to": "now+120d/d", "key": "120"},
+]
+
+STATIC_POSTED_DATE_RANGES: list = [
+    {"from": "now-3d/d", "to": "now", "key": "3"},
+    {"from": "now-7d/d", "to": "now", "key": "7"},
+    {"from": "now-14d/d", "to": "now", "key": "14"},
+    {"from": "now-30d/d", "to": "now", "key": "30"},
+    {"from": "now-60d/d", "to": "now", "key": "60"},
+]
 
 SCHEMA = OpportunityV1Schema()
 
@@ -123,8 +140,7 @@ def _get_sort_by(pagination: PaginationParams) -> list[tuple[str, SortDirection]
 
 
 def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
-    # TODO - we'll likely want to adjust the total number of values returned, especially
-    # for agency as there could be hundreds of different agencies, and currently it's limited to 25.
+    """Add aggregations / facet_counts to the query to the search index"""
     builder.aggregation_terms(
         "opportunity_status",
         _adjust_field_name("opportunity_status", OPP_REQUEST_FIELD_NAME_MAPPING),
@@ -146,6 +162,16 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
         "is_cost_sharing",
         _adjust_field_name("is_cost_sharing", OPP_REQUEST_FIELD_NAME_MAPPING),
     )
+    builder.aggregation_relative_date_range(
+        "close_date",
+        _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+        STATIC_DATE_RANGES,
+    )
+    builder.aggregation_relative_date_range(
+        "post_date",
+        _adjust_field_name("post_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+        STATIC_POSTED_DATE_RANGES,
+    )
 
 
 def _add_top_level_agency_prefix(
@@ -162,6 +188,11 @@ def _add_top_level_agency_prefix(
     if not filters or not (filters.top_level_agency and filters.top_level_agency.one_of):
         return
 
+    # Exact match for the top-level agency itself (e.g., "DOC")
+    builder.filter_should_terms(
+        "agency_code.keyword", [agency for agency in filters.top_level_agency.one_of]
+    )
+
     # Add a prefix match on the top-level agency code (e.g. "DOS-")
     builder.filter_should_prefix(
         "agency_code.keyword", [f"{agency}-" for agency in filters.top_level_agency.one_of]
@@ -176,6 +207,15 @@ def _add_top_level_agency_prefix(
 
         # Clear it so this field isn't added again as a hard filter
         filters.agency = None
+
+
+def _normalize_aln(filters: OpportunityFilters | None) -> None:
+    if not filters or not filters.assistance_listing_number:
+        return
+
+    one_of = filters.assistance_listing_number.one_of
+    if one_of:
+        filters.assistance_listing_number.one_of = [v.upper() for v in one_of]
 
 
 def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
@@ -199,6 +239,9 @@ def _get_search_request(params: SearchOpportunityParams, aggregation: bool = Tru
     # Filter Prefix
     _add_top_level_agency_prefix(builder, params.filters)
 
+    # Normalize ALN casing
+    _normalize_aln(params.filters)
+
     # Filters
     _add_search_filters(builder, OPP_REQUEST_FIELD_NAME_MAPPING, params.filters)
 
@@ -215,12 +258,10 @@ def _search_opportunities(
     includes: list | None = None,
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
-
     index_alias = get_search_config().opportunity_search_index_alias
     logger.info(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
-
     response = search_client.search(
         index_alias, search_request, includes=includes, excludes=["attachments"]
     )
@@ -230,9 +271,10 @@ def _search_opportunities(
 
 def search_opportunities(
     search_client: search.SearchClient, raw_search_params: dict
-) -> Tuple[Sequence[dict], dict, PaginationInfo]:
+) -> tuple[Sequence[dict], dict, PaginationInfo]:
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
+
     response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)
@@ -247,11 +289,13 @@ def search_opportunities(
     return records, response.aggregations, pagination_info
 
 
-def search_opportunities_id(search_client: search.SearchClient, search_query: dict) -> list:
+def search_opportunities_id(
+    search_client: search.SearchClient, search_query: dict
+) -> list[uuid.UUID]:
     # Override pagination when calling opensearch
     updated_search_query = search_query | STATIC_PAGINATION
     search_params = SearchOpportunityParams.model_validate(updated_search_query)
 
     response = _search_opportunities(search_client, search_params, includes=["opportunity_id"])
 
-    return [opp["opportunity_id"] for opp in response.records]
+    return [uuid.UUID(opp["opportunity_id"]) for opp in response.records]

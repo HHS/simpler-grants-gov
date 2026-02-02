@@ -1,10 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  openMobileNav,
-  performSignIn,
-  waitForURLChange,
-} from "./playwrightUtils";
+import { createSpoofedSessionCookie } from "./loginUtils";
+import { openMobileNav, waitForURLChange } from "./playwrightUtils";
 
 test.afterEach(async ({ context }) => {
   await context.close();
@@ -17,16 +14,21 @@ test("shows unauthenticated state if not logged in", async ({ page }) => {
 });
 
 // reenable after https://github.com/HHS/simpler-grants-gov/issues/3791
-test.skip("shows save / search cta if logged in", async ({ page }, {
+test("shows save / search cta if logged in", async ({ page, context }, {
   project,
 }) => {
+  await createSpoofedSessionCookie(context);
   await page.goto("http://localhost:3000/?_ff=authOn:true");
-  await performSignIn(page, project);
 
   if (project.name.match(/[Mm]obile/)) {
     await openMobileNav(page);
   }
-  const savedOpportunitiesNavItem = page.locator(".usa-nav li:nth-child(3)");
+  const dropDownButton = page.locator("#nav-dropdown-button-4");
+  await dropDownButton.click();
+
+  const savedOpportunitiesNavItem = page.locator(
+    "ul#Workspace li:nth-child(4)",
+  );
   await expect(savedOpportunitiesNavItem).toHaveText("Saved opportunities");
   await savedOpportunitiesNavItem.click();
 

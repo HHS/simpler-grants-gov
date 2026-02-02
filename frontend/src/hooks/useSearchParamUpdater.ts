@@ -57,7 +57,9 @@ export function useSearchParamUpdater() {
     router.push(`${pathname}${paramsToFormattedQuery(params)}`, { scroll });
   };
 
-  const replaceQueryParams = (params: ValidSearchQueryParamData) => {
+  const replaceQueryParams = (
+    params: ValidSearchQueryParamData | { savedSearch?: string },
+  ) => {
     router.push(`${pathname}${queryParamsToQueryString(params)}`);
   };
 

@@ -1,12 +1,12 @@
+import freezegun
 import pytest
 
-from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
-
-
-@pytest.fixture()
-def sf424_v4_0():
-    return SF424_v4_0
+from src.services.applications.application_validation import (
+    ApplicationAction,
+    validate_application_form,
+)
+from tests.lib.data_factories import setup_application_for_form_validation
 
 
 @pytest.fixture
@@ -14,7 +14,6 @@ def valid_json_v4_0():
     return {
         "submission_type": "Application",
         "application_type": "New",
-        "date_received": "2025-01-01",
         "organization_name": "Example Org",
         "employer_taxpayer_identification_number": "123-456-7890",
         "sam_uei": "UEI123123123",
@@ -54,10 +53,9 @@ def valid_json_v4_0():
             "first_name": "Bob",
             "last_name": "Smith",
         },
+        "authorized_representative_title": "Doctor",
         "authorized_representative_phone_number": "123-456-7890",
         "authorized_representative_email": "example@mail.com",
-        "aor_signature": "Bob Smith",
-        "date_signed": "2025-06-01",
     }
 
 
@@ -70,6 +68,7 @@ def full_valid_json_v4_0(valid_json_v4_0):
         "application_type": "Revision",
         "revision_type": "E: Other (specify)",
         "revision_other_specify": "I am redoing it",
+        "date_received": "2025-01-01",
         "applicant_id": "ABC123",
         "federal_entity_identifier": "XYZ456",
         "federal_award_identifier": "1234567890",
@@ -92,8 +91,8 @@ def full_valid_json_v4_0(valid_json_v4_0):
             "middle_name": "Anne",
             "last_name": "Jones",
             "suffix": "III",
-            "title": "Director",
         },
+        "contact_person_title": "Director",
         "organization_affiliation": "Secret Research",
         "fax": "123-456-7890",
         "applicant_type_code": ["P: Individual", "X: Other (specify)"],
@@ -118,9 +117,11 @@ def full_valid_json_v4_0(valid_json_v4_0):
             "middle_name": "Frank",
             "last_name": "Smith",
             "suffix": "Jr",
-            "title": "Agent",
         },
+        "authorized_representative_title": "Agent",
         "authorized_representative_fax": "333-333-3333",
+        "aor_signature": "Bob Smith",
+        "date_signed": "2025-06-01",
     }
 
 
@@ -140,7 +141,6 @@ def test_sf424_v4_0_empty_json(sf424_v4_0):
     EXPECTED_REQUIRED_FIELDS = {
         "$.submission_type",
         "$.application_type",
-        "$.date_received",
         "$.organization_name",
         "$.employer_taxpayer_identification_number",
         "$.sam_uei",
@@ -168,10 +168,9 @@ def test_sf424_v4_0_empty_json(sf424_v4_0):
         "$.delinquent_federal_debt",
         "$.certification_agree",
         "$.authorized_representative",
+        "$.authorized_representative_title",
         "$.authorized_representative_phone_number",
         "$.authorized_representative_email",
-        "$.aor_signature",
-        "$.date_signed",
     }
 
     assert len(validation_issues) == len(EXPECTED_REQUIRED_FIELDS)
@@ -208,7 +207,7 @@ def test_sf424_v4_0_empty_nested(sf424_v4_0, valid_json_v4_0):
     "value",
     [
         ["X: Other (specify)"],
-        ["X: Other (specify)", "A: state Government"],
+        ["X: Other (specify)", "A: State Government"],
         ["E: Regional Organization", "X: Other (specify)", "G: Independent School District"],
     ],
 )
@@ -228,9 +227,9 @@ def test_sf424_v4_0_applicant_type_other(sf424_v4_0, valid_json_v4_0, value):
         ([], "[] should be non-empty"),
         (
             [
-                "A: state Government",
-                "B: county Government",
-                "C: city or Township Government",
+                "A: State Government",
+                "B: County Government",
+                "C: City or Township Government",
                 "D: Special District Government",
             ],
             "The array is too long, expected a maximum length of 3",
@@ -247,14 +246,16 @@ def test_sf424_v_4_0_applicant_type_length(sf424_v4_0, valid_json_v4_0, value, e
     assert validation_issues[0].message == expected_error
 
 
-@pytest.mark.parametrize("value", ["-123.45", "123.4", "$123.45", "123..45", "12.345"])
+@pytest.mark.parametrize("value", ["123.4", "$123.45", "123..45", "12.345"])
 def test_sf424_v4_0_monetary_amount_format(sf424_v4_0, valid_json_v4_0, value):
     data = valid_json_v4_0
     data["federal_estimated_funding"] = value
 
     validation_issues = validate_json_schema_for_form(data, sf424_v4_0)
     assert len(validation_issues) == 1
-    assert validation_issues[0].message == f"'{value}' does not match '^\\\\d*([.]\\\\d{{2}})?$'"
+    assert (
+        validation_issues[0].message == f"'{value}' does not match '^(-)?\\\\d*([.]\\\\d{{2}})?$'"
+    )
 
 
 @pytest.mark.parametrize(
@@ -368,3 +369,145 @@ def test_sf424_v4_0_conditionally_required_fields(
     for validation_issue in validation_issues:
         assert validation_issue.type == "required"
         assert validation_issue.field in required_fields
+
+
+def test_sf424_v4_0_pre_population_with_all_non_null_values(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0, verify_no_warning_error_logs
+):
+    application_form = setup_application_for_form_validation(
+        valid_json_v4_0,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
+        opportunity_number="ABC-123-XYZ",
+        opportunity_title="My Example Opportunity",
+        has_agency=True,
+        agency_name="Example Agency XYZ",
+        agency_code="ABC-XYZ-123-456-789",
+        attachment_ids=["4943c20b-57cc-4611-9d10-582144de726d"],
+        has_organization=True,
+        uei="TESTUEI98765",
+        has_assistance_listing_number=True,
+        assistance_listing_number="12.345",
+        assistance_listing_program_title="Example Program Title",
+        public_competition_id="COMP-ABC-XYZ-123",
+        competition_title="Competition for Research Funding",
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    assert len(issues) == 0
+    # Verify prepopulation rules ran
+    app_json = application_form.application_response
+    assert app_json["sam_uei"] == "TESTUEI98765"
+    assert app_json["agency_name"] == "Example Agency XYZ"
+    assert app_json["assistance_listing_number"] == "12.345"
+    assert app_json["assistance_listing_program_title"] == "Example Program Title"
+    assert app_json["funding_opportunity_number"] == "ABC-123-XYZ"
+    assert app_json["funding_opportunity_title"] == "My Example Opportunity"
+    assert app_json["competition_identification_number"] == "COMP-ABC-XYZ-123"
+    assert app_json["competition_identification_title"] == "Competition for Research Funding"
+    # Post-populated fields not present
+    assert "date_received" not in app_json
+    assert "date_signed" not in app_json
+    assert "aor_signature" not in app_json
+
+
+def test_sf424_v4_0_pre_population_with_all_null_values(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0
+):
+    application_form = setup_application_for_form_validation(
+        valid_json_v4_0,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
+        opportunity_number=None,
+        opportunity_title=None,
+        has_agency=False,
+        agency_code=None,
+        has_organization=False,
+        has_assistance_listing_number=False,
+        public_competition_id=None,
+        competition_title=None,
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.MODIFY)
+
+    assert len(issues) == 0
+    # Verify prepopulation rules ran
+    app_json = application_form.application_response
+    assert app_json["sam_uei"] == "00000000INDV"
+    assert app_json["agency_name"] == "unknown"
+    assert app_json["funding_opportunity_number"] == "unknown"
+    assert app_json["funding_opportunity_title"] == "unknown"
+    assert "assistance_listing_program_title" not in app_json
+    assert "competition_identification_number" not in app_json
+    assert "competition_identification_title" not in app_json
+    # Post-populated fields not present
+    assert "date_received" not in app_json
+    assert "date_signed" not in app_json
+    assert "aor_signature" not in app_json
+
+
+@pytest.mark.parametrize(
+    "data,expected_sum",
+    [
+        (
+            {
+                "federal_estimated_funding": "1.00",
+                "applicant_estimated_funding": "2.00",
+                "state_estimated_funding": "3.00",
+                "local_estimated_funding": "4.00",
+                "other_estimated_funding": "5.00",
+                "program_income_estimated_funding": "6.00",
+            },
+            "21.00",
+        ),
+        (
+            {
+                "federal_estimated_funding": "invalid value",
+                "applicant_estimated_funding": "xyz",
+                "state_estimated_funding": "srerser",
+                "local_estimated_funding": "=123",
+                "other_estimated_funding": "4343434.sefse",
+                "program_income_estimated_funding": "a",
+            },
+            "0.00",
+        ),
+        ({}, "0.00"),
+    ],
+)
+def test_sf424_pre_population_auto_sum(
+    enable_factory_create,
+    valid_json_v4_0,
+    data,
+    expected_sum,
+    sf424_v4_0,
+    verify_no_warning_error_logs,
+):
+
+    application_form = setup_application_for_form_validation(
+        data,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
+    )
+
+    validate_application_form(application_form, ApplicationAction.MODIFY)
+    assert application_form.application_response["total_estimated_funding"] == expected_sum
+
+
+@freezegun.freeze_time("2023-02-20 12:00:00", tz_offset=0)
+def test_sf424_post_population(
+    enable_factory_create, valid_json_v4_0, sf424_v4_0, verify_no_warning_error_logs
+):
+    application_form = setup_application_for_form_validation(
+        valid_json_v4_0,
+        json_schema=sf424_v4_0.form_json_schema,
+        rule_schema=sf424_v4_0.form_rule_schema,
+        user_email="mynewmail@example.com",
+    )
+
+    issues = validate_application_form(application_form, ApplicationAction.SUBMIT)
+    assert len(issues) == 0
+    app_json = application_form.application_response
+    assert app_json["date_received"] == "2023-02-20"
+    assert app_json["date_signed"] == "2023-02-20"
+    assert app_json["aor_signature"] == "mynewmail@example.com"

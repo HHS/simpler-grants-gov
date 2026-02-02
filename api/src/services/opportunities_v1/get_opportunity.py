@@ -1,4 +1,6 @@
-from sqlalchemy import select
+import uuid
+
+from sqlalchemy import ColumnExpressionArgument, select
 from sqlalchemy.orm import lazyload, selectinload
 
 import src.adapters.db as db
@@ -7,10 +9,12 @@ from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 
 
-def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
+def _get_opportunity(
+    db_session: db.Session, where_clause: ColumnExpressionArgument[bool]
+) -> Opportunity | None:
     stmt = (
         select(Opportunity)
-        .where(Opportunity.opportunity_id == opportunity_id)
+        .where(where_clause)
         .where(Opportunity.is_draft.is_(False))
         .options(selectinload("*"))
         # To get the top_level_agency field set properly upfront,
@@ -33,7 +37,28 @@ def get_opportunity(db_session: db.Session, opportunity_id: int) -> Opportunity:
 
     opportunity = db_session.execute(stmt).unique().scalar_one_or_none()
 
+    return opportunity
+
+
+def get_opportunity(db_session: db.Session, opportunity_id: uuid.UUID) -> Opportunity:
+    opportunity = _get_opportunity(
+        db_session,
+        where_clause=Opportunity.opportunity_id == opportunity_id,
+    )
     if opportunity is None:
         raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
+
+    return opportunity
+
+
+def get_opportunity_by_legacy_id(db_session: db.Session, legacy_opportunity_id: int) -> Opportunity:
+    opportunity = _get_opportunity(
+        db_session,
+        where_clause=Opportunity.legacy_opportunity_id == legacy_opportunity_id,
+    )
+    if opportunity is None:
+        raise_flask_error(
+            404, message=f"Could not find Opportunity with Legacy ID {legacy_opportunity_id}"
+        )
 
     return opportunity

@@ -3,20 +3,20 @@
 
 * @mdragon # project lead
 
-/documentation/  @acouch @andycochran @btabaska @chouinar @doug-s-nava @freddieyebra @joshtonava @mdragon @myduong-navapbc @widal001 # everyone
+/documentation/  @andycochran @btabaska @chouinar @doug-s-nava @joshtonava @mdragon @myduong-navapbc @widal001 @prasnava @jakobpederson @ErinPattisonNava @glenblosser-nava @nathan-stricker @hao10282025-sudo @kkrug @dghazvini # everyone
 
-/analytics/               @acouch @freddieyebra @widal001
-/documentation/analytics/ @acouch @freddieyebra @widal001
+/analytics/               @widal001
+/documentation/analytics/ @widal001
 
-/api/               @chouinar @freddieyebra @mdragon @joshtonava
-/documentation/api/ @chouinar @freddieyebra @mdragon @joshtonava
+/api/               @chouinar @mdragon @joshtonava @jakobpederson @chay-REIsys @hao10282025-sudo @kkrug @dghazvini
+/documentation/api/ @chouinar @mdragon @joshtonava @jakobpederson @chay-REIsys @hao10282025-sudo @kkrug @dghazvini
 
-/frontend/               @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
-/documentation/frontend/ @acouch @andycochran @btabaska @doug-s-nava @freddieyebra @myduong-navapbc
+/frontend/               @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @chay-REIsys @glenblosser-nava @nathan-stricker @dghazvini
+/documentation/frontend/ @andycochran @btabaska @doug-s-nava @myduong-navapbc @ErinPattisonNava @chay-REIsys @glenblosser-nava @nathan-stricker @dghazvini
 
-/infra/                    @acouch @mdragon @joshtonava @chouinar
-/infra/nofos/              @acouch @mdragon @pcraig3 @joshtonava @chouinar
-/documentation/infra/      @acouch @mdragon @joshtonava @chouinar
-/.github/                  @acouch @mdragon @joshtonava @chouinar
-/.github/workflows/*nofos* @acouch @mdragon @pcraig3 @joshtonava @chouinar
-/bin/                      @acouch @mdragon @joshtonava @chouinar
+/infra/                    @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
+/infra/nofos/              @mdragon @pcraig3 @joshtonava @chouinar @prasnava 
+/documentation/infra/      @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
+/.github/                  @mdragon @joshtonava @chouinar @prasnava @sean-navapbc
+/.github/workflows/*nofos* @mdragon @pcraig3 @joshtonava @chouinar @prasnava
+/bin/                      @mdragon @joshtonava @chouinar @prasnava @sean-navapbc

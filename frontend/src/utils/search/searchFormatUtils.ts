@@ -25,6 +25,8 @@ const orderByFieldLookup = {
   agency: ["top_level_agency_name", "agency_name"],
   postedDate: ["post_date"],
   closeDate: ["close_date"],
+  awardFloor: ["award_floor"],
+  awardCeiling: ["award_ceiling"],
 };
 
 const filterConfigurations = [
@@ -57,6 +59,13 @@ const filterConfigurations = [
     frontendName: "closeDate",
     backendName: "close_date",
     dataType: "dateRange",
+    dateRangeDirection: "forward",
+  },
+  {
+    frontendName: "postedDate",
+    backendName: "post_date",
+    dataType: "dateRange",
+    dateRangeDirection: "backward",
   },
   {
     frontendName: "costSharing",
@@ -66,6 +75,11 @@ const filterConfigurations = [
   {
     frontendName: "topLevelAgency",
     backendName: "top_level_agency",
+    dataType: "oneOf",
+  },
+  {
+    frontendName: "assistanceListingNumber",
+    backendName: "assistance_listing_number",
     dataType: "oneOf",
   },
 ] as const;
@@ -78,11 +92,24 @@ const toOneOfFilter = (data: Set<string>): OneOfFilter => {
 
 const toRelativeDateRangeFilter = (
   data: Set<string>,
+  direction: "forward" | "backward" = "forward",
 ): RelativeDateRangeFilter => {
   const convertedData = Array.from(data);
-  return {
-    end_date_relative: convertedData[0],
-  };
+  const days = parseInt(convertedData[0], 10);
+
+  if (direction === "backward") {
+    // For backward ranges (posted date), use start_date_relative with negative value
+    // e.g., 7 becomes -7 meaning "from 7 days ago to now"
+    return {
+      start_date_relative: -days,
+    };
+  } else {
+    // For forward ranges (close date), use end_date_relative
+    // e.g., 7 means "from now to 7 days in the future"
+    return {
+      end_date_relative: days,
+    };
+  }
 };
 
 // comes in as Set but should have only one entry, take the first
@@ -93,8 +120,17 @@ const toBooleanFilter = (data: Set<string>): BooleanFilter => ({
 const fromOneOfFilter = (data: OneOfFilter): string =>
   data?.one_of?.length ? data.one_of.join(",") : "";
 
-const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string =>
-  data?.end_date_relative;
+const fromRelativeDateRangeFilter = (data: RelativeDateRangeFilter): string => {
+  if ("end_date_relative" in data && data.end_date_relative !== undefined) {
+    return String(data.end_date_relative);
+  }
+  if ("start_date_relative" in data && data.start_date_relative !== undefined) {
+    // Convert negative start_date_relative back to positive number
+    // e.g., -7 becomes "7"
+    return String(Math.abs(data.start_date_relative));
+  }
+  return "";
+};
 
 const fromBooleanFilter = (data: BooleanFilter): string => {
   if (!data?.one_of?.length) {
@@ -171,7 +207,13 @@ export const buildFilters = (
       if (dataType === "oneOf") {
         requestBody[backendName] = toOneOfFilter(queryValue);
       } else if (dataType === "dateRange") {
-        requestBody[backendName] = toRelativeDateRangeFilter(queryValue);
+        const dateRangeDirection =
+          (config as { dateRangeDirection?: "forward" | "backward" })
+            .dateRangeDirection || "forward";
+        requestBody[backendName] = toRelativeDateRangeFilter(
+          queryValue,
+          dateRangeDirection,
+        );
       } else if (dataType === "boolean") {
         requestBody[backendName] = toBooleanFilter(queryValue);
       }
@@ -222,8 +264,14 @@ export const searchToQueryParams = (
       : {};
 
   const sortby = paginationToSortby(searchRecord?.pagination?.sort_order || []);
-
-  return { ...filters, query: searchRecord.query || "", ...sortby };
+  const withQueryAndSort = {
+    ...filters,
+    query: searchRecord.query || "",
+    ...sortby,
+  };
+  return searchRecord.query && searchRecord.query_operator
+    ? { ...withQueryAndSort, andOr: searchRecord.query_operator }
+    : withQueryAndSort;
 };
 
 // sort of the opposite of buildPagination - translates from backend search pagination object to "sortby" query param
@@ -291,7 +339,7 @@ export const buildPagination = (
 
   let sort_order: PaginationSortOrder = [
     { order_by: "relevancy", sort_direction: "descending" },
-    { order_by: "post_date", sort_direction: "descending" },
+    { order_by: "close_date", sort_direction: "ascending" },
   ];
 
   if (sortby) {

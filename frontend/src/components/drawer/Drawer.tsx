@@ -47,6 +47,7 @@ export function Drawer({
               modalRef={drawerRef}
               secondary
               className="width-full"
+              data-testid="close-drawer"
             >
               {closeText}
             </ModalToggleButton>

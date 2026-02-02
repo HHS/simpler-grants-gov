@@ -2,10 +2,12 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { ExternalRoutes } from "src/constants/routes";
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
+import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
@@ -24,16 +26,13 @@ import {
 import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
+import { TestUserSelect } from "./TestUserSelect";
 import { UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
   href?: string;
   children?: PrimaryLink[];
-};
-
-type Props = {
-  locale?: string;
 };
 
 const homeRegexp = /^\/(?:e[ns])?$/;
@@ -68,9 +67,6 @@ const NavLink = ({
   );
 };
 
-const wikiLink = "https://wiki.simpler.grants.gov/";
-const forumLink = "https://simplergrants.discourse.group/";
-
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
@@ -90,9 +86,6 @@ const NavLinks = ({
     [t],
   );
   const { user } = useUser();
-  const { checkFeatureFlag } = useFeatureFlags();
-  const showSavedSearch = checkFeatureFlag("savedSearchesOn");
-  const showSavedOpportunities = checkFeatureFlag("savedOpportunitiesOn");
 
   const navLinkList = useMemo(() => {
     const anonymousNavLinks: PrimaryLink[] = [
@@ -108,36 +101,49 @@ const NavLinks = ({
       {
         text: t("community"),
         children: [
-          { text: t("subscribe"), href: "/subscribe" },
+          { text: t("newsletter"), href: "/newsletter" },
           { text: t("events"), href: "/events" },
-          { text: t("wiki"), href: wikiLink },
-          { text: t("forum"), href: forumLink },
+          { text: t("developers"), href: "/developer" },
+          { text: t("wiki"), href: ExternalRoutes.WIKI },
+          { text: t("forum"), href: ExternalRoutes.FORUM },
         ],
       },
     ];
-    if (!user?.token || (!showSavedOpportunities && !showSavedSearch)) {
+    if (!user?.token) {
       return anonymousNavLinks;
     }
 
     const workspaceSubNavs = [];
-    if (showSavedOpportunities) {
-      workspaceSubNavs.push({
-        text: t("savedOpportunities"),
-        href: "/saved-opportunities",
-      });
-    }
-    if (showSavedSearch) {
-      workspaceSubNavs.push({
-        text: t("savedSearches"),
-        href: "/saved-search-queries",
-      });
-    }
+
+    workspaceSubNavs.push({
+      text: t("activityDashboard"),
+      href: "/dashboard",
+    });
+
+    workspaceSubNavs.push({
+      text: t("applications"),
+      href: "/applications",
+    });
+    workspaceSubNavs.push({
+      text: t("organizations"),
+      href: "/organizations",
+    });
+
+    workspaceSubNavs.push({
+      text: t("savedOpportunities"),
+      href: "/saved-opportunities",
+    });
+
+    workspaceSubNavs.push({
+      text: t("savedSearches"),
+      href: "/saved-search-queries",
+    });
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
       text: t("workspace"),
       children: workspaceSubNavs,
     });
-  }, [t, path, getSearchLink, user, showSavedOpportunities, showSavedSearch]);
+  }, [t, path, getSearchLink, user]);
 
   const getCurrentNavItemIndex = useCallback(
     (currentPath: string): number => {
@@ -246,7 +252,15 @@ const NavLinks = ({
   );
 };
 
-const Header = ({ locale }: Props) => {
+const Header = ({
+  locale,
+  localDev = false,
+  testUsers = [],
+}: {
+  locale?: string;
+  localDev?: boolean;
+  testUsers?: TestUser[];
+}) => {
   const t = useTranslations("Header");
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
@@ -324,6 +338,7 @@ const Header = ({ locale }: Props) => {
               </div>
             </Title>
           </div>
+          {localDev && testUsers && <TestUserSelect testUsers={testUsers} />}
           <div className="usa-navbar order-last desktop:display-none">
             <NavMenuButton
               onClick={handleMobileNavToggle}
@@ -332,8 +347,8 @@ const Header = ({ locale }: Props) => {
             />
           </div>
           {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
-              <UserControl />
+            <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+              <UserControl localDev={localDev} />
             </div>
           )}
           <NavLinks

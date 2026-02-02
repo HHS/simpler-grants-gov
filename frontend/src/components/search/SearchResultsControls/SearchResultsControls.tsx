@@ -29,7 +29,10 @@ export const SearchResultsControls = ({
   const t = useTranslations("Search");
 
   return (
-    <div className="grid-row padding-top-4">
+    <div
+      className="grid-row padding-top-3"
+      data-testid="search-results-controls"
+    >
       <div className="flex-1">
         <h3 className={gridRowClasses.join(" ")}>
           {t("resultsHeader.message", { count: totalResults })}

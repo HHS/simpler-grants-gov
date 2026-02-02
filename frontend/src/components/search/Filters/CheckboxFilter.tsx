@@ -8,7 +8,7 @@ import { useContext, useMemo } from "react";
 import { AnyOptionCheckbox } from "src/components/search/SearchFilterAccordion/AnyOptionCheckbox";
 import {
   BasicSearchFilterAccordion,
-  SearchFilterAccordionProps,
+  SearchAccordionContentProps,
   SearchFilterProps,
 } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
 import SearchFilterCheckbox from "src/components/search/SearchFilterAccordion/SearchFilterCheckbox";
@@ -21,7 +21,7 @@ export function CheckboxFilterBody({
   filterOptions,
   query,
   facetCounts,
-}: SearchFilterAccordionProps) {
+}: SearchAccordionContentProps) {
   const { queryTerm } = useContext(QueryContext);
   const { updateQueryParams } = useSearchParamUpdater();
 

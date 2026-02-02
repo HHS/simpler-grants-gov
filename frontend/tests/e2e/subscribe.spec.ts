@@ -19,7 +19,7 @@ function mockAPIEndpoints(next: NextFixture, responseText = "1") {
   });
 }
 test.beforeEach(async ({ page }) => {
-  await page.goto("/subscribe");
+  await page.goto("/newsletter");
 });
 
 test.afterEach(async ({ context }) => {

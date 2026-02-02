@@ -61,13 +61,11 @@ class TestExportOpportunityDataTask(BaseTestClass):
             ]
         )
 
-        expected_opportunity_ids = set([opp.opportunity_id for opp in opportunities])
+        expected_opportunity_ids = set([str(opp.opportunity_id) for opp in opportunities])
         # Verify csv file contents
         with file_util.open_stream(export_opportunity_data_task.csv_file, "r") as infile:
             reader = csv.DictReader(infile)
-            assert expected_opportunity_ids == set(
-                [int(record["opportunity_id"]) for record in reader]
-            )
+            assert expected_opportunity_ids == set([record["opportunity_id"] for record in reader])
 
         # Verify JSON file contents
         with file_util.open_stream(export_opportunity_data_task.json_file, "r") as infile:
@@ -75,7 +73,7 @@ class TestExportOpportunityDataTask(BaseTestClass):
             json_opportunities = json.load(infile)
 
             assert expected_opportunity_ids == set(
-                [int(record["opportunity_id"]) for record in json_opportunities["opportunities"]]
+                [record["opportunity_id"] for record in json_opportunities["opportunities"]]
             )
 
             schema = OpportunityV1Schema(many=True)

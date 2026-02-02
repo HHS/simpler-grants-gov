@@ -1,62 +1,30 @@
 "use client";
 
 import clsx from "clsx";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { QueryContext } from "src/services/search/QueryProvider";
 
 import { useTranslations } from "next-intl";
-import { useContext, useEffect, useRef, useState } from "react";
-import { ErrorMessage, Icon, Label } from "@trussworks/react-uswds";
+import { ComponentType, useContext, useEffect, useRef, useState } from "react";
+import { ErrorMessage, Icon } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
-
-interface SearchBarProps {
+interface LabeledSearchBarProps {
   queryTermFromParent?: string | null;
+  LabelComponent: ComponentType;
   tableView?: boolean;
-}
-
-function LegacySearchLabel() {
-  const t = useTranslations("Search.bar");
-  return (
-    <label
-      htmlFor="query"
-      className="font-sans-lg display-block margin-bottom-2"
-    >
-      {t.rich("label", {
-        strong: (chunks) => <span className="text-bold">{chunks}</span>,
-        small: (chunks) => (
-          <small className="font-sans-sm display-inline-block">{chunks}</small>
-        ),
-      })}
-    </label>
-  );
-}
-
-function SearchLabel() {
-  const t = useTranslations("Search.bar");
-  return (
-    <Label htmlFor="query" className="maxw-full margin-bottom-2">
-      <USWDSIcon
-        name="lightbulb_outline"
-        className="usa-icon--size-3 text-middle margin-right-05"
-      />
-      <span className="text-middle">{t("exclusionTip")}</span>
-    </Label>
-  );
 }
 
 export default function SearchBar({
   queryTermFromParent,
+  LabelComponent,
   tableView = false,
-}: SearchBarProps) {
+}: LabeledSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { queryTerm, updateQueryTerm, localAndOrParam } =
     useContext(QueryContext);
   const { updateQueryParams, searchParams } = useSearchParamUpdater();
   const t = useTranslations("Search");
   const [validationError, setValidationError] = useState<string>();
-  const { checkFeatureFlag } = useFeatureFlags();
 
   const handleSubmit = () => {
     if (queryTerm && queryTerm.length > 99) {
@@ -100,11 +68,7 @@ export default function SearchBar({
         "usa-form-group--error": !!validationError,
       })}
     >
-      {checkFeatureFlag("searchDrawerOn") ? (
-        <SearchLabel />
-      ) : (
-        <LegacySearchLabel />
-      )}
+      <LabelComponent />
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
       <div className="usa-search usa-search--big" role="search">
         <input

@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from enum import StrEnum
-from typing import Sequence
 
 from pydantic import Field
 from sqlalchemy import select
@@ -107,7 +107,6 @@ class LoadAgenciesToIndex(Task):
             agency_json = SCHEMA.dump(agency)
 
             opportunity_statuses = []
-
             if agency.agency_id in posted_agencies:
                 opportunity_statuses.append(OpportunityStatus.POSTED)
 

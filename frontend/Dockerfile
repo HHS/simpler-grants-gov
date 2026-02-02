@@ -1,7 +1,7 @@
 # This file is largely based on the template-application-flask Dockerfile and
 # Next.js Docker example: https://github.com/vercel/next.js/blob/canary/examples/with-docker-compose
 # =============================================================================
-FROM node:22-bookworm-slim AS base
+FROM node:24-bookworm-slim AS base
 WORKDIR /frontend
 
 # Install dependencies
@@ -54,14 +54,14 @@ RUN npm run build -- --no-lint
 # Run the Next.js server
 # =====================================
 # Use clean image for release, excluding any unnecessary files or dependencies
-FROM node:22-bookworm-slim AS release
+FROM node:24-bookworm-slim AS release
 WORKDIR /frontend
 
 # Update system and install security updates
 RUN apt-get update \
   && apt-get upgrade -y --no-install-recommends \
-  && apt-get install -y --only-upgrade libc-bin libc6 \
-  && apt-get install --no-install-recommends --yes libtasn1-6 libgnutls30 liblzma5 systemd \
+  && apt-get install -y --only-upgrade libc-bin libc6 openssl libssl3 \
+  && apt-get install --no-install-recommends --yes libgnutls30 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -75,7 +75,8 @@ RUN apt-get update \
   # Install wget, required for health checks
   wget \
   # Reduce the image size by clearing apt cached lists
-  && rm -fr /var/lib/apt/lists/*
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Remove dev dependencies after build
 RUN npm prune --production

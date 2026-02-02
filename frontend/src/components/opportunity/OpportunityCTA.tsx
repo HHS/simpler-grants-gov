@@ -21,9 +21,9 @@ export const OpportunityContentBox = ({
   );
 };
 
-const OpportunityCTA = ({ id }: { id: number }) => {
+const OpportunityCTA = ({ legacyId }: { legacyId: number }) => {
   const t = useTranslations("OpportunityListing.cta");
-  const legacyOpportunityURL = `${environment.LEGACY_HOST}/search-results-detail/${id}`;
+  const legacyOpportunityURL = `${environment.LEGACY_HOST}/search-results-detail/${legacyId}`;
 
   const content = (
     <>

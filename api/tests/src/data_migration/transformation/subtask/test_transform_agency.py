@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import pytest
@@ -26,7 +27,7 @@ from tests.src.db.models.factories import AgencyFactory
 
 
 class TestTransformAgencyHierarchy(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_agency_hierarchy(self, transform_oracle_data_task):
         return TransformAgencyHierarchy(transform_oracle_data_task)
 
@@ -94,7 +95,7 @@ class TestTransformAgencyHierarchy(BaseTransformTestClass):
 
 
 class TestTransformAgency(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_agency(self, transform_oracle_data_task):
         return TransformAgency(transform_oracle_data_task)
 
@@ -131,6 +132,39 @@ class TestTransformAgency(BaseTransformTestClass):
                 "AgencyContactAddress1",
             },
         )
+        # Test agency with ReviewProcessEnable field to ensure it's properly ignored
+        update_agency_with_review_process = setup_agency(
+            "UPDATE-AGENCY-REVIEW-PROCESS",
+            create_existing=True,
+            source_values={"ReviewProcessEnable": "Y", "AgencyName": "Agency with Review Process"},
+        )
+        # Test agency with ReviewProcessGoLive field to ensure it's properly ignored
+        update_agency_with_review_process_go_live = setup_agency(
+            "UPDATE-AGENCY-REVIEW-PROCESS-GO-LIVE",
+            create_existing=True,
+            source_values={
+                "ReviewProcessGoLive": "Y",
+                "AgencyName": "Agency with Review Process Go Live",
+            },
+        )
+        # Test agency with EnableReviewProcess field to ensure it's properly ignored
+        update_agency_with_enable_review_process = setup_agency(
+            "UPDATE-AGENCY-ENABLE-REVIEW-PROCESS",
+            create_existing=True,
+            source_values={
+                "EnableReviewProcess": "Y",
+                "AgencyName": "Agency with Enable Review Process",
+            },
+        )
+        # Test agency with ReviewProcessPeriod field to ensure it's properly ignored
+        update_agency_with_review_process_period = setup_agency(
+            "UPDATE-AGENCY-REVIEW-PROCESS-PERIOD",
+            create_existing=True,
+            source_values={
+                "ReviewProcessPeriod": "30",
+                "AgencyName": "Agency with Review Process Period",
+            },
+        )
         update_test_agency = setup_agency("SECSCAN", create_existing=True)
 
         already_processed1 = setup_agency(
@@ -149,8 +183,9 @@ class TestTransformAgency(BaseTransformTestClass):
         update_error1 = setup_agency(
             "UPDATE-ERROR-1", create_existing=True, source_values={"AgencyDownload": "xyz"}
         )
-        update_error2 = setup_agency(
-            "UPDATE-ERROR-2", create_existing=True, source_values={"UnknownField": "xyz"}
+        # This agency now has an unknown field but should process successfully (just skip the unknown field)
+        update_with_unknown_field = setup_agency(
+            "UPDATE-WITH-UNKNOWN-FIELD", create_existing=True, source_values={"UnknownField": "xyz"}
         )
 
         transform_agency.run_subtask()
@@ -175,6 +210,14 @@ class TestTransformAgency(BaseTransformTestClass):
                 "AgencyContactAddress1",
             },
         )
+        # Validate that the agency with ReviewProcessEnable was processed successfully
+        validate_agency(db_session, update_agency_with_review_process)
+        # Validate that the agency with ReviewProcessGoLive was processed successfully
+        validate_agency(db_session, update_agency_with_review_process_go_live)
+        # Validate that the agency with EnableReviewProcess was processed successfully
+        validate_agency(db_session, update_agency_with_enable_review_process)
+        # Validate that the agency with ReviewProcessPeriod was processed successfully
+        validate_agency(db_session, update_agency_with_review_process_period)
         validate_agency(db_session, update_test_agency, is_test_agency=True)
 
         validate_agency(db_session, already_processed1, expect_values_to_match=False)
@@ -183,23 +226,28 @@ class TestTransformAgency(BaseTransformTestClass):
 
         validate_agency(db_session, insert_error, expect_in_db=False)
         validate_agency(db_session, update_error1, expect_values_to_match=False)
-        validate_agency(db_session, update_error2, expect_values_to_match=False)
+        # This agency should now be processed successfully, just skipping the unknown field
+        validate_agency(db_session, update_with_unknown_field)
 
         metrics = transform_agency.metrics
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 13
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 17
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 3
+        assert (
+            metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 9
+        )  # One more successful update
+        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 2  # One fewer error
 
-        # Rerunning does mostly nothing, it will attempt to re-process the three that errored
+        # Rerunning does mostly nothing, it will attempt to re-process the two that errored
         # but otherwise won't find anything else
         db_session.commit()  # commit to end any existing transactions as run_subtask starts a new one
         transform_agency.run_subtask()
 
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 16
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_PROCESSED] == 19
         assert metrics[transform_constants.Metrics.TOTAL_RECORDS_INSERTED] == 6
-        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 4
-        assert metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 6
+        assert metrics[transform_constants.Metrics.TOTAL_RECORDS_UPDATED] == 9
+        assert (
+            metrics[transform_constants.Metrics.TOTAL_ERROR_COUNT] == 4
+        )  # Two more errors from rerun
 
     def test_process_tgroups_missing_fields_for_insert(self, db_session, transform_agency):
         # Fields set to None don't get a tgroup record created
@@ -220,18 +268,25 @@ class TestTransformAgency(BaseTransformTestClass):
 
         validate_agency(db_session, insert_that_will_fail, expect_in_db=False)
 
-    def test_process_tgroups_unknown_field(self, db_session, transform_agency):
-        insert_that_will_fail = setup_agency(
-            "ERROR-CASE-UNKNOWN-FIELD", create_existing=False, source_values={"MysteryField": "X"}
+    def test_process_tgroups_unknown_field(self, db_session, transform_agency, caplog):
+        insert_with_unknown_field = setup_agency(
+            "AGENCY-WITH-UNKNOWN-FIELD", create_existing=False, source_values={"MysteryField": "X"}
         )
 
-        with pytest.raises(ValueError, match="Unknown tgroups agency field"):
-            transform_agency.process_tgroups(
-                TgroupAgency("ERROR-CASE-UNKNOWN-FIELD", insert_that_will_fail, has_update=True),
-                None,
-            )
+        # This should no longer raise an error, but should log a warning and continue processing
+        transform_agency.process_tgroups(
+            TgroupAgency("AGENCY-WITH-UNKNOWN-FIELD", insert_with_unknown_field, has_update=True),
+            None,
+        )
 
-        validate_agency(db_session, insert_that_will_fail, expect_in_db=False)
+        # Verify the agency was created successfully (other required fields should still be processed)
+        validate_agency(db_session, insert_with_unknown_field)
+
+        # Verify that a warning was logged for the unknown field
+        warning_logs = [record for record in caplog.records if record.levelname == "WARNING"]
+        assert any(
+            "Skipping unmapped field MysteryField" in record.getMessage() for record in warning_logs
+        )
 
     def test_process_tgroups_disallowed_deleted_fields(self, db_session, transform_agency):
         update_that_will_fail = setup_agency(
@@ -274,10 +329,62 @@ class TestTransformAgency(BaseTransformTestClass):
 
         validate_agency(db_session, insert_that_will_fail, expect_in_db=False)
 
+    def test_process_tgroups_known_unmapped_field(self, db_session, transform_agency, caplog):
+        caplog.set_level(logging.INFO)
+        """Test that fields in NOT_MAPPED_FIELDS are skipped with info logging"""
+        # Use a field that's already being tested in the main test - ReviewProcessEnable is in NOT_MAPPED_FIELDS
+        insert_with_known_unmapped = setup_agency(
+            "AGENCY-WITH-KNOWN-UNMAPPED",
+            create_existing=False,
+            source_values={"ReviewProcessEnable": "Y"},  # This is in NOT_MAPPED_FIELDS
+        )
+
+        transform_agency.process_tgroups(
+            TgroupAgency("AGENCY-WITH-KNOWN-UNMAPPED", insert_with_known_unmapped, has_update=True),
+            None,
+        )
+
+        # Verify the agency was created successfully
+        validate_agency(db_session, insert_with_known_unmapped)
+
+        # Verify that an info log was generated for the known unmapped field
+        info_logs = [record for record in caplog.records if record.levelname == "INFO"]
+        assert any(
+            "Skipping processing of field ReviewProcessEnable" in record.getMessage()
+            for record in info_logs
+        )
+
+    def test_process_tgroups_truly_unknown_field(self, db_session, transform_agency, caplog):
+        """Test that truly unknown fields are skipped with warning logging"""
+        insert_with_unknown = setup_agency(
+            "AGENCY-WITH-TRULY-UNKNOWN",
+            create_existing=False,
+            source_values={"CompletelyUnknownField": "value"},
+        )
+
+        transform_agency.process_tgroups(
+            TgroupAgency("AGENCY-WITH-TRULY-UNKNOWN", insert_with_unknown, has_update=True),
+            None,
+        )
+
+        # Verify the agency was created successfully
+        validate_agency(db_session, insert_with_unknown)
+
+        # Verify that a warning log was generated for the unknown field
+        warning_logs = [record for record in caplog.records if record.levelname == "WARNING"]
+        assert any(
+            "Skipping unmapped field CompletelyUnknownField" in record.getMessage()
+            for record in warning_logs
+        )
+        assert any(
+            "consider adding to NOT_MAPPED_FIELDS if intentional" in record.getMessage()
+            for record in warning_logs
+        )
+
 
 class TestValidateAgencyData(BaseTransformTestClass):
 
-    @pytest.fixture()
+    @pytest.fixture
     def validate_agency_data(self, transform_oracle_data_task, truncate_agencies):
         return ValidateAgencyData(transform_oracle_data_task)
 

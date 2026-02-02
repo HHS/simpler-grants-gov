@@ -11,14 +11,15 @@ class NotificationReason(StrEnum):
     CLOSING_DATE_REMINDER = "closing_date_reminder"
 
 
-# TODO: Confirm with team if we want to use these metrics
 class Metrics(StrEnum):
-    USERS_NOTIFIED = "users_notified"
     OPPORTUNITIES_TRACKED = "opportunities_tracked"
-    SEARCHES_TRACKED = "searches_tracked"
-    NOTIFICATIONS_SENT = "notifications_sent"
-    FAILED_TO_SEND = "failed_to_send"
     VERSIONLESS_OPPORTUNITY_COUNT = "versionless_opportunity_count"
+    SEARCHES_TRACKED = "searches_tracked"
+    CLOSING_SOON_OPPORTUNITIES_TRACKED = "closing_soon_opportunities_tracked"
+    USERS_NOTIFIED = "users_notified"
+    FAILED_TO_SEND = "failed_to_send"
+    NOTIFICATIONS_RESET = "notifications_reset"
+    SUPPRESSED_DESTINATION_COUNT = "suppressed_destination_count"
 
 
 @dataclass
@@ -34,7 +35,7 @@ class UserEmailNotification:
 
 @dataclass
 class OpportunityVersionChange:
-    opportunity_id: int
+    opportunity_id: UUID
     latest: OpportunityVersion
     previous: OpportunityVersion | None
 

@@ -4,24 +4,33 @@ from src.constants.lookup_constants import (
     AgencyDownloadFileType,
     AgencySubmissionNotificationSetting,
     ApplicantType,
+    ApplicationAuditEvent,
     ApplicationStatus,
+    ApprovalResponseType,
+    ApprovalType,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
     FormFamily,
+    FormType,
     FundingCategory,
     FundingInstrument,
     JobStatus,
     OpportunityCategory,
     OpportunityStatus,
+    OrganizationAuditEvent,
+    Privilege,
+    RoleType,
     SamGovExtractType,
     SamGovImportType,
     SamGovProcessingStatus,
+    UserType,
+    WorkflowType,
 )
 from src.db.models.base import TimestampMixin
 from src.db.models.lookup import Lookup, LookupConfig, LookupRegistry, LookupStr, LookupTable
 
-OPPORTUNITY_STATUS_CONFIG = LookupConfig(
+OPPORTUNITY_STATUS_CONFIG: LookupConfig[OpportunityStatus] = LookupConfig(
     [
         LookupStr(OpportunityStatus.FORECASTED, 1),
         LookupStr(OpportunityStatus.POSTED, 2),
@@ -30,7 +39,7 @@ OPPORTUNITY_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
+OPPORTUNITY_CATEGORY_CONFIG: LookupConfig[OpportunityCategory] = LookupConfig(
     [
         LookupStr(OpportunityCategory.DISCRETIONARY, 1),
         LookupStr(OpportunityCategory.MANDATORY, 2),
@@ -40,7 +49,7 @@ OPPORTUNITY_CATEGORY_CONFIG = LookupConfig(
     ]
 )
 
-APPLICANT_TYPE_CONFIG = LookupConfig(
+APPLICANT_TYPE_CONFIG: LookupConfig[ApplicantType] = LookupConfig(
     [
         LookupStr(ApplicantType.STATE_GOVERNMENTS, 1),
         LookupStr(ApplicantType.COUNTY_GOVERNMENTS, 2),
@@ -63,7 +72,7 @@ APPLICANT_TYPE_CONFIG = LookupConfig(
 )
 
 
-FUNDING_CATEGORY_CONFIG = LookupConfig(
+FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
     [
         LookupStr(FundingCategory.RECOVERY_ACT, 1),
         LookupStr(FundingCategory.AGRICULTURE, 2),
@@ -91,10 +100,11 @@ FUNDING_CATEGORY_CONFIG = LookupConfig(
         LookupStr(FundingCategory.TRANSPORTATION, 24),
         LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
         LookupStr(FundingCategory.OTHER, 26),
+        LookupStr(FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS, 27),
     ]
 )
 
-FUNDING_INSTRUMENT_CONFIG = LookupConfig(
+FUNDING_INSTRUMENT_CONFIG: LookupConfig[FundingInstrument] = LookupConfig(
     [
         LookupStr(FundingInstrument.COOPERATIVE_AGREEMENT, 1),
         LookupStr(FundingInstrument.GRANT, 2),
@@ -103,19 +113,21 @@ FUNDING_INSTRUMENT_CONFIG = LookupConfig(
     ]
 )
 
-AGENCY_DOWNLOAD_FILE_TYPE_CONFIG = LookupConfig(
+AGENCY_DOWNLOAD_FILE_TYPE_CONFIG: LookupConfig[AgencyDownloadFileType] = LookupConfig(
     [LookupStr(AgencyDownloadFileType.XML, 1), LookupStr(AgencyDownloadFileType.PDF, 2)]
 )
 
-AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG = LookupConfig(
-    [
-        LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
-        LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
-        LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
-    ]
+AGENCY_SUBMISSION_NOTIFICATION_SETTING_CONFIG: LookupConfig[AgencySubmissionNotificationSetting] = (
+    LookupConfig(
+        [
+            LookupStr(AgencySubmissionNotificationSetting.NEVER, 1),
+            LookupStr(AgencySubmissionNotificationSetting.FIRST_APPLICATION_ONLY, 2),
+            LookupStr(AgencySubmissionNotificationSetting.ALWAYS, 3),
+        ]
+    )
 )
 
-JOB_STATUS_CONFIG = LookupConfig(
+JOB_STATUS_CONFIG: LookupConfig[JobStatus] = LookupConfig(
     [
         LookupStr(JobStatus.STARTED, 1),
         LookupStr(JobStatus.COMPLETED, 2),
@@ -123,16 +135,18 @@ JOB_STATUS_CONFIG = LookupConfig(
     ]
 )
 
-EXTERNAL_USER_TYPE_CONFIG = LookupConfig([LookupStr(ExternalUserType.LOGIN_GOV, 1)])
+EXTERNAL_USER_TYPE_CONFIG: LookupConfig[ExternalUserType] = LookupConfig(
+    [LookupStr(ExternalUserType.LOGIN_GOV, 1)]
+)
 
-EXTRACT_TYPE_CONFIG = LookupConfig(
+EXTRACT_TYPE_CONFIG: LookupConfig[ExtractType] = LookupConfig(
     [
         LookupStr(ExtractType.OPPORTUNITIES_JSON, 1),
         LookupStr(ExtractType.OPPORTUNITIES_CSV, 2),
     ]
 )
 
-FORM_FAMILY_CONFIG = LookupConfig(
+FORM_FAMILY_CONFIG: LookupConfig[FormFamily] = LookupConfig(
     [
         LookupStr(FormFamily.SF_424, 1),
         LookupStr(FormFamily.SF_424_INDIVIDUAL, 2),
@@ -142,29 +156,52 @@ FORM_FAMILY_CONFIG = LookupConfig(
     ]
 )
 
-COMPETITION_OPEN_TO_APPLICANT_CONFIG = LookupConfig(
+FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
+    [
+        LookupStr(FormType.SF424, 1),
+        LookupStr(FormType.SF424A, 2),
+        LookupStr(FormType.SF424B, 3),
+        LookupStr(FormType.SFLLL, 4),
+        LookupStr(FormType.PROJECT_NARRATIVE_ATTACHMENT, 5),
+        LookupStr(FormType.BUDGET_NARRATIVE_ATTACHMENT, 6),
+        LookupStr(FormType.PROJECT_ABSTRACT_SUMMARY, 7),
+        LookupStr(FormType.CD511, 8),
+        LookupStr(FormType.SF424D, 9),
+        LookupStr(FormType.OTHER_NARRATIVE_ATTACHMENT, 10),
+        LookupStr(FormType.PROJECT_ABSTRACT, 11),
+        LookupStr(FormType.SUPPLEMENTARY_NEH_COVER_SHEET, 12),
+        LookupStr(FormType.GG_LOBBYING_FORM, 13),
+        LookupStr(FormType.EPA_FORM_4700_4, 14),
+        LookupStr(FormType.EPA_KEY_CONTACTS, 15),
+        LookupStr(FormType.ATTACHMENT_FORM, 16),
+    ]
+)
+
+
+COMPETITION_OPEN_TO_APPLICANT_CONFIG: LookupConfig[CompetitionOpenToApplicant] = LookupConfig(
     [
         LookupStr(CompetitionOpenToApplicant.INDIVIDUAL, 1),
         LookupStr(CompetitionOpenToApplicant.ORGANIZATION, 2),
     ]
 )
 
-SAM_GOV_PROCESSING_STATUS_CONFIG = LookupConfig(
+SAM_GOV_PROCESSING_STATUS_CONFIG: LookupConfig[SamGovProcessingStatus] = LookupConfig(
     [
         LookupStr(SamGovProcessingStatus.PENDING, 1),
         LookupStr(SamGovProcessingStatus.COMPLETED, 2),
         LookupStr(SamGovProcessingStatus.FAILED, 3),
+        LookupStr(SamGovProcessingStatus.DELETED, 4),
     ]
 )
 
-SAM_GOV_EXTRACT_TYPE_CONFIG = LookupConfig(
+SAM_GOV_EXTRACT_TYPE_CONFIG: LookupConfig[SamGovExtractType] = LookupConfig(
     [
         LookupStr(SamGovExtractType.MONTHLY, 1),
         LookupStr(SamGovExtractType.DAILY, 2),
     ]
 )
 
-SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
+SAM_GOV_IMPORT_TYPE_CONFIG: LookupConfig[SamGovImportType] = LookupConfig(
     [
         LookupStr(SamGovImportType.MONTHLY_EXTRACT, 1),
         LookupStr(SamGovImportType.DAILY_EXTRACT, 2),
@@ -172,11 +209,97 @@ SAM_GOV_IMPORT_TYPE_CONFIG = LookupConfig(
     ]
 )
 
-APPLICATION_STATUS_CONFIG = LookupConfig(
+APPLICATION_STATUS_CONFIG: LookupConfig[ApplicationStatus] = LookupConfig(
     [
         LookupStr(ApplicationStatus.IN_PROGRESS, 1),
         LookupStr(ApplicationStatus.SUBMITTED, 2),
         LookupStr(ApplicationStatus.ACCEPTED, 3),
+    ]
+)
+
+PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
+    [
+        LookupStr(Privilege.MANAGE_ORG_MEMBERS, 1),
+        LookupStr(Privilege.MANAGE_ORG_ADMIN_MEMBERS, 2),
+        LookupStr(Privilege.VIEW_ORG_MEMBERSHIP, 3),
+        LookupStr(Privilege.START_APPLICATION, 4),
+        LookupStr(Privilege.LIST_APPLICATION, 5),
+        LookupStr(Privilege.VIEW_APPLICATION, 6),
+        LookupStr(Privilege.MODIFY_APPLICATION, 7),
+        LookupStr(Privilege.SUBMIT_APPLICATION, 8),
+        LookupStr(Privilege.UPDATE_FORM, 9),
+        LookupStr(Privilege.MANAGE_AGENCY_MEMBERS, 10),
+        LookupStr(Privilege.GET_SUBMITTED_APPLICATIONS, 11),
+        LookupStr(Privilege.LEGACY_AGENCY_VIEWER, 12),
+        LookupStr(Privilege.LEGACY_AGENCY_GRANT_RETRIEVER, 13),
+        LookupStr(Privilege.LEGACY_AGENCY_ASSIGNER, 14),
+        LookupStr(Privilege.MANAGE_INTERNAL_ROLES, 15),
+        LookupStr(Privilege.MANAGE_COMPETITION, 16),
+        LookupStr(Privilege.READ_TEST_USER_TOKEN, 17),
+    ]
+)
+
+ROLE_TYPE_CONFIG: LookupConfig[RoleType] = LookupConfig(
+    [
+        LookupStr(RoleType.ORGANIZATION, 1),
+        LookupStr(RoleType.AGENCY, 2),
+        LookupStr(RoleType.INTERNAL, 3),
+        LookupStr(RoleType.APPLICATION, 4),
+    ]
+)
+
+APPLICATION_AUDIT_EVENT_CONFIG: LookupConfig[ApplicationAuditEvent] = LookupConfig(
+    [
+        LookupStr(ApplicationAuditEvent.APPLICATION_CREATED, 1),
+        LookupStr(ApplicationAuditEvent.APPLICATION_NAME_CHANGED, 2),
+        LookupStr(ApplicationAuditEvent.APPLICATION_SUBMITTED, 3),
+        LookupStr(ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED, 4),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_ADDED, 5),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_DELETED, 6),
+        LookupStr(ApplicationAuditEvent.ATTACHMENT_UPDATED, 7),
+        LookupStr(ApplicationAuditEvent.SUBMISSION_CREATED, 8),
+        LookupStr(ApplicationAuditEvent.USER_ADDED, 9),
+        LookupStr(ApplicationAuditEvent.USER_UPDATED, 10),
+        LookupStr(ApplicationAuditEvent.USER_REMOVED, 11),
+        LookupStr(ApplicationAuditEvent.FORM_UPDATED, 12),
+        LookupStr(ApplicationAuditEvent.ORGANIZATION_ADDED, 13),
+    ]
+)
+USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
+    [
+        LookupStr(UserType.STANDARD, 1),
+        LookupStr(UserType.INTERNAL_FRONTEND, 2),
+        LookupStr(UserType.LEGACY_CERTIFICATE, 3),
+    ]
+)
+
+WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
+    [
+        LookupStr(WorkflowType.OPPORTUNITY_PUBLISH, 1),
+        LookupStr(WorkflowType.APPLICATION_SUBMISSION, 2),
+        LookupStr(WorkflowType.INITIAL_PROTOTYPE, 3),
+    ]
+)
+
+APPROVAL_TYPE_CONFIG: LookupConfig[ApprovalType] = LookupConfig(
+    [
+        LookupStr(ApprovalType.INITIAL_PROTOTYPE_APPROVAL, 1),
+    ]
+)
+
+APPROVAL_RESPONSE_TYPE_CONFIG: LookupConfig[ApprovalResponseType] = LookupConfig(
+    [
+        LookupStr(ApprovalResponseType.APPROVED, 1),
+        LookupStr(ApprovalResponseType.DECLINED, 2),
+        LookupStr(ApprovalResponseType.REQUIRES_MODIFICATION, 3),
+    ]
+)
+
+ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupConfig(
+    [
+        LookupStr(OrganizationAuditEvent.USER_ADDED, 1),
+        LookupStr(OrganizationAuditEvent.USER_UPDATED, 2),
+        LookupStr(OrganizationAuditEvent.USER_REMOVED, 3),
     ]
 )
 
@@ -189,7 +312,7 @@ class LkOpportunityCategory(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkOpportunityCategory":
+    def from_lookup(cls, lookup: Lookup) -> LkOpportunityCategory:
         return LkOpportunityCategory(
             opportunity_category_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -203,7 +326,7 @@ class LkApplicantType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkApplicantType":
+    def from_lookup(cls, lookup: Lookup) -> LkApplicantType:
         return LkApplicantType(
             applicant_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -217,7 +340,7 @@ class LkFundingCategory(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFundingCategory":
+    def from_lookup(cls, lookup: Lookup) -> LkFundingCategory:
         return LkFundingCategory(
             funding_category_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -231,7 +354,7 @@ class LkFundingInstrument(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFundingInstrument":
+    def from_lookup(cls, lookup: Lookup) -> LkFundingInstrument:
         return LkFundingInstrument(
             funding_instrument_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -245,7 +368,7 @@ class LkOpportunityStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkOpportunityStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkOpportunityStatus:
         return LkOpportunityStatus(
             opportunity_status_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -259,7 +382,7 @@ class LkAgencyDownloadFileType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAgencyDownloadFileType":
+    def from_lookup(cls, lookup: Lookup) -> LkAgencyDownloadFileType:
         return LkAgencyDownloadFileType(
             agency_download_file_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -273,7 +396,7 @@ class LkAgencySubmissionNotificationSetting(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAgencySubmissionNotificationSetting":
+    def from_lookup(cls, lookup: Lookup) -> LkAgencySubmissionNotificationSetting:
         return LkAgencySubmissionNotificationSetting(
             agency_submission_notification_setting_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -288,7 +411,7 @@ class LkExternalUserType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkExternalUserType":
+    def from_lookup(cls, lookup: Lookup) -> LkExternalUserType:
         return LkExternalUserType(
             external_user_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -302,7 +425,7 @@ class LkExtractType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkExtractType":
+    def from_lookup(cls, lookup: Lookup) -> LkExtractType:
         return LkExtractType(
             extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -316,7 +439,7 @@ class LkJobStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkJobStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkJobStatus:
         return LkJobStatus(job_status_id=lookup.lookup_val, description=lookup.get_description())
 
 
@@ -328,8 +451,20 @@ class LkFormFamily(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkFormFamily":
+    def from_lookup(cls, lookup: Lookup) -> LkFormFamily:
         return LkFormFamily(form_family_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(FORM_TYPE_CONFIG)
+class LkFormType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_form_type"
+
+    form_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkFormType:
+        return LkFormType(form_type_id=lookup.lookup_val, description=lookup.get_description())
 
 
 @LookupRegistry.register_lookup(COMPETITION_OPEN_TO_APPLICANT_CONFIG)
@@ -340,7 +475,7 @@ class LkCompetitionOpenToApplicant(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkCompetitionOpenToApplicant":
+    def from_lookup(cls, lookup: Lookup) -> LkCompetitionOpenToApplicant:
         return LkCompetitionOpenToApplicant(
             competition_open_to_applicant_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -354,7 +489,7 @@ class LkSamGovProcessingStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkSamGovProcessingStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkSamGovProcessingStatus:
         return LkSamGovProcessingStatus(
             sam_gov_processing_status_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -368,7 +503,7 @@ class LkSamGovExtractType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkSamGovExtractType":
+    def from_lookup(cls, lookup: Lookup) -> LkSamGovExtractType:
         return LkSamGovExtractType(
             sam_gov_extract_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -382,7 +517,7 @@ class LkSamGovImportType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkSamGovImportType":
+    def from_lookup(cls, lookup: Lookup) -> LkSamGovImportType:
         return LkSamGovImportType(
             sam_gov_import_type_id=lookup.lookup_val, description=lookup.get_description()
         )
@@ -396,7 +531,113 @@ class LkApplicationStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkApplicationStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkApplicationStatus:
         return LkApplicationStatus(
             application_status_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(PRIVILEGE_CONFIG)
+class LkPrivilege(LookupTable, TimestampMixin):
+    __tablename__ = "lk_privilege"
+
+    privilege_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkPrivilege:
+        return LkPrivilege(privilege_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(ROLE_TYPE_CONFIG)
+class LkRoleType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_role_type"
+
+    role_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkRoleType:
+        return LkRoleType(role_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(APPLICATION_AUDIT_EVENT_CONFIG)
+class LkApplicationAuditEvent(LookupTable, TimestampMixin):
+    __tablename__ = "lk_application_audit_event"
+
+    application_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkApplicationAuditEvent:
+        return LkApplicationAuditEvent(
+            application_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(USER_TYPE_CONFIG)
+class LkUserType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_user_type"
+
+    user_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkUserType:
+        return LkUserType(user_type_id=lookup.lookup_val, description=lookup.get_description())
+
+
+@LookupRegistry.register_lookup(ORGANIZATION_AUDIT_EVENT_CONFIG)
+class LkOrganizationAuditEvent(LookupTable, TimestampMixin):
+    __tablename__ = "lk_organization_audit_event"
+
+    organization_audit_event_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkOrganizationAuditEvent:
+        return LkOrganizationAuditEvent(
+            organization_audit_event_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(WORKFLOW_TYPE_CONFIG)
+class LkWorkflowType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_workflow_type"
+
+    workflow_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkWorkflowType:
+        return LkWorkflowType(
+            workflow_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(APPROVAL_TYPE_CONFIG)
+class LkApprovalType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_approval_type"
+
+    approval_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkApprovalType:
+        return LkApprovalType(
+            approval_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(APPROVAL_RESPONSE_TYPE_CONFIG)
+class LkApprovalResponseType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_approval_response_type"
+
+    approval_response_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkApprovalResponseType:
+        return LkApprovalResponseType(
+            approval_response_type_id=lookup.lookup_val, description=lookup.get_description()
         )

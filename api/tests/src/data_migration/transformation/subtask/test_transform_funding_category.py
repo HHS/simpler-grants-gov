@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformFundingCategory(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_funding_category(self, transform_oracle_data_task):
         return TransformFundingCategory(transform_oracle_data_task)
 
@@ -66,7 +66,7 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         syn_insert1 = setup_funding_category(
             create_existing=False,
             opportunity_summary=opportunity_summary_syn,
-            legacy_lookup_value="FN",
+            legacy_lookup_value="EIC",
         )
         syn_insert2 = setup_funding_category(
             create_existing=False,
@@ -116,7 +116,9 @@ class TestTransformFundingCategory(BaseTransformTestClass):
             db_session, forecast_insert2, expected_funding_category=FundingCategory.AGRICULTURE
         )
         validate_funding_category(
-            db_session, syn_insert1, expected_funding_category=FundingCategory.FOOD_AND_NUTRITION
+            db_session,
+            syn_insert1,
+            expected_funding_category=FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS,
         )
         validate_funding_category(
             db_session, syn_insert2, expected_funding_category=FundingCategory.HEALTH
@@ -169,7 +171,7 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         assert transform_constants.Metrics.TOTAL_ERROR_COUNT not in metrics
         assert metrics[transform_constants.Metrics.TOTAL_DELETE_ORPHANS_SKIPPED] == 1
 
-    @pytest.mark.parametrize("is_forecast", [True, False, True, False])
+    @pytest.mark.parametrize("is_forecast", [True, False])
     def test_process_funding_category_but_current_missing(
         self,
         db_session,

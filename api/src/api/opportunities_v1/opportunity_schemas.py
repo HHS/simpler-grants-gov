@@ -203,7 +203,8 @@ class OpportunitySummaryV1Schema(Schema):
     )
 
     version_number = fields.Integer(
-        metadata={"description": "The version number of the opportunity summary", "example": 1}
+        allow_none=True,
+        metadata={"description": "The version number of the opportunity summary", "example": 1},
     )
 
     funding_instruments = fields.List(fields.Enum(FundingInstrument))
@@ -219,8 +220,12 @@ class OpportunitySummaryV1Schema(Schema):
 
 
 class OpportunityV1Schema(Schema):
-    opportunity_id = fields.Integer(
-        metadata={"description": "The internal ID of the opportunity", "example": 12345},
+    opportunity_id = fields.UUID(
+        metadata={"description": "The internal ID of the opportunity"},
+    )
+
+    legacy_opportunity_id = fields.Integer(
+        metadata={"description": "The internal legacy ID of the opportunity", "example": 12345},
     )
 
     opportunity_number = fields.String(
@@ -290,6 +295,11 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_code = fields.String(
+        allow_none=True,
+        metadata={"description": "The top-level (parent) agency", "example": "HHS"},
+    )
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -350,9 +360,7 @@ class OpportunitySearchFilterV1Schema(Schema):
     )
     assistance_listing_number = fields.Nested(
         StrSearchSchemaBuilder("AssistanceListingNumberFilterV1Schema")
-        .with_one_of(
-            example="45.149", pattern=r"^\d{2}\.\d{2,3}$"
-        )  # Always of the format ##.## or ##.###
+        .with_one_of(example="45.149", pattern=r"^\d{2}\.[A-Za-z0-9]{2,3}$")
         .build()
     )
     is_cost_sharing = fields.Nested(
@@ -451,6 +459,22 @@ class OpportunityFacetV1Schema(Schema):
         },
     )
 
+    close_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of close_date values in the full response",
+        },
+    )
+
+    post_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of post_date values in the full response",
+        },
+    )
+
 
 class ExperimentalV1Schema(Schema):
     scoring_rule = fields.Enum(
@@ -546,9 +570,7 @@ class SavedOpportunitySummaryV1Schema(Schema):
 
 
 class SavedOpportunityResponseV1Schema(Schema):
-    opportunity_id = fields.Integer(
-        metadata={"description": "The ID of the saved opportunity", "example": 1234}
-    )
+    opportunity_id = fields.UUID(metadata={"description": "The ID of the saved opportunity"})
     opportunity_title = fields.String(
         allow_none=True,
         metadata={"description": "The title of the opportunity", "example": "my title"},
@@ -565,7 +587,7 @@ class SavedOpportunityResponseV1Schema(Schema):
 
 
 class OpportunityVersionAttachmentSchema(Schema):
-    attachment_id = fields.Integer(
+    attachment_id = fields.UUID(
         metadata={"description": "The attachment id associated with the opportunity"}
     )
 

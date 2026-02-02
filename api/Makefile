@@ -115,7 +115,7 @@ stop:
 
 check: format-check lint db-check-migrations test
 
-remake-backend: volume-recreate db-seed-local populate-search-opportunities populate-search-agencies ## Completely recreate API services, load data into the DB and search index
+remake-backend: volume-recreate setup-api-data ## Completely recreate API services, load data into the DB and search index
 ##################################################
 # DB & migrations
 ##################################################
@@ -179,7 +179,7 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 create-erds: # Create ERD diagrams for our DB schema
-	$(PY_RUN_CMD) create-erds
+	docker compose run --rm openapi-tools poetry run create-erds
 	mv bin/*.png ../documentation/api/database/erds
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
@@ -193,8 +193,12 @@ init-opensearch: start-opensearch ## Start the opensearch service locally
 
 start-opensearch:
 	docker compose up --detach opensearch-node
-	docker compose up --detach opensearch-dashboards
 	./bin/wait-for-local-opensearch.sh
+
+init-opensearch-dashboards: start-opensearch-dashboards
+
+start-opensearch-dashboards:
+	docker compose up --detach opensearch-dashboards
 
 ##################################################
 # Localstack
@@ -231,14 +235,14 @@ start-mock-oauth2:
 # Testing
 ##################################################
 
-test: ## Run all tests except for audit logging tests
-	$(PY_RUN_CMD) pytest -m "not audit" $(args)
+test: ## Run all tests except for audit logging and XML validation tests
+	$(PY_RUN_CMD) pytest -m "not audit and not xml_validation" $(args)
 
 test-audit: ## Run audit logging tests
 	$(PY_RUN_CMD) pytest -m "audit" $(args)
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit and not xml_validation" $(args)
 	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
 	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
 	$(PY_RUN_CMD) coverage report
@@ -266,6 +270,9 @@ lint-py: lint-ruff lint-mypy
 lint-ruff:
 	$(PY_RUN_CMD) ruff check src tests bin
 
+lint-ruff-fix:
+	$(PY_RUN_CMD) ruff check src tests bin --fix
+
 lint-mypy:
 	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 
@@ -280,11 +287,14 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of CLI commands)
 	$(FLASK_CMD) $(args)
 
-# Set init-db as pre-requisite since there seems to be a race condition
-# where the DB can't yet receive connections if it's starting from a
-# clean state (e.g. after make stop, make clean-volumes, make openapi-spec)
-openapi-spec: init-db ## Generate OpenAPI spec
-	$(FLASK_CMD) spec --format yaml --output ./openapi.generated.yml
+openapi-spec: ## Generate OpenAPI spec
+	docker compose run --rm openapi-tools poetry run flask --app src.app spec --format yaml --output openapi.generated.yml
+
+openapi-spec-common-grants:
+	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
+
+check-spec: openapi-spec-common-grants
+	cg check spec ./openapi-cg.generated.yml
 
 
 copy-oracle-data:
@@ -295,6 +305,10 @@ setup-foreign-tables:
 
 seed-local-legacy-tables:
 	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_legacy_tables
+
+generate-internal-token:
+	$(FLASK_CMD) task generate-internal-token $(args)
+
 
 ##################################################
 # Tasks/Jobs
@@ -308,6 +322,8 @@ populate-search-agencies: ## Load agencies from the DB into the search index, ru
 
 run-generate-notifications: ## Send email notifications
 	$(FLASK_CMD) generate-notifications $(args)
+
+setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 
 ##################################################
 # Miscellaneous Utilities
@@ -325,6 +341,16 @@ console: ## Start interactive Python console
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+##################################################
+# XML Validation Tests
+##################################################
+
+test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
+	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
+
+fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=./xsd_cache)
+	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--cache-dir $(cache_dir)) $(if $(form),--form $(form)) $(args)
 
 ##################################################
 # Load testing
@@ -355,7 +381,18 @@ init-mock-soap-services: start-mock-soap-services ## Initialize the applicants s
 start-mock-soap-services: ## start applicants soap api
 	docker compose up --detach mock-applicants-soap-api
 
-# To specify the path of where the downloaded certificates are run the command as follows:
-#   make setup-soap-proxy cert_dir="~/certs/dir/"
-setup-soap-proxy:
-	./bin/setup-soap.sh $(cert_dir)
+validate-simpler-endpoints:
+	$(PY_RUN_CMD) validate-simpler-endpoints
+
+####################
+# XML Generation CLI
+####################
+
+generate-xml: ## Generate XML from JSON (usage: make generate-xml json='{"field": "value"}' form=SF424_4_0)
+	$(PY_RUN_CMD) flask task generate-xml --json '$(json)' --form $(or $(form),SF424_4_0)
+
+validate-xml-generation: ## Run XML generation validation tests
+	$(PY_RUN_CMD) flask task validate-xml-generation
+
+run-xml-validator: ## Run XML validator tool directly
+	$(PY_RUN_CMD) python tool/xml_validator.py

@@ -13,7 +13,6 @@ locals {
     # Login.gov OAuth
     # Default values point to the IDP integration environment
     # which all non-prod environments should use
-    ENABLE_AUTH_ENDPOINT             = 0
     LOGIN_GOV_CLIENT_ID              = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-${var.environment}-simpler-grants-gov"
     LOGIN_GOV_ENDPOINT               = "https://idp.int.identitysandbox.gov/"
     LOGIN_GOV_JWK_ENDPOINT           = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
@@ -24,14 +23,22 @@ locals {
     API_JWT_AUDIENCE                 = "simpler-grants-api-${var.environment}"
     API_JWT_TOKEN_EXPIRATION_MINUTES = 15
 
-    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
+    TEST_AGENCY_PREFIXES = "GDIT,IVPDF,0001,FGLT,NGMS,NGMS-Sub1,SECSCAN"
 
     # grants.gov services/applications URI.
-    GRANTS_GOV_URI  = "https://trainingws.grants.gov:443"
-    ENABLE_SOAP_API = 0
+    # Both staging and dev environments both point to trainingws subdomain.
+    GRANTS_GOV_URI  = "https://trainingws.grants.gov"
+    GRANTS_GOV_PORT = 443
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api-alpha.sam.gov"
+
+    # PDF Generation Configuration
+    FRONTEND_URL                         = "https://${var.environment}.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE                  = "true" # Default to test mode for safety
+    DOCRAPTOR_API_URL                    = "https://docraptor.com/docs"
+    SHORT_LIVED_TOKEN_EXPIRATION_MINUTES = "60"
+    PDF_GENERATION_USE_MOCKS             = "false"
   }
 
   # Configuration for secrets
@@ -84,14 +91,24 @@ locals {
       secret_store_name = "/api/${var.environment}/domain-verification-content"
     }
 
-    SOAP_AUTH_CONTENT = {
+    SOAP_PRIVATE_KEYS = {
       manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/soap-auth-content"
+      secret_store_name = "/api/${var.environment}/soap-private-keys"
     }
 
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"
+    }
+
+    DOCRAPTOR_API_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/docraptor-api-key"
+    }
+
+    API_GATEWAY_DEFAULT_USAGE_PLAN_ID = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/api-gateway-default-usage-plan-id"
     }
   }
 }

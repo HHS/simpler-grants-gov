@@ -133,3 +133,50 @@ a new migration. If there would be anything created, it errors.
 
 This check also runs as part of our CI/CD, so even if you forget to run it yourself during development,
 it will be caught when you send a pull request.
+
+# Operations
+## Removing a column
+
+**First Deploy**
+
+In order to remove a column, we'll first need to remove all usage of the column in the API code base.
+
+One usage case is in transformation module (e.g. \simpler-grants-gov\api\src\data_migration\transformation\transform_util.py).
+
+```diff
+def transform_example():
+    example.first_column = example_source.first_column
+-   example.my_column = example_source.my_column    # column to be removed
+    return example
+```
+
+However, since the column will still be in the database model, SQLAlchemy will still include it in `SELECT`s and `INSERT`s for the table. We'll need to set this column to `deferred`, in order to exclude it from queries, and to `evaluates_none`, to stop inserting null for it. This does require that the column be nullable to work, if it isn't you'll first need to make it nullable in an earlier migration.
+
+Note: `evaulates_none` is required if the column has a server_default as it will make it so if a field isn't set, rather than excluding it from the insert into the DB, it sets it to `null` so the server_default isn't used. If the column has no `server_default`, it isn't technically required to use it, but we recommend adding it because it's simpler to have a single pattern to follow rather than multiple.
+
+```python
+class Example(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "example"
+
+    example_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    # The column we want to deprecate, needs both
+    # the call to evaluates_none() and deferred=True
+    my_column: Mapped[str | None] = mapped_column(Text().evaluates_none(), deferred=True)
+```
+
+**Second Deploy**
+
+Once the column usage removal has been deployed (including deprecating the column in the database model), we can safely remove the column from the database model and the actual database. To do so, simply delete the deprecated column from the database model and create a corresponding database migration.
+
+## Removing a table
+
+**First Deploy**
+
+Removing a table is similar to, but simpler than, removing a column. You'll still start by removing all usage of the table in the API code base. No further steps are required at this point, since SQLAlchemy won't be interacting with the table at this point.
+
+**Second Deploy**
+
+Once the table usage removal has been deployed, we can safely remove the table from the database model and the actual database. Again, simply delete the table from the database model and create a corresponding migration.

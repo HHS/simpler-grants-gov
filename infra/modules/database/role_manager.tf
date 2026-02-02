@@ -15,7 +15,7 @@ resource "aws_lambda_function" "role_manager" {
 
   filename         = local.role_manager_archive_path
   source_code_hash = filebase64sha256(local.role_manager_archive_path)
-  runtime          = "python3.9"
+  runtime          = "python3.13"
   handler          = "role_manager.lambda_handler"
   role             = aws_iam_role.role_manager.arn
   kms_key_arn      = aws_kms_key.role_manager.arn

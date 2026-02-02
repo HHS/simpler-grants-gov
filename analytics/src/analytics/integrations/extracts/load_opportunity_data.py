@@ -12,6 +12,7 @@ from sqlalchemy import Connection
 
 from analytics.integrations.etldb.etldb import EtlDb
 from analytics.integrations.extracts.constants import (
+    MAP_TABLE_TO_FILE_NAME,
     MAP_TABLES_TO_COLS,
     OpportunityTables,
 )
@@ -33,14 +34,14 @@ def extract_copy_opportunity_data() -> None:
     etldb_conn = EtlDb()
 
     with etldb_conn.connection() as conn, conn.begin():
-        _trancate_opportunity_table_records(conn)
+        _truncate_opportunity_table_records(conn)
 
         _fetch_insert_opportunity_data(conn)
 
     logger.info("Extract opportunity data completed successfully")
 
 
-def _trancate_opportunity_table_records(conn: Connection) -> None:
+def _truncate_opportunity_table_records(conn: Connection) -> None:
     """Truncate existing records from all tables."""
     cursor = conn.connection.cursor()
     schema = os.environ["DB_SCHEMA"]
@@ -64,10 +65,13 @@ def _fetch_insert_opportunity_data(conn: Connection) -> None:
                        FROM STDIN WITH (FORMAT CSV, DELIMITER ',', QUOTE '"', HEADER)
                     """
 
+        # Use custom file name if mapping exists, otherwise use table name
+        file_name = MAP_TABLE_TO_FILE_NAME.get(table, table)
+
         with ExitStack() as stack:
             file = stack.enter_context(
                 smart_open.open(
-                    f"{s3_config.load_opportunity_data_file_path}/{table}.csv",
+                    f"{s3_config.load_opportunity_data_file_path}/{file_name}.csv",
                     "r",
                 ),
             )

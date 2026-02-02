@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, cast
+from typing import cast
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -7,8 +7,12 @@ from src.adapters.aws import S3Config
 from src.data_migration.transformation.subtask.abstract_transform_subtask import (
     AbstractTransformSubTask,
 )
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.competition_models import Competition
+from src.db.models.opportunity_models import Opportunity, OpportunityAttachment
 from src.db.models.staging.opportunity import Topportunity
+from src.services.competition_alpha.competition_instruction_util import (
+    get_s3_competition_instruction_path,
+)
 from src.services.opportunity_attachments import attachment_util
 from src.task.task import Task
 from src.util import file_util
@@ -29,10 +33,10 @@ class TransformOpportunity(AbstractTransformSubTask):
     def transform_records(self) -> None:
         # Fetch all opportunities that were modified
         # Alongside that, grab the existing opportunity record
-        opportunities: list[Tuple[Topportunity, Opportunity | None]] = self.fetch(
+        opportunities: list[tuple[Topportunity, Opportunity | None]] = self.fetch(
             Topportunity,
             Opportunity,
-            [Topportunity.opportunity_id == Opportunity.opportunity_id],
+            [Topportunity.opportunity_id == Opportunity.legacy_opportunity_id],
         )
 
         for source_opportunity, target_opportunity in opportunities:
@@ -69,7 +73,20 @@ class TransformOpportunity(AbstractTransformSubTask):
             # Cleanup the attachments from s3
             if target_opportunity is not None:
                 for attachment in target_opportunity.opportunity_attachments:
+                    logger.info(
+                        "Deleting opportunity attachment as opportunity is being deleted.",
+                        extra=extra | {"s3_location": attachment.file_location},
+                    )
                     file_util.delete_file(attachment.file_location)
+
+                # Also cleanup competition instruction files
+                for competition in target_opportunity.competitions:
+                    for competition_instruction in competition.competition_instructions:
+                        logger.info(
+                            "Deleting competition instruction as opportunity is being deleted.",
+                            extra=extra | {"s3_location": competition_instruction.file_location},
+                        )
+                        file_util.delete_file(competition_instruction.file_location)
 
         else:
             # To avoid incrementing metrics for records we fail to transform, record
@@ -96,23 +113,62 @@ class TransformOpportunity(AbstractTransformSubTask):
                 )
                 self.db_session.merge(transformed_opportunity)
 
-                # If an opportunity went from being a draft to not a draft (published)
-                # then we need to move all of its attachments to the public bucket
-                # from the draft s3 bucket.
-                if was_draft and transformed_opportunity.is_draft is False:
-                    for attachment in cast(Opportunity, target_opportunity).opportunity_attachments:
-                        # Determine the new path
-                        file_name = attachment_util.adjust_legacy_file_name(attachment.file_name)
-                        s3_path = attachment_util.get_s3_attachment_path(
-                            file_name,
-                            attachment.attachment_id,
-                            transformed_opportunity,
-                            self.s3_config,
-                        )
+                # If the opportunity's draft status has changed (draft ↔ published),
+                # move all attachments to the correct S3 bucket (public or draft)
+                if was_draft != transformed_opportunity.is_draft:
+                    self._move_attachments_to_correct_bucket(
+                        cast(Opportunity, target_opportunity).opportunity_attachments,
+                        transformed_opportunity,
+                    )
 
-                        # Move the file
-                        file_util.move_file(attachment.file_location, s3_path)
-                        attachment.file_location = s3_path
+                    for competition in cast(Opportunity, target_opportunity).competitions:
+                        self._move_competition_instructions_to_correct_bucket(competition)
 
         logger.info("Processed opportunity", extra=extra)
         source_opportunity.transformed_at = self.transform_time
+
+    def _move_attachments_to_correct_bucket(
+        self,
+        opportunity_attachments: list[OpportunityAttachment],
+        transformed_opportunity: Opportunity,
+    ) -> None:
+        for attachment in opportunity_attachments:
+            file_name = attachment_util.adjust_legacy_file_name(attachment.file_name)
+            s3_path = attachment_util.get_s3_attachment_path(
+                file_name,
+                attachment.attachment_id,
+                transformed_opportunity,
+                self.s3_config,
+            )
+
+            logger.info(
+                "Moving opportunity attachment as opportunity is no longer a draft",
+                extra={
+                    "opportunity_id": transformed_opportunity.opportunity_id,
+                    "source_path": attachment.file_location,
+                    "destination_path": s3_path,
+                },
+            )
+            file_util.move_file(attachment.file_location, s3_path)
+            attachment.file_location = s3_path
+
+    def _move_competition_instructions_to_correct_bucket(self, competition: Competition) -> None:
+        for competition_instruction in competition.competition_instructions:
+            s3_path = get_s3_competition_instruction_path(
+                competition_instruction.file_name,
+                competition_instruction.competition_instruction_id,
+                competition,
+                self.s3_config,
+            )
+
+            logger.info(
+                "Moving competition instruction as opportunity is no longer a draft",
+                extra={
+                    "opportunity_id": competition.opportunity_id,
+                    "competition_id": competition.competition_id,
+                    "source_path": competition_instruction.file_location,
+                    "destination_path": s3_path,
+                },
+            )
+            file_util.move_file(competition_instruction.file_location, s3_path)
+            competition_instruction.file_location = s3_path

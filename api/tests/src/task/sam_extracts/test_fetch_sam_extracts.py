@@ -18,6 +18,7 @@ from src.task.sam_extracts.fetch_sam_extracts import (
 )
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
+from tests.src.db.models.factories import SamExtractFileFactory
 
 # Sample dates for testing
 CURRENT_DATE = datetime(2025, 4, 10, 12, 0, 0)
@@ -48,7 +49,15 @@ class TestSamExtractsTask(BaseTestClass):
         return mock_client
 
     @pytest.fixture
-    def task(self, db_session, mock_s3_bucket, mock_sam_gov_client, setup_method, monkeypatch):
+    def task(
+        self,
+        db_session,
+        mock_s3_bucket,
+        mock_sam_gov_client,
+        setup_method,
+        monkeypatch,
+        enable_factory_create,
+    ):
         """Create an instance of the task with mock dependencies
 
         Note: This fixture is function-scoped to work with mock_s3_bucket,
@@ -82,8 +91,18 @@ class TestSamExtractsTask(BaseTestClass):
         mock_sam_gov_client.reset_mock()
         task.increment.reset_mock()
 
-        # Mock the download response
         filename = f"SAM_FOUO_MONTHLY_V2_{MONTHLY_EXTRACT_DATE.strftime('%Y%m%d')}.ZIP"
+
+        # A prior failed file exists but won't be seen by the fetch
+        SamExtractFileFactory.create(
+            extract_type=SamGovExtractType.MONTHLY,
+            extract_date=MONTHLY_EXTRACT_DATE,
+            filename=filename,
+            s3_path=f"s3://test-bucket/sam-extracts/monthly/{filename}",
+            processing_status=SamGovProcessingStatus.FAILED,
+        )
+
+        # Mock the download response
         download_response = SamExtractResponse(
             file_name=filename,
             file_size=1024,
@@ -99,7 +118,14 @@ class TestSamExtractsTask(BaseTestClass):
         assert result == MONTHLY_EXTRACT_DATE
 
         # Verify DB record
-        record = db_session.query(SamExtractFile).one()
+        record = (
+            db_session.query(SamExtractFile)
+            .where(
+                SamExtractFile.extract_date == MONTHLY_EXTRACT_DATE,
+                SamExtractFile.processing_status == SamGovProcessingStatus.PENDING,
+            )
+            .one_or_none()
+        )
         assert record.extract_type == SamGovExtractType.MONTHLY
         assert record.extract_date == MONTHLY_EXTRACT_DATE
         assert record.filename == filename
@@ -109,7 +135,12 @@ class TestSamExtractsTask(BaseTestClass):
         task.increment.assert_called_once_with(task.Metrics.MONTHLY_EXTRACTS_FETCHED)
 
     @freeze_time(CURRENT_DATE)
-    def test_fetch_monthly_extract_already_exists(self, task, db_session, mock_sam_gov_client):
+    @pytest.mark.parametrize(
+        "current_status", [SamGovProcessingStatus.COMPLETED, SamGovProcessingStatus.PENDING]
+    )
+    def test_fetch_monthly_extract_already_exists(
+        self, task, db_session, mock_sam_gov_client, current_status
+    ):
         """Test fetching a monthly extract that already exists"""
         # Reset the mocks before starting the test
         mock_sam_gov_client.reset_mock()
@@ -122,7 +153,7 @@ class TestSamExtractsTask(BaseTestClass):
             extract_date=MONTHLY_EXTRACT_DATE,
             filename=filename,
             s3_path=f"s3://test-bucket/sam-extracts/monthly/{filename}",
-            processing_status=SamGovProcessingStatus.COMPLETED,
+            processing_status=current_status,
             sam_extract_file_id=uuid.uuid4(),
         )
         db_session.add(existing_extract)
@@ -142,6 +173,13 @@ class TestSamExtractsTask(BaseTestClass):
         # Reset the mocks before starting the test
         mock_sam_gov_client.reset_mock()
         task.increment.reset_mock()
+
+        # An existing failed extract from the 9th won't be seen
+        SamExtractFileFactory.create(
+            extract_type=SamGovExtractType.DAILY,
+            extract_date=date(2025, 4, 9),
+            processing_status=SamGovProcessingStatus.FAILED,
+        )
 
         # Mock download extract to just return a response
         mock_sam_gov_client.download_extract.return_value = SamExtractResponse(
@@ -165,7 +203,11 @@ class TestSamExtractsTask(BaseTestClass):
         assert mock_sam_gov_client.download_extract.call_count == expected_calls
 
         # Verify DB records
-        records = db_session.query(SamExtractFile).all()
+        records = (
+            db_session.query(SamExtractFile)
+            .where(SamExtractFile.processing_status == SamGovProcessingStatus.PENDING)
+            .all()
+        )
         assert len(records) == expected_calls
         assert all(r.extract_type == SamGovExtractType.DAILY for r in records)
         assert all(r.processing_status == SamGovProcessingStatus.PENDING for r in records)

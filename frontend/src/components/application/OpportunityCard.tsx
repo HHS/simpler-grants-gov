@@ -32,7 +32,7 @@ const OpportunityItemLink = ({
 }: {
   opKey: string;
   opValue: string | null;
-  opId: number;
+  opId: string;
 }) => {
   return (
     <div className="margin-bottom-1">

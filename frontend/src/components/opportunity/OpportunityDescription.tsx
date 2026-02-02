@@ -88,8 +88,8 @@ const OpportunityDescription = ({
   );
 
   return (
-    <div className="margin-top-3" data-testid="opportunity-description">
-      <div className="display-block tablet:display-flex flex-align-end">
+    <div className="margin-top-6" data-testid="opportunity-description">
+      <div className="display-block tablet:display-flex flex-align-end margin-bottom-2">
         <h2 className="flex-1">{t("title")}</h2>
         <OpportunityDownload attachments={attachments} />
       </div>

@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import { isNil } from "lodash";
-import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import {
   BaseOpportunity,
+  MinimalOpportunity,
   OpportunityStatus,
+  PossiblySavedBaseOpportunity,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { SearchResponseData } from "src/types/search/searchRequestTypes";
 import { toShortMonthDate } from "src/utils/dateUtil";
@@ -16,13 +17,28 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
+import { FilterSearchNoResults } from "./Filters/FilterSearchNoResults";
 
 const statusColorClasses = {
   posted: "bg-accent-warm-light",
   forecasted: "bg-accent-warm-lightest",
   closed: "bg-base-lightest",
   archived: "bg-base-lightest",
+};
+
+const indicateWhichSearchResultsAreSaved = (
+  searchResults: SearchResponseData,
+  savedOpportunities: MinimalOpportunity[],
+) => {
+  const savedIds = savedOpportunities.map(
+    ({ opportunity_id }) => opportunity_id,
+  );
+  return searchResults.map((result) =>
+    savedIds.includes(result.opportunity_id)
+      ? { ...result, opportunitySaved: true }
+      : result,
+  );
 };
 
 const SearchTableStatusDisplay = ({
@@ -50,34 +66,39 @@ const CloseDateDisplay = ({ closeDate }: { closeDate: string }) => {
 
 const TitleDisplay = ({
   opportunity,
-  saved,
+  page,
+  index,
 }: {
-  opportunity: BaseOpportunity;
-  saved: boolean;
+  opportunity: PossiblySavedBaseOpportunity;
+  page: number;
+  index: number;
 }) => {
   const t = useTranslations("Search.table");
   return (
     <>
-      <div className="font-sans-lg text-bold">
-        <a href={getOpportunityUrl(opportunity.opportunity_id)}>
-          {opportunity.opportunity_title}
-        </a>
-      </div>
-      <div className="display-none tablet-lg:display-block font-sans-xs">
-        <span className="text-bold">{t("number")}:</span>{" "}
-        {opportunity.opportunity_number}
-      </div>
-      {saved && (
-        <div className="margin-top-2 display-inline-block">
-          <span className="display-flex flex-align-center font-sans-2xs">
-            <USWDSIcon
-              name="star"
-              className="text-accent-warm-dark button-icon-md padding-right-05"
-            />
-            {t("saved")}
-          </span>
+      <div className="display-flex">
+        <div className="margin-y-auto grid-col-auto minw-4">
+          <OpportunitySaveUserControl
+            opportunityId={opportunity.opportunity_id}
+            type="icon"
+            opportunitySaved={opportunity.opportunitySaved || false}
+          />
         </div>
-      )}
+        <div className="grid-col-fill">
+          <div className="font-sans-md text-bold line-height-sans-3">
+            <a
+              href={getOpportunityUrl(opportunity.opportunity_id)}
+              id={`search-result-link-${page}-${index + 1}`}
+            >
+              {opportunity.opportunity_title}
+            </a>
+          </div>
+          <div className="display-none tablet-lg:display-block font-sans-xs">
+            <span className="text-bold">{t("number")}:</span>{" "}
+            {opportunity.opportunity_number}
+          </div>
+        </div>
+      </div>
     </>
   );
 };
@@ -102,8 +123,9 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
 };
 
 const toSearchResultsTableRow = (
-  result: BaseOpportunity,
-  saved: boolean,
+  result: PossiblySavedBaseOpportunity,
+  page: number,
+  index: number,
 ): TableCellData[] => {
   return [
     {
@@ -117,7 +139,7 @@ const toSearchResultsTableRow = (
       stackOrder: 1,
     },
     {
-      cellData: <TitleDisplay opportunity={result} saved={saved} />,
+      cellData: <TitleDisplay opportunity={result} page={page} index={index} />,
       stackOrder: 0,
     },
     {
@@ -139,17 +161,23 @@ const toSearchResultsTableRow = (
   ];
 };
 
-export const SearchResultsTable = async ({
+export const SearchResultsTable = ({
   searchResults,
+  page,
+  savedOpportunities,
 }: {
   searchResults: SearchResponseData;
+  page: number;
+  savedOpportunities: MinimalOpportunity[];
 }) => {
   const t = useTranslations("Search.table");
 
-  const savedOpportunities = await fetchSavedOpportunities();
-  const savedOpportunityIds = savedOpportunities.map(
-    (opportunity) => opportunity.opportunity_id,
-  );
+  if (!searchResults.length) {
+    return <FilterSearchNoResults useHeading={true} />;
+  }
+
+  const searchResultsWithSavedOpportunities =
+    indicateWhichSearchResultsAreSaved(searchResults, savedOpportunities);
 
   const headerContent: TableCellData[] = [
     { cellData: t("headings.closeDate") },
@@ -159,11 +187,8 @@ export const SearchResultsTable = async ({
     { cellData: t("headings.awardMin") },
     { cellData: t("headings.awardMax") },
   ];
-  const tableRowData = searchResults.map((result) =>
-    toSearchResultsTableRow(
-      result,
-      savedOpportunityIds.includes(result.opportunity_id),
-    ),
+  const tableRowData = searchResultsWithSavedOpportunities.map(
+    (result, index) => toSearchResultsTableRow(result, page, index),
   );
   return (
     <TableWithResponsiveHeader

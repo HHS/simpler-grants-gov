@@ -1,8 +1,8 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import and_, exists, select, update
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -12,13 +12,16 @@ from src.db.models.opportunity_models import (
     Opportunity,
     OpportunitySummary,
 )
-from src.db.models.user_models import UserSavedSearch
+from src.db.models.user_models import LinkExternalUser, SuppressedEmail, UserSavedSearch
 from src.services.opportunities_v1.search_opportunities import search_opportunities_id
 from src.task.notifications.base_notification import BaseNotificationTask
-from src.task.notifications.constants import Metrics, NotificationReason, UserEmailNotification
+from src.task.notifications.config import EmailNotificationConfig
+from src.task.notifications.constants import NotificationReason, UserEmailNotification
 from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
+
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=search"
 
 
 def _strip_pagination_params(search_query: dict) -> dict:
@@ -34,8 +37,9 @@ class SearchNotificationTask(BaseNotificationTask):
         self,
         db_session: db.Session,
         search_client: search.SearchClient,
+        notification_config: EmailNotificationConfig | None,
     ):
-        super().__init__(db_session)
+        super().__init__(db_session, notification_config)
         self.search_client = search_client
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
@@ -44,9 +48,18 @@ class SearchNotificationTask(BaseNotificationTask):
             select(UserSavedSearch)
             .options(selectinload(UserSavedSearch.user))
             .where(UserSavedSearch.last_notified_at < datetime_util.utcnow())
+            .where(
+                UserSavedSearch.is_deleted.isnot(True),
+                ~exists().where(
+                    and_(
+                        SuppressedEmail.email == LinkExternalUser.email,
+                        LinkExternalUser.user_id == UserSavedSearch.user_id,
+                    )
+                ),
+            )
         )
-        saved_searches = self.db_session.execute(stmt).scalars().all()
 
+        saved_searches = self.db_session.execute(stmt).scalars().all()
         query_map: dict[str, list[UserSavedSearch]] = {}
         for saved_search in saved_searches:
             search_query = _strip_pagination_params(saved_search.search_query)
@@ -63,6 +76,7 @@ class SearchNotificationTask(BaseNotificationTask):
 
         for searches in query_map.values():
             current_results = search_opportunities_id(self.search_client, searches[0].search_query)
+
             for saved_search in searches:
                 previous_results = set(saved_search.searched_opportunity_ids or [])
                 # Find NEW opportunities (in current but not in previous)
@@ -133,9 +147,9 @@ class SearchNotificationTask(BaseNotificationTask):
 
             formatted_date = datetime_util.utcnow().strftime("%-m/%-d/%Y")
             subject = (
-                f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] New Grant Published on {formatted_date}"
+                f"New Grant Published on {formatted_date}"
                 if len(opportunities) == 1
-                else f"[This is a test email from the Simpler.Grants.gov alert system. No action is required] {len(opportunities)} New Grants Published on {formatted_date}"
+                else f"{len(opportunities)} New Grants Published on {formatted_date}"
             )
             users_email_notifications.append(
                 UserEmailNotification(
@@ -186,7 +200,7 @@ class SearchNotificationTask(BaseNotificationTask):
                 continue
 
             # Add opportunity title (empty line before title)
-            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
+            message += f"<b><a href='{self.notification_config.frontend_base_url}/opportunity/{opportunity.opportunity_id}{UTM_TAG}' target='_blank'>{opportunity.opportunity_title}</a></b><br/>"
             # Add status
             status = (
                 str(opportunity.opportunity_status).capitalize()
@@ -239,7 +253,10 @@ class SearchNotificationTask(BaseNotificationTask):
 
     def post_notifications_process(self, user_notifications: list[UserEmailNotification]) -> None:
         for user_notification in user_notifications:
-            if user_notification.is_notified:
+            if (
+                user_notification.is_notified
+                or self.notification_config.reset_emails_without_sending
+            ):
                 self.db_session.execute(
                     update(UserSavedSearch)
                     .where(
@@ -247,12 +264,15 @@ class SearchNotificationTask(BaseNotificationTask):
                     )
                     .values(last_notified_at=datetime_util.utcnow())
                 )
-                logger.info(
-                    "Updated notification log",
-                    extra={
-                        "user_id": user_notification.user_id,
-                        "search_ids": user_notification.notified_object_ids,
-                        "notification_reason": user_notification.notification_reason,
-                    },
-                )
-                self.increment(Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids))
+                if not self.notification_config.reset_emails_without_sending:
+                    logger.info(
+                        "Updated notification log",
+                        extra={
+                            "user_id": user_notification.user_id,
+                            "search_ids": user_notification.notified_object_ids,
+                            "notification_reason": user_notification.notification_reason,
+                        },
+                    )
+                    self.increment(
+                        self.Metrics.SEARCHES_TRACKED, len(user_notification.notified_object_ids)
+                    )

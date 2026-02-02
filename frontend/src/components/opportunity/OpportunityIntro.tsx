@@ -1,3 +1,4 @@
+import { ExternalRoutes } from "src/constants/routes";
 import {
   OpportunityAssistanceListing,
   OpportunityDetail,
@@ -12,6 +13,16 @@ type Props = {
   opportunityData: OpportunityDetail;
 };
 
+const AssitanceListingLink = ({ text }: { text: string }) => {
+  return (
+    <>
+      <a href={ExternalRoutes.ASSISTANCE_LISTINGS} target="_blank">
+        {text}
+      </a>{" "}
+    </>
+  );
+};
+
 const AssistanceListingsDisplay = ({
   assistanceListings,
   assistanceListingsText,
@@ -22,13 +33,15 @@ const AssistanceListingsDisplay = ({
   if (!assistanceListings.length) {
     // note that the dash here is an em dash, not just a regular dash
     return (
-      <p className="tablet-lg:font-sans-2xs">{`${assistanceListingsText} —`}</p>
+      <p className="tablet-lg:font-sans-2xs">
+        <AssitanceListingLink text={assistanceListingsText} />—
+      </p>
     );
   }
 
   return assistanceListings.map((listing, index) => (
     <p className="tablet-lg:font-sans-2xs" key={index}>
-      {index === 0 && `${assistanceListingsText}`}
+      {index === 0 && <AssitanceListingLink text={assistanceListingsText} />}
       {listing.assistance_listing_number}
       {" -- "}
       {listing.program_title}
@@ -36,38 +49,53 @@ const AssistanceListingsDisplay = ({
   ));
 };
 
+const LastUpdatedDisplay = ({ timestamp }: { timestamp: string }) => {
+  const t = useTranslations("OpportunityListing.intro");
+  if (!timestamp)
+    return (
+      <>
+        <span className="text-base-darker">{t("lastUpdated")}</span> --
+      </>
+    );
+  else {
+    const date = new Date(timestamp);
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+
+    return (
+      <>
+        <span className="text-base-darker">{t("lastUpdated")}</span>
+        <span> {formattedDate}</span>
+      </>
+    );
+  }
+};
+
 const OpportunityIntro = ({ opportunityData }: Props) => {
   const t = useTranslations("OpportunityListing.intro");
 
   const agencyName = opportunityData.agency_name || "--";
 
-  const lastUpdated = (timestamp: string) => {
-    if (!timestamp) return `${t("lastUpdated")} --`;
-    else {
-      const date = new Date(timestamp);
-      const formattedDate = new Intl.DateTimeFormat("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(date);
-
-      return `${t("lastUpdated")} ${formattedDate}`;
-    }
-  };
-
   return (
     <>
-      <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg margin-top-0">{`${t("agency")} ${agencyName}`}</p>
+      <p className="usa-intro line-height-sans-5 tablet-lg:font-sans-lg text-base-darker">
+        <span className="text-bold">{t("agency")}</span> {agencyName}
+      </p>
       <AssistanceListingsDisplay
         assistanceListings={opportunityData.opportunity_assistance_listings}
         assistanceListingsText={t("assistanceListings")}
       />
       <div className="tablet-lg:font-sans-2xs display-flex tablet:flex-row flex-column">
-        <div className="flex-2">{lastUpdated(opportunityData.updated_at)}</div>
+        <div className="flex-2">
+          <LastUpdatedDisplay timestamp={opportunityData.updated_at} />
+        </div>
         <div className="flex-3">
           <a
             className="usa-button usa-button--unstyled"
-            href={legacyOpportunityUrl(opportunityData.opportunity_id)}
+            href={legacyOpportunityUrl(opportunityData.legacy_opportunity_id)}
             target="_blank"
             rel="noopener noreferrer"
           >

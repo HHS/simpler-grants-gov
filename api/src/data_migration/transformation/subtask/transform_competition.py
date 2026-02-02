@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -13,6 +14,7 @@ from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging.competition import Tcompetition
 from src.db.models.staging.opportunity import TopportunityCfda
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -41,14 +43,15 @@ class TransformCompetition(AbstractTransformSubTask):
                 opportunity_assistance_listing_id = None
 
                 if opportunity_cfda:
-                    opportunity_id = opportunity_cfda.opportunity_id
 
                     # Make sure the opportunity exists in our target table
                     opportunity = self.db_session.execute(
                         select(Opportunity)
-                        .where(Opportunity.opportunity_id == opportunity_cfda.opportunity_id)
+                        .where(Opportunity.legacy_opportunity_id == opportunity_cfda.opportunity_id)
                         .options(selectinload(Opportunity.opportunity_assistance_listings))
                     ).scalar_one_or_none()
+
+                    opportunity_id = opportunity.opportunity_id if opportunity else None
 
                     # If we found opportunity_id through cfda listing and the opportunity is not
                     # found associated to that id, this denotes an orphaned competition. This case
@@ -63,7 +66,7 @@ class TransformCompetition(AbstractTransformSubTask):
                         # for the purposes of connecting the tables.
                         for assistance_listing in opportunity.opportunity_assistance_listings:
                             if (
-                                assistance_listing.opportunity_assistance_listing_id
+                                assistance_listing.legacy_opportunity_assistance_listing_id
                                 == opportunity_cfda.opp_cfda_id
                             ):
                                 opportunity_id = opportunity.opportunity_id
@@ -92,15 +95,15 @@ class TransformCompetition(AbstractTransformSubTask):
         self,
         source_competition: Tcompetition,
         target_competition: Competition | None,
-        opportunity_id: int | None,
-        opportunity_assistance_listing_id: int | None,
+        opportunity_id: uuid.UUID | None,
+        opportunity_assistance_listing_id: uuid.UUID | None,
     ) -> None:
         self.increment(
             transform_constants.Metrics.TOTAL_RECORDS_PROCESSED,
             prefix=transform_constants.COMPETITION,
         )
 
-        extra = {"competition_id": source_competition.comp_id}
+        extra = {"competition_id": source_competition.comp_id, "opportunity_id": opportunity_id}
         logger.info("Processing competition", extra=extra)
 
         if source_competition.is_deleted:
@@ -111,6 +114,17 @@ class TransformCompetition(AbstractTransformSubTask):
                 record_type=transform_constants.COMPETITION,
                 extra=extra,
             )
+
+            # Cleanup competition instructions
+            if target_competition is not None:
+                for competition_instruction in target_competition.competition_instructions:
+                    logger.info(
+                        "Deleting competition instruction as competition is being deleted.",
+                        extra=extra | {"s3_location": competition_instruction.file_location},
+                    )
+
+                    file_util.delete_file(competition_instruction.file_location)
+
         elif opportunity_id is None:
             # Handle orphaned competition when an opportunity_id has been found but
             # the opportunity for that id does not exist.
@@ -152,8 +166,8 @@ class TransformCompetition(AbstractTransformSubTask):
 def transform_competition(
     source_competition: Tcompetition,
     existing_competition: Competition | None,
-    opportunity_id: int,
-    opportunity_assistance_listing_id: int | None = None,
+    opportunity_id: uuid.UUID,
+    opportunity_assistance_listing_id: uuid.UUID | None = None,
 ) -> Competition:
     """Transform a legacy competition record into the new format."""
     log_extra = {"competition_id": source_competition.comp_id}

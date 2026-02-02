@@ -14,7 +14,7 @@ from . import foreignbase
 class Topportunity(foreignbase.ForeignBase, opportunity_mixin.TopportunityMixin):
     __tablename__ = "topportunity"
 
-    cfdas: Mapped[list["TopportunityCfda"]] = relationship(
+    cfdas: Mapped[list[TopportunityCfda]] = relationship(
         primaryjoin=lambda: Topportunity.opportunity_id == foreign(TopportunityCfda.opportunity_id),
         uselist=True,
     )

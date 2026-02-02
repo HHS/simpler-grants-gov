@@ -1,0 +1,66 @@
+name: "Co-planning: Sync GitHub to Fider"
+
+on:
+  pull_request:
+    paths:
+      - ".github/linters/coplanning/**"
+      - ".github/workflows/coplanning-sync-gh-to-fider.yml"
+  workflow_dispatch: # for manual runs
+
+permissions:
+  issues: read
+
+defaults:
+  run:
+    working-directory: ./.github/linters/coplanning
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FIDER_API_TOKEN: ${{ secrets.FIDER_TOKEN }}
+      FIDER_BOARD: "simplergrants"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Run script (dry run)
+        if: github.event_name == 'pull_request'
+        run: |
+          python run.py \
+            --org "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --label "Coplanning Proposal" \
+            --issue-sections "Summary" \
+            --issue-sections "Problem Statement" \
+            --issue-sections "Proposed Solution" \
+            --issue-sections "Success Criteria" \
+            --issue-sections "Additional Context" \
+            --platform fider \
+            --sync-direction github-to-platform \
+            --update-existing \
+            --dry-run
+
+      - name: Run script (real run)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          python run.py \
+            --org "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --label "Coplanning Proposal" \
+            --issue-sections "Summary" \
+            --issue-sections "Problem Statement" \
+            --issue-sections "Proposed Solution" \
+            --issue-sections "Success Criteria" \
+            --issue-sections "Additional Context" \
+            --platform fider \
+            --sync-direction github-to-platform \
+            --update-existing

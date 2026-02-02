@@ -10,6 +10,7 @@ from src.data_migration.transformation.subtask.transform_competition import (
 )
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.util import file_util
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
@@ -31,7 +32,7 @@ class TestTransformCompetition(BaseTransformTestClass):
 
         db_session.commit()
 
-    @pytest.fixture()
+    @pytest.fixture
     def transform_competition(self, transform_oracle_data_task):
         return TransformCompetition(transform_oracle_data_task)
 
@@ -43,8 +44,8 @@ class TestTransformCompetition(BaseTransformTestClass):
             opportunity=opportunity
         )
         f.StagingTopportunityCfdaFactory.create(
-            opp_cfda_id=opportunity_assistance_listing.opportunity_assistance_listing_id,
-            opportunity_id=opportunity.opportunity_id,
+            opp_cfda_id=opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
+            opportunity_id=opportunity.legacy_opportunity_id,
             opportunity=None,  # Prevent factory from creating another opportunity
         )
 
@@ -53,7 +54,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=opportunity,
-            opportunity_assistance_listing_id=opportunity_assistance_listing.opportunity_assistance_listing_id,
+            legacy_opportunity_assistance_listing_id=opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
         )
 
         # Insert with null fields (for optional fields only)
@@ -92,13 +93,13 @@ class TestTransformCompetition(BaseTransformTestClass):
         )
 
         # Test case where cfda listing exists in staging but not api schema
-        # and we are still able to associate competition to oppportunity.
+        # and we are still able to associate competition to opportunity.
         cfda_opp_id_in_staging_only = 10111
         cfda_opp_listing_only_in_staging = setup_competition(
             db_session,
             create_existing=False,
             opportunity=opportunity,
-            opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
+            legacy_opportunity_assistance_listing_id=cfda_opp_id_in_staging_only,
         )
 
         # Test case where opportunity_id found through cfda listing but the opportunity
@@ -114,7 +115,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             db_session,
             create_existing=False,
             opportunity=None,
-            opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
+            legacy_opportunity_assistance_listing_id=non_existent_opportunity_cfda_listing_opp_cfda_id,
         )
 
         # Run the transformation
@@ -185,11 +186,8 @@ class TestTransformCompetition(BaseTransformTestClass):
     def test_process_competition_with_invalid_form_family(self, db_session, transform_competition):
         """Test handling invalid form family ID"""
         # Create an opportunity to associate with the competition
-        opportunity = f.OpportunityFactory.create(
-            opportunity_id=90001, opportunity_assistance_listings=[]  # Unique ID for this test
-        )
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
         opportunity_assistance_listing = f.OpportunityAssistanceListingFactory.create(
-            opportunity_assistance_listing_id=90001,  # Unique ID for this test
             opportunity=opportunity,
         )
         db_session.commit()
@@ -201,7 +199,7 @@ class TestTransformCompetition(BaseTransformTestClass):
             opportunity=opportunity,
             source_values={
                 "familyid": 999,  # Invalid form family ID
-                "opp_cfda_id": opportunity_assistance_listing.opportunity_assistance_listing_id,
+                "opp_cfda_id": opportunity_assistance_listing.legacy_opportunity_assistance_listing_id,
                 "comp_id": 90001,  # Unique ID for this test
             },
         )
@@ -221,11 +219,8 @@ class TestTransformCompetition(BaseTransformTestClass):
     ):
         """Test handling invalid applicant type"""
         # Create an opportunity to associate with the competition
-        opportunity = f.OpportunityFactory.create(
-            opportunity_id=90002, opportunity_assistance_listings=[]  # Unique ID for this test
-        )
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
         opportunity_assistance_listing = f.OpportunityAssistanceListingFactory.create(
-            opportunity_assistance_listing_id=90002,  # Unique ID for this test
             opportunity=opportunity,
         )
         db_session.commit()
@@ -251,3 +246,35 @@ class TestTransformCompetition(BaseTransformTestClass):
                 opportunity.opportunity_id,
                 opportunity_assistance_listing.opportunity_assistance_listing_id,
             )
+
+    def test_process_competition_delete_with_competition_instructions(
+        self, db_session, transform_competition, s3_config
+    ):
+        opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
+
+        tcompetition = setup_competition(
+            db_session,
+            create_existing=False,  # will make below
+            is_delete=True,
+            opportunity=opportunity,
+        )
+        competition = f.CompetitionFactory.create(
+            opportunity=opportunity, legacy_competition_id=tcompetition.comp_id
+        )
+
+        # create some instructions records
+        competition_instructions = []
+
+        for _ in range(3):
+            competition_instructions.append(
+                f.CompetitionInstructionFactory.create(competition=competition)
+            )
+
+        transform_competition.process_competition(
+            tcompetition, competition, opportunity.opportunity_id, None
+        )
+
+        validate_competition(db_session, tcompetition, expect_in_db=False)
+
+        for competition_instruction in competition_instructions:
+            assert file_util.file_exists(competition_instruction.file_location) is False

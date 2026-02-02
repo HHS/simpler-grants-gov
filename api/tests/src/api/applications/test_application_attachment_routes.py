@@ -7,7 +7,10 @@ import requests
 from sqlalchemy import select
 
 import src.util.file_util as file_util
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege
 from src.db.models.competition_models import ApplicationAttachment
+from tests.lib.application_test_utils import create_user_in_app
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.db.models.factories import (
     ApplicationAttachmentFactory,
     ApplicationFactory,
@@ -33,18 +36,16 @@ def test_application_attachment_create_200(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
     file_name,
     expected_mimetype,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     response = client.post(
         f"/alpha/applications/{application.application_id}/attachments",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / file_name).open("rb")},
     )
 
@@ -64,6 +65,15 @@ def test_application_attachment_create_200(
     assert application_attachment.mime_type == expected_mimetype
     assert application_attachment.file_size_bytes > 0
     assert file_util.file_exists(application_attachment.file_location) is True
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_ADDED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert str(application.application_audits[0].target_attachment_id) == application_attachment_id
 
 
 def test_application_attachment_create_404_not_found(
@@ -134,7 +144,7 @@ def test_application_attachment_create_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 ##########################################
@@ -142,20 +152,17 @@ def test_application_attachment_create_403_not_the_owner(
 ##########################################
 
 
-def test_application_attachment_get_200(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
-):
+def test_application_attachment_get_200(db_session, enable_factory_create, client, s3_config):
     file_contents = "this is text in my file"
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
 
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
     application_attachment = ApplicationAttachmentFactory.create(
         application=application, file_contents=file_contents
     )
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
@@ -190,21 +197,48 @@ def test_application_attachment_get_404_application_not_found(
 
 
 def test_application_attachment_get_404_application_attachment_not_found(
-    db_session, enable_factory_create, client, user, user_auth_token
+    db_session,
+    enable_factory_create,
+    client,
+    user,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
+
     application_attachment_id = uuid.uuid4()
 
     response = client.get(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
     assert (
         response.json["message"]
         == f"Application attachment with ID {application_attachment_id} not found"
+    )
+
+
+def test_application_attachment_get_404_application_attachment_deleted(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+):
+    _, application, token = create_user_in_app(db_session, privileges=[Privilege.VIEW_APPLICATION])
+
+    application_attachment = ApplicationAttachmentFactory.create(
+        application=application, is_deleted=True
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        response.json["message"]
+        == f"Application attachment with ID {application_attachment.application_attachment_id} not found"
     )
 
 
@@ -237,7 +271,7 @@ def test_application_attachment_get_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 ##########################################
@@ -257,15 +291,13 @@ def test_application_attachment_update_200(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
     file_name,
     expected_mimetype,
 ):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     # Create an existing attachment first
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt"
@@ -273,7 +305,7 @@ def test_application_attachment_update_200(
 
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / file_name).open("rb")},
     )
 
@@ -289,6 +321,15 @@ def test_application_attachment_update_200(
     assert existing_attachment.mime_type == expected_mimetype
     assert existing_attachment.file_size_bytes > 0
     assert file_util.file_exists(existing_attachment.file_location) is True
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert str(application.application_audits[0].target_attachment_id) == application_attachment_id
 
 
 def test_application_attachment_update_404_application_not_found(
@@ -311,7 +352,8 @@ def test_application_attachment_update_404_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserFactory.create(user=user, application=application)
+
     attachment_id = uuid.uuid4()
 
     response = client.put(
@@ -322,6 +364,30 @@ def test_application_attachment_update_404_attachment_not_found(
 
     assert response.status_code == 404
     assert response.json["message"] == f"Application attachment with ID {attachment_id} not found"
+
+
+def test_application_attachment_update_404_attachment_is_deleted(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    # Create an existing attachment first
+    deleted_attachment = ApplicationAttachmentFactory.create(
+        application=application, is_deleted=True
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{deleted_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 404
+    assert (
+        response.json["message"]
+        == f"Application attachment with ID {deleted_attachment.application_attachment_id} not found"
+    )
 
 
 def test_application_attachment_update_422_not_a_file(
@@ -417,21 +483,19 @@ def test_application_attachment_update_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
 
 
 def test_application_attachment_update_deletes_old_file_different_name(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
 ):
     """Test that updating an attachment with different filename deletes the old file"""
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="old_file.txt", file_contents="old file contents"
@@ -444,7 +508,7 @@ def test_application_attachment_update_deletes_old_file_different_name(
     # Update with new file
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
     )
 
@@ -462,19 +526,29 @@ def test_application_attachment_update_deletes_old_file_different_name(
     if old_file_location != existing_attachment.file_location:
         assert file_util.file_exists(old_file_location) is False
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_attachment_id
+        == existing_attachment.application_attachment_id
+    )
+
 
 def test_application_attachment_update_same_filename_overwrites(
     db_session,
     enable_factory_create,
     client,
-    user,
-    user_auth_token,
     s3_config,
 ):
     """Test that updating an attachment with same filename updates the attachment"""
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
-
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     # Create attachment with initial file
     existing_attachment = ApplicationAttachmentFactory.create(
         application=application, file_name="text_file.txt", file_contents="old content"
@@ -484,7 +558,7 @@ def test_application_attachment_update_same_filename_overwrites(
     # Update with new file with same name
     response = client.put(
         f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
     )
 
@@ -502,43 +576,67 @@ def test_application_attachment_update_same_filename_overwrites(
     if old_file_location != existing_attachment.file_location:
         assert file_util.file_exists(old_file_location) is False
 
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_UPDATED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_attachment_id
+        == existing_attachment.application_attachment_id
+    )
+
 
 ##########################################
 # Delete application attachment tests
 ##########################################
 
 
-def test_application_attachment_delete_200(
-    db_session, enable_factory_create, client, user, user_auth_token, s3_config
-):
-    application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+def test_application_attachment_delete_200(db_session, enable_factory_create, client, s3_config):
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
     application_attachment = ApplicationAttachmentFactory.create(application=application)
     second_attachment = ApplicationAttachmentFactory.create(application=application)
 
     response = client.delete(
         f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 200
 
     # Make sure the file was deleted from s3
     assert file_util.file_exists(application_attachment.file_location) is False
-    # Make sure the record was deleted from the DB
-    assert (
-        db_session.execute(
-            select(ApplicationAttachment).where(
-                ApplicationAttachment.application_attachment_id
-                == application_attachment.application_attachment_id
-            )
-        ).scalar_one_or_none()
-        is None
-    )
+    # Make sure application attachment is marked as deleted
+    db_session.refresh(application_attachment)
+    assert application_attachment.is_deleted is True
+    assert application_attachment.file_location == "DELETED"
 
     # Make sure the other attachment is unmodified
     db_session.refresh(second_attachment)
     assert second_attachment is not None
+
+    # Make sure the attachment no longer appears on the app
+    assert len(application.application_attachments) == 1
+    assert (
+        application.application_attachments[0].application_attachment_id
+        == second_attachment.application_attachment_id
+    )
+
+    # Verify audit event added
+    assert len(application.application_audits) == 1
+    assert (
+        application.application_audits[0].application_audit_event
+        == ApplicationAuditEvent.ATTACHMENT_DELETED
+    )
+    assert application.application_audits[0].user_id == user.user_id
+    assert (
+        application.application_audits[0].target_attachment_id
+        == application_attachment.application_attachment_id
+    )
 
 
 def test_application_attachment_delete_404_application_not_found(
@@ -559,7 +657,7 @@ def test_application_attachment_delete_404_application_attachment_not_found(
     db_session, enable_factory_create, client, user, user_auth_token
 ):
     application = ApplicationFactory.create()
-    ApplicationUserFactory.create(application=application, user=user)
+    ApplicationUserFactory.create(user=user, application=application)
     application_attachment_id = uuid.uuid4()
 
     response = client.delete(
@@ -571,6 +669,28 @@ def test_application_attachment_delete_404_application_attachment_not_found(
     assert (
         response.json["message"]
         == f"Application attachment with ID {application_attachment_id} not found"
+    )
+
+
+def test_application_attachment_delete_404_already_deleted(
+    db_session, enable_factory_create, client, user, user_auth_token
+):
+    _, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    application_attachment = ApplicationAttachmentFactory.create(
+        application=application, is_deleted=True
+    )
+
+    response = client.delete(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 404
+    assert (
+        response.json["message"]
+        == f"Application attachment with ID {application_attachment.application_attachment_id} not found"
     )
 
 
@@ -603,4 +723,108 @@ def test_application_attachment_delete_403_not_the_owner(
     )
 
     assert response.status_code == 403
-    assert response.json["message"] == "Unauthorized"
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_update_403_access(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
+
+    # Create an existing attachment first
+    existing_attachment = ApplicationAttachmentFactory.create(
+        application=application, file_name="old_file.txt"
+    )
+
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_delete_403_access(
+    db_session, enable_factory_create, client, user, user_auth_token, s3_config
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(application=application, user=user)
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.delete(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_create_403_access(
+    db_session,
+    enable_factory_create,
+    client,
+    user,
+    user_auth_token,
+    s3_config,
+):
+    application = ApplicationFactory.create()
+    ApplicationUserFactory.create(user=user, application=application)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/attachments",
+        headers={"X-SGG-Token": user_auth_token},
+        data={"file_attachment": (attachment_dir / "pdf_file.pdf").open("rb")},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_get_403_access(
+    db_session,
+    enable_factory_create,
+    client,
+):
+    user, application, token = create_user_in_app(db_session)
+
+    application_attachment = ApplicationAttachmentFactory.create(
+        application=application,
+    )
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 403
+    assert response.json["message"] == "Forbidden"
+
+
+def test_application_attachment_get_access_with_organization_role(
+    db_session,
+    enable_factory_create,
+    client,
+):
+    """Test that user can access the application if organization member"""
+    # Associate user with organization
+    _, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_APPLICATION])
+    # Create application owned by org
+    application = ApplicationFactory.create(organization=org)
+    application_attachment = ApplicationAttachmentFactory.create(application=application)
+
+    response = client.get(
+        f"/alpha/applications/{application.application_id}/attachments/{application_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    assert response.json["message"] == "Success"

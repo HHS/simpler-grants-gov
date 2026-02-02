@@ -30,6 +30,11 @@ variable "s3_cdn_domain_name" {
   default     = null
 }
 
+variable "mtls_domain_name" {
+  type        = string
+  description = "The domain name for the mTLS side-by-side ALB for the API"
+  default     = null
+}
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -179,4 +184,16 @@ variable "service_override_extra_environment_variables" {
     Map from environment variable name to environment variable value
   EOT
   default     = {}
+}
+
+variable "database_engine_version" {
+  type        = string
+  description = "Postgres database engine version"
+  default     = "17.5"
+}
+
+variable "secondary_domain_names" {
+  type        = list(string)
+  description = "A list of domain names the ALB can also use"
+  default     = []
 }

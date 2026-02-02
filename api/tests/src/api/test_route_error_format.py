@@ -18,7 +18,7 @@ from src.api.response import ApiResponse, ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
-from src.auth.api_key_auth import api_key_auth
+from src.auth.multi_auth import api_key_multi_auth
 from src.util.dict_util import flatten_dict
 from tests.src.schemas.schema_validation_utils import (
     FieldTestSchema,
@@ -69,7 +69,7 @@ class OverridenClass:
 @test_blueprint.patch("/test/<uuid:test_id>")
 @test_blueprint.input(FieldTestSchema, arg_name="req")
 @test_blueprint.output(OutputSchema)
-@test_blueprint.auth_required(api_key_auth)
+@test_blueprint.auth_required(api_key_multi_auth)
 def api_method(test_id, req):
     resp, warnings = OverridenClass().override_method()
     return ApiResponse("Test method run successfully", data=resp, warnings=warnings)

@@ -1,11 +1,13 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
 
 from sqlalchemy import select
 
 import src.adapters.db as db
 from src.db.models.competition_models import Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
+from src.db.models.staging.instructions import Tinstructions
 from src.legacy_soap_api.applicants.schemas import (
     CFDADetails,
     GetOpportunityListRequest,
@@ -13,8 +15,17 @@ from src.legacy_soap_api.applicants.schemas import (
     OpportunityDetails,
     OpportunityFilter,
 )
+from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
+from src.legacy_soap_api.legacy_soap_api_utils import bool_to_string, ensure_dot_prefix
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TinstructionsURL:
+    schema_url: str | None = None
+    instructions_url: str | None = None
 
 
 def get_opportunity_list_response(
@@ -25,7 +36,8 @@ def get_opportunity_list_response(
         db_session, get_opportunity_list_request
     )
     opened_competitions = _get_opened_competitions(competitions)
-    return _build_get_opportunity_list_response(opened_competitions)
+    tinstructions_map = get_tinstructions_map(db_session, opened_competitions)
+    return _build_get_opportunity_list_response(opened_competitions, tinstructions_map)
 
 
 def get_competitions_from_opportunity_list_request(
@@ -36,6 +48,47 @@ def get_competitions_from_opportunity_list_request(
         get_opportunity_list_request.package_id,
         get_opportunity_list_request.opportunity_filter,
     )
+
+
+def get_tinstructions_map(db_session: db.Session, competitions: list) -> dict:
+    """Get instructions extension for competitions
+
+    This method returns a map of extension string from the staging.tinstructions table
+    that is needed to build the instructions_url property of the competition for the
+    GetOpportunityListResponse.
+
+    This will return a map of Competition.legacy_competition_id: staging.tinstructions.extension.
+    """
+    legacy_competition_ids = [
+        c.legacy_competition_id for c in competitions if c.legacy_competition_id is not None
+    ]
+    tinstructions = (
+        db_session.execute(
+            select(Tinstructions.extension, Tinstructions.comp_id).where(
+                Tinstructions.comp_id.in_(legacy_competition_ids)
+            )
+        )
+        .mappings()
+        .all()
+    )
+    return {tinstruction.comp_id: tinstruction.extension for tinstruction in tinstructions}
+
+
+def get_tinstructions_urls(competition: Competition, tinstructions_map: dict) -> TinstructionsURL:
+    url = TinstructionsURL()
+    if not competition.legacy_package_id:
+        return url
+    base_url = file_util.join(get_soap_config().grants_gov_uri, "apply", "opportunities")
+    url.schema_url = file_util.join(
+        base_url, "schemas", "applicant", f"{competition.legacy_package_id}.xsd"
+    )
+    if extension := tinstructions_map.get(competition.legacy_competition_id):
+        url.instructions_url = file_util.join(
+            base_url,
+            "instructions",
+            f"{competition.legacy_package_id}-instructions{ensure_dot_prefix(extension)}",
+        )
+    return url
 
 
 def _get_competitions(
@@ -68,26 +121,37 @@ def _get_competitions(
     return db_session.execute(stmt).scalars().all()
 
 
-def _build_get_opportunity_list_response(competitions: list) -> GetOpportunityListResponse:
-    opportunity_details = (
-        list(map(_build_get_opportunity_details, competitions)) if competitions else []
-    )
+def _build_get_opportunity_list_response(
+    competitions: list, tcompetitions_map: dict
+) -> GetOpportunityListResponse:
+    opportunity_details = []
+    if competitions:
+        opportunity_details = [
+            _build_get_opportunity_details(
+                competition, get_tinstructions_urls(competition, tcompetitions_map)
+            )
+            for competition in competitions
+        ]
     return GetOpportunityListResponse(opportunity_details=opportunity_details)
 
 
-def _build_get_opportunity_details(competition_model: Competition) -> OpportunityDetails:
+def _build_get_opportunity_details(
+    competition_model: Competition, tinstructions_urls: TinstructionsURL
+) -> OpportunityDetails:
     return OpportunityDetails(
         competition_title=competition_model.competition_title,
         competition_id=competition_model.public_competition_id,
         funding_opportunity_title=competition_model.opportunity.opportunity_title,
         funding_opportunity_number=competition_model.opportunity.opportunity_number,
-        is_multi_project=competition_model.is_multi_package,
+        is_multi_project=bool_to_string(competition_model.is_multi_package),
         closing_date=competition_model.closing_date,
         opening_date=competition_model.opening_date,
         cfda_details=_get_cfda_details(competition_model.opportunity_assistance_listing),
         offering_agency=competition_model.opportunity.agency_name,
         package_id=competition_model.legacy_package_id,
         agency_contact_info=competition_model.contact_info,
+        instructions_url=tinstructions_urls.instructions_url,
+        schema_url=tinstructions_urls.schema_url,
     )
 
 

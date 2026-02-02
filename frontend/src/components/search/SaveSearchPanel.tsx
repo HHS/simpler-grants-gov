@@ -1,6 +1,5 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useUser } from "src/services/auth/useUser";
 import { SavedSearchRecord } from "src/types/search/searchRequestTypes";
 
@@ -42,7 +41,6 @@ const SaveSearchTooltip = ({
 };
 
 export function SaveSearchPanel() {
-  const { checkFeatureFlag } = useFeatureFlags();
   const { user } = useUser();
   const path = usePathname();
   const searchParams = useSearchParams();
@@ -58,10 +56,7 @@ export function SaveSearchPanel() {
     return `${origin}${path}${query}`;
   }, [searchParams, path]);
 
-  const showSavedSearchUI = useMemo(
-    () => checkFeatureFlag("savedSearchesOn") && user?.token,
-    [user?.token, checkFeatureFlag],
-  );
+  const showSavedSearchUI = useMemo(() => Boolean(user?.token), [user?.token]);
 
   const copyText = useMemo(
     () =>
@@ -84,7 +79,7 @@ export function SaveSearchPanel() {
   };
 
   return (
-    <div className="border-base-lighter border-1px padding-2">
+    <div className="border-base border-1px padding-2">
       {showSavedSearchUI && (
         <>
           <div className="display-flex margin-bottom-2">
@@ -110,7 +105,7 @@ export function SaveSearchPanel() {
           url={url}
           snackbarMessage={t("copySearch.snackbar")}
         >
-          {checkFeatureFlag("savedSearchesOn") && !user?.token && (
+          {!user?.token && (
             <SaveSearchTooltip
               text={t("help.unauthenticated")}
               title={t("help.general")}

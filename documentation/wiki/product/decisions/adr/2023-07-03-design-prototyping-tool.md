@@ -1,7 +1,7 @@
 # Use Figma for design prototyping
 
 * **Status:** Active
-* **Last Modified:** 2023-07-03
+* **Last Modified:** 2024-08-26, 2023-07-03
 * **Related Issue:** [#103](https://github.com/HHS/simpler-grants-gov/issues/103)
 * **Deciders:** Andy, Emily, Lucas
 * **Tags:** design
@@ -28,6 +28,8 @@ Which tool should be used for wireframing and prototyping? The tool should facil
 ## Decision Outcome
 
 Chosen option: Figma, because it is not platform specific and its multi-user collaboration allows for easy remote pairing. It's assets can be easily shared, embedded, or integrated into research tools. Additionaly, Nava has the most familiarity with this option.
+
+Update (Aug 26, 2025): Designers should have a "Full seat." Engineers and Product Managers should have a "Dev seat."
 
 ### Positive Consequences
 

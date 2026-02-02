@@ -445,6 +445,16 @@ AGENCIES_TO_CREATE = [
         "agency_name": "Office for Victims of Crime",
         "top_level_agency_id": "63a027ef-7d10-4b3b-b8d6-290e0b8e681a",
     },
+    {
+        "agency_code": "CLOSED",
+        "agency_id": "add4b8ff-e895-4ca9-92f4-38ed34055247",
+        "agency_name": "Agency of closed opportunities",
+    },
+    {
+        "agency_code": "ARCHIVED",
+        "agency_id": "add4bfff-e895-4ca9-92f4-38ed34055247",
+        "agency_name": "Agency of archived opportunities",
+    },
 ]
 
 

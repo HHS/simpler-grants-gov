@@ -41,8 +41,11 @@ data "aws_iam_policy_document" "s3_buckets_put_access" {
     actions = ["s3:*"]
 
     principals {
-      type        = "AWS"
-      identifiers = [aws_iam_role.app_service.arn]
+      type = "AWS"
+      identifiers = concat(
+        [aws_iam_role.app_service.arn],
+        var.db_vars != null ? [aws_iam_role.migrator_task[0].arn] : []
+      )
     }
   }
 
@@ -127,9 +130,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_buckets" {
   bucket = aws_s3_bucket.s3_buckets[each.key].id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
+      sse_algorithm = "AES256"
     }
-    bucket_key_enabled = true
   }
 }
 

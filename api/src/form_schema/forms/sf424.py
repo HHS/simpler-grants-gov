@@ -1,14 +1,15 @@
 import uuid
 
-import src.form_schema.forms.shared_schema as shared_schema
+from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
+from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
+from src.services.xml_generation.constants import NO_VALUE
 
 FORM_JSON_SCHEMA = {
     "type": "object",
     "required": [
         "submission_type",
         "application_type",
-        "date_received",
         "organization_name",
         "employer_taxpayer_identification_number",
         "sam_uei",
@@ -36,10 +37,9 @@ FORM_JSON_SCHEMA = {
         "delinquent_federal_debt",
         "certification_agree",
         "authorized_representative",
+        "authorized_representative_title",
         "authorized_representative_phone_number",
         "authorized_representative_email",
-        "aor_signature",
-        "date_signed",
     ],
     # Conditional validation rules for SF424
     "allOf": [
@@ -136,7 +136,7 @@ FORM_JSON_SCHEMA = {
         },
         "date_received": {
             "type": "string",
-            "title": "Date Received Header",
+            "title": "Date Received",
             "description": "Completed by Grants.gov upon submission.",
             "format": "date",
         },
@@ -148,7 +148,7 @@ FORM_JSON_SCHEMA = {
             "maxLength": 30,
             # Based on applicant_idDataType
             # https://apply07.grants.gov/apply/system/schemas/GlobalLibrary-V2.0.xsd
-            # From the instructions: "Enter the entity identifier assigned by the Federal agency, if any, or the applicant’s control number if applicable."
+            # From the instructions: "Enter the entity identifier assigned by the Federal agency, if any, or the applicant's control number if applicable."
         },
         "federal_entity_identifier": {
             "type": "string",
@@ -170,26 +170,24 @@ FORM_JSON_SCHEMA = {
         "state_receive_date": {
             # A user will never fill this in, it's just on the form for agencies to use
             "type": "string",
-            "title": "Date Received by state",
-            "description": "Enter the date received by the state, if applicable.",
+            "title": "Date Received By State",
+            "description": "Leave blank, to be filled out by state.",
             "format": "date",
             "readOnly": True,
         },
         "state_application_id": {
             # A user will never fill this in, it's just on the form for agencies to use
             "type": "string",
-            "title": "state Application Identifier",
-            "description": "Enter the identifier assigned by the state, if applicable.",
+            "title": "State Application Identifier",
+            "description": "Leave blank, to be filled out by state.",
             "minLength": 0,
             "maxLength": 30,
             "readOnly": True,
         },
         "organization_name": {
-            "type": "string",
-            "title": "Organization Name",
-            "description": "Enter the legal name of the applicant that will undertake the assistance activity.",
-            "minLength": 1,
-            "maxLength": 60,
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("organization_name")}],
+            "title": "Legal Name",
+            "description": "Enter the legal name of the applicant that will undertake the assistance activity. This is the organization that has registered with the System for Award Management (SAM). Information on registering with SAM may be obtained by visiting SAM.gov.",
         },
         "employer_taxpayer_identification_number": {
             "type": "string",
@@ -199,15 +197,13 @@ FORM_JSON_SCHEMA = {
             "maxLength": 30,
         },
         "sam_uei": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("sam_uei")}],
             "title": "SAM UEI",
             "description": "UEI of the applicant organization. This field is pre-populated from the Application cover sheet.",
-            "minLength": 12,
-            "maxLength": 12,
         },
         "applicant": {
-            "allOf": [{"$ref": "#/$defs/address"}],
-            "title": "applicant",
+            "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+            "title": "Applicant",
             "description": "Enter information about the applicant.",
         },
         "department_name": {
@@ -225,9 +221,14 @@ FORM_JSON_SCHEMA = {
             "maxLength": 100,
         },
         "contact_person": {
-            "allOf": [{"$ref": "#/$defs/person_name"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
             "title": "Contact Person",
             "description": "Enter information about the contact person.",
+        },
+        "contact_person_title": {
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_person_title")}],
+            "title": "Title",
+            "description": "Enter the position title.",
         },
         "organization_affiliation": {
             "type": "string",
@@ -237,35 +238,34 @@ FORM_JSON_SCHEMA = {
             "maxLength": 60,
         },
         "phone_number": {
-            "allOf": [{"$ref": "#/$defs/phone_number_field"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "Telephone Number",
             "description": "Enter the daytime Telephone Number.",
         },
         "fax": {
-            "allOf": [{"$ref": "#/$defs/phone_number_field"}],
-            "title": "fax Number",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
+            "title": "Fax Number",
             "description": "Enter the fax Number.",
         },
         "email": {
-            "type": "string",
-            "title": "email",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("contact_email")}],
+            "title": "Email",
             "description": "Enter a valid email Address.",
-            "format": "email",
         },
         "applicant_type_code": {
             # NOTE: In the xml model, this is 3 separate fields, we joined them together
             # into a single value.
             "type": "array",
-            "title": "Type of applicant",
+            "title": "Type of Applicant",
             "description": "Select the appropriate applicant types.",
             "minItems": 1,
             "maxItems": 3,
             "items": {
                 "type": "string",
                 "enum": [
-                    "A: state Government",
-                    "B: county Government",
-                    "C: city or Township Government",
+                    "A: State Government",
+                    "B: County Government",
+                    "C: City or Township Government",
                     "D: Special District Government",
                     "E: Regional Organization",
                     "F: U.S. Territory or Possession",
@@ -292,7 +292,7 @@ FORM_JSON_SCHEMA = {
         },
         "applicant_type_other_specify": {
             "type": "string",
-            "title": "Type of applicant Other Explanation",
+            "title": "Type of Applicant Other Explanation",
             "description": 'Enter the applicant type here if you selected "Other (specify)" for Type of applicant.',
             "minLength": 0,
             "maxLength": 30,
@@ -313,7 +313,7 @@ FORM_JSON_SCHEMA = {
         },
         "assistance_listing_program_title": {
             "type": "string",
-            "title": "Assistance Listing title",
+            "title": "Assistance Listing Title",
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 120,
@@ -341,33 +341,33 @@ FORM_JSON_SCHEMA = {
         },
         "competition_identification_title": {
             "type": "string",
-            "title": "Competition title",
+            "title": "Competition Title",
             "description": "Pre-populated from the Application cover sheet.",
             "minLength": 1,
             "maxLength": 255,
         },
         "areas_affected": {
-            "allOf": [{"$ref": "#/$defs/attachment_field"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
             "title": "Areas Affected",
             "description": "List the areas or entities using the categories (e.g., cities, counties, states, etc.) specified in agency instructions.",
         },
         "project_title": {
             "type": "string",
-            "title": "Project title",
+            "title": "Project Title",
             "description": "Enter a brief, descriptive title of the project.",
             "minLength": 1,
             "maxLength": 200,
         },
         "additional_project_title": {
             "type": "array",
-            "title": "Additional Project title",
+            "title": "Additional Project Title",
             "description": "Attach file(s) using the appropriate buttons.",
             "maxItems": 100,
-            "items": {"allOf": [{"$ref": "#/$defs/attachment_field"}]},
+            "items": {"allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}]},
         },
         "congressional_district_applicant": {
             "type": "string",
-            "title": "applicant District",
+            "title": "Applicant District",
             "description": "Enter the Congressional District in the format: 2 character state Abbreviation - 3 character District Number. Examples: CA-005 for California's 5th district, CA-012 for California's 12th district.If outside the US, enter 00-000.",
             "minLength": 1,
             "maxLength": 6,
@@ -380,9 +380,9 @@ FORM_JSON_SCHEMA = {
             "maxLength": 6,
         },
         "additional_congressional_districts": {
-            "allOf": [{"$ref": "#/$defs/attachment_field"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
             "title": "Additional Congressional Districts",
-            "description": "Additional Congressional Districts.",
+            "description": "Attach an additional list of Program/Project Congressional Districts if needed.",
         },
         "project_start_date": {
             "type": "string",
@@ -397,43 +397,43 @@ FORM_JSON_SCHEMA = {
             "format": "date",
         },
         "federal_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Federal Estimated Funding",
             "description": "Enter the dollar amount.",
         },
         "applicant_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
-            "title": "applicant Estimated Funding",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
+            "title": "Applicant Estimated Funding",
             "description": "Enter the dollar amount.",
         },
         "state_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
-            "title": "state Estimated Funding",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
+            "title": "State Estimated Funding",
             "description": "Enter the dollar amount.",
         },
         "local_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Local Estimated Funding",
             "description": "Enter the dollar amount.",
         },
         "other_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Other Estimated Funding",
             "description": "Enter the dollar amount.",
         },
         "program_income_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Program Income Estimated Funding",
             "description": "Enter the dollar amount.",
         },
         "total_estimated_funding": {
-            "allOf": [{"$ref": "#/$defs/budget_monetary_amount"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
             "title": "Total Estimated Funding",
-            "description": "Total dollar amount. This is a calculated field.",
+            "description": "This field is automatically calculated by Grants.gov",
         },
         "state_review": {
             "type": "string",
-            "title": "Application Subject to Review",
+            "title": "Is Application Subject to Review By State Under Executive Order 12372 Process?",
             "description": "One selection is required.",
             "enum": [
                 "a. This application was made available to the state under the Executive Order 12372 Process for review on",
@@ -443,37 +443,44 @@ FORM_JSON_SCHEMA = {
         },
         "state_review_available_date": {
             "type": "string",
-            "title": "state Review Date",
-            "description": "Enter the date in the format MM/DD/YYYY.",
+            "title": "State Review Date",
+            "description": "If 'a' is selected, enter the date the application was submitted to the State.",
             "format": "date",
         },
         "delinquent_federal_debt": {
             "type": "boolean",
-            "title": "applicant Delinquent on Federal Debt",
-            "description": "A selection is required.",
+            "title": "Applicant Delinquent on Federal Debt",
+            "description": "If 'Yes,' provide explanation in attachment.",
         },
         "debt_explanation": {
-            "allOf": [{"$ref": "#/$defs/attachment_field"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("attachment")}],
             "title": "Debt Explanation",
-            "description": "Debt Explanation is required.",
+            "description": "",
         },
         "certification_agree": {
             "type": "boolean",
             "title": "Certification Agree",
-            "description": "Check to select.",
+            "description": "By signing this application, I certify (1) to the statements contained in the list of certifications* and (2) that the statements herein are true, complete and accurate to the best of my knowledge. I also provide the required assurances** and agree to comply with any resulting terms if I accept an award. I am aware that any false, fictitious, or fraudulent statements or claims may subject me to criminal, civil, or administrative penalties. (U.S. Code, Title 18, Section 1001)",
         },
         "authorized_representative": {
-            "allOf": [{"$ref": "#/$defs/person_name"}],
-            "title": "Authorized Representative Header",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("person_name")}],
+            "title": "Authorized Representative",
             "description": "",
         },
+        "authorized_representative_title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Enter the position title.",
+            "minLength": 1,
+            "maxLength": 45,
+        },
         "authorized_representative_phone_number": {
-            "allOf": [{"$ref": "#/$defs/phone_number_field"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "AOR Telephone Number",
             "description": "Enter the daytime Telephone Number.",
         },
         "authorized_representative_fax": {
-            "allOf": [{"$ref": "#/$defs/phone_number_field"}],
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("phone_number")}],
             "title": "AOR fax Number",
             "description": "Enter the fax Number.",
         },
@@ -484,173 +491,12 @@ FORM_JSON_SCHEMA = {
             "description": "Enter a valid email Address.",
         },
         "aor_signature": {
-            "type": "string",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("signature")}],
             "title": "AOR Signature",
-            "description": "Completed by Grants.gov upon submission.",
-            "minLength": 1,
-            "maxLength": 144,
         },
         "date_signed": {
-            "type": "string",
-            "format": "date",
+            "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
             "title": "Date Signed",
-            "description": "Completed by Grants.gov upon submission.",
-        },
-    },
-    "$defs": {
-        "address": {
-            "type": "object",
-            "title": "Address",
-            "description": "Enter an address.",
-            "required": [
-                "street1",
-                "city",
-                "country",
-            ],
-            # Conditional validation rules for an address field
-            "allOf": [
-                # If country is United states, state and zip_code are required
-                {
-                    "if": {
-                        "properties": {"country": {"const": "USA: UNITED STATES"}},
-                        "required": ["country"],  # Only run rule if country is set
-                    },
-                    "then": {"required": ["state", "zip_code"]},
-                },
-            ],
-            "properties": {
-                "street1": {
-                    "type": "string",
-                    "title": "street1",
-                    "description": "Enter the first line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "street2": {
-                    "type": "string",
-                    "title": "street2",
-                    "description": "Enter the second line of the Street Address.",
-                    "minLength": 1,
-                    "maxLength": 55,
-                },
-                "city": {
-                    "type": "string",
-                    "title": "city",
-                    "description": "Enter the city.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "county": {
-                    "type": "string",
-                    "title": "County/Parish",
-                    "description": "Enter the County/Parish.",
-                    "minLength": 1,
-                    "maxLength": 30,
-                },
-                "state": {
-                    "allOf": [{"$ref": "#/$defs/state_code"}],
-                    "title": "state",
-                    "description": "Enter the state.",
-                },
-                "province": {
-                    "type": "string",
-                    "title": "province",
-                    "description": "Enter the province.",
-                    "minLength": 1,
-                    "maxLength": 30,
-                    # Note that grants.gov would hide this if the country isn't USA, but it isn't required even then
-                },
-                "country": {"$ref": "#/$defs/country_code"},
-                "zip_code": {
-                    "type": "string",
-                    "title": "Zip / Postal Code",
-                    "description": "Enter the nine-digit Postal Code (e.g., ZIP code). This field is required if the country is the United states.",
-                },
-            },
-        },
-        "person_name": {
-            "type": "object",
-            "title": "Name and Contact Information Header",
-            "description": "",
-            "required": [
-                "first_name",
-                "last_name",
-            ],
-            "properties": {
-                "prefix": {
-                    "type": "string",
-                    "title": "prefix",
-                    "description": "Select the prefix from the provided list or enter a new prefix not provided on the list.",
-                    "minLength": 1,
-                    "maxLength": 10,
-                },
-                "first_name": {
-                    "type": "string",
-                    "title": "First Name",
-                    "description": "Enter the First Name.",
-                    "minLength": 1,
-                    "maxLength": 35,
-                },
-                "middle_name": {
-                    "type": "string",
-                    "title": "Middle Name",
-                    "description": "Enter the Middle Name.",
-                    "minLength": 1,
-                    "maxLength": 25,
-                },
-                "last_name": {
-                    "type": "string",
-                    "title": "Last Name",
-                    "description": "Enter the Last Name.",
-                    "minLength": 1,
-                    "maxLength": 60,
-                },
-                "suffix": {
-                    "type": "string",
-                    "title": "suffix",
-                    "description": "Select the suffix from the provided list or enter a new suffix not provided on the list.",
-                    "minLength": 1,
-                    "maxLength": 10,
-                },
-                "title": {
-                    # This isn't in this part of the model of the SF424, but is in the global lib
-                    "type": "string",
-                    "title": "title",
-                    "description": "Enter the position title.",
-                    "minLength": 1,
-                    "maxLength": 45,
-                },
-            },
-        },
-        "budget_monetary_amount": {
-            # Represents a monetary amount. We use a string instead of number
-            # to avoid any floating point rounding issues.
-            "type": "string",
-            # Pattern here effectively says:
-            # * Any number of digits
-            # * An optional decimal point
-            # * Then exactly 2 digits - if there was a decimal
-            "pattern": r"^\d*([.]\d{2})?$",
-            # Limit the max amount based on the length (11-digits, allows up to 99 billion)
-            "maxLength": 14,
-        },
-        "phone_number_field": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 25,
-        },
-        "attachment_field": {"type": "string", "format": "uuid"},
-        "state_code": {
-            "type": "string",
-            "title": "state",
-            "description": "US state or Territory Code",
-            "enum": shared_schema.STATES,
-        },
-        "country_code": {
-            "type": "string",
-            "title": "country",
-            "description": "country Code",
-            "enum": shared_schema.COUNTRIES,
         },
     },
 }
@@ -658,97 +504,289 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Everything",
-        "name": "Everything",
+        "name": "submission_type",
+        "label": "1. Type of Submission",
+        "children": [{"type": "field", "definition": "/properties/submission_type"}],
+    },
+    {
+        "type": "section",
+        "name": "application_type_and_revision",
+        "label": "2. Type of Application",
         "children": [
-            {"type": "field", "definition": "/properties/submission_type"},
             {"type": "field", "definition": "/properties/application_type"},
             {"type": "field", "definition": "/properties/revision_type"},
             {"type": "field", "definition": "/properties/revision_other_specify"},
-            {"type": "field", "definition": "/properties/date_received"},
-            {"type": "field", "definition": "/properties/applicant_id"},
-            {"type": "field", "definition": "/properties/federal_entity_identifier"},
-            {"type": "field", "definition": "/properties/federal_award_identifier"},
-            {"type": "field", "definition": "/properties/state_receive_date"},
-            {"type": "field", "definition": "/properties/state_application_id"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "date_received",
+        "label": "3. Date Received",
+        "children": [{"type": "null", "definition": "/properties/date_received"}],
+    },
+    {
+        "type": "section",
+        "name": "applicant_identifier",
+        "label": "4. Applicant Identifier",
+        "children": [{"type": "field", "definition": "/properties/applicant_id"}],
+    },
+    {
+        "type": "section",
+        "name": "federal_identifiers",
+        "label": "5a. Federal Identifiers",
+        "children": [{"type": "field", "definition": "/properties/federal_entity_identifier"}],
+    },
+    {
+        "type": "section",
+        "name": "federal_award",
+        "label": "5b. Federal Award",
+        "children": [{"type": "field", "definition": "/properties/federal_award_identifier"}],
+    },
+    {
+        "type": "section",
+        "name": "date_received_by_state",
+        "label": "6. Date Received by State",
+        "children": [{"type": "null", "definition": "/properties/state_receive_date"}],
+    },
+    {
+        "type": "section",
+        "name": "state_application_identifier",
+        "label": "7. State Application Identifier",
+        "children": [{"type": "null", "definition": "/properties/state_application_id"}],
+    },
+    {
+        "type": "section",
+        "name": "applicant_information",
+        "label": "8. Applicant Information",
+        "children": [
             {"type": "field", "definition": "/properties/organization_name"},
             {"type": "field", "definition": "/properties/employer_taxpayer_identification_number"},
             {"type": "field", "definition": "/properties/sam_uei"},
-            # TODO - any nested field causes frontend errors, probably needs to be defined differently
-            # {"type": "field", "definition": "/properties/applicant/street1"},
-            # {"type": "field", "definition": "/properties/applicant/street2"},
-            # {"type": "field", "definition": "/properties/applicant/city"},
-            # {"type": "field", "definition": "/properties/applicant/county"},
-            # {"type": "field", "definition": "/properties/applicant/state"},
-            # {"type": "field", "definition": "/properties/applicant/province"},
-            # {"type": "field", "definition": "/properties/applicant/country"},
-            # {"type": "field", "definition": "/properties/applicant/zip_code"},
-            {"type": "field", "definition": "/properties/department_name"},
-            {"type": "field", "definition": "/properties/division_name"},
-            # {"type": "field", "definition": "/properties/contact_person/prefix"},
-            # {"type": "field", "definition": "/properties/contact_person/first_name"},
-            # {"type": "field", "definition": "/properties/contact_person/middle_name"},
-            # {"type": "field", "definition": "/properties/contact_person/last_name"},
-            # {"type": "field", "definition": "/properties/contact_person/suffix"},
-            # {"type": "field", "definition": "/properties/contact_person/title"},
+            {"type": "field", "definition": "/properties/applicant/properties/street1"},
+            {"type": "field", "definition": "/properties/applicant/properties/street2"},
+            {"type": "field", "definition": "/properties/applicant/properties/city"},
+            {"type": "field", "definition": "/properties/applicant/properties/state"},
+            {"type": "field", "definition": "/properties/applicant/properties/province"},
+            {"type": "field", "definition": "/properties/applicant/properties/country"},
+            {"type": "field", "definition": "/properties/applicant/properties/zip_code"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "organizational_unit",
+        "label": "8e. Organizational Unit",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/department_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/division_name",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "contact_person",
+        "label": "8f. Name and contact information of person to be contacted on matters involving this application",
+        "children": [
+            {"type": "field", "definition": "/properties/contact_person/properties/prefix"},
+            {"type": "field", "definition": "/properties/contact_person/properties/first_name"},
+            {"type": "field", "definition": "/properties/contact_person/properties/middle_name"},
+            {"type": "field", "definition": "/properties/contact_person/properties/last_name"},
+            {"type": "field", "definition": "/properties/contact_person/properties/suffix"},
+            {"type": "field", "definition": "/properties/contact_person_title"},
             {"type": "field", "definition": "/properties/organization_affiliation"},
             {"type": "field", "definition": "/properties/phone_number"},
             {"type": "field", "definition": "/properties/fax"},
             {"type": "field", "definition": "/properties/email"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "type_of_applicant",
+        "label": "9. Type of Applicant",
+        "children": [
             {"type": "field", "definition": "/properties/applicant_type_code"},
             {"type": "field", "definition": "/properties/applicant_type_other_specify"},
-            {"type": "field", "definition": "/properties/agency_name"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "federal_agency",
+        "label": "10. Name of Federal Agency",
+        "children": [{"type": "field", "definition": "/properties/agency_name"}],
+    },
+    {
+        "type": "section",
+        "name": "assistance_listing",
+        "label": "11. Assistance Listing Number/Title",
+        "children": [
             {"type": "field", "definition": "/properties/assistance_listing_number"},
             {"type": "field", "definition": "/properties/assistance_listing_program_title"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "funding_opportunity",
+        "label": "12. Funding Opportunity Number/Title",
+        "children": [
             {"type": "field", "definition": "/properties/funding_opportunity_number"},
             {"type": "field", "definition": "/properties/funding_opportunity_title"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "competition_identification",
+        "label": "13. Competition Identification Number/Title",
+        "children": [
             {"type": "field", "definition": "/properties/competition_identification_number"},
             {"type": "field", "definition": "/properties/competition_identification_title"},
-            {"type": "field", "definition": "/properties/areas_affected"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "areas_affected",
+        "label": "14. Areas Affected by Project",
+        "children": [
+            {"type": "field", "definition": "/properties/areas_affected", "widget": "Attachment"}
+        ],
+    },
+    {
+        "type": "section",
+        "name": "project_title",
+        "label": "15. Descriptive Title of Applicant's Project",
+        "children": [
             {"type": "field", "definition": "/properties/project_title"},
-            {"type": "field", "definition": "/properties/additional_project_title"},
+            {
+                "type": "field",
+                "definition": "/properties/additional_project_title",
+                "widget": "AttachmentArray",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "congressional_districts",
+        "label": "16. Congressional Districts",
+        "children": [
             {"type": "field", "definition": "/properties/congressional_district_applicant"},
             {"type": "field", "definition": "/properties/congressional_district_program_project"},
-            {"type": "field", "definition": "/properties/additional_congressional_districts"},
+            {
+                "type": "field",
+                "definition": "/properties/additional_congressional_districts",
+                "widget": "Attachment",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "project_dates",
+        "label": "17. Proposed Project Start and End Dates",
+        "children": [
             {"type": "field", "definition": "/properties/project_start_date"},
             {"type": "field", "definition": "/properties/project_end_date"},
-            {"type": "field", "definition": "/properties/federal_estimated_funding"},
-            {"type": "field", "definition": "/properties/applicant_estimated_funding"},
-            {"type": "field", "definition": "/properties/state_estimated_funding"},
-            {"type": "field", "definition": "/properties/local_estimated_funding"},
-            {"type": "field", "definition": "/properties/other_estimated_funding"},
-            {"type": "field", "definition": "/properties/program_income_estimated_funding"},
-            {"type": "field", "definition": "/properties/total_estimated_funding"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "estimated_funding",
+        "label": "18. Estimated Funding",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/federal_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/applicant_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/state_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/local_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/other_estimated_funding",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/program_income_estimated_funding",
+            },
+            {
+                "type": "null",
+                "definition": "/properties/total_estimated_funding",
+            },
+        ],
+    },
+    {
+        "type": "section",
+        "name": "state_review",
+        "label": "19. Is Application Subject to Review by State Under Executive Order?",
+        "children": [
             {"type": "field", "definition": "/properties/state_review"},
             {"type": "field", "definition": "/properties/state_review_available_date"},
-            {"type": "field", "definition": "/properties/delinquent_federal_debt"},
-            {"type": "field", "definition": "/properties/debt_explanation"},
-            {"type": "field", "definition": "/properties/certification_agree"},
-            # {"type": "field", "definition": "/properties/authorized_representative/prefix"},
-            # {"type": "field", "definition": "/properties/authorized_representative/first_name"},
-            # {"type": "field", "definition": "/properties/authorized_representative/middle_name"},
-            # {"type": "field", "definition": "/properties/authorized_representative/last_name"},
-            # {"type": "field", "definition": "/properties/authorized_representative/suffix"},
-            # {"type": "field", "definition": "/properties/authorized_representative/title"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "federal_debt",
+        "label": "20. Is the Applicant Delinquent on any Federal Debt?",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/delinquent_federal_debt",
+                "widget": "Radio",
+            },
+            {"type": "field", "definition": "/properties/debt_explanation", "widget": "Attachment"},
+        ],
+    },
+    {
+        "type": "section",
+        "name": "authorized_representative",
+        "label": "21. Authorized Representative",
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/certification_agree",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/prefix",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/first_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/middle_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/last_name",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/authorized_representative/properties/suffix",
+            },
+            {"type": "field", "definition": "/properties/authorized_representative_title"},
             {"type": "field", "definition": "/properties/authorized_representative_phone_number"},
             {"type": "field", "definition": "/properties/authorized_representative_fax"},
             {"type": "field", "definition": "/properties/authorized_representative_email"},
-            {"type": "field", "definition": "/properties/aor_signature"},
-            {"type": "field", "definition": "/properties/date_signed"},
+            {"type": "null", "definition": "/properties/aor_signature"},
+            {"type": "null", "definition": "/properties/date_signed"},
         ],
-    }
+    },
 ]
 
 FORM_RULE_SCHEMA = {
     ##### PRE-POPULATION RULES
-    # Note - we don't have pre-population enabled yet, so these
-    # won't run yet.
-    # TODO - before we can enable prepopulation we need the following rules:
-    #   * uei
-    #   * assistance listing number
-    #   * assistance listing program title
-    #   * public competition ID
-    #   * competition title
     "sam_uei": {"gg_pre_population": {"rule": "uei"}},
     "agency_name": {"gg_pre_population": {"rule": "agency_name"}},
     "assistance_listing_number": {"gg_pre_population": {"rule": "assistance_listing_number"}},
@@ -759,6 +797,19 @@ FORM_RULE_SCHEMA = {
     "funding_opportunity_title": {"gg_pre_population": {"rule": "opportunity_title"}},
     "competition_identification_number": {"gg_pre_population": {"rule": "public_competition_id"}},
     "competition_identification_title": {"gg_pre_population": {"rule": "competition_title"}},
+    "total_estimated_funding": {
+        "gg_pre_population": {
+            "rule": "sum_monetary",
+            "fields": [
+                "federal_estimated_funding",
+                "applicant_estimated_funding",
+                "state_estimated_funding",
+                "local_estimated_funding",
+                "other_estimated_funding",
+                "program_income_estimated_funding",
+            ],
+        }
+    },
     ##### POST-POPULATION RULES
     "date_received": {"gg_post_population": {"rule": "current_date"}},
     "date_signed": {"gg_post_population": {"rule": "current_date"}},
@@ -771,16 +822,248 @@ FORM_RULE_SCHEMA = {
 }
 
 
+# XML Transformation Rules for SF-424 4.0
+FORM_XML_TRANSFORM_RULES = {
+    # Metadata
+    "_xml_config": {
+        "description": "XML transformation rules for converting Simpler SF-424 JSON to Grants.gov XML format",
+        "version": "1.0",
+        "form_name": "SF424_4_0",
+        "namespaces": {
+            "default": "http://apply.grants.gov/forms/SF424_4_0-V4.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+        },
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424_4_0-V4.0.xsd",
+        "xml_structure": {"root_element": "SF424_4_0", "version": "4.0"},
+        "null_handling_options": {
+            "exclude": "Default - exclude field entirely from XML (recommended)",
+            "include_null": "Include empty XML element: <Field></Field>",
+            "default_value": "Use configured default value when field is None",
+        },
+        "attachment_fields": {
+            "areas_affected": {
+                "xml_element": "AreasAffected",
+                "type": "single",
+            },
+            "additional_congressional_districts": {
+                "xml_element": "AdditionalCongressionalDistricts",
+                "type": "single",
+            },
+            "debt_explanation": {
+                "xml_element": "DebtExplanation",
+                "type": "single",
+            },
+            "additional_project_title": {
+                "xml_element": "AdditionalProjectTitle",
+                "type": "multiple",
+            },
+        },
+    },
+    # Core application information - direct field mappings
+    "submission_type": {"xml_transform": {"target": "SubmissionType"}},
+    "application_type": {"xml_transform": {"target": "ApplicationType"}},
+    "date_received": {
+        "xml_transform": {
+            "target": "DateReceived",
+            "null_handling": "include_null",
+        }
+    },
+    # Applicant information - direct field mappings
+    "organization_name": {"xml_transform": {"target": "OrganizationName"}},
+    "employer_taxpayer_identification_number": {
+        "xml_transform": {"target": "EmployerTaxpayerIdentificationNumber"}
+    },
+    "sam_uei": {"xml_transform": {"target": "SAMUEI"}},
+    # Address information - nested structure with GlobalLibrary namespace
+    # Order must match XSD: Street1, Street2, City, County, State/Province, ZipPostalCode, Country
+    "applicant": {
+        "xml_transform": {"target": "Applicant", "type": "nested_object"},
+        "street1": {"xml_transform": {"target": "Street1", "namespace": "globLib"}},
+        "street2": {"xml_transform": {"target": "Street2", "namespace": "globLib"}},
+        "city": {"xml_transform": {"target": "City", "namespace": "globLib"}},
+        "county": {"xml_transform": {"target": "County", "namespace": "globLib"}},
+        "state": {"xml_transform": {"target": "State", "namespace": "globLib"}},
+        "province": {"xml_transform": {"target": "Province", "namespace": "globLib"}},
+        "zip_code": {"xml_transform": {"target": "ZipPostalCode", "namespace": "globLib"}},
+        "country": {"xml_transform": {"target": "Country", "namespace": "globLib"}},
+    },
+    # Contact person - nested structure with GlobalLibrary namespace for names
+    "contact_person": {
+        "xml_transform": {"target": "ContactPerson", "type": "nested_object"},
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+            }
+        },
+    },
+    # Contact information - direct field mappings
+    "phone_number": {"xml_transform": {"target": "PhoneNumber"}},
+    "fax_number": {"xml_transform": {"target": "Fax"}},
+    "email": {"xml_transform": {"target": "Email"}},
+    # One-to-many mapping - applicant type codes (must come before agency_name per XSD)
+    "applicant_type_code_mapping": {
+        "xml_transform": {
+            "target": "ApplicantTypeCode",  # Not used for one-to-many
+            "type": "conditional",
+            "conditional_transform": {
+                "type": "one_to_many",
+                "source_field": "applicant_type_code",
+                "target_pattern": "ApplicantTypeCode{index}",
+                "max_count": 3,  # SF-424 supports up to 3 applicant type codes
+            },
+        }
+    },
+    "applicant_type_other_specify": {"xml_transform": {"target": "ApplicantTypeOtherSpecify"}},
+    # Opportunity information - direct field mappings
+    "agency_name": {"xml_transform": {"target": "AgencyName"}},
+    "assistance_listing_number": {"xml_transform": {"target": "CFDANumber"}},
+    "assistance_listing_program_title": {"xml_transform": {"target": "CFDAProgramTitle"}},
+    "funding_opportunity_number": {"xml_transform": {"target": "FundingOpportunityNumber"}},
+    "funding_opportunity_title": {"xml_transform": {"target": "FundingOpportunityTitle"}},
+    "competition_identification_number": {
+        "xml_transform": {"target": "CompetitionIdentificationNumber"}
+    },
+    "competition_identification_title": {
+        "xml_transform": {"target": "CompetitionIdentificationTitle"}
+    },
+    # Project information - direct field mappings
+    "project_title": {"xml_transform": {"target": "ProjectTitle"}},
+    "congressional_district_applicant": {
+        "xml_transform": {"target": "CongressionalDistrictApplicant"}
+    },
+    "congressional_district_program_project": {
+        "xml_transform": {"target": "CongressionalDistrictProgramProject"}
+    },
+    "project_start_date": {"xml_transform": {"target": "ProjectStartDate"}},
+    "project_end_date": {"xml_transform": {"target": "ProjectEndDate"}},
+    # Funding information - with currency formatting
+    "federal_estimated_funding": {
+        "xml_transform": {
+            "target": "FederalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "applicant_estimated_funding": {
+        "xml_transform": {
+            "target": "ApplicantEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "state_estimated_funding": {
+        "xml_transform": {
+            "target": "StateEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "local_estimated_funding": {
+        "xml_transform": {
+            "target": "LocalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "other_estimated_funding": {
+        "xml_transform": {
+            "target": "OtherEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "program_income_estimated_funding": {
+        "xml_transform": {
+            "target": "ProgramIncomeEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    "total_estimated_funding": {
+        "xml_transform": {
+            "target": "TotalEstimatedFunding",
+            "value_transform": {"type": "currency_format"},
+        }
+    },
+    # Review and certification - with value transformations
+    "state_review": {
+        "xml_transform": {
+            "target": "StateReview",
+            "null_handling": "default_value",
+            "default_value": NO_VALUE,  # Use constant from value_transformers
+        }
+    },
+    "state_review_available_date": {"xml_transform": {"target": "StateReviewAvailableDate"}},
+    "delinquent_federal_debt": {
+        "xml_transform": {
+            "target": "DelinquentFederalDebt",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    # Attachment fields - pass through as-is for attachment transformer
+    "debt_explanation": {"xml_transform": {"target": "debt_explanation"}},
+    "areas_affected": {"xml_transform": {"target": "areas_affected"}},
+    "additional_congressional_districts": {
+        "xml_transform": {"target": "additional_congressional_districts"}
+    },
+    "additional_project_title": {"xml_transform": {"target": "additional_project_title"}},
+    "certification_agree": {
+        "xml_transform": {
+            "target": "CertificationAgree",
+            "value_transform": {"type": "boolean_to_yes_no"},
+        }
+    },
+    # Authorized representative - nested structure with GlobalLibrary namespace for names
+    "authorized_representative": {
+        "xml_transform": {"target": "AuthorizedRepresentative", "type": "nested_object"},
+        "first_name": {
+            "xml_transform": {
+                "target": "FirstName",
+                "namespace": "globLib",
+                "null_handling": "default_value",
+                "default_value": "John",
+            }
+        },
+        "last_name": {
+            "xml_transform": {
+                "target": "LastName",
+                "namespace": "globLib",
+                "null_handling": "default_value",
+                "default_value": "Doe",
+            }
+        },
+    },
+    "authorized_representative_title": {
+        "xml_transform": {"target": "AuthorizedRepresentativeTitle"}
+    },
+    "authorized_representative_phone_number": {
+        "xml_transform": {"target": "AuthorizedRepresentativePhoneNumber"}
+    },
+    "authorized_representative_email": {
+        "xml_transform": {"target": "AuthorizedRepresentativeEmail"}
+    },
+    "aor_signature": {"xml_transform": {"target": "AORSignature"}},
+    "date_signed": {"xml_transform": {"target": "DateSigned"}},
+}
+
+
 SF424_v4_0 = Form(
-    # legacy form ID - 713
     # https://www.grants.gov/forms/form-items-description/fid/713
     form_id=uuid.UUID("1623b310-85be-496a-b84b-34bdee22a68a"),
+    legacy_form_id=713,
     form_name="Application for Federal Assistance (SF-424)",
+    short_form_name="SF424_4_0",
     form_version="4.0",
-    agency_code="SGG",  # TODO - Do we want to add Simpler Grants.gov as an "Agency"?
+    agency_code="SGG",
     omb_number="4040-0004",
     form_json_schema=FORM_JSON_SCHEMA,
     form_ui_schema=FORM_UI_SCHEMA,
     form_rule_schema=FORM_RULE_SCHEMA,
-    # No form instructions at the moment.
+    json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
+    form_instruction_id=uuid.UUID("bf48a93f-d445-426f-a8fb-289bf93a2434"),
+    form_type=FormType.SF424,
+    sgg_version="1.0",
+    is_deprecated=False,
 )

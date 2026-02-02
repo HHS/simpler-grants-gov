@@ -31,13 +31,11 @@ TABLES_TO_LOAD = [
     "tfundinstr_synopsis",
     "tgroups",
     "tsynopsisattachment",
-    "tuser_account",
-    "tuser_account_mapper",
-    "tsubscription",
-    "tsubscription_search",
-    "tsubscription_opportunity",
     "tcompetition",
     "tinstructions",
+    "tcertificates",
+    "vuser_account",
+    "tuser_profile",
 ]
 
 
@@ -57,9 +55,9 @@ class LoadOracleDataTask(src.task.task.Task):
             tables_to_load = TABLES_TO_LOAD
 
         # Initialize columns_to_exclude if None
-        self.columns_to_exclude = {
-            "tuser_account": ["email_address"],
-        }
+        # Note: This does not work on UPDATES and can cause errors because the fields won't be excluded
+        # if the column has invalid data
+        self.columns_to_exclude: dict[str, list[str]] = {"tcertificates": ["is_selfsigned"]}
 
         foreign_tables = {k: v for (k, v) in foreign_tables.items() if k in tables_to_load}
         staging_tables = {k: v for (k, v) in staging_tables.items() if k in tables_to_load}
@@ -200,7 +198,14 @@ class LoadOracleDataTask(src.task.task.Task):
         ):
             update_sql = sql.build_update_sql(
                 foreign_table, staging_table, batch_of_update_ids, excluded_columns
-            ).values(transformed_at=None)
+            ).values(
+                transformed_at=None,
+                # Explicitly mark the updated row as not-deleted so that if
+                # a row is deleted and recreated with the same primary key
+                # we'll process the update
+                is_deleted=False,
+                deleted_at=None,
+            )
 
             with self.db_session.begin():
                 self.db_session.execute(update_sql)
@@ -241,7 +246,7 @@ class LoadOracleDataTask(src.task.task.Task):
         with self.db_session.begin():
             result = self.db_session.execute(update_sql)
         t1 = time.monotonic()
-        delete_count = result.rowcount
+        delete_count = result.rowcount  # type: ignore[attr-defined]
 
         self.increment("count.delete.total", delete_count)
 

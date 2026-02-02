@@ -2,16 +2,16 @@ export const messages = {
   Homepage: {
     pageTitle: "Let's build a simpler Grants.gov together",
     pageDescription:
-      "Simpler.Grants.gov is our testing ground for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
+      "Simpler.Grants.gov is where we are building new features for the next generation of Grants.gov. With your help, we're setting a new standard for transparency and usability in government services. ",
     githubLink: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "Test out our experimental features",
+        title: "New Features, simpler experience",
         canDoHeader: "Tell us what's working (and what's not)",
         canDoSubHeader: "What you can do now",
         canDoParagraph:
           "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
-        tryLink: "Try the new simpler search",
+        tryLink: "Use the new simpler search",
         cantDoHeader: "What you can't do quite yet",
         cantDoParagraph:
           "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
@@ -27,7 +27,7 @@ export const messages = {
           {
             description:
               "Our newsletter delivers the latest news straight to your inbox.",
-            http: "/subscribe",
+            http: "/newsletter",
             iconName: "mail",
             link: "Subscribe to our newsletter",
             title: "Be the first to hear about new features.",
@@ -71,7 +71,7 @@ export const messages = {
     demo: {
       title: "Simpler.Grants.gov Big Demo",
       description:
-        "Three times a year, the Simpler.Grants.gov team hosts a public demonstration of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
+        "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
       watchLink: "January 15, 2025",
     },
@@ -113,24 +113,58 @@ export const messages = {
       help: "Use your Login.gov account to sign in to Simpler.Grants.gov. Don't have an account? You can create one.",
       title: "Sign in to save this opportunity",
     },
-    startApplicationButtonText: "Start new application",
     startApplicationModal: {
+      startApplicationButtonText: "Start new application",
       cancelButtonText: "Cancel",
-      description:
-        "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
       error: "Error starting the application. Please try again.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
-      name: "Name of this application",
       requiredText: "All fields are required.",
-      saveButtonText: "Save",
-      title: "New application",
-      validationError: "Please enter a name for your application.",
+      saveButtonText: "Create Application",
+      title: "Start a new application",
+      ineligibleTitle:
+        "It looks like you're not eligible to start a new application through this site",
+      applyingFor: "Applying for: ",
+      fields: {
+        name: {
+          label: "Name of this application",
+          description:
+            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
+          validationError: "Enter a filing name. You can change this later.",
+        },
+        organizationSelect: {
+          label: "Who's applying?",
+          default: "-Select-",
+          notListed: "My organization isn't listed",
+          validationError:
+            "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
+        },
+      },
+      description: {
+        organizationIntro:
+          "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
+        pilotIntro:
+          "Welcome to our new, simpler application process. In partnership with the agency, we ensure your application is processed normally.",
+        organizationApply: "To apply as part of an organization you must:",
+        applyingForOrg:
+          "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
+        uei: "Have a valid UEI (a Unique Entity ID <link>registered through SAM.gov</link>)",
+        ineligibleGoToGrants:
+          "If you believe this is an error or prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        goToGrants:
+          "If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        support:
+          "For product support, contact us at <telephone>1-800-581-4726</telephone> or <email>simpler@grants.gov</email>. You can also apply through <link>Grants.gov</link> if you prefer.",
+        pilotGoToGrants:
+          "This opportunity is part of a pilot program. If you prefer not to participate in this pilot, we recommend applying through <link>Grants.gov</link>.",
+        organizationIndividualIntro:
+          "You can apply as an individual or organization. To apply as part of an organization you must:",
+      },
     },
     intro: {
       agency: "Agency: ",
-      assistanceListings: "Assistance Listings: ",
+      assistanceListings: "Assistance Listings:",
       lastUpdated: "Last Updated: ",
       versionHistory: "View version history on Grants.gov",
     },
@@ -156,7 +190,7 @@ export const messages = {
         fundingDetails: "Funding Details",
         other: "Other",
       },
-      noDocuments: "No documents are currently available here",
+      noDocuments: "No documents are currently available.",
     },
     awardInfo: {
       yes: "Yes",
@@ -208,6 +242,28 @@ export const messages = {
     genericErrorCta: "Please try refreshing the page.",
   },
   Application: {
+    title: "Application",
+    submissionValidationError: {
+      title: "Your application could not be submitted",
+      description:
+        "All required fields or attachments in required forms must be completed or uploaded.",
+      incompleteForm: "is incomplete. Answer all required questions to submit.",
+      notStartedForm: "has not been started. Complete the form to submit.",
+      missingIncludeInSubmission:
+        'Select Yes or No for "Submit with application?" column in Conditionally-Required Forms section.',
+    },
+    submissionError: {
+      title: "Your application could not be submitted",
+      description:
+        "<p>There was a technical problem on our end. Please try again.</p><p>If the problem persists, contact <email-link>simpler@grants.gov</email-link>.</p>",
+    },
+    submissionSuccess: {
+      title: "Your application has been submitted",
+      description:
+        "<p>The awarding agency will review and process your application independently of Grants.gov. Grants.gov won't have access to the status of your award.</p><p>The award agency will contact your EBiz point of contact or your Authorized Organization Representatives (AOR) with all further updates. Please review the application instructions for information on this agency's application review process. You can return to this submitted application at any time by <linkMyApplications>visiting your applications list</linkMyApplications>.</p><p>Grants.gov does support edits to submitted applications. Please submit a new application if you would like to make changes to submitted information.</p>",
+      contact:
+        "For technical support or feedback, email <email-link>simpler@grants.gov</email-link> and include your Application ID.",
+    },
     information: {
       applicant: "Applicant",
       applicantTypeIndividual: "Individual",
@@ -224,6 +280,18 @@ export const messages = {
       closeDate: "Close date",
       closed: "Closed",
       status: "Status",
+      submit: "Submit application",
+      editApplicationFilingNameModal: {
+        buttonText: "Edit filing name",
+        title: "Change application filing name",
+        label: "Application filing name",
+        appliedFor: "Applying for: ",
+        fieldRequirements: "All fields are required.",
+        helperText:
+          "Create a unique and descriptive name for this application so it's easy for you to track. You can change it up until the application is submitted.",
+        buttonAction: "Save",
+        buttonCancel: "Cancel",
+      },
     },
     opportunityOverview: {
       opportunity: "Opportunity",
@@ -249,7 +317,7 @@ export const messages = {
       attachmentUnavailable: "Unavailable",
       conditionalForms: "Conditionally-Required Forms",
       conditionalFormsDescription:
-        "These forms may be required based on your situation. Review the instructions and let us know if you plan to submit each form. If so, you’ll need to complete it and upload any required documents.",
+        "These forms may be required based on your situation. Review the <instructionsLink>opportunity instructions</instructionsLink> and let us know if you plan to submit each form. If so, you'll need to complete it and upload any required documents.",
       downloadInstructions: "Download instructions",
       form: "Form",
       instructions: "Instructions",
@@ -257,11 +325,64 @@ export const messages = {
       requiredForms: " Required Forms",
       status: "Status",
       statuses: {
-        not_started: "Not started",
-        in_progress: "In progress",
-        complete: "Complete",
+        not_started: "Not started.",
+        in_progress: "Some issues found. Check your entries.",
+        complete: "No issues detected.",
+        attachmentDeleted: "An attachment was deleted.",
       },
       updated: "Last updated",
+      includeFormInApplicationSubmissionDataLabel: "Submit with application",
+      includeFormInApplicationSubmissionIncompleteMessage:
+        "Some issues found. Check your entries.",
+      updatedBy: "Last updated by",
+    },
+    attachments: {
+      attachedDocument: "Attached document",
+      attachments: "Attachments",
+      attachmentsInstructions:
+        "If the <instructionsLink>opportunity instructions</instructionsLink> require documentation not covered by one of the forms above, upload the files here. They must be in the file format (e.g., PDF, XLS, etc.) and named as specified.",
+      action: "Action",
+      cancelUpload: "Cancel upload",
+      delete: "Delete",
+      uploading: "Uploading...",
+      download: "Download",
+      emptyTable: "No attachments uploaded",
+      fileSize: "File Size",
+      uploadBy: "Upload by",
+      uploadDate: "Upload date",
+      deleteModal: {
+        titleText: "Delete",
+        cancelDeleteCta: "Cancel",
+        cautionDeletingAttachment: "Caution, deleting attachment",
+        descriptionText:
+          "You may have uploaded this attachment in response to a form question. Check to ensure you no longer need it.",
+        deleteFileCta: "Delete file",
+        deleteFilesCta: "Delete files",
+        deleting: "Deleting...",
+      },
+    },
+    historyTable: {
+      applicationHistory: "Application History",
+      timestamp: "Timestamp",
+      activity: "Activity",
+      performedBy: "Performed By",
+      error:
+        "We have encountered an error loading your application activity history. Please try again later.",
+      activities: {
+        application_created: "Application created",
+        application_name_changed: "Application name changed",
+        attachment_added: "Attachment added: ",
+        attachment_deleted: "Attachment deleted: ",
+        attachment_updated: "Attachment updated: ",
+        application_submitted: "Application submitted",
+        form_updated: "Form updated: ",
+        user_added: "User added: ",
+        user_updated: "User updated: ",
+        user_removed: "User removed: ",
+        organization_added: "Organization Added",
+        application_submit_rejected: "Application submission failed",
+        submission_created: "Application submission created",
+      },
     },
     applyForm: {
       errorTitle: "This form could not be saved",
@@ -273,6 +394,23 @@ export const messages = {
         "Correct the following errors before submitting your application.",
       required: "A red asterisk <abr>*</abr> indicates a required field.",
       navTitle: "Sections in this form",
+      unsavedChangesWarning:
+        "You have unsaved changes or attachments that will be lost if you select OK.",
+    },
+    transferOwnershipModal: {
+      title: "Transfer application ownership",
+      body: "<p>Choose the organization that should own this application. After ownership is transferred, you can continue your work and prepare for submission.</p> <p><strong>Don't see your organization?</strong> If your organization isn't listed, it may not be verified yet, or you may not have been invited. Contact your eBizPOC if you have questions about access.</p>",
+      selectTitle: "Who is applying?",
+      default: "- Select -",
+      warningTitle: "Important to know about ownership",
+      warningBody:
+        "Once you assign an organization, that choice is permanent. An application cannot be transferred to another organization or returned to an individual.",
+      actionConfirm: "Transfer ownership",
+      actionCancel: "Return to application",
+      errorMessage:
+        "We couldn't load your organizations right now. Please try again.",
+      contactSupport:
+        "If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",
     },
   },
   Index: {
@@ -356,16 +494,15 @@ export const messages = {
     },
   },
   Subscribe: {
-    pageTitle: "Subscribe | Simpler.Grants.gov",
+    pageTitle: "Newsletter | Simpler.Grants.gov",
     metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
-    title: "Subscribe to project updates",
-    intro: "Subscribe to get Simpler.Grants.gov project updates in your inbox!",
+    title: "Simpler Grants Newsletter",
     paragraph1:
-      "If you sign up for the Simpler.Grants.gov product updates, we'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    list: "<ul><li>Hear about upcoming milestones</li><li>Be the first to know when we launch new code</li><li>Test out new features and functionalities</li><li>Participate in usability tests and other user research efforts</li><li>Learn about ways to provide feedback </li></ul>",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "Sign up to get project updates delivered to your inbox every few weeks.",
+    paragraph2:
+      "You'll be the first to hear about feature launches, upcoming events, user research, and more.",
+    formLabel: "Subscribe to our newsletter",
     form: {
       name: "First Name",
       lastName: "Last Name",
@@ -387,20 +524,18 @@ export const messages = {
   SubscriptionConfirmation: {
     pageTitle: "Subscription Confirmation | Simpler.Grants.gov",
     title: "You're subscribed",
-    intro:
-      "You are signed up to receive project updates from Simpler.Grants.gov.",
     paragraph1:
-      "Thank you for subscribing. We'll keep you informed of our progress and you'll know about every opportunity to get involved.",
-    disclaimer:
-      "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
+      "We'll keep you informed of our progress and every opportunity to get involved.",
   },
   UnsubscriptionConfirmation: {
     pageTitle: "Unsubscribe | Simpler.Grants.gov",
-    title: "You have unsubscribed",
-    intro:
-      "You will no longer receive project updates from Simpler.Grants.gov. ",
-    paragraph: "Did you unsubscribe by accident? Sign up again.",
+    title: "You've been unsubscribed",
+    paragraph:
+      "You'll no longer receive project updates from Simpler.Grants.gov.",
+    cta: "Change your mind?",
     buttonResub: "Re-subscribe",
+  },
+  SendyDisclaimer: {
     disclaimer:
       "The Simpler.Grants.gov email subscriptions are powered by the Sendy data service. Personal information is not stored within Simpler.Grants.gov.",
   },
@@ -421,25 +556,129 @@ export const messages = {
       visitHomepageButton: "Visit our homepage",
     },
   },
+  Developer: {
+    pageTitle: "Developer Portal | Simpler.Grants.gov",
+    pageDescription:
+      "Tools and resources for developers working on Simpler.Grants.gov",
+    infoTitle: "API tools & management",
+    canDoHeader: "What's available for developers",
+    canDoSubHeader: "What you can do with an API key now",
+    canDoParagraph:
+      "You can call our REST endpoints to search the full catalog of funding opportunities and retrieve detailed information for any record. Current capabilities include keywords, fielded search, pagination, sorting for large result sets, and fetching structured details for a single opportunity. You can also manage your own credentials to create, view, rotate, and revoke API keys.",
+    cantDoHeader: "Current limitations",
+    cantDoParagraph:
+      "<ul><li>Inactive API keys are automatically disabled after 30 days without use.</li><li>Write operations are not supported at this time, which means you cannot apply for funding, post/create opportunities, or create projects within an organization through the API.</li><li>Rate limiting is enforced to ensure reliability for all users; by default, 60 requests per minute and 10,000 requests per day per key. if you need higher throughput for a production integration, please contact us to discuss options.</li></ul><p>Additional management features (such as organization-level projects and roles) are on the roadmap but aren't available yet.</p>",
+    apiDashboardLink: "Manage API Keys",
+    iconSections: [
+      {
+        description:
+          "Make your first API request in minutes. Learn the basics of the Simpler.Grants.gov API.",
+        http: "https://wiki.simpler.grants.gov/product/api",
+        iconName: "code",
+        link: "Get started",
+        title: "Developer quickstart",
+      },
+      {
+        description: "Learn more about integrating our API into your project.",
+        http: "https://api.simpler.grants.gov/docs#/",
+        iconName: "local_library",
+        link: "Read the docs",
+        title: "API reference",
+      },
+    ],
+  },
+  ApiDashboard: {
+    pageTitle: "API Dashboard | Simpler.Grants.gov",
+    metaDescription: "Manage your API keys for Simpler.Grants.gov",
+    heading: "API Dashboard",
+    errorLoadingKeys: "Failed to load API keys",
+    table: {
+      headers: {
+        apiKey: "API Key",
+        dates: "Dates",
+        editName: "Edit Name",
+        deleteKey: "Delete Key",
+      },
+      dateLabels: {
+        created: "Created:",
+        lastUsed: "Last used:",
+        never: "Never",
+      },
+      deleteButton: "Delete Key",
+      deleteButtonTitle: "Delete this API key",
+      emptyState:
+        "You don't have any API keys yet. Create your first API key to get started.",
+    },
+    modal: {
+      apiKeyNameLabel: "Name <required>(required)</required>",
+      placeholder: "e.g., Production API Key",
+      createTitle: "Create New API Key",
+      createDescription:
+        "Create a new key for use with the Simpler.Grants.gov API",
+      editDescription: "Change the name of your Simpler.Grants.gov API key",
+      createSuccessHeading: "API Key Created Successfully",
+      editSuccessHeading: "API Key Renamed Successfully",
+      createSuccessMessage:
+        'Your API key "{keyName}" has been created successfully.',
+      editSuccessMessage:
+        'Your API key has been renamed from "{originalName}" to "{keyName}".',
+      close: "Close",
+      createErrorMessage:
+        "There was an error creating your API key. Please try again.",
+      editErrorMessage:
+        "There was an error renaming your API key. Please try again.",
+      nameRequiredError: "API key name is required",
+      nameChangedError: "Please enter a different name",
+      editTitle: "Rename API Key",
+      createButtonText: "Create API Key",
+      editNameButtonText: "Edit Name",
+      creating: "Creating...",
+      saving: "Saving...",
+      saveChanges: "Save Changes",
+      cancel: "Cancel",
+      deleteTitle: "Delete API Key",
+      deleteDescription:
+        'To confirm deletion, type "delete" in the field below:',
+      deleteConfirmationLabel:
+        'Type "delete" to confirm <required>(required)</required>',
+      deleteConfirmationPlaceholder: "delete",
+      deleteConfirmationError: 'Please type "delete" to confirm deletion',
+      deleteSuccessHeading: "API Key Deleted Successfully",
+      deleteSuccessMessage:
+        'Your API key "{keyName}" has been deleted successfully.',
+      deleteErrorMessage:
+        "There was an error deleting your API key. Please try again.",
+      deleteButtonText: "Delete Key",
+      deleting: "Deleting...",
+    },
+  },
   Header: {
     navLinks: {
       about: "About",
+      account: "Account",
+      activityDashboard: "Activity Dashboard",
+      applications: "Applications",
       community: "Community",
+      developer: "Developer Portal",
+      developers: "Developers",
       events: "Events",
       forum: "Discussion forum",
       home: "Home",
       login: "Sign in",
       logout: "Sign out",
       menuToggle: "Menu",
+      organizations: "Organizations",
       research: "Research",
       roadmap: "Product roadmap",
       savedOpportunities: "Saved opportunities",
       savedSearches: "Saved search queries",
       search: "Search",
-      subscribe: "Subscribe",
+      newsletter: "Newsletter",
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
+      settings: "Settings",
+      testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
     tokenExpired: "You've been logged out. Please sign in again.",
@@ -457,13 +696,24 @@ export const messages = {
     agencyContactCenter: "Grants.gov Program Management Office",
     telephone: "1-800-518-4726",
     returnToTop: "Return to top",
-    linkXTwitter: "X (Twitter)",
-    linkYoutube: "YouTube",
-    linkGithub: "Github",
-    linkRss: "RSS",
-    linkNewsletter: "Newsletter",
-    linkBlog: "Blog",
     logoAlt: "Grants.gov logo",
+    explore: "Explore",
+    simpler: "Simpler.Grants.gov",
+    links: {
+      home: "Home",
+      search: "Search",
+      vision: "Vision",
+      roadmap: "Roadmap",
+      events: "Events",
+      newsletter: "Newsletter",
+      subscribe: "Subscribe",
+    },
+    feedback: "To give feedback, contact: <email>simpler@grants.gov</email>",
+    supportCenter: "Grants.gov Support Center",
+    techSupport:
+      "For technical support, contact: <email>support@grants.gov</email>",
+    grantorSupport:
+      "Grantors, contact the PMO through your <poc>Agency Point of Contact</poc>.",
   },
   Identifier: {
     identity:
@@ -491,6 +741,7 @@ export const messages = {
     authorizationFail:
       "Sign in or user authorization failed. Please try again.",
     signInCTA: "Sign in first in order to view this page",
+    unauthorizedExplanation: "This content is not available",
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
@@ -524,7 +775,7 @@ export const messages = {
         closed: "Closed",
       },
       number: "Number",
-      published: "Published",
+      published: "Posted date",
       expectedAwards: "Expected awards",
       tbd: "TBD",
       saved: "Saved",
@@ -538,6 +789,7 @@ export const messages = {
         agency: "Agency",
         category: "Category",
         status: "Opportunity status",
+        postedDate: "Posted Date",
         closeDate: "Closing date range",
         costSharing: "Cost sharing",
       },
@@ -560,6 +812,7 @@ export const messages = {
       title: "Filters",
       submit: "View results",
       clearFilters: "Clear filters",
+      toggleButton: "Filters",
     },
     callToAction: {
       title: "Search funding opportunities",
@@ -567,15 +820,6 @@ export const messages = {
     opportunitySaved: "Saved",
     resultsHeader: {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
-    },
-    resultsListFetch: {
-      noResultsTitle: "Your search did not return any results.",
-      noResultsBody: [
-        "Check any terms you've, entered for typos",
-        "Try different keywords",
-        "Make sure you've selected the right statuses",
-        "Try resetting filters or selecting fewer options",
-      ],
     },
     resultsListItem: {
       status: {
@@ -594,19 +838,6 @@ export const messages = {
       floor: "Minimum: ",
     },
     sortBy: {
-      options: {
-        postedDateDesc: "Posted date (Newest)",
-        postedDateAsc: "Posted date (Oldest)",
-        closeDateDesc: "Close date (Newest)",
-        closeDateAsc: "Close date (Oldest)",
-        opportunityTitleAsc: "Opportunity title (A to Z)",
-        opportunityTitleDesc: "Opportunity title (Z to A)",
-        agencyAsc: "Agency (A to Z)",
-        agencyDesc: "Agency (Z to A)",
-        opportunityNumberAsc: "Opportunity number (Ascending)",
-        opportunityNumberDesc: "Opportunity number (Descending)",
-        default: "Most relevant (Default)",
-      },
       label: "Sort by",
     },
     filterToggleAll: {
@@ -614,11 +845,6 @@ export const messages = {
       clear: "Clear All",
     },
     loading: "Loading Results",
-    filterDisplayToggle: {
-      showFilters: "Show Filters",
-      hideFilters: "Hide Filters",
-      drawer: "Filters",
-    },
     genericErrorCta: "Please try your search again.",
     validationError: "Search Validation Error",
     tooLongError: "Search terms must be no longer than 100 characters.",
@@ -626,10 +852,9 @@ export const messages = {
       title: "Export results",
     },
     betaAlert: {
-      alertTitle:
-        "We're actively building this search experience. Help us improve!",
+      alertTitle: "How can we build a simpler search experience?",
       alert:
-        "Send your feedback to <mailToGrants>simpler@grants.gov</mailToGrants>. GitHub users can file tickets to <bugReport>report a bug</bugReport> or <featureRequest>request a feature</featureRequest>.",
+        "Fill out a <ethnioSurveyLink>1-minute survey</ethnioSurveyLink> and share your experience with Simpler and Classic Search.",
     },
     saveSearch: {
       heading: "Current search query",
@@ -673,14 +898,15 @@ export const messages = {
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
-    body: "Our team is working to improve the site, and we'll have it back up as soon as possible. In the meantime, please visit <LinkToGrants>www.Grants.gov</LinkToGrants> to search for funding opportunities and manage your applications.",
+    body: "Our team is working to improve the site, and we'll have it back up as soon as possible.",
     signOff: "Thank you for your patience.",
     pageTitle: "Simpler.Grants.gov - Maintenance",
   },
   SavedSearches: {
     heading: "Saved search queries",
-    noSavedCTA:
-      "You don't have any saved queries yet.<br></br>As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
+    noSavedCTAParagraphOne: "You don't have any saved queries yet.",
+    noSavedCTAParagraphTwo:
+      "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
     searchButton: "Start a new search",
     title: "Saved Search Queries | Simpler.Grants.gov",
     error:
@@ -693,13 +919,16 @@ export const messages = {
       fundingInstrument: "Funding instrument",
       eligibility: "Eligibility",
       agency: "Agency",
+      assistanceListingNumber: "Assistance Listing Number",
       category: "Category",
       query: "Search terms",
       page: "Page",
       sortby: "Sort by",
       closeDate: "Close date",
+      postedDate: "Posted date",
       costSharing: "Cost sharing",
       topLevelAgency: "Top level agency",
+      andOr: "Query and/or operator",
     },
     editModal: {
       loading: "Updating",
@@ -723,10 +952,18 @@ export const messages = {
     },
   },
   SavedOpportunities: {
+    metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
-    noSavedCTA:
-      "To add an opportunity to your list, use the Save button next to its title on the listing's page.<br></br>Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+    noSavedCTAParagraphOne:
+      "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
+    noSavedCTAParagraphTwo:
+      "Saved opportunities will be starred in your search results, but you can only save and un-save from the specific opportunity page",
+    noMatchingStatus:
+      "No saved opportunities match the selected status filter.",
     searchButton: "Start a new search",
+    statusFilter: {
+      label: "Filter by status",
+    },
     title: "Saved Opportunities | Simpler.Grants.gov",
   },
   Roadmap: {
@@ -738,102 +975,163 @@ export const messages = {
       progress: {
         title: "What we're working on",
         contentItems: [
-          [
-            {
-              title: "Beta launch of Simpler Search on Grants.gov",
-              content:
-                "<p>We're launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.</p><p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
-            },
-            {
-              title: "New opportunities for open-source collaboration",
-              content:
-                "<p>We're strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.</p><p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
-            },
-          ],
-          [
-            {
-              title: "An 'Apply' workflow pilot",
-              content:
-                "<p>We're piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.</p><p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
-            },
-            {
-              title: "SOAP Proxy for the 'Apply' workflow",
-              content:
-                "<p>We're building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.</p><p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
-            },
-          ],
-          [
-            {
-              title: "User research on permissions",
-              content:
-                "<p>We're researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.</p><p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
-            },
-            {
-              title: "Automated API key management",
-              content:
-                "<p>We're building tools so authorized users can securely generate and manage their API keys independently without admin support.</p><p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
-            },
-          ],
+          {
+            title: "Piloting smarter, easier budget forms",
+            content:
+              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
+          },
+          {
+            title:
+              "Improve users' confidence in choosing competitive, relevant opportunities",
+            content:
+              "<p>We're excited to help you find and get opportunities you need. We are developing user-requested enhancements to Simpler Search, and we're also developing a new set of initiatives to help organizations find opportunities that are better tailored to their needs. This will result in reducing the time and effort required to discover opportunities, determine whether they're a strong fit, and align as a team to pursue them.</p><p><linkGithub7830>Follow #7830 on GitHub</linkGithub7830></p>",
+          },
+          {
+            title: "Scale opportunity coverage and form creation",
+            content:
+              "<p>Simpler's new, streamlined application experience will support enough forms to cover 35% of competitions on Grants.gov, enabling opportunities to be supported from more grantor agencies. This will be made possible with the addition of internal tools that reduce the manual effort needed to launch opportunities between different environments.</p><p><linkGithub7831>Follow #7831 on GitHub</linkGithub7831></p>",
+          },
+          {
+            title:
+              "Community-prioritized improvements & open source involvement",
+            content:
+              "<p>We remain committed to open, participatory software development. We have deepened our collaboration with the Co-Design Group by establishing routine check-ins and workshops that directly involved them in the agile delivery process. We selected a key agile deliverable to pilot our co-planning methodology and successfully advanced community-prioritized improvements by delivering two highly voted items from the public voting board (known as our <fiderBoardLink>Fider board</fiderBoardLink>). We will continue to host co-planning and working sessions, and increase community engagement.</p><p><linkGithub7790>Follow #7790 on GitHub</linkGithub7790></p>",
+          },
+          {
+            title: "Reducing burden of starting an application",
+            content:
+              "<p>We're making it easier for you to find the right opportunity and start an application. Each opportunity page will contain more information to help you decide if it meets your needs, and guide you through the process of starting an application when you're ready to apply. Usability testing will continue improving our forms so they're approachable and easy to follow. Our workflow will make it faster and easier to fill out applications, with improved navigation, helpful guidance, and clear status indicators.</p><p><linkGithub7906>Follow #7906 on GitHub</linkGithub7906></p>",
+          },
         ],
         link: "View all deliverables on GitHub",
       },
       milestones: {
         title: "What we've delivered",
-        contentTitle: "Early 2025",
+        contentTitle: "Late 2025",
+        releaseNotesLink: "Read the latest release notes on our public wiki",
         contentItems: [
           {
-            title: "Simpler application workflow prototype",
+            title: "Launched Release Notes",
             content:
-              "We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.",
+              "<p>We proudly announced the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. <releaseNotesLink>Read the latest release notes on our public wiki</releaseNotesLink>.</p>",
           },
           {
-            title:
-              "Full support for opportunity page attachments (NOFOs/downloads)",
+            title: "Improving the application workflow",
             content:
-              "The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.",
+              "<p>We built on lessons learned from our 'Apply' workflow pilot, launching two opportunities for application through Simpler.Grants.gov while adding features based on direct user feedback and testing. We prepared to scale up to support more agencies. And we added an activity history that improves collaborating on applications.</p>",
           },
           {
-            title: "Authentication via Login.gov",
+            title: "Accelerating form development",
             content:
-              "Finalizing authentication enabled grant seekers to create an account using Login.gov's single sign-on platform. This move reduced the steps and friction users experience when signing up.",
+              "<p>We scaled our form repository to 15 commonly used forms, unlocking additional agency partnership opportunities for applications in the future. Using a shared JSON schema, our tool now instantly renders the form, letting developers and program staff build and preview forms in real time. This also allows Simpler data to map to the <commonGrantsProtocolLink>CommonGrants Protocol</commonGrantsProtocolLink>.</p>",
           },
           {
-            title: "Search & opportunity page improvements",
+            title: "Simplifying user permissions",
             content:
-              "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.",
+              "<p>Grants.gov user roles and permissions can be cumbersome and may not align with how organizations work. We co-designed a new experience with applicants and grantors to simplify onboarding, improve visibility into organizational access, and make collaboration easier and more intuitive.</p>",
+          },
+          {
+            title: "Launched new changes to the Activity Dashboard",
+            content:
+              "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Activity Dashboard centralizes where users can manage their work and track their progress.</p>",
           },
         ],
-        archivedRoadmapTitle: "Late 2024",
-        archivedRoadmapItems: [
+        archivedRoadmapSections: [
           {
-            title: "RESTful API launch",
-            content:
-              "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
+            sectionTitle: "Mid 2025",
+            sectionItems: [
+              {
+                title: "Beta launch of Simpler Search on Grants.gov",
+                content:
+                  "<p>We launched Simpler Search directly on Grants.gov alongside the classic search experience. This gave users a choice, helped us test traffic, and supported tools to improve usability and iterate more quickly based on user data.</p>",
+              },
+              {
+                title: "New opportunities for open-source collaboration",
+                content:
+                  "<p>We strengthened our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.</p>",
+              },
+              {
+                title: "An 'Apply' workflow pilot",
+                content:
+                  "<p>We piloted the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.</p>",
+              },
+              {
+                title: "SOAP Proxy for the 'Apply' workflow",
+                content:
+                  "<p>We built a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.</p>",
+              },
+              {
+                title: "User research on permissions",
+                content:
+                  "<p>We researched how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.</p>",
+              },
+              {
+                title: "Automated API key management",
+                content:
+                  "<p>We built tools so authorized users can securely generate and manage their API keys independently without admin support.</p>",
+              },
+            ],
           },
           {
-            title: "Coding Challenge pilot",
-            content:
-              "We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+            sectionTitle: "Early 2025",
+            sectionItems: [
+              {
+                title: "Simpler application workflow prototype",
+                content:
+                  "<p>We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.</p>",
+              },
+              {
+                title:
+                  "Full support for opportunity page  attachments (NOFOs/downloads)",
+                content:
+                  "<p>The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.</p>",
+              },
+              {
+                title: "Authentication via Login.gov",
+                content:
+                  "<p>Finalizing authentication enabled grant seekers to create an account using Login.gov's single sign-on platform. This move reduced the steps and friction users experience when signing up.</p>",
+              },
+              {
+                title: "Search & opportunity page improvements",
+                content:
+                  "<p>Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.</p>",
+              },
+            ],
           },
           {
-            title: "Search UI usability test",
-            content:
-              "We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
-          },
-          {
-            title: "Opportunity page launch",
-            content:
-              "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
-          },
-          {
-            title: "First Co-Design Group recruitment",
-            content:
-              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
-          },
-          {
-            title: "Search interface launch",
-            content:
-              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+            sectionTitle: "Late 2024",
+            sectionItems: [
+              {
+                title: "RESTful API launch",
+                content:
+                  "<p>Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.</p>",
+              },
+              {
+                title: "Coding Challenge pilot",
+                content:
+                  "<p>We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.</p>",
+              },
+              {
+                title: "Search UI usability test",
+                content:
+                  "<p>We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.</p>",
+              },
+              {
+                title: "Opportunity page launch",
+                content:
+                  "<p>You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.</p>",
+              },
+              {
+                title: "First Co-Design Group recruitment",
+                content:
+                  "<p>We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.</p>",
+              },
+              {
+                title: "Search interface launch",
+                content:
+                  "<p>Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.</p>",
+              },
+            ],
           },
         ],
       },
@@ -848,14 +1146,46 @@ export const messages = {
               "We're building a simpler Grants.gov in the open. All of the code we're writing is open source and our roadmap is public.",
           },
           {
-            title: "Iterative",
-            content:
-              "We continuously release features, refining the product with each cycle based on public input. Email your feedback and suggestions to simpler@grants.gov.",
-          },
-          {
             title: "Agile",
             content:
               "We swiftly adapt to changing priorities and requirements based on the feedback we receive.",
+          },
+          {
+            title: "Iterative",
+            content:
+              "We continuously release features, refining the product with each cycle based on public input. Send us your feedback and suggestions.",
+            link: "mailto:simpler@grants.gov",
+            linkText: "Contact us at simpler@grants.gov",
+          },
+          {
+            title: "Co-planning",
+            content:
+              "We prioritize improvements to align with user needs through public ranking. Let us know what's important to you.",
+            link: "https://simplergrants.fider.io",
+            linkText: "Vote on our proposals board",
+          },
+        ],
+      },
+      timeline: {
+        title: "Key milestones",
+        contentItems: [
+          {
+            date: "Early 2026",
+            title: "A new way to apply",
+            content:
+              "<p>Simpler Search is now the default search for funding opportunities, and we're testing a simpler, more intuitive application workflow with a small number of partner agencies and funding opportunities.</p>",
+          },
+          {
+            date: "Mid-2026",
+            title: "Expanding the Simpler experience",
+            content:
+              "<p>We'll pilot new budget forms and support scaling for all agencies to increase the number of opportunities that can be applied for through Simpler.Grants.gov.</p>",
+          },
+          {
+            date: "2027",
+            title: "Simpler Grants replaces legacy Grants.gov",
+            content:
+              "<p>The Simpler.Grants.gov experience becomes the default experience of Grants.gov, providing a modern, consistent experience for all users.</p>",
           },
         ],
       },
@@ -1203,5 +1533,249 @@ export const messages = {
     "YEM: YEMEN": "Yemen",
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
+  },
+  returnToGrants: {
+    message: "Return to Grants.gov",
+  },
+  Settings: {
+    pageTitle: "Settings | Simpler.Grants.gov",
+    title: "Settings",
+    contactInfoHeading: "Contact information",
+    contactInfoBody:
+      "Your name and email will be visible to others in your organization as you collaborate. You may update your name here at any time, but your email and password are managed by <link>login.gov</link>.",
+    inputs: {
+      firstName: "First name",
+      middleName: "Middle name",
+      lastName: "Last name",
+      email: "Email",
+    },
+    save: "Save changes",
+    validationErrors: {
+      firstName: "You must enter a first name to complete your profile",
+      lastName: "You must enter a last name to complete your profile",
+    },
+    fetchError: "Error fetching user data. Please try refreshing the page.",
+    pending: "Saving...",
+    errorHeading: "Error",
+    successHeading: "Account updated",
+    profileIncomplete: "Your profile is incomplete",
+    addFullNameDescription:
+      "Add your first and last name to complete your profile.",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
+    requiredForProfile: "Required to complete your profile.",
+  },
+  ActivityDashboard: {
+    pageTitle: "Activity Dashboard | Simpler.Grants.gov",
+    title: "Welcome to your activity dashboard.",
+    fetchError: "Error fetching user data. Please try refreshing the page.",
+    organizations: "Your organizations",
+    noOrganizations: {
+      title: "You're not a member of any organizations yet",
+      description:
+        "You'll be notified when an organization adds you, and you can accept the invitation to access their details.",
+    },
+    organizationButtons: {
+      view: "View details",
+      manage: "Manage users",
+    },
+    linksSection: {
+      heading: "Your recent activity",
+      applications: {
+        heading: "Applications",
+        description: "You can now apply for select opportunities on Simpler.",
+        linkText: "View applications",
+      },
+      savedQueries: {
+        heading: "Saved queries",
+        description: "Return to your preferred search terms and filters.",
+        linkText: "View saved queries",
+      },
+      savedOpportunities: {
+        heading: "Saved opportunities",
+        description: "Keep track of oppportunities you're interested in.",
+        linkText: "View saved opportunities",
+      },
+    },
+    invitationReply: {
+      ctaTitle: "would like to add you to their team.",
+      description:
+        "Click Accept to join and gain access to your team, organization details and available applications.",
+      accept: "Accept",
+      reject: "Reject",
+      dismiss: "Dismiss",
+      accepted: {
+        ctaTitle: "Congrats, you've been added to {orgName}!",
+        description:
+          "Join your team by collaborating on applications and searching for the right opportunities.",
+      },
+      rejected: {
+        ctaTitle: "The invitation has been rejected.",
+        description:
+          "If you change your mind, an organization admin can add you again.",
+      },
+      rejectConfirmation: {
+        ctaTitle:
+          "Are you sure you want to reject this organization's invitation?",
+        description:
+          "You'll need to be re-added by an organization admin if you change your mind later.",
+        confirm: "Reject invitation",
+        cancel: "Cancel",
+      },
+      apiError: "Unable to update user organization invitation.",
+    },
+  },
+  OrganizationDetail: {
+    pageTitle: "Organization",
+    fetchError: "Unable to fetch organization details",
+    organizationDetailsHeader: "Organization details",
+    ebizPoc: "eBiz POC",
+    contact: "Contact",
+    uei: "UEI",
+    expiration: "Exp",
+    visitSam:
+      "Visit <link>sam.gov</link> to make changes to your organization's details.",
+    rosterTable: {
+      title: "Organization roster",
+      explanation: "Your organization's active members are listed below.",
+      manageUsersExplanation:
+        "Manage Users to add or update roles and permissions.",
+      manageUsersCTA: "Manage Users",
+      headings: {
+        email: "Email",
+        name: "Name",
+        roles: "Roles",
+      },
+    },
+  },
+  ManageUsers: {
+    pageTitle: "Manage users | Simpler.Grants.gov",
+    pageHeading: "Manage users",
+    activeUsersHeading: "Active Users Roster",
+    activeUsersTableDescription:
+      "Adjust permissions for active users so they have the right access for their role.",
+    activeUsersFetchError:
+      "We have encountered an error retrieving the Active Users roster, please try again later.",
+    activeUsersTableZeroState: "There are no active users.",
+    grantsGovUsersHeading: "Grants.gov Users",
+    grantsGovUsersTableDescription:
+      "Manage users from your Grants.gov organization here in Simpler.",
+    invitedUsersHeading: "Invited users",
+    invitedUsersTableDescription:
+      "These users have been invited to join your organization but haven't accepted yet. Once they accept, the'll appear in your Active User Roster and be able to collaborate on grants and other organizational work.",
+    invitedUsersFetchError:
+      "We have encountered an error retrieving the Invited Users list, please try again later.",
+    invitedUsersTableZeroState: "There are no invited users.",
+    inviteLegacyUsers: "Invite Grants.gov users",
+    roleManager: {
+      errorState:
+        "We were unable to make the change requested at this time. Please try again.",
+      cancel: "Cancel",
+      changeUserRole: "Change user role",
+    },
+    removeUserModal: {
+      header: "Are you sure you want to remove this user?",
+      description:
+        "Removing them will revoke their access and may impact any work they have not yet submitted. If they need access again, an administrator will have to add them back.",
+      errorState: "We couldn't remove this user. Please try again.",
+      cancel: "Cancel",
+      removeUser: "Remove User",
+      removing: "Removing...",
+    },
+    usersTable: {
+      actionsHeading: "Actions",
+      admin: "Administrator",
+      emailHeading: "Email",
+      member: "Member",
+      nameHeading: "Name",
+      noUsersFound: "No users found.",
+      roleHeading: "Role",
+      selectRoleFor: "Select role for",
+    },
+    confirmationModal: {
+      header: "Confirm role change",
+      description: "Are you sure you want to change this user's role to",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      saving: "Saving...",
+    },
+    inviteUser: {
+      heading: "Add users to collaborate on opportunities.",
+      errorHeading: "Error",
+      errorMessage: "Error inviting user, please try again",
+      description:
+        "Users are automatically added to your organization when they sign up. Until then, their status will be pending.",
+      inputs: {
+        email: {
+          label: "Email address",
+          placeholder: "Enter a valid email address",
+        },
+        role: {
+          label: "Role",
+          placeholder: "- Select a role -",
+        },
+      },
+      button: {
+        label: "Add to organization",
+        success: "User invited to organization",
+      },
+      validationErrors: {
+        email: "Email is required",
+        role: "Role is required",
+      },
+    },
+  },
+  Applications: {
+    numApplications: "{num, plural, =1 {1 application} other {# applications}}",
+    errorMessage:
+      "We have encountered an error loading your applications, please try again later.",
+    metaDescription: "View your saved applications",
+    noApplicationsMessage: {
+      primary: "You have not started any applications yet.",
+      secondary:
+        "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Applications",
+    pageTitle: "Applications",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      closeDate: "Close date",
+      status: "Status",
+      applicationName: "Application filing name",
+      type: "Type",
+      opportunity: "Opportunity",
+    },
+  },
+  Organizations: {
+    errorMessage:
+      "We have encountered an error loading your organizations, please try again later.",
+    manageUsers: "Manage Users",
+    metaDescription: "View your organizations",
+    pageHeading: "Organizations",
+    pageTitle: "Organizations",
+  },
+  InviteLegacyUsers: {
+    dataLoadingError:
+      "We're having trouble loading your team from Grants.gov. Please try again later.",
+    emptyLegacyUsers:
+      "It looks like there are no team members to import. Your organization does not have a legacy roster in Grants.gov, so there are no contacts available to add here. You can still invite people directly on your <manageUsersLink>Manage users page</manageUsersLink>.",
+    inviteYourTeam: "Invite your team from Grants.gov",
+    inviteYourTeamDetails:
+      "Add your team from Grants.gov to your organization in Simpler or remove anyone who's no longer actively working with your team. Select the people to invite, and they'll get an invitation to join you here in Simpler.",
+    keyInformation: "Key information",
+    keyInformationDetails:
+      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they've been added.",
+    metaDescription: "Manage users from legacy integrations",
+    pageHeading: "Legacy invite",
+    pageTitle: "Legacy invite | Simpler.Grants.gov",
+    tableHeadings: {
+      email: "Email",
+      name: "Name",
+    },
   },
 };

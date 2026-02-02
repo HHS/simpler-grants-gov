@@ -1,4 +1,7 @@
-import { allFilterOptions } from "src/constants/searchFilterOptions";
+import {
+  allFilterOptions,
+  sortOptions,
+} from "src/constants/searchFilterOptions";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -8,7 +11,25 @@ import {
   RelevantAgencyRecord,
   searchFilterNames,
 } from "src/types/search/searchFilterTypes";
+import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+
+export const optionsForSearchParamKey = (
+  key: ValidSearchQueryParam,
+  agencyOptions: FilterOption[],
+): FilterOption[] => {
+  switch (key) {
+    case "agency":
+    case "topLevelAgency":
+      return agencyOptions;
+    case "assistanceListingNumber":
+      return [];
+    case "sortby":
+      return sortOptions;
+    default:
+      return allFilterOptions[key as HardcodedFrontendFilterNames];
+  }
+};
 
 export const alphabeticalOptionSort = (
   firstOption: FilterOption,
@@ -133,7 +154,7 @@ export const getFilterOptionLabel = (
 ) => {
   const option = options.find((option) => option.value === value);
   if (!option) {
-    console.error(`Pill label not found for ${value}`);
+    console.error(`Label not found for ${value}`);
     return "";
   }
   return option.label;
@@ -152,6 +173,25 @@ export const formatPillLabel = (
       return `Cost sharing: ${getFilterOptionLabel(value, options)}`;
     case "closeDate":
       return `Closing within ${value} days`;
+    case "postedDate":
+      return `Posted within last ${value} days`;
+    case "assistanceListingNumber":
+      return `ALN ${value}`;
+    case "fundingInstrument":
+      if (value === "other") {
+        return "Other - Funding instrument";
+      }
+      return getFilterOptionLabel(value, options);
+    case "eligibility":
+      if (value === "other") {
+        return "Other - Eligibility";
+      }
+      return getFilterOptionLabel(value, options);
+    case "category":
+      if (value === "other") {
+        return "Other - Category";
+      }
+      return getFilterOptionLabel(value, options);
     default:
       return getFilterOptionLabel(value, options);
   }
@@ -175,7 +215,9 @@ export const formatPillLabels = (
       const availableOptions =
         key === "agency" || key === "topLevelAgency"
           ? agencyOptions
-          : allFilterOptions[key as HardcodedFrontendFilterNames];
+          : key === "assistanceListingNumber"
+            ? []
+            : allFilterOptions[key as HardcodedFrontendFilterNames];
       const pillLabels = Array.from(values).map((value) => ({
         label: formatPillLabel(queryParamKey, value, availableOptions),
         queryParamKey,

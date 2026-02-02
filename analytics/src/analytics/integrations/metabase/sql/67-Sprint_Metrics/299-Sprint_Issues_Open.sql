@@ -3,20 +3,36 @@ sprint_data AS
   (SELECT gh_sprint.id AS sprint_id,
           gh_sprint.project_id,
           gh_sprint.name AS sprint_name,
-          gh_sprint.end_date AS sprint_end_date
+          gh_sprint.start_date AS sprint_start_date,
+          gh_sprint.end_date-1 AS sprint_end_date
    FROM gh_sprint
    INNER JOIN gh_project ON gh_project.id = gh_sprint.project_id
    WHERE {{sprint_name}}
-     AND {{project_ghid}}), -- get each issue_id in sprint
-issue_id_list AS
-  (SELECT DISTINCT issue_id AS issue_id,
-                   s.sprint_end_date
+     AND {{project_ghid}}), -- get sprint mapping as of sprint end date
+sprint_mapping_at_end AS
+  (SELECT m.issue_id,
+          m.sprint_id,
+          m.d_effective,
+          ROW_NUMBER() OVER (PARTITION BY m.issue_id
+                             ORDER BY m.d_effective DESC) AS rn
    FROM gh_issue_sprint_map m
-   INNER JOIN sprint_data s ON s.sprint_id = m.sprint_id), -- get metadata for each issue
+   CROSS JOIN sprint_data s
+   WHERE m.d_effective <= CASE
+                              WHEN s.sprint_end_date < CURRENT_DATE THEN s.sprint_end_date
+                              ELSE CURRENT_DATE - 1
+                          END), -- get each issue_id in sprint (only if mapped to this sprint on sprint end date)
+issue_id_list AS
+  (SELECT DISTINCT sm.issue_id AS issue_id,
+                   s.sprint_start_date,
+                   s.sprint_end_date
+   FROM sprint_mapping_at_end sm
+   INNER JOIN sprint_data s ON s.sprint_id = sm.sprint_id
+   WHERE sm.rn = 1), -- get metadata for each issue
 issue_data AS
   (SELECT i.id AS issue_id,
           i.title AS issue_title,
           i.ghid AS issue_ghid,
+          issue_id_list.sprint_start_date,
           issue_id_list.sprint_end_date
    FROM gh_issue i
    INNER JOIN issue_id_list ON issue_id_list.issue_id = i.id
@@ -34,6 +50,7 @@ issue_state AS
           concat('https://github.com/', i.issue_ghid) AS issue_url,
           h.status,
           h.points,
+          i.sprint_start_date,
           i.sprint_end_date,
           CASE
               WHEN h.points > 0 THEN '√'

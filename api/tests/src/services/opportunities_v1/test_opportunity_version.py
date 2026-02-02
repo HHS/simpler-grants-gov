@@ -41,7 +41,8 @@ def test_save_opportunity_version(db_session, enable_factory_create):
         "updated_at": opp.updated_at.isoformat(),
         "agency_code": opp.agency_code,
         "agency_name": agency.agency_name,
-        "opportunity_id": opp.opportunity_id,
+        "opportunity_id": str(opp.opportunity_id),
+        "legacy_opportunity_id": opp.legacy_opportunity_id,
         "opportunity_title": opp.opportunity_title,
         "opportunity_number": opp.opportunity_number,
         "opportunity_status": None,
@@ -54,6 +55,7 @@ def test_save_opportunity_version(db_session, enable_factory_create):
             }
         ],
         "opportunity_attachments": [],
+        "top_level_agency_code": agency_top.agency_code,
     }
 
     # Save opportunity into opportunity_version table
@@ -74,8 +76,8 @@ def test_save_opportunity_version_with_attachments(db_session, enable_factory_cr
     attachment_2 = OpportunityAttachmentFactory.create(opportunity=opp)
 
     expected = [
-        {"attachment_id": attachment_1.attachment_id},
-        {"attachment_id": attachment_2.attachment_id},
+        {"attachment_id": str(attachment_1.attachment_id)},
+        {"attachment_id": str(attachment_2.attachment_id)},
     ]
 
     # Save opportunity into opportunity_version table
@@ -96,3 +98,26 @@ def test_save_opportunity_version_draft(db_session, enable_factory_create):
     # Verify record is not created
     saved_opp_version = db_session.query(OpportunityVersion).all()
     assert len(saved_opp_version) == 0
+
+
+def test_save_opportunity_version_with_prior_versions(db_session, enable_factory_create):
+    opp = OpportunityFactory.create()
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 1
+
+    opp.opportunity_title = "A new opportunity title"
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 2
+
+    opp.opportunity_title = "Yet another title"
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 3
+
+    # Not changing anything won't add a new version
+    opp.opportunity_title = "Yet another title"
+    save_opportunity_version(db_session, opp)
+    db_session.refresh(opp)
+    assert len(opp.versions) == 3

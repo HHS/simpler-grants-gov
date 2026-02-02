@@ -8,7 +8,8 @@ const meta: Meta<typeof Item> = {
   args: {
     saved: true,
     opportunity: {
-      opportunity_id: 1,
+      opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
+      legacy_opportunity_id: 1,
       opportunity_title: "Opportunity Title",
       agency_code: "123",
       agency_name: "Agency Name",

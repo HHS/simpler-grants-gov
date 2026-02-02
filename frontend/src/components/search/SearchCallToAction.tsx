@@ -1,16 +1,23 @@
+import { environment } from "src/constants/environments";
+
 import { useTranslations } from "next-intl";
 import React from "react";
-import { GridContainer } from "@trussworks/react-uswds";
+import { Grid } from "@trussworks/react-uswds";
 
-const SearchCallToAction: React.FC = () => {
+import { ReturnToGrantsNotification } from "src/components/ReturnToGrantsNotification";
+
+const SearchCallToAction = () => {
   const t = useTranslations("Search");
 
   return (
-    <>
-      <GridContainer>
-        <h1>{t("callToAction.title")}</h1>
-      </GridContainer>
-    </>
+    <Grid row gap>
+      <Grid tabletLg={{ col: "auto" }} className="tablet-lg:order-2">
+        <ReturnToGrantsNotification legacyLink={environment.LEGACY_HOST} />
+      </Grid>
+      <Grid tabletLg={{ col: "fill" }}>
+        <h1 className="margin-top-0">{t("callToAction.title")}</h1>
+      </Grid>
+    </Grid>
   );
 };
 

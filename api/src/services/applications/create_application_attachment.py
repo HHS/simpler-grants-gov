@@ -8,8 +8,11 @@ import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import check_user_access
+from src.constants.lookup_constants import ApplicationAuditEvent, Privilege, SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.db.models.user_models import User
+from src.services.applications.application_audit import add_audit_event
 from src.services.applications.get_application import get_application
 
 logger = logging.getLogger(__name__)
@@ -21,7 +24,10 @@ def create_application_attachment(
     # Fetch the application - handles checking if application exists & user can access
     application = get_application(db_session, application_id, user)
 
-    return upsert_application_attachment(
+    # Check privileges
+    check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application)
+
+    application_attachment = upsert_application_attachment(
         db_session=db_session,
         application_id=application_id,
         user=user,
@@ -29,6 +35,15 @@ def create_application_attachment(
         application=application,
         application_attachment=None,
     )
+
+    add_audit_event(
+        db_session=db_session,
+        application=application,
+        user=user,
+        audit_event=ApplicationAuditEvent.ATTACHMENT_ADDED,
+        target_attachment=application_attachment,
+    )
+    return application_attachment
 
 
 def upsert_application_attachment(
@@ -48,6 +63,10 @@ def upsert_application_attachment(
     # This should only ever happen if someone had a filename that Werkzeug could
     # not parse or interpreted as a file stream.
     if file_attachment.filename is None:
+        logger.info(
+            "Invalid file name, cannot parse",
+            extra={"submission_issue": SubmissionIssue.INVALID_FILE_NAME},
+        )
         raise_flask_error(422, "Invalid file name, cannot parse")
 
     # secure_filename makes the file safe in path operations and removes non-ascii characters

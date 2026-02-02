@@ -6,7 +6,7 @@ WITH data_availability AS {{#160-DATA-availability-newest}}, -- get project_id
  sprint_data AS
   (SELECT gh_sprint.id AS sprint_id,
           gh_sprint.start_date,
-          gh_sprint.end_date
+          gh_sprint.end_date-1 AS end_date
    FROM project_data,
         gh_sprint
    WHERE gh_sprint.project_id = project_data.project_id

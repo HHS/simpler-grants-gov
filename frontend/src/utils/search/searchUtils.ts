@@ -1,7 +1,9 @@
+import { uniq } from "lodash";
 import {
-  SEARCH_DEFAULT_VALUES,
   SEARCH_NO_STATUS_VALUE,
+  STATUS_FILTER_DEFAULT_VALUES,
 } from "src/constants/search";
+import { statusOptions } from "src/constants/searchFilterOptions";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { QuerySetParam } from "src/types/search/searchQueryTypes";
@@ -32,10 +34,14 @@ export function convertSearchParamsToProperTypes(
     agency: paramToSet(params.agency),
     category: paramToSet(params.category),
     closeDate: paramToDateRange(params.closeDate),
+    postedDate: paramToDateRange(params.postedDate),
     costSharing: paramToSet(params.costSharing),
     andOr: (params.andOr as QueryOperator) || "",
     topLevelAgency: paramToSet(params.topLevelAgency),
     sortby: (params.sortby as SortOptions) || null, // Convert empty string to null if needed
+    assistanceListingNumber: paramToSet(
+      params.assistanceListingNumber as QuerySetParam,
+    ),
 
     // Ensure page is at least 1 or default to 1 if undefined
     page: getSafePage(params.page),
@@ -47,7 +53,7 @@ export function convertSearchParamsToProperTypes(
 // and to reset that status params none if status=none is set
 function paramToSet(param: QuerySetParam, type?: string): Set<string> {
   if (!param && type === "status") {
-    return new Set(SEARCH_DEFAULT_VALUES);
+    return new Set(STATUS_FILTER_DEFAULT_VALUES);
   }
 
   if (!param || (type === "status" && param === SEARCH_NO_STATUS_VALUE)) {
@@ -107,4 +113,14 @@ export const getSiblingOptionValues = (
         return acc;
       }, [] as string[])
     : [];
+};
+
+// defaults will already have been applied upstream
+export const getStatusValueForAgencySearch = (statuses?: string[]) => {
+  // if empty - apply any / all
+  if (!statuses?.length) {
+    return statusOptions.map(({ value }) => value);
+  }
+  // always include posted and forecasted
+  return uniq(statuses.concat(STATUS_FILTER_DEFAULT_VALUES));
 };

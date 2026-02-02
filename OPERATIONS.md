@@ -4,7 +4,7 @@
 
 ### Deploying Every Service
 
-This series of commands will deploy non-prod every service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
+This series of commands will deploy every non-prod service for you. Run them from the top level directory (where this file is located). If you want to run them all quickly, then run each block of bash in a new terminal. If you want to be more careful, run them all one at a time, from top to bottom, inspecting the output on every step.
 
 ```bash
 terraform -chdir="infra/api/service" init -backend-config="dev.s3.tfbackend" -reconfigure
@@ -230,7 +230,11 @@ At this point the new certificate should start being served... after 5 ~ 10 minu
 
 ### Login.gov Certificates
 
-*These certificates were last updated in December 2024*
+Certificates were last rotated:
+* Dev - December 2025
+* Staging - December 2025
+* Training - August 2025
+* Prod - March 2025
 
 We need to manage a public certificate with login.gov for [private_jwt_auth](https://developers.login.gov/oidc/token/#client_assertion) in each of our environments.
 
@@ -248,11 +252,26 @@ for the given environment to be the value from the `private.pem` key you generat
 
 After the next deployment in an environment, we should be using the new keys, and can cleanup the old certificate.
 
+Remember to update these docs to mention when the certificates were last rotated
+and update the keys in our 1password vault. The vault should have an item for each
+environment named something like `Login.gov Certificates - {environment}`.
+
 #### Prod Login.gov
 
 Prod login.gov does not update immediately, and you must [request a deployment](https://developers.login.gov/production/#changes-to-production-applications) to get a certificate rotated.
 
 For Prod, assume it will take at least two weeks from creating the certificate, before it is available for the API, and until it is, do not change the API's configured key.
+
+Additionally, we don't currently own the account that the prod login.gov is configured in,
+and we need to ask MicroHealth to make the updates. Plan to rotate certificates at least
+a month in advance to be safe.
+
+## JWT Signing Certificate
+
+To sign the JWTs the API uses to track authentication with requests from the FE we need a public/private key. You can see the steps run via the Makefile for the [setup-env-overide-file.sh](https://github.com/HHS/simpler-grants-gov/blob/4c7364f051a4656a7bf2ffcfb0c8933b74b250e7/api/bin/setup-env-override-file.sh#L1) that does this locally.
+1. Generate a new public/private key pair
+2. Set them in the /api/<env>/api-jwt-private-key and /api/<env>/api-jwt-public-key parameters in the Parameter Store.
+3. Force redeploy the API Service to pick up the new values.
 
 ## New Relic
 

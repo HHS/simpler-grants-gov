@@ -17,15 +17,91 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
-TABLES_TO_EXTRACT = [
-    "opportunity",
-    "opportunity_summary",
-    "current_opportunity_summary",
-    "lk_opportunity_category",
-    "lk_opportunity_status",
-    "user_saved_search",
-    "user_saved_opportunity",
-]
+TABLES_TO_EXTRACT = {
+    "opportunity": [
+        "opportunity_id",
+        "legacy_opportunity_id",
+        "opportunity_number",
+        "opportunity_title",
+        "agency_code",
+        "opportunity_category_id",
+        "category_explanation",
+        "is_draft",
+        "revision_number",
+        "modified_comments",
+        "created_at",
+        "updated_at",
+    ],
+    "opportunity_summary": [
+        "opportunity_summary_id",
+        "opportunity_id",
+        "legacy_opportunity_id",
+        "summary_description",
+        "is_cost_sharing",
+        "is_forecast",
+        "post_date",
+        "close_date",
+        "close_date_description",
+        "archive_date",
+        "unarchive_date",
+        "expected_number_of_awards",
+        "estimated_total_program_funding",
+        "award_floor",
+        "award_ceiling",
+        "additional_info_url",
+        "additional_info_url_description",
+        "forecasted_post_date",
+        "forecasted_close_date",
+        "forecasted_close_date_description",
+        "forecasted_award_date",
+        "forecasted_project_start_date",
+        "fiscal_year",
+        "modification_comments",
+        "funding_category_description",
+        "applicant_eligibility_description",
+        "agency_contact_description",
+        "agency_email_address",
+        "agency_email_address_description",
+        "version_number",
+        "can_send_mail",
+        "created_at",
+        "updated_at",
+    ],
+    "current_opportunity_summary": [
+        "opportunity_id",
+        "opportunity_summary_id",
+        "opportunity_status_id",
+        "created_at",
+        "updated_at",
+    ],
+    "lk_opportunity_category": [
+        "opportunity_category_id",
+        "description",
+        "created_at",
+        "updated_at",
+    ],
+    "lk_opportunity_status": ["opportunity_status_id", "description", "created_at", "updated_at"],
+    "user_saved_search": [
+        "saved_search_id",
+        "user_id",
+        "search_query",
+        "name",
+        "last_notified_at",
+        "searched_opportunity_ids",
+        "is_deleted",
+        "created_at",
+        "updated_at",
+    ],
+    "user_saved_opportunity": [
+        "user_id",
+        "opportunity_id",
+        "last_notified_at",
+        "is_deleted",
+        "created_at",
+        "updated_at",
+    ],
+    "user": ["user_id", "created_at", "updated_at"],
+}
 
 
 @task_blueprint.cli.command(
@@ -67,7 +143,7 @@ class CreateAnalyticsDbCsvsTask(Task):
         super().__init__(db_session)
 
         if tables_to_extract is None or len(tables_to_extract) == 0:
-            tables_to_extract = TABLES_TO_EXTRACT
+            tables_to_extract = list(TABLES_TO_EXTRACT.keys())
 
         # We only want to process tables that were configured
         self.tables: list[sqlalchemy.Table] = [
@@ -96,9 +172,14 @@ class CreateAnalyticsDbCsvsTask(Task):
         cursor = self.db_session.connection().connection.cursor()
         schema = table.schema if self.config.db_schema is None else self.config.db_schema
 
-        with cursor.copy(
-            f"COPY {schema}.{table.name} TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"
-        ) as cursor_copy:
+        # Get column configuration for this table
+        columns = TABLES_TO_EXTRACT.get(table.name, ["*"])
+        columns_str = ", ".join(columns)
+
+        # Build the appropriate COPY query based on column configuration
+        copy_query = f"COPY (SELECT {columns_str} FROM {schema}.{table.name}) TO STDOUT with (DELIMITER ',', FORMAT CSV, HEADER TRUE, FORCE_QUOTE *, encoding 'utf-8')"  # nosec B608
+
+        with cursor.copy(copy_query) as cursor_copy:
             with file_util.open_stream(output_path, "wb") as outfile:
                 for data in cursor_copy:
                     outfile.write(data)

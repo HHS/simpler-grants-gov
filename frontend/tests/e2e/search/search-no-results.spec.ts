@@ -13,7 +13,7 @@ interface PageProps {
   contextOptions?: BrowserContextOptions;
 }
 
-test.describe("Search page tests", () => {
+test.describe("Search page no results tests", () => {
   test("should return 0 results when searching for obscure term", async ({
     page,
   }: PageProps) => {
@@ -39,8 +39,8 @@ test.describe("Search page tests", () => {
     });
     await expect(resultsHeading).toBeVisible();
 
-    await expect(page.locator("div.search-results-content h2")).toHaveText(
-      "Your search did not return any results.",
-    );
+    await expect(
+      page.locator("div[data-testid='no-search-results'] h2"),
+    ).toHaveText("Your search didn't return any results.");
   });
 });

@@ -101,7 +101,7 @@ in the form $setting: value,
   $theme-text-measure-narrow: 4,
   $theme-text-measure: 6,
   $theme-text-measure-wide: none,
-
+  $text-align-settings: (responsive: "true"),
   // Breadcrumbs
   $theme-breadcrumb-font-size: 3xs,
   $theme-breadcrumb-padding-bottom: 3,
@@ -212,10 +212,10 @@ in the form $setting: value,
   // $theme-text-color: "ink" !default;
   // $theme-text-reverse-color: "white" !default;
   // Links
-  $theme-link-color: "mint-50",
+  $theme-link-color: "mint-60",
   $theme-link-visited-color: "violet-60",
-  $theme-link-hover-color: "mint-60",
-  $theme-link-active-color: "mint-70",
+  $theme-link-hover-color: "mint-70",
+  $theme-link-active-color: "mint-80",
   $theme-link-reverse-color: "mint-5",
   $theme-link-reverse-hover-color: "mint-10",
   $theme-link-reverse-active-color: "white",
@@ -239,5 +239,8 @@ in the form $setting: value,
 
   // Tooltip
   $theme-tooltip-background-color: "blue-cool-60v",
-  $theme-tooltip-font-color: "white"
+  $theme-tooltip-font-color: "white",
+
+  // Tables
+  $theme-table-border-color: "gray-warm-20"
 );

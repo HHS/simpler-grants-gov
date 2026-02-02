@@ -3,8 +3,10 @@ export const backendFilterNames = [
   "funding_instrument",
   "applicant_type",
   "agency",
+  "assistance_listing_number",
   "funding_category",
   "close_date",
+  "post_date",
   "is_cost_sharing",
 ] as const;
 
@@ -15,15 +17,17 @@ export const searchFilterNames = [
   "agency",
   "category",
   "closeDate",
+  "postedDate",
   "costSharing",
   "topLevelAgency",
+  "assistanceListingNumber",
 ] as const;
 
 export type FrontendFilterNames = (typeof searchFilterNames)[number];
 export type BackendFilterNames = (typeof backendFilterNames)[number];
 export type HardcodedFrontendFilterNames = Exclude<
   FrontendFilterNames,
-  "agency" | "topLevelAgency"
+  "agency" | "topLevelAgency" | "assistanceListingNumber"
 >;
 
 export interface FilterOption {

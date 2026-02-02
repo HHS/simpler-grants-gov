@@ -257,3 +257,12 @@ def test_convert_s3_to_cdn_url_invalid_path(s3_config):
         file_util.convert_public_s3_to_cdn_url(
             "http://not-s3/file.txt", "cdn.example.com", s3_config
         )
+
+
+def test_write_to_file(tmp_path):
+    contents = f.fake.sentence(25)
+    file_path = tmp_path / "my_file_to_write.txt"
+    assert file_util.file_exists(file_path) is False
+    file_util.write_to_file(file_path, contents)
+    assert file_util.file_exists(file_path) is True
+    assert file_util.read_file(file_path) == contents

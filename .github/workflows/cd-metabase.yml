@@ -12,6 +12,7 @@ on:
         options:
           - dev
           - staging
+          - training
           - prod
       image-tag:
         description: "Metabase enterprise image tag to deploy"
@@ -33,7 +34,7 @@ jobs:
       environment: ${{ matrix.envs }}
 
   send-slack-notification:
-    if: failure()
+    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'release')
     needs: [deploy]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

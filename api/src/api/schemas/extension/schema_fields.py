@@ -5,6 +5,7 @@ import typing
 from apiflask import fields as original_fields
 from marshmallow import ValidationError
 
+from src.api.schemas.extension.field_validators import URL as CustomURL
 from src.api.schemas.extension.field_validators import Range
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType
@@ -62,9 +63,9 @@ class MixinField(original_fields.Field):
         except KeyError as error:
             class_name = self.__class__.__name__
             message = (
-                "ValidationError raised by `{class_name}`, but error key `{key}` does "
+                f"ValidationError raised by `{class_name}`, but error key `{key}` does "
                 "not exist in the `error_mapping` dictionary."
-            ).format(class_name=class_name, key=key)
+            )
             raise AssertionError(message) from error
 
         if kwargs:
@@ -209,7 +210,7 @@ class Enum(MixinField):
         ),
     }
 
-    def __init__(self, *enums: typing.Type[enum.Enum], **kwargs: typing.Any) -> None:
+    def __init__(self, *enums: type[enum.Enum], **kwargs: typing.Any) -> None:
         super().__init__(**kwargs)
 
         self.enums = enums
@@ -276,4 +277,38 @@ class File(original_fields.File, MixinField):
 
     error_mapping: dict[str, MarshmallowErrorContainer] = {
         "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid file."),
+    }
+
+
+class Time(MixinField, original_fields.Time):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid time."),
+        "invalid_awareness": MarshmallowErrorContainer(
+            ValidationErrorType.INVALID, "Not a valid time."
+        ),
+        "format": MarshmallowErrorContainer(
+            ValidationErrorType.FORMAT, "'{input}' cannot be formatted as a time."
+        ),
+    }
+
+
+class URL(MixinField, original_fields.URL):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid URL."),
+    }
+
+    def __init__(self, **kwargs: typing.Any):
+        super().__init__(**kwargs)
+        for i, validator in enumerate(self.validators):
+            if hasattr(validator, "error") and validator.error == "Not a valid URL.":
+                self.validators[i] = CustomURL()
+
+
+class Float(MixinField, original_fields.Float):
+    error_mapping: dict[str, MarshmallowErrorContainer] = {
+        "invalid": MarshmallowErrorContainer(ValidationErrorType.INVALID, "Not a valid number."),
+        "special": MarshmallowErrorContainer(
+            ValidationErrorType.SPECIAL_NUMERIC,
+            "Special numeric values (nan or infinity) are not permitted.",
+        ),
     }

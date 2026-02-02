@@ -109,7 +109,17 @@ const headers = [
   },
   // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved:path*",
+    source: "/saved/:path*",
+    headers: [
+      {
+        key: "Cache-Control",
+        value: "no-store, must-revalidate",
+      },
+    ],
+  },
+  // don't cache the user specific page for applications
+  {
+    source: "/applications",
     headers: [
       {
         key: "Cache-Control",
@@ -143,6 +153,13 @@ const nextConfig = {
   async headers() {
     return headers;
   },
+  // see https://nextjs.org/docs/messages/api-routes-response-size-limit
+  // warning about unrecognized key can be ignored
+  api: {
+    bodyParser: {
+      sizeLimit: "2000mb",
+    },
+  },
   basePath,
   reactStrictMode: true,
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
@@ -168,12 +185,41 @@ const nextConfig = {
   },
   experimental: {
     testProxy: true,
+    middlewareClientMaxBodySize: "2000mb",
+    serverActions: {
+      bodySizeLimit: "2000mb",
+    },
   },
   async redirects() {
     return [
       {
         source: "/process",
         destination: "/roadmap",
+        permanent: false,
+      },
+      {
+        source: "/subscribe",
+        destination: "/newsletter",
+        permanent: false,
+      },
+      {
+        source: "/subscribe/confirmation",
+        destination: "/newsletter/confirmation",
+        permanent: false,
+      },
+      {
+        source: "/subscribe/unsubscribe",
+        destination: "/newsletter/unsubscribe",
+        permanent: false,
+      },
+      {
+        source: "/organization/:segments*",
+        destination: "/organizations/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/workspace/applications/application/:segments*",
+        destination: "/applications/:segments*",
         permanent: false,
       },
     ];

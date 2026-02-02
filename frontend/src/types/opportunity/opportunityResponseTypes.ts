@@ -53,7 +53,8 @@ export interface Summary extends MinimalSummary {
 }
 
 export type MinimalOpportunity = {
-  opportunity_id: number;
+  opportunity_id: string;
+  legacy_opportunity_id: number;
   opportunity_status: OpportunityStatus;
   opportunity_title: string | null;
   summary: MinimalSummary;
@@ -81,10 +82,15 @@ export interface OpportunityApiResponse extends APIResponse {
   data: OpportunityDetail;
 }
 
+export interface PossiblySavedBaseOpportunity extends BaseOpportunity {
+  opportunitySaved?: boolean;
+}
+
 export type OpportunityOverview = Pick<
   BaseOpportunity,
   | "opportunity_title"
   | "opportunity_id"
+  | "legacy_opportunity_id"
   | "opportunity_number"
   | "agency_name"
   | "agency_code"

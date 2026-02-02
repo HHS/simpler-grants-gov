@@ -3,13 +3,14 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
-  fetchAgenciesEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
   userRefreshEndpoint,
@@ -39,12 +40,21 @@ export function requesterForEndpoint({
   return async function (
     options: {
       subPath?: string;
-      body?: JSONRequestBody;
+      body?: JSONRequestBody | FormData;
       additionalHeaders?: HeadersDict;
       nextOptions?: NextFetchRequestConfig;
+      allowedErrorStatuses?: number[];
+      addContentType?: boolean;
     } = {},
   ): Promise<Response> {
-    const { additionalHeaders = {}, body, subPath, nextOptions } = options;
+    const {
+      additionalHeaders = {},
+      body,
+      subPath,
+      nextOptions,
+      allowedErrorStatuses = [],
+      addContentType = true,
+    } = options;
     const url = createRequestUrl(
       method,
       basePath,
@@ -54,7 +64,7 @@ export function requesterForEndpoint({
       body,
     );
     const headers: HeadersDict = {
-      ...getDefaultHeaders(),
+      ...getDefaultHeaders(addContentType),
       ...additionalHeaders,
     };
 
@@ -74,7 +84,8 @@ export function requesterForEndpoint({
 
     if (
       !response.ok &&
-      response.headers.get("Content-Type") === "application/json"
+      response.headers.get("Content-Type") === "application/json" &&
+      !allowedErrorStatuses.includes(response.status)
     ) {
       // we can assume this is serializable json based on the response header, but we'll catch anyway
       let jsonBody;
@@ -86,7 +97,10 @@ export function requesterForEndpoint({
         );
       }
       return throwError(jsonBody, url);
-    } else if (!response.ok) {
+    } else if (
+      !response.ok &&
+      !allowedErrorStatuses.includes(response.status)
+    ) {
       throw new ApiRequestError(
         `unable to fetch ${url}`,
         "APIRequestError",
@@ -97,7 +111,6 @@ export function requesterForEndpoint({
     return response;
   };
 }
-
 export const fetchOpportunity = cache(
   requesterForEndpoint(fetchOpportunityEndpoint),
 );
@@ -108,8 +121,9 @@ export const fetchCompetition = cache(
   requesterForEndpoint(fetchCompetitionEndpoint),
 );
 
-export const fetchApplicationWithMethod = (type: "POST" | "GET" | "PUT") =>
-  requesterForEndpoint(toDynamicApplicationsEndpoint(type));
+export const fetchApplicationWithMethod = (
+  type: "POST" | "GET" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicApplicationsEndpoint(type));
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
@@ -117,11 +131,15 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
-export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT") =>
+export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
   requesterForEndpoint(toDynamicUsersEndpoint(type));
-
-export const fetchAgencies = requesterForEndpoint(fetchAgenciesEndpoint);
 
 export const postTokenRefresh = requesterForEndpoint(userRefreshEndpoint);
 
 export const searchAgencies = requesterForEndpoint(searchAgenciesEndpoint);
+
+export const fetchOrganizationWithMethod = (
+  type: "POST" | "DELETE" | "PUT" | "GET",
+) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
+
+export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);

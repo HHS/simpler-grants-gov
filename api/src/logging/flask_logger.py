@@ -24,7 +24,6 @@ import time
 import uuid
 
 import flask
-import newrelic.agent
 import newrelic.api.time_trace
 
 from src.util.deploy_metadata import get_deploy_metadata_config
@@ -33,6 +32,42 @@ logger = logging.getLogger(__name__)
 EXTRA_LOG_DATA_ATTR = "extra_log_data"
 
 _GLOBAL_LOG_CONTEXT: dict = {}
+
+
+def init_general_logging(app_logger: logging.Logger, app_name: str) -> None:
+    """Initialize logging that doesn't depend on a Flask app
+
+    If possible, use init_app instead which is called when we
+    create a flask app, this is only necessary for scripts that
+    aren't possible to run via Flask like our Alembic migrations
+    """
+
+    # Need to add filters to each of the handlers rather than to the logger itself, since
+    # messages are passed directly to the ancestor loggers’ handlers bypassing any filters
+    # set on the ancestors.
+    # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
+    for handler in app_logger.handlers:
+        handler.addFilter(_add_global_context_info_to_log_record)
+        handler.addFilter(_add_request_context_info_to_log_record)
+        handler.addFilter(_add_new_relic_context_to_log_record)
+        handler.addFilter(_add_error_info_to_log_record)
+
+    deploy_metadata = get_deploy_metadata_config()
+
+    # Add some metadata to all log messages globally
+    add_extra_data_to_global_logs(
+        {
+            "app.name": app_name,
+            "app_name": "api",
+            "run_mode": get_run_mode(),
+            "environment": os.environ.get("ENVIRONMENT"),
+            "deploy_github_ref": deploy_metadata.deploy_github_ref,
+            "deploy_github_sha": deploy_metadata.deploy_github_sha,
+            "deploy_whoami": deploy_metadata.deploy_whoami,
+        }
+    )
+
+    app_logger.info("initialized flask logger")
 
 
 def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
@@ -53,16 +88,6 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
         flask_logger.init_app(logger, app)
     """
 
-    # Need to add filters to each of the handlers rather than to the logger itself, since
-    # messages are passed directly to the ancestor loggers’ handlers bypassing any filters
-    # set on the ancestors.
-    # See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
-    for handler in app_logger.handlers:
-        handler.addFilter(_add_global_context_info_to_log_record)
-        handler.addFilter(_add_request_context_info_to_log_record)
-        handler.addFilter(_add_new_relic_context_to_log_record)
-        handler.addFilter(_add_error_info_to_log_record)
-
     # Add request context data to every log record for the current request
     # such as request id, request method, request path, and the matching Flask request url rule
     app.before_request(
@@ -73,29 +98,15 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     app.before_request(_log_start_request)
     app.after_request(_log_end_request)
 
-    deploy_metadata = get_deploy_metadata_config()
-
-    # Add some metadata to all log messages globally
-    add_extra_data_to_global_logs(
-        {
-            "app.name": app.name,
-            "app_name": "api",
-            "run_mode": get_run_mode(),
-            "environment": os.environ.get("ENVIRONMENT"),
-            "deploy_github_ref": deploy_metadata.deploy_github_ref,
-            "deploy_github_sha": deploy_metadata.deploy_github_sha,
-            "deploy_whoami": deploy_metadata.deploy_whoami,
-        }
-    )
-
-    app_logger.info("initialized flask logger")
+    init_general_logging(app_logger, app.name)
 
 
 def add_extra_data_to_current_request_logs(
     data: dict[str, str | int | float | bool | uuid.UUID | None]
 ) -> None:
     """Add data to every log record for the current request."""
-    assert flask.has_request_context(), "Must be in a request context"
+    if not flask.has_request_context():
+        return
 
     extra_log_data = getattr(flask.g, EXTRA_LOG_DATA_ATTR, {})
     extra_log_data.update(data)
@@ -223,6 +234,10 @@ def _add_error_info_to_log_record(record: logging.LogRecord) -> bool:
     exc_info = getattr(record, "exc_info", None)
     # exc_info is a 3-part tuple with the class, error obj, and traceback
     if exc_info and len(exc_info) == 3:
+        # Add the exception class name to the logs, check that it
+        # is a class just in case there is some code path that sets this different.
+        if isinstance(exc_info[0], type):
+            record.__dict__["exc_info_cls"] = exc_info[0].__name__
         # If the error were `raise ValueError("example")`, the
         # value of this would be "ValueError('example')"
         record.__dict__["exc_info_short"] = repr(exc_info[1])

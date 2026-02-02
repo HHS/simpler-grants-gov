@@ -400,6 +400,9 @@ def _create_opportunity_table(conn: EtlDb.connection, schema: str) -> None:
         sql_files = [
             "0007_add_opportunity_tables.sql",
             "0010_add_user_saved_opportunity_and_search_tables.sql",
+            "0011_update_to_uuid_primary_keys.sql",
+            "0012_add_user_tables.sql",
+            "0013_rename_user_table.sql",
         ]
 
         for filename in sql_files:

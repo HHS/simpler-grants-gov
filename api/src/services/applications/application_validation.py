@@ -3,11 +3,18 @@ from enum import StrEnum
 
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import ApplicationFormStatus, ApplicationStatus
+from src.constants.lookup_constants import (
+    ApplicationFormStatus,
+    ApplicationStatus,
+    CompetitionOpenToApplicant,
+    SubmissionIssue,
+)
 from src.db.models.competition_models import Application, ApplicationForm, Competition
+from src.db.models.entity_models import Organization
 from src.form_schema.jsonschema_validator import validate_json_schema_for_form
 from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
+from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -22,7 +29,7 @@ class ApplicationAction(StrEnum):
 
 START_JSON_RULE_CONFIG = JsonRuleConfig(
     # When starting an application, we only do pre-population
-    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,
     do_post_population=False,
     do_field_validation=False,
 )
@@ -39,7 +46,7 @@ UPDATE_JSON_RULE_CONFIG = JsonRuleConfig(
     # When updating, we do pre-population + validate. If a user
     # changed any values, we want to make sure any pre-populated fields
     # stay as the automatically generated ones.
-    do_pre_population=False,  # TODO - when we enable pre-population, flip this to True
+    do_pre_population=True,
     do_post_population=False,
     do_field_validation=True,
 )
@@ -48,7 +55,7 @@ SUBMISSION_JSON_RULE_CONFIG = JsonRuleConfig(
     # During submission, we do post-population (the only place we ever do)
     # and field validation
     do_pre_population=False,
-    do_post_population=False,  # TODO - when we enable post-population, flip this to True
+    do_post_population=True,  # Post-population enabled for submit flow
     do_field_validation=True,
 )
 
@@ -88,6 +95,89 @@ def get_missing_app_form_errors(application: Application) -> list[ValidationErro
     return missing_form_errors
 
 
+def get_organization_required_errors(application: Application) -> list[ValidationErrorDetail]:
+    """Check if application requires an organization but doesn't have one"""
+    organization_errors: list[ValidationErrorDetail] = []
+
+    # Check if competition only allows organization applications (not individual)
+    allowed_applicant_types = application.competition.open_to_applicants
+    requires_organization = (
+        CompetitionOpenToApplicant.ORGANIZATION in allowed_applicant_types
+        and CompetitionOpenToApplicant.INDIVIDUAL not in allowed_applicant_types
+    )
+
+    # If organization is required but application doesn't have one, add error
+    if requires_organization and application.organization_id is None:
+        organization_errors.append(
+            ValidationErrorDetail(
+                message="Application requires organization in order to submit",
+                type=ValidationErrorType.ORGANIZATION_REQUIRED,
+                value=None,
+            )
+        )
+
+    return organization_errors
+
+
+def get_organization_expiration_errors(
+    organization: Organization | None,
+) -> list[ValidationErrorDetail]:
+    """Check if the organization's SAM.gov entity record is expired or invalid."""
+    validation_errors: list[ValidationErrorDetail] = []
+
+    # If no organization is provided, no validation errors
+    if organization is None:
+        return validation_errors
+
+    # Check if organization has no sam.gov entity record
+    if not organization.sam_gov_entity:
+        logger.info(
+            "Organization has no SAM.gov entity record",
+            extra={"submission_issue": SubmissionIssue.ORG_NO_SAM_GOV_ENTITY},
+        )
+        validation_errors.append(
+            ValidationErrorDetail(
+                message="This organization has no SAM.gov entity record and cannot be used for applications",
+                type=ValidationErrorType.ORGANIZATION_NO_SAM_GOV_ENTITY,
+                value=None,
+            )
+        )
+        return validation_errors
+
+    sam_gov_entity = organization.sam_gov_entity
+    current_date = get_now_us_eastern_date()
+
+    # Check if organization is marked as inactive
+    if sam_gov_entity.is_inactive is True:
+        logger.info(
+            "Organization is inactive in SAM.gov",
+            extra={"submission_issue": SubmissionIssue.ORG_INACTIVE_IN_SAM_GOV},
+        )
+        validation_errors.append(
+            ValidationErrorDetail(
+                message="This organization is inactive in SAM.gov and cannot be used for applications",
+                type=ValidationErrorType.ORGANIZATION_INACTIVE_IN_SAM_GOV,
+                value=None,
+            )
+        )
+
+    # Check if organization's registration has expired
+    if sam_gov_entity.expiration_date < current_date:
+        logger.info(
+            "Organization SAM.gov registration has expired",
+            extra={"submission_issue": SubmissionIssue.ORG_SAM_GOV_EXPIRED},
+        )
+        validation_errors.append(
+            ValidationErrorDetail(
+                message=f"This organization's SAM.gov registration expired on {sam_gov_entity.expiration_date.strftime('%B %d, %Y')} and cannot be used for applications",
+                type=ValidationErrorType.ORGANIZATION_SAM_GOV_EXPIRED,
+                value=sam_gov_entity.expiration_date.isoformat(),
+            )
+        )
+
+    return validation_errors
+
+
 def is_form_required(application_form: ApplicationForm) -> bool:
     """Get whether a form is required"""
     # This is very simple at the moment, but in the future this might
@@ -112,33 +202,34 @@ def get_application_form_errors(
     # just iterating over the application forms below
     form_errors.extend(get_missing_app_form_errors(application))
 
+    # Check if application requires an organization but doesn't have one
+    form_errors.extend(get_organization_required_errors(application))
+
+    # Check if organization has expired SAM.gov registration or other issues
+    form_errors.extend(get_organization_expiration_errors(application.organization))
+
     # For each application form, verify it passes all validation rules
     for application_form in application.application_forms:
-        form_validation_errors: list[ValidationErrorDetail] = validate_application_form(
-            application_form, action
-        )
+        validation_errors = validate_application_form(application_form, action)
 
-        is_app_form_required = is_form_required(application_form)
+        # Separate inclusion errors from other validation errors
+        inclusion_errors = [
+            e
+            for e in validation_errors
+            if e.type == ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+        ]
+        other_validation_errors = [
+            e
+            for e in validation_errors
+            if e.type != ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION
+        ]
 
-        # If the user has not yet started, we don't want to put
-        # every error message and instead just want a "form is required error"
-        # If the form is not required, then if they haven't started it
-        # we effectively just want to ignore it.
-        if len(application_form.application_response) == 0:
-            if is_app_form_required:
-                form_errors.append(
-                    ValidationErrorDetail(
-                        message=f"Form {application_form.form.form_name} is required",
-                        type=ValidationErrorType.MISSING_REQUIRED_FORM,
-                        field="form_id",
-                        value=application_form.form_id,
-                    )
-                )
-            # Don't add the form validation errors below if they haven't started yet
-            continue
+        # Add inclusion errors directly to the main form_errors list
+        form_errors.extend(inclusion_errors)
 
-        if form_validation_errors:
-            form_error_map[str(application_form.application_form_id)] = form_validation_errors
+        # Handle other validation errors by wrapping them in APPLICATION_FORM_VALIDATION
+        if other_validation_errors:
+            form_error_map[str(application_form.application_form_id)] = other_validation_errors
 
             form_errors.append(
                 ValidationErrorDetail(
@@ -165,27 +256,62 @@ def _get_json_rule_config_for_action(action: ApplicationAction) -> JsonRuleConfi
 def validate_application_form(
     application_form: ApplicationForm, action: ApplicationAction
 ) -> list[ValidationErrorDetail]:
-    """Validate an application form, and set the current application form status"""
+    """Validate an application form, and set the current application form status
+
+    Returns:
+        list: All validation errors for this form
+    """
     form_validation_errors: list[ValidationErrorDetail] = []
 
     context = JsonRuleContext(application_form, config=_get_json_rule_config_for_action(action))
     process_rule_schema_for_context(context)
     form_validation_errors.extend(context.validation_issues)
 
-    # TODO pre/post-populate should update the value here
+    # Apply pre/post-populated changes back to the application form
+    application_form.application_response = context.json_data
 
-    form_validation_errors.extend(
-        validate_json_schema_for_form(application_form.application_response, application_form.form)
-    )
+    # Check if the form is required
+    is_required = is_form_required(application_form)
 
-    # If there are no issues, we consider the form complete
+    # Handle validation based on form requirement and is_included_in_submission flag
+    should_run_json_schema_validation = True
+
+    # If the form isn't required and we're in the submit endpoint we do two checks:
+    # 1. If the form doesn't have is_included_in_submission set, add an error, skip validation
+    # 2. If the form has is_included_in_submission=True, skip validation
+    #
+    # If this is not the submit endpoint, we'll always do validation for the form, although
+    # it won't block whatever operation is occurring.
+    if not is_required and action == ApplicationAction.SUBMIT:
+        # For non-required forms, is_included_in_submission must be set
+        if application_form.is_included_in_submission is None:
+            # If form hasn't set is_included_in_submission, it's always an error regardless of content
+            form_validation_errors.append(
+                ValidationErrorDetail(
+                    message="is_included_in_submission must be set on all non-required forms",
+                    type=ValidationErrorType.MISSING_INCLUDED_IN_SUBMISSION,
+                    field="is_included_in_submission",
+                    value=application_form.application_form_id,
+                )
+            )
+
+            should_run_json_schema_validation = False
+        elif application_form.is_included_in_submission is False:
+            # Don't run JSON schema validation if form is not included in submission
+            should_run_json_schema_validation = False
+        # If form is_required or is_included_in_submission is True, run validation (default behavior)
+
+    # Run JSON schema validation only if required
+    if should_run_json_schema_validation:
+        json_validation_errors = validate_json_schema_for_form(
+            application_form.application_response, application_form.form
+        )
+        form_validation_errors.extend(json_validation_errors)
+
+    # If the form has no validation issues, we'll mark it as complete
     if len(form_validation_errors) == 0:
         application_form_status = ApplicationFormStatus.COMPLETE
-    # If the form has no answers, we assume it has not been started
-    elif len(application_form.application_response) == 0:
-        application_form_status = ApplicationFormStatus.NOT_STARTED
-    # If the form has been started, but has validation issues, assume it is in-progress
-    else:
+    else:  # Any validation issues we'll mark as in-progress
         application_form_status = ApplicationFormStatus.IN_PROGRESS
 
     application_form.application_form_status = application_form_status  # type: ignore[attr-defined]
@@ -199,6 +325,17 @@ def validate_forms(application: Application, action: ApplicationAction) -> None:
     form_errors, form_error_map = get_application_form_errors(application, action)
 
     if len(form_errors) > 0:
+        # Log the specific validation issues for metrics
+        error_types = [error.type for error in form_errors]
+        logger.info(
+            "Application has form validation issues preventing submission",
+            extra={
+                "submission_issue": SubmissionIssue.FORM_VALIDATION_ERRORS,
+                "error_types": error_types,
+                "error_count": len(form_errors),
+            },
+        )
+
         detail = {}
         if form_error_map:
             detail["form_validation_errors"] = form_error_map
@@ -225,6 +362,7 @@ def validate_application_in_progress(application: Application, action: Applicati
                 "action": action,
                 "application_status": application.application_status,
                 "application_action": action,
+                "submission_issue": SubmissionIssue.APPLICATION_NOT_IN_PROGRESS,
             },
         )
         raise_flask_error(
@@ -254,6 +392,7 @@ def validate_competition_open(competition: Competition, action: ApplicationActio
                 "closing_date": competition.closing_date,
                 "grace_period": competition.grace_period,
                 "application_action": action,
+                "submission_issue": SubmissionIssue.COMPETITION_NOT_OPEN,
             },
         )
         raise_flask_error(

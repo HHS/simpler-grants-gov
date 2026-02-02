@@ -2,13 +2,15 @@ import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
 
+import IconInfo from "src/components/homepage/IconInfoSection";
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 type RoadmapProcessSectionContentProps = {
   content: string;
   title: string;
   iconName: UswdsIconNames;
+  link?: string;
+  linkText?: string;
 };
 
 type RoadmapProcessGrid = RoadmapProcessSectionContentProps[][];
@@ -33,12 +35,21 @@ export default function RoadmapProcess() {
         title: t(`contentItems.${2}.title`),
         content: t(`contentItems.${2}.content`),
         iconName: "construction",
+        link: t(`contentItems.${2}.link`),
+        linkText: t(`contentItems.${2}.linkText`),
+      },
+      {
+        title: t(`contentItems.${3}.title`),
+        content: t(`contentItems.${3}.content`),
+        iconName: "star_half",
+        link: t(`contentItems.${3}.link`),
+        linkText: t(`contentItems.${3}.linkText`),
       },
     ],
   ];
 
   return (
-    <RoadmapPageSection className={"bg-white"} title={t("title")}>
+    <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
       <p>{t("sectionSummary")}</p>
       {roadmapProcesSectionGridRows.map((sectionRow, sectionRoadIdx) => (
         <div
@@ -63,14 +74,18 @@ const RoadmapProcessSectionContent = ({
   title,
   content,
   iconName,
+  link,
+  linkText,
 }: RoadmapProcessSectionContentProps) => {
   return (
     <div className="margin-top-4">
-      {iconName && (
-        <USWDSIcon className="usa-icon--size-4 text-middle" name={iconName} />
-      )}
-      <h3 className="margin-top-2">{title}</h3>
-      <p>{content}</p>
+      <IconInfo
+        title={title}
+        description={content}
+        iconName={iconName}
+        link={link}
+        linkText={linkText}
+      />
     </div>
   );
 };

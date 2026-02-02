@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import Tuple
 
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -24,6 +23,7 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.staging.attachment import TsynopsisAttachment
+from src.db.models.staging.instructions import Tinstructions
 from src.db.models.staging.opportunity import Topportunity, TopportunityCfda
 from src.db.models.staging.staging_base import StagingBase
 from src.util import datetime_util
@@ -85,6 +85,7 @@ FUNDING_CATEGORY_MAP = {
     "T": FundingCategory.TRANSPORTATION,
     "ACA": FundingCategory.AFFORDABLE_CARE_ACT,
     "O": FundingCategory.OTHER,
+    "EIC": FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS,
 }
 
 FUNDING_INSTRUMENT_MAP = {
@@ -104,14 +105,19 @@ def is_empty_str(value: str | None) -> bool:
 def transform_opportunity(
     source_opportunity: Topportunity, existing_opportunity: Opportunity | None
 ) -> Opportunity:
-    log_extra = {"opportunity_id": source_opportunity.opportunity_id}
+    log_extra = {
+        "legacy_opportunity_id": source_opportunity.opportunity_id,
+        "opportunity_id": existing_opportunity.opportunity_id if existing_opportunity else None,
+    }
 
     if existing_opportunity is None:
         logger.info("Creating new opportunity record", extra=log_extra)
 
     # We always create a new opportunity record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
-    target_opportunity = Opportunity(opportunity_id=source_opportunity.opportunity_id)
+    target_opportunity = Opportunity(legacy_opportunity_id=source_opportunity.opportunity_id)
+    if existing_opportunity:
+        target_opportunity.opportunity_id = existing_opportunity.opportunity_id
 
     target_opportunity.opportunity_number = source_opportunity.oppnumber
     target_opportunity.opportunity_title = source_opportunity.opptitle
@@ -120,8 +126,6 @@ def transform_opportunity(
     target_opportunity.category_explanation = source_opportunity.category_explanation
     target_opportunity.revision_number = source_opportunity.revision_number
     target_opportunity.modified_comments = source_opportunity.modified_comments
-    target_opportunity.publisher_user_id = source_opportunity.publisheruid
-    target_opportunity.publisher_profile_id = source_opportunity.publisher_profile_id
 
     # The legacy system doesn't actually have this value as a boolean. There are several
     # different letter codes. However, their API implementation also does this for their draft flag.
@@ -174,6 +178,7 @@ def transform_funding_instrument(value: str | None) -> FundingInstrument | None:
 def transform_assistance_listing(
     source_assistance_listing: TopportunityCfda,
     existing_assistance_listing: OpportunityAssistanceListing | None,
+    opportunity: Opportunity,
 ) -> OpportunityAssistanceListing:
     log_extra = {"opportunity_assistance_listing_id": source_assistance_listing.opp_cfda_id}
 
@@ -183,9 +188,14 @@ def transform_assistance_listing(
     # We always create a new assistance listing record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
     target_assistance_listing = OpportunityAssistanceListing(
-        opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
-        opportunity_id=source_assistance_listing.opportunity_id,
+        legacy_opportunity_assistance_listing_id=source_assistance_listing.opp_cfda_id,
+        opportunity_id=opportunity.opportunity_id,
     )
+
+    if existing_assistance_listing:
+        target_assistance_listing.opportunity_assistance_listing_id = (
+            existing_assistance_listing.opportunity_assistance_listing_id
+        )
 
     target_assistance_listing.assistance_listing_number = source_assistance_listing.cfdanumber
     target_assistance_listing.program_title = source_assistance_listing.programtitle
@@ -198,7 +208,9 @@ def transform_assistance_listing(
 
 
 def transform_opportunity_summary(
-    source_summary: SourceSummary, incoming_summary: OpportunitySummary | None
+    source_summary: SourceSummary,
+    incoming_summary: OpportunitySummary | None,
+    opportunity: Opportunity | None,
 ) -> OpportunitySummary:
     log_extra = get_log_extra_summary(source_summary)
 
@@ -207,15 +219,19 @@ def transform_opportunity_summary(
         # These values are a part of a unique key for identifying across tables, we don't
         # ever want to modify them once created
         target_summary = OpportunitySummary(
-            opportunity_id=source_summary.opportunity_id,
+            legacy_opportunity_id=source_summary.opportunity_id,
             is_forecast=source_summary.is_forecast,
         )
+        if opportunity:
+            target_summary.opportunity_id = opportunity.opportunity_id
     else:
         # We create a new summary object and merge it outside this function
         # that way if any modifications occur on the object and then it errors
         # they aren't actually applied
         target_summary = OpportunitySummary(
-            opportunity_summary_id=incoming_summary.opportunity_summary_id
+            opportunity_id=incoming_summary.opportunity_id,
+            opportunity_summary_id=incoming_summary.opportunity_summary_id,
+            legacy_opportunity_id=source_summary.opportunity_id,
         )
 
     # Fields in all 4 source tables
@@ -236,18 +252,11 @@ def transform_opportunity_summary(
     target_summary.modification_comments = source_summary.modification_comments
     target_summary.funding_category_description = source_summary.oth_cat_fa_desc
     target_summary.applicant_eligibility_description = source_summary.applicant_elig_desc
-    target_summary.agency_name = source_summary.ac_name
     target_summary.agency_email_address = source_summary.ac_email_addr
     target_summary.agency_email_address_description = source_summary.ac_email_desc
     target_summary.can_send_mail = convert_yn_bool(source_summary.sendmail)
-    target_summary.publisher_profile_id = source_summary.publisher_profile_id
-    target_summary.publisher_user_id = source_summary.publisheruid
-    target_summary.updated_by = source_summary.last_upd_id
-    target_summary.created_by = source_summary.creator_id
 
     target_summary.summary_description = source_summary.description
-    target_summary.agency_code = source_summary.agency_code
-    target_summary.agency_phone_number = source_summary.agency_phone_number
 
     # These fields are only on synopsis records, use getattr to avoid isinstance
     target_summary.agency_contact_description = getattr(source_summary, "agency_contact_desc", None)
@@ -292,8 +301,6 @@ def convert_opportunity_summary_applicant_type(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_applicant_type_id=source_applicant_type.legacy_applicant_type_id,
         applicant_type=applicant_type,
-        updated_by=source_applicant_type.last_upd_id,
-        created_by=source_applicant_type.creator_id,
     )
     transform_update_create_timestamp(
         source_applicant_type, target_applicant_type, log_extra=log_extra
@@ -322,8 +329,6 @@ def convert_opportunity_summary_funding_instrument(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_instrument_id=source_funding_instrument.legacy_funding_instrument_id,
         funding_instrument=funding_instrument,
-        updated_by=source_funding_instrument.last_upd_id,
-        created_by=source_funding_instrument.creator_id,
     )
 
     transform_update_create_timestamp(
@@ -353,8 +358,6 @@ def convert_opportunity_summary_funding_category(
         opportunity_summary_id=opportunity_summary.opportunity_summary_id,
         legacy_funding_category_id=source_funding_category.legacy_funding_category_id,
         funding_category=funding_category,
-        updated_by=source_funding_category.last_upd_id,
-        created_by=source_funding_category.creator_id,
     )
 
     transform_update_create_timestamp(
@@ -381,7 +384,7 @@ def get_create_update_timestamps(
     source_created_date: datetime | None,
     source_last_upd_date: datetime | None,
     log_extra: dict | None = None,
-) -> Tuple[datetime, datetime]:
+) -> tuple[datetime, datetime]:
     created_timestamp = convert_est_timestamp_to_utc(source_created_date)
     updated_timestamp = convert_est_timestamp_to_utc(source_last_upd_date)
 
@@ -511,4 +514,10 @@ def get_log_extra_opportunity_attachment(source_attachment: TsynopsisAttachment)
     return {
         "opportunity_id": source_attachment.opportunity_id,
         "syn_att_id": source_attachment.syn_att_id,
+    }
+
+
+def get_log_extra_competition_instruction(source_instruction: Tinstructions) -> dict:
+    return {
+        "competition_id": source_instruction.comp_id,
     }

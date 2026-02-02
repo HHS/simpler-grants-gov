@@ -30,7 +30,7 @@ test.describe("Search page results tests", () => {
   test("should return at least 1 result when searching with valid term", async ({
     page,
   }) => {
-    const resultsHeading = page.locator("h2", {
+    const resultsHeading = page.locator("h3", {
       hasText: /^[1-9]\d*\s+Opportunities$/i,
     });
     await expect(resultsHeading).toBeAttached();

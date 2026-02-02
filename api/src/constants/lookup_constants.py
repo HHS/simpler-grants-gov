@@ -95,6 +95,9 @@ class FundingCategory(StrEnum):
     TRANSPORTATION = "transportation"  # T
     AFFORDABLE_CARE_ACT = "affordable_care_act"  # ACA
     OTHER = "other"  # O
+    ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
+        "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
+    )
 
 
 class FundingInstrument(StrEnum):
@@ -141,9 +144,54 @@ class FormFamily(StrEnum):
     SF_424_SHORT_ORGANIZATION = "sf-424-short-organization"
 
 
+class FormType(StrEnum):
+    SF424 = "SF424"
+    SF424A = "SF424A"
+    SF424B = "SF424B"
+    SF424D = "SF424D"
+    SFLLL = "SFLLL"
+    PROJECT_NARRATIVE_ATTACHMENT = "ProjectNarrativeAttachment"
+    BUDGET_NARRATIVE_ATTACHMENT = "BudgetNarrativeAttachment"
+    OTHER_NARRATIVE_ATTACHMENT = "OtherNarrativeAttachment"
+    PROJECT_ABSTRACT_SUMMARY = "ProjectAbstractSummary"
+    PROJECT_ABSTRACT = "ProjectAbstract"
+    CD511 = "CD511"
+
+    SUPPLEMENTARY_NEH_COVER_SHEET = "SupplementaryNEHCoverSheet"
+
+    GG_LOBBYING_FORM = "GGLobbyingForm"
+
+    EPA_FORM_4700_4 = "EPAForm4700-4"
+    EPA_KEY_CONTACTS = "EPAKeyContacts"
+
+    ATTACHMENT_FORM = "AttachmentForm"
+
+
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
     ORGANIZATION = "organization"
+
+
+class SubmissionIssue(StrEnum):
+    """Submission issue types for metrics logging"""
+
+    NOT_A_MEMBER_OF_ORG = "not_a_member_of_org"
+    ORG_NO_SAM_GOV_ENTITY = "org_no_sam_gov_entity"
+    ORG_INACTIVE_IN_SAM_GOV = "org_inactive_in_sam_gov"
+    ORG_SAM_GOV_EXPIRED = "org_sam_gov_expired"
+    COMPETITION_NO_ORG_APPLICATIONS = "competition_no_org_applications"
+    COMPETITION_NO_INDIVIDUAL_APPLICATIONS = "competition_no_individual_applications"
+    COMPETITION_NOT_FOUND = "competition_not_found"
+    ORGANIZATION_NOT_FOUND = "organization_not_found"
+    APPLICATION_NOT_IN_PROGRESS = "application_not_in_progress"
+    COMPETITION_NOT_OPEN = "competition_not_open"
+    FORM_VALIDATION_ERRORS = "form_validation_errors"
+    UNAUTHORIZED_APPLICATION_ACCESS = "unauthorized_application_access"
+    NO_UPDATE_DATA_PROVIDED = "no_update_data_provided"
+    FORM_NOT_FOUND_OR_NOT_ATTACHED = "form_not_found_or_not_attached"
+    APPLICATION_FORM_NOT_FOUND_NO_RESPONSE = "application_form_not_found_no_response"
+    INVALID_FILE_NAME = "invalid_file_name"
+    ATTACHMENT_NOT_FOUND = "attachment_not_found"
 
 
 class SamGovExtractType(StrEnum):
@@ -155,6 +203,7 @@ class SamGovProcessingStatus(StrEnum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
+    DELETED = "deleted"
 
 
 class SamGovImportType(StrEnum):
@@ -170,6 +219,111 @@ class ApplicationStatus(StrEnum):
 
 
 class ApplicationFormStatus(StrEnum):
-    NOT_STARTED = "not_started"
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
+
+
+class Privilege(StrEnum):
+    MANAGE_ORG_MEMBERS = "manage_org_members"
+    MANAGE_ORG_ADMIN_MEMBERS = "manage_org_admin_members"
+    VIEW_ORG_MEMBERSHIP = "view_org_membership"
+    START_APPLICATION = "start_application"
+    LIST_APPLICATION = "list_application"
+    VIEW_APPLICATION = "view_application"
+    MODIFY_APPLICATION = "modify_application"
+    SUBMIT_APPLICATION = "submit_application"
+    UPDATE_FORM = "update_form"
+    MANAGE_AGENCY_MEMBERS = "manage_agency_members"
+    GET_SUBMITTED_APPLICATIONS = "get_submitted_applications"
+    LEGACY_AGENCY_VIEWER = "legacy_agency_viewer"
+    LEGACY_AGENCY_GRANT_RETRIEVER = "legacy_agency_grant_retriever"
+    LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
+    MANAGE_INTERNAL_ROLES = "manage_internal_roles"
+    MANAGE_COMPETITION = "manage_competition"
+    READ_TEST_USER_TOKEN = "read_test_user_token"
+
+
+class RoleType(StrEnum):
+    ORGANIZATION = "organization"
+    AGENCY = "agency"
+    INTERNAL = "internal"
+    APPLICATION = "application"
+
+
+class OrganizationInvitationStatus(StrEnum):
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+    PENDING = "pending"
+
+
+class LegacyUserStatus(StrEnum):
+    MEMBER = "member"
+    PENDING_INVITATION = "pending_invitation"
+    AVAILABLE = "available"
+
+
+class LegacyProfileType(StrEnum):
+    """Legacy Oracle profile types from tuser_profile table"""
+
+    ORGANIZATION_APPLICANT = "4"
+
+
+class ApplicationAuditEvent(StrEnum):
+    APPLICATION_CREATED = "application_created"
+    APPLICATION_NAME_CHANGED = "application_name_changed"
+    APPLICATION_SUBMITTED = "application_submitted"
+    APPLICATION_SUBMIT_REJECTED = "application_submit_rejected"
+    ATTACHMENT_ADDED = "attachment_added"
+    ATTACHMENT_DELETED = "attachment_deleted"
+    ATTACHMENT_UPDATED = "attachment_updated"
+    SUBMISSION_CREATED = "submission_created"
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
+    FORM_UPDATED = "form_updated"
+    ORGANIZATION_ADDED = "organization_added"
+
+
+class CommonGrantsEvent(StrEnum):
+
+    URL_VALIDATION_ERROR = "url_validation_error"
+    OPPORTUNITY_VALIDATION_ERROR = "opportunity_validation_error"
+
+
+class UserType(StrEnum):
+    STANDARD = "standard"
+    INTERNAL_FRONTEND = "internal_frontend"
+    LEGACY_CERTIFICATE = "legacy_certificate"
+
+
+class OrganizationAuditEvent(StrEnum):
+    USER_ADDED = "user_added"
+    USER_UPDATED = "user_updated"
+    USER_REMOVED = "user_removed"
+
+
+class WorkflowType(StrEnum):
+    OPPORTUNITY_PUBLISH = "opportunity_publish"
+    APPLICATION_SUBMISSION = "application_submission"
+    INITIAL_PROTOTYPE = "initial_prototype"
+
+
+class ApprovalType(StrEnum):
+    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+
+class ApprovalResponseType(StrEnum):
+    APPROVED = "approved"
+    DECLINED = "declined"
+    REQUIRES_MODIFICATION = "requires_modification"
+
+
+class WorkflowEntityType(StrEnum):
+    OPPORTUNITY = "opportunity"
+    APPLICATION = "application"
+
+
+class WorkflowEventType(StrEnum):
+    START_WORKFLOW = "start_workflow"
+    PROCESS_WORKFLOW = "process_workflow"

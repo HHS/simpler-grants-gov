@@ -6,8 +6,10 @@ module "prod_config" {
   environment                     = "prod"
   network_name                    = "prod"
   domain_name                     = "api.simpler.grants.gov"
+  secondary_domain_names          = ["alb.simpler.grants.gov"]
   enable_https                    = true
   s3_cdn_domain_name              = "files.simpler.grants.gov"
+  mtls_domain_name                = "soap.simpler.grants.gov"
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
   has_incident_management_service = local.has_incident_management_service
@@ -65,20 +67,30 @@ module "prod_config" {
     LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT     = 1
     LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
     LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
     LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
 
-    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS"
+
+    # CommonGrants Protocol
+
+    TEST_AGENCY_PREFIXES = "GDIT,IVV,IVPDF,0001,FGLT,NGMS,SECSCAN,TX,MN,MMC,WWC,SCRC,NRC,JL04022024,JUSFC,JMM,IAF,USIP,GCERC,ARPAH,ORD,DC,SCC800,BBG,ACR,ECP,MC,CCFF,CNCS,FMCS,SGG"
 
     # grants.gov services/applications URI.
-    GRANTS_GOV_URI  = "https://ws07.grants.gov:443"
-    ENABLE_SOAP_API = 1
+    GRANTS_GOV_URI  = "https://ws07.grants.gov"
+    GRANTS_GOV_PORT = 443
 
     # Sam.gov
     SAM_GOV_BASE_URL = "https://api.sam.gov"
+
+    # Email notification
+    RESET_EMAILS_WITHOUT_SENDING = "false"
+
+    # PDF Generation - Production overrides
+    FRONTEND_URL             = "https://simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
+    PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
   }
   instance_cpu    = 1024
   instance_memory = 4096

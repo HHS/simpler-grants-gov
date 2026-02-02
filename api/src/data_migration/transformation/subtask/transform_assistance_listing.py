@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -15,13 +14,13 @@ logger = logging.getLogger(__name__)
 class TransformAssistanceListing(AbstractTransformSubTask):
     def transform_records(self) -> None:
         assistance_listings: list[
-            Tuple[TopportunityCfda, OpportunityAssistanceListing | None, Opportunity | None]
+            tuple[TopportunityCfda, OpportunityAssistanceListing | None, Opportunity | None]
         ] = self.fetch_with_opportunity(
             TopportunityCfda,
             OpportunityAssistanceListing,
             [
                 TopportunityCfda.opp_cfda_id
-                == OpportunityAssistanceListing.opportunity_assistance_listing_id
+                == OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
             ],
         )
 
@@ -109,7 +108,7 @@ class TransformAssistanceListing(AbstractTransformSubTask):
 
             logger.info("Transforming and upserting assistance listing", extra=extra)
             transformed_assistance_listing = transform_util.transform_assistance_listing(
-                source_assistance_listing, target_assistance_listing
+                source_assistance_listing, target_assistance_listing, opportunity
             )
 
             if is_insert:

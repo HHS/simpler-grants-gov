@@ -1,6 +1,5 @@
 import zoneinfo
 from datetime import date, datetime, timezone
-from typing import Optional
 
 import pytz
 
@@ -55,7 +54,42 @@ def get_now_us_eastern_date() -> date:
     return get_now_us_eastern_datetime().date()
 
 
-def datetime_str_to_date(datetime_str: Optional[str]) -> Optional[date]:
+def datetime_str_to_date(datetime_str: str | None) -> date | None:
     if not datetime_str:
         return None
     return datetime.fromisoformat(datetime_str).date()
+
+
+def parse_grants_gov_date(date_str: str | None) -> date | None:
+    """
+    Parse a date string from grants.gov SOAP API response.
+
+    Grants.gov returns dates in formats like:
+    - "2025-09-16-04:00" (with timezone suffix)
+    - "2025-09-16" (standard ISO format)
+
+    This function strips any timezone suffix and returns a date object.
+
+    Args:
+        date_str: Date string from grants.gov API
+
+    Returns:
+        date object or None if date_str is None/empty
+
+    Raises:
+        ValueError: If date_str cannot be parsed as a valid date
+    """
+    if not date_str or not date_str.strip():
+        return None
+
+    # Strip timezone suffix if present (e.g., "-04:00" or "+05:00")
+    # The pattern matches a hyphen or plus sign followed by HH:MM at the end of string
+    import re
+
+    cleaned_date_str = re.sub(r"[+-]\d{2}:\d{2}$", "", date_str.strip())
+
+    try:
+        # Parse the cleaned date string
+        return datetime.fromisoformat(cleaned_date_str).date()
+    except ValueError as e:
+        raise ValueError(f"Could not parse date string '{date_str}': {e}") from e

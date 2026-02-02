@@ -58,11 +58,12 @@ locals {
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
 
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
+  network_config   = module.project_config.network_configs[local.environment_config.network_name]
+  healthcheck_path = "/api/health"
 }
 
 terraform {
-  required_version = "< 1.10"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -139,8 +140,8 @@ module "service" {
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
   hostname        = module.app_config.hostname
 
-  cpu                      = local.service_config.instance_cpu
-  memory                   = local.service_config.instance_memory
+  fargate_cpu              = local.service_config.instance_cpu
+  fargate_memory           = local.service_config.instance_memory
   enable_command_execution = local.service_config.enable_command_execution
   max_capacity             = local.service_config.instance_scaling_max_capacity
   min_capacity             = local.service_config.instance_scaling_min_capacity
@@ -183,5 +184,10 @@ module "service" {
     } : {}
   )
 
-  is_temporary = local.is_temporary
+  is_temporary     = local.is_temporary
+  healthcheck_path = local.healthcheck_path
+  healthcheck_command = [
+    "CMD-SHELL",
+    "wget --no-verbose --tries=1 --spider http://localhost:8000${local.healthcheck_path} || exit 1"
+  ]
 }

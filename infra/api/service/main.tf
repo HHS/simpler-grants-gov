@@ -63,7 +63,7 @@ locals {
 }
 
 terraform {
-  required_version = "< 1.10"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -103,9 +103,22 @@ data "aws_acm_certificate" "cert" {
   most_recent = true
 }
 
+data "aws_acm_certificate" "secondary_certs" {
+  # Get secondary domain names if they exists
+  for_each    = toset(lookup(local.service_config, "secondary_domain_names", []))
+  domain      = each.value
+  most_recent = true
+}
+
 data "aws_acm_certificate" "s3_cdn_cert" {
   count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
   domain      = local.service_config.s3_cdn_domain_name
+  most_recent = true
+}
+
+data "aws_acm_certificate" "mtls_cert" {
+  count       = local.service_config.mtls_domain_name != null ? 1 : 0
+  domain      = local.service_config.mtls_domain_name
   most_recent = true
 }
 
@@ -156,12 +169,17 @@ module "service" {
   domain_name            = local.service_config.domain_name
   s3_cdn_domain_name     = local.service_config.s3_cdn_domain_name
   s3_cdn_certificate_arn = local.service_config.s3_cdn_domain_name != null ? data.aws_acm_certificate.s3_cdn_cert[0].arn : null
-  hosted_zone_id         = null
 
+  hosted_zone_id = null
+
+  # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
   enable_mtls_load_balancer = true
+  mtls_domain_name          = local.service_config.mtls_domain_name
+  mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
 
-  cpu                      = local.service_config.cpu
-  memory                   = local.service_config.memory
+
+  fargate_cpu              = local.service_config.cpu
+  fargate_memory           = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
   max_capacity             = local.service_config.instance_scaling_max_capacity
@@ -176,6 +194,11 @@ module "service" {
   scheduled_jobs       = local.environment_config.scheduled_jobs
   s3_buckets           = local.environment_config.s3_buckets
   enable_drafts_bucket = true
+
+  # API Gateway variables
+  enable_api_gateway         = true
+  optional_extra_alb_domains = toset(lookup(local.service_config, "secondary_domain_names", []))
+  optional_extra_alb_certs   = local.service_config.enable_https == true ? [for cert in data.aws_acm_certificate.secondary_certs : cert.arn] : []
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
@@ -200,7 +223,7 @@ module "service" {
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
-    local.service_config.extra_environment_variables
+    local.service_config.extra_environment_variables,
   )
 
   secrets = concat(
@@ -212,15 +235,8 @@ module "service" {
       # name      = "COGNITO_CLIENT_SECRET"
       # valueFrom = module.identity_provider_client[0].client_secret_arn
     }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_USERNAME"
-      valueFrom = data.aws_ssm_parameter.search_username_arn[0].arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
-      name      = "SEARCH_PASSWORD"
-      valueFrom = data.aws_ssm_parameter.search_password_arn[0].arn
-    }] : [],
-    local.environment_config.search_config != null ? [{
+    # OpenSearch endpoint
+    local.search_config != null ? [{
       name      = "SEARCH_ENDPOINT"
       valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
     }] : []
@@ -232,8 +248,15 @@ module "service" {
     },
     module.app_config.enable_identity_provider ? {
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
+    } : {},
+    # OpenSearch IAM policy for query operations
+    local.search_config != null ? {
+      opensearch_query = data.aws_iam_policy.opensearch_query[0].arn,
     } : {}
   )
+
+  # OpenSearch ingest policy for migrator role (scheduled data loading jobs)
+  opensearch_ingest_policy_arn = local.search_config != null ? data.aws_iam_policy.opensearch_ingest[0].arn : null
 
   is_temporary = local.is_temporary
 }

@@ -1,12 +1,16 @@
+import itertools
 import logging
+import time
 import zipfile
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import StrEnum
-from typing import Sequence
+from typing import IO
 
 from sqlalchemy import select
 
+import src.adapters.db as db
 from src.constants.lookup_constants import (
     SamGovExtractType,
     SamGovImportType,
@@ -16,6 +20,7 @@ from src.db.models.entity_models import SamGovEntity, SamGovEntityImportType
 from src.db.models.sam_extract_models import SamExtractFile
 from src.task.task import Task
 from src.util import file_util
+from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
@@ -42,16 +47,27 @@ class ExtractIndex:
 @dataclass
 class SamGovEntityContainer:
     processed_entities: list[SamGovEntity] = field(default_factory=list)
+    ueis_skipped: set[str] = field(default_factory=set)
 
     deactivated_ueis: list[str] = field(default_factory=list)
     expired_ueis: list[str] = field(default_factory=list)
 
 
+class ProcessSamExtractsConfig(PydanticBaseEnvConfig):
+    process_sam_extracts_upsert_batch_size: int = 10000
+
+
 class ProcessSamExtractsTask(Task):
+
+    def __init__(self, db_session: db.Session):
+        super().__init__(db_session)
+        self.config = ProcessSamExtractsConfig()
 
     class Metrics(StrEnum):
 
         ROWS_PROCESSED_COUNT = "rows_processed_count"
+        ROWS_SKIPPED_COUNT = "rows_skipped_count"
+        DEACTIVATED_SKIPPED_COUNT = "deactivated_skipped_count"
         DEACTIVATED_ROWS_COUNT = "deactivated_rows_count"
         EXPIRED_ROWS_COUNT = "expired_rows_count"
         ROWS_CONVERTED_COUNT = "rows_converted_count"
@@ -68,6 +84,8 @@ class ProcessSamExtractsTask(Task):
         ENTITY_EXPIRED_COUNT = "entity_expired_count"
         ENTITY_EXPIRED_MISSING_COUNT = "entity_expired_missing_count"
         ENTITY_EXPIRED_MISMATCH_COUNT = "entity_expired_mismatch_count"
+
+        SKIPPED_UEI_NOT_PROCESSED_COUNT = "skipped_uei_not_processed_count"
 
         EXTRACTS_PROCESSED_COUNT = "extracts_processed_count"
         MONTHLY_EXTRACT_PROCESSED_COUNT = "monthly_extract_processed_count"
@@ -90,39 +108,16 @@ class ProcessSamExtractsTask(Task):
                 "extract_date": sam_extract_file.extract_date,
                 "extract_type": sam_extract_file.extract_type,
             }
-            with self.db_session.begin():
-                # process the extract
-                sam_gov_entity_container = self.process_extract(sam_extract_file, extract_log_extra)
+            start = time.perf_counter()
+            self.process_extract(sam_extract_file, extract_log_extra)
 
-                # Fetch all existing sam.gov records, this is several magnitudes
-                # faster than individually fetching them as we process them below.
-                all_entities = self.db_session.execute(select(SamGovEntity)).scalars()
-                entity_map = {}
-                for entity in all_entities:
-                    entity_map[entity.uei] = entity
-
-                # Process updated/new sam.gov entity records
-                for sam_gov_entity in sam_gov_entity_container.processed_entities:
-                    self.load_sam_gov_entity_to_db(
-                        sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
-                    )
-
-                # Handle deactivated sam.gov entity records
-                for uei in sam_gov_entity_container.deactivated_ueis:
-                    self.handle_deactivated_entity(
-                        uei, entity_map, sam_extract_file, extract_log_extra
-                    )
-
-                # Handle expired sam.gov entity records
-                for uei in sam_gov_entity_container.expired_ueis:
-                    self.handle_expired_entity(uei, entity_map, sam_extract_file, extract_log_extra)
-
-                logger.info(
-                    "Finished loading records to DB for Sam.gov extract", extra=extract_log_extra
-                )
-
-                # Mark extract as processed
-                sam_extract_file.processing_status = SamGovProcessingStatus.COMPLETED
+            # Record the time that extract took to complete
+            end = time.perf_counter()
+            duration = round((end - start), 3)
+            logger.info(
+                "Finished processing sam.gov extract",
+                extra=extract_log_extra | {"extract_process_duration_sec": duration},
+            )
 
     def get_extracts_to_process(self) -> Sequence[SamExtractFile]:
         """Fetch all the sam.gov extract files in ascending order"""
@@ -136,11 +131,53 @@ class ProcessSamExtractsTask(Task):
             .all()
         )
 
-    def process_extract(
+    def process_extract(self, sam_extract_file: SamExtractFile, extract_log_extra: dict) -> None:
+        """Process a sam.gov FOUO entity extract file, parsing and loading the file to our sam.gov entity table"""
+        sam_gov_entity_container = self.parse_extract_file(sam_extract_file, extract_log_extra)
+
+        self.load_sam_gov_entities_to_db(
+            sam_gov_entity_container, sam_extract_file, extract_log_extra
+        )
+
+        # Process all of the deactivations/expired in one transaction as they're usually fairly small.
+        with self.db_session.begin():
+            # Handle deactivated sam.gov entity records
+            existing_deactivated_entities = self.get_existing_entities(
+                sam_gov_entity_container.deactivated_ueis
+            )
+            for uei in sam_gov_entity_container.deactivated_ueis:
+                self.handle_deactivated_entity(
+                    uei, existing_deactivated_entities, sam_extract_file, extract_log_extra
+                )
+
+            # Handle expired sam.gov entity records
+            existing_expired_entities = self.get_existing_entities(
+                sam_gov_entity_container.expired_ueis
+            )
+            for uei in sam_gov_entity_container.expired_ueis:
+                self.handle_expired_entity(
+                    uei, existing_expired_entities, sam_extract_file, extract_log_extra
+                )
+
+            # Verify that the records we skipped due to non-empty EFT indicator all got processed
+            # in one of the above sections.
+            self.verify_skipped_entities_have_processed_row(
+                sam_gov_entity_container, extract_log_extra
+            )
+
+            logger.info(
+                "Finished loading records to DB for Sam.gov extract", extra=extract_log_extra
+            )
+
+            # Mark extract as processed
+            # Have to add to the session as it was fetched in a different transaction
+            self.db_session.add(sam_extract_file)
+            sam_extract_file.processing_status = SamGovProcessingStatus.COMPLETED
+
+    def parse_extract_file(
         self, sam_extract_file: SamExtractFile, extract_log_extra: dict
     ) -> SamGovEntityContainer:
         """Process an extract file from sam.gov, pulling all entities out of it"""
-
         logger.info("Processing sam.gov extract file", extra=extract_log_extra)
         self.increment(self.Metrics.EXTRACTS_PROCESSED_COUNT)
         if sam_extract_file.extract_type == SamGovExtractType.MONTHLY:
@@ -157,27 +194,71 @@ class ProcessSamExtractsTask(Task):
                         f"Expected exactly one file in sam.gov extract zip, found: {','.join(files_in_zip)}"
                     )
 
-                file_bytes = extract_zip.read(files_in_zip[0])
-                return self.process_dat(file_bytes.decode("utf-8"), extract_log_extra)
+                with extract_zip.open(files_in_zip[0]) as dat_file:
+                    return self.process_dat(dat_file, extract_log_extra)
 
-    def process_dat(self, dat_text: str, extract_log_extra: dict) -> SamGovEntityContainer:
-        """Process the text of the dat file from the sam.gov extract"""
+    def process_dat(self, dat_file: IO[bytes], extract_log_extra: dict) -> SamGovEntityContainer:
+        """Process the dat file from the sam.gov extract"""
         container = SamGovEntityContainer()
-        lines = dat_text.split("\n")
 
-        # We need at least two lines (header/footer) for the file to be valid
-        if len(lines) < 2:
-            raise Exception("Invalid DAT file, doesn't contain any records")
+        for raw_line in dat_file:
+            line = raw_line.decode("utf-8")
+            # The header and footer are formatted as
+            # BOF/EOF FOUO V2 STARTDATE ENDDATE RECORD_COUNT SEQUENCE_NUMBER
+            # For example:
+            # BOF FOUO V2 20250726 20250726 0001234 0001000
+            #
+            # The start date seems to always match the end date for daily extracts
+            # For monthly extracts the start date is all zeroes
+            #
+            # Sequence number just increments by 1 every day
+            if line.startswith("BOF") or line.startswith("EOF"):
+                tokens = line.split()
+                if len(tokens) != 7:
+                    raise Exception("Unexpected format for header/footer")
+                sequence_num, record_count = tokens[-1], tokens[-2]
+                logger.info(
+                    "Processing header/footer of dat file",
+                    extra=extract_log_extra
+                    | {"sequence_number": sequence_num, "record_count": record_count},
+                )
+                continue
 
-        # The first and last line of the file are a header + footer
-        # with some counts - so skip those and parse the others.
-        for line in lines[1:-1]:
-            self.increment(self.Metrics.ROWS_PROCESSED_COUNT)
             tokens = line.split("|")
+            self.increment(self.Metrics.ROWS_PROCESSED_COUNT)
 
             uei = get_token_value(tokens, ExtractIndex.UEI)
+            eft_indicator = get_token_value(tokens, ExtractIndex.ENTITY_EFT_INDICATOR)
             extract_code = get_token_value(tokens, ExtractIndex.SAM_EXTRACT_CODE)
             log_extra = {"uei": uei, "extract_code": extract_code} | extract_log_extra
+
+            # We can receive multiple rows for a given UEI in an extract
+            # In sam.gov if your UEI has multiple bank accounts associated
+            # then each comes through as a separate record, BUT as the FOUO
+            # information doesn't have that, they are for our purposes duplicates.
+            # These records are separated by the "EFT Indicator" and we will
+            # assume that every UEI has one null/empty EFT indicator record that we'll use.
+            if len(eft_indicator) > 0:
+                # If the extract_code is to deactivate a record, AND has an eft indicator
+                # then it's saying to deactivate that particular EFT indicator record on a UEI
+                # Since we don't consume any non-empty EFT indicator records, we have nothing
+                # to deactivate and shouldn't expect it to be present.
+                # If the entire UEI was deactivated, we'd receive the empty EFT indicator record itself
+                if extract_code == "1":
+                    logger.info(
+                        "EFT Indicator is not empty, but record is marked for deactivation, skipping entirely",
+                        extra=log_extra,
+                    )
+                    self.increment(self.Metrics.DEACTIVATED_SKIPPED_COUNT)
+                    continue
+
+                logger.info(
+                    "EFT Indicator is not empty, skipping assuming to be a duplicate",
+                    extra=log_extra,
+                )
+                container.ueis_skipped.add(uei)
+                self.increment(self.Metrics.ROWS_SKIPPED_COUNT)
+                continue
 
             """
             The SAM Extract code can have a few different values depending on whether
@@ -222,6 +303,51 @@ class ProcessSamExtractsTask(Task):
                 self.increment(self.Metrics.ENTITY_ERROR_COUNT)
 
         return container
+
+    def get_existing_entities(self, ueis: list[str]) -> dict[str, SamGovEntity]:
+        """Fetch all passed in sam.gov entities by UEI"""
+        all_entities = self.db_session.execute(
+            select(SamGovEntity).where(SamGovEntity.uei.in_(ueis))
+        ).scalars()
+        entity_map = {}
+        for entity in all_entities:
+            entity_map[entity.uei] = entity
+
+        return entity_map
+
+    def load_sam_gov_entities_to_db(
+        self,
+        sam_gov_entity_container: SamGovEntityContainer,
+        sam_extract_file: SamExtractFile,
+        extract_log_extra: dict,
+    ) -> None:
+        """Load sam.gov entities to the DB in batches"""
+        total_to_process = len(sam_gov_entity_container.processed_entities)
+        total_processed = 0
+        for batch in itertools.batched(
+            sam_gov_entity_container.processed_entities,
+            n=self.config.process_sam_extracts_upsert_batch_size,
+            strict=False,
+        ):
+            # Process each of these batches as a separate DB transaction/commit to save memory
+            with self.db_session.begin():
+                logger.info(
+                    f"Processing a batch, processed {total_processed} / {total_to_process}",
+                    extra=extract_log_extra,
+                )
+
+                entity_map = self.get_existing_entities([entity.uei for entity in batch])
+
+                # Process updated/new sam.gov entity records
+                for sam_gov_entity in batch:
+                    self.load_sam_gov_entity_to_db(
+                        sam_gov_entity, entity_map, sam_extract_file.extract_type, extract_log_extra
+                    )
+
+                total_processed += len(batch)
+
+            # Clear the SQLAlchemy cache between batches
+            self.db_session.expunge_all()
 
     def load_sam_gov_entity_to_db(
         self,
@@ -363,6 +489,34 @@ class ProcessSamExtractsTask(Task):
         self.increment(self.Metrics.ENTITY_EXPIRED_COUNT)
         logger.info("Sam.gov entity is marked as expired", extra=log_extra)
 
+    def verify_skipped_entities_have_processed_row(
+        self, sam_gov_entity_container: SamGovEntityContainer, extract_log_extra: dict
+    ) -> None:
+        """Verify that any entities skipped for having the EFT indicator set
+        had a row that we actually processed
+
+        This is just validating an assumption that we have in the data
+        that if an entity receives an update and has multiple EFT indicators,
+        we'll always receive all of the different EFT indicators, including an "empty" one.
+        """
+        logger.info("Validating that skipped UEIs were processed", extra=extract_log_extra)
+        ueis_processed = {entity.uei for entity in sam_gov_entity_container.processed_entities}
+        ueis_processed.update(sam_gov_entity_container.deactivated_ueis)
+        ueis_processed.update(sam_gov_entity_container.expired_ueis)
+
+        unprocessed_ueis = sam_gov_entity_container.ueis_skipped.difference(ueis_processed)
+        for unprocessed_uei in unprocessed_ueis:
+            logger.error(
+                "A UEI we skipped did not have a non-empty EFT indicator in extract file",
+                extra=extract_log_extra | {"uei": unprocessed_uei},
+            )
+            self.increment(self.Metrics.SKIPPED_UEI_NOT_PROCESSED_COUNT)
+
+        if len(unprocessed_ueis) == 0:
+            logger.info(
+                "All UEIs we skipped were processed via another row", extra=extract_log_extra
+            )
+
 
 def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
     uei = get_token_value(tokens, ExtractIndex.UEI, can_be_blank=False)
@@ -373,7 +527,9 @@ def build_sam_gov_entity(tokens: list[str]) -> SamGovEntity:
         tokens, ExtractIndex.REGISTRATION_EXPIRATION_DATE, can_be_blank=False
     )
     # NOTE: Email can be null in rare cases
-    ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL)
+    # We lowercase the email so it can later be joined with our user table
+    # to setup organizations. Sam.gov stores emails with whatever case the user entered.
+    ebiz_poc_email = get_token_value(tokens, ExtractIndex.EBIZ_POC_EMAIL).lower()
     ebiz_first_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_FIRST_NAME)
     ebiz_last_name = get_token_value(tokens, ExtractIndex.EBIZ_POC_LAST_NAME)
     debt_subject_to_offset = get_token_value(tokens, ExtractIndex.DEBT_SUBJECT_TO_OFFSET)

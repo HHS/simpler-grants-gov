@@ -2,11 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { APIResponse } from "src/types/apiResponseTypes";
 
 import { UiSchema } from "src/components/applyForm/types";
-import { RegexMatchedString } from "./generalTypes";
-
-// ISO 8601 date, ie "1978-10-08T19:23:01.165Z"
-const iso8601Date =
-  /^\d{4}(-\d\d(-\d\d(T\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)?)?)?)?$/;
+import { iso8601Date, RegexMatchedString } from "./generalTypes";
 
 export type FormInstruction = {
   created_at: RegexMatchedString<typeof iso8601Date>;

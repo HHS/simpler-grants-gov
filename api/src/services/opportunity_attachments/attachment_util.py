@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from src.adapters.aws import S3Config
 from src.db.models.opportunity_models import Opportunity
@@ -6,7 +7,10 @@ from src.util import file_util
 
 
 def get_s3_attachment_path(
-    file_name: str, opportunity_attachment_id: int, opportunity: Opportunity, s3_config: S3Config
+    file_name: str,
+    opportunity_attachment_id: uuid.UUID,
+    opportunity: Opportunity,
+    s3_config: S3Config,
 ) -> str:
     """Construct a path to the attachments on s3
 

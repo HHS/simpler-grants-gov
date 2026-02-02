@@ -11,25 +11,38 @@ module "aws_vpc" {
   version = "5.13.0"
   # checkov:skip=CKV_TF_1:Difference of opinion, I think using the version number is fine here.
 
-  name = var.name
-  azs  = local.availability_zones
-  cidr = local.vpc_cidr
+  name        = var.name
+  azs         = local.availability_zones
+  cidr        = local.vpc_cidr
+  enable_ipv6 = true
 
   # Public subnets
-  public_subnets     = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
-  public_subnet_tags = { subnet_type = "public" }
+  public_subnets                                               = ["10.${var.second_octet}.10.0/24", "10.${var.second_octet}.11.0/24", "10.${var.second_octet}.12.0/24"]
+  public_subnet_tags                                           = { subnet_type = "public" }
+  public_subnet_assign_ipv6_address_on_creation                = false
+  public_subnet_enable_dns64                                   = true
+  public_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
+  public_subnet_ipv6_prefixes                                  = [1, 2, 3]
 
   # Private subnets
-  private_subnets     = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
-  private_subnet_tags = { subnet_type = "private" }
+  private_subnets                                               = ["10.${var.second_octet}.0.0/24", "10.${var.second_octet}.1.0/24", "10.${var.second_octet}.2.0/24"]
+  private_subnet_tags                                           = { subnet_type = "private" }
+  private_subnet_assign_ipv6_address_on_creation                = false
+  private_subnet_enable_dns64                                   = true
+  private_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
+  private_subnet_ipv6_prefixes                                  = [4, 5, 6]
 
   # Database subnets
   # `database_subnet_tags` is only used if `database_subnets` is not empty
   # `database_subnet_group_name` is only used if `create_database_subnet_group` is true
-  database_subnets             = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24"]
-  database_subnet_tags         = { subnet_type = "database" }
-  create_database_subnet_group = var.has_database
-  database_subnet_group_name   = var.database_subnet_group_name
+  database_subnets                                               = ["10.${var.second_octet}.5.0/24", "10.${var.second_octet}.6.0/24", "10.${var.second_octet}.7.0/24"]
+  database_subnet_tags                                           = { subnet_type = "database" }
+  create_database_subnet_group                                   = var.has_database
+  database_subnet_group_name                                     = var.database_subnet_group_name
+  database_subnet_assign_ipv6_address_on_creation                = false
+  database_subnet_enable_dns64                                   = true
+  database_subnet_enable_resource_name_dns_aaaa_record_on_launch = true
+  database_subnet_ipv6_prefixes                                  = [7, 8, 9]
 
   # If application needs external services, then create one NAT gateway per availability zone
   enable_nat_gateway     = var.has_external_non_aws_service

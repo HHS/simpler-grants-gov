@@ -1,0 +1,66 @@
+name: "Co-planning: Sync Fider to GitHub"
+
+on:
+  pull_request:
+    paths:
+      - ".github/linters/coplanning/**"
+      - ".github/workflows/coplanning-sync-fider-to-gh.yml"
+  workflow_dispatch: # for manual runs
+  schedule:
+    - cron: "0 0 * * *" # run daily at midnight
+
+permissions:
+  issues: write
+
+defaults:
+  run:
+    working-directory: ./.github/linters/coplanning
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FIDER_API_TOKEN: ${{ secrets.FIDER_TOKEN }}
+      FIDER_BOARD: "simplergrants"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Run script (dry run)
+        if: github.event_name == 'pull_request'
+        run: |
+          python run.py \
+            --org "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --label "Coplanning Proposal" \
+            --issue-sections "Summary" \
+            --issue-sections "Problem Statement" \
+            --issue-sections "Proposed Solution" \
+            --issue-sections "Success Criteria" \
+            --issue-sections "Additional Context" \
+            --platform fider \
+            --sync-direction platform-to-github \
+            --dry-run
+
+      - name: Run script (real run)
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+        run: |
+          python run.py \
+            --org "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --label "Coplanning Proposal" \
+            --issue-sections "Summary" \
+            --issue-sections "Problem Statement" \
+            --issue-sections "Proposed Solution" \
+            --issue-sections "Success Criteria" \
+            --issue-sections "Additional Context" \
+            --platform fider \
+            --sync-direction platform-to-github

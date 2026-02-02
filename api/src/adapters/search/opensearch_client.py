@@ -1,6 +1,8 @@
 import logging
-from typing import Any, Generator, Iterable
+from collections.abc import Generator, Iterable
+from typing import Any
 
+import boto3
 import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
@@ -20,11 +22,11 @@ DEFAULT_INDEX_ANALYSIS = {
     },
     # Change the default stemming to use snowball which handles plural
     # queries better than the default
-    # TODO - there are a lot of stemmers, we should take some time to figure out
-    #        which one works best with our particular dataset. Snowball is really
+    # NOTE - there are a lot of stemmers, Snowball is really
     #        basic and naive (literally just adjusting suffixes on words in common patterns)
     #        which might be fine generally, but we work with a lot of acronyms
-    #        and should verify that doesn't cause any issues.
+    #        and should verify that doesn't cause any issues. Although we can use
+    #        keyword fields to work around that particular issue.
     # see: https://opensearch.org/docs/latest/analyzers/token-filters/index/
     "filter": {"custom_stemmer": {"type": "snowball", "name": "english"}},
 }
@@ -78,21 +80,6 @@ class SearchClient:
         logger.info("Deleting search index %s", index_name, extra={"index_name": index_name})
         self._client.indices.delete(index=index_name)
 
-    def put_pipeline(self, pipeline: dict, pipeline_name: str) -> None:
-        """
-        Create a pipeline
-        """
-        resp = self._client.ingest.put_pipeline(id=pipeline_name, body=pipeline)
-        if resp["acknowledged"]:
-            logger.info(f"Pipeline '{pipeline_name}' created successfully!")
-        else:
-            status_code = resp["status"] or 500
-            error_message = resp["error"]["reason"] or "Internal Server Error"
-
-            raise Exception(
-                f"Failed to create pipeline {pipeline_name}: {error_message}. Status code: {status_code}"
-            )
-
     def bulk_upsert(
         self,
         index_name: str,
@@ -100,7 +87,6 @@ class SearchClient:
         primary_key_field: str,
         *,
         refresh: bool = True,
-        pipeline: str | None = None,
     ) -> None:
         """
         Bulk upsert records to an index
@@ -132,8 +118,6 @@ class SearchClient:
             },
         )
         bulk_args = {"index": index_name, "body": bulk_operations, "refresh": refresh}
-        if pipeline:
-            bulk_args["pipeline"] = pipeline
 
         self._client.bulk(**bulk_args)
 
@@ -186,14 +170,6 @@ class SearchClient:
 
         for index in old_indexes:
             self.delete_index(index)
-
-    def refresh_index(self, index_name: str) -> None:
-        """
-        Refresh index
-        """
-        logger.info("Refreshing index %s", index_name, extra={"index_name": index_name})
-
-        self._client.indices.refresh(index_name)
 
     def swap_alias_index(self, index_name: str | None, alias_name: str) -> None:
         """
@@ -250,7 +226,7 @@ class SearchClient:
         search_query: dict,
         include_scores: bool = True,
         duration: str = "10m",
-    ) -> Generator[SearchResponse, None, None]:
+    ) -> Generator[SearchResponse]:
         """
         Scroll (iterate) over a large result set a given search query.
 
@@ -310,14 +286,13 @@ def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str,
         pool_maxsize=opensearch_config.search_connection_pool_size,
     )
 
-    # We'll assume if the aws_region is set, we're running in AWS
-    # and should connect using the session credentials
+    # When aws_region is set, use AWS IAM credentials (SigV4) for authentication
     if opensearch_config.aws_region:
-        # Get credentials and authorize with AWS Opensearch Serverless (es)
-        # TODO - once we have the user setup in Opensearch, we want to change to this approach
-        # credentials = boto3.Session().get_credentials()
-        # auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
-        auth = (opensearch_config.search_username, opensearch_config.search_password)
+        credentials = boto3.Session().get_credentials()
+        if credentials is None:
+            raise RuntimeError("AWS credentials not found. Ensure AWS credentials are configured ")
+        auth = opensearchpy.AWSV4SignerAuth(credentials, opensearch_config.aws_region, "es")
         params["http_auth"] = auth
+        logger.info("Using AWS IAM (SigV4) authentication for OpenSearch")
 
     return params

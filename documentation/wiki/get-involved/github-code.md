@@ -13,7 +13,7 @@ Our development team curates "help wanted" issues for open source developers lik
 ### A. Code style and standards
 
 * Follow the established code style and standards.&#x20;
-* Use clear and description variable names, comments and documentation where necessary.
+* Use clear and descriptive variable names, comments, and documentation where necessary.
 
 ### B. Testing
 
@@ -56,14 +56,14 @@ git clone https://github.com/<your-github-username>/<repository-name>.git
 
 Instruction on setting up the local development environment can be found in the README of the repository.&#x20;
 
-API Development Instructions [API Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
+API Development Instructions [API Development Instructions](../../api/development.md)
 
-Front End Development Instructions [Front End Development Instructions](https://chatgpt.com/c/66fad4c4-0df8-8004-8d1d-2def20e6e3da)
+Front End Development Instructions [Front End Development Instructions](../../../frontend/)
 
 {% hint style="info" %}
 Nee**d help with your local development environment?**\
 \
-Post in the [Discourse forum](https://simplergrants.discourse.group/) if you're having issues. We can walk you through the process of resolving blockers.\
+Post in the [Discourse forum](https://forum.simpler.grants.gov/) if you're having issues. We can walk you through the process of resolving blockers.\
 \
 We also use a CODEOWNERS file to automatically suggest and add folks knowledgeable about the area of the code you're making changes to.
 {% endhint %}

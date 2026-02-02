@@ -6,6 +6,10 @@ This component takes form and UI schemas to create a form. The form schema confo
 
 The UI schema is custom for this project. It was inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form). RJSF was not chosen because it doesn't work with server actions, it doesn't support hierarchical UI layouts natively, and the validation will move to the API which reduces the value of the tightly coupled validation in RJSF. There is a [plugin for layouts](https://github.com/audibene-labs/react-jsonschema-form-layout), however it hasn't been updated in 4 years and still requires a lot of abstraction. This component provides most of the UI rendering with a ~100 line recursive function and uses the same library for validation. The widgets however are patterned after the RJSF widgets.
 
+## UI Template
+
+File adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/templates/BaseInputTemplate.tsx
+
 ## UI Schema
 
 The UI Schema is an array of fields or sections.
@@ -109,3 +113,21 @@ Sections wrap fields, or other sections:
 }
 
 ```
+
+## Using multiple definitions in a single field
+
+Some widgets require data from more than one field. To add more than one field, use the `multiField` field type:
+
+```
+{
+    "type": "multiField",
+    "name": "Budget424aSectionA",
+    "widget": "Budget424aSectionA",
+    "definition": [
+        "/properties/activity_line_items",
+        "/properties/total_budget_summary"
+    ]
+}
+```
+
+In the widget, the data is available as a combined `value` object.

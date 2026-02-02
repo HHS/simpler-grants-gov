@@ -14,9 +14,9 @@ from tests.src.data_migration.transformation.conftest import (
 )
 
 
-class TestTransformOpportunitySummary(BaseTransformTestClass):
+class TestTransformOpportunityAttachment(BaseTransformTestClass):
 
-    @pytest.fixture()
+    @pytest.fixture
     def transform_opportunity_attachment(self, transform_oracle_data_task, s3_config):
         return TransformOpportunityAttachment(transform_oracle_data_task, s3_config)
 
@@ -190,7 +190,7 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
             outfile.write(f.fake.sentence(25))
 
         target_attachment = f.OpportunityAttachmentFactory.create(
-            attachment_id=update.syn_att_id,
+            legacy_attachment_id=update.syn_att_id,
             opportunity=opportunity,
             file_location=old_s3_path,
             file_name="old_file_name.txt",
@@ -212,7 +212,7 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
 
         synopsis_attachment = f.StagingTsynopsisAttachmentFactory.create(
             opportunity=None,
-            opportunity_id=opportunity.opportunity_id,
+            opportunity_id=opportunity.legacy_opportunity_id,
             is_deleted=True,
         )
 
@@ -222,7 +222,7 @@ class TestTransformOpportunitySummary(BaseTransformTestClass):
         )
 
         target_attachment = f.OpportunityAttachmentFactory.create(
-            attachment_id=synopsis_attachment.syn_att_id,
+            legacy_attachment_id=synopsis_attachment.syn_att_id,
             opportunity=opportunity,
             file_location=s3_path,
         )

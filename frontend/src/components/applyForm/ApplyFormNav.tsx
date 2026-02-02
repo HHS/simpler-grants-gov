@@ -21,11 +21,11 @@ const ApplyFormNav = ({
   return (
     fields.length > 0 && (
       <aside
-        className="usa-in-page-nav width-mobile-lg maxw-none order-1 margin-left-0 desktop:margin-right-10"
+        className="usa-in-page-nav maxw-card order-1 margin-left-0 desktop:margin-right-5 overflow-auto"
         aria-label={title}
         data-testid="InPageNavigation"
       >
-        <nav className="usa-in-page-nav__nav">
+        <nav className="usa-in-page-nav__nav padding-x-0">
           <h4 className="usa-in-page-nav__heading" tabIndex={0}>
             {title}
           </h4>

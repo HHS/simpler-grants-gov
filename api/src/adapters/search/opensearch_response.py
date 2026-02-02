@@ -71,7 +71,6 @@ def _parse_aggregations(
 ) -> dict[str, dict[str, int]]:
     # Note that this is assuming the response from a terms aggregation
     # https://opensearch.org/docs/latest/aggregations/bucket/terms/
-
     if raw_aggs is None:
         return {}
 
@@ -106,14 +105,16 @@ def _parse_aggregations(
               "doc_count": 3
             }
           ]
+        },
+        "close_date": {
+            {'buckets': [{'key': '7', 'from': 1753119560446.0, 'from_as_string': '2025-07-21', 'to': 1753660800000.0, 'to_as_string': '2025-07-28', 'doc_count': 0}
         }
-      }
+    }
     """
 
     aggregations: dict[str, dict[str, int]] = {}
     for field, raw_agg_value in raw_aggs.items():
         buckets: list[dict[str, typing.Any]] = raw_agg_value.get("buckets", [])
-
         field_aggregation: dict[str, int] = {}
         for bucket in buckets:
             key = bucket.get("key")

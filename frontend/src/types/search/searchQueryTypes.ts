@@ -7,8 +7,10 @@ export interface FilterQueryParamData {
   fundingInstrument: Set<string>;
   eligibility: Set<string>;
   agency: Set<string>;
+  assistanceListingNumber: Set<string>;
   category: Set<string>;
   closeDate: Set<string>;
+  postedDate: Set<string>;
   costSharing: Set<string>;
   topLevelAgency: Set<string>;
 }
@@ -19,7 +21,15 @@ export const validSearchQueryParamKeys = [
   ...searchFilterNames,
   "page",
   "sortby",
+  "andOr",
 ] as const;
+
+// an allow list for any paramaters we expect and would like to keep track of in New Relic or elsewhere
+export const expectedQueryParamKeys = [
+  ...validSearchQueryParamKeys,
+  "utm_source",
+  "savedSearch",
+];
 
 // Only a few defined keys possible
 // URL example => ?query=abcd&status=closed,archived

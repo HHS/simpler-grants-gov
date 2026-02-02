@@ -5,7 +5,7 @@ import src.adapters.db.flask_db as flask_db
 import src.api.extracts_v1.extract_schema as extract_schema
 import src.api.response as response
 from src.api.extracts_v1.extract_blueprint import extract_blueprint
-from src.auth.api_key_auth import api_key_auth
+from src.auth.multi_auth import api_key_multi_auth, api_key_multi_auth_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.extracts_v1.get_extracts import ExtractListParams, get_extracts
 
@@ -37,7 +37,8 @@ examples = {
     examples=examples,
 )
 @extract_blueprint.output(extract_schema.ExtractMetadataListResponseSchema)
-@extract_blueprint.auth_required(api_key_auth)
+@extract_blueprint.doc(security=api_key_multi_auth_security_schemes)
+@api_key_multi_auth.login_required
 @flask_db.with_db_session()
 def extract_metadata_get(db_session: db.Session, raw_list_params: dict) -> response.ApiResponse:
     list_params: ExtractListParams = ExtractListParams.model_validate(raw_list_params)

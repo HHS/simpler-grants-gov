@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Type
 
 import src.adapters.db as db
 from src.adapters.db import PostgresDBClient
@@ -9,7 +8,7 @@ from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
 logger = logging.getLogger(__name__)
 
 
-def sync_lookup_values(db_client: Optional[PostgresDBClient] = None) -> None:
+def sync_lookup_values(db_client: PostgresDBClient | None = None) -> None:
     """
     Sync lookup values to the DB, adding or updating any
     values that aren't already present.
@@ -30,10 +29,13 @@ def sync_lookup_values(db_client: Optional[PostgresDBClient] = None) -> None:
         for table, lookup_config in sync_values.items():
             _sync_lookup_for_table(table, lookup_config.get_lookups(), db_session)
 
+        _sync_roles(db_session)
+
 
 def _sync_lookup_for_table(
-    table: Type[LookupTable], lookups: list[Lookup], db_session: db.Session
+    table: type[LookupTable], lookups: list[Lookup], db_session: db.Session
 ) -> None:
+    log_extra: dict = {"table_name": table.get_table_name()}
     logger.info("Syncing lookup values for table %s", table.get_table_name())
 
     # Optimization: Read all rows into the db_session's identity map. This makes
@@ -42,14 +44,39 @@ def _sync_lookup_for_table(
     # runtime down from 3500ms to 180ms for ~20 tables & ~400 lookup values
     _ = db_session.query(table).all()
 
-    has_modification = False
+    modified_lookup_count = 0
     for lookup in lookups:
-        instance = db_session.merge(table.from_lookup(lookup))
+        instance: LookupTable = db_session.merge(table.from_lookup(lookup))
         if db_session.is_modified(instance):
             logger.info("Updated lookup value in table %s to %r", table.get_table_name(), lookup)
-            has_modification = True
+            modified_lookup_count += 1
 
-    if not has_modification:
+    log_extra["modified_lookup_count"] = modified_lookup_count
+    if modified_lookup_count == 0:
         # This is just to make the logs clearer instead of seeing
         # several "Syncing lookup values for table .." and then nothing in-between
-        logger.info("No modified lookup values for table %s", table.get_table_name())
+        logger.info(
+            "No modified lookup values for table %s", table.get_table_name(), extra=log_extra
+        )
+    else:
+        logger.info("Updated lookup values for table %s", table.get_table_name(), extra=log_extra)
+
+
+def _sync_roles(
+    db_session: db.Session,
+) -> None:
+    # Import placed here to avoid circular dependencies
+    from src.constants.static_role_values import CORE_ROLES
+
+    logger.info("Syncing static core roles")
+    updated_role_count = 0
+    for role in CORE_ROLES:
+        instance = db_session.merge(role)
+        role_name = role.role_name
+        if db_session.is_modified(instance):
+            logger.info("Updated role: %s", role_name)
+            updated_role_count += 1
+        else:
+            logger.info("No modified values for role `%s`", role_name)
+
+    logger.info("Finished updating roles", extra={"updated_role_count": updated_role_count})

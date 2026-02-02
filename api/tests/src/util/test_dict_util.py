@@ -1,6 +1,6 @@
 import pytest
 
-from src.util.dict_util import diff_nested_dicts, flatten_dict
+from src.util.dict_util import diff_nested_dicts, flatten_dict, get_nested_value
 
 
 @pytest.mark.parametrize(
@@ -139,3 +139,54 @@ def test_diff_nested_dicts(dict1, dict2, expected_output):
     sorted_result = sorted(result, key=lambda x: x["field"])
 
     assert expected_sorted == sorted_result
+
+
+# Test data for get_nested_value tests
+COMPLEX_ARRAY_DATA = {
+    "array_field": [
+        {"x": 1, "y": "hello", "nested_array": [{"a": 10, "b": 4}, {"a": 15}]},
+        {"x": 3, "y": "there", "z": "words", "nested_array": [{"a": 5, "b": 6}]},
+        {"nested_array": [{"g": 100}]},
+        {"e": "text"},
+    ]
+}
+
+
+@pytest.mark.parametrize(
+    "json_data,path,expected_value",
+    [
+        ({"my_field": 5}, ["my_field"], 5),
+        ({"nested": {"path": {"to": {"value": 10}}}}, ["nested", "path", "to", "value"], 10),
+        # Path doesn't fully exist
+        ({}, ["whatever", "path"], None),
+        ({"whatever": {}}, ["whatever", "path"], None),
+        # Can fetch a whole chunk
+        (
+            {"nested": {"path": {"to": {"value": "hello"}}}},
+            ["nested"],
+            {"path": {"to": {"value": "hello"}}},
+        ),
+        (
+            {"nested": {"path": ["hello", "there", "this is a text"]}},
+            ["nested", "path"],
+            ["hello", "there", "this is a text"],
+        ),
+        # Passing in an empty path returns itself
+        ({"example": 5, "nested": {"field": 100}}, [], {"example": 5, "nested": {"field": 100}}),
+    ],
+)
+def test_get_nested_value(json_data, path, expected_value):
+    assert get_nested_value(json_data, path) == expected_value
+
+
+@pytest.mark.parametrize(
+    "path,expected_value",
+    [
+        (["array_field[0]", "x"], 1),
+        (["array_field[*]", "x"], [1, 3]),
+        (["array_field[*]", "nested_array[*]", "a"], [10, 15, 5]),
+        (["array_field[*]", "nested_array[*]", "b"], [4, 6]),
+    ],
+)
+def test_get_nested_value_of_arrays(path, expected_value):
+    assert get_nested_value(COMPLEX_ARRAY_DATA, path) == expected_value

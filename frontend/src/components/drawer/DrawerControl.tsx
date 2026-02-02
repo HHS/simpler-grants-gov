@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { UswdsIconNames } from "src/types/generalTypes";
 
 import { RefObject } from "react";
@@ -9,17 +10,20 @@ export const DrawerControl = ({
   drawerRef,
   buttonText,
   iconName,
+  className,
 }: {
   drawerRef: RefObject<ModalRef | null>;
   buttonText: string;
   iconName?: UswdsIconNames;
+  className?: string;
 }) => {
   return (
     <ModalToggleButton
       modalRef={drawerRef}
       opener
-      secondary
-      className="display-block margin-x-auto"
+      outline
+      className={clsx("display-block", className)}
+      data-testid="toggle-drawer"
     >
       {iconName && (
         <USWDSIcon

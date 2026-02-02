@@ -5,7 +5,7 @@
 FROM buildpack-deps:oracular AS build
 
 # Copy the fluentbit binary from the official image.
-FROM fluent/fluent-bit:4.0.3 AS fluentbit
+FROM fluent/fluent-bit:4.0.8 AS fluentbit
 
 FROM build AS release
 
@@ -19,6 +19,9 @@ HEALTHCHECK --timeout=5s --interval=10s --start-period=20s \
 # We copy into `/fluent-bit/etc/fluent-bit-custom.yml` because AWS
 # will overwrite any `/fluent-bit/etc/fluent-bit.yml` on the container.
 COPY fluentbit.yml /fluent-bit/etc/fluent-bit-custom.yml
+
+# Copy the Lua script for log truncation
+COPY truncate_logs.lua /fluent-bit/etc/truncate_logs.lua
 
 ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 

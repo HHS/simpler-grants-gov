@@ -1,32 +1,31 @@
-# Update database ERD diagrams and OpenAPI docs so that they remain up to date with the application
 name: Update Database ERD Diagrams and OpenAPI Docs
 
 on:
-  pull_request:
-    paths:
-      - api/**
-      - Makefile
-      - .github/workflows/ci-openapi.yml
+  workflow_dispatch:
+  schedule:
+    # Runs daily at 9 AM EST
+    - cron: '0 14 * * *'
 
 defaults:
   run:
     working-directory: ./api
 
-# Only trigger run one update of the OpenAPI spec at a time on the branch.
-# If new commits are pushed to the branch, cancel in progress runs and start
-# a new one.
-concurrency:
-  group: ${{ github.head_ref }}
-  cancel-in-progress: true
-
 jobs:
   update-openapi-docs:
     runs-on: ubuntu-22.04
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          # Checkout the feature branch associated with the pull request
-          ref: ${{ github.head_ref }}
+          fetch-depth: 0  # fetch full history so we can create branches properly
+
+      # Generate artifacts on the triggering ref BEFORE switching branches
+      - name: Build Docker images
+        run: make build
+
+      - name: Start database
+        run: make start-db
 
       - name: Create ERD diagram
         run: make create-erds
@@ -34,11 +33,168 @@ jobs:
       - name: Update OpenAPI spec
         run: make openapi-spec
 
-      - name: Push changes
+      - name: Stash generated artifacts
+        working-directory: .
         run: |
-          git config user.name nava-platform-bot
-          git config user.email platform-admins@navapbc.com
-          git add --all
-          # Commit changes (if no changes then no-op)
-          git diff-index --quiet HEAD || git commit -m "Create ERD diagram and Update OpenAPI spec"
-          git push
+          mkdir -p /tmp/sgg-artifacts
+          cp -v api/openapi.generated.yml /tmp/sgg-artifacts/ || true
+          # Copy ERD PNGs if they exist
+          if ls documentation/api/database/erds/*.png >/dev/null 2>&1; then
+            cp -v documentation/api/database/erds/*.png /tmp/sgg-artifacts/
+          fi
+
+      # Now create/switch to the bot branch based on main for a clean PR
+      - name: Setup branch
+        working-directory: .
+        run: |
+          git config user.name "nava-platform-bot"
+          git config user.email "platform-admins@navapbc.com"
+
+          BRANCH="nava-platform-bot/update-erd-and-openapi-docs"
+          echo "Branch name: $BRANCH"
+
+          git fetch origin main
+          git fetch origin "$BRANCH" || true
+
+          # Check if branch exists remotely and use it, otherwise create from main
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo "Remote branch exists, checking it out"
+            # Reset any local changes that might conflict with checkout
+            # (Artifacts are safe in /tmp/sgg-artifacts and will be restored after checkout)
+            git reset --hard HEAD || true
+            git clean -fd || true
+            # Force checkout/create the branch (creates if doesn't exist locally, resets if it does)
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            echo "Remote branch does not exist, creating from main"
+            git reset --hard HEAD || true
+            git clean -fd || true
+            git checkout -b "$BRANCH" origin/main
+          fi
+
+      - name: Rebase branch onto latest main
+        working-directory: .
+        run: |
+          BRANCH="nava-platform-bot/update-erd-and-openapi-docs"
+          git checkout "$BRANCH" || exit 1
+          git fetch origin main
+          
+          if ! git rebase origin/main; then
+            git checkout --theirs . 2>/dev/null || true
+            git add . || true
+            # Restore our generated files
+            if [ -f /tmp/sgg-artifacts/openapi.generated.yml ]; then
+              cp -v /tmp/sgg-artifacts/openapi.generated.yml api/openapi.generated.yml
+              git add api/openapi.generated.yml || true
+            fi
+            if [ -d /tmp/sgg-artifacts ]; then
+              for png in /tmp/sgg-artifacts/*.png; do
+                if [ -f "$png" ]; then
+                  cp -v "$png" "documentation/api/database/erds/$(basename "$png")"
+                  git add "documentation/api/database/erds/$(basename "$png")" || true
+                fi
+              done
+            fi
+            git rebase --continue
+          fi
+
+      - name: Restore artifacts
+        working-directory: .
+        run: |
+          # Restore generated files from temp stash
+          if [ -f /tmp/sgg-artifacts/openapi.generated.yml ]; then
+            cp -v /tmp/sgg-artifacts/openapi.generated.yml api/
+          fi
+          if ls /tmp/sgg-artifacts/*.png >/dev/null 2>&1; then
+            mkdir -p documentation/api/database/erds
+            cp -v /tmp/sgg-artifacts/*.png documentation/api/database/erds/
+          fi
+
+      - name: Commit & push changes
+        id: commit
+        working-directory: .
+        run: |
+          BRANCH="nava-platform-bot/update-erd-and-openapi-docs"
+
+          # Show file status before adding
+          echo "Files before git add:"
+          ls -lh api/openapi.generated.yml || echo "openapi.generated.yml not found"
+          ls -lh documentation/api/database/erds/*.png || echo "ERD files not found"
+
+          # Add files from both api/ and documentation/ directories
+          git add api/openapi.generated.yml documentation/api/database/erds/*.png
+
+          echo "Git status after adding files:"
+          git status
+
+          echo "Checking for staged changes:"
+          if git diff --cached --quiet; then
+            echo "No changes detected in staged files"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Changes detected! Showing diff:"
+          git diff --cached --stat
+
+          git commit -m "Update ERD Diagrams and OpenAPI Specs"
+          git push --force --set-upstream origin "$BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Changes committed and pushed successfully"
+
+      - name: Debug - Check outputs
+        working-directory: .
+        run: |
+          echo "Changed value: ${{ steps.commit.outputs.changed }}"
+          echo "Condition will be: ${{ steps.commit.outputs.changed == 'true' }}"
+
+      - name: Create Pull Request (only if none exists)
+        if: steps.commit.outputs.changed == 'true'
+        working-directory: .
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          API="https://api.github.com/repos/${{ github.repository }}/pulls"
+          BRANCH="nava-platform-bot/update-erd-and-openapi-docs"
+
+          echo "Checking for existing PR..."
+          echo "API endpoint: $API?head=${{ github.repository_owner }}:$BRANCH&base=main"
+
+          # Check if a PR already exists
+          PR_RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                        -H "Accept: application/vnd.github+json" \
+                        "$API?head=${{ github.repository_owner }}:$BRANCH&base=main")
+
+          echo "PR check response:"
+          echo "$PR_RESPONSE" | jq '.'
+
+          PR_NUM=$(echo "$PR_RESPONSE" | jq '.[0].number // empty')
+
+          if [ -n "$PR_NUM" ]; then
+            echo "PR #$PR_NUM already exists — skipping creation."
+            exit 0
+          fi
+
+          echo "No existing PR found, creating new PR..."
+
+          # Create a new PR if none exists
+          CREATE_RESPONSE=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github+json" \
+               "$API" \
+               -d "$(jq -n \
+                     --arg title "[Unticketed] Automated Update to Database ERD Diagrams and OpenAPI Docs" \
+                     --arg head "$BRANCH" \
+                     --arg base "main" \
+                     --arg body "Automated update of ERD diagrams and OpenAPI specs." \
+                     '{title: $title, head: $head, base: $base, body: $body}')")
+
+          echo "PR creation response:"
+          echo "$CREATE_RESPONSE" | jq '.'
+
+          PR_URL=$(echo "$CREATE_RESPONSE" | jq -r '.html_url // empty')
+          if [ -n "$PR_URL" ]; then
+            echo "Successfully created PR: $PR_URL"
+          else
+            echo "Failed to create PR"
+            exit 1
+          fi

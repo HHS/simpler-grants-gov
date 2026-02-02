@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformAssistanceListing(BaseTransformTestClass):
-    @pytest.fixture()
+    @pytest.fixture
     def transform_assistance_listing(self, transform_oracle_data_task):
         return TransformAssistanceListing(transform_oracle_data_task)
 
@@ -126,14 +126,16 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         # Verify nothing actually gets created
         opportunity = (
             db_session.query(Opportunity)
-            .filter(Opportunity.opportunity_id == cfda_insert_without_opportunity.opportunity_id)
+            .filter(
+                Opportunity.legacy_opportunity_id == cfda_insert_without_opportunity.opportunity_id
+            )
             .one_or_none()
         )
         assert opportunity is None
         assistance_listing = (
             db_session.query(OpportunityAssistanceListing)
             .filter(
-                OpportunityAssistanceListing.opportunity_assistance_listing_id
+                OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                 == cfda_insert_without_opportunity.opp_cfda_id
             )
             .one_or_none()
@@ -147,7 +149,6 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         delete_but_current_missing = setup_cfda(
             create_existing=False, is_delete=True, opportunity=opportunity
         )
-
         transform_assistance_listing.process_assistance_listing(
             delete_but_current_missing, None, opportunity
         )
@@ -200,7 +201,7 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
             assistance_listing = (
                 db_session.query(OpportunityAssistanceListing)
                 .filter(
-                    OpportunityAssistanceListing.opportunity_assistance_listing_id
+                    OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                     == record.opp_cfda_id
                 )
                 .one_or_none()
@@ -221,7 +222,6 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
     ):
         """Test that empty assistance listings are skipped even for updates"""
         opportunity = f.OpportunityFactory.create(opportunity_assistance_listings=[])
-
         # Create a record that exists but will be updated with empty values
         empty_update = setup_cfda(
             create_existing=True,
@@ -239,7 +239,7 @@ class TestTransformAssistanceListing(BaseTransformTestClass):
         assistance_listing = (
             db_session.query(OpportunityAssistanceListing)
             .filter(
-                OpportunityAssistanceListing.opportunity_assistance_listing_id
+                OpportunityAssistanceListing.legacy_opportunity_assistance_listing_id
                 == empty_update.opp_cfda_id
             )
             .one()

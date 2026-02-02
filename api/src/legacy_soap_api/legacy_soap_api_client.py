@@ -1,189 +1,315 @@
 import logging
-import os
-from tempfile import NamedTemporaryFile
+import uuid
+from collections.abc import Iterator
+from typing import Any, BinaryIO
 
-import requests
+from pydantic import ValidationError
 
 import src.adapters.db as db
-from src.legacy_soap_api.applicants import schemas
+from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
-from src.legacy_soap_api.legacy_soap_api_auth import (
-    MTLS_CERT_HEADER_KEY,
-    SessionResumptionAdapter,
-    SOAPAuth,
-    SOAPClientCertificateLookupError,
-    SOAPClientCertificateNotConfigured,
+from src.legacy_soap_api.grantors import schemas as grantors_schemas
+from src.legacy_soap_api.grantors.services import (
+    get_application_zip_response,
+    get_submission_list_expanded_response,
 )
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
-    SOAP_OPERATION_CONFIGS,
-    SOAPFaultException,
-    format_local_soap_response,
-    get_auth_error_response,
-    get_envelope_dict,
+    diff_soap_dicts,
     get_soap_response,
+    json_formatter,
+    log_local,
+    to_snake_case,
     wrap_envelope_dict,
+    xml_formatter,
 )
-from src.legacy_soap_api.soap_payload_handler import SoapPayload
+from src.legacy_soap_api.soap_payload_handler import (
+    SOAPPayload,
+    build_mtom_response_from_dict,
+    build_xml_from_dict,
+    get_envelope_dict,
+    get_soap_operation_dict,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class BaseSOAPClient:
-    def __init__(
-        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None = None
-    ) -> None:
-        self.config = LegacySoapAPIConfig()
-        self.auth = auth
+    def __init__(self, soap_request: SOAPRequest, db_session: db.Session) -> None:
         self.soap_request = soap_request
-        self.soap_request_message = SoapPayload(self.soap_request.data.decode())
-        self.soap_request_operation_name = self.soap_request_message.operation_name
-        self.proxy_response = self._proxy_soap_request()
-        self.proxy_response_message = SoapPayload(self.proxy_response.data.decode())
+        self.operation_config = soap_request.get_soap_request_operation_config()
         self.db_session = db_session
 
-    def _proxy_soap_request(self) -> SOAPResponse:
-        """Proxy incoming SOAP requests to grants.gov
-        This method handles proxying requests to grants.gov SOAP API and retrieving
-        and returning the xml data as is from the existing SOAP API.
-        """
-        session = requests.Session()
-        session.mount("https://", SessionResumptionAdapter())
-        request = requests.Request(
-            method=self.soap_request.method,
-            url=self.get_soap_proxy_url(),
-            data=self.soap_request.data,
-            headers=self.get_proxy_request_headers(),
-        )
-
-        if not self.auth or self.config.soap_auth_map == {}:
-            logger.info("soap_api_proxy: proxying unauthorized request")
-            prepared = session.prepare_request(request)
-            response = session.send(prepared)
-        else:
-            logger.info("soap_api_proxy: proxying authorized request")
-            with NamedTemporaryFile(mode="w", delete=True) as temp_cert_file:
-                temp_file_path = temp_cert_file.name
-                logger.info(
-                    "soap_api_proxy: created temp certificate file",
-                    extra={"temp_file_path": temp_file_path},
-                )
-                temp_cert_file.write(self.get_client_cert())
-                temp_cert_file.flush()
-                prepared = session.prepare_request(request)
-                try:
-                    response = session.send(prepared, cert=temp_file_path)
-                except requests.exceptions.SSLError:
-                    return get_auth_error_response()
-
-        return SOAPResponse(
-            data=self._process_response_response_content(response.content),
-            status_code=response.status_code,
-            headers=dict(response.headers),
-        )
-
-    def get_client_cert(self) -> str:
-        """This is temp auth solution"""
-        cert = ""
-        if not self.auth:
-            return cert
-        try:
-            cert = self.auth.certificate.get_pem(self.config.soap_auth_map)
-            logger.info("soap_client_certificate: found associated key")
-        except (SOAPClientCertificateLookupError, SOAPClientCertificateNotConfigured) as e:
-            logger.info(f"soap_client_certificate: {e}")
-        return cert
-
-    def _process_response_response_content(self, soap_content: bytes) -> bytes:
-        if not self.config.inject_uuid_data or self.config.gg_s2s_proxy_header_key:
-            return soap_content
-        return format_local_soap_response(soap_content)
-
     def get_soap_request_dict(self) -> dict:
-        return get_envelope_dict(
-            self.soap_request_message.to_dict(), self.soap_request_operation_name
+        return get_soap_operation_dict(
+            self.soap_request.data.decode(), self.operation_config.request_operation_name
         )
 
-    def get_soap_proxy_url(self) -> str:
-        return os.path.join(
-            self.soap_request.headers.get(
-                self.config.gg_s2s_proxy_header_key, self.config.grants_gov_uri
+    def get_soap_response_dict(self, proxy_response: SOAPResponse | None = None) -> dict:
+        """Get Simpler SOAP response dict
+
+        This method will return the validated pydantic schema returned from the
+        SOAP response operation. It will be in the format necessary to convert to and
+        from XML utilizing SOAPPayload class.
+
+        Example:
+            {'Envelope': {'Body': {'GetOpportunityListResponse': {...}}}}
+        """
+        operation_method = getattr(
+            self, to_snake_case(self.operation_config.request_operation_name)
+        )
+        return operation_method(proxy_response).to_soap_envelope_dict(
+            self.operation_config.response_operation_name
+        )
+
+    def get_proxy_soap_response_dict(self, proxy_response: SOAPResponse) -> dict:
+        """
+        This method does the following:
+
+        1. Gets the pydantic schema defined in self.operation_config.
+        2. Converts the SOAP proxy response XML to a dict.
+        3. Validates the XML dict.
+        4. Returns the proxy XML dict from the pydantic schema data.
+
+        This ensures parity when we need to compare proxy response to simpler
+        SOAP response.
+
+        Note: Ignoring type checking in return statement since we already check
+        that the schema is not None prior to statement.
+        """
+        proxy_response_schema_data = wrap_envelope_dict(
+            {}, self.operation_config.response_operation_name
+        )
+
+        simpler_response_schema = self._get_simpler_soap_response_schema()
+        if simpler_response_schema is None:
+            logger.info(
+                "Unable to validate SOAP proxy response. No Simpler SOAP pydantic schema found.",
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.NO_SIMPLER_SCHEMA_DEFINED,
+                    "response_operation_name": self.operation_config.response_operation_name,
+                },
+            )
+            return proxy_response_schema_data
+
+        try:
+            proxy_response_payload = SOAPPayload(
+                proxy_response.to_bytes().decode(errors="replace"),
+                operation_name=self.operation_config.response_operation_name,
+                force_list_attributes=self.operation_config.force_list_attributes,
+            )
+
+            # The XML dict that includes namespaces and other attributes prior to normalization and schema validation.
+            proxy_response_dict = proxy_response_payload.to_dict()
+            log_local(
+                msg="proxy response dict pre-validation",
+                data=proxy_response_dict,
+                formatter=json_formatter,
+            )
+
+            # Validated/normalized dict from pydantic schema.
+            proxy_response_schema_dict = self._get_simpler_soap_response_schema()(
+                **get_envelope_dict(
+                    proxy_response_dict, self.operation_config.response_operation_name
+                )
+            )  # type: ignore[misc]
+            return proxy_response_schema_dict.to_soap_envelope_dict(
+                self.operation_config.response_operation_name
+            )
+        except ValidationError as e:
+            msg = f"Could not parse proxy response {str(simpler_response_schema)} into Simpler SOAP response pydantic schema."
+            error_fields = {(err["type"], err["loc"]) for err in e.errors()}
+            logger.info(
+                msg=f"{msg} {error_fields}",
+                extra={
+                    "soap_api_event": LegacySoapApiEvent.PROXY_RESPONSE_VALIDATION_PROBLEM,
+                },
+            )
+        except Exception:
+            logger.info(
+                msg="Could not parse proxy response",
+                exc_info=True,
+                extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
+            )
+        return proxy_response_schema_data
+
+    def log_diffs(self, proxy_response_soap_dict: dict, simpler_response_soap_dict: dict) -> None:
+        try:
+            diff_results = diff_soap_dicts(
+                sgg_dict=get_envelope_dict(
+                    simpler_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                gg_dict=get_envelope_dict(
+                    proxy_response_soap_dict, self.operation_config.response_operation_name
+                ),
+                key_indexes=self.operation_config.key_indexes,
+                keys_only=True,
+            )
+            logger.info(
+                "soap_api_diff complete",
+                extra={"soap_api_diff": diff_results, "soap_responses_match": diff_results == {}},
+            )
+        except Exception:
+            logger.info(
+                "soap_api_diff incomplete",
+                exc_info=True,
+                extra={
+                    "soap_responses_match": False,
+                    "soap_api_event": LegacySoapApiEvent.SOAP_DIFF_FAILED,
+                },
+            )
+
+    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
+        """
+        This method is responsible getting the simpler soap xml payload.
+
+        We first compare validated SOAP response dicts from simpler and
+        proxy responses. We then utilize the SOAPPayload class to get the
+        XML soap response from the validated XML dicts.
+        """
+        simpler_response_soap_dict = self.get_soap_response_dict()
+        log_local(
+            msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
+        )
+
+        simpler_response_xml = build_xml_from_dict(
+            operation_name=self.operation_config.response_operation_name,
+            xml_dict=get_envelope_dict(
+                simpler_response_soap_dict, self.operation_config.response_operation_name
             ),
-            self.soap_request.full_path.lstrip("/"),
+            key_namespace_config=self.operation_config.namespace_keymap,
+            namespaces=self.operation_config.namespaces,
         )
+        log_local(msg="simpler response XML", data=simpler_response_xml, formatter=xml_formatter)
+        if self.operation_config.compare_endpoints:
+            proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
+            log_local(
+                msg="proxy response validated dict",
+                data=proxy_response_soap_dict,
+                formatter=json_formatter,
+            )
+            # We will only run diffs for responses that do not match.
+            if proxy_response_soap_dict == simpler_response_soap_dict:
+                logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
+            else:
+                self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
 
-    def get_proxy_request_headers(self) -> dict:
-        # These request header keys are utilized in simpler soap api and are not
-        # required in the proxy requests.
-        simpler_soap_header_keys = {self.config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY}
-        return {
-            k: v for k, v in self.soap_request.headers.items() if k not in simpler_soap_header_keys
-        }
+        return get_soap_response(data=simpler_response_xml)
+
+    def _get_simpler_soap_response_schema(self) -> Any | None:
+        if self.soap_request.api_name == SimplerSoapAPI.APPLICANTS:
+            return getattr(applicants_schemas, self.operation_config.response_operation_name)
+        # Grantors SOAP API schemas will be returned once they exist but will return None for now.
+        return None
 
 
 class SimplerApplicantsS2SClient(BaseSOAPClient):
-    def __init__(
-        self, soap_request: SOAPRequest, db_session: db.Session, auth: SOAPAuth | None = None
-    ) -> None:
-        super().__init__(soap_request, db_session, auth)
-        self.operation_config = SOAP_OPERATION_CONFIGS["applicants"].get(
-            self.soap_request_operation_name
+    """Simpler SOAP API Client for Applicants SOAP API
+
+    This class implements SOAP operations listed under the grants.gov services
+    here: https://grants.gov/system-to-system/applicant-system-to-system/web-services/
+    """
+
+    def get_opportunity_list_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> applicants_schemas.GetOpportunityListResponse:
+        return get_opportunity_list_response(
+            db_session=self.db_session,
+            get_opportunity_list_request=applicants_schemas.GetOpportunityListRequest(
+                **self.get_soap_request_dict()
+            ),
         )
-
-    def GetOpportunityListRequest(self) -> schemas.GetOpportunityListResponse:
-        get_opportunity_list_request = schemas.GetOpportunityListRequest(
-            **self.get_soap_request_dict()
-        )
-        opportunity_list = get_opportunity_list_response(
-            self.db_session, get_opportunity_list_request
-        )
-
-        # It is ok to log this response since it is public and does not contain PII.
-        logger.info(
-            "soap get_opportunity_list_response retrieved",
-            extra={
-                "get_opportunity_list_request": get_opportunity_list_request.model_dump(),
-                "get_opportunity_list_response": opportunity_list.model_dump(),
-            },
-        )
-        return opportunity_list
-
-    def get_response(self) -> tuple:
-        # This method returns the raw response we get from the proxy request as well as
-        # the new simpler soap response data.
-        operation_method = getattr(self, self.soap_request_operation_name, None)
-        if not operation_method:
-            logger.info(f"soap_operation_not_supported: {self.soap_request_operation_name}")
-            return self.proxy_response, None
-        if not self.operation_config:
-            logger.info(f"soap_operation_config_not_found: {self.soap_request_operation_name}")
-            return self.proxy_response, None
-
-        try:
-            simpler_response = operation_method()
-            simpler_soap_payload = SoapPayload(
-                soap_payload=wrap_envelope_dict(
-                    soap_xml_dict=simpler_response.model_dump(mode="json", by_alias=True),
-                    operation_name=self.operation_config.response_operation_name,
-                ),
-                force_list_attributes=self.operation_config.force_list_attributes,
-                operation_name=self.operation_config.response_operation_name,
-            )
-            simpler_soap_response = get_soap_response(data=simpler_soap_payload.envelope.encode())
-        except SOAPFaultException as e:
-            logger.info(
-                "simpler_soap_api_fault",
-                extra={"err": e.message, "fault": e.fault.model_dump()},
-            )
-            simpler_soap_response = get_soap_response(
-                data=e.fault.to_xml(),
-                status_code=500,
-            )
-
-        return self.proxy_response, simpler_soap_response
 
 
 class SimplerGrantorsS2SClient(BaseSOAPClient):
-    def get_response(self) -> tuple:
-        return self.proxy_response, None
+    """Simpler SOAP API Client for Grantors SOAP API
+
+    This class implements SOAP operations listed under the grants.gov services
+    here: https://grants.gov/system-to-system/grantor-system-to-system/web-services
+    """
+
+    def get_application_zip_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
+        return get_application_zip_response(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            get_application_zip_request=grantors_schemas.GetApplicationZipRequest(
+                **self.get_soap_request_dict()
+            ),
+            soap_config=self.operation_config,
+        )
+
+    def get_submission_list_expanded_request(
+        self, proxy_response: SOAPResponse
+    ) -> grantors_schemas.GetSubmissionListExpandedResponse:
+        soap_request_dict = self.get_soap_request_dict() or {}
+        return get_submission_list_expanded_response(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
+            proxy_response=proxy_response,
+        )
+
+    def _gen_response_data(
+        self, mime_message: bytes, boundary: str, mtom_file_stream: BinaryIO
+    ) -> Iterator:
+        yield mime_message
+        CHUNK_SIZE = 4000
+        try:
+            chunk = mtom_file_stream.read(CHUNK_SIZE)
+            while chunk:
+                yield chunk
+                chunk = mtom_file_stream.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+        finally:
+            mtom_file_stream.close()
+        yield b"\n" + boundary.encode("utf-8") + b"--"
+
+    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
+        if self.operation_config.is_mtom is False:
+            return proxy_response
+        # MTOM message is assembled here
+        # 1. --uuid: {boundary_uuid}\n
+        # 2. headers:
+        #    'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
+        #    "Content-Transfer-Encoding: binary\n"
+        #    "Content-ID: <root.message@cxf.apache.org>\n\n"
+        # 3. MTOM xml body
+        # 4. --uuid: {boundary_uuid}
+        # 5. the file bytes from the file being attached
+        # 6. --uuid: {boundary_uuid}--
+        simpler_response_soap_dict = self.get_soap_response_dict(proxy_response)
+        mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
+        log_local(
+            msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
+        )
+        boundary_uuid = str(uuid.uuid4())
+        update_headers = {
+            "MIME-Version": "1.0",
+            "Content-Type": f'multipart/related; type="application/xop+xml"; boundary="uuid:{boundary_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"',
+        }
+        boundary = "--uuid:" + boundary_uuid
+        mime_message: Iterator[bytes] | bytes = b""
+        mime_message = build_mtom_response_from_dict(
+            simpler_response_soap_dict,
+            boundary_uuid,
+            self.operation_config.namespaces,
+            root=self.operation_config.response_operation_name,
+        )
+        if self.operation_config.response_operation_name != "GetApplicationZipResponse":
+            mime_message += f"\n--uuid:{boundary_uuid}--".encode("utf-8")
+            return get_soap_response(
+                data=mime_message,
+                headers=update_headers,
+            )
+        if mtom_file_stream:
+            mime_message += ("\n" + boundary + "\n").encode("utf8")
+            return get_soap_response(
+                data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
+                headers=update_headers,
+            )
+        return proxy_response

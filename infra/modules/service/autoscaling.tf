@@ -25,7 +25,7 @@ resource "aws_appautoscaling_policy" "ecs_scale_policy_memory" {
     }
     scale_in_cooldown  = 300
     scale_out_cooldown = 5
-    target_value       = 99
+    target_value       = 70
   }
 }
 
@@ -42,6 +42,6 @@ resource "aws_appautoscaling_policy" "ecs_scale_policy_cpu" {
     }
     scale_in_cooldown  = 300
     scale_out_cooldown = 5
-    target_value       = 75
+    target_value       = 70
   }
 }

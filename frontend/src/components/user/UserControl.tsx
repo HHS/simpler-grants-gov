@@ -1,31 +1,48 @@
 import clsx from "clsx";
 import { noop } from "lodash";
+import { applicationTestUserId, testApplicationId } from "src/constants/auth";
 import { useUser } from "src/services/auth/useUser";
-import { UserProfile } from "src/types/authTypes";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import {
-  IconListContent,
-  Menu,
-  NavDropDownButton,
-} from "@trussworks/react-uswds";
+import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
 
-import { LoginButtonModal } from "src/components/LoginButtonModal";
+import { LoginButton } from "src/components/LoginButton";
 import { USWDSIcon } from "src/components/USWDSIcon";
+
+// links directly to a test application, only used in local environments when logged in as specific test user
+const TestApplicationLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href={`/applications/${testApplicationId}`}
+    >
+      {t("testApplication")}
+    </Link>
+  );
+};
+
+const SettingsNavLink = () => {
+  const t = useTranslations("Header.navLinks");
+  return (
+    <Link
+      className="display-flex usa-button usa-button--unstyled text-no-underline"
+      href="/settings"
+    >
+      {t("settings")}
+    </Link>
+  );
+};
 
 // used in three different places
 // 1. on desktop - nav item drop down button content
 // 2. on mobile - nav item drop down button content, without email text
 // 3. on mobile - nav sub item content
-const UserEmailItem = ({
-  email,
-  isSubnav,
-}: {
-  email?: string;
-  isSubnav: boolean;
-}) => {
+const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
+  const t = useTranslations("Header.navLinks");
   return (
     <a
       className={clsx("flex-align-center", "display-flex", {
@@ -46,35 +63,46 @@ const UserEmailItem = ({
           "desktop:display-block": !isSubnav,
         })}
       >
-        {email}
+        {t("account")}
       </div>
     </a>
   );
 };
 
-const UserDropdown = ({
-  user,
-  navLogoutLinkText,
-  logout,
-}: {
-  user: UserProfile;
-  navLogoutLinkText: string;
-  logout: () => Promise<void>;
-}) => {
-  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
+const LogoutNavItem = () => {
+  const t = useTranslations("Header.navLinks");
 
-  const logoutNavItem = (
+  const { logoutLocalUser } = useUser();
+  const router = useRouter();
+
+  const logout = useCallback(async (): Promise<void> => {
+    // this isn't using the clientFetch hook because we don't really need all that added functionality here
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    logoutLocalUser();
+    router.refresh();
+  }, [logoutLocalUser, router]);
+
+  return (
     <a
       className="display-flex usa-button usa-button--unstyled text-no-underline"
       // eslint-disable-next-line
       onClick={() => logout()}
     >
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
-      <IconListContent className="font-sans-sm">
-        {navLogoutLinkText}
-      </IconListContent>
+      {t("logout")}
     </a>
   );
+};
+
+export const UserDropdown = ({
+  isApplicationTestUser,
+}: {
+  isApplicationTestUser: boolean;
+}) => {
+  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
 
   return (
     <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative">
@@ -84,7 +112,7 @@ const UserDropdown = ({
         // perfectly well.
         // eslint-disable-next-line
         // @ts-ignore: Type 'Element' is not assignable to type 'string'
-        label={<UserEmailItem isSubnav={false} email={user.email} />}
+        label={<UserAccountItem isSubnav={false} />}
         isOpen={userProfileMenuOpen}
         onClick={(e) => {
           if (!userProfileMenuOpen) {
@@ -109,9 +137,11 @@ const UserDropdown = ({
         className="position-absolute desktop:width-full z-200 right-0"
         id="user-control"
         items={[
-          <UserEmailItem key="email" isSubnav={true} email={user.email} />,
-          logoutNavItem,
-        ]}
+          <UserAccountItem key="account" isSubnav={true} />,
+          <SettingsNavLink key="settings" />,
+          isApplicationTestUser && <TestApplicationLink />,
+          <LogoutNavItem key="logout" />,
+        ].filter(Boolean)}
         type="subnav"
         isOpen={userProfileMenuOpen}
       />
@@ -119,33 +149,18 @@ const UserDropdown = ({
   );
 };
 
-export const UserControl = () => {
+export const UserControl = ({ localDev }: { localDev: boolean }) => {
   const t = useTranslations("Header");
 
-  const { user, logoutLocalUser } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
 
-  const logout = useCallback(async (): Promise<void> => {
-    // this isn't using the clientFetch hook because we don't really need all that added functionality here
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-
-    logoutLocalUser();
-    router.refresh();
-  }, [logoutLocalUser, router]);
-
+  const isApplicationTestUser =
+    localDev && user?.user_id === applicationTestUserId;
   return (
     <>
-      {!user?.token && (
-        <LoginButtonModal navLoginLinkText={t("navLinks.login")} />
-      )}
+      {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
       {!!user?.token && (
-        <UserDropdown
-          user={user}
-          navLogoutLinkText={t("navLinks.logout")}
-          logout={logout}
-        />
+        <UserDropdown isApplicationTestUser={isApplicationTestUser} />
       )}
     </>
   );

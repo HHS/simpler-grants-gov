@@ -16,13 +16,14 @@ import {
 import {
   ComboBox,
   ComboBoxOption,
-  ErrorMessage,
   FormGroup,
   Select,
 } from "@trussworks/react-uswds";
 
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
 import { UswdsWidgetProps } from "src/components/applyForm/types";
-import { FieldLabel } from "./FieldLabel";
+import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {
   if (multiple) {
@@ -46,8 +47,8 @@ function SelectWidget<
 >({
   id,
   disabled,
-  options,
-  readonly,
+  options = {},
+  readOnly,
   required,
   schema,
   value,
@@ -61,6 +62,7 @@ function SelectWidget<
   onFocus = () => ({}),
 }: UswdsWidgetProps<T, S, F>) {
   const { title, description } = schema;
+  const labelType = getLabelTypeFromOptions(options?.["widget-label"]);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
   const enums = useMemo(() => (opts && opts.length > 0 ? opts : []), [opts]);
@@ -115,18 +117,23 @@ function SelectWidget<
       : undefined;
 
   const Widget = useCombo ? ComboBox : Select;
+  // ComboBox widget changes the id which breaks handling of idFor and anchor links
+  const idFor = useCombo ? `${id}__combobox` : id;
+  const IdSpan = useCombo ? <span id={id}></span> : undefined;
 
   return (
-    <FormGroup error={error} key={`wrapper-for-${id}`}>
-      <FieldLabel
-        idFor={id}
+    <FormGroup error={error} key={`form-group__select-input--${id}`}>
+      <DynamicFieldLabel
+        idFor={idFor}
         title={title}
         required={required}
-        description={description}
+        description={description as string}
+        labelType={labelType}
       />
-
-      {error && <ErrorMessage>{rawErrors[0]}</ErrorMessage>}
-
+      {error && (
+        <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
+      )}
+      {IdSpan}
       <Widget
         // necessary due to react 19 bug https://github.com/facebook/react/issues/30580
         key={selectValue}
@@ -136,7 +143,7 @@ function SelectWidget<
         defaultValue={updateOnInput ? undefined : selectValue}
         value={updateOnInput ? selectValue : undefined}
         required={required}
-        disabled={disabled || readonly}
+        disabled={disabled || readOnly}
         autoFocus={autofocus}
         onChange={updateOnInput ? handleChange : noop}
         onBlur={updateOnInput ? handleBlur : undefined}

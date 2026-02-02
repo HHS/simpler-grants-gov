@@ -1,5 +1,7 @@
+from collections.abc import Callable
 from enum import StrEnum
-from typing import Any, Callable, Pattern, Type
+from re import Pattern
+from typing import Any
 
 from marshmallow import ValidationError, validates_schema
 
@@ -84,11 +86,11 @@ class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
     def with_one_of(
         self,
         *,
-        allowed_values: Type[StrEnum] | None = None,
+        allowed_values: type[StrEnum] | None = None,
         pattern: str | Pattern | None = None,
         example: str | None = None,
         minimum_length: int | None = None
-    ) -> "StrSearchSchemaBuilder":
+    ) -> StrSearchSchemaBuilder:
         if pattern is not None and allowed_values is not None:
             raise Exception("Cannot specify both a pattern and allowed_values")
 
@@ -158,7 +160,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         min_example: int | None = None,
         max_example: int | None = None,
         positive_only: bool = True,
-    ) -> "IntegerSearchSchemaBuilder":
+    ) -> IntegerSearchSchemaBuilder:
         self._with_minimum_value(min_example, positive_only)
         self._with_maximum_value(max_example, positive_only)
         self._with_int_range_validator()
@@ -166,7 +168,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
     def _with_minimum_value(
         self, example: int | None = None, positive_only: bool = True
-    ) -> "IntegerSearchSchemaBuilder":
+    ) -> IntegerSearchSchemaBuilder:
         metadata = {}
         if example is not None:
             metadata["example"] = example
@@ -182,7 +184,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
     def _with_maximum_value(
         self, example: int | None = None, positive_only: bool = True
-    ) -> "IntegerSearchSchemaBuilder":
+    ) -> IntegerSearchSchemaBuilder:
         metadata = {}
         if example is not None:
             metadata["example"] = example
@@ -196,7 +198,7 @@ class IntegerSearchSchemaBuilder(BaseSearchSchemaBuilder):
         )
         return self
 
-    def _with_int_range_validator(self) -> "IntegerSearchSchemaBuilder":
+    def _with_int_range_validator(self) -> IntegerSearchSchemaBuilder:
         # Define a schema validator function that we'll use to define any
         # rules that go across fields in the validation
         @validates_schema
@@ -252,7 +254,7 @@ class BoolSearchSchemaBuilder(BaseSearchSchemaBuilder):
             )
     """
 
-    def with_one_of(self, example: bool | None = None) -> "BoolSearchSchemaBuilder":
+    def with_one_of(self, example: bool | None = None) -> BoolSearchSchemaBuilder:
         metadata = {}
         if example is not None:
             metadata["example"] = example
@@ -289,7 +291,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
         )
     """
 
-    def with_date_range(self) -> "DateSearchSchemaBuilder":
+    def with_date_range(self) -> DateSearchSchemaBuilder:
         self.schema_fields["start_date"] = fields.Date(allow_none=True)
         self.schema_fields["end_date"] = fields.Date(allow_none=True)
 
@@ -304,7 +306,7 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
         return self
 
-    def _with_date_range_validator(self) -> "DateSearchSchemaBuilder":
+    def _with_date_range_validator(self) -> DateSearchSchemaBuilder:
         # Define a schema validator function that we'll use to define any
         # rules that go across fields in the validation
         @validates_schema
@@ -346,4 +348,34 @@ class DateSearchSchemaBuilder(BaseSearchSchemaBuilder):
                 )
 
         self.schema_fields["validate_date_range"] = validate_date_range
+        return self
+
+
+class UuidSearchSchemaBuilder(BaseSearchSchemaBuilder):
+    """Builder for setting up a filter for UUID values in a search endpoint schema.
+
+    Our schemas are set up to look like:
+        { "filters": { "field": { "one_of": ["uuid1", "uuid2"] } } }
+
+    This helps generate the filters for a given UUID field. Currently, only a `one_of` filter is implemented,
+    allowing the user to specify one or more UUIDs to match exactly. The `fields.UUID()` type ensures
+    strict UUID format validation (e.g., "f47ac10b-58cc-4372-a567-0e02b2c3d479").
+
+    While filtering by multiple UUIDs may not be common in all cases, we maintain consistency with
+    the overall filter structure used across other field types.
+
+    Usage::
+        # In a search request schema, you would use it like so
+        class UserApplicationFilterSchema(Schema):
+            example_uuid_field = fields.Nested(
+                UuidSearchSchemaBuilder("ExampleUuidFieldSchema")
+                .with_one_of()
+                .build()
+            )
+    """
+
+    def with_one_of(
+        self,
+    ) -> UuidSearchSchemaBuilder:
+        self.schema_fields["one_of"] = fields.List(fields.UUID(), allow_none=True)
         return self

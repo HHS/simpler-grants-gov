@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -21,7 +21,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             Tsynopsis,
             OpportunitySummary,
             [
-                Tsynopsis.opportunity_id == OpportunitySummary.opportunity_id,
+                Tsynopsis.opportunity_id == OpportunitySummary.legacy_opportunity_id,
                 OpportunitySummary.is_forecast.is_(False),
             ],
         )
@@ -32,7 +32,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
             Tforecast,
             OpportunitySummary,
             [
-                Tforecast.opportunity_id == OpportunitySummary.opportunity_id,
+                Tforecast.opportunity_id == OpportunitySummary.legacy_opportunity_id,
                 OpportunitySummary.is_forecast.is_(True),
             ],
         )
@@ -41,7 +41,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
     def process_opportunity_summary_group(
         self,
         records: Sequence[
-            Tuple[transform_constants.SourceSummary, OpportunitySummary | None, Opportunity | None]
+            tuple[transform_constants.SourceSummary, OpportunitySummary | None, Opportunity | None]
         ],
     ) -> None:
         for source_summary, target_summary, opportunity in records:
@@ -88,7 +88,7 @@ class TransformOpportunitySummary(AbstractTransformSubTask):
 
             logger.info("Transforming and upserting opportunity summary", extra=extra)
             transformed_opportunity_summary = transform_util.transform_opportunity_summary(
-                source_summary, target_summary
+                source_summary, target_summary, opportunity
             )
 
             if is_insert:

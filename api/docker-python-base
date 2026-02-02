@@ -1,0 +1,167 @@
+#==============================================
+# Stage 1: Build Python base from Amazon Linux
+#==============================================
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
+
+ARG PYTHON_VERSION=3.14.2
+ARG PY_MM=3.14
+ARG POETRY_VERSION=2.2.1
+ARG PIP_VERSION=25.3
+
+SHELL ["/bin/bash", "-eux", "-c"]
+
+# Create python-version.txt file to be used by downstream stages
+RUN echo "${PY_MM}" > /python-version.txt
+
+# Install build dependencies
+RUN dnf install -y \
+      gcc \
+      gcc-c++ \
+      make \
+      wget \
+      tar \
+      gzip \
+      xz \
+      bzip2-devel \
+      zlib-devel \
+      openssl-devel \
+      libffi-devel \
+      sqlite-devel \
+      readline-devel \
+      ncurses-devel \
+      xz-devel \
+      gdbm-devel \
+      ca-certificates \
+      findutils \
+      shadow-utils \
+      libxml2-devel \
+      libxslt-devel && \
+    dnf clean all
+
+# Build Python from source
+WORKDIR /tmp
+RUN wget -q https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz && \
+    tar xzf Python-${PYTHON_VERSION}.tgz
+WORKDIR /tmp/Python-${PYTHON_VERSION}
+RUN ./configure \
+        --prefix=/usr/local \
+        --with-lto \
+        --enable-shared \
+        --with-ensurepip=install \
+        LDFLAGS="-Wl,-rpath=/usr/local/lib" && \
+    make -j"$(nproc)" && \
+    make install
+
+WORKDIR /tmp
+RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
+    python3 -m pip install --no-cache-dir --upgrade "pip==${PIP_VERSION}" && \
+    ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
+    ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
+    pip3 install --no-cache-dir poetry==${POETRY_VERSION}
+
+# Ensure virtualenv embeds patched pip (25.3) for offline venv creation
+RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
+
+# Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
+RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
+
+# Upgrade filelock to fix GHSA-w853-jp5j-5j7f
+RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
+
+# List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
+RUN python3 -m pip list -v
+
+# Remove pip from runtime (keep Poetry)
+RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
+    /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
+    /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
+    /usr/local/bin/pip* \
+    /usr/local/bin/easy_install* \
+    /root/.cache \
+    /root/.local/share/virtualenv || true
+
+# Prune stdlib
+RUN rm -rf \
+      /usr/local/lib/python${PY_MM}/test \
+      /usr/local/lib/python${PY_MM}/ensurepip \
+      /usr/local/lib/python${PY_MM}/idlelib \
+      /usr/local/lib/python${PY_MM}/tkinter \
+      /usr/local/lib/python${PY_MM}/turtledemo \
+      /usr/local/lib/python${PY_MM}/distutils \
+      /usr/local/lib/python${PY_MM}/lib2to3 \
+      /usr/local/lib/python${PY_MM}/venv
+
+# Compile stdlib to optimized bytecode
+RUN python3 -m compileall -f -o 1 /usr/local/lib/python${PY_MM}
+
+# Strip Python binary and extension modules
+RUN strip --strip-unneeded /usr/local/bin/python${PY_MM} || true; \
+    for f in /usr/local/lib/libpython${PY_MM}.so*; do strip --strip-unneeded "$f" || true; done; \
+    find /usr/local/lib/python${PY_MM}/lib-dynload -type f -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+#==============================================
+# Stage 2: Runtime base on Amazon Linux
+#==============================================
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS python-base
+ARG PY_MM=3.14
+LABEL org.opencontainers.image.source="https://github.com/HHS/simpler-grants-gov"
+
+# Install runtime dependencies and build tools for compiling Python packages
+# Build tools are needed because Python 3.14 is new and many packages lack prebuilt wheels
+RUN dnf install -y \
+      ca-certificates \
+      openssl \
+      libffi \
+      sqlite \
+      readline \
+      ncurses \
+      xz-libs \
+      gdbm \
+      bzip2-libs \
+      zlib \
+      shadow-utils \
+      findutils \
+      wget \
+      libxml2 \
+      libxslt \
+      gcc \
+      gcc-c++ \
+      make \
+      libxml2-devel \
+      libxslt-devel \
+      openssl-devel \
+      libffi-devel && \
+    # Update packages with security vulnerabilities
+    dnf update -y \
+      libcap-2.73-1.amzn2023.0.4 \
+      lz4-libs-1.9.4-1.amzn2023.0.3 \
+      binutils-2.41-50.amzn2023.0.5 \
+      glib2-2.82.2-767.amzn2023 \
+      curl-minimal-8.11.1-4.amzn2023.0.3 \
+      libcurl-minimal-8.11.1-4.amzn2023.0.3 && \
+    dnf clean all && \
+    # Remove the system Python RPMs
+    (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \
+    rm -rf /var/cache/dnf /var/cache/yum || true
+
+# Copy python-version.txt for downstream stages to use
+COPY --from=amazonlinux-builder /python-version.txt /python-version.txt
+
+# Copy Python runtime and development headers
+COPY --from=amazonlinux-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
+COPY --from=amazonlinux-builder /usr/local/bin/python3 /usr/local/bin/python3
+COPY --from=amazonlinux-builder /usr/local/bin/python /usr/local/bin/python
+COPY --from=amazonlinux-builder /usr/local/bin/poetry /usr/local/bin/poetry
+COPY --from=amazonlinux-builder /usr/local/lib/python${PY_MM}/ /usr/local/lib/python${PY_MM}/
+COPY --from=amazonlinux-builder /usr/local/lib/libpython${PY_MM}.so* /usr/local/lib/
+COPY --from=amazonlinux-builder /usr/local/include/python${PY_MM}/ /usr/local/include/python${PY_MM}/
+
+ENV PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    LD_LIBRARY_PATH="/usr/local/lib:/lib64:/usr/lib64" \
+    SSL_CERT_FILE="/etc/pki/tls/certs/ca-bundle.crt" \
+    SSL_CERT_DIR="/etc/pki/tls/certs" \
+    TMPDIR="/tmp"
+
+SHELL ["/bin/bash", "-c"]

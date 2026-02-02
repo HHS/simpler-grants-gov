@@ -125,3 +125,9 @@ variable "service_override_extra_environment_variables" {
   EOT
   default     = {}
 }
+
+variable "database_engine_version" {
+  type        = string
+  description = "Postgres database engine version"
+  default     = "17.5"
+}

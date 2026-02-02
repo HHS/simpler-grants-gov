@@ -8,7 +8,37 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 ### 🏗️ Development version
 
-Run `npm install && npm run dev` to install and start the application.
+Running a local server requires the version of Node specified in [the .nvmrc file](https://github.com/HHS/simpler-grants-gov/blob/main/.nvmrc) to be installed.
+
+This project supports the use of NVM for node version management, so it is suggested you intall and use NVM. More infomrmation can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
+
+* **For Mac** - Run `npm install && npm run local` to install and start the application.
+* **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
+
+Optionally, disable [telemetry data collection](https://nextjs.org/telemetry)
+
+```bash
+npx next telemetry disable
+```
+
+### Configuration
+
+Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
+
+On Mac, run `touch .env.local`
+
+On Windows, run `ni .env.local` in PowerShell.
+
+For more information about environments, take a look at [environments.md](./environments.md).
+
+### Authentication
+
+Running authentication locally requires running the API and sharing the correct JWT keys.
+
+1. Ensure you've completed the [API setup](../api/development.md), including creating the `override.env` file
+2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to your `/frontend/.env.local` file which creates the necessary keys
+3. Restart the API (if necessary reseed the database, then `make start`)
+4. Restart the frontend (on Mac, `npm run local`, and on Windows, `npx run dev`) for development
 
 ### 🏛️ "Built" version
 
@@ -85,7 +115,7 @@ E2E test filenames end with `.spec.ts` and are found in the `tests/e2e` director
 
 To run E2E tests via CLI:
 
-- `cd ../api && make init db-seed-local start` (prerequisite to start the API)
+- `cd ../api && make remake-backend start` (prerequisite to start the API)
 - `npx playwright install --with-deps` — Downloads playwright browsers required to run tests
 - `npm run test:e2e` — Runs all E2E tests using the playwright config found at `tests/playwright.config.ts`
 - `npm run test:e2e:ui` — Run specific or all E2E tests using Playwright's [UI mode](https://playwright.dev/docs/test-ui-mode), which is useful for debugging full traces of each test
@@ -190,18 +220,9 @@ The `/search` and opportunity pages rely on the application API. The API endpoin
 
 The `API_URL` environment variable can be set to connect to prod (`https://api.simpler.grants.gov`) or lower environment URLs to quickly develop using production or development data. To successfully connect to a deployed API, the `API_AUTH_TOKEN` variable must be set correctly for the environment.
 
-To start a local development version of the API, run `make init && db-seed-local && populate-search-opportunities` in the `/api` folder.
+To start a local development version of the API, run `make remake-backend` in the `/api` folder.
 
 See [documentation/api/development.md](../api/development.md) for more details.
-
-### Authentication
-
-Running authentication locally requires running the API, directing the API redirect to the frontend, and sharing the correct JWT keys.
-
-1. Run `make setup-env-override-file` to create the `override.env` file in the `/api` folder
-2. Copy the `API_JWT_PUBLIC_KEY` value from `/api/override.env` file to `/frontend/.env.local` file which creates the necessary keys
-3. Add `LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback` to the `api/override.env` so the API redirects to the correct callback route
-4. Start the API (`make make db-seed-local && make populate-search-opportunities && make start`) and frontend (`npm run dev`) for development
 
 #### Login flow
 

@@ -6,7 +6,9 @@ module "staging_config" {
   environment                     = "staging"
   network_name                    = "staging"
   domain_name                     = "api.staging.simpler.grants.gov"
+  secondary_domain_names          = ["alb.staging.simpler.grants.gov"]
   s3_cdn_domain_name              = "files.staging.simpler.grants.gov"
+  mtls_domain_name                = "soap.staging.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   database_enable_http_endpoint   = true
@@ -42,9 +44,17 @@ module "staging_config" {
 
   service_override_extra_environment_variables = {
     # Login.gov OAuth
-    ENABLE_AUTH_ENDPOINT   = 1
-    ENABLE_APPLY_ENDPOINTS = 1
-    ENABLE_SOAP_API        = 1
+    ENABLE_XML_GENERATION = 1
+
+    ENABLE_WORKFLOW_ENDPOINTS = 1
+
+    # Email notification
+    RESET_EMAILS_WITHOUT_SENDING = "false"
+
+    # PDF Generation - Staging overrides
+    FRONTEND_URL             = "https://staging.simpler.grants.gov"
+    DOCRAPTOR_TEST_MODE      = "true"
+    PDF_GENERATION_USE_MOCKS = "false"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

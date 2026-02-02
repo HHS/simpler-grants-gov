@@ -1,7 +1,8 @@
-import { APIResponse } from "src/types/apiResponseTypes";
-
 import { FormDetail } from "./formResponseTypes";
-import { OpportunityAssistanceListing } from "./opportunity/opportunityResponseTypes";
+import {
+  BaseOpportunity,
+  OpportunityAssistanceListing,
+} from "./opportunity/opportunityResponseTypes";
 
 export interface CompetitionInstructions {
   created_at: string;
@@ -10,6 +11,8 @@ export interface CompetitionInstructions {
   updated_at: string;
 }
 export type CompetitionForms = [{ form: FormDetail; is_required: boolean }];
+
+export type ApplicantTypes = "individual" | "organization";
 
 export type Competition = {
   closing_date: string;
@@ -20,17 +23,9 @@ export type Competition = {
   competition_title: string;
   contact_info: null;
   is_open: boolean;
-  open_to_applicants: [string];
+  open_to_applicants: ApplicantTypes[];
   opening_date: string;
   opportunity_assistance_listings: OpportunityAssistanceListing[];
   opportunity_id: number;
+  opportunity: BaseOpportunity;
 };
-
-export interface CompetitionsDetailApiResponse extends APIResponse {
-  data: {
-    competition_forms: [{ form: FormDetail }];
-    competition_id: string;
-    opportunity_id: number;
-    competition_instructions: CompetitionInstructions[];
-  };
-}

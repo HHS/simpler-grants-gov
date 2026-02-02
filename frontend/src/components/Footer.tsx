@@ -1,75 +1,29 @@
 import GrantsLogo from "public/img/grants-logo.svg";
 import { ExternalRoutes } from "src/constants/routes";
-import { UswdsIconNames } from "src/types/generalTypes";
+import { messages } from "src/i18n/messages/en";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import Link from "next/link";
 import {
-  Address,
   Grid,
   GridContainer,
-  SocialLinks,
   Footer as USWDSFooter,
 } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+type FooterNavItems = typeof messages.Footer.links;
 
-// Recreate @trussworks/react-uswds SocialLink component to accept any Icon
-// https://github.com/trussworks/react-uswds/blob/cf5b4555e25f0e52fc8af66afe29253922bed2a5/src/components/Footer/SocialLinks/SocialLinks.tsx#L33
-type SocialLinkProps = {
-  href: string;
-  name: string;
-  icon: string;
+const FooterNavLinkItem = ({ to }: { to: keyof FooterNavItems }) => {
+  const t = useTranslations("Footer");
+  return (
+    <li className="usa-footer__secondary-link margin-left-0">
+      <Link href={`/${to}`}>{t(`links.${to}`)}</Link>
+    </li>
+  );
 };
-
-const SocialLink = ({ href, name, icon }: SocialLinkProps) => (
-  <a className="usa-social-link" href={href} title={name} target="_blank">
-    <USWDSIcon
-      className="usa-social-link__icon"
-      height="40px"
-      name={icon as UswdsIconNames}
-      aria-label={name}
-    />
-  </a>
-);
 
 const Footer = () => {
   const t = useTranslations("Footer");
-
-  const links = [
-    {
-      href: ExternalRoutes.GRANTS_X_TWITTER,
-      name: t("linkXTwitter"),
-      icon: "x",
-    },
-    {
-      href: ExternalRoutes.GRANTS_YOUTUBE,
-      name: t("linkYoutube"),
-      icon: "youtube",
-    },
-    {
-      href: ExternalRoutes.GRANTS_BLOG,
-      name: t("linkBlog"),
-      icon: "local_library",
-    },
-    {
-      href: ExternalRoutes.GRANTS_NEWSLETTER,
-      name: t("linkNewsletter"),
-      icon: "mail",
-    },
-    {
-      href: ExternalRoutes.GRANTS_RSS,
-      name: t("linkRss"),
-      icon: "rss_feed",
-    },
-    {
-      href: ExternalRoutes.GITHUB_REPO,
-      name: t("linkGithub"),
-      icon: "github",
-    },
-  ].map(({ href, name, icon }) => (
-    <SocialLink href={href} key={name} name={name} icon={icon} />
-  ));
 
   return (
     <USWDSFooter
@@ -83,7 +37,7 @@ const Footer = () => {
       primary={
         <GridContainer>
           <Grid row gap>
-            <Grid tablet={{ col: 4 }}>
+            <Grid tablet={{ col: 3 }}>
               <div className="footer-logo-container position-relative">
                 <Image
                   className="height-auto position-relative"
@@ -94,25 +48,63 @@ const Footer = () => {
                 />
               </div>
             </Grid>
-            <Grid className="usa-footer__contact-links" tablet={{ col: 8 }}>
-              <SocialLinks links={links} />
-              <h2 className="usa-footer__contact-heading text-balance">
-                {t("agencyContactCenter")}
-              </h2>
-              <Address
-                size="medium"
-                items={[
-                  <a key="telephone" href={`tel:${t("telephone")}`}>
-                    {t("telephone")}
-                  </a>,
-                  <a
-                    key="email"
-                    href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}
-                  >
-                    {ExternalRoutes.EMAIL_SUPPORT}
-                  </a>,
-                ]}
-              />
+            <Grid className="usa-footer__nav border-0" tablet={{ col: 3 }}>
+              <h3>{t("explore")}</h3>
+              <ul className="margin-top-3">
+                <li className="usa-footer__secondary-link margin-left-0">
+                  <Link href="/">{t("links.home")}</Link>
+                </li>
+                <FooterNavLinkItem to="search" />
+                <FooterNavLinkItem to="vision" />
+                <FooterNavLinkItem to="roadmap" />
+                <FooterNavLinkItem to="events" />
+                <FooterNavLinkItem to="subscribe" />
+              </ul>
+            </Grid>
+            <Grid
+              className="margin-top-3 tablet:margin-top-0"
+              tablet={{ col: 3 }}
+            >
+              <h3>{t("simpler")}</h3>
+              <div>
+                {t.rich("feedback", {
+                  email: (chunk) => (
+                    <a href={`mailto:${ExternalRoutes.EMAIL_SIMPLERGRANTSGOV}`}>
+                      {chunk}
+                    </a>
+                  ),
+                })}
+              </div>
+              <h3>{t("supportCenter")}</h3>
+              <div>
+                {t.rich("techSupport", {
+                  email: (chunk) => (
+                    <a href={`mailto:${ExternalRoutes.EMAIL_SUPPORT}`}>
+                      {chunk}
+                    </a>
+                  ),
+                })}
+              </div>
+              <div className="margin-top-2">{t("telephone")}</div>
+            </Grid>
+            <Grid
+              className="margin-top-3 tablet:margin-top-0"
+              tablet={{ col: 3 }}
+            >
+              <h3 className="">{t("agencyContactCenter")}</h3>
+              <div>
+                {t.rich("grantorSupport", {
+                  poc: (chunk) => (
+                    <a
+                      href={ExternalRoutes.GRANTOR_SUPPORT}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {chunk}
+                    </a>
+                  ),
+                })}
+              </div>
             </Grid>
           </Grid>
         </GridContainer>

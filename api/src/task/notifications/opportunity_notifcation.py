@@ -1,20 +1,21 @@
 import logging
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Sequence, cast
+from typing import cast
 from uuid import UUID
 
-from sqlalchemy import and_, desc, func, select, tuple_, update
+from sqlalchemy import and_, desc, exists, func, select, tuple_, update
 from sqlalchemy.orm import aliased, selectinload
 
 from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
 from src.constants.lookup_constants import FundingCategory, OpportunityCategory, OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion
-from src.db.models.user_models import UserSavedOpportunity
+from src.db.models.user_models import LinkExternalUser, SuppressedEmail, UserSavedOpportunity
 from src.task.notifications.base_notification import BaseNotificationTask
+from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
     ChangedSavedOpportunity,
-    Metrics,
     NotificationReason,
     OpportunityVersionChange,
     UserEmailNotification,
@@ -81,10 +82,12 @@ NOT_SPECIFIED = "not specified"  # If None value display this string
 
 TRUNCATION_THRESHOLD = 250
 
+UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=opportunity_update"
+
 
 class OpportunityNotificationTask(BaseNotificationTask):
-    def __init__(self, db_session: db.Session):
-        super().__init__(db_session)
+    def __init__(self, db_session: db.Session, notification_config: EmailNotificationConfig):
+        super().__init__(db_session, notification_config)
 
     def collect_email_notifications(self) -> list[UserEmailNotification]:
         """Collect notifications for changed opportunities that users are tracking"""
@@ -133,7 +136,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
                 user_opportunity_pairs.append((user_id, opp_id))
 
-        self.increment(Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
+        self.increment(self.Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
 
         # Grab last notified versions.
         prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
@@ -146,18 +149,29 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 logger.warning("No email found for user", extra={"user_id": user_id})
                 continue
 
-            updated_opps = user_changed_opp.opportunities
-
-            for opp in updated_opps:
+            updated_opps: list[OpportunityVersionChange] = []
+            for opp in user_changed_opp.opportunities:
                 opp.previous = prior_notified_versions.get(
                     (user_changed_opp.user_id, opp.opportunity_id)
                 )
+                if opp.previous is None:
+                    logger.error(
+                        "No previous version found for this opportunity",
+                        extra={"user_id": user_id, "opportunity_id": opp.opportunity_id},
+                    )
+                    continue
+                updated_opps.append(opp)
+
+            if not updated_opps:
+                logger.warning(
+                    "No opportunities with prior versions for user", extra={"user_id": user_id}
+                )
+                continue
 
             user_content = self._build_notification_content(updated_opps)
-
             if not user_content:
                 logger.info("No relevant notifications found for user", extra={"user_id": user_id})
-                return users_email_notifications
+                continue
 
             logger.info(
                 "Created changed opportunity email notifications",
@@ -210,7 +224,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         # Map cols in the subquery back to OpportunityVersion model
         latest_opp_version = aliased(OpportunityVersion, latest_versions_subq)
 
-        # Grab latest version for each UserSavedOpportunity
+        # Grab latest version for each active UserSavedOpportunity
         stmt = (
             select(UserSavedOpportunity, latest_opp_version)
             .options(selectinload(UserSavedOpportunity.user))
@@ -221,6 +235,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     latest_versions_subq.c.rn == 1,
                 ),
             )
+            .where(
+                UserSavedOpportunity.is_deleted.isnot(True),
+                ~exists().where(
+                    and_(
+                        SuppressedEmail.email == LinkExternalUser.email,
+                        LinkExternalUser.user_id == UserSavedOpportunity.user_id,
+                    )
+                ),
+            )
         )
 
         results = self.db_session.execute(stmt).all()
@@ -229,7 +252,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _get_last_notified_versions(
         self, user_opportunity_pairs: list
-    ) -> dict[tuple[UUID, int], OpportunityVersion]:
+    ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
         """
         Given (user_id, opportunity_id) pairs, return the most recent
         OpportunityVersion for each that was created before the user's
@@ -276,7 +299,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _build_description_fields_content(self, description_change: dict, opp_id: int) -> str:
+    def _build_description_fields_content(self, description_change: dict) -> str:
         after = description_change["after"]
         if not after:
             return ""
@@ -361,15 +384,14 @@ class OpportunityNotificationTask(BaseNotificationTask):
         for field, change in eligibility_change.items():
             before = change["before"]
             after = change["after"]
-
             if field == "applicant_types":
-                added = sorted(set(after) - set(before), key=lambda x: x.value)
-                removed = sorted(set(before) - set(after), key=lambda x: x.value)
+                added = sorted(set(after) - set(before))
+                removed = sorted(set(before) - set(after))
                 stmt = ELIGIBILITY_FIELDS["applicant_types"]
                 if added:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in added)}].<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type)}" for e_type in added)}].<br>"
                 if removed:
-                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type.value)}" for e_type in removed)}].<br>"
+                    eligibility_section += f"{BULLET_POINTS_STYLING} Removed {stmt} [{", ".join(f"{self._format_slug(e_type)}" for e_type in removed)}].<br>"
 
             if field == "applicant_eligibility_description":
                 stmt = f"{BULLET_POINTS_STYLING} {ELIGIBILITY_FIELDS["applicant_eligibility_description"]}"
@@ -439,15 +461,27 @@ class OpportunityNotificationTask(BaseNotificationTask):
             return NOT_SPECIFIED
         return value
 
-    def _build_important_dates_content(self, imp_dates_change: dict) -> str:
-        important_section = SECTION_STYLING.format("Important dates")
+    def _build_important_dates_content(
+        self, imp_dates_change: dict, opportunity_status: dict | None
+    ) -> str:
+        relevant_changes = []
         for field, change in imp_dates_change.items():
             before = self._normalize_date_field(change["before"])
             after = self._normalize_date_field(change["after"])
-            important_section += (
+            if field != "close_date":
+                if (
+                    opportunity_status
+                    and opportunity_status["before"] == OpportunityStatus.FORECASTED
+                ):
+                    continue
+            relevant_changes.append(
                 f"{BULLET_POINTS_STYLING} {IMPORTANT_DATE_FIELDS[field]} {before} to {after}.<br>"
             )
-        return important_section
+
+        if not relevant_changes:
+            return ""
+        important_section = SECTION_STYLING.format("Important dates")
+        return important_section + "".join(relevant_changes)
 
     def _build_opportunity_status_content(self, status_change: dict) -> str:
         before = status_change["before"]
@@ -479,7 +513,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
         if "opportunity_status" in changes:
             sections.append(self._build_opportunity_status_content(changes["opportunity_status"]))
         if important_date_diffs := {k: changes[k] for k in IMPORTANT_DATE_FIELDS if k in changes}:
-            sections.append(self._build_important_dates_content(important_date_diffs))
+            sections.append(
+                self._build_important_dates_content(
+                    important_date_diffs, changes.get("opportunity_status", None)
+                )
+            )
         if award_fields_diffs := {k: changes[k] for k in AWARD_FIELDS if k in changes}:
             sections.append(self._build_award_fields_content(award_fields_diffs))
         if categorization_fields_diffs := {
@@ -501,11 +539,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
             )
         if "summary_description" in changes:
-            sections.append(
-                self._build_description_fields_content(
-                    changes["summary_description"], opp_change.opportunity_id
-                )
-            )
+            sections.append(self._build_description_fields_content(changes["summary_description"]))
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
@@ -523,7 +557,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         closing_msg = (
             "<div>"
             "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-            f"<a href='{self.notification_config.frontend_base_url}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+            f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
             "</div>"
         ) + CONTACT_INFO
 
@@ -539,7 +573,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
             all_sections += (
                 "<div>"
-                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
+                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}{UTM_TAG}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
                 "Here’s what changed:"
                 "</div>"
             ) + sections
@@ -556,9 +590,9 @@ class OpportunityNotificationTask(BaseNotificationTask):
             else "The following funding opportunity recently changed:<br><br>"
         )
         subject = (
-            "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunities changed on "
+            "Your saved funding opportunities changed on "
             if updated_opp_count > 1
-            else "[This is a test email from the Simpler.Grants.gov alert system. No action is required] Your saved funding opportunity changed on "
+            else "Your saved funding opportunity changed on "
         )
         subject += "Simpler.Grants.gov"
 
@@ -581,7 +615,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
                     )
                     .values(last_notified_at=datetime_util.utcnow())
                 )
-
                 logger.info(
                     "Updated notification log",
                     extra={
@@ -592,5 +625,5 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
 
                 self.increment(
-                    Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
+                    self.Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
                 )

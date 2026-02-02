@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 import pytest
 import pytz
 
-from src.util.datetime_util import adjust_timezone
+from src.util.datetime_util import adjust_timezone, parse_grants_gov_date
 
 
 @pytest.mark.parametrize(
@@ -50,3 +50,78 @@ def test_adjust_timezone_from_non_utc(timezone_name, expected_output):
     # in a few places that don't observe DST (the US timezones are all 1 hour closer to UTC)
 
     assert adjust_timezone(input_datetime, timezone_name).isoformat() == expected_output
+
+
+class TestParseGrantsGovDate:
+    """Test the parse_grants_gov_date function"""
+
+    def test_parse_date_with_negative_timezone_suffix(self):
+        """Test parsing date with negative timezone suffix like grants.gov returns"""
+        result = parse_grants_gov_date("2025-09-16-04:00")
+        expected = date(2025, 9, 16)
+        assert result == expected
+
+    def test_parse_date_with_positive_timezone_suffix(self):
+        """Test parsing date with positive timezone suffix"""
+        result = parse_grants_gov_date("2025-09-16+05:00")
+        expected = date(2025, 9, 16)
+        assert result == expected
+
+    def test_parse_standard_iso_date(self):
+        """Test parsing standard ISO date format without timezone"""
+        result = parse_grants_gov_date("2025-09-16")
+        expected = date(2025, 9, 16)
+        assert result == expected
+
+    def test_parse_none_returns_none(self):
+        """Test that None input returns None"""
+        result = parse_grants_gov_date(None)
+        assert result is None
+
+    def test_parse_empty_string_returns_none(self):
+        """Test that empty string returns None"""
+        result = parse_grants_gov_date("")
+        assert result is None
+
+    def test_parse_invalid_date_raises_error(self):
+        """Test that invalid date format raises ValueError"""
+        with pytest.raises(ValueError, match="Could not parse date string"):
+            parse_grants_gov_date("not-a-date")
+
+    def test_parse_invalid_format_raises_error(self):
+        """Test that malformed date raises ValueError"""
+        with pytest.raises(ValueError, match="Could not parse date string"):
+            parse_grants_gov_date("2025-13-45")  # Invalid month and day
+
+    def test_parse_date_with_different_timezone_offsets(self):
+        """Test parsing dates with various timezone offset formats"""
+        test_cases = [
+            "2025-09-16-04:00",  # UTC-4
+            "2025-09-16+05:30",  # UTC+5:30 (India)
+            "2025-09-16-11:00",  # UTC-11
+            "2025-09-16+14:00",  # UTC+14 (Line Islands)
+        ]
+
+        expected = date(2025, 9, 16)
+
+        for test_case in test_cases:
+            result = parse_grants_gov_date(test_case)
+            assert result == expected, f"Failed for input: {test_case}"
+
+    def test_parse_leap_year_date(self):
+        """Test parsing a leap year date"""
+        result = parse_grants_gov_date("2024-02-29-05:00")
+        expected = date(2024, 2, 29)
+        assert result == expected
+
+    def test_parse_edge_case_dates(self):
+        """Test parsing edge case dates like year boundaries"""
+        test_cases = [
+            ("2024-01-01+00:00", date(2024, 1, 1)),
+            ("2024-12-31-12:00", date(2024, 12, 31)),
+            ("2000-02-29+06:00", date(2000, 2, 29)),  # Leap year
+        ]
+
+        for date_str, expected in test_cases:
+            result = parse_grants_gov_date(date_str)
+            assert result == expected, f"Failed for input: {date_str}"

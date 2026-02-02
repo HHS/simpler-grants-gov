@@ -1,44 +1,48 @@
-import { Breadcrumb, BreadcrumbList } from "src/components/Breadcrumbs";
+import { Breadcrumb } from "src/components/Breadcrumbs";
 
+// individual breadcrumbs
 const HOME: Breadcrumb = { title: "Home", path: "/" };
-const SUBSCRIBE: Breadcrumb = { title: "Subscribe", path: "/subscribe/" };
+const SUBSCRIBE: Breadcrumb = { title: "Newsletter", path: "/newsletter/" };
 const SEARCH: Breadcrumb = {
   title: "Search",
   path: "/search",
 };
 export const SUBSCRIBE_CONFIRMATION: Breadcrumb = {
   title: "Confirmation",
-  path: "/subscribe/confirmation/",
+  path: "/newsletter/confirmation/",
 };
 const UNSUBSCRIBE: Breadcrumb = {
   title: "Unsubscribe",
-  path: "/subscribe/unsubscribe/",
+  path: "/newsletter/unsubscribe/",
 };
 const SAVED_OPPORTUNITIES: Breadcrumb = {
   title: "Saved opportunities",
   path: "/saved-opportunities/",
 };
-
 const SAVED_SEARCHES: Breadcrumb = {
   title: "Saved search queries",
   path: "/saved-search-queries/",
 };
+const ACTIVITY_DASHBOARD: Breadcrumb = {
+  title: "Activity Dashboard",
+  path: "/dashboard",
+};
 
-export const SUBSCRIBE_CRUMBS: BreadcrumbList = [HOME, SUBSCRIBE];
-export const SUBSCRIBE_CONFIRMATION_CRUMBS: BreadcrumbList = [
+// page breadcrumbs
+export const SUBSCRIBE_CONFIRMATION_CRUMBS: Breadcrumb[] = [
   HOME,
   SUBSCRIBE,
   SUBSCRIBE_CONFIRMATION,
 ];
-export const UNSUBSCRIBE_CRUMBS: BreadcrumbList = [
-  HOME,
-  SUBSCRIBE,
-  UNSUBSCRIBE,
-];
-export const SEARCH_CRUMBS: BreadcrumbList = [HOME, SEARCH];
-export const OPPORTUNITY_CRUMBS: BreadcrumbList = [HOME, SEARCH];
-export const SAVED_OPPORTUNITIES_CRUMBS: BreadcrumbList = [
+export const UNSUBSCRIBE_CRUMBS: Breadcrumb[] = [HOME, SUBSCRIBE, UNSUBSCRIBE];
+export const SEARCH_CRUMBS: Breadcrumb[] = [HOME, SEARCH];
+export const OPPORTUNITY_CRUMBS: Breadcrumb[] = [HOME, SEARCH];
+export const SAVED_OPPORTUNITIES_CRUMBS: Breadcrumb[] = [
   HOME,
   SAVED_OPPORTUNITIES,
 ];
-export const SAVED_SEARCHES_CRUMBS: BreadcrumbList = [HOME, SAVED_SEARCHES];
+export const SAVED_SEARCHES_CRUMBS: Breadcrumb[] = [HOME, SAVED_SEARCHES];
+export const ACTIVITY_DASHBOARD_CRUMBS: Breadcrumb[] = [
+  HOME,
+  ACTIVITY_DASHBOARD,
+];

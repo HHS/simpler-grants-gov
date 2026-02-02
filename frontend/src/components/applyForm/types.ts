@@ -6,7 +6,6 @@ import {
   StrictRJSFSchema,
   UIOptionsType,
 } from "@rjsf/utils";
-import { ErrorObject } from "ajv";
 
 import { HTMLAttributes } from "react";
 
@@ -35,12 +34,6 @@ export interface SetFormDataFunction {
   (data: FormData): void;
 }
 
-export type FieldErrors = ErrorObject<
-  string,
-  Record<string, unknown>,
-  unknown
->[];
-
 export type FormValidationWarning = {
   field: string;
   message: string;
@@ -48,19 +41,46 @@ export type FormValidationWarning = {
   value: string;
 };
 
-export type WidgetTypes = "Checkbox" | "Text" | "TextArea" | "Radio" | "Select";
+export type FormattedFormValidationWarning = FormValidationWarning & {
+  htmlField?: string;
+  formatted?: string;
+  definition?: string | undefined;
+};
+
+export type WidgetTypes =
+  | "Attachment"
+  | "AttachmentArray"
+  | "Checkbox"
+  | "Text"
+  | "TextArea"
+  | "Radio"
+  | "Select"
+  | "MultiSelect"
+  | "Print"
+  | "PrintAttachment"
+  | "Budget424aSectionA"
+  | "Budget424aSectionB"
+  | "Budget424aSectionC"
+  | "Budget424aSectionD"
+  | "Budget424aSectionE"
+  | "Budget424aSectionF";
+
+export type DefinitionPath =
+  | `/properties/${string}`
+  | [`/properties/${string}`];
 
 export type UiSchemaField = {
-  type: "field";
+  type: "field" | "multiField" | "null";
   widget?: WidgetTypes;
+  name?: string;
 } & (
   | {
-      definition: `/properties/${string}`;
+      definition: DefinitionPath;
       schema?: undefined;
     }
   | { schema: SchemaField; definition?: undefined }
   | {
-      definition: `/properties/${string}`;
+      definition: DefinitionPath;
       schema: SchemaField;
     }
 );
@@ -70,6 +90,7 @@ export interface UiSchemaSection {
   label: string;
   name: string;
   children: Array<UiSchemaField | UiSchemaSection>;
+  description?: string;
 }
 
 export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
@@ -83,7 +104,6 @@ export type TextTypes =
   | "tel"
   | "url";
 
-// extends the WidgetProps type from rjsf for USWDS and this project implementation
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -94,29 +114,51 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
-  value?: string | unknown;
+  value?: string | Array<T> | unknown;
   type?: string;
   minLength?: number;
-  schema: RJSFSchema;
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
   maxLength?: number;
   required?: boolean;
   disabled?: boolean;
-  readonly?: boolean;
+  readOnly?: boolean;
+  isFormLocked?: boolean;
   hideError?: boolean;
   autofocus?: boolean;
   placeholder?: string;
-  options: NonNullable<UIOptionsType<T, S, F>> & {
+  options?: NonNullable<UIOptionsType<T, S, F>> & {
     /** The enum options list for a type that supports them */
     enumOptions?: EnumOptionsType<S>[];
     enumDisabled?: unknown;
     emptyValue?: string | undefined;
   };
+  formClassName?: string;
+  inputClassName?: string;
   hideLabel?: boolean;
   multiple?: boolean;
-  rawErrors?: string[] | undefined;
+  rawErrors?: string[] | FormValidationWarning[] | undefined;
   // whether or not to use value + onChange
   updateOnInput?: boolean;
   onChange?: (value: unknown) => void;
   onBlur?: (id: string, value: unknown) => void;
   onFocus?: (id: string, value: unknown) => void;
+  formContext?: {
+    rootSchema?: RJSFSchema;
+    rootFormData?: unknown;
+  };
 }
+
+export type SchemaWithLabelOption = UswdsWidgetProps & {
+  options?: {
+    "widget-label"?: string;
+    [key: string]: unknown;
+  };
+};
+
+export type UploadedFile = {
+  id: string;
+  name: string;
+};

@@ -63,7 +63,7 @@ locals {
 }
 
 terraform {
-  required_version = "< 1.10"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -146,8 +146,8 @@ module "service" {
   hosted_zone_id  = null
   certificate_arn = null
 
-  cpu                      = local.service_config.cpu
-  memory                   = local.service_config.memory
+  fargate_cpu              = local.service_config.cpu
+  fargate_memory           = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
 

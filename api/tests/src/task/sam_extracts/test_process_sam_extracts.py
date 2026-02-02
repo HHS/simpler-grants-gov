@@ -50,10 +50,13 @@ def build_sam_extract_row(
     return "|".join(raw_data) + "!end"
 
 
-def build_sam_extract_row_deactivated_or_expired(uei: str, extract_code: str = "1"):
+def build_sam_extract_row_deactivated_or_expired(
+    uei: str, extract_code: str = "1", eft_indicator: str = ""
+):
     return build_sam_extract_row(
         uei=uei,
         extract_code=extract_code,
+        entity_eft_indicator=eft_indicator,
         # All of the below won't be set for deactivated/expired rows
         legal_business_name="",
         registration_expiration_date="",
@@ -62,7 +65,6 @@ def build_sam_extract_row_deactivated_or_expired(uei: str, extract_code: str = "
         ebiz_last_name="",
         debt_subject_to_offset="",
         exclusion_status_flag="",
-        entity_eft_indicator="",
         initial_registration_date="",
         last_update_date="",
     )
@@ -70,6 +72,7 @@ def build_sam_extract_row_deactivated_or_expired(uei: str, extract_code: str = "
 
 def build_sam_extract_contents(rows):
     contents = []
+
     header = "BOF FOUO V2 00000000 20200414 0084875 0005510"
     footer = "EOF FOUO V2 00000000 20200414 0084875 0005510"
 
@@ -102,12 +105,12 @@ class TestProcessSamExtracts:
             extract_code="A",
             legal_business_name="Sara's Sweets",
             registration_expiration_date="20250101",
-            ebiz_poc_email="sara@example.com",
+            ebiz_poc_email="SARA@example.com",  # will be lowercased when processed
             ebiz_first_name="Sara",
             ebiz_last_name="Smith",
             debt_subject_to_offset="Y",
             exclusion_status_flag="D",
-            entity_eft_indicator="0001",
+            entity_eft_indicator="",
             initial_registration_date="20200101",
             last_update_date="20241225",
         )
@@ -135,7 +138,7 @@ class TestProcessSamExtracts:
             ebiz_last_name="Jones",
             debt_subject_to_offset="",
             exclusion_status_flag="",
-            entity_eft_indicator="789",
+            entity_eft_indicator="",
             initial_registration_date="20200101",
             last_update_date="20210203",
         )
@@ -161,12 +164,18 @@ class TestProcessSamExtracts:
             extract_code="4",
         )
 
-        rows = [row1, row2, row3, row4, row5, row6, row7, row8]
+        row9 = build_sam_extract_row_deactivated_or_expired(
+            uei="III999", extract_code="1", eft_indicator="1234"
+        )
+
+        rows = [row1, row2, row3, row4, row5, row6, row7, row8, row9]
 
         s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1234.zip"
         make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
 
-        SamExtractFileFactory.create(s3_path=s3_path, extract_date=date(2025, 1, 1))
+        sam_extract_file = SamExtractFileFactory.create(
+            s3_path=s3_path, extract_date=date(2025, 1, 1)
+        )
         # Other extract files aren't picked up as they're not pending
         SamExtractFileFactory.create_batch(
             size=3, processing_status=SamGovProcessingStatus.COMPLETED
@@ -187,6 +196,13 @@ class TestProcessSamExtracts:
         task = ProcessSamExtractsTask(db_session)
         task.run()
 
+        db_extract_file = db_session.execute(
+            select(SamExtractFile).where(
+                SamExtractFile.sam_extract_file_id == sam_extract_file.sam_extract_file_id
+            )
+        ).scalar_one_or_none()
+        assert db_extract_file.processing_status == SamGovProcessingStatus.COMPLETED
+
         sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
         assert len(sam_gov_entities) == 6
         sam_gov_entities.sort(key=lambda e: e.uei)
@@ -200,7 +216,7 @@ class TestProcessSamExtracts:
         assert entity1.ebiz_poc_last_name == "Smith"
         assert entity1.has_debt_subject_to_offset is True
         assert entity1.has_exclusion_status is True
-        assert entity1.eft_indicator == "0001"
+        assert entity1.eft_indicator is None
         assert entity1.initial_registration_date == date(2020, 1, 1)
         assert entity1.last_update_date == date(2024, 12, 25)
         assert len(entity1.import_records) == 1
@@ -228,7 +244,7 @@ class TestProcessSamExtracts:
         assert entity3.ebiz_poc_last_name == "Jones"
         assert entity3.has_debt_subject_to_offset is False
         assert entity3.has_exclusion_status is False
-        assert entity3.eft_indicator == "789"
+        assert entity3.eft_indicator is None
         assert entity3.initial_registration_date == date(2020, 1, 1)
         assert entity3.last_update_date == date(2021, 2, 3)
         assert len(entity3.import_records) == 1
@@ -254,10 +270,12 @@ class TestProcessSamExtracts:
         assert len(entity6.import_records) == 0
 
         metrics = task.metrics
-        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 8
+        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 9
         assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 4
+        assert metrics[task.Metrics.DEACTIVATED_SKIPPED_COUNT] == 1
         assert metrics[task.Metrics.DEACTIVATED_ROWS_COUNT] == 1
         assert metrics[task.Metrics.EXPIRED_ROWS_COUNT] == 1
+        assert metrics[task.Metrics.ROWS_SKIPPED_COUNT] == 0
         assert metrics[task.Metrics.ENTITY_ERROR_COUNT] == 2
 
         assert metrics[task.Metrics.ENTITY_INSERTED_COUNT] == 1
@@ -271,6 +289,8 @@ class TestProcessSamExtracts:
         assert metrics[task.Metrics.ENTITY_EXPIRED_COUNT] == 1
         assert metrics[task.Metrics.ENTITY_EXPIRED_MISSING_COUNT] == 0
         assert metrics[task.Metrics.ENTITY_EXPIRED_MISMATCH_COUNT] == 0
+
+        assert metrics[task.Metrics.SKIPPED_UEI_NOT_PROCESSED_COUNT] == 0
 
         assert metrics[task.Metrics.EXTRACTS_PROCESSED_COUNT] == 1
 
@@ -310,11 +330,13 @@ class TestProcessSamExtracts:
 
         s3_path_day1 = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1.zip"
         make_zip_on_s3(s3_path_day1, build_sam_extract_contents([row1_day1, row3_day1]))
-        SamExtractFileFactory.create(s3_path=s3_path_day1, extract_date=date(2025, 1, 1))
+        day1_extract_file = SamExtractFileFactory.create(
+            s3_path=s3_path_day1, extract_date=date(2025, 1, 1)
+        )
 
         s3_path_day2 = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_DAILY_2.zip"
         make_zip_on_s3(s3_path_day2, build_sam_extract_contents([row2_day2, row3_day2]))
-        SamExtractFileFactory.create(
+        day2_extract_file = SamExtractFileFactory.create(
             s3_path=s3_path_day2,
             extract_date=date(2025, 1, 2),
             extract_type=SamGovExtractType.DAILY,
@@ -322,7 +344,7 @@ class TestProcessSamExtracts:
 
         s3_path_day3 = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_DAILY_3.zip"
         make_zip_on_s3(s3_path_day3, build_sam_extract_contents([row1_day3, row2_day3, row3_day3]))
-        SamExtractFileFactory.create(
+        day3_extract_file = SamExtractFileFactory.create(
             s3_path=s3_path_day3,
             extract_date=date(2025, 1, 3),
             extract_type=SamGovExtractType.DAILY,
@@ -331,7 +353,26 @@ class TestProcessSamExtracts:
         task = ProcessSamExtractsTask(db_session)
         task.run()
 
-        db_session.expire_all()  # Expire so this query actually goes to the DB
+        db_session.expire_all()  # Expire so the queries actually go to the DB
+
+        db_extract_files = (
+            db_session.execute(
+                select(SamExtractFile).where(
+                    SamExtractFile.sam_extract_file_id.in_(
+                        [
+                            day1_extract_file.sam_extract_file_id,
+                            day2_extract_file.sam_extract_file_id,
+                            day3_extract_file.sam_extract_file_id,
+                        ]
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for db_extract_file in db_extract_files:
+            assert db_extract_file.processing_status == SamGovProcessingStatus.COMPLETED
+
         sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
         assert len(sam_gov_entities) == 3
         sam_gov_entities.sort(key=lambda e: e.uei)
@@ -368,6 +409,90 @@ class TestProcessSamExtracts:
         assert metrics[task.Metrics.ENTITY_NO_OP_COUNT] == 1
 
         assert metrics[task.Metrics.EXTRACTS_PROCESSED_COUNT] == 3
+
+    def test_run_task_skipped_records(
+        self, db_session, enable_factory_create, mock_s3_bucket, caplog
+    ):
+        row1 = build_sam_extract_row(
+            uei="AAA111",
+            extract_code="A",
+            legal_business_name="Sara's Sweets",
+            registration_expiration_date="20250101",
+            ebiz_poc_email="sara@example.com",
+            ebiz_first_name="Sara",
+            ebiz_last_name="Smith",
+            debt_subject_to_offset="Y",
+            exclusion_status_flag="D",
+            entity_eft_indicator="",
+            initial_registration_date="20200101",
+            last_update_date="20241225",
+        )
+        row1_dupe = build_sam_extract_row(
+            uei="AAA111",
+            extract_code="A",
+            legal_business_name="Sara's Sweets",
+            registration_expiration_date="20250101",
+            ebiz_poc_email="sara@example.com",
+            ebiz_first_name="Sara",
+            ebiz_last_name="Smith",
+            debt_subject_to_offset="Y",
+            exclusion_status_flag="D",
+            entity_eft_indicator="0001",  # The only difference from the above
+            initial_registration_date="20200101",
+            last_update_date="20241225",
+        )
+
+        # This should get flagged as an issue because
+        # there is ONLY a row with an entity EFT indicator which is not expected
+        row2_dupe = build_sam_extract_row(
+            uei="BBB222",
+            extract_code="A",
+            legal_business_name="Steve's Shovels",
+            registration_expiration_date="20250101",
+            ebiz_poc_email="steve@example.com",
+            ebiz_first_name="Steve",
+            ebiz_last_name="Shovelman",
+            debt_subject_to_offset="Y",
+            exclusion_status_flag="D",
+            entity_eft_indicator="0001",
+            initial_registration_date="20200101",
+            last_update_date="20241225",
+        )
+
+        rows = [row1, row1_dupe, row2_dupe]
+
+        s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_1234.zip"
+        make_zip_on_s3(s3_path, build_sam_extract_contents(rows))
+
+        SamExtractFileFactory.create(s3_path=s3_path, extract_date=date(2025, 1, 1))
+
+        task = ProcessSamExtractsTask(db_session)
+        task.run()
+
+        sam_gov_entities = db_session.execute(select(SamGovEntity)).scalars().all()
+        # Only the first UEI was made, the second was skipped and alerted
+        assert len(sam_gov_entities) == 1
+
+        entity1 = sam_gov_entities[0]
+        assert entity1.uei == "AAA111"
+        assert entity1.legal_business_name == "Sara's Sweets"
+        assert entity1.eft_indicator is None
+
+        # For the second record, verify we did flag that there was an issue
+        record = next(
+            record
+            for record in caplog.records
+            if record.message
+            == "A UEI we skipped did not have a non-empty EFT indicator in extract file"
+        )
+        assert record.uei == "BBB222"
+
+        metrics = task.metrics
+        assert metrics[task.Metrics.ROWS_PROCESSED_COUNT] == 3
+        assert metrics[task.Metrics.ROWS_CONVERTED_COUNT] == 1
+        assert metrics[task.Metrics.ROWS_SKIPPED_COUNT] == 2
+
+        assert metrics[task.Metrics.SKIPPED_UEI_NOT_PROCESSED_COUNT] == 1
 
     def test_run_task_deactivated_records(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
@@ -507,16 +632,14 @@ class TestProcessSamExtracts:
         with pytest.raises(Exception, match="Expected exactly one file in sam.gov extract zip"):
             task.run()
 
-    def test_run_task_invalid_file_contents(
-        self, db_session, enable_factory_create, mock_s3_bucket
-    ):
+    def test_run_task_invalid_header(self, db_session, enable_factory_create, mock_s3_bucket):
         s3_path = f"s3://{mock_s3_bucket}/extracts/SAM_FOUO_MONTHLY_12345678.zip"
-        make_zip_on_s3(s3_path, "this isn't a valid file")
+        make_zip_on_s3(s3_path, "BOF bad header")
 
         SamExtractFileFactory.create(s3_path=s3_path)
 
         task = ProcessSamExtractsTask(db_session)
-        with pytest.raises(Exception, match="Invalid DAT file, doesn't contain any records"):
+        with pytest.raises(Exception, match="Unexpected format for header/footer"):
             task.run()
 
     def test_run_task_invalid_file_contents_bad_lines(

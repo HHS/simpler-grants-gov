@@ -49,6 +49,7 @@ __check_defined = \
 	infra-configure-network \
 	infra-format \
 	infra-lint \
+	infra-lint-markdown \
 	infra-lint-scripts \
 	infra-lint-terraform \
 	infra-lint-workflows \
@@ -62,6 +63,7 @@ __check_defined = \
 	infra-update-current-account \
 	infra-update-network \
 	infra-validate-modules \
+	invalidate-cloudfront-cache \
 	release-build \
 	release-deploy \
 	release-image-name \
@@ -220,7 +222,10 @@ infra-check-compliance-checkov: ## Run checkov compliance checks
 infra-check-compliance-tfsec: ## Run tfsec compliance checks
 	tfsec infra
 
-infra-lint: lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows
+infra-lint: infra-lint-markdown infra-lint-scripts infra-lint-terraform infra-lint-workflows ## Lint infra code
+
+infra-lint-markdown: ## Lint Markdown docs for broken links
+	./bin/lint-markdown.sh
 
 infra-lint-scripts: ## Lint shell scripts
 	shellcheck bin/**
@@ -304,6 +309,10 @@ metabase-deploy: ## Deploy metabase to $APP_NAME's web service in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
 	./bin/deploy-metabase $(APP_NAME) $(IMAGE_TAG) $(ENVIRONMENT)
+
+invalidate-cloudfront-cache: ## Invalidate CloudFront cache for $ENVIRONMENT
+	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "dev")
+	./bin/invalidate-cloudfront-cache $(ENVIRONMENT)
 
 release-image-name: ## Prints the image name of the release image
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

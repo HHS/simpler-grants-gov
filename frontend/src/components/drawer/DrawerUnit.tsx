@@ -16,6 +16,7 @@ export function DrawerUnit({
   openText,
   headingText,
   iconName,
+  buttonClass,
 }: {
   drawerId: string;
   children: ReactNode;
@@ -23,6 +24,7 @@ export function DrawerUnit({
   openText: string;
   headingText: string | ReactNode;
   iconName?: UswdsIconNames;
+  buttonClass?: string;
 }) {
   const drawerRef = useRef<ModalRef>(null);
   return (
@@ -39,6 +41,7 @@ export function DrawerUnit({
         drawerRef={drawerRef}
         buttonText={openText}
         iconName={iconName}
+        className={buttonClass}
       />
     </>
   );

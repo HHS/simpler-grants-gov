@@ -1,5 +1,6 @@
 import logging
-from typing import Sequence
+import uuid
+from collections.abc import Sequence
 
 import src.data_migration.transformation.transform_constants as transform_constants
 import src.data_migration.transformation.transform_util as transform_util
@@ -49,7 +50,7 @@ class TransformOpportunityAttachment(AbstractTransformSubTask):
         records = self.fetch_with_opportunity(
             TsynopsisAttachment,
             OpportunityAttachment,
-            [TsynopsisAttachment.syn_att_id == OpportunityAttachment.attachment_id],
+            [TsynopsisAttachment.syn_att_id == OpportunityAttachment.legacy_attachment_id],
             # We load opportunity attachments into memory, so need to process very small batches
             # to avoid running out of memory.
             batch_size=self.attachment_config.transform_opportunity_attachment_batch_size,
@@ -209,15 +210,21 @@ def transform_opportunity_attachment(
     if source_attachment.file_lob_size is None:
         raise ValueError("Opportunity attachment does not have a file size, cannot process.")
 
+    if incoming_attachment:
+        attachment_id = incoming_attachment.attachment_id
+    else:
+        attachment_id = uuid.uuid4()
+
     file_location = attachment_util.get_s3_attachment_path(
-        file_name, source_attachment.syn_att_id, opportunity, s3_config
+        file_name, attachment_id, opportunity, s3_config
     )
 
     # We always create a new record here and merge it in the calling function
     # this way if there is any error doing the transformation, we don't modify the existing one.
     target_attachment = OpportunityAttachment(
-        attachment_id=source_attachment.syn_att_id,
-        opportunity_id=source_attachment.opportunity_id,
+        attachment_id=attachment_id,
+        legacy_attachment_id=source_attachment.syn_att_id,
+        opportunity_id=opportunity.opportunity_id,
         # Note we calculate the file location here, but haven't yet done anything
         # with s3, the calling function, will handle writing the file to s3.
         file_location=file_location,
@@ -225,8 +232,6 @@ def transform_opportunity_attachment(
         file_name=file_name,
         file_description=source_attachment.file_desc,
         file_size_bytes=source_attachment.file_lob_size,
-        created_by=source_attachment.creator_id,
-        updated_by=source_attachment.last_upd_id,
         legacy_folder_id=source_attachment.syn_att_folder_id,
     )
 

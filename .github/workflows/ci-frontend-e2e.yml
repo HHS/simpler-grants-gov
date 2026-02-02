@@ -1,5 +1,6 @@
 name: Frontend E2E Tests
 on:
+  workflow_dispatch:
   workflow_call:
   pull_request:
     paths:
@@ -11,9 +12,10 @@ defaults:
     working-directory: ./frontend
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
+  NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,16 +23,18 @@ concurrency:
 
 jobs:
   e2e-tests:
-    name: Run E2E Tests
+    name: Run Local E2E Tests
     runs-on: ubuntu-22.04
 
     strategy:
+      fail-fast: true
       matrix:
         shard: [1, 2, 3, 4]
         total_shards: [4]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -39,16 +43,23 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - run: |
+      - name: Install dependencies and Playwright
+        run: |
           npm ci
           npx playwright install --with-deps
 
       - name: Start API Server for e2e tests
         run: |
           cd ../api
-          make init db-seed-local-with-agencies populate-search-opportunities start
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+          # Run init first to generate JWT keys in override.env
+          make init
+          # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          echo "ENABLE_OPPORTUNITY_ATTACHMENT_PIPELINE=false" >> override.env
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
@@ -57,10 +68,13 @@ jobs:
 
       - name: Build a prod version of the site
         run: |
-          sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env >> .env.local
-          cat .env.development >> .env.local
-          # Use the localhost url for tests
-          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://localhost:3000|' .env.local
+          {
+            cat .env.development
+            sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
+            cat ../api/e2e_token.tmp
+          } >> .env.local
+          # Use the 127.0.0.1 url for tests (IPv4 only)
+          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build -- --no-lint
 
       - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
@@ -68,7 +82,29 @@ jobs:
           CI: true
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
-        run: npm run test:e2e
+        run: |
+          npm run test:e2e
+
+      - name: Debug logging on failure
+        if: failure()
+        run: |
+          cd ../api
+          echo "=== API Container Logs ==="
+          docker logs grants-api || echo "Could not retrieve API logs"
+          echo ""
+          echo "=== OpenSearch Container Logs ==="
+          docker logs opensearch-node || echo "Could not retrieve OpenSearch logs"
+          echo ""
+          echo "=== Container Status ==="
+          docker ps -a
+          echo ""
+          echo "=== Images ==="
+          docker image ls
+          echo ""
+          echo "=== Disk free ==="
+          df -h
+          echo ""
+        shell: bash
 
       - name: Verify Blob Report Directory
         run: |
@@ -119,9 +155,9 @@ jobs:
       - name: Merge Blob Reports into HTML
         run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-      - name: Verify Downloaded Artifacts
+      - name: Verify merged HTML report
         run: |
-          echo "Contents of all-blob-reports after download:"
+          echo "Contents of the merged Playwright HTML report:"
           ls -R playwright*
 
       - name: Upload Merged HTML Report

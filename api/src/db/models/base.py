@@ -1,7 +1,8 @@
 import uuid
+from collections.abc import Iterable
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Iterable
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import TIMESTAMP, MetaData, Text, inspect
@@ -71,8 +72,7 @@ class Base(DeclarativeBase):
 
         return json_valid_dict
 
-    def copy(self, **kwargs: dict[str, Any]) -> "Base":
-        # TODO - Python 3.11 will let us make the return Self instead
+    def copy(self, **kwargs: dict[str, Any]) -> Base:
         table = self.__table__
         non_pk_columns = [
             k for k in table.columns.keys() if k not in table.primary_key.columns.keys()  # type: ignore

@@ -1,7 +1,5 @@
 "use-client";
 
-import SessionStorage from "src/services/auth/sessionStorage";
-
 import { RefObject } from "react";
 import {
   ButtonGroup,
@@ -11,9 +9,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { LoginLink } from "./LoginButton";
 import { SimplerModal } from "./SimplerModal";
-
-export const LOGIN_URL = "/api/auth/login";
 
 export const LoginModal = ({
   modalRef,
@@ -69,24 +66,14 @@ export const LoginModalBody = ({
       <p className="font-sans-2xs margin-y-4">{descriptionText}</p>
       <ModalFooter>
         <ButtonGroup>
-          <a
-            href={LOGIN_URL}
-            key="login-link"
-            className="usa-button"
-            onClick={() => {
-              const startURL = `${location.pathname}${location.search}`;
-              if (startURL !== "") {
-                SessionStorage.setItem("login-redirect", startURL);
-              }
-            }}
-          >
+          <LoginLink className="usa-button">
             {buttonText}
             <USWDSIcon
               className="usa-icon margin-right-05 margin-left-neg-05"
               name="launch"
               key="login-gov-link-icon"
             />
-          </a>
+          </LoginLink>
           <ModalToggleButton
             modalRef={modalRef}
             closer

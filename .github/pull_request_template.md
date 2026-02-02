@@ -1,6 +1,7 @@
 ## Summary
 
-Work for #ISSUE
+<!-- Use "Fixes" to automatically close issue upon PR merge. Use "Work for" when UAT is required. -->
+Fixes / Work for #ISSUE 
 
 ## Changes proposed
 

@@ -3,8 +3,9 @@ import logging
 import os
 import time
 import uuid
+from collections.abc import Callable, Generator
 from functools import wraps
-from typing import Callable, Generator, ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar
 
 import newrelic.agent
 import requests
@@ -62,7 +63,7 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
 
 
 @contextlib.contextmanager
-def _ecs_background_task_impl(task_name: str) -> Generator[None, None, None]:
+def _ecs_background_task_impl(task_name: str) -> Generator[None]:
     # The actual implementation, see the docs on the
     # decorator method above for details on usage
     start = time.perf_counter()
@@ -126,12 +127,8 @@ def _get_ecs_metadata() -> dict:
     # cloudwatch_log_group = metadata_json["LogOptions"]["awslogs-group"]
     # cloudwatch_log_stream = metadata_json["LogOptions"]["awslogs-stream"]
 
-    # Step function only
-    step_function_name = os.environ.get("SCHEDULED_JOB_NAME", None)
-
     return {
         "aws.ecs.task_name": ecs_task_name,
         "aws.ecs.task_id": ecs_task_id,
         "aws.ecs.task_definition": ecs_taskdef,
-        "scheduled_job_name": step_function_name,
     }

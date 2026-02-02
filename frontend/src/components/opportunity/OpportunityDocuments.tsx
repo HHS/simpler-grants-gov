@@ -8,7 +8,7 @@ import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 
 interface OpportunityDocumentsProps {
   documents: OpportunityDocument[];
-  opportunityId: number;
+  opportunityId: string;
 }
 
 const DocumentTable = ({
@@ -61,9 +61,13 @@ const OpportunityDocuments = ({
   const t = useTranslations("OpportunityListing.documents");
 
   return (
-    <Grid row className="margin-top-6">
+    <Grid
+      row
+      className="margin-top-6 simpler-page-anchor-offset"
+      id="opportunity-documents"
+    >
       <Grid col={8}>
-        <h2 id="opportunity_documents">{t("title")}</h2>
+        <h2>{t("title")}</h2>
       </Grid>
       {documents.length > 0 ? (
         <>
