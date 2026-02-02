@@ -129,7 +129,6 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
-        "SGG-ALL-Forms": uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms"),
     }
 
     for opp_number, expected_id in expected_ids.items():
@@ -138,6 +137,18 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
             f"Opportunity {opp_number} has incorrect ID: "
             f"expected {expected_id}, got {db_ids[opp_number]}"
         )
+
+    # Verify the ALL forms opportunity has the expected UUID5
+    # The opportunity number is dynamic (includes date), so find it by prefix
+    all_forms_opp_number = next(
+        (num for num in db_ids.keys() if num.startswith("SGG-ALL-Forms-")), None
+    )
+    assert all_forms_opp_number is not None, "ALL forms opportunity not found"
+    expected_all_forms_id = uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms")
+    assert db_ids[all_forms_opp_number] == expected_all_forms_id, (
+        f"ALL forms opportunity has incorrect ID: "
+        f"expected {expected_all_forms_id}, got {db_ids[all_forms_opp_number]}"
+    )
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):

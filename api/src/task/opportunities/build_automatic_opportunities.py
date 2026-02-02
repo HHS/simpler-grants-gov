@@ -211,8 +211,8 @@ class BuildAutomaticOpportunitiesTask(Task):
         # and we don't have to adjust something existing
         self.create_opportunity(
             OpportunityContainer(
-                opportunity_title="Opportunity with ALL forms",
-                opportunity_number="SGG-ALL-Forms",
+                opportunity_title=f"Opportunity with ALL forms - {datetime_util.get_now_us_eastern_date().isoformat()}",
+                opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
                 opportunity_id=uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms"),
             ),
             competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
