@@ -245,31 +245,29 @@ class SubmissionXMLAssembler:
             )
             return None
 
-        # Get CFDA number from the opportunity
-        # Note: An opportunity can have multiple CFDA numbers, we use the first one
-        # The cfdas relationship only exists on legacy/foreign Topportunity models
+        # Get assistance listing number from the competition
+        # Note: A competition is associated with a single assistance listing (or none)
         cfda_suffix = ""
-        opportunity = self.application.competition.opportunity
+        opportunity_assistance_listing = self.application.competition.opportunity_assistance_listing
 
-        # Check if the opportunity has cfdas (only present in foreign/legacy schema)
-        if hasattr(opportunity, "cfdas") and opportunity.cfdas and len(opportunity.cfdas) > 0:
-            cfda_number = opportunity.cfdas[0].cfdanumber
-            if cfda_number:
-                cfda_suffix = f"-cfda{cfda_number}"
+        if opportunity_assistance_listing is not None:
+            assistance_listing_number = opportunity_assistance_listing.assistance_listing_number
+            if assistance_listing_number:
+                cfda_suffix = f"-cfda{assistance_listing_number}"
             else:
                 logger.info(
-                    "CFDA entry exists but cfdanumber is None - XSD filename will not include CFDA",
+                    "Assistance listing exists but assistance_listing_number is None - XSD filename will not include CFDA",
                     extra={
                         "application_id": self.application.application_id,
-                        "opportunity_id": opportunity.opportunity_id,
+                        "competition_id": self.application.competition.competition_id,
                     },
                 )
         else:
             logger.info(
-                "No CFDA numbers found for opportunity - XSD filename will not include CFDA",
+                "No assistance listing found for competition - XSD filename will not include CFDA",
                 extra={
                     "application_id": self.application.application_id,
-                    "opportunity_id": opportunity.opportunity_id,
+                    "competition_id": self.application.competition.competition_id,
                 },
             )
 

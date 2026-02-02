@@ -203,11 +203,11 @@ class TestSubmissionXMLAssembler:
         assert len(sf424_elements) == 1
 
         # Verify schemaLocation is set correctly
-        # Note: No CFDA in this fixture, so filename won't include CFDA suffix
+        # Note: The fixture includes an assistance listing with number "12.345"
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
-        assert "oppTEST-OPP-001.xsd" in schema_location
+        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
         assert "None.xsd" not in schema_location
 
         # Verify footer element
@@ -218,15 +218,14 @@ class TestSubmissionXMLAssembler:
     def test_generate_complete_submission_xml_includes_cfda_when_present(
         self, sample_application, sample_application_submission
     ):
-        """Test that schema location includes CFDA number when present on opportunity."""
+        """Test that schema location includes CFDA number when present on competition."""
 
-        # Create a mock for the CFDA object
-        class MockCfda:
-            cfdanumber = "93.123"
-
-        # Mock the cfdas relationship on the opportunity
-        # The assembler checks hasattr(opportunity, "cfdas")
-        sample_application.competition.opportunity.cfdas = [MockCfda()]
+        # Verify it's set up correctly
+        assert sample_application.competition.opportunity_assistance_listing is not None
+        assert (
+            sample_application.competition.opportunity_assistance_listing.assistance_listing_number
+            == "12.345"
+        )
 
         assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
 
@@ -240,7 +239,7 @@ class TestSubmissionXMLAssembler:
         xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
         schema_location = root.get(f"{xsi_ns}schemaLocation")
         assert schema_location is not None
-        assert "oppTEST-OPP-001-cfda93.123.xsd" in schema_location
+        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
         assert "None.xsd" not in schema_location
 
     def test_generate_complete_submission_xml_contains_header_data(
