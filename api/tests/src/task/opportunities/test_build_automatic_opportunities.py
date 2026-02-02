@@ -1,4 +1,3 @@
-import logging
 import uuid
 from copy import deepcopy
 
@@ -83,17 +82,14 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 12
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
-    # If we rerun the task, only the all-form opportunity will be created
+    # If we rerun the task, all opportunities should be skipped (including ALL-forms)
     task = BuildAutomaticOpportunitiesTask(db_session)
     task.run()
 
-    assert len(task.opportunities) == 1
-    assert all_form_ids == {
-        c.form_id for c in task.opportunities[0].competitions[0].competition_forms
-    }
+    assert len(task.opportunities) == 0
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 1
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 11
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 12
 
 
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
@@ -149,136 +145,3 @@ def test_does_not_work_in_prod(db_session, monkeypatch):
     with pytest.raises(Exception, match="This task is not meant to be run in production"):
         BuildAutomaticOpportunitiesTask(db_session).run()
 
-
-def test_force_recreate_flag_recreates_opportunities(enable_factory_create, db_session, forms):
-    """Test that force_recreate=True only recreates opportunities that allow it (hardcoded test scenarios)"""
-    # 1. Run initially to create opportunities
-    task1 = BuildAutomaticOpportunitiesTask(db_session)
-    task1.run()
-
-    # Store original IDs
-    original_ids = {}
-    for opp in task1.opportunities:
-        original_ids[opp.opportunity_number] = opp.opportunity_id
-
-    # 2. Run again with force_recreate=True
-    task2 = BuildAutomaticOpportunitiesTask(db_session, force_recreate=True)
-    task2.run()
-
-    # The 4 hardcoded test scenarios should be recreated (allow_force_recreate=True)
-    # The 7 form-based opportunities + ALL-forms should be skipped (allow_force_recreate=False)
-    assert task2.metrics[task2.Metrics.OPPORTUNITY_CREATED_COUNT] == 4  # 4 test scenarios
-    assert (
-        task2.metrics[task2.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 8
-    )  # 7 form-based + 1 ALL-forms
-
-
-def test_id_mismatch_does_not_trigger_recreation_without_flag(
-    enable_factory_create, db_session, forms, caplog
-):
-    """Test that a mismatch in existing opportunity ID triggers a warning but NOT a recreation without the flag"""
-    # 1. Run initially
-    task = BuildAutomaticOpportunitiesTask(db_session)
-    task.run()
-
-    # Pick a scenario opportunity (e.g. SGG-org-only-test) which has a fixed ID
-    target_opp_num = "SGG-org-only-test"
-    target_opp_id = uuid.UUID("10000000-0000-0000-0000-000000000001")
-
-    # Verify it exists with correct ID
-    opp = (
-        db_session.execute(
-            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
-        )
-        .scalars()
-        .one()
-    )
-    assert opp.opportunity_id == target_opp_id
-
-    # 2. Hack the DB to change the ID
-    db_session.delete(opp)
-    db_session.flush()
-
-    fake_id = uuid.uuid4()
-    fake_opp = Opportunity(
-        opportunity_id=fake_id,
-        legacy_opportunity_id=999999999,
-        opportunity_number=target_opp_num,
-        opportunity_title="Fake Opp",
-        agency_code="FAKE",
-        is_draft=False,
-    )
-    db_session.add(fake_opp)
-    db_session.commit()
-
-    # 3. Run task again (WITHOUT force_recreate)
-    # We expect a warning
-    with caplog.at_level(logging.WARNING):
-        task2 = BuildAutomaticOpportunitiesTask(db_session)
-        task2.run()
-
-    # 4. Verify the opportunity STILL has the WRONG ID (not recreated)
-    opp_refreshed = (
-        db_session.execute(
-            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
-        )
-        .scalars()
-        .one()
-    )
-
-    assert opp_refreshed.opportunity_id == fake_id
-    assert opp_refreshed.opportunity_id != target_opp_id
-
-    # Verify warning was logged
-    assert "Skipping creating opportunity" in caplog.text
-    assert "Run with --force-recreate" in caplog.text
-
-
-def test_id_mismatch_triggers_recreation_with_flag(enable_factory_create, db_session, forms):
-    """Test that a mismatch in existing opportunity ID triggers recreation WITH the flag"""
-    # 1. Run initially
-    task = BuildAutomaticOpportunitiesTask(db_session)
-    task.run()
-
-    # Pick a scenario opportunity
-    target_opp_num = "SGG-org-only-test"
-    target_opp_id = uuid.UUID("10000000-0000-0000-0000-000000000001")
-
-    # 2. Hack the DB to change the ID
-    opp = (
-        db_session.execute(
-            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
-        )
-        .scalars()
-        .one()
-    )
-    db_session.delete(opp)
-    db_session.flush()
-
-    fake_id = uuid.uuid4()
-    fake_opp = Opportunity(
-        opportunity_id=fake_id,
-        legacy_opportunity_id=999999999,
-        opportunity_number=target_opp_num,
-        opportunity_title="Fake Opp",
-        agency_code="FAKE",
-        is_draft=False,
-    )
-    db_session.add(fake_opp)
-    db_session.commit()
-
-    # 3. Run task again (WITH force_recreate)
-    task2 = BuildAutomaticOpportunitiesTask(db_session, force_recreate=True)
-    task2.run()
-
-    # 4. Verify the opportunity back to the CORRECT ID
-    opp_refreshed = (
-        db_session.execute(
-            select(Opportunity).where(Opportunity.opportunity_number == target_opp_num)
-        )
-        .scalars()
-        .one()
-    )
-
-    assert opp_refreshed.opportunity_id == target_opp_id
-    assert opp_refreshed.opportunity_id != fake_id
