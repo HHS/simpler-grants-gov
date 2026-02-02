@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/nextjs";
-
 import Hero from "src/components/homepage/sections/HomepageHero";
 
-const meta: Meta<typeof Hero> = {
+const meta = {
   title: "Components/Hero",
   component: Hero,
 };

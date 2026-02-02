@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/nextjs";
-
 import { Button } from "@trussworks/react-uswds";
 
-const meta: Meta<typeof Button> = {
+const meta = {
   title: "Core Components/Button",
   component: Button,
   args: {

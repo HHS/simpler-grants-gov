@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/nextjs";
-
 import SearchQueryCopyButton from "src/components/search/SearchQueryCopyButton";
 
-const meta: Meta<typeof SearchQueryCopyButton> = {
+const meta = {
   title: "Components/Search/SavedSearchQuery",
   component: SearchQueryCopyButton,
   args: {

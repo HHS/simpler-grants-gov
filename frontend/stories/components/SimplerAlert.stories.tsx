@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/nextjs";
-
 import SimplerAlert from "src/components/SimplerAlert";
 
-const meta: Meta<typeof SimplerAlert> = {
+const meta = {
   title: "Components/SimplerAlert",
   component: SimplerAlert,
   args: {

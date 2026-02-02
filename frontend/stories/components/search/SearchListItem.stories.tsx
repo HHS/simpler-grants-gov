@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/nextjs";
-
 import Item from "src/components/search/SearchResultsListItem";
 
-const meta: Meta<typeof Item> = {
+const meta = {
   title: "Components/Search/SearchListItem",
   component: Item,
   args: {

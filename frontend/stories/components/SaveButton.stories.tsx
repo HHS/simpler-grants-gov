@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/nextjs";
-
 import SaveButton from "src/components/SaveButton";
 
-const meta: Meta<typeof SaveButton> = {
+const meta = {
   title: "Components/SaveButton",
   component: SaveButton,
   args: {

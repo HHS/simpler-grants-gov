@@ -1,4 +1,3 @@
-import { Meta } from "@storybook/nextjs";
 import {
   fakeResponsiveTableHeaders,
   fakeResponsiveTableRows,
@@ -6,7 +5,7 @@ import {
 
 import { TableWithResponsiveHeader } from "src/components/TableWithResponsiveHeader";
 
-const meta: Meta<typeof TableWithResponsiveHeader> = {
+const meta = {
   title: "Components/TableWithResponsiveHeader",
   component: TableWithResponsiveHeader,
   args: {

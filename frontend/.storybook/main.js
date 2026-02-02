@@ -30,7 +30,7 @@ function blockSearchEnginesInHead(head) {
 }
 
 /**
- * @type {import("@storybook/nextjs").StorybookConfig}
+ * @type {import("@storybook/nextjs-vite").StorybookConfig}
  */
 const config = {
   stories: ["../stories/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
