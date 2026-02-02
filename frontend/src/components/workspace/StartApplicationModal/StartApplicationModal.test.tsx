@@ -217,4 +217,157 @@ describe("StartApplicationModal", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.getByText("ineligibleTitle")).toBeInTheDocument();
   });
+
+  describe("Individual selection", () => {
+    it("sends undefined organization when 'As an individual' is selected", async () => {
+      clientFetchMock.mockResolvedValue({ applicationId: "999" });
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["individual", "organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      const input = await screen.findByTestId("textInput");
+      const select = await screen.findByTestId("Select");
+
+      await userEvent.type(input, "new application");
+      await userEvent.selectOptions(select, "INDIVIDUAL");
+
+      const saveButton = await screen.findByTestId("application-start-save");
+      act(() => saveButton.click());
+
+      expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
+        method: "POST",
+        body: JSON.stringify({
+          applicationName: "new application",
+          competitionId: "1",
+          organization: undefined,
+        }),
+      });
+    });
+
+    it("sends undefined organization when 'I don't see my org listed' is selected", async () => {
+      clientFetchMock.mockResolvedValue({ applicationId: "999" });
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["individual", "organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      const input = await screen.findByTestId("textInput");
+      const select = await screen.findByTestId("Select");
+
+      await userEvent.type(input, "new application");
+      await userEvent.selectOptions(select, "NOT_LISTED");
+
+      const saveButton = await screen.findByTestId("application-start-save");
+      act(() => saveButton.click());
+
+      expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
+        method: "POST",
+        body: JSON.stringify({
+          applicationName: "new application",
+          competitionId: "1",
+          organization: undefined,
+        }),
+      });
+    });
+  });
+
+  describe("Dropdown options", () => {
+    it("shows 'As an individual' option when individual applicant type is allowed", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["individual", "organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      expect(screen.getByText("asIndividual")).toBeInTheDocument();
+    });
+
+    it("does not show 'As an individual' option when only organization type is allowed", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      expect(screen.queryByText("asIndividual")).not.toBeInTheDocument();
+    });
+
+    it("shows 'I don't see my org listed' option when organization type is allowed", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      expect(screen.getByText("notListed")).toBeInTheDocument();
+    });
+  });
+
+  describe("UI updates", () => {
+    it("renders info banner", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      expect(screen.getByTestId("helpful-tips-banner")).toBeInTheDocument();
+    });
+
+    it("button has success styling", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      const button = screen.getByTestId("application-start-save");
+      expect(button).toHaveClass("bg-success");
+    });
+  });
 });
