@@ -95,8 +95,9 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
     """Test that opportunities with hard-coded IDs maintain the same IDs across runs"""
     # First run - create all opportunities
-    task1 = BuildAutomaticOpportunitiesTask(db_session)
-    task1.run()
+    with freeze_time("2026-02-03 12:00:00"):
+        task1 = BuildAutomaticOpportunitiesTask(db_session)
+        task1.run()
 
     # Collect opportunity IDs from first run
     first_run_ids = {}
@@ -104,8 +105,10 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         first_run_ids[opp.opportunity_number] = opp.opportunity_id
 
     # Second run - should skip existing opportunities
-    task2 = BuildAutomaticOpportunitiesTask(db_session)
-    task2.run()
+    
+    with freeze_time("2026-02-04 12:00:00"):
+        task2 = BuildAutomaticOpportunitiesTask(db_session)
+        task2.run()
 
     # Manually query all opportunities from database to verify IDs
     all_opportunities = db_session.scalars(select(Opportunity)).all()
