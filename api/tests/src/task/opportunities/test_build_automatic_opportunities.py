@@ -144,4 +144,3 @@ def test_does_not_work_in_prod(db_session, monkeypatch):
     monkeypatch.setenv("ENVIRONMENT", "prod")
     with pytest.raises(Exception, match="This task is not meant to be run in production"):
         BuildAutomaticOpportunitiesTask(db_session).run()
-
