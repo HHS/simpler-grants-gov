@@ -50,6 +50,11 @@ module "project_config" {
 module "backend" {
   source = "../modules/terraform-backend-s3"
   name   = local.tf_state_bucket_name
+
+  # Keep managing the existing DynamoDB table for now, but it's no longer used for locking.
+  # S3 native locking (use_lockfile = true) is now used instead.
+  # In a future change, this can be set to false and the DynamoDB table can be manually deleted.
+  enable_dynamodb_lock_table = true
 }
 
 module "auth_github_actions" {
