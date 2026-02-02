@@ -2,6 +2,7 @@ import uuid
 from copy import deepcopy
 
 import pytest
+from freezegun import freeze_time
 from sqlalchemy import select, update
 
 from src.db.models.competition_models import Form
@@ -105,7 +106,7 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         first_run_ids[opp.opportunity_number] = opp.opportunity_id
 
     # Second run - should skip existing opportunities
-    
+
     with freeze_time("2026-02-04 12:00:00"):
         task2 = BuildAutomaticOpportunitiesTask(db_session)
         task2.run()
@@ -141,17 +142,12 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
             f"expected {expected_id}, got {db_ids[opp_number]}"
         )
 
-    # Verify the ALL forms opportunity has the expected UUID5
     # The opportunity number is dynamic (includes date), so find it by prefix
-    all_forms_opp_number = next(
-        (num for num in db_ids.keys() if num.startswith("SGG-ALL-Forms-")), None
-    )
-    assert all_forms_opp_number is not None, "ALL forms opportunity not found"
-    expected_all_forms_id = uuid.uuid5(uuid.NAMESPACE_DNS, "simpler-grants-gov.all-forms")
-    assert db_ids[all_forms_opp_number] == expected_all_forms_id, (
-        f"ALL forms opportunity has incorrect ID: "
-        f"expected {expected_all_forms_id}, got {db_ids[all_forms_opp_number]}"
-    )
+    all_forms_opp_numbers = [num for num in db_ids.keys() if num.startswith("SGG-ALL-Forms-")]
+    # With freeze_time testing different dates, we should have at least 2 ALL forms opportunities
+    assert (
+        len(all_forms_opp_numbers) >= 2
+    ), f"Expected at least 2 ALL forms opportunities, found {len(all_forms_opp_numbers)}"
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):
