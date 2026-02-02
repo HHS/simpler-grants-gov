@@ -24,7 +24,6 @@ from src.task.notifications.constants import (
 )
 from src.task.notifications.email_notification import EmailNotificationTask
 from src.task.notifications.opportunity_notifcation import UTM_TAG, OpportunityNotificationTask
-from src.util.string_utils import truncate_html_safe
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import UserFactory
 

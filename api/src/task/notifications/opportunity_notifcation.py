@@ -23,7 +23,7 @@ from src.task.notifications.constants import (
 )
 from src.util import datetime_util
 from src.util.dict_util import diff_nested_dicts
-from src.util.string_utils import contains_regex, truncate_html_safe
+from src.util.string_utils import truncate_html_safe
 
 logger = logging.getLogger(__name__)
 
@@ -299,7 +299,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _build_description_fields_content(self, description_change: dict) -> str:
+    def _build_description_fields_content(self, description_change: dict, opp_id: UUID) -> str:
         after = description_change["after"]
         if not after:
             return ""
@@ -539,7 +539,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
             )
         if "summary_description" in changes:
-            sections.append(self._build_description_fields_content(changes["summary_description"]))
+            sections.append(
+                self._build_description_fields_content(
+                    changes["summary_description"], opp_change.opportunity_id
+                )
+            )
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",

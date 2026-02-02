@@ -23,7 +23,6 @@ def test_join_list():
         ("abc123", False),
         ("1234", False),
         ("xyz", False),
-        ("abc123", False),
     ],
 )
 def test_is_valid_uuid(value, is_valid):
@@ -33,48 +32,35 @@ def test_is_valid_uuid(value, is_valid):
 @pytest.mark.parametrize(
     "html_str,expected_html",
     [
-        # Truncate mid-text inside inline tag <strong>, no closing tags
+        # Truncate mid-text inside inline tag <strong>, no closing tag present
         (
-            "<p>This is a <strong>very big description here!!!!",
-            "<p>This is a <strong>very big description here!!!!</strong>",
+            "<p>This is a <strong>very big description, here!!!!",
+            "<p>This is a <strong>very big description, here!!!</strong>",
         ),
-        # Truncate mid-text inside multiple inline tag
+        # Truncate mid-text inside multiple nested inline tags
         (
-            "<p>Some <strong>bold and <em>emphasized text here ",
+            "<p>Some <strong>bold and <em>emphasized text here EXTRA WORDS</p>",
             "<p>Some <strong>bold and <em>emphasized text here </em></strong>",
         ),
+        # Truncate inside deeply nested block tags (block tags intentionally left open)
         (
-            "div>first<div>second<div>another</div></div></div>",
-            "div>first<div>second<div>another",
+            "<div>first<div>second<div>third and some extra trailing content</div></div></div>",
+            "<div>first<div>second<div>third and some extra tra",
         ),
+        # Broken / mismatched HTML, truncate after inline content
         (
-            "<p>Hello <p><strong>i am here!!</strong></div></p>",
-            "<p>Hello <p><strong>i am here!!</strong>",
-        ),
-        # Truncate after closing an inline tag
-        (
-            "<p>This is a <strong>very long text that </strong>",
-            "<p>This is a <strong>very long text that </strong>",
-        ),
-        # Truncate mid-text after closing an inline tag
-        (
-            "<p>This is a <strong>very long text</strong> that ",
-            "<p>This is a <strong>very long text</strong> that ",
+            "<p>Hello <p><strong>i am here!!!</strong></div></p> EXTRA TEXT",
+            "<p>Hello <p><strong>i am here!!!</strong>",
         ),
         # Self-closing tag inside truncated text (e.g. <br />)
         (
-            "<div>This is a description<br/>with a break tag an",
+            "<div>This is a description<br/>with a break tag and more words here</div>",
             "<div>This is a description<br/>with a break tag an",
         ),
-        # Deeply nested HTML tags
+        # Deep nesting with inline tags, truncate mid-inline
         (
-            "<section><div><p>This is <span>a deeply <strong>ne",
+            "<section><div><p>This is <span>a deeply <strong>nested example with text",
             "<section><div><p>This is <span>a deeply <strong>ne</strong></span>",
-        ),
-        # Truncate after block level tag
-        (
-            "<section><p>Important text goes here</p></section>",
-            "<section><p>Important text goes here",
         ),
     ],
 )

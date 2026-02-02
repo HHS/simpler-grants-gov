@@ -1,6 +1,5 @@
 import re
 import uuid
-from typing import Optional
 
 BLOCK_TAGS = [
     "p",
@@ -17,7 +16,7 @@ BLOCK_TAGS = [
 ]
 
 
-def join_list(joining_list: Optional[list], join_txt: str = "\n") -> str:
+def join_list(joining_list: list | None, join_txt: str = "\n") -> str:
     """
     Utility to join a list.
 
@@ -40,6 +39,26 @@ def is_valid_uuid(value: str) -> bool:
 
 def contains_regex(value: str, regex: str) -> bool:
     return bool(re.search(regex, value))
+
+
+def _strip_partial_tag(html: str) -> str:
+    """
+    Remove a trailing partial HTML tag, if present.
+    Safe for nested and previously closed tags.
+    """
+    i = len(html) - 1
+
+    while i >= 0:
+        if html[i] == ">":
+            # Found a complete tag end before any '<' → safe
+            return html
+        if html[i] == "<":
+            # Found start of a tag with no closing '>' → strip it
+            return html[:i]
+        i -= 1
+
+    return html
+
 
 def _truncate_preserving_html(html_str: str) -> str:
     tag_stack: list = []  # Keep track of open tags
@@ -64,7 +83,7 @@ def _truncate_preserving_html(html_str: str) -> str:
             )
             if tag_name and token[1] == "/":  # Closing tag
                 if tag_stack and tag_stack[-1] == tag_name.group(
-                        1
+                    1
                 ):  # check if closing tag matches the last opened tag
                     tag_stack.pop()  # remove matched tag
             else:
@@ -87,7 +106,6 @@ def _truncate_preserving_html(html_str: str) -> str:
             break
     # Close any remaining open tags (excluding block-level)
     closing_tags = [f"</{tag}>" for tag in reversed(tag_stack) if tag not in BLOCK_TAGS]
-
     return "".join(output_tokens) + "".join(closing_tags)
 
 
@@ -96,6 +114,8 @@ def truncate_html_safe(value: str, max_length: int) -> str:
         return value
 
     truncated = value[:max_length]
+    # Prevent cutting in the middle of a tag
+    truncated = _strip_partial_tag(truncated)
     if contains_regex(truncated, r"<[^>]+>"):
         truncated = _truncate_preserving_html(truncated)
 
