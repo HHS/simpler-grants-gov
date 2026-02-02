@@ -139,6 +139,7 @@ export const FormFields = ({
           if (keys.length) {
             keys.forEach((key) => {
               childAcc.push(acc[key]);
+              // eslint-disable-next-line @typescript-eslint/no-array-delete
               delete acc[key];
             });
             acc = [

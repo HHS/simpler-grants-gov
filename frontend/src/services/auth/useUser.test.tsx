@@ -16,7 +16,7 @@ const UseUserConsumer = () => {
     <>
       <div data-testid="error">{error?.toString() || ""}</div>
       <div data-testid="isLoading">{isLoading.toString()}</div>
-      <div data-testid="user">{user?.toString() || ""}</div>
+      <div data-testid="user">{user?.email?.toString() || ""}</div>
     </>
   );
 };

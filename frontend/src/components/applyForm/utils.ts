@@ -98,7 +98,7 @@ const formatValidationWarning = (
 const validationWarningOverrides = (
   message: string,
   fieldName: string,
-  title?: string | null | undefined,
+  title?: string | null,
 ) => {
   const formattedTitle = title ? title.replace("?", "") : "Field";
   return message

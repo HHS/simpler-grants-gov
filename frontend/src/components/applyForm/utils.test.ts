@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable testing-library/no-node-access */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { RJSFSchema } from "@rjsf/utils";
 

@@ -114,7 +114,7 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
-  value?: string | Array<T> | unknown;
+  value?: string | Array<T>;
   type?: string;
   minLength?: number;
   schema: RJSFSchema & {

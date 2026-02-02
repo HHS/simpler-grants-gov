@@ -18,7 +18,7 @@ export async function FilterPillPanel({
   try {
     agencies = await agencyListPromise;
   } catch (e) {
-    console.error("Unable to fetch agency options for pills");
+    console.error("Unable to fetch agency options for pills", e);
   }
   const agencyOptions = agenciesToSortedFilterOptions(agencies || []);
   const pillLabelData = formatPillLabels(searchParams, agencyOptions || []);

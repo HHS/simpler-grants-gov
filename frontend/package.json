@@ -68,6 +68,7 @@
     "@playwright/test": "^1.44.0",
     "@storybook/addon-docs": "^10.2.3",
     "@storybook/nextjs": "^10.2.3",
+    "@storybook/nextjs-vite": "^10.2.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^16.1.0",
@@ -84,6 +85,7 @@
     "@types/node-fetch": "^2.6.11",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "dotenv": "^17.2.2",
@@ -109,8 +111,7 @@
     "sass": "^1.77.1",
     "storybook": "^10.2.3",
     "style-loader": "^3.3.2",
-    "typescript": "^5.9.2",
-    "@storybook/nextjs-vite": "^10.2.3"
+    "typescript": "^5.9.2"
   },
   "overrides": {
     "@types/react": "19.2.7",

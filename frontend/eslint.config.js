@@ -1,87 +1,110 @@
-const {
-    defineConfig,
-} = require("eslint/config");
+const { defineConfig } = require("eslint/config");
 
 const jest = require("eslint-plugin-jest");
 const typescriptEslint = require("@typescript-eslint/eslint-plugin");
 const js = require("@eslint/js");
 
-const {
-    FlatCompat,
-} = require("@eslint/eslintrc");
+const { FlatCompat } = require("@eslint/eslintrc");
 
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
 });
 
-module.exports = defineConfig([{
-    extends: compat.extends("nava", "plugin:storybook/recommended", "prettier", "next/core-web-vitals"),
+module.exports = defineConfig([
+  // ignoring linting errors on storybook for now, will turn back on when we resume
+  // active storybook development
+  { ignores: ["**/public/", "**/.storybook/"] },
+  {
+    extends: compat.extends(
+      "nava",
+      "plugin:storybook/recommended",
+      "prettier",
+      "next/core-web-vitals",
+    ),
 
     rules: {
-        "@next/next/no-img-element": "off",
+      "@next/next/no-img-element": "off",
 
-        "no-restricted-imports": ["error", {
-            patterns: [{
-                group: ["../"],
-                message: "Relative imports are not allowed.",
-            }],
-        }],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["../"],
+              message: "Relative imports are not allowed.",
+            },
+          ],
+        },
+      ],
     },
 
     settings: {
-        next: {
-            rootDir: __dirname,
-        },
+      next: {
+        rootDir: __dirname,
+      },
     },
-}, {
+  },
+  {
     files: ["tests/**/*.test.tsx"],
 
     plugins: {
-        jest,
+      jest,
     },
 
     extends: compat.extends(
-        "plugin:jest/recommended",
-        "plugin:jest-dom/recommended",
-        "plugin:testing-library/react",
+      "plugin:jest/recommended",
+      "plugin:jest-dom/recommended",
+      "plugin:testing-library/react",
     ),
-}, {
+  },
+  {
     files: ["**/*.+(ts|tsx)"],
 
     languageOptions: {
-        parserOptions: {
-            tsconfigRootDir: __dirname,
-            project: ["./tsconfig.json"],
-        },
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: ["./tsconfig.json"],
+      },
     },
 
     extends: compat.extends(
-        "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended-requiring-type-checking",
     ),
 
     plugins: {
-        "@typescript-eslint": typescriptEslint,
+      "@typescript-eslint": typescriptEslint,
     },
 
     rules: {
-        camelcase: "off",
+      camelcase: "off",
 
-        "@typescript-eslint/no-unused-vars": ["error", {
-            argsIgnorePattern: "^_",
-        }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
 
-        "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": "error",
 
-        "no-console": ["error", {
-            allow: ["warn", "error"],
-        }],
+      "no-console": [
+        "error",
+        {
+          allow: ["warn", "error"],
+        },
+      ],
 
-        "promise/catch-or-return": ["error", {
-            allowFinally: true,
-        }],
+      "promise/catch-or-return": [
+        "error",
+        {
+          allowFinally: true,
+        },
+      ],
     },
-}]);
+  },
+]);

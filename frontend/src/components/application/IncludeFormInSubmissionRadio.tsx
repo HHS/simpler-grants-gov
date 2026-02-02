@@ -1,5 +1,5 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { Status } from "src/types/applicationResponseTypes";
+import { ApplicationStatus } from "src/types/applicationResponseTypes";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +14,7 @@ export const IncludeFormInSubmissionRadio = ({
   applicationId: string;
   formId: string;
   includeFormInApplicationSubmission?: boolean | null;
-  applicationStatus: string;
+  applicationStatus: ApplicationStatus;
 }) => {
   const router = useRouter();
   const { clientFetch } = useClientFetch<{
@@ -25,7 +25,7 @@ export const IncludeFormInSubmissionRadio = ({
   >(includeFormInApplicationSubmission ?? null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleChange = (value: string | unknown) => {
+  const handleChange = (value: string) => {
     const newValue = value === "Yes";
     setIncludeFormInSubmission(newValue); // eagerly set state.
     setLoading(true);
@@ -59,7 +59,7 @@ export const IncludeFormInSubmissionRadio = ({
       ? "No"
       : undefined;
   const disabledValue =
-    applicationStatus !== Status.IN_PROGRESS ? true : loading;
+    applicationStatus !== ApplicationStatus.IN_PROGRESS ? true : loading;
   const radioId = `include-form${formId}-in-application-submission-radio`;
   return (
     <>

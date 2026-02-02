@@ -20,7 +20,6 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
 }));
 
 jest.mock("src/hooks/useRouteChange", () => ({
-  // eslint-disable-next-line
   useRouteChange: () => {},
 }));
 
