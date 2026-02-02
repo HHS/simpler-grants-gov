@@ -475,7 +475,7 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
     __tablename__ = "referenced_opportunity"
 
-    __table_args__ = (UniqueConstraint("derived_opportunity_id"), ApiSchemaTable.__table_args__)
+    __table_args__ = (UniqueConstraint("original_opportunity_id", "derived_opportunity_id"), ApiSchemaTable.__table_args__)
 
     referenced_opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4

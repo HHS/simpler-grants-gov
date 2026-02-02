@@ -1,8 +1,8 @@
 """add_referenced_opportunity_table
 
-Revision ID: 71eb98feb1b8
+Revision ID: 1c069c3a6ccc
 Revises: f6cb2434a583
-Create Date: 2026-01-30 16:29:18.891955
+Create Date: 2026-02-02 16:43:54.201380
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "71eb98feb1b8"
+revision = "1c069c3a6ccc"
 down_revision = "f6cb2434a583"
 branch_labels = None
 depends_on = None
@@ -49,8 +49,9 @@ def upgrade():
             "referenced_opportunity_id", name=op.f("referenced_opportunity_pkey")
         ),
         sa.UniqueConstraint(
+            "original_opportunity_id",
             "derived_opportunity_id",
-            name=op.f("referenced_opportunity_derived_opportunity_id_uniq"),
+            name=op.f("referenced_opportunity_original_opportunity_id_uniq"),
         ),
         schema="api",
     )
