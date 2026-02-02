@@ -1,8 +1,10 @@
 const { defineConfig } = require("eslint/config");
 
-const jest = require("eslint-plugin-jest");
+const pluginJest = require("eslint-plugin-jest");
+const testingLibrary = require("eslint-plugin-testing-library");
 const typescriptEslint = require("@typescript-eslint/eslint-plugin");
 const js = require("@eslint/js");
+const jestDomPlugin = require("eslint-plugin-jest-dom");
 
 const { FlatCompat } = require("@eslint/eslintrc");
 
@@ -13,9 +15,11 @@ const compat = new FlatCompat({
 });
 
 module.exports = defineConfig([
-  // ignoring linting errors on storybook for now, will turn back on when we resume
-  // active storybook development
-  { ignores: ["**/public/", "**/.storybook/"] },
+  {
+    // ignoring linting errors on storybook for now, will turn back on when we resume
+    // active storybook development
+    ignores: ["**/public/", "**/.storybook/", "**/.next/"],
+  },
   {
     extends: compat.extends(
       "nava",
@@ -47,17 +51,20 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ["tests/**/*.test.tsx"],
-
+    files: ["**/*.test.tsx"],
     plugins: {
-      jest,
+      jest: pluginJest,
+      "testing-library": testingLibrary,
+      "jest-dom": jestDomPlugin,
     },
-
-    extends: compat.extends(
-      "plugin:jest/recommended",
-      "plugin:jest-dom/recommended",
-      "plugin:testing-library/react",
-    ),
+    languageOptions: {
+      globals: pluginJest.environments.globals.globals,
+    },
+    rules: {
+      ...pluginJest.configs.recommended.rules,
+      ...testingLibrary.configs["flat/react"].rules,
+      ...jestDomPlugin.configs["flat/recommended"].rules,
+    },
   },
   {
     files: ["**/*.+(ts|tsx)"],

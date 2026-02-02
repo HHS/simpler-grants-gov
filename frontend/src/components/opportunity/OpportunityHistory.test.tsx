@@ -1,5 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
-
 import { render, screen } from "@testing-library/react";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
@@ -62,13 +60,17 @@ describe("OpportunityHistory", () => {
     );
 
     const firstHeading = screen.getByText("history");
+    // eslint-disable-next-line testing-library/no-node-access
     expect(firstHeading.nextSibling).toHaveTextContent("--");
 
     const secondHeading = screen.getByText("version:");
+    // eslint-disable-next-line testing-library/no-node-access
     expect(secondHeading.nextSibling).toHaveTextContent("--");
     const thirdHeading = screen.getByText("postedDate:");
+    // eslint-disable-next-line testing-library/no-node-access
     expect(thirdHeading.nextSibling).toHaveTextContent("--");
     const fifthHeading = screen.getByText("archiveDate:");
+    // eslint-disable-next-line testing-library/no-node-access
     expect(fifthHeading.nextSibling).toHaveTextContent("--");
   });
 });

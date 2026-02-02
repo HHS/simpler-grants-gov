@@ -184,6 +184,7 @@ describe("Header", () => {
 
     // the submenu assertions are not strictly necessary, but I could not get the timing to work right
     // to get tests to pass correctly without them, so leaving them in
+    // eslint-disable-next-line testing-library/no-node-access
     const subMenu = workspaceButton.nextSibling;
     expect(subMenu).not.toBeVisible();
 
