@@ -6,7 +6,6 @@ import uuid
 from datetime import date
 from enum import StrEnum
 
-import click
 from sqlalchemy import select
 
 from src.adapters import db
