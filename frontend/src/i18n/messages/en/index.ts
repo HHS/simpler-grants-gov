@@ -1751,6 +1751,32 @@ export const messages = {
       opportunity: "Opportunity",
     },
   },
+  Opportunities: {
+    numOpportunities:
+      "{num, plural, =1 {1 opportunity} other {# opportunities}}",
+    errorMessage:
+      "We have encountered an error loading your opportunities, please try again later.",
+    metaDescription: "View your saved opportunities",
+    noOpportunitiesMessage: {
+      primary: "You have not started any opportunities yet.",
+      secondary:
+        "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Opportunities",
+    pageTitle: "Opportunities",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      agency: "Agency",
+      title: "Title",
+      status: "Status",
+      actions: "Actions",
+    },
+  },
   Organizations: {
     errorMessage:
       "We have encountered an error loading your organizations, please try again later.",
