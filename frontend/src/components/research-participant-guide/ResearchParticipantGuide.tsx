@@ -10,7 +10,9 @@ export default function ResearchParticipantGuide() {
     <>
       <GridContainer className="padding-y-4 grid-container tablet-lg:padding-y-6">
         <h1>{t("h1")}</h1>
-        <p className="usa-intro" data-testid="introParagraph">{t("intro")}</p>
+        <p className="usa-intro" data-testid="introParagraph">
+          {t("intro")}
+        </p>
         <Grid row gap className="margin-top-5">
           <Grid tabletLg={{ col: 4 }}>
             <h2>{t("beforeHeader")}</h2>
