@@ -1,4 +1,3 @@
-from src.db.models.competition_models import CompetitionForm
 import dataclasses
 import logging
 import uuid
@@ -13,7 +12,7 @@ import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
-from src.db.models.competition_models import Competition, Form, FormInstruction
+from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
