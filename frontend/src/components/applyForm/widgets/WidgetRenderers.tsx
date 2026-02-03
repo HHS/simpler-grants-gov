@@ -34,15 +34,15 @@ export const wrapSection = ({
   );
 };
 
-export const renderWidget = ({
+export function renderWidget<V>({
   type,
   props,
   definition,
 }: {
   type: WidgetTypes;
-  props: UswdsWidgetProps;
+  props: UswdsWidgetProps<V>;
   definition?: DefinitionPath;
-}) => {
+}) {
   const Widget = widgetComponents[type];
 
   // light debugging for unknown widgets
@@ -58,4 +58,4 @@ export const renderWidget = ({
   const key = props.key as string;
   const spreadProps = omit(props, "key") as UswdsWidgetProps;
   return <Widget key={key} {...spreadProps} />;
-};
+}
