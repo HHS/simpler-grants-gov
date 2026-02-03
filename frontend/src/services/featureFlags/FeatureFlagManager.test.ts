@@ -1,5 +1,5 @@
 /**
- * @jest-environment ./src/utils/testing/jsdomNodeEnvironment.ts
+ * @jest-environment ./src/test/jest-environments/jsdomNodeEnvironment.ts
  */
 
 import { FEATURE_FLAGS_KEY } from "src/services/featureFlags/featureFlagHelpers";

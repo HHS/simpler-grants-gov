@@ -162,7 +162,7 @@ test file that is affected
 
 ```typescript
 /**
- * @jest-environment ./tests/utils/jsdomNodeEnvironment.ts
+ * @jest-environment ./src/test/jest-environments/jsdomNodeEnvironment.ts
  */
 ```
 
