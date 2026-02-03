@@ -150,6 +150,8 @@ OPPORTUNITY_PUBLISHER = Role(
         [
             Privilege.VIEW_OPPORTUNITY,
             Privilege.PUBLISH_OPPORTUNITY,
+            Privilege.CREATE_OPPORTUNITY,
+            Privilege.UPDATE_OPPORTUNITY,
         ],
     ),
     link_role_types=[LinkRoleRoleType(role_id=OPPORTUNITY_PUBLISHER_ID, role_type=RoleType.AGENCY)],
