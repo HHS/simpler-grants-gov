@@ -1,6 +1,5 @@
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
@@ -9,7 +8,6 @@ import { UserPrivilegesResponse } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 

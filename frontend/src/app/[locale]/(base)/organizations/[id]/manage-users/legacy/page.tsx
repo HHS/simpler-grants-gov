@@ -1,4 +1,3 @@
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getOrganizationDetails,
   getOrganizationLegacyUsers,
@@ -6,8 +5,6 @@ import {
 import { Organization } from "src/types/applicationResponseTypes";
 import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 import { OrganizationLegacyUser } from "src/types/userTypes";
-
-import { redirect } from "next/navigation";
 
 import { InviteLegacyUsersErrorPage } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersErrorPage";
 import { InviteLegacyUsersPageContent } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersPageContent";

@@ -1,6 +1,5 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserPrivilegesResponse } from "src/types/userTypes";
 import { userRoleForOrganization } from "src/utils/userUtils";
@@ -58,8 +57,6 @@ export const OrganizationItem = ({
   const canManageUsers = orgPermissions?.organization_user_roles.find((role) =>
     role.privileges.includes("manage_org_members"),
   );
-
-  const { checkFeatureFlag } = useFeatureFlags();
 
   return (
     <li className="border-base-lighter border-1px padding-2 margin-top-2">

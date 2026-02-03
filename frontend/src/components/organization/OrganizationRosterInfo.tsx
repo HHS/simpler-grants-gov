@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthorizedData } from "src/hooks/useAuthorizedData";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -14,7 +13,6 @@ export const OrganizationRosterInfo = ({
   organizationId: string;
 }) => {
   const t = useTranslations("OrganizationDetail.rosterTable");
-  const { checkFeatureFlag } = useFeatureFlags();
   const { confirmedPrivileges } = useAuthorizedData();
   const manageUsersPrivilege = confirmedPrivileges.find(
     (confirmedPrivilege) =>

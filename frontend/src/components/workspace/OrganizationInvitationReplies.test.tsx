@@ -1,7 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
-import { useUser } from "src/services/auth/useUser";
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
 
