@@ -84,7 +84,6 @@ describe("Maintenance", () => {
           },
           featureFlags: {
             applyFormPrototypeOff: false,
-            manageUsersOff: false,
           },
           userFeatureFlags: {},
           defaultFeatureFlags: {},
