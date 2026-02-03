@@ -1,21 +1,25 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+# Generate a random username for the RDS superuser.
+# For Aurora PostgreSQL, it must contain 1–63 alphanumeric characters.
+resource "random_id" "db_superuser" {
+  prefix      = "root" # Fixed 4 character prefix for identification in logs
+  byte_length = 16     # 32 hexadecimal digits
+}
+
 locals {
-  master_username       = "postgres"
+  master_username       = random_id.db_superuser.hex
   primary_instance_name = "${var.name}-primary"
   role_manager_name     = "${var.name}-role-manager"
+  role_manager_package  = "${path.root}/role_manager.zip"
+
   # The ARN that represents the users accessing the database are of the format: "arn:aws:rds-db:<region>:<account-id>:dbuser:<resource-id>/<database-user-name>""
   # See https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/
   db_user_arn_prefix = "arn:aws:rds-db:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:dbuser:${aws_rds_cluster.db.cluster_resource_id}"
 
-  engine_version       = "16"
+  engine_version       = var.engine_version
   engine_major_version = regex("^\\d+", local.engine_version)
-}
-
-module "interface" {
-  source = "../interface"
-  name   = var.name
 }
 
 # Database Configuration
@@ -46,53 +50,48 @@ resource "aws_rds_cluster" "db" {
   # checkov:skip=CKV_AWS_162:Auth decision needs to be ironed out
   iam_database_authentication_enabled = true
   copy_tags_to_snapshot               = true
+  enable_http_endpoint                = var.enable_http_endpoint
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
 
+  backup_retention_period = 35
   # Use a separate line to support automated terraform destroy commands
   # checkov:skip=CKV_AWS_139:Allow disabling deletion protection for automated tests
   deletion_protection = !var.is_temporary
 
   serverlessv2_scaling_configuration {
-    max_capacity = 1.0
-    min_capacity = 0.5
+    max_capacity = var.max_capacity
+    min_capacity = var.min_capacity
   }
 
-  db_subnet_group_name   = module.network.database_subnet_group_name
-  vpc_security_group_ids = [aws_security_group.db.id]
-
+  db_subnet_group_name            = var.database_subnet_group_name
+  vpc_security_group_ids          = [aws_security_group.db.id]
   enabled_cloudwatch_logs_exports = ["postgresql"]
-
-  # Many DB modifications are by default queued up for the next maintenance
-  # window, but when you want changes to happen now, set this.
-  #
-  # apply_immediately = true
 }
 
-resource "aws_rds_cluster_instance" "primary" {
-  identifier                            = local.primary_instance_name
+resource "aws_rds_cluster_instance" "instance" {
+  count = var.instance_count
+
+  identifier                            = "${var.name}-instance-${count.index}"
   cluster_identifier                    = aws_rds_cluster.db.id
   instance_class                        = "db.serverless"
+  db_subnet_group_name                  = var.database_subnet_group_name
   engine                                = aws_rds_cluster.db.engine
   engine_version                        = aws_rds_cluster.db.engine_version
+  promotion_tier                        = 0
   auto_minor_version_upgrade            = true
   monitoring_role_arn                   = aws_iam_role.rds_enhanced_monitoring.arn
   monitoring_interval                   = 30
   performance_insights_enabled          = true
-  performance_insights_retention_period = 7
+  performance_insights_retention_period = 93
 
-  # checkov:skip=CKV_AWS_354:Performance insights KMS key not needed for serverless instances
-
-  # Many DB modifications are by default queued up for the next maintenance
-  # window, but when you want changes to happen now, set this.
-  #
-  # apply_immediately = true
+  # checkov:skip=CKV_AWS_354:Ignore the managed customer KMS key requirement for now
 }
 
 resource "aws_kms_key" "db" {
-  # checkov:skip=CKV2_AWS_64:KMS key policy managed by AWS default policy
   description         = "Key for RDS cluster ${var.name}"
   enable_key_rotation = true
+  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 # Query Logging
@@ -113,10 +112,5 @@ resource "aws_rds_cluster_parameter_group" "rds_query_logging" {
     name = "log_min_duration_statement"
     # Logs all statements that run 100ms or longer
     value = "100"
-  }
-
-  lifecycle {
-    # To support major version updates.
-    create_before_destroy = true
   }
 }

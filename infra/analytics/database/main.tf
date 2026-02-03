@@ -34,6 +34,7 @@ locals {
 
   environment_config = module.app_config.environment_configs[var.environment_name]
   database_config    = local.environment_config.database_config
+  network_config     = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -64,6 +65,18 @@ module "project_config" {
 
 module "app_config" {
   source = "../app-config"
+}
+
+data "aws_security_groups" "aws_services" {
+  filter {
+    name   = "group-name"
+    values = ["${module.project_config.aws_services_security_group_name_prefix}*"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.network.id]
+  }
 }
 
 module "database" {

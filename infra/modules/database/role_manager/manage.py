@@ -10,9 +10,7 @@ import db
 def manage(config: dict):
     """Manage database roles, schema, and privileges"""
 
-    print(
-        "-- Running command 'manage' to manage database roles, schema, and privileges"
-    )
+    print("-- Running command 'manage' to manage database roles, schema, and privileges")
     with db.connect_as_master_user() as master_conn:
         print_current_db_config(master_conn)
         configure_database(master_conn, config)
@@ -24,9 +22,7 @@ def manage(config: dict):
     return {
         "roles": roles,
         "roles_with_groups": roles_with_groups,
-        "schema_privileges": {
-            schema_name: schema_acl for schema_name, schema_acl in schema_privileges
-        },
+        "schema_privileges": {schema_name: schema_acl for schema_name, schema_acl in schema_privileges},
     }
 
 
@@ -35,10 +31,7 @@ def get_roles(conn: Connection) -> list[str]:
         row[0]
         for row in db.execute(
             conn,
-            "SELECT rolname "
-            "FROM pg_roles "
-            "WHERE rolname NOT LIKE 'pg_%' "
-            "AND rolname NOT LIKE 'rds%'",
+            "SELECT rolname " "FROM pg_roles " "WHERE rolname NOT LIKE 'pg_%' " "AND rolname NOT LIKE 'rds%'",
             print_query=False,
         )
     ]
@@ -95,7 +88,7 @@ def configure_database(conn: Connection, config: dict) -> None:
     # for projects that wish to use earlier versions of Postgres.
     print("---- Revoking default access on public schema")
     db.execute(conn, "REVOKE CREATE ON SCHEMA public FROM PUBLIC")
-    
+
     print("---- Revoking database access from public role")
     db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
     print(f"---- Setting default search path to schema {schema_name}")
@@ -107,6 +100,7 @@ def configure_database(conn: Connection, config: dict) -> None:
     configure_roles(conn, [migrator_username, app_username], database_name)
     configure_schema(conn, schema_name, migrator_username, app_username)
     configure_superuser_extensions(conn, config["superuser_extensions"])
+
 
 def configure_roles(conn: Connection, roles: list[str], database_name: str) -> None:
     print("---- Configuring roles")
@@ -136,9 +130,7 @@ def configure_role(conn: Connection, username: str, database_name: str) -> None:
     )
 
 
-def configure_schema(
-    conn: Connection, schema_name: str, migrator_username: str, app_username: str
-) -> None:
+def configure_schema(conn: Connection, schema_name: str, migrator_username: str, app_username: str) -> None:
     print("---- Configuring schema")
     print(f"------ Creating schema: {schema_name=}")
     db.execute(conn, f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
@@ -165,9 +157,7 @@ def configure_default_privileges():
     schema_name = os.environ.get("DB_SCHEMA")
     app_username = os.environ.get("APP_USER")
     with db.connect_using_iam(migrator_username) as conn:
-        print(
-            f"------ Granting privileges for future objects in schema: grantee={app_username}"
-        )
+        print(f"------ Granting privileges for future objects in schema: grantee={app_username}")
         db.execute(
             conn,
             f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}",

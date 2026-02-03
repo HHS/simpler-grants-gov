@@ -58,6 +58,7 @@ def check_superuser_extensions(app_conn: Connection, superuser_extensions: dict)
         is_enabled = len(result) > 0
         assert should_be_enabled == is_enabled
 
+
 def cleanup_migrator_drop_table(migrator_conn: Connection):
     print("-- Clean up role_manager_test table if it exists")
     db.execute(migrator_conn, "DROP TABLE IF EXISTS role_manager_test")

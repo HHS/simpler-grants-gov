@@ -2,7 +2,7 @@
 # --------------
 
 resource "aws_iam_policy" "app_db_access" {
-  name   = module.interface.app_access_policy_name
+  name   = var.app_access_policy_name
   policy = data.aws_iam_policy_document.app_db_access.json
 }
 
@@ -16,13 +16,13 @@ data "aws_iam_policy_document" "app_db_access" {
     ]
 
     resources = [
-      "${local.db_user_arn_prefix}/${module.interface.app_username}",
+      "${local.db_user_arn_prefix}/${var.app_username}",
     ]
   }
 }
 
 resource "aws_iam_policy" "migrator_db_access" {
-  name   = module.interface.migrator_access_policy_name
+  name   = var.migrator_access_policy_name
   policy = data.aws_iam_policy_document.migrator_db_access.json
 }
 
@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "migrator_db_access" {
     ]
 
     resources = [
-      "${local.db_user_arn_prefix}/${module.interface.migrator_username}",
+      "${local.db_user_arn_prefix}/${var.migrator_username}",
     ]
   }
 }

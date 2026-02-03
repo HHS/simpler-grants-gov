@@ -11,7 +11,3 @@ output "opensearch_query_policy_arn" {
   description = "The ARN of the IAM policy for OpenSearch query operations"
   value       = local.search_config != null ? module.search[0].opensearch_query_policy_arn : null
 }
-
-output "engine_version" {
-  value = module.database.engine_version
-}
