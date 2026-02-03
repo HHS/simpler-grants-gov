@@ -301,7 +301,9 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 
 # Build custom competitions 8037 for testing 7953
 def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
-    logger.info("Creating custom test opportunities and competitions for Apply Happy Path scenarios")
+    logger.info(
+        "Creating custom test opportunities and competitions for Apply Happy Path scenarios"
+    )
     # Static UUIDs for each opportunity and competition
     uuid_map = {
         "TEST-APPLY-ORG-IND-ON01": uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
