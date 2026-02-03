@@ -251,7 +251,15 @@ class BuildAutomaticOpportunitiesTask(Task):
             ),
             competitions=[
                 CompetitionContainer(
-                    required_form_ids=[SF424_v4_0.form_id, SF424a_v1_0.form_id,SF424b_v1_1.form_id,ProjectAbstractSummary_v2_0.form_id,ProjectNarrativeAttachment_v1_2.form_id,BudgetNarrativeAttachment_v1_2.form_id, SFLLL_v2_0.form_id],
+                    required_form_ids=[
+                        SF424_v4_0.form_id,
+                        SF424a_v1_0.form_id,
+                        SF424b_v1_1.form_id,
+                        ProjectAbstractSummary_v2_0.form_id,
+                        ProjectNarrativeAttachment_v1_2.form_id,
+                        BudgetNarrativeAttachment_v1_2.form_id,
+                        SFLLL_v2_0.form_id,
+                    ],
                     open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
                 )
             ],
@@ -265,7 +273,13 @@ class BuildAutomaticOpportunitiesTask(Task):
             competitions=[
                 CompetitionContainer(
                     required_form_ids=[SF424_v4_0.form_id, ProjectAbstractSummary_v2_0.form_id],
-                    optional_form_ids=[SF424a_v1_0.form_id,SF424b_v1_1.form_id,ProjectNarrativeAttachment_v1_2.form_id,BudgetNarrativeAttachment_v1_2.form_id, SFLLL_v2_0.form_id],
+                    optional_form_ids=[
+                        SF424a_v1_0.form_id,
+                        SF424b_v1_1.form_id,
+                        ProjectNarrativeAttachment_v1_2.form_id,
+                        BudgetNarrativeAttachment_v1_2.form_id,
+                        SFLLL_v2_0.form_id,
+                    ],
                     open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
                 )
             ],
@@ -278,7 +292,15 @@ class BuildAutomaticOpportunitiesTask(Task):
             ),
             competitions=[
                 CompetitionContainer(
-                    optional_form_ids=[SF424_v4_0.form_id, SF424a_v1_0.form_id,SF424b_v1_1.form_id,ProjectAbstractSummary_v2_0.form_id,ProjectNarrativeAttachment_v1_2.form_id,BudgetNarrativeAttachment_v1_2.form_id, SFLLL_v2_0.form_id],
+                    optional_form_ids=[
+                        SF424_v4_0.form_id,
+                        SF424a_v1_0.form_id,
+                        SF424b_v1_1.form_id,
+                        ProjectAbstractSummary_v2_0.form_id,
+                        ProjectNarrativeAttachment_v1_2.form_id,
+                        BudgetNarrativeAttachment_v1_2.form_id,
+                        SFLLL_v2_0.form_id,
+                    ],
                     open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
                 )
             ],
