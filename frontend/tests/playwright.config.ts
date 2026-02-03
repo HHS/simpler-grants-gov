@@ -15,10 +15,9 @@ export default defineConfig({
   fullyParallel: targetEnv !== "staging",
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCi,
-  /* Retry on CI only, but reduce retries for staging */
-  retries: isCi && targetEnv === "staging" ? 1 : isCi ? 3 : 0,
-  // Reduce workers for staging to prevent resource exhaustion
-  workers: targetEnv === "staging" ? 1 : 10,
+  /* Retry on CI only */
+  retries: isCi ? 3 : 0,
+  workers: 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: isCi ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -26,9 +25,9 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: baseUrl,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: targetEnv === "staging" ? "off" : "on-first-retry",
-    screenshot: targetEnv === "staging" ? "off" : "on",
-    video: targetEnv === "staging" ? "off" : "on-first-retry",
+    trace: "on-first-retry",
+    screenshot: "on",
+    video: "on-first-retry",
     launchOptions:
       targetEnv === "staging"
         ? {
