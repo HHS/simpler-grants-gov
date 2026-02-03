@@ -1,0 +1,219 @@
+import uuid
+
+import pytest
+
+from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
+from src.db.models.opportunity_models import Opportunity
+from src.db.models.user_models import User
+from src.workflow.event.state_machine_event import StateMachineEvent
+from src.workflow.event.workflow_event import (
+    ProcessWorkflowEventContext,
+    StartWorkflowEventContext,
+    WorkflowEntity,
+    WorkflowEvent,
+)
+from src.workflow.handler.event_handler import EventHandler
+from src.workflow.state_machine.initial_prototype_state_machine import (
+    InitialPrototypeState,
+    InitialPrototypeStateMachine,
+    initial_prototype_state_machine_config,
+)
+from src.workflow.state_persistence.base_state_persistence_model import Workflow
+from src.workflow.workflow_errors import (
+    InvalidEventError,
+    InvalidWorkflowTypeError,
+    UserDoesNotExist,
+)
+from tests.src.db.models.factories import OpportunityFactory, UserFactory
+
+
+def build_start_workflow_event(
+    workflow_type: WorkflowType | str,
+    user: User | None,
+    entities: list,
+    exclude_start_workflow_context: bool = False,
+) -> WorkflowEvent:
+    user_id = user.user_id if user else uuid.uuid4()
+
+    entity_list = []
+    for entity in entities:
+        if isinstance(entity, Opportunity):
+            entity_list.append(
+                WorkflowEntity(
+                    entity_type=WorkflowEntityType.OPPORTUNITY, entity_id=entity.opportunity_id
+                )
+            )
+
+    if exclude_start_workflow_context:
+        start_workflow_context = None
+    else:
+        start_workflow_context = StartWorkflowEventContext(
+            workflow_type=workflow_type,
+            entities=entity_list,
+        )
+
+    event = WorkflowEvent(
+        event_id=uuid.uuid4(),
+        acting_user_id=user_id,
+        event_type=WorkflowEventType.START_WORKFLOW,
+        start_workflow_context=start_workflow_context,
+    )
+
+    return event
+
+
+def test_start_workflow_event(db_session, enable_factory_create):
+
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    event = build_start_workflow_event(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        user=user,
+        entities=[opportunity],
+    )
+
+    event_handler = EventHandler(db_session, event)
+    state_machine = event_handler.process()
+
+    assert state_machine.workflow.current_workflow_state == InitialPrototypeState.MIDDLE
+    assert state_machine.workflow.is_active is True
+
+    # Verify that just one event was processed
+    # and that the event has all the expected fields
+    assert len(state_machine.transition_history) == 1
+    state_machine_event = state_machine.transition_history[0]
+    assert state_machine_event.event_to_send == "start_workflow"
+    assert state_machine_event.acting_user.user_id == user.user_id
+    assert state_machine_event.workflow is state_machine.workflow
+    assert state_machine_event.state_machine_cls is InitialPrototypeStateMachine
+
+
+def test_process_workflow_event(db_session, enable_factory_create):
+
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    event = WorkflowEvent(
+        event_id=uuid.uuid4(),
+        acting_user_id=user.user_id,
+        event_type=WorkflowEventType.PROCESS_WORKFLOW,
+        process_workflow_context=ProcessWorkflowEventContext(
+            workflow_id=uuid.uuid4(), event_to_send="TODO"  # TODO
+        ),
+    )
+
+    event_handler = EventHandler(db_session, event)
+    state_machine = event_handler.process()
+
+    assert state_machine.workflow.current_workflow_state == InitialPrototypeState.END
+    assert state_machine.workflow.is_active is False
+
+
+def test_start_workflow_event_missing_start_context(db_session, enable_factory_create):
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    event = build_start_workflow_event(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        user=user,
+        entities=[opportunity],
+        exclude_start_workflow_context=True,
+    )
+
+    event_handler = EventHandler(db_session, event)
+    with pytest.raises(InvalidEventError, match="Start workflow event cannot have null context"):
+        event_handler.process()
+
+
+def test_start_workflow_event_invalid_workflow_type(db_session, enable_factory_create):
+    user = UserFactory.create()
+
+    event = build_start_workflow_event(
+        # We haven't made an app submission workflow yet
+        # If this starts failing in the future because we
+        # did implement that, well, we might need to do this
+        # a bit different.
+        workflow_type=WorkflowType.APPLICATION_SUBMISSION,
+        user=user,
+        entities=[],
+    )
+
+    event_handler = EventHandler(db_session, event)
+    with pytest.raises(
+        InvalidWorkflowTypeError, match="Workflow event does not map to an actual state machine"
+    ):
+        event_handler.process()
+
+
+def test_start_workflow_event_missing_user(db_session, enable_factory_create):
+    opportunity = OpportunityFactory.create()
+
+    event = build_start_workflow_event(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        user=None,  # A random ID will be added
+        entities=[opportunity],
+    )
+
+    event_handler = EventHandler(db_session, event)
+    with pytest.raises(UserDoesNotExist, match="User does not exist"):
+        event_handler.process()
+
+
+def test_process_event_does_not_exist(db_session, enable_factory_create):
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    state_machine_event = StateMachineEvent(
+        event_to_send="not-a-real-event",
+        acting_user=user,
+        workflow=Workflow(
+            workflow_id=uuid.uuid4(),
+            workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+            current_workflow_state="start",
+            is_active=True,
+            opportunities=[opportunity],
+        ),
+        state_machine_cls=InitialPrototypeStateMachine,
+        config=initial_prototype_state_machine_config,
+    )
+
+    event_handler = EventHandler(
+        db_session, build_start_workflow_event(WorkflowType.INITIAL_PROTOTYPE, user, [opportunity])
+    )
+
+    with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):
+        event_handler._process_event(state_machine_event)
+
+
+def test_process_current_state_does_not_exist(db_session, enable_factory_create):
+    # TODO - just test this by doing a process event
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    state_machine_event = StateMachineEvent(
+        event_to_send="start_workflow",
+        acting_user=user,
+        workflow=Workflow(
+            workflow_id=uuid.uuid4(),
+            workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+            current_workflow_state="not-a-real-state",
+            is_active=True,
+            opportunities=[opportunity],
+        ),
+        state_machine_cls=InitialPrototypeStateMachine,
+        config=initial_prototype_state_machine_config,
+    )
+
+    event_handler = EventHandler(
+        db_session, build_start_workflow_event(WorkflowType.INITIAL_PROTOTYPE, user, [opportunity])
+    )
+
+    with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):
+        event_handler._process_event(state_machine_event)
+
+
+# TODO
+# Process workflow
+# * Various error scenarios
+# * Sending an event that doesn't exist (catching and rethrowing state machine errors)
