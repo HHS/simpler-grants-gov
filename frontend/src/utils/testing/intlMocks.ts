@@ -1,7 +1,5 @@
 import { TFn } from "src/types/intl";
 
-import ResearchParticipantGuide from "src/components/research-participant-guide/ResearchParticipantGuide";
-
 export function mockUseTranslations(
   translationKey: string,
   options?: { [key: string]: string },
