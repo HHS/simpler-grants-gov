@@ -13,7 +13,6 @@ export const OrganizationInvitationReplies = ({
 }: {
   userInvitations: OrganizationInvitation[];
 }) => {
-
   return (
     <ul className="usa-list--unstyled">
       {userInvitations.reduce((invitationsToShow, userInvitation) => {

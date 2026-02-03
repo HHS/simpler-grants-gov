@@ -25,17 +25,15 @@ export const OrganizationRosterInfo = ({
       <h3>{t("title")}</h3>
       <div>
         {t("explanation")} {t("manageUsersExplanation")}{" "}
-        {
-          manageUsersPrivilege?.authorized && (
-            <Link
-              href={`/organizations/${organizationId}/manage-users`}
-              className="usa-button usa-button--secondary float-right"
-            >
-              <USWDSIcon name="people" />
-              {t("manageUsersCTA")}
-            </Link>
-          )
-        }
+        {manageUsersPrivilege?.authorized && (
+          <Link
+            href={`/organizations/${organizationId}/manage-users`}
+            className="usa-button usa-button--secondary float-right"
+          >
+            <USWDSIcon name="people" />
+            {t("manageUsersCTA")}
+          </Link>
+        )}
       </div>
     </div>
   );
