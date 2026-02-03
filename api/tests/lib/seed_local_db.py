@@ -1,3 +1,9 @@
+def fetch_competition(db_session, competition_id):
+    return db_session.scalar(
+        select(Competition).where(Competition.competition_id == competition_id)
+    )
+
+
 import dataclasses
 import logging
 import uuid
@@ -302,9 +308,12 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 # Build custom competitions 8037 for testing 7953
 def does_competition_form_exist(db_session, competition_id, form_id):
     return (
-        db_session.query(CompetitionForm)
-        .filter_by(competition_id=competition_id, form_id=form_id)
-        .first()
+        db_session.scalar(
+            select(CompetitionForm).where(
+                CompetitionForm.competition_id == competition_id,
+                CompetitionForm.form_id == form_id,
+            )
+        )
         is not None
     )
 
@@ -329,8 +338,9 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     }
 
     db_session = factories._db_session
-    # Open to both orgs and individuals
-    if not does_opportunity_exist(db_session, uuid_map["TEST-APPLY-ORG-IND-ON01"]):
+
+    both_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-IND-CT01"])
+    if not both_competition:
         both_competition = factories.CompetitionFactory.create(
             competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"],
             opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
@@ -344,15 +354,9 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             ],
             with_instruction=True,
         )
-    else:
-        both_competition = (
-            db_session.query(Competition)
-            .filter_by(competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"])
-            .one()
-        )
 
-    # Only open to organizations
-    if not does_opportunity_exist(db_session, uuid_map["TEST-APPLY-ORG-ON01"]):
+    org_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-CT01"])
+    if not org_competition:
         org_competition = factories.CompetitionFactory.create(
             competition_id=uuid_map["TEST-APPLY-ORG-CT01"],
             opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-ON01"],
@@ -363,15 +367,9 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
             with_instruction=True,
         )
-    else:
-        org_competition = (
-            db_session.query(Competition)
-            .filter_by(competition_id=uuid_map["TEST-APPLY-ORG-CT01"])
-            .one()
-        )
 
-    # Only open to individuals
-    if not does_opportunity_exist(db_session, uuid_map["TEST-APPLY-IND-ON01"]):
+    ind_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-IND-CT01"])
+    if not ind_competition:
         ind_competition = factories.CompetitionFactory.create(
             competition_id=uuid_map["TEST-APPLY-IND-CT01"],
             opportunity__opportunity_id=uuid_map["TEST-APPLY-IND-ON01"],
@@ -381,12 +379,6 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             competition_forms=[],
             open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
             with_instruction=True,
-        )
-    else:
-        ind_competition = (
-            db_session.query(Competition)
-            .filter_by(competition_id=uuid_map["TEST-APPLY-IND-CT01"])
-            .one()
         )
 
     # Add forms to each competition
