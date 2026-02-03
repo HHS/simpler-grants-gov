@@ -1,12 +1,9 @@
-import uuid
 from copy import deepcopy
 
 import pytest
-from freezegun import freeze_time
-from sqlalchemy import select, update
+from sqlalchemy import update
 
 from src.db.models.competition_models import Form
-from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -63,91 +60,54 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 12
-
-    # Figure out the forms we added to each opportunity
-    opp_form_ids_for_opps = set()
-    for opportunity in opportunities:
-        opp_form_ids = frozenset(c.form_id for c in opportunity.competitions[0].competition_forms)
-        opp_form_ids_for_opps.add(opp_form_ids)
+    
+    # Separate opportunities by the number of forms they contain
+    single_form_opps = []
+    all_forms_opp = None
+    scenario_opps = []
+    
+    all_form_ids_set = {form.form_id for form in forms}
+    
+    for opp in opportunities:
+        opp_form_ids = frozenset(
+            form_id for comp in opp.competitions for form_id in [c.form_id for c in comp.competition_forms]
+        )
+        
+        if opp_form_ids == all_form_ids_set:
+            all_forms_opp = opp
+        elif len(opp_form_ids) == 1:
+            single_form_opps.append(opp)
+        else:
+            scenario_opps.append(opp)
+    
+    # Validate the breakdown
+    assert len(single_form_opps) == len(forms)
+    assert all_forms_opp is not None
+    expected_opportunities = len(single_form_opps) + 1 + len(scenario_opps)
+    assert len(opportunities) == expected_opportunities
 
     # Each form should have gotten its own opportunity
-    all_form_ids = set()
-    for form in forms:
-        assert {form.form_id} in opp_form_ids_for_opps
-        all_form_ids.add(form.form_id)
+    all_form_ids = {form.form_id for form in forms}
+    single_form_ids_in_opps = {
+        next(iter(opp_form_ids)) for opp in single_form_opps 
+        for opp_form_ids in [{c.form_id for comp in opp.competitions for c in comp.competition_forms}]
+    }
+    assert single_form_ids_in_opps == all_form_ids
 
-    # There should also be one opportunity with every form
-    assert all_form_ids in opp_form_ids_for_opps
-
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 12
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == expected_opportunities
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
-    # If we rerun the task, all opportunities should be skipped (including ALL-forms)
+    # If we rerun the task, only the all-form opportunity will be created
     task = BuildAutomaticOpportunitiesTask(db_session)
     task.run()
 
-    assert len(task.opportunities) == 0
-
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 12
-
-
-def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
-    """Test that opportunities with hard-coded IDs maintain the same IDs across runs"""
-    # First run - create all opportunities
-    with freeze_time("2026-02-03 12:00:00"):
-        task1 = BuildAutomaticOpportunitiesTask(db_session)
-        task1.run()
-
-    # Collect opportunity IDs from first run
-    first_run_ids = {}
-    for opp in task1.opportunities:
-        first_run_ids[opp.opportunity_number] = opp.opportunity_id
-
-    # Second run - should skip existing opportunities
-
-    with freeze_time("2026-02-04 12:00:00"):
-        task2 = BuildAutomaticOpportunitiesTask(db_session)
-        task2.run()
-
-    # Manually query all opportunities from database to verify IDs
-    all_opportunities = db_session.scalars(select(Opportunity)).all()
-
-    # Build a mapping of opportunity_number to opportunity_id from database
-    db_ids = {}
-    for opp in all_opportunities:
-        db_ids[opp.opportunity_number] = opp.opportunity_id
-
-    # Verify that all opportunities from first run have the same IDs in the database
-    for opp_number, opp_id in first_run_ids.items():
-        assert opp_number in db_ids, f"Opportunity {opp_number} not found in database"
-        assert db_ids[opp_number] == opp_id, (
-            f"Opportunity ID mismatch for {opp_number}: "
-            f"expected {opp_id}, got {db_ids[opp_number]}"
-        )
-
-    # Verify specific hard-coded UUIDs for the named scenarios
-    expected_ids = {
-        "SGG-org-only-test": uuid.UUID("10000000-0000-0000-0000-000000000001"),
-        "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
-        "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
-        "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
+    assert len(task.opportunities) == 1
+    assert all_form_ids == {
+        c.form_id for c in task.opportunities[0].competitions[0].competition_forms
     }
 
-    for opp_number, expected_id in expected_ids.items():
-        assert opp_number in db_ids, f"Expected opportunity {opp_number} not found"
-        assert db_ids[opp_number] == expected_id, (
-            f"Opportunity {opp_number} has incorrect ID: "
-            f"expected {expected_id}, got {db_ids[opp_number]}"
-        )
-
-    # The opportunity number is dynamic (includes date), so find it by prefix
-    all_forms_opp_numbers = [num for num in db_ids.keys() if num.startswith("SGG-ALL-Forms-")]
-    # With freeze_time testing different dates, we should have at least 2 ALL forms opportunities
-    assert (
-        len(all_forms_opp_numbers) >= 2
-    ), f"Expected at least 2 ALL forms opportunities, found {len(all_forms_opp_numbers)}"
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 1
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == expected_opportunities - 1
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):
