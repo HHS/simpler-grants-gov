@@ -243,7 +243,46 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-
+        ### Test data 1 for only individuals - all forms are required
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="Test data 1 for only individuals - all forms are required",
+                opportunity_number="SGG-indv-only-test-1",
+            ),
+            competitions=[
+                CompetitionContainer(
+                    required_form_ids=[SF424_v4_0.form_id, SF424a_v1_0.form_id,SF424b_v1_1.form_id,ProjectAbstractSummary_v2_0.form_id,ProjectNarrativeAttachment_v1_2.form_id,BudgetNarrativeAttachment_v1_2.form_id, SFLLL_v2_0.form_id],
+                    open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                )
+            ],
+        )
+        ### Test data 2 for only individuals - Some forms are required
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="Test data 2 for only individuals - Some forms are required",
+                opportunity_number="SGG-indv-only-test-2",
+            ),
+            competitions=[
+                CompetitionContainer(
+                    required_form_ids=[SF424_v4_0.form_id, ProjectAbstractSummary_v2_0.form_id],
+                    optional_form_ids=[SF424a_v1_0.form_id,SF424b_v1_1.form_id,ProjectNarrativeAttachment_v1_2.form_id,BudgetNarrativeAttachment_v1_2.form_id, SFLLL_v2_0.form_id],
+                    open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                )
+            ],
+        )
+        ### Test data 3 for only individuals - All forms are Optional
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="Test data 3 for only individuals - All forms are Optional",
+                opportunity_number="SGG-indv-only-test-3",
+            ),
+            competitions=[
+                CompetitionContainer(
+                    optional_form_ids=[SF424_v4_0.form_id, SF424a_v1_0.form_id,SF424b_v1_1.form_id,ProjectAbstractSummary_v2_0.form_id,ProjectNarrativeAttachment_v1_2.form_id,BudgetNarrativeAttachment_v1_2.form_id, SFLLL_v2_0.form_id],
+                    open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                )
+            ],
+        )
         ### Mock BOR Opportunity
         self.create_opportunity(
             OpportunityContainer(
