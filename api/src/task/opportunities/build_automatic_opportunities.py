@@ -414,7 +414,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 return
 
         logger.info(f"Creating opportunity for scenario '{data.opportunity_number}'")
-        SGG-SIMPLE-2025-08-11 = datetime_util.get_now_us_eastern_date()
+        current_date = datetime_util.get_now_us_eastern_date()
 
         ### Opportunity
         opportunity = Opportunity(
