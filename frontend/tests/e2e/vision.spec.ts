@@ -20,10 +20,7 @@ test("can navigate to wiki in new tab", async ({ page, context }, testInfo) => {
     "https://wiki.simpler.grants.gov/design-and-research/user-research/grants.gov-archetypes",
   );
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
-  if (isMobile) {
-    return;
-  }
+  // Removed mobile skip: run on all devices per reviewer comment
 
   const newTabPromise = context.waitForEvent("page");
   await wikiLink.click();
@@ -45,10 +42,7 @@ test("can navigate to ethnio in new tab", async ({
   await ethnioLink.scrollIntoViewIfNeeded();
   await expect(ethnioLink).toHaveAttribute("href", "https://ethn.io/91822");
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
-  if (isMobile) {
-    return;
-  }
+  // Removed mobile skip: run on all devices per reviewer comment
 
   const newTabPromise = context.waitForEvent("page");
   await ethnioLink.click();
