@@ -300,56 +300,85 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 
 
 # Build custom competitions 8037 for testing 7953
+def does_opportunity_exist(db_session: db.Session, opportunity_id: uuid.UUID) -> bool:
+    opportunity = db_session.get(Opportunity, opportunity_id)
+    return opportunity is not None
+
+
 def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     logger.info(
         "Creating custom test opportunities and competitions for Apply Happy Path scenarios"
     )
     # Static UUIDs for each opportunity and competition
     uuid_map = {
-        "TEST-APPLY-ORG-IND-ON01": uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
-        "TEST-APPLY-ORG-IND-CT01": uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
-        "TEST-APPLY-ORG-ON01": uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
-        "TEST-APPLY-ORG-CT01": uuid.UUID("b2c3d4e5-f6a7-8901-bcde-fa2345678901"),
-        "TEST-APPLY-IND-ON01": uuid.UUID("d4e5f6a7-b890-1234-cdef-ab3456789012"),
-        "TEST-APPLY-IND-CT01": uuid.UUID("e5f6a7b8-9012-3456-defa-b4567890123c"),
+        "TEST-APPLY-ORG-IND-ON01": uuid.UUID("f7a1c2b3-4d5e-6789-8abc-1234567890ab"),
+        "TEST-APPLY-ORG-IND-CT01": uuid.UUID("a2b3c4d5-6e7f-8901-9bcd-2345678901bc"),
+        "TEST-APPLY-ORG-ON01": uuid.UUID("b3c4d5e6-7f80-9012-abcd-3456789012cd"),
+        "TEST-APPLY-ORG-CT01": uuid.UUID("c4d5e6f7-8091-0123-bcde-4567890123de"),
+        "TEST-APPLY-IND-ON01": uuid.UUID("d5e6f7a8-0912-1234-cdef-5678901234ef"),
+        "TEST-APPLY-IND-CT01": uuid.UUID("e6f7a8b9-1023-2345-def0-6789012345f0"),
     }
 
+    db_session = factories._db_session
     # Open to both orgs and individuals
-    both_competition = factories.CompetitionFactory.create(
-        competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"],
-        opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
-        opportunity__opportunity_title="TEST-APPLY-ORG-IND-OT01",
-        opportunity__opportunity_number="TEST-APPLY-ORG-IND-ON01",
-        competition_title="TEST-APPLY-ORG-IND-CT01",
-        competition_forms=[],
-        open_to_applicants=[
-            CompetitionOpenToApplicant.ORGANIZATION,
-            CompetitionOpenToApplicant.INDIVIDUAL,
-        ],
-        with_instruction=True,
-    )
+    if not does_opportunity_exist(db_session, uuid_map["TEST-APPLY-ORG-IND-ON01"]):
+        both_competition = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
+            opportunity__opportunity_title="TEST-APPLY-ORG-IND-OT01",
+            opportunity__opportunity_number="TEST-APPLY-ORG-IND-ON01",
+            competition_title="TEST-APPLY-ORG-IND-CT01",
+            competition_forms=[],
+            open_to_applicants=[
+                CompetitionOpenToApplicant.ORGANIZATION,
+                CompetitionOpenToApplicant.INDIVIDUAL,
+            ],
+            with_instruction=True,
+        )
+    else:
+        both_competition = (
+            db_session.query(Competition)
+            .filter_by(competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"])
+            .one()
+        )
+
     # Only open to organizations
-    org_competition = factories.CompetitionFactory.create(
-        competition_id=uuid_map["TEST-APPLY-ORG-CT01"],
-        opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-ON01"],
-        opportunity__opportunity_title="TEST-APPLY-ORG-OT01",
-        opportunity__opportunity_number="TEST-APPLY-ORG-ON01",
-        competition_title="TEST-APPLY-ORG-CT01",
-        competition_forms=[],
-        open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
-        with_instruction=True,
-    )
+    if not does_opportunity_exist(db_session, uuid_map["TEST-APPLY-ORG-ON01"]):
+        org_competition = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-ORG-CT01"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-ON01"],
+            opportunity__opportunity_title="TEST-APPLY-ORG-OT01",
+            opportunity__opportunity_number="TEST-APPLY-ORG-ON01",
+            competition_title="TEST-APPLY-ORG-CT01",
+            competition_forms=[],
+            open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+            with_instruction=True,
+        )
+    else:
+        org_competition = (
+            db_session.query(Competition)
+            .filter_by(competition_id=uuid_map["TEST-APPLY-ORG-CT01"])
+            .one()
+        )
+
     # Only open to individuals
-    ind_competition = factories.CompetitionFactory.create(
-        competition_id=uuid_map["TEST-APPLY-IND-CT01"],
-        opportunity__opportunity_id=uuid_map["TEST-APPLY-IND-ON01"],
-        opportunity__opportunity_title="TEST-APPLY-IND-OT01",
-        opportunity__opportunity_number="TEST-APPLY-IND-ON01",
-        competition_title="TEST-APPLY-IND-CT01",
-        competition_forms=[],
-        open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
-        with_instruction=True,
-    )
+    if not does_opportunity_exist(db_session, uuid_map["TEST-APPLY-IND-ON01"]):
+        ind_competition = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-IND-CT01"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-IND-ON01"],
+            opportunity__opportunity_title="TEST-APPLY-IND-OT01",
+            opportunity__opportunity_number="TEST-APPLY-IND-ON01",
+            competition_title="TEST-APPLY-IND-CT01",
+            competition_forms=[],
+            open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+            with_instruction=True,
+        )
+    else:
+        ind_competition = (
+            db_session.query(Competition)
+            .filter_by(competition_id=uuid_map["TEST-APPLY-IND-CT01"])
+            .one()
+        )
 
     # Add forms to each competition
     for competition, opp_num, comp_title in [
