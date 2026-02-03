@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Applications from "src/app/[locale]/(base)/applications/page";
+import Opportunities from "src/app/[locale]/(base)/opportunities/page";
 import { UnauthorizedError } from "src/errors";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { DeepPartial } from "src/utils/testing/commonTestUtils";
 import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
 
@@ -23,24 +23,25 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-const applications = jest.fn().mockResolvedValue([]);
+const opportunities = jest.fn().mockResolvedValue({ data: [] });
 
-jest.mock("src/services/fetch/fetchers/applicationsFetcher", () => ({
-  fetchApplications: () => applications() as Promise<ApplicationDetail[]>,
+jest.mock("src/services/fetch/fetchers/searchFetcher", () => ({
+  searchForOpportunities: () =>
+    opportunities() as Promise<{ data: BaseOpportunity[] }>,
 }));
 
-describe("Applications", () => {
+describe("Opportunities", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe("no applications have been saved", () => {
+  describe("no opportunities have been saved", () => {
     beforeEach(() => {
-      applications.mockResolvedValue([]);
+      opportunities.mockResolvedValue({ data: [] });
     });
 
     it("renders correct text", async () => {
-      const component = await Applications({ params: localeParams });
+      const component = await Opportunities({ params: localeParams });
       render(component);
 
       expect(await screen.findByText("primary")).toBeVisible();
@@ -48,7 +49,7 @@ describe("Applications", () => {
     });
 
     it("passes accessibility scan", async () => {
-      const component = await Applications({ params: localeParams });
+      const component = await Opportunities({ params: localeParams });
       const { container } = render(component);
       const results = await waitFor(() => axe(container));
 
@@ -58,27 +59,27 @@ describe("Applications", () => {
 
   describe("there was error fetching applications", () => {
     beforeEach(() => {
-      applications.mockRejectedValue(new Error("failure"));
+      opportunities.mockRejectedValue(new Error("failure"));
     });
 
     it("general errors render an alert", async () => {
-      applications.mockRejectedValue(new Error("failure"));
-      const component = await Applications({ params: localeParams });
+      opportunities.mockRejectedValue(new Error("failure"));
+      const component = await Opportunities({ params: localeParams });
       render(component);
 
       expect(await screen.findByTestId("alert")).toBeVisible();
     });
 
     it("unauthorized errors continue up the stack", async () => {
-      applications.mockRejectedValue(
+      opportunities.mockRejectedValue(
         new UnauthorizedError("No active session"),
       );
-      await expect(Applications({ params: localeParams })).rejects.toThrow();
+      await expect(Opportunities({ params: localeParams })).rejects.toThrow();
     });
 
     it("passes accessibility scan", async () => {
-      applications.mockRejectedValue(new Error("failure"));
-      const component = await Applications({ params: localeParams });
+      opportunities.mockRejectedValue(new Error("failure"));
+      const component = await Opportunities({ params: localeParams });
       const { container } = render(component);
       const results = await waitFor(() => axe(container));
 
@@ -87,30 +88,24 @@ describe("Applications", () => {
   });
 
   describe("an application is returned", () => {
-    let basicApplication: DeepPartial<ApplicationDetail>;
+    let basicOpportunity: { data: DeepPartial<BaseOpportunity>[] };
     beforeEach(() => {
-      basicApplication = {
-        application_id: "1a4d247b-ca08-4855-bdcd-e48432cd6d71",
-        application_name: "first!!!",
-        application_status: "in_progress",
-        competition: {
-          closing_date: "2025-11-11",
-          competition_id: "642a4dda-8c13-4bc6-bbae-1a0d133d90a6",
-          competition_title: "Truth common can board.",
-          is_open: true,
-          opening_date: "2025-10-26",
-          opportunity: {
-            agency_name: "Health Resources and Services Administration",
-            opportunity_id: "c9e472ab-2561-4ac3-b514-63781bc6a404",
-            opportunity_title: "Local Pilot-equivalent Opportunity",
+      basicOpportunity = {
+        data: [
+          {
+            agency_code: "HHS-ACF-FYSB",
+            agency_name: "Administration for Children & Families - ACYF/FYSB",
+            opportunity_id: "89a44d32-0d90-4514-85a9-d5491f1c454d",
+            opportunity_status: "posted",
+            opportunity_title: "Test Opportunity for SF424A 1.0",
           },
-        },
+        ],
       };
     });
 
     it("passes accessibility scan", async () => {
-      applications.mockResolvedValue([basicApplication]);
-      const component = await Applications({ params: localeParams });
+      opportunities.mockResolvedValue(basicOpportunity);
+      const component = await Opportunities({ params: localeParams });
       const { container } = render(component);
       const results = await waitFor(() => axe(container));
 
@@ -118,116 +113,46 @@ describe("Applications", () => {
     });
 
     it("renders headings", async () => {
-      applications.mockResolvedValue([basicApplication]);
-      const component = await Applications({ params: localeParams });
+      opportunities.mockResolvedValue(basicOpportunity);
+      const component = await Opportunities({ params: localeParams });
       render(component);
 
       expect(
-        screen.getAllByText("Applications.tableHeadings.closeDate"),
+        screen.getAllByText("Opportunities.tableHeadings.agency"),
       ).toHaveLength(2);
       expect(
-        screen.getAllByText("Applications.tableHeadings.status"),
+        screen.getAllByText("Opportunities.tableHeadings.title"),
       ).toHaveLength(2);
       expect(
-        screen.getAllByText("Applications.tableHeadings.applicationName"),
+        screen.getAllByText("Opportunities.tableHeadings.status"),
       ).toHaveLength(2);
       expect(
-        screen.getAllByText("Applications.tableHeadings.type"),
+        screen.getAllByText("Opportunities.tableHeadings.actions"),
       ).toHaveLength(2);
-      expect(
-        screen.getAllByText("Applications.tableHeadings.opportunity"),
-      ).toHaveLength(2);
-    });
-
-    it("renders close date", async () => {
-      applications.mockResolvedValue([basicApplication]);
-      const component = await Applications({ params: localeParams });
-      render(component);
-
-      expect(await screen.findByText("November 11, 2025")).toBeVisible();
-    });
-
-    it("renders application filing name", async () => {
-      applications.mockResolvedValue([basicApplication]);
-      const component = await Applications({ params: localeParams });
-      render(component);
-
-      expect(await screen.findByText("first!!!")).toBeVisible();
     });
 
     it("renders opportunity name and agency", async () => {
-      applications.mockResolvedValue([basicApplication]);
-      const component = await Applications({ params: localeParams });
+      opportunities.mockResolvedValue(basicOpportunity);
+      const component = await Opportunities({ params: localeParams });
       render(component);
 
       expect(
-        await screen.findByText("Local Pilot-equivalent Opportunity"),
+        await screen.findByText("Test Opportunity for SF424A 1.0"),
       ).toBeVisible();
       expect(
-        await screen.findByText("Health Resources and Services Administration"),
+        await screen.findByText(
+          "Administration for Children & Families - ACYF/FYSB",
+        ),
       ).toBeVisible();
     });
 
     describe("renders status", () => {
       it("if in draft", async () => {
-        applications.mockResolvedValue([basicApplication]);
-        const component = await Applications({ params: localeParams });
+        opportunities.mockResolvedValue(basicOpportunity);
+        const component = await Opportunities({ params: localeParams });
         render(component);
 
-        expect(
-          await screen.findByText("Applications.tableContents.draft"),
-        ).toBeVisible();
-      });
-
-      it("if submitted", async () => {
-        applications.mockResolvedValue([
-          { ...basicApplication, application_status: "submitted" },
-        ]);
-        const component = await Applications({ params: localeParams });
-        render(component);
-
-        expect(
-          await screen.findByText("Applications.tableContents.submitted"),
-        ).toBeVisible();
-      });
-
-      it("if approved", async () => {
-        applications.mockResolvedValue([
-          { ...basicApplication, application_status: "approved" },
-        ]);
-        const component = await Applications({ params: localeParams });
-        render(component);
-
-        expect(
-          await screen.findByText("Applications.tableContents.submitted"),
-        ).toBeVisible();
-      });
-    });
-
-    describe("renders type", () => {
-      it("if started as an individual", async () => {
-        applications.mockResolvedValue([basicApplication]);
-        const component = await Applications({ params: localeParams });
-        render(component);
-
-        expect(
-          await screen.findByText("Applications.tableContents.individual"),
-        ).toBeVisible();
-      });
-
-      it("if started as an organization", async () => {
-        applications.mockResolvedValue([
-          {
-            ...basicApplication,
-            organization: {
-              sam_gov_entity: { legal_business_name: "Great Organization" },
-            },
-          },
-        ]);
-        const component = await Applications({ params: localeParams });
-        render(component);
-
-        expect(await screen.findByText("Great Organization")).toBeVisible();
+        expect(await screen.findByText("posted")).toBeVisible();
       });
     });
   });
