@@ -30,6 +30,7 @@ describe("getNextRoutes", () => {
       "/(base)/organizations/1",
       "/(base)/organizations",
       "/(base)",
+      "/(base)/research-participant-guide",
       "/(base)/roadmap",
       "/(base)/saved-opportunities",
       "/(base)/saved-search-queries",
