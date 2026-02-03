@@ -9,7 +9,7 @@ test("has title", async ({ page }) => {
   await expect(page).toHaveTitle("Vision | Simpler.Grants.gov");
 });
 
-test("can navigate to wiki in new tab", async ({ page, context }, testInfo) => {
+test("can navigate to wiki in new tab", async ({ page, context }) => {
   const wikiLink = page.getByRole("link", {
     name: /Read more about the research on our public wiki/i,
   });
@@ -31,10 +31,7 @@ test("can navigate to wiki in new tab", async ({ page, context }, testInfo) => {
   );
 });
 
-test("can navigate to ethnio in new tab", async ({
-  page,
-  context,
-}, testInfo) => {
+test("can navigate to ethnio in new tab", async ({ page, context }) => {
   const ethnioLink = page.getByRole("link", {
     name: /Sign up to participate in future user studies/i,
   });
