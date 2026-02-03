@@ -1,14 +1,11 @@
 import { RJSFSchema } from "@rjsf/utils";
+import { getFieldConfig } from "src/utils/applyForm/getFieldConfig";
 
 import React, { JSX } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
 import { FormattedFormValidationWarning, UiSchema } from "./types";
-import {
-  getFieldConfig,
-  getRequiredProperties,
-  isFieldRequired,
-} from "./utils";
+import { getRequiredProperties, isFieldRequired, isMultifield } from "./utils";
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
 type RootBudgetFormContext = {
@@ -55,20 +52,25 @@ export const FormFields = ({
         typeof uiSchema === "object" &&
         "children" in uiSchema
       ) {
+        // if handling a single section object, build the tree for the section children
         buildFormTree(uiSchema.children, {
           label: uiSchema.label,
           name: uiSchema.name,
           description: uiSchema.description,
         });
       } else if (Array.isArray(uiSchema)) {
+        // if handling an array of sections or children
         uiSchema.forEach((node) => {
           if ("children" in node) {
+            // if handling a section with an array of children, build the tree for the children within the section
             buildFormTree(node.children as unknown as UiSchema, {
               label: node.label,
               name: node.name,
               description: node.description,
             });
           } else if (!parent && ("definition" in node || "schema" in node)) {
+            // if handling a single field outside of a section ???
+            // is this actually something we need to support?
             const requiredField = isFieldRequired(
               (node.definition || node.schema.title || "") as string,
               requiredFieldPaths,
@@ -101,6 +103,7 @@ export const FormFields = ({
         });
 
         if (parent) {
+          // if handling children within a section
           const childAcc: JSX.Element[] = [];
           const keys: number[] = [];
           const row = uiSchema.map((node) => {
