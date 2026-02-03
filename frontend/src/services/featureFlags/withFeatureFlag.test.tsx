@@ -38,7 +38,7 @@ describe("WithFeatureFlag", () => {
     const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "manageUsersOff",
       identity,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -64,7 +64,7 @@ describe("WithFeatureFlag", () => {
     const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "manageUsersOff",
       onEnabled,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -85,7 +85,7 @@ describe("WithFeatureFlag", () => {
     const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "manageUsersOff",
       onEnabled,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -108,7 +108,7 @@ describe("WithFeatureFlag", () => {
     // const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "manageUsersOff",
       onEnabled,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

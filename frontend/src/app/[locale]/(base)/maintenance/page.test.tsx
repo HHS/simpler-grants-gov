@@ -83,9 +83,8 @@ describe("Maintenance", () => {
             throw new Error("Function not implemented.");
           },
           featureFlags: {
-            authOn: true,
-            opportunityOff: false,
-            searchOff: false,
+            applyFormPrototypeOff: false,
+            manageUsersOff: false,
           },
           userFeatureFlags: {},
           defaultFeatureFlags: {},
