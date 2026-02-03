@@ -207,14 +207,9 @@ export const getBasicMultifieldInfo = ({
     throw new Error("Could not build field");
   }
   const fieldSchema = definition
-    .map((def) => {
-      const ref = getSchemaObjectFromPointer(formSchema, def) as RJSFSchema;
-      return ref;
-    })
-    .reduce((acc, schema) => {
-      const newAcc = { ...acc, ...schema };
-      return newAcc;
-    }, {});
+    .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
+    .reduce((acc, schema) => ({ ...acc, ...schema }), {});
+
   const value = definition
     .map((def) => {
       const defName = getNameFromDef({ definition: def, schema });
