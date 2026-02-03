@@ -300,16 +300,16 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 
 
 # Build custom competitions 8037 for testing 7953
+def does_competition_form_exist(db_session, competition_id, form_id):
+    return (
+        db_session.query(CompetitionForm)
+        .filter_by(competition_id=competition_id, form_id=form_id)
+        .first()
+        is not None
+    )
+
+
 def does_opportunity_exist(db_session: db.Session, opportunity_id: uuid.UUID) -> bool:
-
-    def does_competition_form_exist(db_session, competition_id, form_id):
-        return (
-            db_session.query(CompetitionForm)
-            .filter_by(competition_id=competition_id, form_id=form_id)
-            .first()
-            is not None
-        )
-
     opportunity = db_session.get(Opportunity, opportunity_id)
     return opportunity is not None
 
