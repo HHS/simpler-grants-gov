@@ -1803,6 +1803,7 @@ export const messages = {
       "The goal of design research is to understand how people use the products we make in the real world so that we can make them better for everyone who uses them.",
       "The study will be focused on understanding your work and how you use our products in your work. We will ask you questions and/or have you use working software or prototypes of improvements we're working on.",
       "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
+      "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
   },
 };
