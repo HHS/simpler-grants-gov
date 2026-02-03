@@ -1,9 +1,3 @@
-def fetch_competition(db_session, competition_id):
-    return db_session.scalar(
-        select(Competition).where(Competition.competition_id == competition_id)
-    )
-
-
 import dataclasses
 import logging
 import uuid
@@ -27,6 +21,13 @@ from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_data_utils import CompetitionContainer
 from tests.lib.seed_e2e import _build_users_and_tokens
 from tests.lib.seed_orgs_and_users import _build_organizations_and_users, seed_internal_admin
+
+
+def fetch_competition(db_session, competition_id):
+    return db_session.scalar(
+        select(Competition).where(Competition.competition_id == competition_id)
+    )
+
 
 logger = logging.getLogger(__name__)
 
