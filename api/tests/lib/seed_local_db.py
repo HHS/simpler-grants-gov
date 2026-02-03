@@ -1,3 +1,4 @@
+from src.db.models.competition_models import CompetitionForm
 import dataclasses
 import logging
 import uuid
@@ -301,6 +302,15 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 
 # Build custom competitions 8037 for testing 7953
 def does_opportunity_exist(db_session: db.Session, opportunity_id: uuid.UUID) -> bool:
+
+    def does_competition_form_exist(db_session, competition_id, form_id):
+        return (
+            db_session.query(CompetitionForm)
+            .filter_by(competition_id=competition_id, form_id=form_id)
+            .first()
+            is not None
+        )
+
     opportunity = db_session.get(Opportunity, opportunity_id)
     return opportunity is not None
 
@@ -386,12 +396,22 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         (org_competition, "TEST-APPLY-ORG-ON01", "TEST-APPLY-ORG-CT01"),
         (ind_competition, "TEST-APPLY-IND-ON01", "TEST-APPLY-IND-CT01"),
     ]:
-        factories.CompetitionFormFactory.create(
-            competition=competition, form=forms["SF424B"], is_required=True
-        )
-        factories.CompetitionFormFactory.create(
-            competition=competition, form=forms["SFLLL_2_0"], is_required=False
-        )
+        # SF424B
+        sf424b_form = forms["SF424B"]
+        if not does_competition_form_exist(
+            db_session, competition.competition_id, sf424b_form.form_id
+        ):
+            factories.CompetitionFormFactory.create(
+                competition=competition, form=sf424b_form, is_required=True
+            )
+        # SFLLL_2_0
+        sflll_form = forms["SFLLL_2_0"]
+        if not does_competition_form_exist(
+            db_session, competition.competition_id, sflll_form.form_id
+        ):
+            factories.CompetitionFormFactory.create(
+                competition=competition, form=sflll_form, is_required=False
+            )
         logger.info(
             f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
