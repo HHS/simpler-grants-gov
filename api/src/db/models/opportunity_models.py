@@ -36,7 +36,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True, unique=True)
+    legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True, unique=True)
+
+    is_simpler_grants_opportunity: Mapped[bool | None] = mapped_column(index=True)
 
     opportunity_number: Mapped[str | None]
     opportunity_title: Mapped[str | None] = mapped_column(index=True)
@@ -110,6 +112,18 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         back_populates="opportunity",
         uselist=True,
         cascade="all, delete-orphan",
+    )
+
+    derived_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
+        uselist=True,
+        cascade="all, delete-orphan",
+        foreign_keys="[ReferencedOpportunity.original_opportunity_id]",
+    )
+
+    original_opportunities: Mapped[list[ReferencedOpportunity]] = relationship(
+        uselist=True,
+        cascade="all, delete-orphan",
+        foreign_keys="[ReferencedOpportunity.derived_opportunity_id]",
     )
 
     @property
@@ -456,6 +470,41 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
     is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
+
+
+class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "referenced_opportunity"
+
+    __table_args__ = (
+        UniqueConstraint("original_opportunity_id", "derived_opportunity_id"),
+        ApiSchemaTable.__table_args__,
+    )
+
+    referenced_opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    original_opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
+    )
+
+    derived_opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
+    )
+
+    original_opportunity: Mapped[Opportunity] = relationship(
+        Opportunity,
+        foreign_keys=[original_opportunity_id],
+        uselist=False,
+        back_populates="derived_opportunities",
+    )
+
+    derived_opportunity: Mapped[Opportunity] = relationship(
+        Opportunity,
+        foreign_keys=[derived_opportunity_id],
+        uselist=False,
+        back_populates="original_opportunities",
+    )
 
 
 class OpportunityVersion(ApiSchemaTable, TimestampMixin):
