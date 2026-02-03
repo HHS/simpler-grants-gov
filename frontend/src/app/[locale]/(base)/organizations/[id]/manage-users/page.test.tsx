@@ -1,16 +1,24 @@
 import { render, screen } from "@testing-library/react";
 
-import React, { JSX } from "react";
+import React, { type JSX } from "react";
 
 import "@testing-library/jest-dom";
 
-import Page, {
-  generateMetadata,
-} from "src/app/[locale]/(base)/organizations/[id]/manage-users/page";
+import { expectAnyFeatureFlagWiring } from "src/test/harness/featureFlagHarness";
+import { loadPageWithFeatureFlagHarness } from "src/test/helpers/loadPageWithFeatureFlagHarness";
 
 type Params = { locale: string; id: string };
 
-// Keep this type minimal so eslint doesn't treat it as propTypes
+type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
+
+type PageModule = {
+  default: PageFn;
+  generateMetadata: (args: { params: Promise<Params> }) => Promise<{
+    title: string;
+    description: string;
+  }>;
+};
+
 type ManageUsersPageContentMinimalProps = {
   organizationId: string;
 };
@@ -19,32 +27,6 @@ const ManageUsersPageContentMock = jest.fn<
   void,
   [ManageUsersPageContentMinimalProps]
 >();
-
-jest.mock("src/components/manageUsers/ManageUsersPageContent", () => ({
-  ManageUsersPageContent: (props: unknown) => {
-    const typedProps = props as ManageUsersPageContentMinimalProps;
-    ManageUsersPageContentMock(typedProps);
-    return (
-      <div data-testid="manage-users-page-content">
-        org-id: {typedProps.organizationId}
-      </div>
-    );
-  },
-}));
-
-type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
-
-jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
-  __esModule: true,
-  default:
-    (WrappedComponent: PageFn, _flagName: string, _onDisabled: () => void) =>
-    (props: { params: Promise<Params> }) =>
-      WrappedComponent(props),
-}));
-
-jest.mock("next/navigation", () => ({
-  redirect: jest.fn(),
-}));
 
 type TranslationFn = (key: string) => string;
 
@@ -61,12 +43,7 @@ const getTranslationsMock = jest.fn<
   }),
 );
 
-jest.mock("next-intl/server", () => ({
-  getTranslations: (opts: { locale: string }) => getTranslationsMock(opts),
-}));
-
-// --- AuthorizationGate mock ---
-
+// --- AuthorizationGate mock types ---
 type ResourcePromises = {
   invitedUsersList: Promise<unknown>;
   activeUsersList: Promise<unknown>;
@@ -81,46 +58,26 @@ type RequiredPrivilege = {
 
 const AuthorizationGateMock = jest.fn<void, [unknown]>();
 
-jest.mock("src/components/user/AuthorizationGate", () => ({
-  AuthorizationGate: (props: unknown) => {
-    AuthorizationGateMock(props);
-    const { children } = props as { children: React.ReactNode };
-    return <div data-testid="authorization-gate">{children}</div>;
-  },
-}));
-
 // --- organizationsFetcher mocks ---
-
 type GetOrgPendingInvitationsFn = (organizationId: string) => Promise<unknown>;
-
 type GetOrgUsersFn = (organizationId: string) => Promise<unknown>;
-
 type GetOrgRolesFn = (organizationId: string) => Promise<unknown>;
 
 const getOrganizationPendingInvitationsMock: jest.MockedFunction<GetOrgPendingInvitationsFn> =
-  jest.fn<Promise<unknown>, [string]>((_orgId: string) => Promise.resolve([]));
+  jest.fn<Promise<unknown>, [string]>(() => Promise.resolve([]));
 
 const getOrganizationUsersMock: jest.MockedFunction<GetOrgUsersFn> = jest.fn<
   Promise<unknown>,
   [string]
->((_orgId: string) => Promise.resolve([]));
+>(() => Promise.resolve([]));
 
 const getOrganizationRolesMock: jest.MockedFunction<GetOrgRolesFn> = jest.fn<
   Promise<unknown>,
   [string]
->((_orgId: string) => Promise.resolve([]));
+>(() => Promise.resolve([]));
 
-jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
-  getOrganizationPendingInvitations: (
-    ...args: Parameters<GetOrgPendingInvitationsFn>
-  ) => getOrganizationPendingInvitationsMock(...args),
-  getOrganizationUsers: (...args: Parameters<GetOrgUsersFn>) =>
-    getOrganizationUsersMock(...args),
-  getOrganizationRoles: (...args: Parameters<GetOrgRolesFn>) =>
-    getOrganizationRolesMock(...args),
-}));
-
-const PageTyped = Page as unknown as PageFn;
+const MANAGE_USERS_PAGE_MODULE_PATH =
+  "src/app/[locale]/(base)/organizations/[id]/manage-users/page";
 
 describe("manage-users page", () => {
   beforeEach(() => {
@@ -130,13 +87,66 @@ describe("manage-users page", () => {
     getOrganizationRolesMock.mockResolvedValue([]);
   });
 
+  function loadPageModuleWithMocks(
+    featureFlagHarnessMode: "flagDisabled" | "flagEnabled",
+  ): ReturnType<typeof loadPageWithFeatureFlagHarness<PageModule>> {
+    return loadPageWithFeatureFlagHarness<PageModule>(
+      MANAGE_USERS_PAGE_MODULE_PATH,
+      featureFlagHarnessMode,
+    );
+  }
+
   it("renders ManageUsersPageContent with the organizationId from params and wires AuthorizationGate correctly", async () => {
+    jest.doMock("src/components/manageUsers/ManageUsersPageContent", () => ({
+      ManageUsersPageContent: (props: unknown) => {
+        const typedProps = props as ManageUsersPageContentMinimalProps;
+        ManageUsersPageContentMock(typedProps);
+        return (
+          <div data-testid="manage-users-page-content">
+            org-id: {typedProps.organizationId}
+          </div>
+        );
+      },
+    }));
+
+    jest.doMock("next/navigation", () => ({
+      redirect: jest.fn(),
+    }));
+
+    jest.doMock("next-intl/server", () => ({
+      getTranslations: (opts: { locale: string }) => getTranslationsMock(opts),
+    }));
+
+    jest.doMock("src/components/user/AuthorizationGate", () => ({
+      AuthorizationGate: (props: unknown) => {
+        AuthorizationGateMock(props);
+        const { children } = props as { children: React.ReactNode };
+        return <div data-testid="authorization-gate">{children}</div>;
+      },
+    }));
+
+    jest.doMock("src/services/fetch/fetchers/organizationsFetcher", () => ({
+      getOrganizationPendingInvitations: (
+        ...args: Parameters<GetOrgPendingInvitationsFn>
+      ) => getOrganizationPendingInvitationsMock(...args),
+      getOrganizationUsers: (...args: Parameters<GetOrgUsersFn>) =>
+        getOrganizationUsersMock(...args),
+      getOrganizationRoles: (...args: Parameters<GetOrgRolesFn>) =>
+        getOrganizationRolesMock(...args),
+    }));
+
+    const { pageModule, featureFlagHarness } =
+      loadPageModuleWithMocks("flagDisabled");
+
+    // Assert that the page is wrapped by withFeatureFlag without coupling to a specific flag name.
+    expectAnyFeatureFlagWiring(featureFlagHarness);
+
     const params: Promise<Params> = Promise.resolve({
       locale: "en",
       id: "org-123",
     });
 
-    const element = await PageTyped({ params });
+    const element = await pageModule.default({ params });
 
     render(element);
 
@@ -174,12 +184,18 @@ describe("manage-users page", () => {
   });
 
   it("generateMetadata returns translated title and description", async () => {
+    jest.doMock("next-intl/server", () => ({
+      getTranslations: (opts: { locale: string }) => getTranslationsMock(opts),
+    }));
+
+    const { pageModule } = loadPageModuleWithMocks("flagDisabled");
+
     const params: Promise<Params> = Promise.resolve({
       locale: "en",
       id: "org-123",
     });
 
-    const meta = await generateMetadata({ params });
+    const meta = await pageModule.generateMetadata({ params });
 
     expect(meta).toEqual({
       title: "Manage users page title",
