@@ -243,7 +243,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 )
             ],
         )
-       
+
         ### Mock BOR Opportunity
         self.create_opportunity(
             OpportunityContainer(
