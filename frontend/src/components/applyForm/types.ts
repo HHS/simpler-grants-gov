@@ -9,9 +9,11 @@ import {
 
 import { HTMLAttributes } from "react";
 
+export type GeneralRecord = Record<string, unknown>;
+
 export type BroadlyDefinedWidgetValue =
   | string
-  | Record<string, unknown>
+  | GeneralRecord
   | string[]
   | number
   | boolean;

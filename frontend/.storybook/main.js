@@ -2,8 +2,6 @@
 import { fileURLToPath } from "node:url";
 import path, { dirname } from "path";
 
-// import { uswdsCssPaths } from "../scripts/sassOptions";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

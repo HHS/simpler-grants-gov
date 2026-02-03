@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 
@@ -156,7 +154,10 @@ describe("PrintWidget", () => {
   });
 
   it("handles array values by joining defined items with ', '", () => {
-    const props = { ...defaultProps, value: ["A", null, "B", undefined, "C"] };
+    const props = {
+      ...defaultProps,
+      value: ["A", null, "B", undefined, "C"] as string[],
+    };
 
     render(<PrintWidget {...props} />);
 

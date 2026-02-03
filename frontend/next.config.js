@@ -1,7 +1,6 @@
 // @ts-check
 
 const withNextIntl = require("next-intl/plugin")();
-const sassOptions = require("./scripts/sassOptions");
 const nrExternals = require("@newrelic/next/load-externals");
 
 /**
@@ -12,7 +11,6 @@ const nrExternals = require("@newrelic/next/load-externals");
  * @example "/test" results in "localhost:3000/test" as the index page for the app
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
-// const appSassOptions = sassOptions();
 
 const cspHeader = `
     default-src 'self';
