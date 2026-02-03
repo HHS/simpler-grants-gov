@@ -300,13 +300,25 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
 
 
 # Build custom competitions 8037 for testing 7953
-def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
-    logger.info("Creating 8037 custom opportunities and competitions")
+def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
+    logger.info("Creating custom test opportunities and competitions for Apply Happy Path scenarios")
+    # Static UUIDs for each opportunity and competition
+    uuid_map = {
+        "TEST-APPLY-ORG-IND-ON01": uuid.UUID("c3c59562-a54f-4203-b0f6-98f2f0383481"),
+        "TEST-APPLY-ORG-IND-CT01": uuid.UUID("859ab4a4-a6c3-46c5-b63e-6d1396ae9c86"),
+        "TEST-APPLY-ORG-ON01": uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+        "TEST-APPLY-ORG-CT01": uuid.UUID("b2c3d4e5-f6a7-8901-bcde-fa2345678901"),
+        "TEST-APPLY-IND-ON01": uuid.UUID("d4e5f6a7-b890-1234-cdef-ab3456789012"),
+        "TEST-APPLY-IND-CT01": uuid.UUID("e5f6a7b8-9012-3456-defa-b4567890123c"),
+    }
+
     # Open to both orgs and individuals
     both_competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="TEST-BR-8037-IOU-OT01",
-        opportunity__opportunity_number="TEST-BR-8037-IOU-ON01",
-        competition_title="TEST-BR-8037-IOU-CT01",
+        competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"],
+        opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
+        opportunity__opportunity_title="TEST-APPLY-ORG-IND-OT01",
+        opportunity__opportunity_number="TEST-APPLY-ORG-IND-ON01",
+        competition_title="TEST-APPLY-ORG-IND-CT01",
         competition_forms=[],
         open_to_applicants=[
             CompetitionOpenToApplicant.ORGANIZATION,
@@ -316,18 +328,22 @@ def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
     )
     # Only open to organizations
     org_competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="TEST-BR-8037-OU-OT01",
-        opportunity__opportunity_number="TEST-BR-8037-OU-ON01",
-        competition_title="TEST-BR-8037-OU-CT01",
+        competition_id=uuid_map["TEST-APPLY-ORG-CT01"],
+        opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-ON01"],
+        opportunity__opportunity_title="TEST-APPLY-ORG-OT01",
+        opportunity__opportunity_number="TEST-APPLY-ORG-ON01",
+        competition_title="TEST-APPLY-ORG-CT01",
         competition_forms=[],
         open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
         with_instruction=True,
     )
     # Only open to individuals
     ind_competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="TEST-BR-8037-IT-OT01",
-        opportunity__opportunity_number="TEST-BR-8037-IU-ON01",
-        competition_title="TEST-BR-8037-IU-CT01",
+        competition_id=uuid_map["TEST-APPLY-IND-CT01"],
+        opportunity__opportunity_id=uuid_map["TEST-APPLY-IND-ON01"],
+        opportunity__opportunity_title="TEST-APPLY-IND-OT01",
+        opportunity__opportunity_number="TEST-APPLY-IND-ON01",
+        competition_title="TEST-APPLY-IND-CT01",
         competition_forms=[],
         open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
         with_instruction=True,
@@ -335,9 +351,9 @@ def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
 
     # Add forms to each competition
     for competition, opp_num, comp_title in [
-        (both_competition, "TEST-BR-8037-IOU-ON01", "TEST-BR-8037-IOU-CT01"),
-        (org_competition, "TEST-BR-8037-OU-ON01", "TEST-BR-8037-OU-CT01"),
-        (ind_competition, "TEST-BR-8037-IU-ON01", "TEST-BR-8037-IU-CT01"),
+        (both_competition, "TEST-APPLY-ORG-IND-ON01", "TEST-APPLY-ORG-IND-CT01"),
+        (org_competition, "TEST-APPLY-ORG-ON01", "TEST-APPLY-ORG-CT01"),
+        (ind_competition, "TEST-APPLY-IND-ON01", "TEST-APPLY-IND-CT01"),
     ]:
         factories.CompetitionFormFactory.create(
             competition=competition, form=forms["SF424B"], is_required=True
@@ -346,7 +362,7 @@ def _build_8037_custom_competitions(forms: dict[str, Form]) -> None:
             competition=competition, form=forms["SFLLL_2_0"], is_required=False
         )
         logger.info(
-            f"Created 8037 competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
+            f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
 
 
@@ -355,7 +371,7 @@ def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> C
     _build_pilot_competition(forms_map)
     _build_individual_only_competition(forms_map)
     _build_organization_only_competition(forms_map)
-    _build_8037_custom_competitions(forms_map)
+    _build_custom_test_competitions(forms_map)
 
     forms = list(forms_map.values())
 
