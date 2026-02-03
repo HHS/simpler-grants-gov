@@ -34,11 +34,7 @@ function blockSearchEnginesInHead(head) {
  */
 const config = {
   stories: ["../stories/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
-  addons: [
-    "@chromatic-com/storybook",
-    "@storybook/addon-docs",
-    // "@storybook/addon-styling-webpack"
-  ],
+  addons: ["@chromatic-com/storybook", "@storybook/addon-docs"],
 
   framework: {
     name: "@storybook/nextjs-vite",
@@ -91,20 +87,5 @@ const config = {
       },
     });
   },
-
-  // webpackFinal: (config) => ({
-  //   // stuff for sass paths?
-  //   ...config,
-  //   module: {
-  //     ...config.module,
-  //     rules: [
-  //       ...config.module.rules,
-  //       {
-  //         test: /\.s[ac]ss$/i,
-  //         use: ["sass-loader"],
-  //       },
-  //     ],
-  //   },
-  // }),
 };
 export default config;

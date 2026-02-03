@@ -12,7 +12,7 @@ const nrExternals = require("@newrelic/next/load-externals");
  * @example "/test" results in "localhost:3000/test" as the index page for the app
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
-const appSassOptions = sassOptions(basePath);
+// const appSassOptions = sassOptions();
 
 const cspHeader = `
     default-src 'self';
@@ -148,7 +148,6 @@ if (!isCi)
     headers: securityHeaders,
   });
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     return headers;
@@ -165,7 +164,12 @@ const nextConfig = {
   // Output only the necessary files for a deployment, excluding irrelevant node_modules
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
-  sassOptions: appSassOptions,
+  sassOptions: {
+    loadPaths: [
+      "./node_modules/@uswds",
+      "./node_modules/@uswds/uswds/packages",
+    ],
+  },
   serverExternalPackages: ["newrelic"],
   webpack: (config) => {
     nrExternals(config);
