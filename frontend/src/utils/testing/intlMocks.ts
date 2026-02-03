@@ -1,5 +1,6 @@
-import ResearchParticipantGuide from "src/components/research-participant-guide/ResearchParticipantGuide";
 import { TFn } from "src/types/intl";
+
+import ResearchParticipantGuide from "src/components/research-participant-guide/ResearchParticipantGuide";
 
 export function mockUseTranslations(
   translationKey: string,
@@ -179,9 +180,10 @@ export const mockMessages = {
   },
   ResearchParticipantGuide: {
     h1: "Design Research Participant Guide",
-    intro: "This guide is for participants in Simpler Grants design research studies. If you have been contacted by the Simpler Grants team to participate in a study, read through these steps to learn more about the process and let us know if you have any questions.",
+    intro:
+      "This guide is for participants in Simpler Grants design research studies. If you have been contacted by the Simpler Grants team to participate in a study, read through these steps to learn more about the process and let us know if you have any questions.",
     beforeHeader: "Before the interview",
-    beforeItems:[
+    beforeItems: [
       "You will or already have received an email asking for your participation in a user interview.",
       "Taking part in a research study is voluntary. If you opt-in to participate, you'll receive an emailed invitation with your scheduled time.",
       "For remote studies, you will receive a Zoom link to participate.",
