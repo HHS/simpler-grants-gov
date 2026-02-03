@@ -60,7 +60,6 @@ export const OrganizationItem = ({
   );
 
   const { checkFeatureFlag } = useFeatureFlags();
-  const manageUsersTurnedOn = !checkFeatureFlag("manageUsersOff");
 
   return (
     <li className="border-base-lighter border-1px padding-2 margin-top-2">
@@ -75,7 +74,7 @@ export const OrganizationItem = ({
           tablet={{ col: "auto" }}
           className="flex-align-self-end text-right"
         >
-          {canManageUsers && manageUsersTurnedOn ? (
+          {canManageUsers ? (
             <ManageUsersButton organization={organization} />
           ) : (
             ""

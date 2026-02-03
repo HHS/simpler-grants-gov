@@ -54,8 +54,4 @@ async function ManageUsersPage({ params }: ManageUsersPageProps) {
   );
 }
 
-export default withFeatureFlag<ManageUsersPageProps, never>(
-  ManageUsersPage,
-  "manageUsersOff",
-  () => redirect("/maintenance"),
-);
+export default ManageUsersPage;

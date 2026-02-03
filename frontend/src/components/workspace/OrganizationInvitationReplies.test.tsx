@@ -29,18 +29,6 @@ const makeInvitation = (overrides: Partial<OrganizationInvitation>) => ({
 
 beforeEach(() => {
   jest.resetAllMocks();
-
-  (useUser as jest.Mock).mockReturnValue({
-    featureFlags: { manageUsersOff: false },
-    defaultFeatureFlags: { manageUsersOff: false },
-  });
-
-  (useFeatureFlags as jest.Mock).mockReturnValue({
-    checkFeatureFlag: () => false,
-    setFeatureFlag: jest.fn(),
-    featureFlags: { manageUsersOff: false },
-    defaultFeatureFlags: { manageUsersOff: false },
-  });
 });
 
 describe("OrganizationInvitationReplies", () => {
@@ -75,23 +63,5 @@ describe("OrganizationInvitationReplies", () => {
     expect(items).toHaveLength(1);
     expect(screen.getByTestId("invite-uuid")).toBeInTheDocument();
     expect(screen.queryByTestId("invite-inv-complete")).not.toBeInTheDocument();
-  });
-
-  it("renders nothing when the feature gate is ON (manageUsersOff=true)", () => {
-    (useFeatureFlags as jest.Mock).mockReturnValue({
-      checkFeatureFlag: () => true,
-      setFeatureFlag: jest.fn(),
-      featureFlags: { manageUsersOff: true },
-      defaultFeatureFlags: { manageUsersOff: true },
-    });
-
-    render(
-      <OrganizationInvitationReplies
-        userInvitations={[fakeOrganizationInvitation]}
-      />,
-    );
-
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
-    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
 });

@@ -27,7 +27,7 @@ export const OrganizationRosterInfo = ({
       <h3>{t("title")}</h3>
       <div>
         {t("explanation")} {t("manageUsersExplanation")}{" "}
-        {!checkFeatureFlag("manageUsersOff") &&
+        {
           manageUsersPrivilege?.authorized && (
             <Link
               href={`/organizations/${organizationId}/manage-users`}
@@ -36,7 +36,8 @@ export const OrganizationRosterInfo = ({
               <USWDSIcon name="people" />
               {t("manageUsersCTA")}
             </Link>
-          )}
+          )
+        }
       </div>
     </div>
   );

@@ -14,11 +14,6 @@ export const OrganizationInvitationReplies = ({
 }: {
   userInvitations: OrganizationInvitation[];
 }) => {
-  const { checkFeatureFlag } = useFeatureFlags();
-
-  if (checkFeatureFlag("manageUsersOff")) {
-    return null;
-  }
 
   return (
     <ul className="usa-list--unstyled">

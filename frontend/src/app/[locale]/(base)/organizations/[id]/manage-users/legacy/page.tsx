@@ -76,8 +76,4 @@ async function InviteLegacyUsersPage({ params }: InviteLegacyUsersPageProps) {
   );
 }
 
-export default withFeatureFlag<InviteLegacyUsersPageProps, never>(
-  InviteLegacyUsersPage,
-  "manageUsersOff",
-  () => redirect("/maintenance"),
-);
+export default InviteLegacyUsersPage;

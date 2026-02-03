@@ -15,7 +15,6 @@ const {
   FEATURE_OPPORTUNITY_OFF,
   FEATURE_AUTH_ON,
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
-  FEATURE_MANAGE_USERS_OFF,
   AUTH_LOGIN_URL,
   AUTH_EXPIRATION_TIME,
   API_JWT_PUBLIC_KEY,
@@ -29,7 +28,6 @@ export const envFeatureFlags = {
   searchOff: FEATURE_SEARCH_OFF,
   authOn: FEATURE_AUTH_ON,
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
-  manageUsersOff: FEATURE_MANAGE_USERS_OFF,
 };
 
 const legacyHost = (): string => {

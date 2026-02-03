@@ -85,27 +85,14 @@ describe("InviteLegacyUsersPage page", () => {
     );
   });
 
-  it("check InviteLegacyUsersPage redirects to maintenance if manageUsersOff is enabled", async () => {
+  it("check InviteLegacyUsersPage not to redirect to maintenance because not feature flag is enabled", async () => {
     const component = await InviteLegacyUsersPage({
       params: Promise.resolve({ locale: "en", id: "org-123" }),
     });
     render(component);
 
-    expect(withFeatureFlagMock).toHaveBeenCalledTimes(1);
-
-    const [wrappedComponent, flagName, onEnabled] = withFeatureFlagMock.mock
-      .calls[0] as [
-      FunctionComponent<LocalizedPageProps>,
-      string,
-      (props: LocalizedPageProps) => ReactNode,
-    ];
-
-    expect(flagName).toBe("manageUsersOff");
-    expect(typeof wrappedComponent).toBe("function");
-    expect(typeof onEnabled).toBe("function");
-
-    (onEnabled as () => void)();
-    expect(redirectMock).toHaveBeenCalledTimes(1);
-    expect(redirectMock).toHaveBeenCalledWith("/maintenance");
+    expect(withFeatureFlagMock).toHaveBeenCalledTimes(0);
+    expect(redirectMock).toHaveBeenCalledTimes(0);
+    expect(redirectMock).not.toHaveBeenCalledWith("/maintenance");
   });
 });

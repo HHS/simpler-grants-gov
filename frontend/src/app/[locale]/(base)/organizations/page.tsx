@@ -82,8 +82,4 @@ async function OrganizationsPage({ params }: LocalizedPageProps) {
   );
 }
 
-export default withFeatureFlag<LocalizedPageProps, never>(
-  OrganizationsPage,
-  "manageUsersOff",
-  () => redirect("/maintenance"),
-);
+export default OrganizationsPage;
