@@ -1,24 +1,24 @@
 # Community Organization and Governance
 
-The grants.gov team is taking a community-first and open source approach to the product development of this tool. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
+The grants.gov team is taking a community-first and open source approach to the product development of Simpler Grants. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
 
-We know that we can learn from a wide variety of communities, including those who will use or will be impacted by the tool, who are experts in technology, or who have experience with similar technologies deployed in other spaces. We are dedicated to creating forums for continuous conversation and feedback to help shape the design and development of the tool.
+We know that we can learn from a wide variety of communities, including those who will use or will be impacted by Simpler Grants, who are experts in technology, or who have experience with similar technologies deployed in other spaces. We are dedicated to creating forums for continuous conversation and feedback to help shape the design and development of Simpler Grants.
 
 We also recognize capacity building as a key part of involving a diverse open source community. We are doing our best to use accessible language, provide technical and process documents in multiple languages, and offer support to community members with a wide variety of backgrounds and skillsets. If you have ideas for how we can improve or add to our capacity building efforts and methods for welcoming people into our community, please let us know by filing an issue on our GitHub repository.
 
+Principles and guidelines for participating in our open source community are linked below. Please review these before joining or starting a conversation in this repo or one of the channels listed below. All community members are expected to adhere to these principles and guidelines and to the code of conduct when participating in community spaces such as code repositories, communication channels and venues, and events.
+
 ## Principles
 
-Principles and guidelines for participating in our open source community are linked below here. Please read them before joining or starting a conversation in this repo or one of the channels listed below. All community members and participants are expected to adhere to the community guidelines and code of conduct when participating in community spaces including: code repositories, communication channels and venues, and events.
+The following principles guide our data, product, and process decisions, architecture, and approach:
 
-These principles guide our data, product, and process decisions, architecture, and approach. These guidelines are inspired by the [Justice40 Community Guidelines](https://github.com/usds/justice40-tool/blob/main/COMMUNITY_GUIDELINES.md).
-
-- Open means transparent and participatory.
+- "Open" means *transparent* and *participatory*.
 - We take a modular and modern approach to software development.
-- We build open-source software and open-source processes.
+- We build open source software and open source processes.
 - We value ease of implementation.
 - Fostering community includes building capacity and making our software and processes accessible to participants with diverse backgrounds and skillsets.
 - Data (and data science) is as important as software and process. We build open data sets where possible.
-- We strive for transparency for algorithms and places we might be introducing bias.
+- We strive for transparency in algorithms and places we might be introducing bias.
 
 All community members are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
 
