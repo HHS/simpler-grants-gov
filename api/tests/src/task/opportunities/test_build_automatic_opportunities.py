@@ -90,7 +90,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     }
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 1
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 11
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 15
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):
