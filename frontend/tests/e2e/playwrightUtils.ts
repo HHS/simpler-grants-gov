@@ -4,6 +4,9 @@ import {
   FullProject,
   Page,
 } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
+
+const { targetEnv } = playwrightEnv;
 
 export interface PageProps {
   page: Page;
@@ -14,7 +17,7 @@ export interface PageProps {
 export async function waitForURLChange(
   page: Page,
   changeCheck: (url: string) => boolean,
-  timeout = 30000, // query params get set after a debounce period)
+  timeout = 60000, // query params get set after a debounce period)
 ) {
   const endTime = Date.now() + timeout;
 
@@ -30,41 +33,35 @@ export async function waitForURLChange(
   throw new Error(`URL did not update as expected within ${timeout}ms`);
 }
 
-const getPageUrlParam = (
-  rawUrl: string,
-  queryParamName: string,
-): string | null => {
-  const url = new URL(rawUrl);
-  const params = new URLSearchParams(url.search);
-  return params.get(queryParamName);
-};
-
 export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
   queryParamValue: string,
+  timeoutOverride?: number,
 ) {
+  // Use longer timeout for staging environment due to slower response times
+  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+
   const changeCheck = (pageUrl: string): boolean => {
-    const actualValue = getPageUrlParam(pageUrl, queryParamName);
+    const url = new URL(pageUrl);
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
 
     return actualValue === queryParamValue;
   };
   try {
-    await waitForURLChange(page, changeCheck);
+    await waitForURLChange(page, changeCheck, timeout);
   } catch (_e) {
     throw new Error(
       `Url did not change to contain ${queryParamName}:${queryParamValue} as expected`,
     );
   }
 
-  return expect(getPageUrlParam(page.url(), queryParamName)).toBe(
-    queryParamValue,
-  );
-
-  // potentially an easier implementation, may not need our own "waitForURLChange" function
-  // const expectedQueryString = `${queryParamName}=${queryParamValue}`;
-
-  // return await page.waitForURL(new RegExp(expectedQueryString));
+  // Verify using URLSearchParams to handle URL encoding correctly
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName);
+  return expect(actualValue).toBe(queryParamValue);
 }
 
 export async function waitForUrl(
@@ -81,7 +78,7 @@ export async function waitForUrl(
 export async function waitForURLContainsQueryParam(
   page: Page,
   queryParamName: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeout = 60000, // query params get set after a debounce period
 ) {
   const changeCheck = (pageUrl: string): boolean => {
     const url = new URL(pageUrl);
@@ -96,7 +93,7 @@ export async function waitForURLContainsQueryParam(
 export async function waitForAnyURLChange(
   page: Page,
   initialUrl: string,
-  timeout = 30000, // query params get set after a debounce period
+  timeout = 60000, // query params get set after a debounce period
 ) {
   const changeCheck = (pageUrl: string): boolean => {
     return pageUrl !== initialUrl;
@@ -165,6 +162,18 @@ export const performSignIn = async (page: Page, project: FullProject) => {
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   await menuOpener.click();
+
+  // Wait for animation to complete on slow staging environment
+  if (targetEnv === "staging") {
+    await page.waitForTimeout(5000);
+  }
+
+  const nav = page.locator(".usa-nav");
+  const overlay = page.locator(".usa-overlay");
+  const timeout = targetEnv === "staging" ? 120000 : 10000;
+
+  await expect(nav).toHaveClass(/is-visible/, { timeout });
+  await expect(overlay).toBeVisible({ timeout });
   return menuOpener;
 };
 

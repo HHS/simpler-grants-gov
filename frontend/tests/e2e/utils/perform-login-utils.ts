@@ -13,7 +13,7 @@ if (
 }
 
 // --- Timeouts ---
-const TIMEOUT_HOME = 60000;
+const TIMEOUT_HOME = playwrightEnv.targetEnv === "staging" ? 180000 : 60000;
 const TIMEOUT_MFA = 120000;
 
 export const findSignOutButton = async (
@@ -100,14 +100,18 @@ export const clickSignIn = async (page: Page): Promise<boolean> => {
     .locator('button:has-text("Sign In")')
     .filter({ visible: true })
     .first();
-  let isVisible = await signInButton.isVisible().catch(() => false);
+  let isVisible = await signInButton
+    .isVisible({ timeout: TIMEOUT_HOME })
+    .catch(() => false);
 
   if (!isVisible) {
     signInButton = page
       .locator('a:has-text("Sign In")')
       .filter({ visible: true })
       .first();
-    isVisible = await signInButton.isVisible().catch(() => false);
+    isVisible = await signInButton
+      .isVisible({ timeout: TIMEOUT_HOME })
+      .catch(() => false);
     if (!isVisible) {
       return false;
     }

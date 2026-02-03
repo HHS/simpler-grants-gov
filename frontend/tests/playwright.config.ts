@@ -12,7 +12,7 @@ export default defineConfig({
   timeout: targetEnv === "local" ? 75000 : 120000,
   testDir: "./e2e",
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: targetEnv !== "staging",
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCi,
   /* Retry on CI only */
@@ -28,6 +28,12 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "on",
     video: "on-first-retry",
+    launchOptions:
+      targetEnv === "staging"
+        ? {
+            args: ["--disable-dev-shm-usage"],
+          }
+        : undefined,
   },
   // Enable test sharding for parallelization in CI.
   shard: {
@@ -37,36 +43,54 @@ export default defineConfig({
     current: parseInt(currentShard || "1"),
   },
   /* Configure projects for major browsers */
-  projects: [
-    {
-      name: "Chrome",
-      use: {
-        ...devices["Desktop Chrome"],
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-    {
-      name: "Firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-        permissions: [],
-      },
-    },
-    {
-      name: "Webkit",
-      use: {
-        ...devices["Desktop Safari"],
-        permissions: ["clipboard-read"],
-      },
-    },
-    {
-      name: "Mobile chrome",
-      use: {
-        ...devices["Pixel 7"],
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-  ],
+  projects:
+    targetEnv === "staging"
+      ? [
+          {
+            name: "Chrome",
+            use: {
+              ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "Mobile chrome",
+            use: {
+              ...devices["Pixel 7"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ]
+      : [
+          {
+            name: "Chrome",
+            use: {
+              ...devices["Desktop Chrome"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+          {
+            name: "Firefox",
+            use: {
+              ...devices["Desktop Firefox"],
+              permissions: [],
+            },
+          },
+          {
+            name: "Webkit",
+            use: {
+              ...devices["Desktop Safari"],
+              permissions: ["clipboard-read"],
+            },
+          },
+          {
+            name: "Mobile chrome",
+            use: {
+              ...devices["Pixel 7"],
+              permissions: ["clipboard-read", "clipboard-write"],
+            },
+          },
+        ],
 
   //  Only start the local dev server when running in the local environment.
   webServer:

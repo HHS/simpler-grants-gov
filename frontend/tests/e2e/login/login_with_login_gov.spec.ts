@@ -49,7 +49,10 @@ test.describe("Login.gov based authentication tests", () => {
     await context.tracing.start({ screenshots: true, snapshots: true });
 
     // --- Step 1: Navigate to staging ---
-    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await page.goto(baseUrl, {
+      waitUntil: "domcontentloaded",
+      timeout: targetEnv === "staging" ? 180000 : 60000,
+    });
     const step1Path = test.info().outputPath("step1-homepage.png");
     await page.screenshot({ path: step1Path, fullPage: true });
     await test
