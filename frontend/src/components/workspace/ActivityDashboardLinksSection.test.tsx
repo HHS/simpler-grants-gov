@@ -9,10 +9,6 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => useTranslationsMock(),
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
-
 describe("ActivityDashboardLinksSection", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(await ActivityDashboardLinksSection());

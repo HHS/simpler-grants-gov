@@ -4,7 +4,6 @@ import {
   filterOptionsWithChildren,
   initialFilterOptions,
 } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { AllOptionCheckbox } from "src/components/search/SearchFilterAccordion/AllOptionCheckbox";
 
@@ -12,10 +11,6 @@ const mockSetQueryParam = jest.fn();
 const mockSetQueryParams = jest.fn();
 
 const optionValues = initialFilterOptions.map((option) => option.value);
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({

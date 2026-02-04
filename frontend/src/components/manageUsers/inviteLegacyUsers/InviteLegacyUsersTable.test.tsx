@@ -4,18 +4,11 @@ import {
   OrganizationLegacyUserStatus,
 } from "src/types/userTypes";
 
-import React from "react";
-
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { InviteLegacyUsersTable } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersTable";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 const legacyUsers: OrganizationLegacyUser[] = [
   {

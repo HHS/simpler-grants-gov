@@ -14,10 +14,6 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
-
 const authentication = jest.fn().mockResolvedValue({
   token: "fake-token",
   user_id: "user-1",
