@@ -148,6 +148,11 @@ FORM_JSON_SCHEMA = {
                     # Column G
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
                 },
+                "total_new_or_revised_amount": {
+                    "xml_transform": {
+                        "target": "BudgetTotalNewOrRevisedAmount"
+                    }
+                },
             },
         },
         "budget_categories": {
@@ -407,7 +412,17 @@ FORM_RULE_SCHEMA = {
                         "@THIS.non_federal_new_or_revised_amount",
                     ],
                 }
-            }
+            },
+            "total_new_or_revised_amount": {
+                        "gg_pre_population": {
+                            "rule": "sum_monetary",
+                            "fields": [
+                                "@THIS.federal_new_or_revised_amount",
+                                "@THIS.non_federal_new_or_revised_amount"
+                            ]
+                        }
+                    }
+
         },
         "budget_categories": {
             # Section B - Budget Categories: Total direct charge amount (Row 6I, Columns 1-4)
@@ -505,6 +520,15 @@ FORM_RULE_SCHEMA = {
                 "order": 2,
             }
         },
+        "total_new_or_revised_amount": {
+                "gg_pre_population": {
+                    "rule": "sum_monetary",
+                    "fields": [
+                        "activity_line_items[*].budget_summary.total_new_or_revised_amount"
+                    ],
+                    "order": 3,
+                }
+            },
     },
     "total_budget_categories": {
         # Section B - Budget Categories: Total Personnel Amount (Row A, Column 5)
@@ -809,7 +833,7 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "FormVersionIdentifier",
             "static_value": "1.0",
             "namespace": "glob",
-            "attributes": {  # ← add this
+            "attributes": {
                         "xmlns:glob": "http://apply.grants.gov/system/Global-V1.0"
                     }
         }
