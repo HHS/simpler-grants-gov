@@ -9,7 +9,6 @@ import {
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Grid,
@@ -17,6 +16,7 @@ import {
   Link,
   ModalRef,
 } from "@trussworks/react-uswds";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
 import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
@@ -66,7 +66,6 @@ const ApplicantDetails = ({
   onOpenTransferModal: () => void;
 }) => {
   const t = useTranslations("Application.information");
-
   if (hasOrganization) {
     return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
   }
@@ -191,7 +190,7 @@ export const InformationCard = ({
     return (
       <div className="margin-bottom-1 margin-left-0">
         <dt className="margin-right-1 text-bold">
-          {t("applicationDownloadInstructionsLabel")}:
+          {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
         <dd>-</dd>
       </div>
