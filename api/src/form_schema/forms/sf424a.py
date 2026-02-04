@@ -781,9 +781,11 @@ FORM_XML_TRANSFORM_RULES = {
         "version": "1.0",
         "form_name": "SF424A",
         "namespaces": {
-            "default": "http://apply.grants.gov/forms/SF424A-V1.0",
-            "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "default": "http://apply.grants.gov/forms/SF424A-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
         "xml_structure": {
@@ -791,7 +793,7 @@ FORM_XML_TRANSFORM_RULES = {
             "root_namespace_prefix": "SF424A",  # Use SF424A: prefix for root element per XSD
             # Required attributes for XSD validation
             "root_attributes": {
-                "programType": "program_type",  # Maps to input field
+                "SF424A:programType": "Non-Construction",
                 "glob:coreSchemaVersion": "1.0",  # Static value required by XSD
             },
         },
@@ -805,7 +807,11 @@ FORM_XML_TRANSFORM_RULES = {
     "form_version_identifier": {
         "xml_transform": {
             "target": "FormVersionIdentifier",
+            "static_value": "1.0",
             "namespace": "glob",
+            "attributes": {  # ← add this
+                        "xmlns:glob": "http://apply.grants.gov/system/Global-V1.0"
+                    }
         }
     },
     # Note: program_type is handled as a root attribute via xml_structure.root_attributes
