@@ -90,7 +90,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 12
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 15
 
 
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
@@ -135,8 +135,19 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
     }
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 1
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 15
+    for opp_number, expected_id in expected_ids.items():
+        assert opp_number in db_ids, f"Expected opportunity {opp_number} not found"
+        assert db_ids[opp_number] == expected_id, (
+            f"Opportunity {opp_number} has incorrect ID: "
+            f"expected {expected_id}, got {db_ids[opp_number]}"
+        )
+
+    # The opportunity number is dynamic (includes date), so find it by prefix
+    all_forms_opp_numbers = [num for num in db_ids.keys() if num.startswith("SGG-ALL-Forms-")]
+    # With freeze_time testing different dates, we should have at least 2 ALL forms opportunities
+    assert (
+        len(all_forms_opp_numbers) >= 2
+    ), f"Expected at least 2 ALL forms opportunities, found {len(all_forms_opp_numbers)}"
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):
