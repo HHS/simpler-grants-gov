@@ -14,7 +14,6 @@ from src.workflow.workflow_errors import (
     EntityNotFound,
     ImplementationMissingError,
     InvalidEntityForWorkflow,
-    InvalidEventError,
 )
 
 logger = logging.getLogger(__name__)

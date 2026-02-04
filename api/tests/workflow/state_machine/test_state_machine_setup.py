@@ -1,6 +1,4 @@
-import src.workflow.state_machine  # TODO - explain why
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.state_persistence.base_state_persistence_model import Workflow
 
 
 def test_state_machines_configured_as_expected():
@@ -16,7 +14,7 @@ def test_state_machines_configured_as_expected():
     # in case a developer does have issues, they get told all of them
     # at once.
     errors = []
-    for config, state_machine_cls in WorkflowRegistry._workflow_registry.values():
+    for _, state_machine_cls in WorkflowRegistry._workflow_registry.values():
 
         # Every workflow should have a "start_workflow" transition
         # so that we can easily handle a start workflow event.

@@ -2,12 +2,10 @@ import uuid
 
 import pytest
 
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import WorkflowEntityType
 from src.workflow.event.workflow_event import WorkflowEntity
 from src.workflow.service.workflow_service import get_workflow_entities
-from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
-from src.workflow.workflow_config import WorkflowConfig
-from src.workflow.workflow_errors import EntityNotFound, InvalidEntityForWorkflow, InvalidEventError
+from src.workflow.workflow_errors import EntityNotFound, InvalidEntityForWorkflow
 from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory
 from tests.workflow.workflow_test_util import build_workflow_config
 
