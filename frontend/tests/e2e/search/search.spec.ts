@@ -80,12 +80,26 @@ test.describe("Search page tests", () => {
     await toggleCheckboxes(page, eligibilityCheckboxes, "eligibility");
 
     await clickAccordionWithTitle(page, "Agency");
-    const firstSubAgency = page
-      .locator("div[data-testid='Agency-filter'] > ul > li ul input")
-      .first();
+    let agencyId;
 
-    await expect(firstSubAgency).toHaveAttribute("id");
-    const agencyId = await firstSubAgency.getAttribute("id");
+    // need to find the first subagency box with an ID that doesn't start with a number
+    // targeting checkboxes with ids that start with a number raises issues related
+    // to querySelector functionality and what it considers a valid id
+    for (let i = 1; !agencyId || !isNaN(parseInt(agencyId[0])); i++) {
+      const subAgency = page
+        .locator(
+          `div[data-testid='Agency-filter'] > ul > li:nth-child(${i}) ul input`,
+        )
+        .first();
+
+      const exists = await subAgency.count();
+
+      if (!exists) {
+        continue;
+      }
+
+      agencyId = await subAgency.getAttribute("id");
+    }
     expect(agencyId).toBeTruthy();
     if (!agencyId) {
       test.fail();
@@ -102,6 +116,7 @@ test.describe("Search page tests", () => {
     /***********************************************************/
 
     await refreshPageWithCurrentURL(page);
+    await waitForSearchResultsInitialLoad(page);
 
     // Expect search inputs are retained in the new tab
     await expectSortBy(page, "awardCeilingDesc", isMobile);
@@ -174,6 +189,16 @@ test.describe("Search page tests", () => {
     if (isMobile) {
       await toggleFilterDrawer(page);
     }
+    await selectSortBy(page, "opportunityTitleAsc", isMobile);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
+    const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+
+    if (isMobile) {
+      await toggleFilterDrawer(page);
+    }
     await selectSortBy(page, "opportunityTitleDesc", isMobile);
 
     if (isMobile) {
@@ -183,18 +208,6 @@ test.describe("Search page tests", () => {
     await clickLastPaginationPage(page);
 
     const lastSearchResultTitle = await getLastSearchResultTitle(page);
-
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-
-    await selectSortBy(page, "opportunityTitleAsc", isMobile);
-
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-
-    const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
     expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
   });
