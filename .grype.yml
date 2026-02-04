@@ -58,6 +58,12 @@ ignore:
   # Last checked: 01/23/26
   - vulnerability: CVE-2025-11468
 
+  # Not fixed in GA Python yet
+  # Vulnerability in a very specific part of the python email
+  # package which we don't use.
+  # Last checked: 02/04/26
+  - vulnerability: CVE-2026-1299
+
   # Next.js vulnerability reported as fixed only in canary prerelease
   # Scanner indicates fix in 15.6.0-canary.61, which cannot be installed due to
   # npm peer dependency resolution rules for prerelease versions
