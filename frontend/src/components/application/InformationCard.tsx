@@ -10,12 +10,17 @@ import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Grid, GridContainer, Link, ModalRef } from "@trussworks/react-uswds";
+import {
+  Button,
+  Grid,
+  GridContainer,
+  Link,
+  ModalRef,
+} from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
-import { USWDSIcon } from "src/components/USWDSIcon";
-
 import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };
@@ -58,7 +63,7 @@ const ApplicantDetails = ({
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
-    onOpenTransferModal: () => void;
+  onOpenTransferModal: () => void;
 }) => {
   const t = useTranslations("Application.information");
 
