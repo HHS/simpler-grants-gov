@@ -9,9 +9,10 @@ The structure for the infrastructure code looks like this:
 ```text
 infra/                  Infrastructure code
   accounts/             [Root module] IaC and IAM resources
-  [app_name]/           Application directory: infrastructure for the main application
+  <APP_NAME>/           Application directory(-ies): infrastructure for the application <APP_NAME>
   modules/              Reusable child modules
   networks/             [Root module] Account level network config (shared across all apps, environments, and terraform workspaces)
+  test/                 Infrastructure tests
 ```
 
 Each application directory contains the following:
@@ -45,7 +46,7 @@ This project has the following AWS environments:
 - `staging`
 - `prod`
 
-The environments share the same root modules but will have different configurations. Backend configuration is saved as [`.tfbackend`](https://developer.hashicorp.com/terraform/language/backend#file) files. Most `.tfbackend` files are named after the environment. For example, the `[app_name]/service` infrastructure resources for the `dev` environment are configured via `dev.s3.tfbackend`. Resources for a module that are shared across environments, such as the build-repository, use `shared.s3.tfbackend`. Resources that are shared across the entire account (e.g. /infra/accounts) use `<account name>.<account id>.s3.tfbackend`.
+The environments share the same root modules but will have different configurations. Backend configuration is saved as [`.tfbackend`](https://developer.hashicorp.com/terraform/language/backend#file) files. Most `.tfbackend` files are named after the environment. For example, the `<APP_NAME>/service` infrastructure resources for the `dev` environment are configured via `dev.s3.tfbackend`. Resources for a module that are shared across environments, such as the build-repository, use `shared.s3.tfbackend`. Resources that are shared across the entire account (e.g. /infra/accounts) use `<account name>.<account id>.s3.tfbackend`.
 
 ### 🔀 Project workflow
 
@@ -55,7 +56,7 @@ Generally you should use the Make targets or the underlying bin scripts, but you
 
 ## 💻 Development
 
-### 1️⃣ First time initialization
+### 1️⃣ Getting started
 
 To set up this project for the first time (aka it has never been deployed to the target AWS account):
 
@@ -75,6 +76,53 @@ To get set up as a new developer to a project that has already been deployed to 
 1. [Set up infrastructure developer tools](/docs/infra/set-up-infrastructure-tools.md)
 2. [Review how to make changes to infrastructure](/docs/infra/making-infra-changes.md)
 3. (Optional) Set up a [terraform workspace](/docs/infra/intro-to-terraform-workspaces.md)
+
+### Preparing for production launch
+
+Set up the following before launching to end users in production:
+
+- [HTTPS support](/docs/infra/https-support.md)
+- [Custom domains](/docs/infra/custom-domains.md)
+- [Monitoring alerts](/docs/infra/monitoring-alerts.md)
+- [Web application firewall (WAF)](/docs/infra/web-application-firewall.md)
+- [Staging and production environments](../docs/infra/staging-and-production-environments.md)
+
+### Setting up additional capabilities
+
+- [Additional applications](../docs/infra/add-application.md)
+- [Background jobs](../docs/infra/background-jobs.md)
+- [Custom environment variables and secrets](../docs/infra/environment-variables-and-secrets.md)
+- [Identity provider](../docs/infra/identity-provider.md)
+- [User notifications](../docs/infra/notifications.md)
+- [Pull request (preview) environments](../docs/infra/pull-request-environments.md)
+- [Service command execution](../docs/infra/service-command-execution.md)
+- [Outbound public internet access](../docs/infra/set-up-public-internet-access.md)
+- [CI/CD system notifications](../docs/infra/system-notifications.md)
+
+### Day to day operations
+
+- [Destroy infrastructure](../docs/infra/destroy-infrastructure.md)
+- [Develop and test infrastructure in isolation using workspaces](../docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md)
+- [Making infrastructure changes](../docs/infra/making-infra-changes.md)
+- [Upgrade database](../docs/infra/upgrade-database.md)
+
+### Reference
+
+#### Architecture
+
+- [Module architecture](../docs/infra/module-architecture.md)
+- [Infrastructure configuration](../docs/infra/infrastructure-configuration.md)
+- [Module dependencies](../docs/infra/module-dependencies.md)
+
+#### Style guide
+
+- [Infrastructure style guide](../docs/infra/style-guide.md)
+
+#### Security
+
+- [Cloud access control](../docs/infra/cloud-access-control.md)
+- [Database access control](../docs/infra/database-access-control.md)
+- [Vulnerability management](../docs/infra/vulnerability-management.md)
 
 ## 📇 Additional reading
 
