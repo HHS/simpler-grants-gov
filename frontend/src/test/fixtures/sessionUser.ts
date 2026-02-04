@@ -1,7 +1,7 @@
 export type GetSession = typeof import("src/services/auth/session").getSession;
-export type SessionUser = NonNullable<SessionValue>;
 
 type SessionValue = Awaited<ReturnType<GetSession>>;
+export type SessionUser = NonNullable<SessionValue>;
 
 export function buildSessionUser(
   overrides?: Partial<SessionUser>,
