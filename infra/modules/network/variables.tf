@@ -1,12 +1,21 @@
+variable "second_octet" {
+  type        = number
+  description = "Second octet of the VPC CIDR block. Must be between 0 and 255."
+}
+
+variable "aws_services_security_group_name_prefix" {
+  type        = string
+  description = "Prefix for the name of the security group attached to VPC endpoints"
+}
+
+variable "database_subnet_group_name" {
+  type        = string
+  description = "Name of the database subnet group"
+}
+
 variable "enable_command_execution" {
   type        = bool
   description = "Whether the application(s) in this network need ECS Exec access. Determines whether to create VPC endpoints needed by ECS Exec."
-  default     = false
-}
-
-variable "enable_notifications" {
-  type        = bool
-  description = "Whether the application(s) in this network need AWS Pinpoint access."
   default     = false
 }
 
@@ -19,7 +28,7 @@ variable "has_database" {
 variable "has_external_non_aws_service" {
   type        = bool
   description = "Whether the application(s) in this network need to call external non-AWS services. Determines whether or not to create NAT gateways."
-  default     = false
+  default     = true
 }
 
 variable "name" {

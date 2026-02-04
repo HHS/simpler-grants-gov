@@ -10,14 +10,14 @@ locals {
     # AWS services used by ECS Fargate: ECR to fetch images, S3 for image layers, and CloudWatch for logs
     ["ecr.api", "ecr.dkr", "s3", "logs"],
 
+    # AWS service endpoint(s) reccommended by AWS for all VPCs
+    ["ec2"],
+
     # AWS services used by the database's role manager
     var.has_database ? ["ssm", "kms", "secretsmanager"] : [],
 
     # AWS services used by ECS Exec
     var.enable_command_execution ? ["ssmmessages"] : [],
-
-    # AWS services used by notifications
-    var.enable_notifications ? ["pinpoint", "email-smtp"] : [],
   )
 
   # S3 and DynamoDB use Gateway VPC endpoints. All other services use Interface VPC endpoints
@@ -69,9 +69,21 @@ locals {
 }
 
 resource "aws_security_group" "aws_services" {
-  name_prefix = module.interface.aws_services_security_group_name_prefix
+  name_prefix = var.aws_services_security_group_name_prefix
   description = "VPC endpoints to access AWS services from the VPCs private subnets"
   vpc_id      = module.aws_vpc.vpc_id
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "vpc_endpoints_ingress_from_vpc_cidr" {
+  security_group_id = aws_security_group.aws_services.id
+  description       = "Allow inbound requests to VPC endpoints from the VPC cidr block"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4         = local.vpc_cidr
 }
 
 resource "aws_vpc_endpoint" "interface" {
