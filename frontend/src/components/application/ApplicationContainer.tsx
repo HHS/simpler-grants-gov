@@ -64,6 +64,9 @@ const ApplicationContainer = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
 
+  // TODO: check this after mvp
+  // instructions were to use the first available path
+  // this may change
   const instructionsDownloadPath = applicationDetails.competition
     .competition_instructions.length
     ? applicationDetails.competition.competition_instructions[0].download_path
