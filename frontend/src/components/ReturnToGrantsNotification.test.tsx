@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReturnToGrantsNotification } from "src/components/ReturnToGrantsNotification";
 
@@ -23,10 +22,6 @@ jest.mock("src/services/sessionStorage/sessionStorage", () => {
     },
   };
 });
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 describe("ReturnToGrantsNotification", () => {
   afterEach(() => jest.resetAllMocks());
