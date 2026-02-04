@@ -8,9 +8,9 @@ import {
   ApplicationHistoryApiResponse,
   ApplicationResponseDetail,
   ApplicationStartApiResponse,
+  ApplicationStatus,
   ApplicationSubmissionsApiResponse,
   ApplicationSubmitApiResponse,
-  Status,
 } from "src/types/applicationResponseTypes";
 
 /**
@@ -84,7 +84,7 @@ export const getLatestApplicationSubmission = async (
   applicationStatus: string,
 ): Promise<ApplicationSubmission | null> => {
   // Submissions are only available if the application is in the ACCEPTED status.
-  if (applicationStatus !== Status.ACCEPTED) return null;
+  if (applicationStatus !== ApplicationStatus.ACCEPTED) return null;
 
   // Request body to list endpoint to get latest app submission.
   const body: ApplicationSubmissionsRequestBody = {
