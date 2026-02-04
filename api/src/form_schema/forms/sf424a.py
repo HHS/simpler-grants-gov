@@ -864,11 +864,7 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "BudgetOtherContributionAmount",
         }
     },
-    "total_amount": {
-        "xml_transform": {
-            "target": "BudgetTotalContributionAmount",
-        }
-    },
+
     # CFDA/Assistance Listing Number - appears in Section A
     "assistance_listing_number": {
         "xml_transform": {
@@ -1007,6 +1003,11 @@ FORM_XML_TRANSFORM_RULES = {
                         "item_attributes": ["activity_title"],
                         "total_field": "total_budget_summary",
                         "total_wrapper": "SummaryTotals",
+                        "total_field_overrides": {
+                            "total_amount": "BudgetTotalAmount",
+                            "total_new_or_revised_amount": "BudgetTotalNewOrRevisedAmount",
+                        },
+
                     },
                     # Section B - Budget Categories (XSD requires CategorySet/CategoryTotals)
                     "BudgetCategories": {
@@ -1015,6 +1016,11 @@ FORM_XML_TRANSFORM_RULES = {
                         "item_attributes": ["activity_title"],
                         "total_field": "total_budget_categories",
                         "total_wrapper": "CategoryTotals",
+                        "total_field_overrides": {
+                            "total_amount": "BudgetTotalAmount",
+                            "total_direct_charge_amount": "BudgetTotalDirectChargesAmount",
+                            "total_indirect_charge_amount": "BudgetIndirectChargesAmount",
+                    },
                     },
                     # Section C - Non-Federal Resources (XSD requires ResourceLineItem/ResourceTotals)
                     "NonFederalResources": {
@@ -1023,6 +1029,9 @@ FORM_XML_TRANSFORM_RULES = {
                         "item_attributes": ["activity_title"],
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
+                        "total_field_overrides": {
+                            "total_amount": "BudgetTotalAmount",
+                        },
                     },
                     # Note: FederalFundsNeeded moved to separate config after BudgetForecastedCashNeeds for correct XSD order
                 },
