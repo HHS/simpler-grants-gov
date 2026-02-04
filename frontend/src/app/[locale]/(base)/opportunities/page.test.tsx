@@ -118,16 +118,16 @@ describe("Opportunities", () => {
       render(component);
 
       expect(
-        screen.getAllByText("Opportunities.tableHeadings.agency"),
+        screen.getAllByText("tableHeadings.agency"),
       ).toHaveLength(2);
       expect(
-        screen.getAllByText("Opportunities.tableHeadings.title"),
+        screen.getAllByText("tableHeadings.title"),
       ).toHaveLength(2);
       expect(
-        screen.getAllByText("Opportunities.tableHeadings.status"),
+        screen.getAllByText("tableHeadings.status"),
       ).toHaveLength(2);
       expect(
-        screen.getAllByText("Opportunities.tableHeadings.actions"),
+        screen.getAllByText("tableHeadings.actions"),
       ).toHaveLength(2);
     });
 

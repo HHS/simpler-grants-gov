@@ -5,7 +5,6 @@ import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes"
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
@@ -80,19 +79,19 @@ const OpportunitiesTable = ({
 }: {
   userOpportunities: BaseOpportunity[];
 }) => {
-  const t = useTranslations();
+  const t = useTranslations("Opportunities");
 
   const headerTitles: TableCellData[] = [
-    { cellData: t("Opportunities.tableHeadings.agency") },
-    { cellData: t("Opportunities.tableHeadings.title") },
-    { cellData: t("Opportunities.tableHeadings.status") },
-    { cellData: t("Opportunities.tableHeadings.actions") },
+    { cellData: t("tableHeadings.agency") },
+    { cellData: t("tableHeadings.title") },
+    { cellData: t("tableHeadings.status") },
+    { cellData: t("tableHeadings.actions") },
   ];
 
   return (
     <div>
       <span className="font-sans-lg text-bold">
-        {t("Opportunities.numOpportunities", { num: userOpportunities.length })}
+        {t("numOpportunities", { num: userOpportunities.length })}
       </span>
 
       <TableWithResponsiveHeader
@@ -103,10 +102,7 @@ const OpportunitiesTable = ({
   );
 };
 
-export default async function Opportunities({ params }: LocalizedPageProps) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
+export default async function Opportunities(_props: LocalizedPageProps) {
   const searchParams = convertSearchParamsToProperTypes({});
 
   let userOpportunities: BaseOpportunity[];
