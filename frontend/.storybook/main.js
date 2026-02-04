@@ -73,6 +73,11 @@ const config = {
     const { mergeConfig } = await import("vite");
 
     return mergeConfig(config, {
+      build: {
+        rollupOptions: {
+          external: /session/,
+        },
+      },
       css: {
         preprocessorOptions: {
           scss: {
