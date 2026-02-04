@@ -35,6 +35,10 @@ def simpler_soap_api_route(
     )
     logger.info("POST /<service_name>/services/v2/<service_port_name>")
 
+    soap_jwt = request.args.get("soap_jwt")
+    if soap_jwt == "1":
+        logger.info("soap_jwt flag is enabled")
+
     api_name = SimplerSoapAPI.get_soap_api(service_name, service_port_name)
     if not api_name:
         logger.info(
