@@ -20,6 +20,7 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
 }));
 
 jest.mock("src/hooks/useRouteChange", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   useRouteChange: () => {},
 }));
 
