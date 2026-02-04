@@ -12,7 +12,7 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 
 ## Context and Problem Statement
 
-Simpler.Grants.gov needs a content management system to 1) reduce the time it takes for content changes to get into production, 2) enable content creators to self serve, and 3) reduce the dependency on developers to make content changes. Current bottlenecks can delay critical updates by days or weeks and distract frontend developers from focusing on more impactful feature improvements.&#x20;
+Simpler.Grants.gov needs a content management system to 1) reduce the time and associated cost it takes to get content changes into production, 2) enable content creators to self serve, and 3) reduce the dependency on developers to make content changes. Current bottlenecks can delay critical updates by days or weeks and distract frontend developers from focusing on more impactful feature improvements.&#x20;
 
 **Which content management system is best suited for Simpler.Grants.gov?**&#x20;
 
@@ -22,7 +22,7 @@ Simpler.Grants.gov needs a content management system to 1) reduce the time it ta
 * A robust/configurable "Preview ⇒ Approve ⇒ Publish" workflow that's compatible with our production, lower, and local development environments&#x20;
 * Role-Based Access Control (RBAC)
 * Cost saving advantages of vendor-hosted vs. self-hosted
-  * The pros of vendor-hosted being managed infrastructure, automated updates and patching, and enterprise support; the cons being less control and (mostly) the higher dollar cost
+  * The pros of vendor-hosted being managed infrastructure, automated updates and patching, and enterprise support; the cons being less control and (mostly) the higher ongoing costs
   * The pros of self-hosted being full control over the tech stack, configurability, customization, and how/where the data is securely stored; the cons being developer time for maintenance&#x20;
 * Open source _<mark style="color:$info;">(although a secondary concern, this is relevant to the project's principles)</mark>_&#x20;
 * FedRAMP certification&#x20;
@@ -54,7 +54,8 @@ However, Storyblok is only recommended if Simpler.Grants.gov's static site conte
 
 #### Risks:&#x20;
 
-* Long-term, a non-FedRAMP solution might affect Simpler Grants' own FedRAMP Certification efforts
+* Short-term, increased timelines required for security review, approval, and procurement of a non-FedRAMP solution may be infeasible or impossible&#x20;
+* Long-term, a non-FedRAMP solution might affect Simpler Grants' own FedRAMP Certification efforts if ever sought in the future
 
 ### Alternative options:&#x20;
 
