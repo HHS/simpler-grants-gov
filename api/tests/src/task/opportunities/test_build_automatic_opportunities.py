@@ -1,9 +1,12 @@
+import uuid
 from copy import deepcopy
 
 import pytest
-from sqlalchemy import update
+from freezegun import freeze_time
+from sqlalchemy import select, update
 
 from src.db.models.competition_models import Form
+from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import (
     BudgetNarrativeAttachment_v1_2,
     ProjectAbstractSummary_v2_0,
@@ -80,13 +83,56 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 15
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
-    # If we rerun the task, only the all-form opportunity will be created
+    # If we rerun the task, all opportunities should be skipped (including ALL-forms)
     task = BuildAutomaticOpportunitiesTask(db_session)
     task.run()
 
-    assert len(task.opportunities) == 1
-    assert all_form_ids == {
-        c.form_id for c in task.opportunities[0].competitions[0].competition_forms
+    assert len(task.opportunities) == 0
+
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 12
+
+
+def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
+    """Test that opportunities with hard-coded IDs maintain the same IDs across runs"""
+    # First run - create all opportunities
+    with freeze_time("2026-02-03 12:00:00"):
+        task1 = BuildAutomaticOpportunitiesTask(db_session)
+        task1.run()
+
+    # Collect opportunity IDs from first run
+    first_run_ids = {}
+    for opp in task1.opportunities:
+        first_run_ids[opp.opportunity_number] = opp.opportunity_id
+
+    # Second run - should skip existing opportunities
+
+    with freeze_time("2026-02-04 12:00:00"):
+        task2 = BuildAutomaticOpportunitiesTask(db_session)
+        task2.run()
+
+    # Manually query all opportunities from database to verify IDs
+    all_opportunities = db_session.scalars(select(Opportunity)).all()
+
+    # Build a mapping of opportunity_number to opportunity_id from database
+    db_ids = {}
+    for opp in all_opportunities:
+        db_ids[opp.opportunity_number] = opp.opportunity_id
+
+    # Verify that all opportunities from first run have the same IDs in the database
+    for opp_number, opp_id in first_run_ids.items():
+        assert opp_number in db_ids, f"Opportunity {opp_number} not found in database"
+        assert db_ids[opp_number] == opp_id, (
+            f"Opportunity ID mismatch for {opp_number}: "
+            f"expected {opp_id}, got {db_ids[opp_number]}"
+        )
+
+    # Verify specific hard-coded UUIDs for the named scenarios
+    expected_ids = {
+        "SGG-org-only-test": uuid.UUID("10000000-0000-0000-0000-000000000001"),
+        "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
+        "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
+        "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
     }
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 1

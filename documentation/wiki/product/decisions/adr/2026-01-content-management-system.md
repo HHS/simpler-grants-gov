@@ -5,7 +5,7 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 # \[Draft] Content Management System
 
 * **Status:** Active
-* **Last Modified:** 2026-01-28
+* **Last Modified:** 2026-01-30
 * **Related Issue:** [#6559](https://github.com/HHS/simpler-grants-gov/issues/6559)
 * **Deciders:** Julius, Jay (contributors: Doug, Andy, Matt, Yan-Yin)&#x20;
 * **Tags:** cms, storyblok, drupal, content&#x20;
@@ -29,14 +29,14 @@ Simpler.Grants.gov needs a content management system to 1) reduce the time it ta
 
 ## Options Considered
 
-Nava explored the current headless CMS SaaS market landscape. Four options stood out as most appropriate for Simpler.Grants.gov. All provide the functionalities required by Simpler, including custom roles & permissions and configurable publishing workflows.&#x20;
+Nava explored the current headless CMS SaaS market landscape. Four options stood out as most appropriate for Simpler.Grants.gov. We stood up sandbox demo instances, consulted with vendor support/sales teams, and completed technical spikes (implementing a static page in each technology) to thoroughly evaluate each option. All provide the functionalities required by Simpler, including custom roles & permissions and configurable publishing workflows.
 
 * [**Storyblok**](https://www.storyblok.com/)&#x20;
 * [**Decoupled Drupal**](https://www.drupal.org/docs/develop/decoupled-drupal)&#x20;
 * [**Directus**](https://directus.io/)
 * [**Payload CMS**](https://payloadcms.com/)
 
-_<mark style="color:$info;">(Other options considered, but determined inappropriate after cursory exploration:</mark>_ [_<mark style="color:$info;">Liferay DXP</mark>_](https://www.liferay.com/platform)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Oracle Content Management</mark>_](https://docs.oracle.com/en-us/iaas/content-management/index.html)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Strapi</mark>_](https://strapi.io/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Ghost</mark>_](https://ghost.org/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Headless WordPress</mark>_](https://wordpress.com/blog/2025/03/20/headless-wordpress/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Contentful</mark>_](https://www.contentful.com/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Sanity</mark>_](https://www.sanity.io/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Hygraph</mark>_](https://hygraph.com/)_<mark style="color:$info;">)</mark>_
+_<mark style="color:$info;">(Other options considered, but determined less appropriate:</mark>_ [_<mark style="color:$info;">Liferay DXP</mark>_](https://www.liferay.com/platform)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Oracle Content Management</mark>_](https://docs.oracle.com/en-us/iaas/content-management/index.html)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Strapi</mark>_](https://strapi.io/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Ghost</mark>_](https://ghost.org/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Headless WordPress</mark>_](https://wordpress.com/blog/2025/03/20/headless-wordpress/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Contentful</mark>_](https://www.contentful.com/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Sanity</mark>_](https://www.sanity.io/)_<mark style="color:$info;">,</mark>_ [_<mark style="color:$info;">Hygraph</mark>_](https://hygraph.com/)_<mark style="color:$info;">)</mark>_
 
 ## Decision Outcome
 
@@ -54,7 +54,7 @@ However, Storyblok is only recommended if Simpler.Grants.gov's static site conte
 
 #### Risks:&#x20;
 
-* May prevent long-term FedRAMP certification for Simpler.Grants.gov&#x20;
+* Long-term, a non-FedRAMP solution might affect Simpler Grants' own FedRAMP Certification efforts
 
 ### Alternative options:&#x20;
 
