@@ -9,6 +9,7 @@ import {
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Grid,
@@ -16,7 +17,6 @@ import {
   Link,
   ModalRef,
 } from "@trussworks/react-uswds";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
 import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
