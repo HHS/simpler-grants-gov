@@ -42,7 +42,7 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
 
 
 def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort?soap_jwt=1"
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort?use_soap_jwt=1"
     fixture_path = (
         "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
     )
@@ -52,14 +52,16 @@ def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -
 
     # Verify that certain logs are present with expected extra values
     post_message = next(
-        record for record in caplog.records if record.message == "soap_jwt flag is enabled"
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
     )
     assert post_message.service_name == "grantsws-applicant"
     assert post_message.service_port_name == "ApplicantWebServicesSoapPort"
 
 
 def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, caplog) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort?soap_jwt=0"
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort?use_soap_jwt=0"
     fixture_path = (
         "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
     )
@@ -69,7 +71,9 @@ def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, capl
 
     # Verify that certain logs are present with expected extra values
     post_message = [
-        record for record in caplog.records if record.message == "soap_jwt flag is enabled"
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
     ]
     assert len(post_message) == 0
 
@@ -87,7 +91,9 @@ def test_soap_jwt_flag_is_not_included_is_treated_as_if_it_is_disabled(
 
     # Verify that certain logs are present with expected extra values
     post_message = [
-        record for record in caplog.records if record.message == "soap_jwt flag is enabled"
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
     ]
     assert len(post_message) == 0
 
