@@ -13,7 +13,7 @@ from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_errors import (
     EntityNotFound,
     ImplementationMissingError,
-    InvalidEventError,
+    InvalidEventError, InvalidEntityForWorkflow,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,22 +24,30 @@ def get_workflow_entities(
 ) -> dict[str, list[ApiSchemaTable]]:
     # TODO - add details to relevant places that this needs
     #        to be maintained and updated with new entities
-    workflow_entities: dict[str, list[ApiSchemaTable]] = {"opportunities": [], "applications": []}
 
+    entities_to_add = {e.entity_type for e in entities}
+    allowed_entity_types = set(config.entity_types)
     log_extra = {
         "workflow_type": config.workflow_type,
-        "allowed_entity_types": ",".join(config.entity_types),
+        "allowed_entity_types": ",".join(allowed_entity_types),
+        "entities_to_add": ",".join(entities_to_add),
     }
+
+    # Verify that the entities we have match those
+    # on the configuration to avoid setting a workflow
+    # up incorrectly.
+
+    if entities_to_add != allowed_entity_types:
+        logger.warning("Entities given for workflow do not match expected types", extra=log_extra)
+        raise InvalidEntityForWorkflow("Entities given for workflow do not match expected types")
+
+    workflow_entities: dict[str, list[ApiSchemaTable]] = {"opportunities": [], "applications": []}
 
     for entity in entities:
         log_extra |= {
             "entity_type": entity.entity_type,
             "entity_id": entity.entity_id,
         }
-
-        if entity.entity_type not in config.entity_types:
-            logger.warning("Entity type is not supported for workflow", extra=log_extra)
-            raise InvalidEventError("Entity type is not supported for workflow")
 
         if entity.entity_type == WorkflowEntityType.OPPORTUNITY:
             opportunity = db_session.scalar(
@@ -65,7 +73,6 @@ def get_workflow_entities(
             logger.warning("Entity type is not supported for workflow", extra=log_extra)
             raise ImplementationMissingError("Entity type is not supported for workflow")
 
-    # TODO - make sure the entities expected are present
 
     return workflow_entities
 

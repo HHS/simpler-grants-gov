@@ -20,8 +20,16 @@ class WorkflowRegistry:
     def register_workflow(
         cls, config: WorkflowConfig
     ) -> Callable[[type[BaseStateMachine]], type[BaseStateMachine]]:
-        """TODO - docs"""
+        """Attach the workflow config to a particular state machine.
 
+           Can be used as::
+
+           config = WorkflowConfig(...)
+
+           @WorkflowRegistry.register_workflow(config)
+           class MyStateMachine(BaseStateMachine):
+               pass
+        """
         def decorator(state_machine_cls: type[BaseStateMachine]) -> type[BaseStateMachine]:
             if state_machine_cls in cls._workflow_registry:
                 raise Exception(
@@ -38,6 +46,7 @@ class WorkflowRegistry:
     def get_state_machine_for_workflow_type(
         cls, workflow_type: WorkflowType
     ) -> tuple[WorkflowConfig, type[BaseStateMachine]]:
+        """For a given workflow type, get the workflow config + state machine class"""
         result = cls._workflow_registry.get(workflow_type)
         if result is None:
             raise InvalidWorkflowTypeError("Workflow event does not map to an actual state machine")

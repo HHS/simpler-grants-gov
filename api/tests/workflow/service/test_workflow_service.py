@@ -7,7 +7,7 @@ from src.workflow.event.workflow_event import WorkflowEntity
 from src.workflow.service.workflow_service import get_workflow_entities
 from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 from src.workflow.workflow_config import WorkflowConfig
-from src.workflow.workflow_errors import EntityNotFound, InvalidEventError
+from src.workflow.workflow_errors import EntityNotFound, InvalidEventError, InvalidEntityForWorkflow
 from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory
 
 
@@ -145,9 +145,28 @@ def test_get_workflow_entity_not_valid_for_config(db_session, enable_factory_cre
         )
     ]
 
-    with pytest.raises(InvalidEventError, match="Entity type is not supported for workflow"):
+    with pytest.raises(InvalidEntityForWorkflow, match="Entities given for workflow do not match expected types"):
         get_workflow_entities(db_session, entities, config)
 
+def test_get_workflow_no_entity_expected_but_one_given(db_session, enable_factory_create):
+    config = build_workflow_config(entity_types=[WorkflowEntityType.APPLICATION])
+
+    with pytest.raises(InvalidEntityForWorkflow, match="Entities given for workflow do not match expected types"):
+        get_workflow_entities(db_session, [], config)
+
+def test_get_workflow_entity_expected_but_none_given(db_session, enable_factory_create):
+
+    opportunity = OpportunityFactory.create()
+    config = build_workflow_config(entity_types=[])
+
+    entities = [
+        WorkflowEntity(
+            entity_type=WorkflowEntityType.OPPORTUNITY, entity_id=opportunity.opportunity_id
+        )
+    ]
+
+    with pytest.raises(InvalidEntityForWorkflow, match="Entities given for workflow do not match expected types"):
+        get_workflow_entities(db_session, entities, config)
 
 def test_get_workflow_entities_opportunity_missing(db_session, enable_factory_create):
     config = build_workflow_config(entity_types=[WorkflowEntityType.OPPORTUNITY])
