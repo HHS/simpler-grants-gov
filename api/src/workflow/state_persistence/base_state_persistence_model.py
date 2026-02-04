@@ -1,6 +1,7 @@
 import dataclasses
 import uuid
 from abc import ABC
+from typing import Any
 
 import statemachine.state
 
@@ -25,6 +26,14 @@ class Workflow:
 
     opportunities: list[Opportunity] = dataclasses.field(default_factory=list)
     applications: list[Application] = dataclasses.field(default_factory=list)
+
+    def get_log_extra(self) -> dict[str, Any]:
+        return {
+            "workflow_id": self.workflow_id,
+            "workflow_type": self.workflow_type,
+            "current_workflow_state": self.current_workflow_state,
+            "is_active": self.is_active,
+        }
 
 
 class BaseStatePersistenceModel(ABC):

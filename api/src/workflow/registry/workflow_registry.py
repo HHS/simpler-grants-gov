@@ -22,14 +22,15 @@ class WorkflowRegistry:
     ) -> Callable[[type[BaseStateMachine]], type[BaseStateMachine]]:
         """Attach the workflow config to a particular state machine.
 
-           Can be used as::
+        Can be used as::
 
-           config = WorkflowConfig(...)
+        config = WorkflowConfig(...)
 
-           @WorkflowRegistry.register_workflow(config)
-           class MyStateMachine(BaseStateMachine):
-               pass
+        @WorkflowRegistry.register_workflow(config)
+        class MyStateMachine(BaseStateMachine):
+            pass
         """
+
         def decorator(state_machine_cls: type[BaseStateMachine]) -> type[BaseStateMachine]:
             if state_machine_cls in cls._workflow_registry:
                 raise Exception(

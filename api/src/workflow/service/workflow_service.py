@@ -13,7 +13,8 @@ from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_errors import (
     EntityNotFound,
     ImplementationMissingError,
-    InvalidEventError, InvalidEntityForWorkflow,
+    InvalidEntityForWorkflow,
+    InvalidEventError,
 )
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,6 @@ def get_workflow_entities(
         else:  # Any unconfigured entity types will result in an error
             logger.warning("Entity type is not supported for workflow", extra=log_extra)
             raise ImplementationMissingError("Entity type is not supported for workflow")
-
 
     return workflow_entities
 
