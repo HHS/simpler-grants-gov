@@ -1,14 +1,11 @@
-import {
-  ApplicationDetail,
-  ApplicationStatus,
-} from "src/types/applicationResponseTypes";
+import { ApplicationDetail } from "src/types/applicationResponseTypes";
 
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
 import competitionMock from "./competition.mock.json";
 
 const applicationDetailsObject: ApplicationDetail = {
   ...(competitionMock as unknown as ApplicationDetail),
-  application_status: ApplicationStatus.IN_PROGRESS,
+  application_status: "in_progress",
   application_id: "12345",
   competition: {
     ...(competitionMock.competition as unknown as ApplicationDetail["competition"]),
