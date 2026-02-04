@@ -2,6 +2,12 @@
 # Network Configuration
 #-----------------------
 
+module "network" {
+  source       = "../../modules/network/data"
+  name         = var.network_name
+  project_name = var.project_name
+}
+
 resource "aws_security_group" "alb" {
   # Specify name_prefix instead of name because when a change requires creating a new
   # security group, sometimes the change requires the new security group to be created
@@ -17,10 +23,9 @@ resource "aws_security_group" "alb" {
     ignore_changes = [description]
   }
 
-  vpc_id = var.vpc_id
+  vpc_id = module.network.vpc_id
 
 }
-
 
 resource "aws_security_group_rule" "http_ingress" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Disallow incoming traffic to port 80
@@ -96,7 +101,7 @@ resource "aws_security_group" "app" {
   # before the old one is destroyed. In this situation, the new one needs a unique name
   name_prefix = "${var.service_name}-app"
   description = "Allow inbound TCP access to application container port"
-  vpc_id      = var.vpc_id
+  vpc_id      = module.network.vpc_id
   lifecycle {
     create_before_destroy = true
 

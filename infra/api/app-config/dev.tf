@@ -46,7 +46,7 @@ module "dev_config" {
     # Login.gov OAuth
     ENABLE_XML_GENERATION = 1
 
-
+    ENABLE_WORKFLOW_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
@@ -62,4 +62,8 @@ module "dev_config" {
   # enable_command_execution = true
 
   enable_identity_provider = local.enable_identity_provider
+  # Uncomment to override default feature flag values
+  # feature_flag_overrides = {
+  #   BAR = true
+  # }
 }

@@ -35,6 +35,7 @@ locals {
       vpc_name                     = "staging"
       second_octet                 = 1               # The second octet our the VPC CIDR block
       grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+
       domain_config = {
         manage_dns  = false
         hosted_zone = "staging.simpler.grants.gov"
