@@ -58,8 +58,21 @@ ignore:
   # Last checked: 01/23/26
   - vulnerability: CVE-2025-11468
 
-  # Next.js 15.4.10 -> 15.5.10 upgrade causes breaking changes in next.config.js
-  # The fix requires path pattern syntax updates that need more testing
-  # https://github.com/advisories/GHSA-9g9p-9gw9-jx7f
-  # Last checked: 01/28/26
-  - vulnerability: GHSA-9g9p-9gw9-jx7f
+  # Not fixed in GA Python yet
+  # Vulnerability in a very specific part of the python email
+  # package which we don't use.
+  # Last checked: 02/04/26
+  - vulnerability: CVE-2026-1299
+
+  # Next.js vulnerability reported as fixed only in canary prerelease
+  # Scanner indicates fix in 15.6.0-canary.61, which cannot be installed due to
+  # npm peer dependency resolution rules for prerelease versions
+  # Attempting to upgrade to canary causes ERESOLVE failures with
+  # @next/third-parties peer dependencies
+  # Stable Next.js 15.x releases include backported fixes, but are not
+  # recognized by the scanner at this time
+  # https://github.com/advisories/GHSA-5f7q-jpqc-wp7h
+  # Versions: https://github.com/vercel/next.js/releases
+  # Dependencies: @next/third-parties
+  # Last checked: 01/29/26
+  - vulnerability: GHSA-5f7q-jpqc-wp7h
