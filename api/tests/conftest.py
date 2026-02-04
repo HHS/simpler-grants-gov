@@ -484,6 +484,15 @@ def s3_config(mock_s3_bucket, other_mock_s3_bucket):
     )
 
 
+@pytest.fixture
+def mock_sqs():
+    with moto.mock_aws():
+        sqs = boto3.client("sqs", region_name="us-east-1")
+        # Create a default queue for tests
+        queue = sqs.create_queue(QueueName="test-workflow-queue")
+        yield {"client": sqs, "queue_url": queue["QueueUrl"]}
+
+
 ####################
 # Class-based testing
 ####################
