@@ -51,7 +51,6 @@ jest.mock("next/navigation", () => ({
 describe("QueryProvider", () => {
   it("queryTerm is set to the correct default based-on useSearchParams()", async () => {
     await updateAndDisplayQueryContext({
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       onContextUpdate: (_: QueryContextParams) => {},
       onContextDisplay: (context: QueryContextParams) => context.queryTerm,
     });

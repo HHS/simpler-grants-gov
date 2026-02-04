@@ -1,6 +1,6 @@
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { buildPathToZipDownload as orgBuiltPathToZipDownload } from "src/utils/opportunity/zipDownloadUtils";
-import { render, screen } from "tests/react-utils";
 
 import ZipDownloadButton from "src/components/opportunity/ZipDownloadButton";
 
@@ -20,7 +20,7 @@ describe("ZipDownloadButton", () => {
     render(<ZipDownloadButton {...ZipDownloadButtonProps} />);
     const zipDownloadButton = screen.getByRole("button");
     expect(zipDownloadButton).toBeInTheDocument();
-    expect(zipDownloadButton).toHaveTextContent("Download all");
+    expect(zipDownloadButton).toHaveTextContent("zipDownload");
   });
 
   it("Calls downloadAttachmentsZip on click", async () => {

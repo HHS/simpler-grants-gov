@@ -1,3 +1,4 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
 import {
@@ -6,22 +7,10 @@ import {
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import {
-  localeParams,
-  mockUseTranslations,
-  useTranslationsMock,
-} from "src/utils/testing/intlMocks";
-import { render, screen, waitFor } from "tests/react-utils";
-
-import { ReactNode } from "react";
+import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockUseTranslations,
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  NextIntlClientProvider: ({ children }: { children: ReactNode }) => children, // this is a dumb workaround for a global wrapper we're using
 }));
 
 const savedOpportunities = jest.fn().mockResolvedValue([]);

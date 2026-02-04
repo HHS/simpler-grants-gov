@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable testing-library/no-node-access */
 
 import { render, screen } from "@testing-library/react";
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 
@@ -17,10 +15,6 @@ const splitMarkupMock = jest
 
 jest.mock("isomorphic-dompurify", () => ({
   sanitize: jest.fn((input: string) => input),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/utils/generalUtils", () => ({
@@ -158,14 +152,17 @@ describe("OpportunityDescription", () => {
 
     const contactInfoHeading = screen.getByText("contactDescription");
     expect(contactInfoHeading).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access
     expect(contactInfoHeading.nextElementSibling).toHaveTextContent("--");
 
     const applicantsHeading = screen.getByText("eligibleApplicants");
     expect(applicantsHeading).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access
     expect(applicantsHeading.nextSibling).toHaveTextContent("--");
 
     const emailHeading = screen.getByText("email");
     expect(emailHeading).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access
     expect(emailHeading.nextElementSibling).toHaveTextContent("--");
 
     // documents and summary are harder to target here, but we can just get a total count
