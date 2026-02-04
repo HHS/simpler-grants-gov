@@ -55,7 +55,7 @@ class TransformOracleDataTaskConfig(PydanticBaseEnvConfig):
     )
     enable_competition: bool = True  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION
     enable_competition_instruction: bool = (
-        False  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION_INSTRUCTION
+        True  # TRANSFORM_ORACLE_DATA_ENABLE_COMPETITION_INSTRUCTION
     )
 
 
